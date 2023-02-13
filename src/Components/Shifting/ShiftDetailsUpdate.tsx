@@ -1,10 +1,7 @@
 import { useReducer, useState, useCallback, useEffect } from "react";
 import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  MultilineInputField,
-  ErrorHelperText,
-} from "../Common/HelperInputFields";
+import { ErrorHelperText } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate, useQueryParams } from "raviger";
@@ -24,7 +21,6 @@ import { useTranslation } from "react-i18next";
 import {
   Card,
   CardContent,
-  InputLabel,
   Radio,
   RadioGroup,
   Box,
@@ -33,6 +29,8 @@ import {
 import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useConfig from "../../Common/hooks/useConfig";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -150,6 +148,12 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     form[name] = value;
     dispatch({ type: "set_form", form });
   };
+  const handleTextAreaChange = (e: any) => {
+    const form = { ...state.form };
+    const { name, value } = e;
+    form[name] = value;
+    dispatch({ type: "set_form", form });
+  };
 
   const handleOnSelect = (user: any) => {
     const form = { ...state.form };
@@ -250,7 +254,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           <CardContent>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="md:col-span-1">
-                <InputLabel>{t("status")}</InputLabel>
+                <FieldLabel>{t("status")}</FieldLabel>
                 <SelectField
                   name="status"
                   variant="outlined"
@@ -259,11 +263,11 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.status}
                   options={shiftStatusOptions}
                   onChange={handleChange}
-                  className="bg-white h-14 w-full mt-2 shadow-sm md:text-sm md:leading-5"
+                  className="bg-white h-14 w-full shadow-sm md:text-sm md:leading-5 mt-2"
                 />
               </div>
               <div className="flex-none">
-                <InputLabel>{t("assigned_to")}</InputLabel>
+                <FieldLabel>{t("assigned_to")}</FieldLabel>
                 <div>
                   {assignedUserLoading ? (
                     <CircularProgress size={20} />
@@ -281,9 +285,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 </div>
               </div>
               <div>
-                <InputLabel>
+                <FieldLabel>
                   {t("name_of_shifting_approving_facility")}
-                </InputLabel>
+                </FieldLabel>
                 <FacilitySelect
                   multiple={false}
                   name="shifting_approving_facility"
@@ -297,9 +301,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>
+                <FieldLabel>
                   {t("what_facility_assign_the_patient_to")}
-                </InputLabel>
+                </FieldLabel>
                 <FacilitySelect
                   multiple={false}
                   name="assigned_facility"
@@ -312,7 +316,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>{t("is_this_an_emergency")}</InputLabel>
+                <FieldLabel>{t("is_this_an_emergency")}</FieldLabel>
                 <RadioGroup
                   aria-label="emergency"
                   name="emergency"
@@ -337,9 +341,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>
+                <FieldLabel>
                   {t("is")} {kasp_full_string}?
-                </InputLabel>
+                </FieldLabel>
                 <RadioGroup
                   aria-label="is_kasp"
                   name="is_kasp"
@@ -364,7 +368,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>{t("is_this_an_upshift")}</InputLabel>
+                <FieldLabel>{t("is_this_an_upshift")}</FieldLabel>
                 <RadioGroup
                   aria-label={t("is_it_upshift")}
                   name="is_up_shift"
@@ -388,7 +392,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 <ErrorHelperText error={state.errors.is_up_shift} />
               </div>
               <div className="md:col-span-1">
-                <InputLabel>{t("preferred_vehicle")}</InputLabel>
+                <FieldLabel>{t("preferred_vehicle")}</FieldLabel>
                 <SelectField
                   name="preferred_vehicle_choice"
                   variant="outlined"
@@ -402,7 +406,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 />
               </div>
               <div className="md:col-span-1">
-                <InputLabel>{t("preferred_facility_type")}*</InputLabel>
+                <FieldLabel>{t("preferred_facility_type")}*</FieldLabel>
                 <SelectField
                   name="assigned_facility_type"
                   variant="outlined"
@@ -416,7 +420,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 />
               </div>
               <div className="md:col-span-1">
-                <InputLabel>{t("severity_of_breathlessness")}*</InputLabel>
+                <FieldLabel>{t("severity_of_breathlessness")}*</FieldLabel>
                 <SelectField
                   name="breathlessness_level"
                   variant="outlined"
@@ -429,32 +433,27 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 />
               </div>
               <div className="">
-                <InputLabel>{t("reason_for_shift")}*</InputLabel>
-                <MultilineInputField
+                <TextAreaFormField
                   rows={5}
                   name="reason"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
+                  label={t("reason_for_shift")}
+                  required
                   placeholder={t("type_your_reason_here") + "*"}
                   value={state.form.reason}
-                  onChange={handleChange}
-                  errors={state.errors.reason}
+                  onChange={handleTextAreaChange}
+                  error={state.errors.reason}
                 />
               </div>
 
               <div className="">
-                <InputLabel>{t("any_other_comments")}</InputLabel>
-                <MultilineInputField
+                <TextAreaFormField
                   rows={5}
                   name="comments"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
+                  label={t("any_other_comments")}
                   placeholder={t("type_any_extra_comments_here")}
                   value={state.form.comments}
-                  onChange={handleChange}
-                  errors={state.errors.comments}
+                  onChange={handleTextAreaChange}
+                  error={state.errors.comments}
                 />
               </div>
 
