@@ -217,7 +217,7 @@ export const Login = (props: { forgot?: boolean }) => {
             </div>
           </div>
         </div>
-        <div className="flex items-center xl:absolute xl:inset-x-0 xl:py-12 xl:px-16 pb-10 xl:bottom-0 xl:z-20">
+        <div className="flex items-center">
           <div className="text-xs md:text-sm max-w-lg">
             <div className="ml-1 flex items-center gap-4 mb-2">
               <a href={dpg_url} rel="noopener noreferrer" target="_blank">
