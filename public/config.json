@@ -10,6 +10,7 @@
     "gmaps_api_key": "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
     "gov_data_api_key": "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b",
     "recaptcha_site_key": "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN",
+    "sentry_dsn": "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
     "kasp_enabled": false,
     "kasp_string": "KASP",
     "kasp_full_string": "Karunya Arogya Suraksha Padhathi",

@@ -7,6 +7,7 @@ import { getConfig, getCurrentUser } from "./Redux/actions";
 import { useAbortableEffect, statusType } from "./Common/utils";
 import axios from "axios";
 import { HistoryAPIProvider } from "./CAREUI/misc/HistoryAPIProvider";
+import * as Sentry from "@sentry/browser";
 
 const Loading = loadable(() => import("./Components/Common/Loading"));
 
@@ -19,6 +20,13 @@ const App: React.FC = () => {
   useAbortableEffect(async () => {
     const res = await dispatch(getConfig());
     if (res.data && res.status < 400) {
+      if (res.data.sentry_dsn && process.env.NODE_ENV === "production") {
+        Sentry.init({
+          environment: process.env.NODE_ENV,
+          dsn: res.data.sentry_dsn,
+        });
+      }
+
       localStorage.setItem("config", JSON.stringify(res.data));
     }
   }, [dispatch]);
