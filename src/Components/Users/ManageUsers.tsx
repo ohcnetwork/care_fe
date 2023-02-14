@@ -130,10 +130,7 @@ export default function ManageUsers() {
   );
 
   const addUser = (
-    <ButtonV2
-      className="w-full"
-      onClick={() => navigate("/users/add")}
-    >
+    <ButtonV2 className="w-full" onClick={() => navigate("/users/add")}>
       <CareIcon className="care-l-plus text-lg w-full" />
       <p>Add New User</p>
     </ButtonV2>
@@ -700,6 +697,11 @@ function UserFacilities(props: { user: any }) {
         </div>
       ) : (
         <div className="flex flex-col">
+          {facilities.length === 0 && (
+            <div className="flex justify-center items-center text-2xl w-full font-medium text-gray-600">
+              No Facilities Linked
+            </div>
+          )}
           {facilities.map((facility: any, i: number) => {
             const isHomeFacility =
               user?.home_facility_object?.id === facility.id;
