@@ -698,7 +698,7 @@ function UserFacilities(props: { user: any }) {
       ) : (
         <div className="flex flex-col">
           {facilities.length === 0 && (
-            <div className="flex justify-center items-center text-2xl w-full font-medium text-gray-600">
+            <div className="flex justify-center items-center text-xl w-full font-bold text-gray-600">
               No Facilities Linked
             </div>
           )}
