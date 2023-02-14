@@ -130,13 +130,13 @@ export default function ManageUsers() {
   );
 
   const addUser = (
-    <button
-      className="px-4 py-1 w-full md:w-auto rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
+    <ButtonV2
+      className="w-full"
       onClick={() => navigate("/users/add")}
     >
-      <i className="fas fa-plus mr-2"></i>
-      Add New User
-    </button>
+      <CareIcon className="care-l-plus text-lg w-full" />
+      <p>Add New User</p>
+    </ButtonV2>
   );
 
   const handleCancel = () => {
@@ -427,7 +427,6 @@ export default function ManageUsers() {
   } else if (users && users.length) {
     manageUsers = (
       <div>
-        {userTypes.length && addUser}
         <div className="flex flex-wrap md:-mx-4">{userList}</div>
         <Pagination totalCount={totalCount} />
       </div>
@@ -435,10 +434,7 @@ export default function ManageUsers() {
   } else if (users && users.length === 0) {
     manageUsers = (
       <div>
-        {userTypes.length && addUser}
-        <div>
-          <h5> No Users Found</h5>
-        </div>
+        <h5> No Users Found</h5>
       </div>
     );
   }
@@ -494,6 +490,7 @@ export default function ManageUsers() {
             </dl>
           </div>
         </div>
+
         <div className="flex flex-col lg:flex-row justify-between col-span-2 lg:px-3 space-y-3 lg:space-y-0 lg:space-x-4 my-2">
           <div className="w-full">
             <SearchInput
@@ -503,9 +500,8 @@ export default function ManageUsers() {
               placeholder="Search by username"
             />
           </div>
-
           <div>
-            <div className="flex items-start mb-2">
+            <div className="flex flex-col items-center mb-2 gap-2">
               <button
                 className="btn btn-primary-ghost w-full"
                 onClick={() => advancedFilter.setShow(true)}
@@ -541,6 +537,7 @@ export default function ManageUsers() {
                 </svg>
                 <span>Advanced Filters</span>
               </button>
+              {userTypes.length && addUser}
             </div>
           </div>
 
