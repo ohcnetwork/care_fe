@@ -14,7 +14,6 @@ import { useState, useCallback, useEffect } from "react";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import { make as SlideOver } from "../Common/SlideOver.gen";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import AssetFilter from "./AssetFilter";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
@@ -29,6 +28,7 @@ import AuthorizeFor from "../../Utils/AuthorizeFor";
 import ButtonV2 from "../Common/components/ButtonV2";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import ExportMenu from "../Common/Export";
+import CountBlock from "../../CAREUI/display/Count";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -309,25 +309,12 @@ const AssetsList = () => {
         )}
       </div>
       <div className="lg:flex mt-5 space-y-2">
-        <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
-          <div className="px-4 py-5 sm:p-6">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Assets
-              </dt>
-              {/* Show spinner until count is fetched from server */}
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
-                </dd>
-              ) : (
-                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
-          </div>
-        </div>
+        <CountBlock
+          text="Total Assets"
+          count={totalCount}
+          loading={isLoading}
+          icon={"monitor-heart-rate"}
+        />
         <div className="flex-1">
           <SearchInput
             name="search"

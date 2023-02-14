@@ -15,7 +15,6 @@ import {
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { FacilityModel } from "./models";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacilityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
@@ -23,6 +22,7 @@ import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { FacilityCard } from "./FacilityCard";
 import ExportMenu from "../Common/Export";
+import CountBlock from "../../CAREUI/display/Count";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -238,25 +238,12 @@ export const HospitalList = () => {
         />
       </div>
       <div className="lg:flex gap-2 mt-4">
-        <div className="bg-white overflow-hidden shadow rounded-lg md:mr-2 min-w-fit flex-1">
-          <div className="px-4 py-5 sm:p-6">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Facilities
-              </dt>
-              {/* Show spinner until cound is fetched from server */}
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
-                </dd>
-              ) : (
-                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
-          </div>
-        </div>
+        <CountBlock
+          text="Total Facilities"
+          count={totalCount}
+          loading={isLoading}
+          icon={"hospital"}
+        />
         <div className="flex my-4 gap-2 flex-col md:flex-row justify-between flex-grow">
           <SearchInput
             name="search"
