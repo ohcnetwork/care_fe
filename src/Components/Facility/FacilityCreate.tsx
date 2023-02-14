@@ -33,7 +33,6 @@ import GLocationPicker from "../Common/GLocationPicker";
 import {
   includesIgnoreCase as includesIgnoreCase,
   getPincodeDetails,
-  goBack,
 } from "../../Utils/utils";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -54,6 +53,7 @@ import {
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -170,6 +170,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [bedCapacityKey, setBedCapacityKey] = useState(0);
   const [docCapacityKey, setDocCapacityKey] = useState(0);
+  const { goBack } = useAppHistory();
 
   const [anchorEl, setAnchorEl] = React.useState<
     (EventTarget & Element) | null

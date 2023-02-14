@@ -265,6 +265,7 @@ export default function ResourceDetails(props: { id: string }) {
             <PageTitle
               title={"Resource details"}
               crumbsReplacements={{ [props.id]: { name: data.title } }}
+              backUrl={`/resource/board-view`}
             />
             <div>
               <button

@@ -6,9 +6,10 @@ import {
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import { getAllLocalBodyByDistrict } from "../../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "raviger";
 import moment from "moment";
 import useMergeState from "../../Common/hooks/useMergeState";
+import FilterButtons from "../Common/FilterButtons";
+import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 
 export default function ListFilter(props: any) {
@@ -175,30 +176,18 @@ export default function ListFilter(props: any) {
     setFilterState(filterData);
   };
 
-  const clearFilters = () => {
-    dataList([], []);
-    closeFilter();
-  };
-
   return (
     <div>
-      <div className="flex justify-between">
-        <button className="btn btn-default" onClick={closeFilter}>
-          <i className="fas fa-times mr-2" />
-          {t("cancel")}
-        </button>
-        <Link
-          href="/external_results"
-          className="btn btn-default hover:text-gray-900"
-          onClick={clearFilters}
-        >
-          <i className="fas fa-times mr-2" />
-          {t("clear_filters")}
-        </Link>
-        <button className="btn btn-primary" onClick={applyFilter}>
-          <i className="fas fa-check mr-2" />
-          {t("apply")}
-        </button>
+      <div className="pb-10">
+        <FilterButtons
+          onClose={closeFilter}
+          onApply={applyFilter}
+          onClear={() => {
+            navigate("/external_results");
+            setFilterState(filterState);
+            closeFilter();
+          }}
+        />
       </div>
       <div className="font-light text-md mt-2">{t("filter_by")}:</div>
       <div className="flex flex-wrap gap-2">
