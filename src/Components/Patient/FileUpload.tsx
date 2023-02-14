@@ -1178,7 +1178,14 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
             <Cancel onClick={() => setModalOpenForEdit(false)} />
-            <Submit disabled={btnloader} label="Proceed" />
+            <Submit
+              disabled={
+                btnloader ||
+                modalDetails?.name === editFileName ||
+                editFileName.length === 0
+              }
+              label="Proceed"
+            />
           </div>
         </form>
       </DialogModal>
