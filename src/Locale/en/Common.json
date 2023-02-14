@@ -89,5 +89,18 @@
   "save": "Save",
   "select": "Select",
   "lsg": "Lsg",
-  "delete": "DELETE"
+  "delete": "Delete",
+  "max_size_for_image_uploaded_should_be":"Max size for image uploaded should be",
+  "allowed_formats_are":"Allowed formats are", 
+  "recommended_aspect_ratio_for":"Recommended aspect ratio for",
+  "drag_drop_image_to_upload":"Drag & drop image to upload",
+  "upload_an_image":"Upload an image",
+  "uploading":"Uploading",
+  "switch":"Switch",
+  "capture":"Capture",
+  "retake":"Retake",
+  "submit":"Submit",
+  "camera":"Camera",
+  "submitting":"Submitting"
+
 }
