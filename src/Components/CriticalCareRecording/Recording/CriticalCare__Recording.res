@@ -47,7 +47,7 @@ let editorNameToString = editor => {
   switch editor {
   | NeurologicalMonitoringEditor => "Neurological Monitoring"
   | HemodynamicParametersEditor => "Vitals"
-  | VentilatorParametersEditor => "Ventilator Parameters"
+  | VentilatorParametersEditor => "Respiratory Support"
   | ArterialBloodGasAnalysisEditor => "Arterial Blood Gas Analysis"
   | BloodSugarEditor => "Blood Sugar"
   | IOBalanceEditor => "I/O Balance"

@@ -100,15 +100,13 @@ const Form = <T extends FormDetails>({
             <div className="my-6 flex flex-col gap-4">
               <Consumer>{props.children}</Consumer>
             </div>
-            <div className="flex justify-end gap-2">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
               <Cancel
-                className="w-full md:w-auto"
                 onClick={props.onCancel}
                 label={props.cancelLabel ?? "Cancel"}
               />
               <Submit
                 type="submit"
-                className="w-full md:w-auto"
                 disabled={disabled}
                 label={props.submitLabel ?? "Submit"}
               />

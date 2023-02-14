@@ -72,11 +72,9 @@ const StatelessSidebar = ({
       e.style.display = "block";
 
       if (indexDifference > 0) {
-        console.log("indexDifference > 0");
         e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
         e.style.bottom = "auto";
       } else {
-        console.log("indexDifference < 0");
         e.style.bottom =
           itemHeight * (NavItems.length + bottomItemOffset) -
           lastIndicatorPosition * itemHeight -

@@ -7,6 +7,7 @@ import ErrorPages from "./ErrorPages.json";
 import Shifting from "./Shifting.json";
 import Notifications from "./Notifications.json";
 import ExternalResult from "./ExternalResult.json";
+import CoverImageEdit from "./CoverImageEdit.json";
 
 export default {
   ...Auth,
@@ -18,4 +19,5 @@ export default {
   ...Shifting,
   ...Notifications,
   ...ExternalResult,
+  ...CoverImageEdit,
 };

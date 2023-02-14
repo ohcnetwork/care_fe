@@ -22,13 +22,13 @@ import {
 import { phonePreg } from "../../Common/validation";
 
 import { createShift, getPatient } from "../../Redux/actions";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -89,6 +89,7 @@ const initialState = {
 };
 
 export const ShiftCreate = (props: patientShiftProps) => {
+  const { goBack } = useAppHistory();
   const { facilityId, patientId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
