@@ -137,25 +137,28 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
-      const phoneNumber = parsePhoneNumberFromString(state.form[field]);
       switch (field) {
-        case "refering_facility_contact_number":
+        case "refering_facility_contact_number": {
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
           } else if (
-            !phoneNumber?.isPossible() ||
-            !phonePreg(String(phoneNumber?.number))
+            !parsePhoneNumberFromString(state.form[field])?.isPossible() ||
+            !phonePreg(
+              String(parsePhoneNumberFromString(state.form[field])?.number)
+            )
           ) {
             errors[field] = requiredFields[field].invalidText;
             isInvalidForm = true;
           }
           return;
-        default:
+        }
+        default: {
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
           }
+        }
       }
     });
 
