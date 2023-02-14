@@ -131,13 +131,10 @@ export default function ManageUsers() {
   );
 
   const addUser = (
-    <button
-      className="px-4 py-1 w-full md:w-auto rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
-      onClick={() => navigate("/users/add")}
-    >
-      <i className="fas fa-plus mr-2"></i>
-      Add New User
-    </button>
+    <ButtonV2 className="w-full" onClick={() => navigate("/users/add")}>
+      <CareIcon className="care-l-plus text-lg w-full" />
+      <p>Add New User</p>
+    </ButtonV2>
   );
 
   const handleCancel = () => {
@@ -203,8 +200,8 @@ export default function ManageUsers() {
           id={`usr_${idx}`}
           className=" w-full lg:w-1/2 xl:w-1/3 mt-6 md:px-4"
         >
-          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-visible">
-            <div className="h-full flex flex-col justify-between">
+          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-visible relative">
+            <div className="h-full flex flex-col justify-between pb-20 sm:pb-16">
               <div className="px-6 py-4">
                 <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
                   {user.username && (
@@ -266,7 +263,7 @@ export default function ManageUsers() {
                   className={`flex ${
                     isExtremeSmallScreen
                       ? " flex-wrap "
-                      : " flex-row justify-between "
+                      : " flex-col md:flex-row justify-between "
                   } md:grid md:grid-cols-4 gap-2`}
                 >
                   {user.user_type && (
@@ -371,7 +368,7 @@ export default function ManageUsers() {
                   )}
                   {user.username && (
                     <div id="facilities" className="col-span-4">
-                      <div className="flex text-gray-800">
+                      <div className="flex text-gray-800 absolute bottom-12 sm:bottom-9 left-6">
                         <p className="flex items-center">Linked Facilities: </p>
                         <ButtonV2
                           ghost
@@ -411,7 +408,7 @@ export default function ManageUsers() {
                       setExpandSkillList(true);
                       setSelectedUser(user.username);
                     }}
-                    className="col-span-4 mt-2 align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+                    className="col-span-4 mt-2 align-baseline font-bold text-sm text-blue-500 hover:text-blue-800 absolute bottom-3"
                   >
                     Click here to show linked skills
                   </div>
@@ -428,7 +425,6 @@ export default function ManageUsers() {
   } else if (users && users.length) {
     manageUsers = (
       <div>
-        {userTypes.length && addUser}
         <div className="flex flex-wrap md:-mx-4">{userList}</div>
         <Pagination totalCount={totalCount} />
       </div>
@@ -436,10 +432,7 @@ export default function ManageUsers() {
   } else if (users && users.length === 0) {
     manageUsers = (
       <div>
-        {userTypes.length && addUser}
-        <div>
-          <h5> No Users Found</h5>
-        </div>
+        <h5> No Users Found</h5>
       </div>
     );
   }
@@ -488,9 +481,8 @@ export default function ManageUsers() {
               placeholder="Search by username"
             />
           </div>
-
           <div>
-            <div className="flex items-start mb-2">
+            <div className="flex flex-col items-center mb-2 gap-2">
               <button
                 className="btn btn-primary-ghost w-full"
                 onClick={() => advancedFilter.setShow(true)}
@@ -526,6 +518,7 @@ export default function ManageUsers() {
                 </svg>
                 <span>Advanced Filters</span>
               </button>
+              {userTypes.length && addUser}
             </div>
           </div>
 
@@ -688,6 +681,11 @@ function UserFacilities(props: { user: any }) {
         </div>
       ) : (
         <div className="flex flex-col">
+          {facilities.length === 0 && (
+            <div className="flex justify-center items-center text-xl w-full font-bold text-gray-600">
+              No Facilities Linked
+            </div>
+          )}
           {facilities.map((facility: any, i: number) => {
             const isHomeFacility =
               user?.home_facility_object?.id === facility.id;

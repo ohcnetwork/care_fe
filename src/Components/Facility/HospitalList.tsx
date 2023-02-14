@@ -23,9 +23,9 @@ import useFilters from "../../Common/hooks/useFilters";
 import { FacilityCard } from "./FacilityCard";
 import ExportMenu from "../Common/Export";
 import CountBlock from "../../CAREUI/display/Count";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const HospitalList = () => {
   const {
@@ -209,9 +209,11 @@ export const HospitalList = () => {
   }
 
   return (
-    <div className="px-6">
-      <div className="flex justify-between items-center">
-        <PageTitle title={t("Facilities")} breadcrumbs={false} hideBack />
+    <Page
+      title={t("Facilities")}
+      breadcrumbs={false}
+      hideBack
+      options={
         <ExportMenu
           exportItems={[
             {
@@ -236,7 +238,8 @@ export const HospitalList = () => {
             },
           ]}
         />
-      </div>
+      }
+    >
       <div className="lg:flex gap-2 mt-4">
         <CountBlock
           text="Total Facilities"
@@ -316,6 +319,6 @@ export const HospitalList = () => {
       <div className="mt-4 pb-4">
         <div>{manageFacilities}</div>
       </div>
-    </div>
+    </Page>
   );
 };

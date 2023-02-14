@@ -103,7 +103,8 @@ export const PatientManager = () => {
   const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
     useState("");
 
-  useEffect(() => {
+  const setPhoneNum = (phone_number: string) => {
+    setPhoneNumber(phone_number);
     if (phone_number.length === 15) {
       setPhoneNumberError("");
       updateQuery({ phone_number });
@@ -117,9 +118,10 @@ export const PatientManager = () => {
     }
 
     setPhoneNumberError("Enter a valid number");
-  }, [phone_number]);
+  };
 
-  useEffect(() => {
+  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
+    setEmergencyPhoneNumber(emergency_phone_number);
     if (emergency_phone_number.length === 15) {
       setEmergencyPhoneNumberError("");
       updateQuery({ emergency_phone_number });
@@ -133,7 +135,7 @@ export const PatientManager = () => {
     }
 
     setEmergencyPhoneNumberError("Enter a valid number");
-  }, [emergency_phone_number]);
+  };
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
@@ -815,14 +817,14 @@ export const PatientManager = () => {
                 label="Search by Primary Number"
                 {...queryField("phone_number", "+91")}
                 value={phone_number}
-                onChange={(e) => setPhoneNumber(e.value)}
+                onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
               />
               <PhoneNumberFormField
                 label="Search by Emergency Number"
                 {...queryField("emergency_phone_number", "+91")}
                 value={emergency_phone_number}
-                onChange={(e) => setEmergencyPhoneNumber(e.value)}
+                onChange={(e) => setEmergencyPhoneNum(e.value)}
                 error={emergencyPhoneNumberError}
               />
             </div>
