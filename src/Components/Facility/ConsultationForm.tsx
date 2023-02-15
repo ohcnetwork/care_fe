@@ -59,6 +59,7 @@ import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import DateFormField from "../Form/FormFields/DateFormField";
 import useConfig from "../../Common/hooks/useConfig";
+import HCXPolicyEligibilityCheck from "../HCX/PolicyEligibilityCheck";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -733,8 +734,13 @@ export const ConsultationForm = (props: any) => {
         }
       />
 
+      <HCXPolicyEligibilityCheck
+        patient={patientId}
+        className="mt-10 bg-white rounded px-8 md:px-16 py-5 md:py-11 max-w-3xl mx-auto"
+      />
+
       <form
-        className="mt-10 bg-white rounded px-8 md:px-16 py-5 md:py-11 max-w-3xl mx-auto flex flex-col gap-4"
+        className="mt-6 bg-white rounded px-8 md:px-16 py-5 md:py-11 max-w-3xl mx-auto flex flex-col gap-4"
         onSubmit={handleSubmit}
       >
         <SymptomsSelect required label="Symptoms" {...field("symptoms")} />

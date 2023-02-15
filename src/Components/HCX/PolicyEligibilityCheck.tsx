@@ -1,0 +1,137 @@
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { HCXActions } from "../../Redux/actions";
+import ButtonV2 from "../Common/components/ButtonV2";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { HCXPolicyModel } from "./models";
+
+interface Props {
+  className?: string;
+  patient: string;
+}
+
+export default function HCXPolicyEligibilityCheck({
+  patient,
+  className,
+}: Props) {
+  const dispatch = useDispatch<any>();
+  const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>();
+  const [policy, setPolicy] = useState<string>();
+  const [eligibility, setEligibility] = useState<
+    Record<string, boolean | undefined>
+  >({});
+  const [isChecking, setIsChecking] = useState(false);
+
+  useEffect(() => {
+    async function fetchPatientInsuranceDetails() {
+      setInsuranceDetails(undefined);
+      setEligibility({});
+
+      const res = await dispatch(HCXActions.policies.list({ patient }));
+
+      if (res.data) {
+        setInsuranceDetails(res.data.results);
+        setEligibility({});
+      }
+    }
+
+    fetchPatientInsuranceDetails();
+  }, [patient, dispatch]);
+
+  const checkEligibility = async () => {
+    if (!policy) return;
+
+    setIsChecking(true);
+
+    const res = await dispatch(HCXActions.checkEligibility({ policy }));
+    if (res.data) {
+      setEligibility((prev) => ({
+        ...prev,
+        [policy]: res.data.eligible,
+      }));
+    }
+
+    setIsChecking(false);
+  };
+
+  return (
+    <div className={className}>
+      <div className="flex flex-col gap-4">
+        <h1 className="text-lg font-medium">
+          Check Insurance Policy Eligibility
+        </h1>
+
+        <div className="flex gap-2 items-center">
+          <SelectFormField
+            name="policy"
+            labelClassName="hidden"
+            errorClassName="hidden"
+            className="w-full"
+            options={insuranceDetails || []}
+            optionValue={(option) => option.id as string}
+            optionLabel={(option) =>
+              option.id && eligibility[option.id] !== undefined ? (
+                <div className="flex items-center gap-2">
+                  {option.policy_id}
+                  <EligibilityChip eligible={!!eligibility[option.id]} />
+                </div>
+              ) : (
+                option.policy_id
+              )
+            }
+            onChange={({ value }) => setPolicy(value)}
+            value={policy}
+            placeholder={
+              insuranceDetails
+                ? insuranceDetails.length
+                  ? "Select a policy"
+                  : "No Policies"
+                : "Loading..."
+            }
+            disabled={!insuranceDetails}
+            optionDescription={(option) => (
+              <div className="flex flex-wrap gap-3">
+                <span>
+                  {option.subscriber_id}
+                  {"(Subscriber ID)"}
+                </span>
+                <span>
+                  {option.insurer_id}
+                  {"(Insurer ID)"}
+                </span>
+                <span>
+                  {option.insurer_name}
+                  {"(Insurer Name)"}
+                </span>
+              </div>
+            )}
+          />
+          <ButtonV2
+            className="py-3 w-16"
+            onClick={checkEligibility}
+            disabled={isChecking}
+          >
+            {isChecking ? (
+              <CareIcon className="care-l-spinner text-lg animate-spin" />
+            ) : (
+              "Check"
+            )}
+          </ButtonV2>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const EligibilityChip = ({ eligible }: { eligible: boolean }) => {
+  return (
+    <div
+      className={`px-1.5 py-0.5 rounded-full text-sm font-bold ${
+        eligible ? "text-primary-500 bg-primary-200" : "text-red-500 bg-red-200"
+      }`}
+    >
+      {eligible ? "Eligible" : "Not Eligible"}
+    </div>
+  );
+};
