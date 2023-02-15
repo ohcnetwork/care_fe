@@ -1,3 +1,4 @@
+import { HCXPolicyModel } from "../Components/HCX/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
 export const getConfig = () => {
@@ -821,3 +822,34 @@ export const listAssetTransaction = (params: object) =>
   fireRequest("listAssetTransaction", [], params);
 export const getAssetTransaction = (id: string) =>
   fireRequest("getAssetTransaction", [], {}, { id });
+
+// HCX Actions
+
+export const HCXActions = {
+  checkEligibility: (params: object) => {
+    return fireRequest("hcxCheckEligibility", [], params);
+  },
+
+  policies: {
+    list(params: object) {
+      return fireRequest("listHCXPolicies", [], params);
+    },
+    create(obj: HCXPolicyModel) {
+      return fireRequest("createHCXPolicy", [], obj);
+    },
+    read(id: string) {
+      return fireRequest("getHCXPolicy", [], {}, { external_id: id });
+    },
+    update(id: string, obj: HCXPolicyModel) {
+      return fireRequest("updateHCXPolicy", [], obj, { external_id: id });
+    },
+    partialUpdate(id: string, obj: Partial<HCXPolicyModel>) {
+      return fireRequest("partialUpdateHCXPolicy", [], obj, {
+        external_id: id,
+      });
+    },
+    delete(id: string) {
+      return fireRequest("deleteHCXPolicy", [], {}, { external_id: id });
+    },
+  },
+};

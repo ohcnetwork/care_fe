@@ -793,6 +793,43 @@ const routes: Routes = {
     path: "/api/v1/asset_transaction/{id}",
     method: "GET",
   },
+
+  // HCX Endpoints
+
+  hcxCheckEligibility: {
+    path: "/api/v1/hcx/check_eligibility/",
+    method: "POST",
+  },
+
+  listHCXPolicies: {
+    path: "/api/v1/hcx/policy/",
+    method: "GET",
+  },
+
+  createHCXPolicy: {
+    path: "/api/v1/hcx/policy/",
+    method: "POST",
+  },
+
+  getHCXPolicy: {
+    path: "/api/v1/hcx/policy/{external_id}/",
+    method: "GET",
+  },
+
+  updateHCXPolicy: {
+    path: "/api/v1/hcx/policy/{external_id}/",
+    method: "PUT",
+  },
+
+  partialUpdateHCXPolicy: {
+    path: "/api/v1/hcx/policy/{external_id}/",
+    method: "PATCH",
+  },
+
+  deleteHCXPolicy: {
+    path: "/api/v1/hcx/policy/{external_id}/",
+    method: "DELETE",
+  },
 };
 
 export default routes;
