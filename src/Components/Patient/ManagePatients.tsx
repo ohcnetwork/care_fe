@@ -634,7 +634,7 @@ export const PatientManager = () => {
       name,
       value: qParams[name] || defaultValue,
       onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
-      className: "grow lg:max-w-sm w-full mb-2",
+      className: "grow w-full mb-2",
     };
   };
 
@@ -762,15 +762,14 @@ export const PatientManager = () => {
         </div>
       </div>
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-4 my-4 px-2 md:px-0 mb-[-12px]">
-        <div className="col-span-1">
-          <div className="flex flex-col xl:flex-row mt-2 h-full gap-3">
-            <CountBlock
-              text="Total Patients"
-              count={totalCount}
-              loading={isLoading}
-              icon={"user-injured"}
-            />
-            {/*<div className="bg-white overflow-hidden shadow rounded-lg flex-1">
+        <div className="flex flex-col xl:flex-row mt-2 h-full gap-3">
+          <CountBlock
+            text="Total Patients"
+            count={totalCount}
+            loading={isLoading}
+            icon={"user-injured"}
+          />
+          {/*<div className="bg-white overflow-hidden shadow rounded-lg flex-1">
               <div className="p-4">
                 <dl>
                   <div className="flex items-center justify-center rounded-lg text-xl w-10 h-10 bg-yellow-100">
@@ -791,26 +790,21 @@ export const PatientManager = () => {
                 </dl>
               </div>
             </div>*/}
-          </div>
         </div>
         <div className="w-full col-span-3">
           <div className="col-span-2 mt-2">
-            <div>
-              <div>
-                <div className="md:flex md:gap-4 mt-1">
-                  <SearchInput
-                    label="Search by Patient"
-                    placeholder="Enter patient name"
-                    {...queryField("name")}
-                  />
-                  <SearchInput
-                    label="Search by IP Number"
-                    placeholder="Enter IP Number"
-                    secondary
-                    {...queryField("ip_no")}
-                  />
-                </div>
-              </div>
+            <div className="md:flex md:gap-4 mt-1">
+              <SearchInput
+                label="Search by Patient"
+                placeholder="Enter patient name"
+                {...queryField("name")}
+              />
+              <SearchInput
+                label="Search by IP Number"
+                placeholder="Enter IP Number"
+                secondary
+                {...queryField("ip_no")}
+              />
             </div>
             <div className="md:flex md:gap-4">
               <PhoneNumberFormField
