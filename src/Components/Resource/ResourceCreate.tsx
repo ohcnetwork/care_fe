@@ -23,7 +23,7 @@ import {
   FormControlLabel,
 } from "@material-ui/core";
 import { phonePreg } from "../../Common/validation";
-
+import TextFormField from "../Form/FormFields/TextFormField";
 import { createResource, getAnyFacility } from "../../Redux/actions";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
@@ -134,15 +134,16 @@ export default function ResourceCreate(props: resourceProps) {
     const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
-      const phoneNumber = parsePhoneNumberFromString(state.form[field]);
       switch (field) {
         case "refering_facility_contact_number":
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
           } else if (
-            !phoneNumber?.isPossible() ||
-            !phonePreg(String(phoneNumber?.number))
+            !parsePhoneNumberFromString(state.form[field])?.isPossible() ||
+            !phonePreg(
+              String(parsePhoneNumberFromString(state.form[field])?.number)
+            )
           ) {
             errors[field] = requiredFields[field].invalidText;
             isInvalidForm = true;
@@ -167,7 +168,7 @@ export default function ResourceCreate(props: resourceProps) {
     dispatch({ type: "set_form", form });
   };
 
-  const handleTextAreaChange = (e: any) => {
+  const handleTextFieldChange = (e: any) => {
     const form = { ...state.form };
     const { name, value } = e;
     form[name] = value;
@@ -244,17 +245,13 @@ export default function ResourceCreate(props: resourceProps) {
           <CardContent>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
-                <FieldLabel required>
-                  Name of Contact Person at Facility
-                </FieldLabel>
-                <TextInputField
-                  fullWidth
+                <TextFormField
                   name="refering_facility_contact_name"
-                  variant="outlined"
-                  margin="dense"
+                  required
+                  label=" Name of Contact Person at Facility"
                   value={state.form.refering_facility_contact_name}
-                  onChange={handleChange}
-                  errors={state.errors.refering_facility_contact_name}
+                  onChange={handleTextFieldChange}
+                  error={state.errors.refering_facility_contact_name}
                 />
               </div>
 
@@ -350,7 +347,7 @@ export default function ResourceCreate(props: resourceProps) {
                   label="Description of request"
                   placeholder="Type your description here"
                   value={state.form.reason}
-                  onChange={handleTextAreaChange}
+                  onChange={handleTextFieldChange}
                   error={state.errors.reason}
                   required
                 />
