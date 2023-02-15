@@ -35,6 +35,7 @@ import {
   getWardByLocalBody,
   externalResult,
   getAnyFacility,
+  HCXActions,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
@@ -72,6 +73,10 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
+import { HCXPolicyModel } from "../HCX/models";
+import HCXPolicyValidator from "../HCX/validators";
+import { FieldError } from "../Form/FieldValidators";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -225,6 +230,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [patientName, setPatientName] = useState("");
   const [{ extId }, setQuery] = useQueryParams();
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
+  const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>(
+    []
+  );
+  const [insuranceDetailsError, setInsuranceDetailsError] =
+    useState<FieldError>();
 
   useEffect(() => {
     if (extId) {
@@ -495,6 +505,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const errors = { ...initError };
     let invalidForm = false;
     let error_div = "";
+
+    const insuranceDetailsError = insuranceDetails
+      .map(HCXPolicyValidator)
+      .find((error) => !!error);
+    setInsuranceDetailsError(insuranceDetailsError);
+
+    if (insuranceDetailsError) {
+      invalidForm = true;
+      error_div = "insurance_details";
+    }
 
     Object.keys(state.form).forEach((field) => {
       let phoneNumber, emergency_phone_number;
@@ -868,8 +888,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ? updatePatient(data, { id })
           : createPatient({ ...data, facility: facilityId })
       );
-      setIsLoading(false);
       if (res && res.data && res.status != 400) {
+        await Promise.all(
+          insuranceDetails.map((obj) => {
+            const policy: HCXPolicyModel = { ...obj, patient: res.data.id };
+            return policy.id
+              ? dispatchAction(HCXActions.policies.update(policy.id, policy))
+              : dispatchAction(HCXActions.policies.create(policy));
+          })
+        );
+
         dispatch({ type: "set_form", form: initForm });
         if (!id) {
           setAlertMessage({
@@ -887,6 +915,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           goBack();
         }
       }
+      setIsLoading(false);
     }
   };
 
@@ -2049,6 +2078,39 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </div>
                     </CardContent>
                   </Card>
+                  <div className="bg-white rounded flex flex-col gap-4 w-full p-4">
+                    <div className="flex w-full items-center justify-between">
+                      <h1 className="font-bold text-purple-500 text-left text-xl">
+                        Insurance Details
+                      </h1>
+                      <ButtonV2
+                        type="button"
+                        variant="alert"
+                        border
+                        ghost={insuranceDetails.length !== 0}
+                        onClick={() =>
+                          setInsuranceDetails([
+                            ...insuranceDetails,
+                            {
+                              subscriber_id: "",
+                              policy_id: "",
+                              insurer_id: "",
+                              insurer_name: "",
+                            },
+                          ])
+                        }
+                      >
+                        <CareIcon className="care-l-plus text-lg" />
+                        <span>Add Policy</span>
+                      </ButtonV2>
+                    </div>
+                    <InsuranceDetailsBuilder
+                      name="insurance_details"
+                      value={insuranceDetails}
+                      onChange={({ value }) => setInsuranceDetails(value)}
+                      error={insuranceDetailsError}
+                    />
+                  </div>
                   <div className="flex items-center my-4 mx-4">
                     <button
                       className="btn btn-large btn-primary mr-4"
