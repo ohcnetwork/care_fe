@@ -84,9 +84,14 @@ export const PatientManager = () => {
     Pagination,
     FilterBadges,
     resultsPerPage,
-  } = useFilters({
-    limit: 12,
-  });
+  } = useFilters(
+    {
+      limit: 12,
+    },
+    {
+      ordering: "-modified_date",
+    }
+  );
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
