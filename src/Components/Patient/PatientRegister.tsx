@@ -466,6 +466,24 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     [dispatchAction, fetchDistricts, fetchLocalBody, fetchWards, id]
   );
 
+  useEffect(() => {
+    const fetchPatientInsuranceDetails = async () => {
+      if (!id) {
+        setInsuranceDetails([]);
+        return;
+      }
+
+      const res = await dispatchAction(
+        HCXActions.policies.list({ patient: id })
+      );
+      if (res && res.data) {
+        setInsuranceDetails(res.data.results);
+      }
+    };
+
+    fetchPatientInsuranceDetails();
+  }, [dispatchAction, id]);
+
   const fetchStates = useCallback(
     async (status: statusType) => {
       setIsStateLoading(true);
