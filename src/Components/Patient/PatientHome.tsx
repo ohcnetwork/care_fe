@@ -406,7 +406,7 @@ export const PatientHome = (props: any) => {
             [id]: { name: patientData?.name },
           }}
           backUrl={
-            facilityId ? `/facility/${facilityId}/patients` : `/patients`
+            facilityId ? `/facility/${facilityId}/patients` : "/patients"
           }
         />
 
@@ -455,7 +455,7 @@ export const PatientHome = (props: any) => {
             patientData?.last_consultation?.discharge_date)) && (
           <div className="relative mt-2">
             <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8 rounded-lg shadow bg-red-200 ">
-              <div className="text-center">
+              <div className="text-center flex justify-center gap-4">
                 <p className="font-bold text-red-800">
                   <i className="fas fa-exclamation-triangle mr-2" />
                   <span className="inline">
@@ -463,6 +463,12 @@ export const PatientHome = (props: any) => {
                     <strong>{patientData.facility_object?.name || "-"} </strong>
                   </span>
                 </p>
+                <span className="relative inline-flex">
+                  <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
+                    <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                  </span>
+                </span>
               </div>
             </div>
             <div className="flex items-center mt-4">
