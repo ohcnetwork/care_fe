@@ -211,11 +211,13 @@ const AssetManage = (props: AssetManageProps) => {
             name: asset?.name,
           },
         }}
+        backUrl="/assets"
       />
       <ConfirmDialogV2
         title="Delete Asset"
         description="Are you sure you want to delete this asset?"
         action="Confirm"
+        variant="danger"
         show={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={handleDelete}
@@ -280,6 +282,11 @@ const AssetManage = (props: AssetManageProps) => {
                   label: "Asset Class",
                   icon: assetClassProp.uicon,
                   content: assetClassProp.name,
+                },
+                {
+                  label: "Asset QR Code ID",
+                  icon: "qrcode-scan",
+                  content: asset?.qr_code_id,
                 },
                 {
                   label: "Not working reason",

@@ -7,10 +7,10 @@ import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { RESOURCE_CHOICES } from "../../Common/constants";
-import { Link } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import useMergeState from "../../Common/hooks/useMergeState";
-
+import FilterButtons from "../Common/FilterButtons";
+import { navigate } from "raviger";
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
 export default function ListFilter(props: any) {
@@ -149,23 +149,16 @@ export default function ListFilter(props: any) {
   };
   return (
     <div>
-      <div className="flex justify-between">
-        <button className="btn btn-default" onClick={closeFilter}>
-          <i className="fas fa-times mr-2" />
-          Cancel
-        </button>
-        <Link
-          href="/resource"
-          className="btn btn-default hover:text-gray-900"
-          onClick={closeFilter}
-        >
-          <i className="fas fa-times mr-2" />
-          Clear Filters
-        </Link>
-        <button className="btn btn-primary" onClick={applyFilter}>
-          <i className="fas fa-check mr-2" />
-          Apply
-        </button>
+      <div className="pb-10">
+        <FilterButtons
+          onClose={closeFilter}
+          onApply={applyFilter}
+          onClear={() => {
+            navigate("/resource");
+            setFilterState(filterState);
+            closeFilter();
+          }}
+        />
       </div>
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">

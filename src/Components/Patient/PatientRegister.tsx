@@ -52,11 +52,7 @@ import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
 import { InfoOutlined } from "@material-ui/icons";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import {
-  getPincodeDetails,
-  goBack,
-  includesIgnoreCase,
-} from "../../Utils/utils";
+import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -70,6 +66,9 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import useConfig from "../../Common/hooks/useConfig";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -187,12 +186,14 @@ const patientFormReducer = (state = initialState, action: any) => {
   }
 };
 
-const scrollTo = (id: any) => {
+const scrollTo = (id: string | boolean) => {
   const element = document.querySelector(`#${id}-div`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
 export const PatientRegister = (props: PatientRegisterProps) => {
+  const { goBack } = useAppHistory();
+  const { gov_data_api_key } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
@@ -628,7 +629,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
         case "is_vaccinated":
           if (state.form.is_vaccinated === "true") {
-            console.log(state);
             if (state.form.number_of_doses === "0") {
               errors["number_of_doses"] =
                 "Please fill the number of doses taken";
@@ -652,6 +652,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
+
+        case "date_of_result":
+          if (state.form[field] < state.form.date_of_test) {
+            errors[field] =
+              "Date should not be before the date of sample collection";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
         case "disease_status":
           if (state.form[field] === "POSITIVE") {
             if (!state.form.date_of_test) {
@@ -664,6 +673,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               if (!error_div) error_div = field;
               invalidForm = true;
             }
+          }
+          return;
+        case "medical_history":
+          if (!state.form[field].length) {
+            errors[field] = "Please fill the medical history";
+            if (!error_div) error_div = field;
+            invalidForm = true;
           }
           return;
         default:
@@ -680,7 +696,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
     if (!validatePincode(e.target.value)) return;
 
-    const pincodeDetails = await getPincodeDetails(e.target.value);
+    const pincodeDetails = await getPincodeDetails(
+      e.target.value,
+      gov_data_api_key
+    );
     if (!pincodeDetails) return;
 
     const matchedState = states.find((state) => {
@@ -731,10 +750,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           });
         }
       });
-      if (!medical_history.length) {
-        medical_history.push({ disease: "NO", details: "" });
-      }
-
       const data = {
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
@@ -901,7 +916,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleDateChange = (date: any, field: string) => {
+  const handleDateChange = (date: MaterialUiPickersDate, field: string) => {
     if (moment(date).isValid()) {
       const form = { ...state.form };
       form[field] = date;
@@ -1010,9 +1025,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <PageTitle
         title={headerText}
         className="mb-11"
-        backButtonCB={() => {
+        onBackClick={() => {
           if (showImport) {
             setShowImport(false);
+            return false;
+          } else {
+            id
+              ? navigate(`/facility/${facilityId}/patient/${id}`)
+              : navigate(`/facility/${facilityId}`);
           }
         }}
         crumbsReplacements={{
@@ -1886,7 +1906,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onChange={(date) =>
                                 handleDateChange(date, "date_of_result")
                               }
-                              min={state.form.date_of_test}
                               errors={state.errors.date_of_result}
                               inputVariant="outlined"
                               margin="dense"
@@ -1984,6 +2003,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               return renderMedicalHistory(i.id, i.text);
                             })}
                           </div>
+                          <ErrorHelperText
+                            error={state.errors.medical_history}
+                          />
                         </div>
 
                         <div id="allergies-div">

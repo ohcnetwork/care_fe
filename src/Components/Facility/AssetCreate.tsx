@@ -22,17 +22,16 @@ import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
 import moment from "moment";
-import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
 import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import DateInputV2 from "../Common/DateInputV2";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+
 const Loading = loadable(() => import("../Common/Loading"));
 
 const formErrorKeys = [
@@ -97,6 +96,7 @@ type AssetFormSection =
   | "Service Details";
 
 const AssetCreate = (props: AssetProps) => {
+  const { goBack } = useAppHistory();
   const { facilityId, assetId } = props;
 
   let assetTypeInitial: AssetType;
@@ -203,11 +203,8 @@ const AssetCreate = (props: AssetProps) => {
       setQrCodeId(asset.qr_code_id);
       setManufacturer(asset.manufacturer);
       asset.warranty_amc_end_of_validity &&
-        setWarrantyAmcEndOfValidity(
-          moment(asset.warranty_amc_end_of_validity).toDate()
-        );
-      asset.last_serviced_on &&
-        setLastServicedOn(moment(asset.last_serviced_on).toDate());
+        setWarrantyAmcEndOfValidity(asset.warranty_amc_end_of_validity);
+      asset.last_serviced_on && setLastServicedOn(asset.last_serviced_on);
       setNotes(asset.notes);
     }
   }, [asset]);
@@ -397,6 +394,7 @@ const AssetCreate = (props: AssetProps) => {
             assets: { style: "text-gray-200 pointer-events-none" },
             [assetId || "????"]: { name },
           }}
+          backUrl={`/facility/${facilityId}`}
         />
         <section className="text-center">
           <h1 className="text-6xl flex items-center flex-col py-10">
@@ -462,9 +460,6 @@ const AssetCreate = (props: AssetProps) => {
     );
   };
 
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-
   return (
     <div className="pb-2 relative flex flex-col">
       <PageTitle
@@ -475,6 +470,11 @@ const AssetCreate = (props: AssetProps) => {
           assets: { style: "text-gray-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
+        backUrl={
+          assetId
+            ? `/facility/${facilityId}/assets/${assetId}`
+            : `/facility/${facilityId}`
+        }
       />
       <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
         <div className="hidden xl:flex flex-col w-72 fixed h-full mt-4">
@@ -707,12 +707,13 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["manufacturer"]}
                   >
-                    <TextInputFieldV2
+                    <TextFormField
                       id="manufacturer"
+                      name="manufacturer"
                       label="Manufacturer"
                       value={manufacturer}
                       placeholder="Eg. XYZ"
-                      onValueChange={setManufacturer}
+                      onChange={(e) => setManufacturer(e.value)}
                       error={state.errors.manufacturer}
                     />
                   </div>
@@ -723,23 +724,25 @@ const AssetCreate = (props: AssetProps) => {
                     ref={fieldRef["warranty_amc_end_of_validity"]}
                   >
                     <label className="mb-2">Warranty / AMC Expiry</label>
-                    <DateInputV2
-                      className="border-1 border-gray-200"
+                    <TextFormField
+                      name="WarrantyAMCExpiry"
                       value={warranty_amc_end_of_validity}
                       onChange={(date) => {
                         if (
-                          moment(date).format("YYYY-MM-DD") <
+                          moment(date.value).format("YYYY-MM-DD") <
                           new Date().toLocaleDateString("en-ca")
                         ) {
                           Notification.Error({
                             msg: "Warranty / AMC Expiry date can't be in past",
                           });
                         } else {
-                          setWarrantyAmcEndOfValidity(moment(date).toDate());
+                          setWarrantyAmcEndOfValidity(
+                            moment(date.value).format("YYYY-MM-DD")
+                          );
                         }
                       }}
-                      position="LEFT"
-                      min={yesterday}
+                      type="date"
+                      min={moment().format("YYYY-MM-DD")}
                     />
                     <ErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}
@@ -751,12 +754,13 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["support_name"]}
                   >
-                    <TextInputFieldV2
+                    <TextFormField
                       id="support-name"
+                      name="support_name"
                       label="Customer Support Name"
                       placeholder="Eg. ABC"
                       value={support_name}
-                      onValueChange={setSupportName}
+                      onChange={(e) => setSupportName(e.value)}
                       error={state.errors.support_name}
                     />
                   </div>
@@ -782,12 +786,13 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["support_email"]}
                   >
-                    <TextInputFieldV2
+                    <TextFormField
                       id="support-email"
+                      name="support_email"
                       label="Customer Support Email"
                       placeholder="Eg. mail@example.com"
                       value={support_email}
-                      onValueChange={setSupportEmail}
+                      onChange={(e) => setSupportEmail(e.value)}
                       error={state.errors.support_email}
                     />
                   </div>
@@ -799,12 +804,13 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["vendor_name"]}
                   >
-                    <TextInputFieldV2
-                      label="Vendor Name"
+                    <TextFormField
                       id="vendor-name"
+                      name="vendor_name"
+                      label="Vendor Name"
                       value={vendor_name}
                       placeholder="Eg. XYZ"
-                      onValueChange={setVendorName}
+                      onChange={(e) => setVendorName(e.value)}
                       error={state.errors.vendor_name}
                     />
                   </div>
@@ -814,11 +820,12 @@ const AssetCreate = (props: AssetProps) => {
                     className="col-span-6 sm:col-span-3"
                     ref={fieldRef["serial_number"]}
                   >
-                    <TextInputFieldV2
-                      label="Serial Number"
+                    <TextFormField
                       id="serial-number"
+                      name="serial_number"
+                      label="Serial Number"
                       value={serial_number}
-                      onValueChange={setSerialNumber}
+                      onChange={(e) => setSerialNumber(e.value)}
                       error={state.errors.serial_number}
                     />
                   </div>
@@ -832,23 +839,26 @@ const AssetCreate = (props: AssetProps) => {
                     ref={fieldRef["last_serviced_on"]}
                   >
                     <label htmlFor="last-serviced-on">Last Serviced On</label>
-                    <DateInputV2
-                      className="border-1 border-gray-200"
+                    <TextFormField
+                      name="LastServicedOn"
+                      className="mt-2"
                       value={last_serviced_on}
                       onChange={(date) => {
                         if (
-                          moment(date).format("YYYY-MM-DD") >
+                          moment(date.value).format("YYYY-MM-DD") >
                           new Date().toLocaleDateString("en-ca")
                         ) {
                           Notification.Error({
                             msg: "Last Serviced date can't be in future",
                           });
                         } else {
-                          setLastServicedOn(moment(date).toDate());
+                          setLastServicedOn(
+                            moment(date.value).format("YYYY-MM-DD")
+                          );
                         }
                       }}
-                      position="LEFT"
-                      max={new Date()}
+                      type="date"
+                      max={moment(new Date()).format("YYYY-MM-DD")}
                     />
                     <ErrorHelperText error={state.errors.last_serviced_on} />
                   </div>

@@ -954,7 +954,10 @@ export default function SampleReport(props: samplePreviewProps) {
                       <Typography className={`${classes.cellText}`}>
                         {sampleData &&
                           sampleData.exposure_history &&
-                          sampleData.exposure_history.places_of_travel}
+                          sampleData.exposure_history.places_of_travel &&
+                          sampleData.exposure_history.places_of_travel.join(
+                            ", "
+                          )}
                       </Typography>
                     </Box>
                   </Box>
@@ -1753,7 +1756,7 @@ export default function SampleReport(props: samplePreviewProps) {
   }
   return (
     <Paper className={classes.root}>
-      <PageTitle title="Sample Report" />
+      <PageTitle title="Sample Report" backUrl={`/sample/${sampleId}`} />
       {report}
     </Paper>
   );

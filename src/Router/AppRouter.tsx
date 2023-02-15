@@ -1,10 +1,8 @@
 import { useRedirect, useRoutes, usePath, Redirect } from "raviger";
 import { useState, useEffect } from "react";
-import { BedCapacityForm } from "../Components/Facility/BedCapacityForm";
 import { ConsultationDetails } from "../Components/Facility/ConsultationDetails";
 import TreatmentSummary from "../Components/Facility/TreatmentSummary";
 import { ConsultationForm } from "../Components/Facility/ConsultationForm";
-import { DoctorCapacityForm } from "../Components/Facility/DoctorCapacityForm";
 import { FacilityCreate } from "../Components/Facility/FacilityCreate";
 import { FacilityHome } from "../Components/Facility/FacilityHome";
 import { HospitalList } from "../Components/Facility/HospitalList";
@@ -68,8 +66,7 @@ import {
 } from "../Components/Common/Sidebar/Sidebar";
 import { BLACKLISTED_PATHS } from "../Common/constants";
 import { UpdateFacilityMiddleware } from "../Components/Facility/UpdateFacilityMiddleware";
-
-const logoBlack = process.env.REACT_APP_BLACK_LOGO;
+import useConfig from "../Common/hooks/useConfig";
 
 const routes = {
   "/hub": () => <HubDashboard />,
@@ -108,12 +105,6 @@ const routes = {
   "/facility/:facilityId/triage": ({ facilityId }: any) => (
     <TriageForm facilityId={facilityId} />
   ),
-  "/facility/:facilityId/bed": ({ facilityId }: any) => (
-    <BedCapacityForm facilityId={facilityId} />
-  ),
-  "/facility/:facilityId/doctor": ({ facilityId }: any) => (
-    <DoctorCapacityForm facilityId={facilityId} />
-  ),
   "/facility/:facilityId/patient": ({ facilityId }: any) => (
     <PatientRegister facilityId={facilityId} />
   ),
@@ -150,12 +141,6 @@ const routes = {
   ),
   "/facility/:facilityId/triage/:id": ({ facilityId, id }: any) => (
     <TriageForm facilityId={facilityId} id={id} />
-  ),
-  "/facility/:facilityId/bed/:id": ({ facilityId, id }: any) => (
-    <BedCapacityForm facilityId={facilityId} id={id} />
-  ),
-  "/facility/:facilityId/doctor/:id": ({ facilityId, id }: any) => (
-    <DoctorCapacityForm facilityId={facilityId} id={id} />
   ),
   "/facility/:facilityId/patient/:patientId/consultation": ({
     facilityId,
@@ -393,6 +378,7 @@ const routes = {
 };
 
 export default function AppRouter() {
+  const { static_black_logo } = useConfig();
   useRedirect("/", "/facility");
   useRedirect("/user", "/users");
   const pages = useRoutes(routes) || <Error404 />;
@@ -449,7 +435,11 @@ export default function AppRouter() {
             href="/"
             className="md:hidden flex h-full w-full items-center px-4"
           >
-            <img className="h-6 w-auto" src={logoBlack} alt="care logo" />
+            <img
+              className="h-6 w-auto"
+              src={static_black_logo}
+              alt="care logo"
+            />
           </a>
         </div>
 

@@ -1,4 +1,3 @@
-import React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useAbortableEffect, statusType } from "../../Common/utils";
 import { navigate, useQueryParams } from "raviger";
@@ -7,12 +6,12 @@ import { FacilityModel } from "../Facility/models";
 import { useDispatch } from "react-redux";
 import { getAnyFacility, getFacilityAssetLocation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { SelectField } from "../Common/HelperInputFields";
 import { LocationSelect } from "../Common/LocationSelect";
-import { AssetLocationObject } from "./AssetTypes";
+import { AssetClass, AssetLocationObject } from "./AssetTypes";
 import FilterButtons from "../Common/FilterButtons";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 
 const initialLocation = {
   id: "",
@@ -34,6 +33,9 @@ function AssetFilter(props: any) {
     filter.asset_type ? filter.asset_type : ""
   );
   const [asset_status, setAssetStatus] = useState<string>(filter.status || "");
+  const [asset_class, setAssetClass] = useState<string>(
+    filter.asset_class || ""
+  );
   const [facilityId, setFacilityId] = useState<number | "">(filter.facility);
   const [locationId, setLocationId] = useState<string | "">(filter.location);
   const [qParams, _] = useQueryParams();
@@ -101,6 +103,7 @@ function AssetFilter(props: any) {
     const data = {
       facility: facilityId,
       asset_type: asset_type,
+      asset_class: asset_class,
       status: asset_status,
       location: locationId,
     };
@@ -159,63 +162,64 @@ function AssetFilter(props: any) {
           )}
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Asset Type</FieldLabel>
-            <SelectField
+            <SelectFormField
               id="asset-type"
-              fullWidth
               name="asset_type"
-              placeholder=""
-              variant="outlined"
-              margin="dense"
               options={[
                 {
-                  id: "",
-                  name: "Select",
+                  value: "EXTERNAL",
+                  title: "EXTERNAL",
                 },
                 {
-                  id: "EXTERNAL",
-                  name: "EXTERNAL",
-                },
-                {
-                  id: "INTERNAL",
-                  name: "INTERNAL",
+                  value: "INTERNAL",
+                  title: "INTERNAL",
                 },
               ]}
-              optionValue="name"
+              optionLabel={({ title }) => title}
+              optionValue={({ value }) => value}
               value={asset_type}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setAssetType(e.target.value)
-              }
+              onChange={({ value }) => setAssetType(value)}
             />
           </div>
 
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Asset Status</FieldLabel>
-            <SelectField
+            <SelectFormField
               id="asset-status"
-              fullWidth
               name="asset_status"
-              placeholder=""
-              variant="outlined"
-              margin="dense"
               options={[
                 {
-                  id: "",
-                  name: "Select",
+                  value: "ACTIVE",
+                  title: "ACTIVE",
                 },
                 {
-                  id: "ACTIVE",
-                  name: "ACTIVE",
-                },
-                {
-                  id: "TRANSFER_IN_PROGRESS",
-                  name: "TRANSFER IN PROGRESS",
+                  value: "TRANSFER_IN_PROGRESS",
+                  title: "TRANSFER IN PROGRESS",
                 },
               ]}
-              optionValue="name"
+              optionLabel={({ title }) => title}
+              optionValue={({ value }) => value}
               value={asset_status}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setAssetStatus(e.target.value)
-              }
+              onChange={({ value }) => setAssetStatus(value)}
+            />
+          </div>
+
+          <div className="w-full flex-none">
+            <FieldLabel className="text-sm">Asset Class</FieldLabel>
+            <SelectFormField
+              id="asset-class"
+              name="asset_class"
+              options={[
+                { title: "ONVIF Camera", value: AssetClass.ONVIF },
+                {
+                  title: "HL7 Vitals Monitor",
+                  value: AssetClass.HL7MONITOR,
+                },
+              ]}
+              optionLabel={({ title }) => title}
+              optionValue={({ value }) => value}
+              value={asset_class}
+              onChange={({ value }) => setAssetClass(value)}
             />
           </div>
         </div>

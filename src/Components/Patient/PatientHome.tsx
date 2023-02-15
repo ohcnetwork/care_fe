@@ -401,11 +401,13 @@ export const PatientHome = (props: any) => {
       <div id="revamp">
         <PageTitle
           title={"Patient Details"}
-          backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
             [id]: { name: patientData?.name },
           }}
+          backUrl={
+            facilityId ? `/facility/${facilityId}/patients` : `/patients`
+          }
         />
 
         <div className="relative mt-2">
@@ -457,7 +459,7 @@ export const PatientHome = (props: any) => {
                 <p className="font-bold text-red-800">
                   <i className="fas fa-exclamation-triangle mr-2" />
                   <span className="inline">
-                    You have not created a consultation for the patient in
+                    You have not created a consultation for the patient in{" "}
                     <strong>{patientData.facility_object?.name || "-"} </strong>
                   </span>
                 </p>
@@ -649,17 +651,16 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 )}
-                {patientData.is_vaccinated &&
-                  patientData.last_vaccinated_date && (
-                    <div className="sm:col-span-1">
-                      <div className="text-sm leading-5 font-semibold text-zinc-400">
-                        Last Vaccinated on
-                      </div>
-                      <div className="mt-1 text-sm leading-5 font-medium">
-                        {formatDate(patientData.last_vaccinated_date)}
-                      </div>
+                {patientData.is_vaccinated && patientData.last_vaccinated_date && (
+                  <div className="sm:col-span-1">
+                    <div className="text-sm leading-5 font-semibold text-zinc-400">
+                      Last Vaccinated on
                     </div>
-                  )}
+                    <div className="mt-1 text-sm leading-5 font-medium">
+                      {formatDate(patientData.last_vaccinated_date)}
+                    </div>
+                  </div>
+                )}
                 {patientData.countries_travelled &&
                   !!patientData.countries_travelled.length && (
                     <div className="sm:col-span-1">
@@ -667,11 +668,7 @@ export const PatientHome = (props: any) => {
                         Countries travelled
                       </div>
                       <div className="mt-1 text-sm leading-5 font-medium">
-                        {Array.isArray(patientData.countries_travelled)
-                          ? patientData.countries_travelled.join(", ")
-                          : patientData.countries_travelled
-                              .split(",")
-                              .join(", ")}
+                        {patientData.countries_travelled.join(", ")}
                       </div>
                     </div>
                   )}
@@ -1357,7 +1354,8 @@ export const PatientHome = (props: any) => {
               <div className="border-b border-dashed text-gray-900 font-semibold text-left text-lg space-y-2">
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     disabled={
                       !(
                         patientData.is_active &&
@@ -1377,7 +1375,8 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     onClick={() =>
                       navigate(`/patient/${id}/investigation_reports`)
                     }
@@ -1388,7 +1387,8 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/files`
@@ -1401,7 +1401,8 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
@@ -1416,7 +1417,8 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
@@ -1431,7 +1433,8 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/notes`
@@ -1444,7 +1447,8 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     onClick={() => setOpenAssignVolunteerDialog(true)}
                     disabled={false}
                     authorizeFor={NonReadOnlyUsers}

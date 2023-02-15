@@ -1,6 +1,5 @@
 import axios from "axios";
-import { Button, CircularProgress, InputLabel } from "@material-ui/core";
-import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
+import { CircularProgress, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
 import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -119,6 +118,8 @@ interface StateInterface {
 export const FileUpload = (props: FileUploadProps) => {
   const { t } = useTranslation();
   const [audioBlob, setAudioBlob] = useState<Blob>();
+  const [audioBlobExists, setAudioBlobExists] = useState(false);
+  const [resetRecording, setResetRecording] = useState(false);
   const [file, setFile] = useState<File | null>();
   const {
     facilityId,
@@ -141,11 +142,11 @@ export const FileUpload = (props: FileUploadProps) => {
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
-  const [uploadFileNameError, setUploadFileNameError] = useState<string>("");
+  const [uploadFileError, setUploadFileError] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
   const [audioName, setAudioName] = useState<string>("");
-  const [audioNameError, setAudioNameError] = useState<string>("");
+  const [audioFileError, setAudioFileError] = useState<string>("");
   const [contentType, setcontentType] = useState<string>("");
   const [downloadURL, setDownloadURL] = useState<string>();
   const initialState = {
@@ -833,6 +834,7 @@ export const FileUpload = (props: FileUploadProps) => {
     setUploadFileName(
       fileName.substring(0, fileName.lastIndexOf(".")) || fileName
     );
+
     const ext: string = fileName.split(".")[1];
     setcontentType(header_content_type[ext]);
 
@@ -880,7 +882,7 @@ export const FileUpload = (props: FileUploadProps) => {
           Notification.Success({
             msg: "File Uploaded Successfully",
           });
-          setUploadFileNameError("");
+          setUploadFileError("");
           resolve(response);
         })
         .catch((e) => {
@@ -896,12 +898,16 @@ export const FileUpload = (props: FileUploadProps) => {
   const validateFileUpload = () => {
     const filenameLength = uploadFileName.trim().length;
     const f = file;
-    if (f === undefined) {
-      setUploadFileNameError("Please choose a file to upload");
+    if (f === undefined || f === null) {
+      setUploadFileError("Please choose a file to upload");
       return false;
     }
     if (filenameLength === 0) {
-      setUploadFileNameError("Please give a name !!");
+      setUploadFileError("Please give a name !!");
+      return false;
+    }
+    if (f.size > 10e7) {
+      setUploadFileError("Maximum size of files is 100 MB");
       return false;
     }
     return true;
@@ -948,13 +954,21 @@ export const FileUpload = (props: FileUploadProps) => {
     setAudioBlob(createdBlob);
   };
 
+  const confirmAudioBlobExists = () => {
+    setAudioBlobExists(true);
+  };
+
+  const deleteAudioBlob = () => {
+    setAudioBlobExists(false);
+    setResetRecording(true);
+  };
+
   const uploadAudiofile = (response: any) => {
     const url = response.data.signed_url;
     const internal_name = response.data.internal_name;
     const f = audioBlob;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`, { type: "audio/mpeg" });
-
     const config = {
       onUploadProgress: (progressEvent: any) => {
         const percentCompleted = Math.round(
@@ -982,7 +996,12 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const validateAudioUpload = () => {
     const f = audioBlob;
-    if (f === undefined) {
+    if (f === undefined || f === null) {
+      setAudioFileError("Please upload a file");
+      return false;
+    }
+    if (f.size > 10e7) {
+      setAudioFileError("File size must not exceed 100 MB");
       return false;
     }
     return true;
@@ -990,7 +1009,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const handleAudioUpload = async () => {
     if (!validateAudioUpload()) return;
-    setAudioNameError("");
+    setAudioFileError("");
     const category = "AUDIO";
     const name = "audio.mp3";
     const filename =
@@ -1010,6 +1029,7 @@ export const FileUpload = (props: FileUploadProps) => {
         setAudioUploadStarted(false);
       });
     setAudioName("");
+    setAudioBlobExists(false);
   };
 
   // For creating the Download File URL
@@ -1072,7 +1092,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         disabled={button[3] as boolean}
                       >
                         <i className={`fas fa-${button[1]} mr-2`} />
-                        {button[0] as string}
+                        {button[0] as String}
                       </button>
                     ))}
                   </>
@@ -1158,7 +1178,14 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
             <Cancel onClick={() => setModalOpenForEdit(false)} />
-            <Submit disabled={btnloader} label="Proceed" />
+            <Submit
+              disabled={
+                btnloader ||
+                modalDetails?.name === editFileName ||
+                editFileName.length === 0
+              }
+              label="Proceed"
+            />
           </div>
         </form>
       </DialogModal>
@@ -1254,6 +1281,11 @@ export const FileUpload = (props: FileUploadProps) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={
+          type === "CONSULTATION"
+            ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+            : `/facility/${facilityId}/patient/${patientId}`
+        }
       />
       <div className="mt-4">
         <div className="md:grid grid-cols-2 gap-4">
@@ -1276,30 +1308,48 @@ export const FileUpload = (props: FileUploadProps) => {
                 onChange={(e: any) => {
                   setAudioName(e.target.value);
                 }}
-                errors={audioNameError}
+                errors={audioFileError}
               />
+              <div className="text-xs">
+                Please allow browser permission before you start speaking
+              </div>
               {audiouploadStarted ? (
                 <LinearProgressWithLabel value={uploadPercent} />
               ) : (
-                <>
-                  <VoiceRecorder createAudioBlob={createAudioBlob} />
-                  {audioBlob && (
-                    <Button
-                      color="primary"
-                      variant="contained"
-                      type="submit"
-                      style={{ marginLeft: "auto" }}
-                      startIcon={
-                        <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                      }
-                      onClick={() => {
-                        handleAudioUpload();
-                      }}
-                    >
-                      Save Recording
-                    </Button>
+                <div className="flex flex-col lg:flex-row justify-between w-full">
+                  {audioBlobExists && (
+                    <div className="flex items-center w-full md:w-auto">
+                      <ButtonV2
+                        variant="danger"
+                        className="w-full"
+                        onClick={() => {
+                          deleteAudioBlob();
+                        }}
+                      >
+                        <CareIcon className="care-l-trash h-4" /> Delete
+                      </ButtonV2>
+                    </div>
                   )}
-                </>
+                  <VoiceRecorder
+                    createAudioBlob={createAudioBlob}
+                    confirmAudioBlobExists={confirmAudioBlobExists}
+                    reset={resetRecording}
+                    setResetRecording={setResetRecording}
+                  />
+                  {audioBlobExists && (
+                    <div className="flex items-center w-full md:w-auto">
+                      <ButtonV2
+                        onClick={() => {
+                          handleAudioUpload();
+                        }}
+                        className="w-full"
+                      >
+                        <CareIcon className={"care-l-cloud-upload text-xl"} />
+                        Save
+                      </ButtonV2>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           ) : null}
@@ -1309,7 +1359,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 <h4>Upload New File</h4>
               </div>
               <div>
-                <InputLabel id="spo2-label">Enter File Name</InputLabel>
+                <InputLabel id="spo2-label">Enter File Name*</InputLabel>
                 <TextInputField
                   name="consultation_file"
                   variant="outlined"
@@ -1321,7 +1371,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   onChange={(e: any) => {
                     setUploadFileName(e.target.value);
                   }}
-                  errors={uploadFileNameError}
+                  errors={uploadFileError}
                 />
               </div>
               <div className="mt-4">

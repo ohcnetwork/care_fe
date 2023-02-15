@@ -4,7 +4,7 @@ import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 
 import { sendNotificationMessages } from "../../Redux/actions";
-import { FACILITY_FEATURE_TYPES, KASP_STRING } from "../../Common/constants";
+import { FACILITY_FEATURE_TYPES } from "../../Common/constants";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import * as Notification from "../../Utils/Notifications.js";
 import Chip from "../../CAREUI/display/Chip";
@@ -12,9 +12,11 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { parsePhoneNumber } from "libphonenumber-js";
 import DialogModal from "../Common/Dialog";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import useConfig from "../../Common/hooks/useConfig";
 
 export const FacilityCard = (props: { facility: any; userType: any }) => {
   const { facility, userType } = props;
+  const { kasp_string } = useConfig();
 
   const { t } = useTranslation();
   const dispatchAction: any = useDispatch();
@@ -45,17 +47,17 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
 
   return (
     <div key={`usr_${facility.id}`} className="w-full">
-      <div className="block rounded-lg overflow-clip bg-white shadow h-full hover:border-primary-500">
+      <div className="block rounded-lg h-full overflow-clip bg-white shadow hover:border-primary-500">
         <div className="flex h-full">
           <Link
             href={`/facility/${facility.id}`}
-            className="group md:flex hidden w-1/4 self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0"
+            className="group md:flex hidden w-1/4 self-stretch bg-gray-300 items-center justify-center relative z-0"
           >
             {(facility.read_cover_image_url && (
               <img
                 src={facility.read_cover_image_url}
                 alt={facility.name}
-                className="w-full h-full object-cover"
+                className="w-full h-[210px] object-cover"
               />
             )) || (
               <i className="fas fa-hospital text-4xl block text-gray-500" />
@@ -64,13 +66,13 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
           <div className="h-full w-full grow">
             <Link
               href={`/facility/${facility.id}`}
-              className="group md:hidden flex w-full self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0"
+              className="group md:hidden flex w-full self-stretch bg-gray-300 items-center justify-center relative z-0"
             >
               {(facility.read_cover_image_url && (
                 <img
                   src={facility.read_cover_image_url}
                   alt={facility.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full max-h-32 object-cover"
                 />
               )) || (
                 <i className="fas fa-hospital text-4xl block text-gray-500 p-10" />
@@ -82,7 +84,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 <div className="flow-root">
                   {facility.kasp_empanelled && (
                     <div className="float-right mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
-                      {KASP_STRING}
+                      {kasp_string}
                     </div>
                   )}
                   <Link
@@ -135,7 +137,8 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   className="font-semibold tracking-wider text-sm"
                 >
                   {parsePhoneNumber(
-                    facility.phone_number as string
+                    facility.phone_number as string,
+                    "IN"
                   ).formatInternational() || "-"}
                 </a>
               </div>

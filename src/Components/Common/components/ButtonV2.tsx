@@ -44,6 +44,8 @@ export type ButtonProps = RawButtonProps &
      * - `"alert"` is ideal for actions that require alert.
      */
     variant?: ButtonVariant;
+    /** Specify text alignment. Defaults to `center` */
+    align?: "start" | "center" | "end" | "between" | "around" | "evenly";
     /** If set, gives an elevated button with hover effects. */
     shadow?: boolean | undefined;
     /** If set, removes the background to give a simple text button. */
@@ -79,6 +81,7 @@ const ButtonV2 = ({
   authorizeFor,
   size = "default",
   variant = "primary",
+  align = "center",
   circle,
   shadow,
   ghost,
@@ -91,13 +94,14 @@ const ButtonV2 = ({
   ...props
 }: ButtonProps) => {
   const className = classNames(
-    "font-medium h-min inline-flex items-center justify-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
+    props.className,
+    "font-medium h-min inline-flex items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
     `button-size-${size}`,
+    `justify-${align}`,
     `button-shape-${circle ? "circle" : "square"}`,
     ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
     border && `button-${variant}-border`,
-    shadow && "shadow enabled:hover:shadow-lg",
-    props.className
+    shadow && "shadow enabled:hover:shadow-lg"
   );
 
   if (authorizeFor) {
@@ -146,8 +150,6 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
     <ButtonV2
       id="submit"
       type="submit"
-      className="w-full md:w-auto"
-      // Voluntarily setting children this way, so that it's overridable when using.
       children={
         <>
           <CareIcon className="care-l-check-circle text-lg" />
@@ -155,6 +157,7 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
         </>
       }
       {...props}
+      className={classNames("w-full md:w-auto", props.className)}
     />
   );
 };
@@ -166,8 +169,7 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
       id="cancel"
       type="button"
       variant="secondary"
-      className="w-full md:w-auto"
-      // Voluntarily setting children this way, so that it's overridable when using.
+      border
       children={
         <>
           <CareIcon className="care-l-times-circle text-lg" />
@@ -175,6 +177,7 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
         </>
       }
       {...props}
+      className={classNames("w-full md:w-auto", props.className)}
     />
   );
 };
