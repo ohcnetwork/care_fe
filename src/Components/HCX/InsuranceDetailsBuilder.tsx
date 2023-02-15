@@ -10,8 +10,9 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { useDispatch } from "react-redux";
 import { HCXActions } from "../../Redux/actions";
+import { classNames } from "../../Utils/utils";
 
-type Props = FormFieldBaseProps<HCXPolicyModel[]>;
+type Props = FormFieldBaseProps<HCXPolicyModel[]> & { gridView?: boolean };
 
 export default function InsuranceDetailsBuilder(props: Props) {
   const field = useFormFieldPropsResolver(props as any);
@@ -64,7 +65,14 @@ export default function InsuranceDetailsBuilder(props: Props) {
                 </ButtonV2>
               </div>
 
-              <div className="p-2 grid gap-x-8 gap-y-2 grid-cols-1 md:grid-cols-2">
+              <div
+                className={classNames(
+                  "p-2",
+                  props.gridView
+                    ? "grid gap-x-8 gap-y-2 grid-cols-1 md:grid-cols-2"
+                    : "flex flex-col gap-2"
+                )}
+              >
                 <TextFormField
                   required
                   name="subscriber_id"

@@ -2109,6 +2109,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       value={insuranceDetails}
                       onChange={({ value }) => setInsuranceDetails(value)}
                       error={insuranceDetailsError}
+                      gridView
                     />
                   </div>
                   <div className="flex items-center my-4 mx-4">
