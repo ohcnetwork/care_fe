@@ -1,0 +1,14 @@
+{
+  "monitor": "Monitor",
+  "show_default_presets": "Show Default Presets",
+  "show_patient_presets": "Show Patient Presets",
+  "moving_camera": "Moving Camera",
+  "full_screen": "Full Screen",
+  "feed_is_currently_not_live": "Feed is currently not live",
+  "zoom_out": "Zoom Out",
+  "zoom_in": "Zoom In",
+  "right": "Right",
+  "left": "Left",
+  "down": "Down",
+  "up": "Up"
+}

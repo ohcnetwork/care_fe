@@ -20,8 +20,8 @@ import {
 } from "../../Redux/actions";
 import { MultilineInputField, SelectField } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -67,6 +67,7 @@ const initialWard = [{ id: 0, name: "Choose Ward", number: 0 }];
 
 export default function UpdateResult(props: any) {
   const { id } = props;
+  const { goBack } = useAppHistory();
 
   const dispatchAction: any = useDispatch();
   const [state, dispatch] = useReducer(FormReducer, initialState);
@@ -224,7 +225,11 @@ export default function UpdateResult(props: any) {
 
   return (
     <div>
-      <PageTitle title="Update External Result" className="px-6 mb-2" />
+      <PageTitle
+        title="Update External Result"
+        className="px-6 mb-2"
+        backUrl={`/external_results/${id}`}
+      />
       <CardContent>
         <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
           <h3 className="text-lg leading-6 font-medium text-gray-900">

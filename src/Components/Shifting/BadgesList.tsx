@@ -1,11 +1,7 @@
 import { useState, useEffect } from "react";
 import { getUserList, getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-
-const booleanFilterOptions = {
-  trueValue: "yes",
-  falseValue: "no",
-};
+import { useTranslation } from "react-i18next";
 
 export default function BadgesList(props: any) {
   const { qParams, FilterBadges } = props;
@@ -14,6 +10,12 @@ export default function BadgesList(props: any) {
   const [originFacilityName, setOriginFacilityName] = useState("");
   const [approvingFacilityName, setApprovingFacilityName] = useState("");
   const dispatch: any = useDispatch();
+  const { t } = useTranslation();
+
+  const booleanFilterOptions = {
+    trueValue: t("yes"),
+    falseValue: t("no"),
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -72,21 +74,25 @@ export default function BadgesList(props: any) {
         kasp,
         value,
       }: any) => [
-        badge("Status", "status"),
-        boolean("Emergency", "emergency", booleanFilterOptions),
+        badge(t("status"), "status"),
+        boolean(t("emergency"), "emergency", booleanFilterOptions),
         kasp(),
-        boolean("Up shift", "is_up_shift", booleanFilterOptions),
-        boolean("Antenatal", "is_antenatal", booleanFilterOptions),
-        phoneNumber("Phone no.", "patient_phone_number"),
-        badge("Patient name", "patient_name"),
-        ...dateRange("Created", "created_date"),
-        badge("Disease status", "disease_status"),
-        badge("Breathlessness level", "breathlessness_level"),
-        value("Assigned to", "assigned_to", assignedUsername),
-        value("Facility assigned", "assigned_facility", assignedFacilityName),
-        value("Origin facility", "orgin_facility", originFacilityName),
+        boolean(t("up_shift"), "is_up_shift", booleanFilterOptions),
+        boolean(t("antenatal"), "is_antenatal", booleanFilterOptions),
+        phoneNumber(t("phone_no"), "patient_phone_number"),
+        badge(t("patient_name"), "patient_name"),
+        ...dateRange(t("created"), "created_date"),
+        badge(t("disease_status"), "disease_status"),
+        badge(t("breathlessness_level"), "breathlessness_level"),
+        value(t("assigned_to"), "assigned_to", assignedUsername),
         value(
-          "Shifting approval facility",
+          t("assigned_facility"),
+          "assigned_facility",
+          assignedFacilityName
+        ),
+        value(t("origin_facility"), "orgin_facility", originFacilityName),
+        value(
+          t("shifting_approval_facility"),
           "shifting_approving_facility",
           approvingFacilityName
         ),

@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
 import { getFacilityUsers } from "../../Redux/actions";
 import { UserAssignedModel } from "../Users/models";
+import { SkillObjectModel } from "../Users/models";
 
 export default function DoctorVideoSlideover(props: {
   show: boolean;
@@ -96,6 +97,7 @@ function UserListItem(props: { user: UserAssignedModel }) {
   const user = props.user;
   const icon =
     user.user_type === "Doctor" ? "fa-user-doctor " : " fa-user-nurse";
+
   return (
     <li>
       <li
@@ -144,6 +146,17 @@ function UserListItem(props: { user: UserAssignedModel }) {
                 <span>{user.doctor_qualification}</span>
               )}
             </p>
+            {!!user.skills.length && (
+              <div className="mt-1 text-sm leading-5 text-gray-900">
+                <div className="flex flex-wrap gap-2">
+                  {user.skills?.map((skill: SkillObjectModel) => (
+                    <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-900 rounded-full text-xs px-3">
+                      <p className="py-1.5">{skill.name}</p>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
             <p className="text-sm text-gray-500 flex gap-2 divide-gray-800">
               <span>{user.alt_phone_number}</span>
               {user.last_login && (
