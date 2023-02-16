@@ -388,7 +388,9 @@ export default function NotificationsList({
   } else if (data && data.length === 0) {
     manageResults = (
       <div className="px-4 pt-3 lg:px-8 flex justify-center">
-        <h5> {t("no_results_found")} </h5>
+        <h5 className="text-gray-600 text-xl font-bold">
+          {t("no_results_found")}
+        </h5>
       </div>
     );
   }
