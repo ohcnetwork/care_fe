@@ -755,6 +755,7 @@ export const ConsultationForm = (props: any) => {
             disableFuture
             required
             label="Date of onset of the symptoms"
+            position="LEFT"
           />
         )}
 
