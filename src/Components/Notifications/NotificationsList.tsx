@@ -193,7 +193,6 @@ export default function NotificationsList({
         setIsSubscribed("SubscribedOnAnotherDevice");
       }
     } catch (error) {
-      console.error(`Service worker error...Details: ${error}`);
       Sentry.captureException(error);
     }
   };
@@ -268,7 +267,6 @@ export default function NotificationsList({
           });
       })
       .catch(function (_e) {
-        console.error(`Service worker error...Details: ${_e}`);
         Sentry.captureException(_e);
       });
   };
@@ -307,8 +305,6 @@ export default function NotificationsList({
 
     if (res.status >= 200 && res.status <= 300) {
       setIsSubscribed("SubscribedOnThisDevice");
-    } else {
-      console.log("Error saving web push info.");
     }
     setIsSubscribing(false);
   }
