@@ -846,6 +846,7 @@ export const ConsultationForm = (props: any) => {
               {...field("admission_date")}
               required
               label="Admission date"
+              position="LEFT"
             />
 
             {!isUpdate && (
