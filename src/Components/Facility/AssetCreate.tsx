@@ -24,13 +24,13 @@ import { parseQueryParams } from "../../Utils/primitives";
 import moment from "moment";
 import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -96,6 +96,7 @@ type AssetFormSection =
   | "Service Details";
 
 const AssetCreate = (props: AssetProps) => {
+  const { goBack } = useAppHistory();
   const { facilityId, assetId } = props;
 
   let assetTypeInitial: AssetType;

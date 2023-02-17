@@ -253,7 +253,7 @@ export default function ShiftDetails(props: { id: string }) {
             <>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  {t("State")}:{" "}
+                  {t("state")}:{" "}
                 </span>
                 {patientData?.state_object?.name}
               </div>
@@ -408,7 +408,7 @@ export default function ShiftDetails(props: { id: string }) {
         </div>
         <div>
           <span className="font-semibold leading-relaxed mr-1">
-            {t("State")}:{" "}
+            {t("state")}:{" "}
           </span>
           {facilityData?.state_object?.name || "--"}
         </div>
