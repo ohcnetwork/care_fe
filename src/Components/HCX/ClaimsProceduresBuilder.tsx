@@ -84,7 +84,12 @@ export default function ClaimsProceduresBuilder(props: Props) {
                   label="Price"
                   placeholder="0.00"
                   value={obj.price.toString()}
-                  onChange={handleUpdate(index)}
+                  onChange={(event) =>
+                    handleUpdate(index)({
+                      name: event.name,
+                      value: parseFloat(event.value),
+                    })
+                  }
                   disabled={props.disabled}
                 />
               </div>
