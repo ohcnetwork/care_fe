@@ -40,7 +40,6 @@ import PrescriptionBuilder, {
 import PRNPrescriptionBuilder, {
   PRNPrescriptionType,
 } from "../Common/prescription-builder/PRNPrescriptionBuilder";
-import { goBack } from "../../Utils/utils";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
@@ -59,8 +58,7 @@ import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import DateFormField from "../Form/FormFields/DateFormField";
 import useConfig from "../../Common/hooks/useConfig";
-import DialogModal from "../Common/Dialog";
-import HCXMakeClaim from "../HCX/MakeClaim";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -193,6 +191,7 @@ const scrollTo = (id: any) => {
 };
 
 export const ConsultationForm = (props: any) => {
+  const { goBack } = useAppHistory();
   const { kasp_enabled, kasp_string } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
@@ -214,7 +213,6 @@ export const ConsultationForm = (props: any) => {
   const [facilityName, setFacilityName] = useState("");
   const isUpdate = !!id;
   const topRef = useRef<HTMLDivElement>(null);
-  const [showClaimsModal, setShowClaimsModal] = useState<string>();
 
   useEffect(() => {
     setTimeout(() => {
@@ -632,12 +630,16 @@ export const ConsultationForm = (props: any) => {
           Notification.Success({
             msg: "Consultation updated successfully",
           });
-          setShowClaimsModal(id);
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/consultation/${id}/claims`
+          );
         } else {
           Notification.Success({
             msg: "Consultation created successfully",
           });
-          setShowClaimsModal(res.data.id);
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}/claims`
+          );
         }
       }
     }
@@ -732,32 +734,8 @@ export const ConsultationForm = (props: any) => {
         }
       />
 
-      <DialogModal
-        title="Claims"
-        className="w-full max-w-3xl"
-        show={!!showClaimsModal}
-        onClose={() =>
-          navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
-          )
-        }
-      >
-        {showClaimsModal && (
-          <HCXMakeClaim
-            key={showClaimsModal}
-            consultationId={showClaimsModal}
-            patientId={patientId}
-            onComplete={() =>
-              navigate(
-                `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
-              )
-            }
-          />
-        )}
-      </DialogModal>
-
       <form
-        className="mt-6 bg-white rounded px-8 md:px-16 py-5 md:py-11 max-w-3xl mx-auto flex flex-col gap-4"
+        className="mt-10 bg-white rounded px-8 md:px-16 py-5 md:py-11 max-w-3xl mx-auto flex flex-col gap-4"
         onSubmit={handleSubmit}
       >
         <SymptomsSelect required label="Symptoms" {...field("symptoms")} />
