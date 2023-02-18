@@ -83,6 +83,12 @@ self.addEventListener("push", async function (event) {
   if (event.data) {
     const data = JSON.parse(event.data.text());
 
+    if (data?.type === "MESSAGE") {
+      self.clients.matchAll().then((clients) => {
+        clients[0].postMessage(data);
+      });
+    }
+
     event.waitUntil(
       self.registration.showNotification("Care - CoronaSafe Network", {
         body: data.title,

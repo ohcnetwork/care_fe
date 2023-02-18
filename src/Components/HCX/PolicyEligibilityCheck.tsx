@@ -5,6 +5,7 @@ import { HCXActions } from "../../Redux/actions";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { HCXPolicyModel } from "./models";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
 
 interface Props {
   className?: string;
@@ -22,6 +23,8 @@ export default function HCXPolicyEligibilityCheck({
     Record<string, boolean | undefined>
   >({});
   const [isChecking, setIsChecking] = useState(false);
+
+  useMessageListener((data) => console.log(data));
 
   useEffect(() => {
     async function fetchPatientInsuranceDetails() {
