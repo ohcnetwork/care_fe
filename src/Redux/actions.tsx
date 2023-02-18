@@ -1,4 +1,4 @@
-import { HCXPolicyModel } from "../Components/HCX/models";
+import { HCXClaimModel, HCXPolicyModel } from "../Components/HCX/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
 export const getConfig = () => {
@@ -826,8 +826,8 @@ export const getAssetTransaction = (id: string) =>
 // HCX Actions
 
 export const HCXActions = {
-  checkEligibility: (params: object) => {
-    return fireRequest("hcxCheckEligibility", [], params);
+  checkEligibility: (policy: string) => {
+    return fireRequest("hcxCheckEligibility", [], { policy });
   },
 
   policies: {
@@ -851,5 +851,32 @@ export const HCXActions = {
     delete(id: string) {
       return fireRequest("deleteHCXPolicy", [], {}, { external_id: id });
     },
+  },
+
+  claims: {
+    list(params: object) {
+      return fireRequest("listHCXClaims", [], params);
+    },
+    create(obj: HCXClaimModel) {
+      return fireRequest("createHCXClaim", [], obj);
+    },
+    read(id: string) {
+      return fireRequest("getHCXClaim", [], {}, { external_id: id });
+    },
+    update(id: string, obj: HCXClaimModel) {
+      return fireRequest("updateHCXClaim", [], obj, { external_id: id });
+    },
+    partialUpdate(id: string, obj: Partial<HCXClaimModel>) {
+      return fireRequest("partialUpdateHCXClaim", [], obj, {
+        external_id: id,
+      });
+    },
+    delete(id: string) {
+      return fireRequest("deleteHCXClaim", [], {}, { external_id: id });
+    },
+  },
+
+  makeClaim(claim: string) {
+    return fireRequest("hcxMakeClaim", [], { claim });
   },
 };

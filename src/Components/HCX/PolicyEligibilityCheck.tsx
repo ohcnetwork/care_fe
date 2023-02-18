@@ -60,7 +60,7 @@ export default function HCXPolicyEligibilityCheck({
 
     setIsChecking(true);
 
-    const res = await dispatch(HCXActions.checkEligibility({ policy }));
+    const res = await dispatch(HCXActions.checkEligibility(policy));
     if (res.status === 200) {
       Notification.Success({ msg: "Checking Policy Eligibility..." });
     } else {

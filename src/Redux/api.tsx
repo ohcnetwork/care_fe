@@ -830,6 +830,41 @@ const routes: Routes = {
     path: "/api/v1/hcx/policy/{external_id}/",
     method: "DELETE",
   },
+
+  listHCXlaims: {
+    path: "/api/v1/hcx/claim/",
+    method: "GET",
+  },
+
+  createHCXClaim: {
+    path: "/api/v1/hcx/claim/",
+    method: "POST",
+  },
+
+  getHCXClaim: {
+    path: "/api/v1/hcx/claim/{external_id}/",
+    method: "GET",
+  },
+
+  updateHCXClaim: {
+    path: "/api/v1/hcx/claim/{external_id}/",
+    method: "PUT",
+  },
+
+  partialUpdateHCXClaim: {
+    path: "/api/v1/hcx/claim/{external_id}/",
+    method: "PATCH",
+  },
+
+  deleteHCXClaim: {
+    path: "/api/v1/hcx/claim/{external_id}/",
+    method: "DELETE",
+  },
+
+  makeClaim: {
+    path: "/api/v1/hcx/make_claim/",
+    method: "POST",
+  },
 };
 
 export default routes;
