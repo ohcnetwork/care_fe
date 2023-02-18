@@ -27,8 +27,6 @@ export default function HCXPolicyEligibilityCheck({
   >({});
   const [isChecking, setIsChecking] = useState(false);
 
-  console.log(insuranceDetails, eligibility);
-
   const fetchPatientInsuranceDetails = useCallback(async () => {
     setInsuranceDetails(undefined);
     setEligibility({});

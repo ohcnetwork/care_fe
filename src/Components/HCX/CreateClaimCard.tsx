@@ -100,7 +100,10 @@ export default function CreateClaimCard({
             variant="alert"
             border
             ghost={procedures?.length !== 0}
-            disabled={procedures === undefined || !policy}
+            disabled={
+              procedures === undefined ||
+              !(policy?.outcome === "Processing Complete")
+            }
             onClick={() =>
               setProcedures([
                 ...(procedures || []),
@@ -130,7 +133,7 @@ export default function CreateClaimCard({
           {"Total Amount: "}
           {procedures ? (
             <span className="font-bold tracking-wider">
-              INR {procedures.map((p) => p.price).reduce((a, b) => a + b)}
+              INR {procedures.map((p) => p.price).reduce((a, b) => a + b, 0.0)}
             </span>
           ) : (
             "--"
