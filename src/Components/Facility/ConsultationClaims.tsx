@@ -1,5 +1,9 @@
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { HCXActions } from "../../Redux/actions";
 import PageTitle from "../Common/PageTitle";
 import CreateClaimCard from "../HCX/CreateClaimCard";
+import { HCXClaimModel } from "../HCX/models";
 
 interface Props {
   facilityId: string;
@@ -12,6 +16,25 @@ export default function ConsultationClaims({
   consultationId,
   patientId,
 }: Props) {
+  const dispatch = useDispatch<any>();
+  const [claims, setClaims] = useState<HCXClaimModel[]>();
+
+  useEffect(() => {
+    async function fetchClaims() {
+      const res = await dispatch(
+        HCXActions.claims.list({
+          consultation: consultationId,
+        })
+      );
+
+      if (res.data && res.data.results) {
+        setClaims(res.data.results);
+      }
+    }
+
+    fetchClaims();
+  }, [consultationId]);
+
   return (
     <div className="pb-2 relative flex flex-col">
       <PageTitle
@@ -24,6 +47,9 @@ export default function ConsultationClaims({
         <CreateClaimCard
           consultationId={consultationId}
           patientId={patientId}
+          onClaimCreated={(claim) => {
+            setClaims([claim, ...(claims || [])]);
+          }}
         />
 
         <div className="flex flex-col gap-8">
