@@ -149,7 +149,7 @@ export default function CreateClaimCard({
           disabled={procedures?.length === 0 || !policy || isCreating}
           onClick={handleSubmit}
         >
-          {isCreating && <CareIcon className="care-l-spinner" />}
+          {isCreating && <CareIcon className="care-l-spinner animate-spin" />}
           {isCreating ? "Creating Claim..." : "Create Claim"}
         </Submit>
       </div>

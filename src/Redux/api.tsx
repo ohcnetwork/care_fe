@@ -861,7 +861,7 @@ const routes: Routes = {
     method: "DELETE",
   },
 
-  makeClaim: {
+  hcxMakeClaim: {
     path: "/api/v1/hcx/make_claim/",
     method: "POST",
   },
