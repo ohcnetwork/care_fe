@@ -831,7 +831,7 @@ const routes: Routes = {
     method: "DELETE",
   },
 
-  listHCXlaims: {
+  listHCXClaims: {
     path: "/api/v1/hcx/claim/",
     method: "GET",
   },

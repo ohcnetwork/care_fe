@@ -78,72 +78,68 @@ export default function HCXPolicyEligibilityCheck({
     } else {
       Notification.Error({ msg: "Something Went Wrong..." });
     }
+
+    setIsChecking(true);
   };
 
   return (
     <div className={className}>
-      <div className="flex flex-col gap-4">
-        <h1 className="text-lg font-medium">
-          Check Insurance Policy Eligibility
-        </h1>
-
-        <div className="flex gap-2 items-center">
-          <SelectFormField
-            name="policy"
-            labelClassName="hidden"
-            errorClassName="hidden"
-            className="w-full"
-            options={insuranceDetails || []}
-            optionValue={(option) => option.id as string}
-            optionLabel={(option) =>
-              option.id && eligibility[option.id] !== undefined ? (
-                <div className="flex items-center gap-2">
-                  {option.policy_id}
-                  <EligibilityChip eligible={!!eligibility[option.id]} />
-                </div>
-              ) : (
-                option.policy_id
-              )
-            }
-            onChange={({ value }) => setPolicy(value)}
-            value={policy}
-            placeholder={
-              insuranceDetails
-                ? insuranceDetails.length
-                  ? "Select a policy"
-                  : "No Policies"
-                : "Loading..."
-            }
-            disabled={!insuranceDetails}
-            optionDescription={(option) => (
-              <div className="flex flex-wrap gap-3">
-                <span>
-                  {"Subscriber ID "}
-                  <span className="text-black">{option.subscriber_id}</span>
-                </span>
-                <span>
-                  {"Insurer ID "}
-                  <span className="text-black">{option.insurer_id}</span>
-                </span>
-                <span>
-                  {"Insurer Name "}
-                  <span className="text-black">{option.insurer_name}</span>
-                </span>
+      <div className="flex gap-2 items-center">
+        <SelectFormField
+          name="policy"
+          labelClassName="hidden"
+          errorClassName="hidden"
+          className="w-full"
+          options={insuranceDetails || []}
+          optionValue={(option) => option.id as string}
+          optionLabel={(option) =>
+            option.id && eligibility[option.id] !== undefined ? (
+              <div className="flex items-center gap-2">
+                {option.policy_id}
+                <EligibilityChip eligible={!!eligibility[option.id]} />
               </div>
-            )}
-          />
-          <ButtonV2
-            className="py-3 w-16"
-            onClick={checkEligibility}
-            disabled={isChecking}
-          >
-            {isChecking ? (
-              <CareIcon className="care-l-spinner text-lg animate-spin" />
             ) : (
-              "Check"
-            )}
-          </ButtonV2>
-        </div>
+              option.policy_id
+            )
+          }
+          onChange={({ value }) => setPolicy(value)}
+          value={policy}
+          placeholder={
+            insuranceDetails
+              ? insuranceDetails.length
+                ? "Select a policy"
+                : "No Policies"
+              : "Loading..."
+          }
+          disabled={!insuranceDetails}
+          optionDescription={(option) => (
+            <div className="flex flex-wrap gap-3">
+              <span>
+                {"Subscriber ID "}
+                <span className="text-black">{option.subscriber_id}</span>
+              </span>
+              <span>
+                {"Insurer ID "}
+                <span className="text-black">{option.insurer_id}</span>
+              </span>
+              <span>
+                {"Insurer Name "}
+                <span className="text-black">{option.insurer_name}</span>
+              </span>
+            </div>
+          )}
+        />
+        <ButtonV2
+          className="py-3 w-16"
+          onClick={checkEligibility}
+          disabled={isChecking}
+        >
+          {isChecking ? (
+            <CareIcon className="care-l-spinner text-lg animate-spin" />
+          ) : (
+            "Check"
+          )}
+        </ButtonV2>
       </div>
     </div>
   );

@@ -145,7 +145,7 @@ export default function HCXMakeClaim({
         </div>
       )}
 
-      {claim?.policy && (
+      {(claim.policy || claim.policy_object) && (
         <div className="flex flex-col gap-4">
           <div className="flex w-full items-center justify-between">
             <h1 className="font-bold text-left text-lg">Procedures</h1>
@@ -163,6 +163,7 @@ export default function HCXMakeClaim({
                   ],
                 })
               }
+              disabled={isApproved}
             >
               <CareIcon className="care-l-plus text-lg" />
               <span>Add Procedure</span>
