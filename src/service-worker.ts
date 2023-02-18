@@ -87,14 +87,14 @@ self.addEventListener("push", async function (event) {
       self.clients.matchAll().then((clients) => {
         clients[0].postMessage(data);
       });
+    } else {
+      event.waitUntil(
+        self.registration.showNotification("Care - CoronaSafe Network", {
+          body: data.title,
+          tag: data.external_id,
+        })
+      );
     }
-
-    event.waitUntil(
-      self.registration.showNotification("Care - CoronaSafe Network", {
-        body: data.title,
-        tag: data.external_id,
-      })
-    );
   }
 });
 
