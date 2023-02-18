@@ -68,9 +68,7 @@ export default function HCXPolicyEligibilityCheck({
       const isEligible = true;
       setEligibility((prev) => ({ ...prev, [policy]: isEligible }));
       if (isEligible && onEligiblePolicySelected) {
-        const selectedPolicy = insuranceDetails?.find(
-          (policy) => policy.id === res.data?.policy
-        );
+        const selectedPolicy = insuranceDetails?.find((p) => p.id === policy);
         onEligiblePolicySelected(selectedPolicy);
       } else {
         onEligiblePolicySelected?.(undefined);
@@ -79,7 +77,7 @@ export default function HCXPolicyEligibilityCheck({
       Notification.Error({ msg: "Something Went Wrong..." });
     }
 
-    setIsChecking(true);
+    setIsChecking(false);
   };
 
   return (

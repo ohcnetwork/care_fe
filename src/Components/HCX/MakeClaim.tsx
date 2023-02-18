@@ -102,6 +102,7 @@ export default function HCXMakeClaim({
           <HCXPolicyEligibilityCheck
             patient={patientId}
             onEligiblePolicySelected={(policy) => {
+              console.log("policy", policy);
               setClaim({
                 ...claim,
                 policy: policy?.id || "",

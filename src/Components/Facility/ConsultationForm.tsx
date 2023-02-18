@@ -734,6 +734,7 @@ export const ConsultationForm = (props: any) => {
 
       <DialogModal
         title="Claims"
+        className="w-full max-w-3xl"
         show={!!showClaimsModal}
         onClose={() =>
           navigate(
