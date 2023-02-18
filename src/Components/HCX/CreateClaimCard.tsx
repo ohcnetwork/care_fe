@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { HCXActions } from "../../Redux/actions";
+import { getConsultation, HCXActions } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { classNames } from "../../Utils/utils";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -24,6 +24,28 @@ export default function CreateClaimCard({
   const [policy, setPolicy] = useState<HCXPolicyModel>();
   const [procedures, setProcedures] = useState<HCXProcedureModel[]>();
   const [isCreating, setIsCreating] = useState(false);
+
+  useEffect(() => {
+    async function autoFillProceduresFromConsultation() {
+      const res = await dispatch(getConsultation(consultationId as any));
+
+      if (res.data && Array.isArray(res.data.procedure)) {
+        setProcedures(
+          res.data.procedure.map((p: any) => {
+            return {
+              id: p.procedure,
+              name: p.procedure,
+              price: 0.0,
+            };
+          })
+        );
+      } else {
+        setProcedures([{ id: "", name: "", price: 0 }]);
+      }
+    }
+
+    autoFillProceduresFromConsultation();
+  }, [consultationId]);
 
   const handleSubmit = async () => {
     if (procedures?.length === 0 || !policy) return;
@@ -104,6 +126,16 @@ export default function CreateClaimCard({
           value={procedures}
           onChange={({ value }) => setProcedures(value)}
         />
+        <div className="place-self-end pr-8">
+          {"Total Amount: "}
+          {procedures ? (
+            <span className="font-bold tracking-wider">
+              INR {procedures.map((p) => p.price).reduce((a, b) => a + b)}
+            </span>
+          ) : (
+            "--"
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">

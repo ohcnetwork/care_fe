@@ -57,8 +57,9 @@ export default function ClaimsProceduresBuilder(props: Props) {
                 )}
               </div>
 
-              <div className="p-2 flex flex-col gap-2">
+              <div className="p-2 flex flex-row gap-2">
                 <TextFormField
+                  className="flex-[3]"
                   required
                   name="id"
                   label="ID"
@@ -66,8 +67,10 @@ export default function ClaimsProceduresBuilder(props: Props) {
                   value={obj.id}
                   onChange={handleUpdate(index)}
                   disabled={props.disabled}
+                  errorClassName="hidden"
                 />
                 <TextFormField
+                  className="flex-[3]"
                   required
                   name="name"
                   label="Name"
@@ -75,8 +78,10 @@ export default function ClaimsProceduresBuilder(props: Props) {
                   value={obj.name}
                   onChange={handleUpdate(index)}
                   disabled={props.disabled}
+                  errorClassName="hidden"
                 />
                 <TextFormField
+                  className="flex-[2]"
                   required
                   type="number"
                   name="price"
@@ -91,6 +96,7 @@ export default function ClaimsProceduresBuilder(props: Props) {
                     })
                   }
                   disabled={props.disabled}
+                  errorClassName="hidden"
                 />
               </div>
             </div>
