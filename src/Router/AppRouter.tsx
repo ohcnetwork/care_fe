@@ -67,6 +67,7 @@ import {
 import { BLACKLISTED_PATHS } from "../Common/constants";
 import { UpdateFacilityMiddleware } from "../Components/Facility/UpdateFacilityMiddleware";
 import useConfig from "../Common/hooks/useConfig";
+import ConsultationClaims from "../Components/Facility/ConsultationClaims";
 
 const routes = {
   "/hub": () => <HubDashboard />,
@@ -153,6 +154,8 @@ const routes = {
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
+  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/claims":
+    (pathParams: any) => <ConsultationClaims {...pathParams} />,
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
     patientId,
