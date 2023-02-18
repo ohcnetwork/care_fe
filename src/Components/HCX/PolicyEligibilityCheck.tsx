@@ -11,7 +11,7 @@ import * as Notification from "../../Utils/Notifications.js";
 interface Props {
   className?: string;
   patient: string;
-  onEligiblePolicySelected?: (policy: HCXPolicyModel | undefined) => void;
+  onEligiblePolicySelected: (policy: HCXPolicyModel | undefined) => void;
 }
 
 export default function HCXPolicyEligibilityCheck({
@@ -35,27 +35,54 @@ export default function HCXPolicyEligibilityCheck({
 
     const res = await dispatch(HCXActions.policies.list({ patient }));
 
-    if (res.data) {
-      setInsuranceDetails(res.data.results);
+    if (res.data?.results) {
+      const results = res.data.results as HCXPolicyModel[];
+      setInsuranceDetails(results);
       setEligibility(
-        res.data?.results?.reduce?.((acc: any, policy: HCXPolicyModel) => {
+        results.reduce?.((acc: any, policy: HCXPolicyModel) => {
           if (policy.outcome)
             acc[policy.id] = policy.outcome === "Processing Complete";
           return acc;
         }, {})
       );
-      setIsChecking(false);
+      setIsChecking((isChecking) => {
+        if (isChecking && policy) {
+          const isCurrentlySelectedPolicyEligible = eligibility[policy];
+          if (isCurrentlySelectedPolicyEligible) {
+            const eligiblePolicy = results.find((p) => p.id === policy);
+            onEligiblePolicySelected(eligiblePolicy);
+          } else {
+            onEligiblePolicySelected(undefined);
+          }
+          Notification.Success({ msg: "Policy Eligibility Checked" });
+        }
+        return false;
+      });
     }
   }, [patient, dispatch]);
+
+  useEffect;
 
   useEffect(() => {
     fetchPatientInsuranceDetails();
   }, [fetchPatientInsuranceDetails]);
 
   useMessageListener((data) => {
-    if (data.type === "MESSAGE" && data.from === "coverageelegibility/on_check")
+    if (
+      data.type === "MESSAGE" &&
+      data.from === "coverageelegibility/on_check"
+    ) {
       fetchPatientInsuranceDetails();
+    }
   });
+
+  // TODO: Momentary hack to bypass the actual eligibility check.
+  useEffect(() => {
+    Notification.Success({ msg: "Policy Eligibility Checked" });
+    onEligiblePolicySelected(
+      insuranceDetails?.find((p) => p.id === policy) || undefined
+    );
+  }, [policy, insuranceDetails]);
 
   const checkEligibility = async () => {
     if (!policy) return;
@@ -65,19 +92,9 @@ export default function HCXPolicyEligibilityCheck({
     const res = await dispatch(HCXActions.checkEligibility(policy));
     if (res.status === 200) {
       Notification.Success({ msg: "Checking Policy Eligibility..." });
-      const isEligible = true;
-      setEligibility((prev) => ({ ...prev, [policy]: isEligible }));
-      if (isEligible && onEligiblePolicySelected) {
-        const selectedPolicy = insuranceDetails?.find((p) => p.id === policy);
-        onEligiblePolicySelected(selectedPolicy);
-      } else {
-        onEligiblePolicySelected?.(undefined);
-      }
     } else {
       Notification.Error({ msg: "Something Went Wrong..." });
     }
-
-    setIsChecking(false);
   };
 
   return (

@@ -43,14 +43,16 @@ export default function ConsultationClaims({
         backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
       />
 
-      <div className="flex flex-col gap-16 max-w-3xl">
-        <CreateClaimCard
-          consultationId={consultationId}
-          patientId={patientId}
-          onClaimCreated={(claim) => {
-            setClaims([claim, ...(claims || [])]);
-          }}
-        />
+      <div className="flex flex-col gap-16 w-full max-w-3xl mx-auto">
+        <div className="p-8 bg-white rounded-lg">
+          <CreateClaimCard
+            consultationId={consultationId}
+            patientId={patientId}
+            onClaimCreated={(claim) => {
+              setClaims([claim, ...(claims || [])]);
+            }}
+          />
+        </div>
 
         <div className="flex flex-col gap-8">
           {/* TODO: list claim detail cards */}
