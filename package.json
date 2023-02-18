@@ -15,7 +15,7 @@
     "coronasafe Contributors"
   ],
   "homepage": "https://care.coronasafe.in",
-  "proxy": "http://localhost:9000",
+  "proxy": "https://local.kha.vin/",
   "main": "./src/index.tsx",
   "keywords": [
     "Coronasafe",
