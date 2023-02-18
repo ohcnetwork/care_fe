@@ -11,11 +11,13 @@ import * as Notification from "../../Utils/Notifications.js";
 interface Props {
   className?: string;
   patient: string;
+  onEligiblePolicySelected?: (policy: HCXPolicyModel | undefined) => void;
 }
 
 export default function HCXPolicyEligibilityCheck({
-  patient,
   className,
+  patient,
+  onEligiblePolicySelected,
 }: Props) {
   const dispatch = useDispatch<any>();
   const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>();
@@ -63,6 +65,16 @@ export default function HCXPolicyEligibilityCheck({
     const res = await dispatch(HCXActions.checkEligibility(policy));
     if (res.status === 200) {
       Notification.Success({ msg: "Checking Policy Eligibility..." });
+      const isEligible = true;
+      setEligibility((prev) => ({ ...prev, [policy]: isEligible }));
+      if (isEligible && onEligiblePolicySelected) {
+        const selectedPolicy = insuranceDetails?.find(
+          (policy) => policy.id === res.data?.policy
+        );
+        onEligiblePolicySelected(selectedPolicy);
+      } else {
+        onEligiblePolicySelected?.(undefined);
+      }
     } else {
       Notification.Error({ msg: "Something Went Wrong..." });
     }
