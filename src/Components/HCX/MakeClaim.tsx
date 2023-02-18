@@ -56,7 +56,14 @@ export default function HCXMakeClaim({
       return;
     }
 
-    const res = await dispatch(HCXActions.claims.create(claim));
+    const res = await dispatch(
+      claim.id
+        ? HCXActions.claims.update(claim.id as string, {
+            ...claim,
+            policy: claim.policy_object?.id || "",
+          })
+        : HCXActions.claims.create(claim)
+    );
 
     if (res.data) {
       setClaim(res.data);
