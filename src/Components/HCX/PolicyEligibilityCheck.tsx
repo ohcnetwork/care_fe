@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { HCXActions } from "../../Redux/actions";
@@ -6,6 +6,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { HCXPolicyModel } from "./models";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import * as Notification from "../../Utils/Notifications.js";
 
 interface Props {
   className?: string;
@@ -24,23 +25,35 @@ export default function HCXPolicyEligibilityCheck({
   >({});
   const [isChecking, setIsChecking] = useState(false);
 
-  useMessageListener((data) => console.log(data));
+  console.log(insuranceDetails, eligibility);
+
+  const fetchPatientInsuranceDetails = useCallback(async () => {
+    setInsuranceDetails(undefined);
+    setEligibility({});
+
+    const res = await dispatch(HCXActions.policies.list({ patient }));
+
+    if (res.data) {
+      setInsuranceDetails(res.data.results);
+      setEligibility(
+        res.data?.results?.reduce?.((acc: any, policy: HCXPolicyModel) => {
+          if (policy.outcome)
+            acc[policy.id] = policy.outcome === "Processing Complete";
+          return acc;
+        }, {})
+      );
+      setIsChecking(false);
+    }
+  }, [patient, dispatch]);
 
   useEffect(() => {
-    async function fetchPatientInsuranceDetails() {
-      setInsuranceDetails(undefined);
-      setEligibility({});
-
-      const res = await dispatch(HCXActions.policies.list({ patient }));
-
-      if (res.data) {
-        setInsuranceDetails(res.data.results);
-        setEligibility({});
-      }
-    }
-
     fetchPatientInsuranceDetails();
-  }, [patient, dispatch]);
+  }, [fetchPatientInsuranceDetails]);
+
+  useMessageListener((data) => {
+    if (data.type === "MESSAGE" && data.from === "coverageelegibility/on_check")
+      fetchPatientInsuranceDetails();
+  });
 
   const checkEligibility = async () => {
     if (!policy) return;
@@ -48,14 +61,11 @@ export default function HCXPolicyEligibilityCheck({
     setIsChecking(true);
 
     const res = await dispatch(HCXActions.checkEligibility({ policy }));
-    if (res.data) {
-      setEligibility((prev) => ({
-        ...prev,
-        [policy]: res.data.eligible,
-      }));
+    if (res.status === 200) {
+      Notification.Success({ msg: "Checking Policy Eligibility..." });
+    } else {
+      Notification.Error({ msg: "Something Went Wrong..." });
     }
-
-    setIsChecking(false);
   };
 
   return (

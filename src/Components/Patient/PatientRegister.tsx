@@ -2110,6 +2110,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           setInsuranceDetails([
                             ...insuranceDetails,
                             {
+                              id: "",
                               subscriber_id: "",
                               policy_id: "",
                               insurer_id: "",
