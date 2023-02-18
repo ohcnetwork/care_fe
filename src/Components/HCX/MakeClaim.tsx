@@ -11,9 +11,14 @@ import { useDispatch } from "react-redux";
 interface Props {
   consultationId: string;
   patientId: string;
+  onComplete?: () => void;
 }
 
-export default function HCXMakeClaim({ consultationId, patientId }: Props) {
+export default function HCXMakeClaim({
+  consultationId,
+  patientId,
+  onComplete,
+}: Props) {
   const dispatch = useDispatch<any>();
   const [claim, setClaim] = useState<HCXClaimModel>();
   const [isApproved, setIsApproved] = useState(false);
@@ -41,7 +46,7 @@ export default function HCXMakeClaim({ consultationId, patientId }: Props) {
     }
 
     fetchClaim();
-  }, []);
+  }, [consultationId, dispatch]);
 
   const handleMakeClaim = async () => {
     if (!claim) return;
@@ -57,6 +62,9 @@ export default function HCXMakeClaim({ consultationId, patientId }: Props) {
       setClaim(res.data);
       await dispatch(HCXActions.makeClaim(res.data.id));
       Notification.Success({ msg: "Claim created successfully" });
+      onComplete?.();
+    } else {
+      Notification.Error({ msg: "Error creating claim" });
     }
   };
 
@@ -170,7 +178,7 @@ export default function HCXMakeClaim({ consultationId, patientId }: Props) {
       )}
 
       <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
-        <Cancel />
+        <Cancel onClick={onComplete} />
         {!isApproved && (
           <Submit
             label={isUpdate ? "Update Claim" : "Make Claim"}

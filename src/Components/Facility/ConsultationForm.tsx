@@ -59,7 +59,8 @@ import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import DateFormField from "../Form/FormFields/DateFormField";
 import useConfig from "../../Common/hooks/useConfig";
-import HCXPolicyEligibilityCheck from "../HCX/PolicyEligibilityCheck";
+import DialogModal from "../Common/Dialog";
+import HCXMakeClaim from "../HCX/MakeClaim";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -213,6 +214,7 @@ export const ConsultationForm = (props: any) => {
   const [facilityName, setFacilityName] = useState("");
   const isUpdate = !!id;
   const topRef = useRef<HTMLDivElement>(null);
+  const [showClaimsModal, setShowClaimsModal] = useState<string>();
 
   useEffect(() => {
     setTimeout(() => {
@@ -630,16 +632,12 @@ export const ConsultationForm = (props: any) => {
           Notification.Success({
             msg: "Consultation updated successfully",
           });
-          navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
-          );
+          setShowClaimsModal(id);
         } else {
           Notification.Success({
             msg: "Consultation created successfully",
           });
-          navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
-          );
+          setShowClaimsModal(res.data.id);
         }
       }
     }
@@ -734,10 +732,28 @@ export const ConsultationForm = (props: any) => {
         }
       />
 
-      <HCXPolicyEligibilityCheck
-        patient={patientId}
-        className="mt-10 bg-white rounded px-8 md:px-16 py-5 md:py-11 max-w-3xl mx-auto"
-      />
+      <DialogModal
+        title="Claims"
+        show={!!showClaimsModal}
+        onClose={() =>
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
+          )
+        }
+      >
+        {showClaimsModal && (
+          <HCXMakeClaim
+            key={showClaimsModal}
+            consultationId={showClaimsModal}
+            patientId={patientId}
+            onComplete={() =>
+              navigate(
+                `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
+              )
+            }
+          />
+        )}
+      </DialogModal>
 
       <form
         className="mt-6 bg-white rounded px-8 md:px-16 py-5 md:py-11 max-w-3xl mx-auto flex flex-col gap-4"
