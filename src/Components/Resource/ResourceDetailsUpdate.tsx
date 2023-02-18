@@ -30,8 +30,8 @@ import {
   Box,
   FormControlLabel,
 } from "@material-ui/core";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -73,6 +73,7 @@ const initialState = {
 };
 
 export const ResourceDetailsUpdate = (props: resourceProps) => {
+  const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
@@ -226,6 +227,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       <PageTitle
         title={"Update Resource Request"}
         crumbsReplacements={{ [props.id]: { name: requestTitle } }}
+        backUrl={`/resource/${props.id}`}
       />
       <div className="mt-4">
         <Card>

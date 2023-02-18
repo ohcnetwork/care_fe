@@ -211,11 +211,13 @@ const AssetManage = (props: AssetManageProps) => {
             name: asset?.name,
           },
         }}
+        backUrl="/assets"
       />
       <ConfirmDialogV2
         title="Delete Asset"
         description="Are you sure you want to delete this asset?"
         action="Confirm"
+        variant="danger"
         show={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={handleDelete}

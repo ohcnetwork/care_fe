@@ -53,7 +53,7 @@ const DialogModal = (props: DialogProps) => {
                     <h4>{title}</h4>
                   </Dialog.Title>
                   <div className="mt-2">
-                    <p className="text-sm text-gray-500">{description}</p>
+                    <p className="text-sm text-gray-600">{description}</p>
                   </div>
                   {children}
                 </Dialog.Panel>

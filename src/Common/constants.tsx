@@ -1,6 +1,7 @@
 import { PatientCategory } from "../Components/Facility/models";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
+import { IConfig } from "./hooks/useConfig";
 
 export const KeralaLogo = "images/kerala-logo.png";
 
@@ -12,10 +13,6 @@ export interface OptionsType {
   desc?: string;
   disabled?: boolean;
 }
-
-export const KASP_STRING = process.env.REACT_APP_KASP_STRING ?? "";
-export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
-export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
 export type UserRole =
   | "Pharmacist"
@@ -168,28 +165,33 @@ export const PATIENT_FILTER_ORDER: (OptionsType & { order: string })[] = [
   { id: 6, text: "-review_time", desc: "Review Time", order: "Descending" },
 ];
 
-const KASP_BED_TYPES = KASP_ENABLED
-  ? [
-      { id: 40, text: KASP_STRING + " Ordinary Beds" },
-      { id: 60, text: KASP_STRING + " Oxygen beds" },
-      { id: 50, text: KASP_STRING + " ICU (ICU without ventilator)" },
-      { id: 70, text: KASP_STRING + " ICU (ICU with ventilator)" },
-    ]
-  : [];
+export const getBedTypes = ({
+  kasp_enabled,
+  kasp_string,
+}: Pick<IConfig, "kasp_enabled" | "kasp_string">) => {
+  const kaspBedTypes = kasp_enabled
+    ? [
+        { id: 40, text: kasp_string + " Ordinary Beds" },
+        { id: 60, text: kasp_string + " Oxygen beds" },
+        { id: 50, text: kasp_string + " ICU (ICU without ventilator)" },
+        { id: 70, text: kasp_string + " ICU (ICU with ventilator)" },
+      ]
+    : [];
 
-export const BED_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Non-Covid Ordinary Beds" },
-  { id: 150, text: "Non-Covid Oxygen beds" },
-  { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
-  { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
-  { id: 30, text: "Covid Ordinary Beds" },
-  { id: 120, text: "Covid Oxygen beds" },
-  { id: 110, text: "Covid ICU (ICU without ventilator)" },
-  { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
-  ...KASP_BED_TYPES,
-  { id: 2, text: "Hostel" },
-  { id: 3, text: "Single Room with Attached Bathroom" },
-];
+  return [
+    { id: 1, text: "Non-Covid Ordinary Beds" },
+    { id: 150, text: "Non-Covid Oxygen beds" },
+    { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
+    { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
+    { id: 30, text: "Covid Ordinary Beds" },
+    { id: 120, text: "Covid Oxygen beds" },
+    { id: 110, text: "Covid ICU (ICU without ventilator)" },
+    { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
+    ...kaspBedTypes,
+    { id: 2, text: "Hostel" },
+    { id: 3, text: "Single Room with Attached Bathroom" },
+  ];
+};
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
   { id: 1, text: "General Medicine", desc: "bg-doctors-general" },
@@ -213,15 +215,19 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
   { id: 30, text: "30 mins" },
   { id: 60, text: "1 hr" },
-  { id: 120, text: "2 hr" },
-  { id: 180, text: "3 hr" },
-  { id: 240, text: "4 hr" },
-  { id: 360, text: "6 hr" },
-  { id: 480, text: "8 hr" },
-  { id: 720, text: "12 hr" },
-  { id: 1440, text: "24 hr" },
-  { id: 2160, text: "36 hr" },
-  { id: 2880, text: "48 hr" },
+  { id: 2 * 60, text: "2 hr" },
+  { id: 3 * 60, text: "3 hr" },
+  { id: 4 * 60, text: "4 hr" },
+  { id: 6 * 60, text: "6 hr" },
+  { id: 8 * 60, text: "8 hr" },
+  { id: 12 * 60, text: "12 hr" },
+  { id: 24 * 60, text: "24 hr" },
+  { id: 36 * 60, text: "36 hr" },
+  { id: 2 * 24 * 60, text: "2 days" },
+  { id: 3 * 24 * 60, text: "3 days" },
+  { id: 7 * 24 * 60, text: "7 days" },
+  { id: 14 * 24 * 60, text: "2 weeks" },
+  { id: 30 * 24 * 60, text: "1 month" },
 ];
 
 export const SYMPTOM_CHOICES = [
@@ -232,15 +238,22 @@ export const SYMPTOM_CHOICES = [
   { id: 5, text: "BREATHLESSNESS" },
   { id: 6, text: "MYALGIA" },
   { id: 7, text: "ABDOMINAL DISCOMFORT" },
-  { id: 8, text: "VOMITING/DIARRHOEA" },
-  { id: 10, text: "SARI" },
+  { id: 8, text: "VOMITING" },
+  { id: 9, text: "OTHERS" },
   { id: 11, text: "SPUTUM" },
   { id: 12, text: "NAUSEA" },
   { id: 13, text: "CHEST PAIN" },
   { id: 14, text: "HEMOPTYSIS" },
   { id: 15, text: "NASAL DISCHARGE" },
   { id: 16, text: "BODY ACHE" },
-  { id: 9, text: "OTHERS" },
+  { id: 17, text: "DIARRHOEA" },
+  { id: 18, text: "PAIN" },
+  { id: 19, text: "PEDAL EDEMA" },
+  { id: 20, text: "WOUND" },
+  { id: 21, text: "CONSTIPATION" },
+  { id: 22, text: "HEAD ACHE" },
+  { id: 23, text: "BLEEDING" },
+  { id: 24, text: "DIZZINESS" },
 ];
 
 export const DISCHARGE_REASONS = [
