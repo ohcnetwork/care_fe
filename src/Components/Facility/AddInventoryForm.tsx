@@ -12,8 +12,8 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { SelectField, TextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -47,6 +47,7 @@ const inventoryFormReducer = (state = initialState, action: any) => {
 };
 
 export const AddInventoryForm = (props: any) => {
+  const { goBack } = useAppHistory();
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
@@ -218,6 +219,7 @@ export const AddInventoryForm = (props: any) => {
       <PageTitle
         title="Manage Inventory"
         crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+        backUrl={`/facility/${facilityId}/inventory`}
       />
       <div className="mt-4">
         <Card>

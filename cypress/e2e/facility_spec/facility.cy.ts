@@ -154,30 +154,21 @@ describe("Facility", () => {
     cy.verifyNotification("Facility added successfully");
 
     // add bed type
-    cy.url().should("include", "bed");
     cy.get("[id=bed-type] > div > button").click();
     cy.get("div").contains("Non-Covid Ordinary Beds").click();
     cy.get("input[id=total-capacity]").should("exist").type("150");
     cy.get("input[id=currently-occupied]").should("exist").type("100");
-    cy.get("[id=bed-capacity-save]").click();
+    cy.get("[id=bed-capacity-save-and-exit]").click();
+
     cy.verifyNotification("Bed capacity added successfully");
 
-    cy.url().should("include", "bed");
-    cy.get("[id=cancel]").click();
-
     // add doctor information
-    cy.get("button")
-      .should("contain", "Add Doctor Types")
-      .contains("Add Doctor Types")
-      .click({ force: true });
-    cy.url().should("include", "doctor");
     cy.get("[id=area-of-specialization] > div > button").click();
     cy.get("ul > li:nth-child(2)").click();
     cy.get("[id=count]").type("15");
-    cy.get("[id=doctor-save").click();
+    cy.get("[id=submit").click();
+
     cy.verifyNotification("Doctor count added successfully");
-    cy.url().should("include", "doctor");
-    cy.get("[id=cancel").click();
     cy.url().then((url) => {
       current_url = url;
     });

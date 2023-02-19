@@ -69,23 +69,26 @@ const StatelessSidebar = ({
       const bottomItemOffset = 2;
 
       const indexDifference = index - lastIndicatorPosition;
-      // e.style.display = "block";
+      e.style.display = "block";
 
-      // if (indexDifference > 0) {
-      //   console.log("indexDifference > 0");
-      //   e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
-      //   e.style.bottom = "auto";
-      // } else {
-      //   console.log("indexDifference < 0");
-      //   e.style.bottom =
-      //     itemHeight * (NavItems.length + bottomItemOffset) -
-      //     lastIndicatorPosition * itemHeight -
-      //     28 +
-      //     "px";
-      //   e.style.top = "auto";
-      // }
+      if (indexDifference > 0) {
+        e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
+        e.style.bottom = "auto";
+      } else {
+        e.style.bottom =
+          itemHeight * (NavItems.length + bottomItemOffset) -
+          lastIndicatorPosition * itemHeight -
+          28 +
+          "px";
+        e.style.top = "auto";
+      }
 
-      // e.style.height = `${Math.abs(indexDifference) * itemHeight + 12}px`;
+      const variableHeight = Math.min(
+        Math.abs(indexDifference) * itemHeight,
+        70
+      );
+
+      e.style.height = `${variableHeight}px`;
       setTimeout(() => {
         if (!e) return;
         if (indexDifference > 0) {
@@ -102,10 +105,9 @@ const StatelessSidebar = ({
         e.style.height = "0.75rem";
         setLastIndicatorPosition(index);
       }, 300);
+    } else {
+      indicatorRef.current.style.display = "none";
     }
-    // else {
-    //   indicatorRef.current.style.display = "none";
-    // }
   }, [activeLink]);
 
   return (
@@ -130,7 +132,7 @@ const StatelessSidebar = ({
             ref={indicatorRef}
             // className="absolute left-2 w-1 hidden md:block bg-primary-400 rounded z-10 transition-all"
             className={classNames(
-              "block absolute left-2 w-1 bg-primary-400 rounded z-10 transition-all duration-200 ease-in-out",
+              "block absolute left-2 w-1 bg-primary-400 rounded z-10 transition-all",
               activeLink ? "opacity-0 md:opacity-100" : "opacity-0"
             )}
           />

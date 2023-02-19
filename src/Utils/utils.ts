@@ -66,23 +66,6 @@ export const calculateApache2Score = (apacheParams: ApacheParams): number => {
   return totalScore;
 };
 
-/**
- * Deprecated. Use `goBack` from the `useAppHistory` hook instead.
- */
-export const goBack = (deltaOrUrl?: string | number | false | void) => {
-  if (typeof deltaOrUrl === "number") {
-    window.history.go(-deltaOrUrl);
-    return;
-  }
-
-  if (typeof deltaOrUrl === "string") {
-    navigate(deltaOrUrl);
-    return;
-  }
-
-  window.history.back();
-};
-
 export const formatDate = (
   date: string | Date,
   format = "hh:mm A; DD/MM/YYYY"

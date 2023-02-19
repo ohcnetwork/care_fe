@@ -37,6 +37,7 @@ import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
+import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -73,7 +74,7 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
 
 export const PatientManager = () => {
   const dispatch: any = useDispatch();
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<any[]>();
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const {
@@ -90,7 +91,8 @@ export const PatientManager = () => {
     name: "",
   });
   const [showDialog, setShowDialog] = useState(false);
-
+  const [showDoctors, setShowDoctors] = useState(false);
+  const [showDoctorConnect, setShowDoctorConnect] = useState(false);
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadge] = useState("");
@@ -100,7 +102,8 @@ export const PatientManager = () => {
   const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
     useState("");
 
-  useEffect(() => {
+  const setPhoneNum = (phone_number: string) => {
+    setPhoneNumber(phone_number);
     if (phone_number.length === 15) {
       setPhoneNumberError("");
       updateQuery({ phone_number });
@@ -114,9 +117,10 @@ export const PatientManager = () => {
     }
 
     setPhoneNumberError("Enter a valid number");
-  }, [phone_number]);
+  };
 
-  useEffect(() => {
+  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
+    setEmergencyPhoneNumber(emergency_phone_number);
     if (emergency_phone_number.length === 15) {
       setEmergencyPhoneNumberError("");
       updateQuery({ emergency_phone_number });
@@ -130,7 +134,7 @@ export const PatientManager = () => {
     }
 
     setEmergencyPhoneNumberError("Enter a valid number");
-  }, [emergency_phone_number]);
+  };
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
@@ -196,6 +200,12 @@ export const PatientManager = () => {
     is_antenatal: qParams.is_antenatal || undefined,
   };
 
+  useEffect(() => {
+    if (params.facility) {
+      setShowDoctorConnect(true);
+    }
+  }, [qParams.facility]);
+
   const date_range_fields = [
     [params.created_date_before, params.created_date_after],
     [params.modified_date_before, params.modified_date_after],
@@ -240,20 +250,14 @@ export const PatientManager = () => {
   };
 
   useEffect(() => {
-    if (params.page === 1) return;
-
     setIsLoading(true);
-    dispatch(getAllPatient(params, "listPatients"))
-      .then((res: any) => {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-        }
+    dispatch(getAllPatient(params, "listPatients")).then((res: any) => {
+      if (res && res.data) {
+        setData(res.data.results);
+        setTotalCount(res.data.count);
         setIsLoading(false);
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
+      }
+    });
   }, [
     dispatch,
     qParams.last_consultation_admission_date_before,
@@ -648,6 +652,15 @@ export const PatientManager = () => {
       <div className="flex flex-col lg:flex-row justify-between items-center">
         <PageTitle title="Patients" hideBack={true} breadcrumbs={false} />
         <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end">
+          {showDoctorConnect && (
+            <ButtonV2
+              onClick={() => {
+                setShowDoctors(true);
+              }}
+            >
+              <p>Doctor Connect</p>
+            </ButtonV2>
+          )}
           <ButtonV2
             onClick={() => {
               qParams.facility
@@ -750,8 +763,8 @@ export const PatientManager = () => {
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-12px]">
         <div>
           <div className="flex flex-col mt-2 h-full">
-            <div className="bg-white overflow-hidden shadow rounded-lg mb-2 h-full">
-              <div className="px-4 py-24 sm:p-[35px]">
+            <div className="bg-white overflow-hidden shadow rounded-lg mb-2">
+              <div className="px-4 py-24 sm:p-[47px]">
                 <dl>
                   <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                     Total Patients
@@ -795,14 +808,14 @@ export const PatientManager = () => {
                 label="Search by Primary Number"
                 {...queryField("phone_number", "+91")}
                 value={phone_number}
-                onChange={(e) => setPhoneNumber(e.value)}
+                onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
               />
               <PhoneNumberFormField
                 label="Search by Emergency Number"
                 {...queryField("emergency_phone_number", "+91")}
                 value={emergency_phone_number}
-                onChange={(e) => setEmergencyPhoneNumber(e.value)}
+                onChange={(e) => setEmergencyPhoneNum(e.value)}
                 error={emergencyPhoneNumberError}
               />
             </div>
@@ -883,6 +896,11 @@ export const PatientManager = () => {
             <div className="mb-4">{managePatients}</div>
           </TabPanel>
         </SwipeableViews>
+        <DoctorVideoSlideover
+          facilityId={params.facility}
+          show={showDoctors}
+          setShow={setShowDoctors}
+        />
       </div>
     </div>
   );

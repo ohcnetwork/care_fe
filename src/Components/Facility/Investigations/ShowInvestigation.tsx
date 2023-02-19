@@ -168,6 +168,7 @@ export default function ShowInvestigation(props: any) {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
       />
       {isLoading ? (
         <Loading />

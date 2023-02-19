@@ -24,13 +24,13 @@ import { parseQueryParams } from "../../Utils/primitives";
 import moment from "moment";
 import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -96,6 +96,7 @@ type AssetFormSection =
   | "Service Details";
 
 const AssetCreate = (props: AssetProps) => {
+  const { goBack } = useAppHistory();
   const { facilityId, assetId } = props;
 
   let assetTypeInitial: AssetType;
@@ -393,6 +394,7 @@ const AssetCreate = (props: AssetProps) => {
             assets: { style: "text-gray-200 pointer-events-none" },
             [assetId || "????"]: { name },
           }}
+          backUrl={`/facility/${facilityId}`}
         />
         <section className="text-center">
           <h1 className="text-6xl flex items-center flex-col py-10">
@@ -468,6 +470,11 @@ const AssetCreate = (props: AssetProps) => {
           assets: { style: "text-gray-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
+        backUrl={
+          assetId
+            ? `/facility/${facilityId}/assets/${assetId}`
+            : `/facility/${facilityId}`
+        }
       />
       <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
         <div className="hidden xl:flex flex-col w-72 fixed h-full mt-4">

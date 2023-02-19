@@ -4,7 +4,7 @@ import PageHeadTitle from "./PageHeadTitle";
 import { classNames } from "../../Utils/utils";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 
-interface PageTitleProps {
+export interface PageTitleProps {
   title: string;
   hideBack?: boolean;
   backUrl?: string;
@@ -24,6 +24,7 @@ interface PageTitleProps {
     [key: string]: { name?: string; uri?: string; style?: string };
   };
   focusOnLoad?: boolean;
+  isInsidePage?: boolean;
 }
 
 export default function PageTitle({
@@ -37,6 +38,7 @@ export default function PageTitle({
   crumbsReplacements = {},
   justifyContents = "justify-start",
   focusOnLoad = false,
+  isInsidePage = false,
 }: PageTitleProps) {
   const divRef = useRef<any>();
 
@@ -49,7 +51,7 @@ export default function PageTitle({
   const { goBack } = useAppHistory();
 
   return (
-    <div ref={divRef} className={`pt-4 mb-4 ${className}`}>
+    <div ref={divRef} className={isInsidePage ? "" : `pt-4 mb-4 ${className}`}>
       <PageHeadTitle title={title} />
       <div className={classNames("flex items-center", justifyContents)}>
         <div className="flex items-center">
