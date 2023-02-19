@@ -79,10 +79,11 @@ export default function CreateClaimCard({
     const makeClaimRes = await dispatch(HCXActions.makeClaim(res.data.id));
 
     if (makeClaimRes.status === 200 && makeClaimRes.data) {
-      // TODO: reset form
+      setProcedures([]);
+      setPriority("normal");
+      setUse("preauthorization");
+      setType("institutional");
     }
-
-    setIsCreating(false);
   };
 
   return (
