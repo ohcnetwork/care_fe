@@ -1,4 +1,4 @@
-import { formatDate } from "../../Utils/utils";
+import { formatCurrency, formatDate } from "../../Utils/utils";
 import { HCXClaimModel } from "../HCX/models";
 
 interface IProps {
@@ -92,7 +92,7 @@ export default function ClaimDetailCard({ claim }: IProps) {
                 <td></td>
                 <td></td>
                 <td className="py-4 pl-3 pr-6 text-right text-sm text-gray-500 sm:pr-0">
-                  {procedure.price}
+                  {formatCurrency(procedure.price)}
                 </td>
               </tr>
             ))}
@@ -113,7 +113,8 @@ export default function ClaimDetailCard({ claim }: IProps) {
                 Total Claim Amount
               </th>
               <td className="pl-3 pr-6 pt-6 text-right text-sm text-gray-500 sm:pr-0">
-                {claim.total_claim_amount}
+                {claim.total_claim_amount &&
+                  formatCurrency(claim.total_claim_amount)}
               </td>
             </tr>
 
@@ -132,7 +133,9 @@ export default function ClaimDetailCard({ claim }: IProps) {
                 Total Amount Approved
               </th>
               <td className="pl-3 pr-6 pt-4 text-right text-sm font-semibold text-gray-900 sm:pr-0">
-                {claim.total_amount_approved ?? "NA"}
+                {claim.total_amount_approved
+                  ? formatCurrency(claim.total_amount_approved)
+                  : "NA"}
               </td>
             </tr>
           </tfoot>

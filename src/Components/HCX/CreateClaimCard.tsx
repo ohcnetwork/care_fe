@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { getConsultation, HCXActions } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { classNames } from "../../Utils/utils";
+import { classNames, formatCurrency } from "../../Utils/utils";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import ClaimsProceduresBuilder from "./ClaimsProceduresBuilder";
 import { HCXPolicyModel, HCXProcedureModel } from "./models";
@@ -155,7 +155,9 @@ export default function CreateClaimCard({ consultationId, patientId }: Props) {
           {"Total Amount: "}
           {procedures ? (
             <span className="font-bold tracking-wider">
-              INR {procedures.map((p) => p.price).reduce((a, b) => a + b, 0.0)}
+              {formatCurrency(
+                procedures.map((p) => p.price).reduce((a, b) => a + b, 0.0)
+              )}
             </span>
           ) : (
             "--"
