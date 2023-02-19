@@ -60,6 +60,7 @@ import PRNPrescriptionBuilder, {
   PRNPrescriptionType,
 } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { formatDate } from "../../Utils/utils";
+import CreateClaimCard from "../HCX/CreateClaimCard";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -444,7 +445,7 @@ export const ConsultationDetails = (props: any) => {
         }
         show={openDischargeDialog}
         onClose={handleDischargeClose}
-        className="md:max-w-2xl"
+        className="md:max-w-3xl"
       >
         <div className="mt-6 flex flex-col">
           <SelectFormField
@@ -551,6 +552,19 @@ export const ConsultationDetails = (props: any) => {
           )}
         </div>
 
+        {
+          // TODO: if policy and approved pre-auth exists
+          // TODO: if claim exists, show claim card else create claim card
+          <div className="my-5 shadow rounded p-5">
+            <h2 className="mb-2">Insurance Claim</h2>
+            <CreateClaimCard
+              consultationId={consultationId}
+              patientId={patientId}
+              initialUse="claim"
+            />
+          </div>
+        }
+
         <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
           <Cancel onClick={handleDischargeClose} />
           {isSendingDischargeApi ? (
@@ -581,7 +595,7 @@ export const ConsultationDetails = (props: any) => {
               },
             }}
             breadcrumbs={true}
-            backUrl={`/patients`}
+            backUrl="/patients"
           />
           <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
