@@ -19,6 +19,7 @@ export default function CreateClaimCard({ consultationId, patientId }: Props) {
   const dispatch = useDispatch<any>();
   const [policy, setPolicy] = useState<HCXPolicyModel>();
   const [procedures, setProcedures] = useState<HCXProcedureModel[]>();
+  const [proceduresError, setProceduresError] = useState<string>();
   const [isCreating, setIsCreating] = useState(false);
   const [priority, setPriority] = useState("normal");
   const [use, setUse] = useState("preauthorization");
@@ -46,16 +47,35 @@ export default function CreateClaimCard({ consultationId, patientId }: Props) {
     autoFillProceduresFromConsultation();
   }, [consultationId, dispatch]);
 
+  const validate = () => {
+    if (!policy) {
+      Notification.Error({ msg: "Please select a policy" });
+      return false;
+    }
+    if (policy?.outcome !== "Processing Complete") {
+      Notification.Error({ msg: "Please select an eligible policy" });
+      return false;
+    }
+    if (!procedures || procedures.length === 0) {
+      setProceduresError("Please add at least one procedure");
+      return false;
+    }
+    if (procedures?.some((p) => !p.id || !p.name || p.price === 0)) {
+      setProceduresError("Please fill all the procedure details");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async () => {
-    if (procedures?.length === 0 || !policy) return;
+    if (!validate()) return;
 
     setIsCreating(true);
 
-    // TODO: validate procedures
-
     const res = await dispatch(
       HCXActions.claims.create({
-        policy: policy.id,
+        policy: policy?.id,
         procedures: procedures,
         consultation: consultationId,
         priority,
@@ -129,6 +149,7 @@ export default function CreateClaimCard({ consultationId, patientId }: Props) {
           name="procedures"
           value={procedures}
           onChange={({ value }) => setProcedures(value)}
+          error={proceduresError}
         />
         <div className="place-self-end pr-8">
           {"Total Amount: "}
