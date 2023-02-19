@@ -238,6 +238,12 @@ export default function PatientInfoCard(props: {
               "file-medical",
               patient.last_consultation?.id,
             ],
+            [
+              `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/claims`,
+              "Claims",
+              "copy-landscape",
+              patient.last_consultation?.id,
+            ],
           ].map(
             (action: any, i) =>
               action[3] && (

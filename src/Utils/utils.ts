@@ -231,3 +231,9 @@ export const getExperienceSuffix = (date?: Date) => {
 
   return str;
 };
+
+export const formatCurrency = (price: number) =>
+  price.toLocaleString("en-IN", {
+    style: "currency",
+    currency: "INR",
+  });

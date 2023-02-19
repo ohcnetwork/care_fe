@@ -6,6 +6,7 @@ import ClaimDetailCard from "../HCX/ClaimDetailCard";
 import CreateClaimCard from "../HCX/CreateClaimCard";
 import { HCXClaimModel } from "../HCX/models";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import { navigate } from "raviger";
 
 interface Props {
   facilityId: string;
@@ -52,7 +53,12 @@ export default function ConsultationClaims({
       <PageTitle
         title="Claims"
         className="pl-6 flex-grow-0"
-        backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
+        onBackClick={() => {
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+          );
+          return false;
+        }}
       />
 
       <div className="flex flex-col gap-16 w-full max-w-3xl mx-auto">
