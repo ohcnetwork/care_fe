@@ -22,6 +22,14 @@ export interface IConfig {
    */
   gov_data_api_key: string;
   recaptcha_site_key: string;
+  /**
+   * SENTRY_DSN
+   */
+  sentry_dsn: string;
+  /**
+   * SENTRY_ENVIRONMENT
+   */
+  sentry_environment: string;
   kasp_enabled: boolean;
   kasp_string: string;
   kasp_full_string: string;

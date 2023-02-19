@@ -68,8 +68,6 @@ const SearchInput = ({
       {...props}
       name={name}
       errorClassName="hidden"
-      reducerProps={undefined}
-      validate={undefined}
       type="search"
       ref={ref}
       className={className}

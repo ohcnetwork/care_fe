@@ -56,7 +56,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                 schema: XLSXAssetImportSchema,
               });
               if (parsedData.errors.length) {
-                parsedData.errors.map((error: any) => {
+                parsedData.errors.map((error) => {
                   Notification.Error({
                     msg: `Please check the row ${error.row} of column ${error.column}`,
                   });
@@ -176,16 +176,25 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
             <span className="mt-1 text-gray-700">{facility.name}</span>
           </div>
           {locations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full">
-              <h1 className="text-2xl font-medium text-gray-700 m-7">
-                You need at least one location to import an assest.
-              </h1>
-              <Link href={`/facility/${facility.id}/location/add`}>
-                <a className="bg-primary text-white px-4 py-2 rounded-md">
-                  Add Asset Location
-                </a>
-              </Link>
-            </div>
+            <>
+              <div className="flex flex-col items-center justify-center h-full">
+                <h1 className="text-2xl font-medium text-gray-700 m-7">
+                  You need at least one location to import an assest.
+                </h1>
+                <Link href={`/facility/${facility.id}/location/add`}>
+                  <a className="bg-primary text-white px-4 py-2 rounded-md">
+                    Add Asset Location
+                  </a>
+                </Link>
+              </div>
+              <div className="mt-6 flex flex-col justify-center items-center">
+                <Cancel
+                  onClick={closeModal}
+                  disabled={isImporting}
+                  className="px-4 py-2 w-1/4"
+                />
+              </div>
+            </>
           ) : (
             <>
               {preview && preview?.length > 0 ? (

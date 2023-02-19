@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 import AutocompleteFormField from "./Autocomplete";
 import FormField from "./FormField";
 import TextFormField from "./TextFormField";
-import {
-  FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
-} from "./Utils";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 
 type Props = FormFieldBaseProps<Date> & {
   suffix?: (value?: Date) => React.ReactNode;
@@ -27,24 +24,21 @@ const MonthLabels = [
 ];
 
 const MonthFormField = (props: Props) => {
-  const handleChange = resolveFormFieldChangeEventHandler(props);
+  const field = useFormFieldPropsResolver(props as any);
 
-  const [month, setMonth] = useState(props.value?.getMonth());
-  const [year, setYear] = useState(props.value?.getFullYear());
+  const [month, setMonth] = useState(field.value?.getMonth());
+  const [year, setYear] = useState(field.value?.getFullYear());
 
   useEffect(() => {
     if (month === undefined || year === undefined) return;
-    handleChange({
-      name: props.name,
-      value: new Date(year, month),
-    });
+    field.handleChange(new Date(year, month));
   }, [month, year]);
 
   return (
-    <FormField props={props} className="flex items-center gap-1">
+    <FormField field={field} className="flex items-center gap-1">
       <AutocompleteFormField
-        name={props.name + "__month"}
-        required={props.required}
+        name={field.name + "__month"}
+        required={field.required}
         labelClassName="hidden"
         errorClassName="hidden"
         placeholder="Month"
@@ -55,8 +49,8 @@ const MonthFormField = (props: Props) => {
         onChange={(event) => setMonth(event.value)}
       />
       <TextFormField
-        name={props.name + "__year"}
-        required={props.required}
+        name={field.name + "__year"}
+        required={field.required}
         type="number"
         labelClassName="hidden"
         errorClassName="hidden"
@@ -66,7 +60,7 @@ const MonthFormField = (props: Props) => {
         onChange={(event) => setYear(parseInt(event.value))}
       />
       {props.suffix && (
-        <span className="text-gray-600">{props.suffix(props.value)}</span>
+        <span className="text-gray-600">{props.suffix(field.value)}</span>
       )}
     </FormField>
   );
