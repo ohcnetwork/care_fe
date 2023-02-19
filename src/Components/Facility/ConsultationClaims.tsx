@@ -60,9 +60,6 @@ export default function ConsultationClaims({
           <CreateClaimCard
             consultationId={consultationId}
             patientId={patientId}
-            onClaimCreated={(claim) => {
-              setClaims([claim, ...(claims || [])]);
-            }}
           />
         </div>
 

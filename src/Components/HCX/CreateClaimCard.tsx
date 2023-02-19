@@ -6,21 +6,16 @@ import * as Notification from "../../Utils/Notifications";
 import { classNames } from "../../Utils/utils";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import ClaimsProceduresBuilder from "./ClaimsProceduresBuilder";
-import { HCXClaimModel, HCXPolicyModel, HCXProcedureModel } from "./models";
+import { HCXPolicyModel, HCXProcedureModel } from "./models";
 import HCXPolicyEligibilityCheck from "./PolicyEligibilityCheck";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 
 interface Props {
   consultationId: string;
   patientId: string;
-  onClaimCreated: (claim: HCXClaimModel) => void;
 }
 
-export default function CreateClaimCard({
-  consultationId,
-  patientId,
-  onClaimCreated,
-}: Props) {
+export default function CreateClaimCard({ consultationId, patientId }: Props) {
   const dispatch = useDispatch<any>();
   const [policy, setPolicy] = useState<HCXPolicyModel>();
   const [procedures, setProcedures] = useState<HCXProcedureModel[]>();
@@ -71,18 +66,16 @@ export default function CreateClaimCard({
 
     if (res.data) {
       Notification.Success({ msg: "Claim created successfully" });
-      onClaimCreated(res.data);
+      const makeClaimRes = await dispatch(HCXActions.makeClaim(res.data.id));
+
+      if (makeClaimRes.status === 200 && makeClaimRes.data) {
+        setProcedures([]);
+        setPriority("normal");
+        setUse("preauthorization");
+        setType("institutional");
+      }
     } else {
       Notification.Error({ msg: "Failed to create claim" });
-    }
-
-    const makeClaimRes = await dispatch(HCXActions.makeClaim(res.data.id));
-
-    if (makeClaimRes.status === 200 && makeClaimRes.data) {
-      setProcedures([]);
-      setPriority("normal");
-      setUse("preauthorization");
-      setType("institutional");
     }
   };
 
