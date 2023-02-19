@@ -7,7 +7,7 @@ import CreateClaimCard from "../HCX/CreateClaimCard";
 import { HCXClaimModel } from "../HCX/models";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { navigate } from "raviger";
-
+import * as Notification from "../../Utils/Notifications";
 interface Props {
   facilityId: string;
   patientId: string;
@@ -21,17 +21,25 @@ export default function ConsultationClaims({
 }: Props) {
   const dispatch = useDispatch<any>();
   const [claims, setClaims] = useState<HCXClaimModel[]>();
+  const [isCreateLoading, setIsCreateLoading] = useState(false);
 
   const fetchClaims = useCallback(async () => {
     const res = await dispatch(
       HCXActions.claims.list({
+        ordering: "-modified_date",
         consultation: consultationId,
       })
     );
 
     if (res.data && res.data.results) {
       setClaims(res.data.results);
+      if (isCreateLoading)
+        Notification.Success({ msg: "Fetched Claim Approval Results" });
+    } else {
+      if (isCreateLoading)
+        Notification.Success({ msg: "Error Fetched Claim Approval Results" });
     }
+    setIsCreateLoading(false);
   }, [dispatch, consultationId]);
 
   useEffect(() => {
@@ -66,6 +74,8 @@ export default function ConsultationClaims({
           <CreateClaimCard
             consultationId={consultationId}
             patientId={patientId}
+            isCreating={isCreateLoading}
+            setIsCreating={setIsCreateLoading}
           />
         </div>
 

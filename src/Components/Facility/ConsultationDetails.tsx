@@ -63,6 +63,8 @@ import { formatDate } from "../../Utils/utils";
 import CreateClaimCard from "../HCX/CreateClaimCard";
 import { HCXClaimModel } from "../HCX/models";
 import ClaimDetailCard from "../HCX/ClaimDetailCard";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
+
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -114,24 +116,42 @@ export const ConsultationDetails = (props: any) => {
   const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
 
   const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
+  const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
+
+  const fetchLatestClaim = useCallback(async () => {
+    const res = await dispatch(
+      HCXActions.claims.list({
+        ordering: "-modified_date",
+        use: "claim",
+        consultation: consultationId,
+      })
+    );
+
+    if (res.data?.results?.length) {
+      setLatestClaim(res.data.results[0]);
+      if (isCreateClaimLoading)
+        Notification.Success({ msg: "Fetched Claim Approval Results" });
+    } else {
+      setLatestClaim(undefined);
+      if (isCreateClaimLoading)
+        Notification.Success({ msg: "Error Fetched Claim Approval Results" });
+    }
+    setIsCreateClaimLoading(false);
+  }, [consultationId, dispatch]);
 
   useEffect(() => {
-    async function fetchLatestClaim() {
-      const res = await dispatch(
-        HCXActions.claims.list({ consultation: consultationId })
-      );
-
-      if (res.data?.results?.length) {
-        const results = res.data.results as HCXClaimModel[];
-        results.filter((claim) => claim.use === "Claim");
-        setLatestClaim(res.data.results[0]);
-      } else {
-        setLatestClaim(undefined);
-      }
-    }
-
     fetchLatestClaim();
-  }, [consultationId, dispatch]);
+  }, [fetchLatestClaim]);
+
+  useMessageListener((data) => {
+    if (
+      data.type === "MESSAGE" &&
+      (data.from === "claim/on_submit" || data.from === "preauth/on_submit") &&
+      data.message === "success"
+    ) {
+      fetchLatestClaim();
+    }
+  });
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -576,7 +596,6 @@ export const ConsultationDetails = (props: any) => {
 
         {
           // TODO: if policy and approved pre-auth exists
-          // TODO: if claim exists, show claim card else create claim card
           <div className="my-5 shadow rounded p-5">
             <h2 className="mb-2">Insurance Claim</h2>
             {latestClaim ? (
@@ -586,6 +605,8 @@ export const ConsultationDetails = (props: any) => {
                 consultationId={consultationId}
                 patientId={patientId}
                 initialUse="claim"
+                isCreating={isCreateClaimLoading}
+                setIsCreating={setIsCreateClaimLoading}
               />
             )}
           </div>

@@ -13,19 +13,22 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 interface Props {
   consultationId: string;
   patientId: string;
+  setIsCreating: (creating: boolean) => void;
+  isCreating: boolean;
   initialUse?: string;
 }
 
 export default function CreateClaimCard({
   consultationId,
   patientId,
+  setIsCreating,
+  isCreating,
   initialUse = "preauthorization",
 }: Props) {
   const dispatch = useDispatch<any>();
   const [policy, setPolicy] = useState<HCXPolicyModel>();
   const [procedures, setProcedures] = useState<HCXProcedureModel[]>();
   const [proceduresError, setProceduresError] = useState<string>();
-  const [isCreating, setIsCreating] = useState(false);
   const [priority, setPriority] = useState("normal");
   const [use, setUse] = useState(initialUse);
   const [type, setType] = useState("institutional");
