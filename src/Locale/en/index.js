@@ -6,6 +6,8 @@ import Hub from "./Hub.json";
 import ErrorPages from "./ErrorPages.json";
 import Shifting from "./Shifting.json";
 import Notifications from "./Notifications.json";
+import ExternalResult from "./ExternalResult.json";
+import CoverImageEdit from "./CoverImageEdit.json";
 
 export default {
   ...Auth,
@@ -16,4 +18,6 @@ export default {
   ...ErrorPages,
   ...Shifting,
   ...Notifications,
+  ...ExternalResult,
+  ...CoverImageEdit,
 };

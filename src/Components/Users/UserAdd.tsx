@@ -29,7 +29,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 
-import { classNames, getExperienceSuffix, goBack } from "../../Utils/utils";
+import { classNames, getExperienceSuffix } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -39,6 +39,7 @@ import MonthFormField from "../Form/FormFields/Month";
 import Checkbox from "../Common/components/CheckBox";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -131,6 +132,7 @@ const getDate = (value: any) =>
   value && moment(value).isValid() && moment(value).toDate();
 
 export const UserAdd = (props: UserProps) => {
+  const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const { userId } = props;
 
@@ -632,6 +634,7 @@ export const UserAdd = (props: UserProps) => {
           </Link>
         }
         justifyContents="justify-between"
+        backUrl="/users"
       />
 
       <Card className="mt-4">

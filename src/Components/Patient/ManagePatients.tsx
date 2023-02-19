@@ -102,7 +102,8 @@ export const PatientManager = () => {
   const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
     useState("");
 
-  useEffect(() => {
+  const setPhoneNum = (phone_number: string) => {
+    setPhoneNumber(phone_number);
     if (phone_number.length === 15) {
       setPhoneNumberError("");
       updateQuery({ phone_number });
@@ -116,9 +117,10 @@ export const PatientManager = () => {
     }
 
     setPhoneNumberError("Enter a valid number");
-  }, [phone_number]);
+  };
 
-  useEffect(() => {
+  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
+    setEmergencyPhoneNumber(emergency_phone_number);
     if (emergency_phone_number.length === 15) {
       setEmergencyPhoneNumberError("");
       updateQuery({ emergency_phone_number });
@@ -132,7 +134,7 @@ export const PatientManager = () => {
     }
 
     setEmergencyPhoneNumberError("Enter a valid number");
-  }, [emergency_phone_number]);
+  };
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
@@ -761,8 +763,8 @@ export const PatientManager = () => {
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-12px]">
         <div>
           <div className="flex flex-col mt-2 h-full">
-            <div className="bg-white overflow-hidden shadow rounded-lg mb-2 h-full">
-              <div className="px-4 py-24 sm:p-[35px]">
+            <div className="bg-white overflow-hidden shadow rounded-lg mb-2">
+              <div className="px-4 py-24 sm:p-[47px]">
                 <dl>
                   <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
                     Total Patients
@@ -806,14 +808,14 @@ export const PatientManager = () => {
                 label="Search by Primary Number"
                 {...queryField("phone_number", "+91")}
                 value={phone_number}
-                onChange={(e) => setPhoneNumber(e.value)}
+                onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
               />
               <PhoneNumberFormField
                 label="Search by Emergency Number"
                 {...queryField("emergency_phone_number", "+91")}
                 value={emergency_phone_number}
-                onChange={(e) => setEmergencyPhoneNumber(e.value)}
+                onChange={(e) => setEmergencyPhoneNum(e.value)}
                 error={emergencyPhoneNumberError}
               />
             </div>

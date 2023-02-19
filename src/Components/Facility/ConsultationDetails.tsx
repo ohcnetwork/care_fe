@@ -581,6 +581,7 @@ export const ConsultationDetails = (props: any) => {
               },
             }}
             breadcrumbs={true}
+            backUrl={"/patients"}
           />
           <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
@@ -1268,7 +1269,7 @@ export const ConsultationDetails = (props: any) => {
         {tab === "VENTILATOR" && (
           <div>
             <PageTitle
-              title="Ventilator Parameters"
+              title="Respiratory Support"
               hideBack={true}
               breadcrumbs={false}
             />

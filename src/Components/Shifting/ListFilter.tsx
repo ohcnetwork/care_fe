@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { UserSelect } from "../Common/UserSelect2";
+import { navigate } from "raviger";
 import { SelectField } from "../Common/HelperInputFields";
 import {
   SHIFTING_FILTER_ORDER,
@@ -12,7 +13,6 @@ import { getAnyFacility, getUserList } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { SHIFTING_CHOICES } from "../../Common/constants";
-import { Link } from "raviger";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import parsePhoneNumberFromString from "libphonenumber-js";
 import useMergeState from "../../Common/hooks/useMergeState";
@@ -20,6 +20,7 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { useTranslation } from "react-i18next";
+import FilterButtons from "../Common/FilterButtons";
 
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
@@ -162,10 +163,6 @@ export default function ListFilter(props: any) {
     });
   };
 
-  const clearFilters = () => {
-    closeFilter();
-  };
-
   const applyFilter = () => {
     const {
       orgin_facility,
@@ -236,23 +233,16 @@ export default function ListFilter(props: any) {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <button className="btn btn-default" onClick={closeFilter}>
-          <i className="fas fa-times mr-2" />
-          {t("cancel")}
-        </button>
-        <Link
-          href="/shifting"
-          className="btn btn-default hover:text-gray-900"
-          onClick={clearFilters}
-        >
-          <i className="fas fa-times mr-2" />
-          {t("clear_filters")}
-        </Link>
-        <button className="btn btn-primary" onClick={applyFilter}>
-          <i className="fas fa-check mr-2" />
-          {t("apply")}
-        </button>
+      <div className="pb-10">
+        <FilterButtons
+          onClose={closeFilter}
+          onApply={applyFilter}
+          onClear={() => {
+            navigate("/shifting");
+            setFilterState(filterState);
+            closeFilter();
+          }}
+        />
       </div>
       <div className="font-light text-md mt-2">{t("filter_by") + ":"}</div>
       <div className="flex flex-wrap gap-2">

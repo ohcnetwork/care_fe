@@ -14,10 +14,10 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { TextInputField } from "../Common/HelperInputFields";
 import { PatientStatsModel } from "./models";
-import { goBack } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import DateInputV2 from "../Common/DateInputV2";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -60,6 +60,7 @@ const triageFormReducer = (state = initialState, action: any) => {
 };
 
 export const TriageForm = (props: triageFormProps) => {
+  const { goBack } = useAppHistory();
   const dispatchTriageData: any = useDispatch();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
@@ -279,6 +280,7 @@ export const TriageForm = (props: triageFormProps) => {
             name: moment(state.form.entry_date).format("YYYY-MM-DD"),
           },
         }}
+        backUrl={`/facility/${facilityId}`}
       />
 
       <Modal
