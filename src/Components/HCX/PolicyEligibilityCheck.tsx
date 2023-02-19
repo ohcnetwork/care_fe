@@ -56,7 +56,8 @@ export default function HCXPolicyEligibilityCheck({
   useMessageListener((data) => {
     if (
       data.type === "MESSAGE" &&
-      data.from === "coverageelegibility/on_check"
+      data.from === "coverageelegibility/on_check" &&
+      data.message === "success"
     ) {
       fetchPatientInsuranceDetails();
     }
