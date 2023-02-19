@@ -43,19 +43,7 @@ export default function HCXPolicyEligibilityCheck({
           return acc;
         }, {})
       );
-      setIsChecking((isChecking) => {
-        if (isChecking && policy) {
-          const isCurrentlySelectedPolicyEligible = eligibility[policy];
-          if (isCurrentlySelectedPolicyEligible) {
-            const eligiblePolicy = results.find((p) => p.id === policy);
-            onEligiblePolicySelected(eligiblePolicy);
-          } else {
-            onEligiblePolicySelected(undefined);
-          }
-          Notification.Success({ msg: "Policy Eligibility Checked" });
-        }
-        return false;
-      });
+      setIsChecking(false);
     }
   }, [patient, dispatch]);
 
@@ -74,12 +62,17 @@ export default function HCXPolicyEligibilityCheck({
     }
   });
 
-  // TODO: Momentary hack to bypass the actual eligibility check.
   useEffect(() => {
-    Notification.Success({ msg: "Policy Eligibility Checked" });
-    onEligiblePolicySelected(
-      insuranceDetails?.find((p) => p.id === policy) || undefined
-    );
+    if (policy) {
+      const isCurrentlySelectedPolicyEligible = eligibility[policy];
+      if (isCurrentlySelectedPolicyEligible) {
+        const eligiblePolicy = insuranceDetails?.find((p) => p.id === policy);
+        onEligiblePolicySelected(eligiblePolicy);
+        Notification.Success({ msg: "Policy is Eligibile" });
+      } else {
+        onEligiblePolicySelected(undefined);
+      }
+    }
   }, [policy, insuranceDetails]);
 
   const checkEligibility = async () => {

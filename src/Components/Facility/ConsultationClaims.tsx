@@ -20,8 +20,6 @@ export default function ConsultationClaims({
   const dispatch = useDispatch<any>();
   const [claims, setClaims] = useState<HCXClaimModel[]>();
 
-  console.log(claims);
-
   useEffect(() => {
     async function fetchClaims() {
       const res = await dispatch(
