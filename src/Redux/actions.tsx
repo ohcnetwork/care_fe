@@ -857,7 +857,7 @@ export const HCXActions = {
     list(params: object) {
       return fireRequest("listHCXClaims", [], params);
     },
-    create(obj: HCXClaimModel) {
+    create(obj: object) {
       return fireRequest("createHCXClaim", [], obj);
     },
     read(id: string) {

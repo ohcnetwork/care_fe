@@ -4,10 +4,11 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { getConsultation, HCXActions } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { classNames } from "../../Utils/utils";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import ClaimsProceduresBuilder from "./ClaimsProceduresBuilder";
 import { HCXClaimModel, HCXPolicyModel, HCXProcedureModel } from "./models";
 import HCXPolicyEligibilityCheck from "./PolicyEligibilityCheck";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 
 interface Props {
   consultationId: string;
@@ -24,6 +25,9 @@ export default function CreateClaimCard({
   const [policy, setPolicy] = useState<HCXPolicyModel>();
   const [procedures, setProcedures] = useState<HCXProcedureModel[]>();
   const [isCreating, setIsCreating] = useState(false);
+  const [priority, setPriority] = useState("normal");
+  const [use, setUse] = useState("preauthorization");
+  const [type, setType] = useState("institutional");
 
   useEffect(() => {
     async function autoFillProceduresFromConsultation() {
@@ -45,7 +49,7 @@ export default function CreateClaimCard({
     }
 
     autoFillProceduresFromConsultation();
-  }, [consultationId]);
+  }, [consultationId, dispatch]);
 
   const handleSubmit = async () => {
     if (procedures?.length === 0 || !policy) return;
@@ -59,6 +63,9 @@ export default function CreateClaimCard({
         policy: policy.id,
         procedures: procedures,
         consultation: consultationId,
+        priority,
+        use,
+        type,
       })
     );
 
@@ -141,10 +148,60 @@ export default function CreateClaimCard({
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
-        <Cancel
-        // TODO: onClick={handleReset}
-        />
+      <div className="flex flex-col gap-4 mt-4">
+        <div className="flex flex-col sm:flex-row items-center gap-2 justify-evenly">
+          <SelectFormField
+            required
+            name="priority"
+            label="Priority"
+            errorClassName="hidden"
+            className="w-full"
+            options={[
+              { id: "stat", text: "Immediately" },
+              { id: "normal", text: "Normal" },
+              { id: "deferred", text: "Deferred" },
+            ]}
+            optionValue={(option) => option.id as string}
+            optionLabel={(option) => option.text}
+            onChange={({ value }) => setPriority(value)}
+            value={priority}
+          />
+          <SelectFormField
+            required
+            name="type"
+            label="Type"
+            errorClassName="hidden"
+            className="w-full"
+            options={[
+              { id: "institutional", text: "Institutional" },
+              { id: "oral", text: "Oral" },
+              { id: "pharmacy", text: "Pharmacy" },
+              { id: "professional", text: "Professional" },
+              { id: "vision", text: "Vision" },
+            ]}
+            optionValue={(option) => option.id as string}
+            optionLabel={(option) => option.text}
+            onChange={({ value }) => setType(value)}
+            value={type}
+          />
+          <SelectFormField
+            required
+            name="use"
+            label="Use"
+            errorClassName="hidden"
+            className="w-full"
+            options={[
+              { id: "preauthorization", text: "Pre-Auth" },
+              { id: "claim", text: "Claim" },
+            ]}
+            optionValue={(option) => option.id as string}
+            optionLabel={(option) => option.text}
+            onChange={({ value }) => setUse(value)}
+            value={use}
+            // disabled={!insuranceDetails}
+          />
+        </div>
+
         <Submit
           disabled={procedures?.length === 0 || !policy || isCreating}
           onClick={handleSubmit}
