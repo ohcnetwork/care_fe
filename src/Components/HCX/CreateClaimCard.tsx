@@ -103,7 +103,7 @@ export default function CreateClaimCard({
         setType("institutional");
       }
     } else {
-      Notification.Error({ msg: "Failed to create claim" });
+      Notification.Error({ msg: "Failed to request pre-authorization" });
     }
   };
 
@@ -232,7 +232,9 @@ export default function CreateClaimCard({
           onClick={handleSubmit}
         >
           {isCreating && <CareIcon className="care-l-spinner animate-spin" />}
-          {isCreating ? "Creating Claim..." : "Create Claim"}
+          {isCreating
+            ? "Requesting Pre-Authorization..."
+            : "Request Pre-Authorization"}
         </Submit>
       </div>
     </div>
