@@ -9,6 +9,7 @@ import ClaimsProceduresBuilder from "./ClaimsProceduresBuilder";
 import { HCXPolicyModel, HCXProcedureModel } from "./models";
 import HCXPolicyEligibilityCheck from "./PolicyEligibilityCheck";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import PROCEDURES from "../../Common/procedures";
 
 interface Props {
   consultationId: string;
@@ -16,6 +17,24 @@ interface Props {
   setIsCreating: (creating: boolean) => void;
   isCreating: boolean;
   initialUse?: string;
+}
+
+export function useKnownProcedureIfAvailable({ procedure }: any) {
+  const knownProcedure = PROCEDURES.find((o) => o.code === procedure);
+
+  if (knownProcedure) {
+    return {
+      id: knownProcedure.code,
+      name: knownProcedure.name || knownProcedure.code,
+      price: knownProcedure.price,
+    };
+  }
+
+  return {
+    id: procedure,
+    name: procedure,
+    price: 0.0,
+  };
 }
 
 export default function CreateClaimCard({
@@ -38,15 +57,7 @@ export default function CreateClaimCard({
       const res = await dispatch(getConsultation(consultationId as any));
 
       if (res.data && Array.isArray(res.data.procedure)) {
-        setProcedures(
-          res.data.procedure.map((p: any) => {
-            return {
-              id: p.procedure,
-              name: p.procedure,
-              price: 0.0,
-            };
-          })
-        );
+        setProcedures(res.data.procedure.map(useKnownProcedureIfAvailable));
       } else {
         setProcedures([{ id: "", name: "", price: 0 }]);
       }

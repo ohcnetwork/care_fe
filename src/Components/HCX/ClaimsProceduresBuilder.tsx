@@ -1,5 +1,7 @@
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import PROCEDURES from "../../Common/procedures";
 import ButtonV2 from "../Common/components/ButtonV2";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import FormField, { FieldLabel } from "../Form/FormFields/FormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import {
@@ -24,10 +26,27 @@ export default function ClaimsProceduresBuilder(props: Props) {
     };
   };
 
+  const handleUpdates = (index: number) => {
+    return (updates: HCXProcedureModel) => {
+      field.handleChange(
+        (props.value || [])?.map((obj, i) =>
+          i === index ? { ...obj, ...updates } : obj
+        )
+      );
+    };
+  };
+
   const handleRemove = (index: number) => {
     return () => {
       field.handleChange((props.value || [])?.filter((obj, i) => i !== index));
     };
+  };
+
+  const procedureOptions = (current?: HCXProcedureModel) => {
+    if (!current) return PROCEDURES;
+    const knownProcedure = PROCEDURES.find((o) => o.code === current.id);
+    if (knownProcedure) return PROCEDURES;
+    return [{ ...current, code: current.id }, ...PROCEDURES];
   };
 
   return (
@@ -58,27 +77,63 @@ export default function ClaimsProceduresBuilder(props: Props) {
               </div>
 
               <div className="p-2 flex flex-row gap-2">
-                <TextFormField
+                <AutocompleteFormField
                   className="flex-[3]"
                   required
                   name="id"
                   label="ID"
                   placeholder="Eg. PROCEDURE-001"
+                  options={procedureOptions(obj)}
+                  optionLabel={(o) => o.code}
+                  optionDescription={(o) => o.name || ""}
+                  optionValue={(o) => o.code}
+                  onChange={(event) => {
+                    const knownProcedure = PROCEDURES.find(
+                      (p) => p.code === event.value
+                    );
+
+                    if (knownProcedure) {
+                      handleUpdates(index)({
+                        id: knownProcedure.code,
+                        name: knownProcedure.name || knownProcedure.code,
+                        price: knownProcedure.price,
+                      });
+                    } else {
+                      handleUpdate(index)(event);
+                    }
+                  }}
                   value={obj.id}
-                  onChange={handleUpdate(index)}
                   disabled={props.disabled}
                   errorClassName="hidden"
                 />
-                <TextFormField
+                <AutocompleteFormField
                   className="flex-[3]"
                   required
                   name="name"
                   label="Name"
                   placeholder="Eg. Knee Replacement"
                   value={obj.name}
-                  onChange={handleUpdate(index)}
+                  onChange={(event) => {
+                    const knownProcedure = PROCEDURES.find(
+                      (p) => p.name === event.value
+                    );
+
+                    if (knownProcedure) {
+                      handleUpdates(index)({
+                        id: knownProcedure.code,
+                        name: knownProcedure.name || knownProcedure.code,
+                        price: knownProcedure.price,
+                      });
+                    } else {
+                      handleUpdate(index)(event);
+                    }
+                  }}
+                  optionLabel={(o) => o.name || o.code}
+                  optionDescription={(o) => o.code}
+                  optionValue={(o) => o.name || o.code}
                   disabled={props.disabled}
                   errorClassName="hidden"
+                  options={procedureOptions(obj)}
                 />
                 <TextFormField
                   className="flex-[2]"
