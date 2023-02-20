@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import AutocompleteFormField from "../../Form/FormFields/Autocomplete";
+import PROCEDURES from "../../../Common/procedures";
 
 export type ProcedureType = {
   procedure?: string;
@@ -63,28 +65,25 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     <CareIcon className="care-l-trash-alt w-4 h-4" />
                   </button>
                 </div>
-                <div className="w-full">
-                  Procedure
-                  <span className="text-danger-500">{" *"}</span>
-                  <input
-                    type="text"
-                    className="mt-1 w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                    placeholder="Procedure"
-                    maxLength={100}
-                    value={procedure.procedure || ""}
-                    onFocus={() => setActiveIdx(i)}
-                    onBlur={() => setActiveIdx(null)}
-                    onChange={(e) => {
-                      setItem(
-                        {
-                          ...procedure,
-                          procedure: e.currentTarget.value,
-                        },
-                        i
-                      );
-                    }}
-                  />
-                </div>
+                <AutocompleteFormField
+                  required
+                  labelClassName="text-sm text-gray-700"
+                  label="Procedure"
+                  placeholder="Procedure"
+                  name="procedure_name"
+                  options={PROCEDURES}
+                  optionLabel={(o) => o.code}
+                  optionDescription={(o) => o.name || ""}
+                  optionValue={(o) => o.code}
+                  value={procedure.procedure || ""}
+                  onQuery={(query) =>
+                    setItem({ ...procedure, procedure: query }, i)
+                  }
+                  onChange={({ value }) =>
+                    setItem({ ...procedure, procedure: value }, i)
+                  }
+                  errorClassName="hidden"
+                />
                 <div className="flex gap-2 md:gap-4 flex-col md:flex-row">
                   <div className="shrink-0 flex gap-2 items-center md:mt-3 cursor-pointer">
                     Is the procedure repetitive?

@@ -13,6 +13,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   options: T[];
   optionLabel: OptionCallback<T, string>;
   optionValue?: OptionCallback<T, V>;
+  optionDescription?: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   onQuery?: (query: string) => void;
   dropdownIcon?: React.ReactNode | undefined;
@@ -36,6 +37,7 @@ const AutocompleteFormField = <T, V>(
         optionLabel={props.optionLabel}
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
+        optionDescription={props.optionDescription}
         onQuery={props.onQuery}
       />
     </FormField>
@@ -53,6 +55,7 @@ type AutocompleteProps<T, V = T> = {
   optionLabel: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
+  optionDescription?: OptionCallback<T, string>;
   className?: string;
   onQuery?: (query: string) => void;
   isLoading?: boolean;
@@ -87,6 +90,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
       search: label.toLowerCase(),
       icon: props.optionIcon && props.optionIcon(option),
       value: props.optionValue ? props.optionValue(option) : option,
+      description: props.optionDescription && props.optionDescription(option),
     };
   });
 
@@ -128,9 +132,16 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   className={dropdownOptionClassNames}
                   value={option}
                 >
-                  <div className="flex justify-between">
-                    {option.label}
-                    {option.icon}
+                  <div className="flex flex-col">
+                    <div className="flex justify-between">
+                      {option.label}
+                      {option.icon}
+                    </div>
+                    {option.description && (
+                      <div className="text-sm text-gray-500">
+                        {option.description}
+                      </div>
+                    )}
                   </div>
                 </Combobox.Option>
               ))}
