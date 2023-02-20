@@ -142,7 +142,7 @@ export default function ClaimDetailCard({ claim }: IProps) {
         </table>
       </div>
       {claim.error_text && (
-        <div className="text-red-500 text-sm text-center mt-4">
+        <div className="text-red-500 text-sm text-center mt-4 font-bold">
           {claim.error_text}
         </div>
       )}
