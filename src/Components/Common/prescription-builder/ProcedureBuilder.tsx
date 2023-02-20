@@ -36,6 +36,13 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
     );
   };
 
+  const procedureOptions = (currentProcedure?: string) => {
+    if (!currentProcedure) return PROCEDURES;
+    const knownProcedure = PROCEDURES.find((o) => o.code === currentProcedure);
+    if (knownProcedure) return PROCEDURES;
+    return [{ code: currentProcedure, name: currentProcedure }, ...PROCEDURES];
+  };
+
   return (
     <div className="mt-2">
       {procedures.map((procedure, i) => {
@@ -71,14 +78,11 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   label="Procedure"
                   placeholder="Procedure"
                   name="procedure_name"
-                  options={PROCEDURES}
+                  options={procedureOptions(procedure.procedure)}
                   optionLabel={(o) => o.code}
                   optionDescription={(o) => o.name || ""}
                   optionValue={(o) => o.code}
-                  value={procedure.procedure || ""}
-                  onQuery={(query) =>
-                    setItem({ ...procedure, procedure: query }, i)
-                  }
+                  value={procedure.procedure}
                   onChange={({ value }) =>
                     setItem({ ...procedure, procedure: value }, i)
                   }
