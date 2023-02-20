@@ -39,7 +39,8 @@ export default function HCXPolicyEligibilityCheck({
       setEligibility(
         results.reduce?.((acc: any, policy: HCXPolicyModel) => {
           if (policy.outcome)
-            acc[policy.id] = policy.outcome === "Processing Complete";
+            acc[policy.id] =
+              !policy.error_text && policy.outcome === "Processing Complete";
           return acc;
         }, {})
       );
@@ -56,8 +57,7 @@ export default function HCXPolicyEligibilityCheck({
   useMessageListener((data) => {
     if (
       data.type === "MESSAGE" &&
-      data.from === "coverageelegibility/on_check" &&
-      data.message === "success"
+      data.from === "coverageelegibility/on_check"
     ) {
       fetchPatientInsuranceDetails();
     }
@@ -127,25 +127,32 @@ export default function HCXPolicyEligibilityCheck({
           }
           disabled={!insuranceDetails}
           optionDescription={(option) => (
-            <div className="flex flex-wrap gap-3">
-              <span>
-                {"Subscriber ID "}
-                <span className="font-medium tracking-wide">
-                  {option.subscriber_id}
+            <div>
+              <div className="flex flex-wrap gap-3">
+                <span>
+                  {"Subscriber ID "}
+                  <span className="font-medium tracking-wide">
+                    {option.subscriber_id}
+                  </span>
                 </span>
-              </span>
-              <span>
-                {"Insurer ID "}
-                <span className="font-medium tracking-wide">
-                  {option.insurer_id}
+                <span>
+                  {"Insurer ID "}
+                  <span className="font-medium tracking-wide">
+                    {option.insurer_id}
+                  </span>
                 </span>
-              </span>
-              <span>
-                {"Insurer Name "}
-                <span className="font-medium tracking-wide">
-                  {option.insurer_name}
+                <span>
+                  {"Insurer Name "}
+                  <span className="font-medium tracking-wide">
+                    {option.insurer_name}
+                  </span>
                 </span>
-              </span>
+              </div>
+              {option.error_text && (
+                <span className="text-red-600 text-sm">
+                  {option.error_text}
+                </span>
+              )}
             </div>
           )}
         />

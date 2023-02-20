@@ -8,6 +8,7 @@ import { HCXClaimModel } from "../HCX/models";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { navigate } from "raviger";
 import * as Notification from "../../Utils/Notifications";
+import { classNames } from "../../Utils/utils";
 interface Props {
   facilityId: string;
   patientId: string;
@@ -81,7 +82,17 @@ export default function ConsultationClaims({
 
         <div className="flex flex-col gap-8">
           {claims?.map((claim) => (
-            <div className="p-8 bg-white rounded-lg">
+            <div
+              className={classNames(
+                "p-8 bg-white rounded-lg",
+                claim.outcome === "Processing Complete" &&
+                  claim.error_text &&
+                  "!bg-red-100",
+                claim.outcome === "Processing Complete" &&
+                  !claim.error_text &&
+                  "!bg-primary-100"
+              )}
+            >
               <ClaimDetailCard claim={claim} />
             </div>
           ))}
