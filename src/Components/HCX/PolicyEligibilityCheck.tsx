@@ -48,8 +48,6 @@ export default function HCXPolicyEligibilityCheck({
     }
   }, [patient, dispatch]);
 
-  useEffect;
-
   useEffect(() => {
     fetchPatientInsuranceDetails();
   }, [fetchPatientInsuranceDetails]);
