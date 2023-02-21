@@ -6,7 +6,7 @@ import * as Notification from "../../Utils/Notifications";
 import { classNames, formatCurrency } from "../../Utils/utils";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import ClaimsProceduresBuilder from "./ClaimsProceduresBuilder";
-import { HCXPolicyModel, HCXProcedureModel } from "./models";
+import { HCXClaimModel, HCXPolicyModel, HCXProcedureModel } from "./models";
 import HCXPolicyEligibilityCheck from "./PolicyEligibilityCheck";
 import PROCEDURES from "../../Common/procedures";
 
@@ -49,7 +49,20 @@ export default function CreateClaimCard({
   const [proceduresError, setProceduresError] = useState<string>();
 
   useEffect(() => {
-    async function autoFillProceduresFromConsultation() {
+    async function autoFill() {
+      const latestApprovedPreAuthsRes = await dispatch(
+        HCXActions.claims.listLatestApprovedPreAuths(consultationId)
+      );
+
+      if (latestApprovedPreAuthsRes.data?.results?.length) {
+        const latestApprovedPreAuth = (
+          latestApprovedPreAuthsRes.data.results as HCXClaimModel[]
+        ).filter((o) => o.outcome === "Processing Complete")[0];
+        setPolicy(latestApprovedPreAuth.policy_object);
+        setProcedures(latestApprovedPreAuth.procedures);
+        return;
+      }
+
       const res = await dispatch(getConsultation(consultationId as any));
 
       if (res.data && Array.isArray(res.data.procedure)) {
@@ -59,7 +72,7 @@ export default function CreateClaimCard({
       }
     }
 
-    autoFillProceduresFromConsultation();
+    autoFill();
   }, [consultationId, dispatch]);
 
   const validate = () => {
@@ -98,7 +111,7 @@ export default function CreateClaimCard({
     );
 
     if (res.data) {
-      Notification.Success({ msg: "Claim created successfully" });
+      Notification.Success({ msg: "Pre-authorization requested" });
       const makeClaimRes = await dispatch(HCXActions.makeClaim(res.data.id));
 
       if (makeClaimRes.status === 200 && makeClaimRes.data) {

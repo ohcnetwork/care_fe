@@ -874,6 +874,21 @@ export const HCXActions = {
     delete(id: string) {
       return fireRequest("deleteHCXClaim", [], {}, { external_id: id });
     },
+
+    listLatestApprovedPreAuths(consultation: string) {
+      return fireRequest(
+        "listHCXClaims",
+        [],
+        {
+          consultation,
+          ordering: "-modified_date",
+          use: "preauthorization",
+          limit: 1,
+        },
+        {},
+        `listLatestApprovedPreAuths-${consultation}`
+      );
+    },
   },
 
   makeClaim(claim: string) {
