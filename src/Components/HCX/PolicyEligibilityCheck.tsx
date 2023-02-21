@@ -63,6 +63,9 @@ export default function HCXPolicyEligibilityCheck({
 
   useEffect(() => {
     if (policy) {
+      // Skip checking eligibility if we already know the policy is eligible
+      if (eligibility[policy]) return;
+
       const isCurrentlySelectedPolicyEligible = eligibility[policy];
       if (isCurrentlySelectedPolicyEligible) {
         const eligiblePolicy = insuranceDetails?.find((p) => p.id === policy);
@@ -76,6 +79,9 @@ export default function HCXPolicyEligibilityCheck({
 
   const checkEligibility = async () => {
     if (!policy) return;
+
+    // Skip checking eligibility if we already know the policy is eligible
+    if (eligibility[policy]) return;
 
     setIsChecking(true);
 
@@ -157,7 +163,7 @@ export default function HCXPolicyEligibilityCheck({
         <ButtonV2
           className="py-3 w-44"
           onClick={checkEligibility}
-          disabled={isChecking}
+          disabled={!policy || (policy && eligibility[policy]) || isChecking}
         >
           {isChecking ? (
             <>
