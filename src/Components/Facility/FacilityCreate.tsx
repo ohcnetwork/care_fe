@@ -628,7 +628,6 @@ export const FacilityCreate = (props: FacilityProps) => {
       </div>
     );
   }
-
   let doctorList: any = null;
   if (!doctorData || !doctorData.length) {
     doctorList = (
