@@ -883,7 +883,6 @@ export const HCXActions = {
           consultation,
           ordering: "-modified_date",
           use: "preauthorization",
-          limit: 1,
         },
         {},
         `listLatestApprovedPreAuths-${consultation}`
