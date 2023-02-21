@@ -557,7 +557,7 @@ export default function PatientFilterV2(props: any) {
             errorClassName="hidden"
           />
         </div>
-        <div className="w-full flex-none">
+        <div className="w-full flex-none" id="bed-type-select">
           <FieldLabel className="text-sm">Admitted to (Bed Types)</FieldLabel>
           <MultiSelectMenuV2
             id="last_consultation_admitted_bed_type_list"
