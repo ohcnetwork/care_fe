@@ -1,4 +1,4 @@
-import { formatCurrency, formatDate } from "../../Utils/utils";
+import { classNames, formatCurrency, formatDate } from "../../Utils/utils";
 import { HCXClaimModel } from "../HCX/models";
 
 interface IProps {
@@ -6,6 +6,13 @@ interface IProps {
 }
 
 export default function ClaimDetailCard({ claim }: IProps) {
+  const status =
+    claim.outcome === "Processing Complete"
+      ? claim.error_text
+        ? "Rejected"
+        : "Approved"
+      : "Pending";
+
   return (
     <div className="px-6 lg:px-8">
       <div className="sm:flex sm:items-center">
@@ -23,14 +30,15 @@ export default function ClaimDetailCard({ claim }: IProps) {
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 flex items-center justify-center gap-3">
-          <span className="bg-red-400 text-white font-bold text-sm p-1 px-2 rounded shadow">
-            {claim.priority || "NA"}
-          </span>
-          <span className="bg-primary-400 text-white font-bold text-sm p-1 px-2 rounded shadow">
-            {claim.use || "NA"}
-          </span>
-          <span className="bg-blue-400 text-white font-bold text-sm p-1 px-2 rounded shadow">
-            {claim.type || "NA"}
+          <span
+            className={classNames(
+              "text-white font-bold text-sm p-1 px-2 rounded shadow",
+              status === "Approved" && "bg-primary-400",
+              status === "Rejected" && "bg-danger-400",
+              status === "Pending" && "bg-yellow-400"
+            )}
+          >
+            {status}
           </span>
         </div>
       </div>
