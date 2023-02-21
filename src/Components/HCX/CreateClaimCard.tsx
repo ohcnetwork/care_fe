@@ -55,6 +55,7 @@ export default function CreateClaimCard({
       );
 
       if (latestApprovedPreAuthsRes.data?.results?.length) {
+        // TODO: offload outcome filter to server side once payer server is back
         const latestApprovedPreAuth = (
           latestApprovedPreAuthsRes.data.results as HCXClaimModel[]
         ).filter((o) => o.outcome === "Processing Complete")[0];
