@@ -597,14 +597,14 @@ export const ConsultationDetails = (props: any) => {
         {
           // TODO: if policy and approved pre-auth exists
           <div className="my-5 shadow rounded p-5">
-            <h2 className="mb-2">Insurance Claim</h2>
+            <h2 className="mb-2">Claim Insurance</h2>
             {latestClaim ? (
               <ClaimDetailCard claim={latestClaim} />
             ) : (
               <CreateClaimCard
                 consultationId={consultationId}
                 patientId={patientId}
-                initialUse="claim"
+                use="claim"
                 isCreating={isCreateClaimLoading}
                 setIsCreating={setIsCreateClaimLoading}
               />
