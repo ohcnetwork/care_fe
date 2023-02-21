@@ -5,6 +5,7 @@ import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserDetails,
+  getUserListSkills,
   partialUpdateUser,
   updateUserPassword,
 } from "../../Redux/actions";
@@ -21,6 +22,7 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import MonthFormField from "../Form/FormFields/Month";
 import moment from "moment";
+import { SkillModel, SkillObjectModel } from "../Users/models";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -123,8 +125,12 @@ export default function UserProfile() {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getUserDetails(username));
+      const resSkills = await dispatchAction(getUserListSkills({ username }));
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res && res.data && resSkills) {
+          res.data.skills = resSkills.data.results.map(
+            (skill: SkillModel) => skill.skill_object
+          );
           setDetails(res.data);
           const formData: EditForm = {
             firstName: res.data.first_name,
@@ -223,7 +229,10 @@ export default function UserProfile() {
           }
           return;
         case "email":
-          if (states.form[field] && !validateEmailAddress(states.form[field])) {
+          if (!states.form[field]) {
+            errors[field] = "This field is required";
+            invalidForm = true;
+          } else if (!validateEmailAddress(states.form[field])) {
             errors[field] = "Enter a valid email address";
             invalidForm = true;
           }
@@ -277,12 +286,20 @@ export default function UserProfile() {
           ) || "",
         gender: states.form.gender,
         age: states.form.age,
-        doctor_qualification: states.form.doctor_qualification,
-        doctor_experience_commenced_on: moment(
-          states.form.doctor_experience_commenced_on
-        ).format("YYYY-MM-DD"),
+        doctor_qualification:
+          details.user_type === "Doctor"
+            ? states.form.doctor_qualification
+            : undefined,
+        doctor_experience_commenced_on:
+          details.user_type === "Doctor"
+            ? moment(states.form.doctor_experience_commenced_on).format(
+                "YYYY-MM-DD"
+              )
+            : undefined,
         doctor_medical_council_registration:
-          states.form.doctor_medical_council_registration,
+          details.user_type === "Doctor"
+            ? states.form.doctor_medical_council_registration
+            : undefined,
       };
       const res = await dispatchAction(partialUpdateUser(username, data));
       if (res && res.data) {
@@ -472,6 +489,24 @@ export default function UserProfile() {
                     </dd>
                   </div>
                 </dl>
+                <div className="sm:col-span-1  my-2">
+                  <dt className="text-sm leading-5 font-medium text-black">
+                    Skills
+                  </dt>
+                  <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <div className="flex flex-wrap gap-2">
+                      {details.skills && details.skills.length
+                        ? details.skills?.map((skill: SkillObjectModel) => {
+                            return (
+                              <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-700 rounded-full text-xs px-3">
+                                <p className="py-1.5">{skill.name}</p>
+                              </span>
+                            );
+                          })
+                        : "-"}
+                    </div>
+                  </dd>
+                </div>
               </div>
             )}
 
@@ -530,6 +565,7 @@ export default function UserProfile() {
                           {...fieldProps("email")}
                           label="Email"
                           className="col-span-6 sm:col-span-3"
+                          required
                           type="email"
                         />
                         {details.user_type === "Doctor" && (

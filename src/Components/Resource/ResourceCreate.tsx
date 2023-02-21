@@ -27,10 +27,10 @@ import {
 import { phonePreg } from "../../Common/validation";
 
 import { createResource, getAnyFacility } from "../../Redux/actions";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -89,6 +89,7 @@ const initialState = {
 };
 
 export default function ResourceCreate(props: resourceProps) {
+  const { goBack } = useAppHistory();
   const { facilityId } = props;
 
   const dispatchAction: any = useDispatch();
@@ -229,6 +230,7 @@ export default function ResourceCreate(props: resourceProps) {
           [facilityId]: { name: facilityName },
           resource: { style: "pointer-events-none" },
         }}
+        backUrl={`/facility/${facilityId}`}
       />
       <div className="mt-4">
         <Card>

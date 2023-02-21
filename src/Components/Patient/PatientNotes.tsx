@@ -113,6 +113,7 @@ const PatientNotes = (props: PatientNotesProps) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={`/facility/${facilityId}/patient/${patientId}`}
       />
       <h3 className="text-lg pl-10">Add new notes</h3>
       <textarea
@@ -141,9 +142,7 @@ const PatientNotes = (props: PatientNotesProps) => {
                 key={note.id}
                 className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
               >
-                <div className="flex  w-full ">
-                  <p className="text-justify">{note.note}</p>
-                </div>
+                <span className="whitespace-pre">{note.note}</span>
                 <div className="mt-3">
                   <span className="text-xs text-gray-500">
                     {formatDate(note.created_date) || "-"}
