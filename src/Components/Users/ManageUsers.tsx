@@ -612,8 +612,10 @@ function UserFacilities(props: { user: any }) {
 
   const updateHomeFacility = async (username: string, facility: any) => {
     setIsLoading(true);
-    await dispatch(partialUpdateUser(username, { home_facility: facility.id }));
-    user.home_facility_object = facility;
+    const res = await dispatch(
+      partialUpdateUser(username, { home_facility: facility.id })
+    );
+    if (res && res.status === 200) user.home_facility_object = facility;
     fetchFacilities();
     setIsLoading(false);
   };
@@ -621,8 +623,10 @@ function UserFacilities(props: { user: any }) {
   const handleUnlinkFacilitySubmit = async () => {
     setIsLoading(true);
     if (unlinkFacilityData.isHomeFacility) {
-      await dispatch(clearHomeFacility(unlinkFacilityData.userName));
-      user.home_facility_object = null;
+      const res = await dispatch(
+        clearHomeFacility(unlinkFacilityData.userName)
+      );
+      if (res && res.status === 204) user.home_facility_object = null;
     } else {
       await dispatch(
         deleteUserFacility(
