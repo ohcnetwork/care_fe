@@ -63,11 +63,7 @@ export default function HCXPolicyEligibilityCheck({
 
   useEffect(() => {
     if (policy) {
-      // Skip checking eligibility if we already know the policy is eligible
-      if (eligibility[policy]) return;
-
-      const isCurrentlySelectedPolicyEligible = eligibility[policy];
-      if (isCurrentlySelectedPolicyEligible) {
+      if (eligibility[policy]) {
         const eligiblePolicy = insuranceDetails?.find((p) => p.id === policy);
         onEligiblePolicySelected(eligiblePolicy);
         Notification.Success({ msg: "Policy is Eligibile" });
