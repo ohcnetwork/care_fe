@@ -251,6 +251,12 @@ export const PatientManager = () => {
 
   useEffect(() => {
     setIsLoading(true);
+    if (!params.phone_number) {
+      setPhoneNumber("+91");
+    }
+    if (!params.emergency_phone_number) {
+      setEmergencyPhoneNumber("+91");
+    }
     dispatch(getAllPatient(params, "listPatients")).then((res: any) => {
       if (res && res.data) {
         setData(res.data.results);
@@ -358,7 +364,6 @@ export const PatientManager = () => {
     },
     [fetchFacilityBadgeName]
   );
-
   const LastAdmittedToTypeBadges = () => {
     const badge = (key: string, value: any, id: string) => {
       return (
@@ -367,13 +372,13 @@ export const PatientManager = () => {
             name={key}
             value={value}
             onRemove={() => {
-              const lcat = qParams.last_consultation_admitted_to_list
+              const lcat = qParams.last_consultation_admitted_bed_type_list
                 .split(",")
                 .filter((x: string) => x != id)
                 .join(",");
               updateQuery({
                 ...qParams,
-                last_consultation_admitted_to_list: lcat,
+                last_consultation_admitted_bed_type_list: lcat,
               });
             }}
           />
@@ -822,7 +827,7 @@ export const PatientManager = () => {
           </div>
         </div>
       </div>
-      <div className="flex flex-wrap w-full col-span-3 mt-6">
+      <div className="flex flex-wrap col-span-3 mt-6">
         <FilterBadges
           badges={({ badge, value, kasp, phoneNumber, dateRange, range }) => [
             phoneNumber("Primary number", "phone_number"),
@@ -870,9 +875,11 @@ export const PatientManager = () => {
               paramKey: "last_consultation_is_telemedicine",
             },
           ]}
+          children={
+            qParams.last_consultation_admitted_bed_type_list &&
+            LastAdmittedToTypeBadges()
+          }
         />
-        {qParams.last_consultation_admitted_bed_type_list &&
-          LastAdmittedToTypeBadges()}
       </div>
       <div>
         <SlideOver {...advancedFilter}>
