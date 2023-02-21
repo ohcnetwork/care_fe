@@ -113,7 +113,20 @@ function UserListItem(props: { user: UserAssignedModel }) {
         role="option"
         tabIndex={-1}
       >
-        <div className="flex">
+        <a
+          href={
+            user.alt_phone_number
+              ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
+                  user.alt_phone_number
+                )}&text=${encodeURIComponent(
+                  `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`
+                )}`
+              : "#"
+          }
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex"
+        >
           <div className="flex h-10 w-10 flex-none items-center justify-center">
             {
               // Show online icon based on last_login
@@ -144,14 +157,24 @@ function UserListItem(props: { user: UserAssignedModel }) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <CareIcon className="care-l-whatsapp" />
+                  <div className="tooltip">
+                    <span className="tooltip-text tooltip-left">
+                      Connect on WhatsApp
+                    </span>
+                    <CareIcon className="care-l-whatsapp w-5 h-5" />
+                  </div>
                 </a>
                 <a
                   href={
                     user.alt_phone_number ? `tel:${user.alt_phone_number}` : "#"
                   }
                 >
-                  <CareIcon className="care-l-phone-alt" />
+                  <div className="tooltip">
+                    <span className="tooltip-text tooltip-left">
+                      Connect on Phone
+                    </span>
+                    <CareIcon className="care-l-phone-alt w-5 h-5" />
+                  </div>
                 </a>
               </div>
             </p>
@@ -167,22 +190,29 @@ function UserListItem(props: { user: UserAssignedModel }) {
               </div>
             )}
             <p className="text-sm text-gray-500 flex gap-2 divide-gray-800">
-              <button
+              <a
+                role="button"
+                href="#"
                 onClick={async () =>
                   await navigator.clipboard.writeText(
                     user?.alt_phone_number || ""
                   )
                 }
               >
-                <CareIcon className="care-l-clipboard" />
-              </button>
+                <div className="tooltip">
+                  <span className="tooltip-text tooltip-top">
+                    Copy Phone number
+                  </span>
+                  <CareIcon className="care-l-clipboard w-5 h-5" />
+                </div>
+              </a>
               <span>{user.alt_phone_number}</span>
               {user.last_login && (
                 <span>{moment(user.last_login).fromNow()}</span>
               )}
             </p>
           </div>
-        </div>
+        </a>
       </li>
     </li>
   );
