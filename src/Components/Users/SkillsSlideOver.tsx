@@ -152,7 +152,7 @@ export default ({ show, setShow, username }: IProps) => {
                           size="small"
                           variant="danger"
                           ghost={true}
-                          disabled={isLoading}
+                          disabled={isLoading || !authorizeForAddSkill}
                           onClick={() => setDeleteSkill(skill)}
                         >
                           <CareIcon className="care-l-times text-lg" />
