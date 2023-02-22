@@ -54,7 +54,7 @@ export default function CreateClaimCard({
   useEffect(() => {
     async function autoFill() {
       const latestApprovedPreAuthsRes = await dispatch(
-        HCXActions.claims.listLatestApprovedPreAuths(consultationId)
+        HCXActions.preauths.list(consultationId)
       );
 
       if (latestApprovedPreAuthsRes.data?.results?.length) {

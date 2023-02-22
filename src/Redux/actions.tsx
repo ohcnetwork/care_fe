@@ -880,8 +880,10 @@ export const HCXActions = {
     delete(id: string) {
       return fireRequest("deleteHCXClaim", [], {}, { external_id: id });
     },
+  },
 
-    listLatestApprovedPreAuths(consultation: string) {
+  preauths: {
+    list(consultation: string) {
       return fireRequest(
         "listHCXClaims",
         [],
@@ -891,7 +893,7 @@ export const HCXActions = {
           use: "preauthorization",
         },
         {},
-        `listLatestApprovedPreAuths-${consultation}`
+        `listPreAuths-${consultation}`
       );
     },
   },
