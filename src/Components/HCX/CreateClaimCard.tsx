@@ -144,7 +144,7 @@ export default function CreateClaimCard({
       </DialogModal>
       {/* Check Insurance Policy Eligibility */}
       <div className="flex flex-col gap-4">
-        <div className="flex justify-between pb-4">
+        <div className="flex items-center justify-between pb-4">
           <h1 className="text-lg font-bold">
             Check Insurance Policy Eligibility
           </h1>
