@@ -126,6 +126,8 @@ export default function CreateClaimCard({
     } else {
       Notification.Error({ msg: "Failed to request pre-authorization" });
     }
+
+    setIsCreating(false);
   };
 
   return (
