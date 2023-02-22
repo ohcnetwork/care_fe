@@ -76,7 +76,7 @@ export default function InsuranceDetailsBuilder(props: Props) {
                 <TextFormField
                   required
                   name="subscriber_id"
-                  label="Subscriber ID"
+                  label="Medical ID"
                   placeholder="Eg. SUB001"
                   value={obj.subscriber_id}
                   onChange={handleUpdate(index)}
