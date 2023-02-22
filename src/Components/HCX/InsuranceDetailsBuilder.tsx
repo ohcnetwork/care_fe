@@ -88,8 +88,6 @@ const InsuranceDetailEditCard = ({
       ? { id: policy.insurer_id, name: policy.insurer_name }
       : undefined;
 
-  console.log("seletedInsurer", seletedInsurer);
-
   return (
     <div className="border-2 border-gray-200 border-dashed p-4 rounded-lg">
       <div className="flex justify-between items-center">
