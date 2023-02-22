@@ -139,6 +139,7 @@ export default function ClaimsItemsBuilder(props: Props) {
                 />
                 <AutocompleteFormField
                   className="flex-[2]"
+                  required
                   name="category"
                   label="Category"
                   placeholder="Optional"

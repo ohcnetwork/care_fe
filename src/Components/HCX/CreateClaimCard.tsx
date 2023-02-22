@@ -98,7 +98,7 @@ export default function CreateClaimCard({
       setItemsError("Please add at least one item");
       return false;
     }
-    if (items?.some((p) => !p.id || !p.name || p.price === 0)) {
+    if (items?.some((p) => !p.id || !p.name || p.price === 0 || !p.category)) {
       setItemsError("Please fill all the item details");
       return false;
     }
