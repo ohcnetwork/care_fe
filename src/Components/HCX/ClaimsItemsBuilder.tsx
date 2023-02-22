@@ -9,11 +9,11 @@ import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
-import { HCXProcedureModel } from "./models";
+import { HCXItemModel } from "./models";
 
-type Props = FormFieldBaseProps<HCXProcedureModel[]>;
+type Props = FormFieldBaseProps<HCXItemModel[]>;
 
-export default function ClaimsProceduresBuilder(props: Props) {
+export default function ClaimsItemsBuilder(props: Props) {
   const field = useFormFieldPropsResolver(props as any);
 
   const handleUpdate = (index: number) => {
@@ -27,7 +27,7 @@ export default function ClaimsProceduresBuilder(props: Props) {
   };
 
   const handleUpdates = (index: number) => {
-    return (updates: HCXProcedureModel) => {
+    return (updates: HCXItemModel) => {
       field.handleChange(
         (props.value || [])?.map((obj, i) =>
           i === index ? { ...obj, ...updates } : obj
@@ -42,7 +42,7 @@ export default function ClaimsProceduresBuilder(props: Props) {
     };
   };
 
-  const procedureOptions = (current?: HCXProcedureModel) => {
+  const itemOptions = (current?: HCXItemModel) => {
     if (!current) return PROCEDURES;
     const knownProcedure = PROCEDURES.find((o) => o.code === current.id);
     if (knownProcedure) return PROCEDURES;
@@ -60,7 +60,7 @@ export default function ClaimsProceduresBuilder(props: Props) {
             >
               <div className="flex justify-between items-center">
                 <FieldLabel className="!font-bold my-auto">
-                  Procedure {index + 1}
+                  Item {index + 1}
                 </FieldLabel>
                 {!props.disabled && (
                   <ButtonV2
@@ -83,7 +83,7 @@ export default function ClaimsProceduresBuilder(props: Props) {
                   name="id"
                   label="ID"
                   placeholder="Eg. PROCEDURE-001"
-                  options={procedureOptions(obj)}
+                  options={itemOptions(obj)}
                   optionLabel={(o) => o.code}
                   optionDescription={(o) => o.name || ""}
                   optionValue={(o) => o.code}
@@ -133,7 +133,7 @@ export default function ClaimsProceduresBuilder(props: Props) {
                   optionValue={(o) => o.name || o.code}
                   disabled={props.disabled}
                   errorClassName="hidden"
-                  options={procedureOptions(obj)}
+                  options={itemOptions(obj)}
                 />
                 <TextFormField
                   className="flex-[2]"

@@ -37,7 +37,7 @@ export interface HCXPolicyModel {
   modified_date?: string;
 }
 
-export interface HCXProcedureModel {
+export interface HCXItemModel {
   id: string;
   name: string;
   price: number;
@@ -59,7 +59,7 @@ export interface HCXClaimModel {
   consultation_object?: ConsultationModel;
   policy: string;
   policy_object?: HCXPolicyModel;
-  procedures?: HCXProcedureModel[];
+  procedures?: HCXItemModel[];
   total_claim_amount?: number;
   total_amount_approved?: number;
   use?: HCXClaimUse;

@@ -5,8 +5,8 @@ import { getConsultation, HCXActions } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { classNames, formatCurrency } from "../../Utils/utils";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import ClaimsProceduresBuilder from "./ClaimsProceduresBuilder";
-import { HCXClaimModel, HCXPolicyModel, HCXProcedureModel } from "./models";
+import ClaimsItemsBuilder from "./ClaimsItemsBuilder";
+import { HCXClaimModel, HCXPolicyModel, HCXItemModel } from "./models";
 import HCXPolicyEligibilityCheck from "./PolicyEligibilityCheck";
 import PROCEDURES from "../../Common/procedures";
 import DialogModal from "../Common/Dialog";
@@ -49,8 +49,8 @@ export default function CreateClaimCard({
   const dispatch = useDispatch<any>();
   const [showAddPolicy, setShowAddPolicy] = useState(false);
   const [policy, setPolicy] = useState<HCXPolicyModel>();
-  const [procedures, setProcedures] = useState<HCXProcedureModel[]>();
-  const [proceduresError, setProceduresError] = useState<string>();
+  const [items, setItems] = useState<HCXItemModel[]>();
+  const [itemsError, setItemsError] = useState<string>();
   const [createdClaim, setCreatedClaim] = useState<HCXClaimModel>();
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export default function CreateClaimCard({
         ).find((o) => o.outcome === "Processing Complete");
         if (latestApprovedPreAuth) {
           setPolicy(latestApprovedPreAuth.policy_object);
-          setProcedures(latestApprovedPreAuth.procedures);
+          setItems(latestApprovedPreAuth.procedures);
           return;
         }
       }
@@ -74,9 +74,9 @@ export default function CreateClaimCard({
       const res = await dispatch(getConsultation(consultationId as any));
 
       if (res.data && Array.isArray(res.data.procedure)) {
-        setProcedures(res.data.procedure.map(useKnownProcedureIfAvailable));
+        setItems(res.data.procedure.map(useKnownProcedureIfAvailable));
       } else {
-        setProcedures([{ id: "", name: "", price: 0 }]);
+        setItems([{ id: "", name: "", price: 0 }]);
       }
     }
 
@@ -92,12 +92,12 @@ export default function CreateClaimCard({
       Notification.Error({ msg: "Please select an eligible policy" });
       return false;
     }
-    if (!procedures || procedures.length === 0) {
-      setProceduresError("Please add at least one procedure");
+    if (!items || items.length === 0) {
+      setItemsError("Please add at least one item");
       return false;
     }
-    if (procedures?.some((p) => !p.id || !p.name || p.price === 0)) {
-      setProceduresError("Please fill all the procedure details");
+    if (items?.some((p) => !p.id || !p.name || p.price === 0)) {
+      setItemsError("Please fill all the item details");
       return false;
     }
 
@@ -112,7 +112,7 @@ export default function CreateClaimCard({
     const res = await dispatch(
       HCXActions.claims.create({
         policy: policy?.id,
-        procedures: procedures,
+        procedures: items,
         consultation: consultationId,
         use,
       })
@@ -123,7 +123,7 @@ export default function CreateClaimCard({
       const makeClaimRes = await dispatch(HCXActions.makeClaim(res.data.id));
 
       if (makeClaimRes.status === 200 && makeClaimRes.data) {
-        setProcedures([]);
+        setItems([]);
       }
     } else {
       Notification.Error({ msg: "Failed to request pre-authorization" });
@@ -174,22 +174,19 @@ export default function CreateClaimCard({
       {/* Procedures */}
       <div className="flex flex-col gap-4">
         <div className="flex w-full items-center justify-between">
-          <h1 className="font-bold text-left text-lg">Procedures</h1>
+          <h1 className="font-bold text-left text-lg">Items</h1>
           <ButtonV2
             type="button"
             variant="alert"
             border
-            ghost={procedures?.length !== 0}
-            disabled={procedures === undefined || !policy}
+            ghost={items?.length !== 0}
+            disabled={items === undefined || !policy}
             onClick={() =>
-              setProcedures([
-                ...(procedures || []),
-                { name: "", id: "", price: 0 },
-              ])
+              setItems([...(items || []), { name: "", id: "", price: 0 }])
             }
           >
             <CareIcon className="care-l-plus text-lg" />
-            <span>Add Procedure</span>
+            <span>Add Item</span>
           </ButtonV2>
         </div>
         <span
@@ -198,21 +195,21 @@ export default function CreateClaimCard({
             "text-gray-700 transition-opacity duration-300 ease-in-out"
           )}
         >
-          Select a policy to add procedures
+          Select a policy to add items
         </span>
-        <ClaimsProceduresBuilder
-          disabled={procedures === undefined || !policy}
-          name="procedures"
-          value={procedures}
-          onChange={({ value }) => setProcedures(value)}
-          error={proceduresError}
+        <ClaimsItemsBuilder
+          disabled={items === undefined || !policy}
+          name="items"
+          value={items}
+          onChange={({ value }) => setItems(value)}
+          error={itemsError}
         />
         <div className="place-self-end pr-8">
           {"Total Amount: "}
-          {procedures ? (
+          {items ? (
             <span className="font-bold tracking-wider">
               {formatCurrency(
-                procedures.map((p) => p.price).reduce((a, b) => a + b, 0.0)
+                items.map((p) => p.price).reduce((a, b) => a + b, 0.0)
               )}
             </span>
           ) : (
@@ -223,7 +220,7 @@ export default function CreateClaimCard({
 
       <div className="flex flex-col gap-4 mt-4">
         <Submit
-          disabled={procedures?.length === 0 || !policy || isCreating}
+          disabled={items?.length === 0 || !policy || isCreating}
           onClick={handleSubmit}
         >
           {isCreating && <CareIcon className="care-l-spinner animate-spin" />}
