@@ -323,12 +323,6 @@ export const TriageForm = (props: triageFormProps) => {
                   placeholder="Entry Date"
                   error={state.errors.entry_date}
                 />
-                {state.errors.entry_date &&
-                  state.errors.entry_date.length > 0 && (
-                    <div className="text-sm text-red-500">
-                      {state.errors.entry_date}
-                    </div>
-                  )}
               </div>
               <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
