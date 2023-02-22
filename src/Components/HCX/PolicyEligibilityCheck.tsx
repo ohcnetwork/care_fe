@@ -7,6 +7,8 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { HCXPolicyModel } from "./models";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import * as Notification from "../../Utils/Notifications.js";
+import DialogModal from "../Common/Dialog";
+import PatientInsuranceDetailsEditor from "./PatientInsuranceDetailsEditor";
 
 interface Props {
   className?: string;
@@ -26,6 +28,7 @@ export default function HCXPolicyEligibilityCheck({
     Record<string, boolean | undefined>
   >({});
   const [isChecking, setIsChecking] = useState(false);
+  const [showAddPolicy, setShowAddPolicy] = useState(false);
 
   const fetchPatientInsuranceDetails = useCallback(async () => {
     setInsuranceDetails(undefined);
@@ -39,7 +42,7 @@ export default function HCXPolicyEligibilityCheck({
       setEligibility(
         results.reduce?.((acc: any, policy: HCXPolicyModel) => {
           if (policy.outcome)
-            acc[policy.id] =
+            acc[policy.id!] =
               !policy.error_text && policy.outcome === "Processing Complete";
           return acc;
         }, {})
@@ -91,6 +94,18 @@ export default function HCXPolicyEligibilityCheck({
 
   return (
     <div className={className}>
+      <DialogModal
+        title="Edit Patient Insurance Details"
+        show={showAddPolicy}
+        onClose={() => setShowAddPolicy(false)}
+        description="Add or edit patient's insurance details"
+        className="w-full max-w-screen-md"
+      >
+        <PatientInsuranceDetailsEditor
+          patient={patient}
+          onCancel={() => setShowAddPolicy(false)}
+        />
+      </DialogModal>
       <div className="flex gap-2 items-center">
         <SelectFormField
           required
@@ -112,8 +127,8 @@ export default function HCXPolicyEligibilityCheck({
             )
           }
           optionIcon={(option) =>
-            eligibility[option.id] !== undefined && (
-              <EligibilityChip eligible={!!eligibility[option.id]} />
+            eligibility[option.id!] !== undefined && (
+              <EligibilityChip eligible={!!eligibility[option.id!]} />
             )
           }
           onChange={({ value }) => setPolicy(value)}
@@ -122,7 +137,7 @@ export default function HCXPolicyEligibilityCheck({
             insuranceDetails
               ? insuranceDetails.length
                 ? "Select a policy to check eligibility"
-                : "No Policies"
+                : "No policies for the patient"
               : "Loading..."
           }
           disabled={!insuranceDetails}
@@ -156,20 +171,30 @@ export default function HCXPolicyEligibilityCheck({
             </div>
           )}
         />
-        <ButtonV2
-          className="py-3 w-44"
-          onClick={checkEligibility}
-          disabled={!policy || (policy && eligibility[policy]) || isChecking}
-        >
-          {isChecking ? (
-            <>
-              <CareIcon className="care-l-spinner text-lg animate-spin" />
-              <span>Checking ...</span>
-            </>
-          ) : (
-            "Check Eligibility"
-          )}
-        </ButtonV2>
+        {insuranceDetails && insuranceDetails.length === 0 ? (
+          <ButtonV2
+            className="py-3 whitespace-nowrap"
+            onClick={() => setShowAddPolicy(true)}
+            disabled={isChecking}
+          >
+            Add Insurance Details
+          </ButtonV2>
+        ) : (
+          <ButtonV2
+            className="py-3 whitespace-nowrap"
+            onClick={checkEligibility}
+            disabled={!policy || (policy && eligibility[policy]) || isChecking}
+          >
+            {isChecking ? (
+              <>
+                <CareIcon className="care-l-spinner text-lg animate-spin" />
+                <span>Checking ...</span>
+              </>
+            ) : (
+              "Check Eligibility"
+            )}
+          </ButtonV2>
+        )}
       </div>
     </div>
   );

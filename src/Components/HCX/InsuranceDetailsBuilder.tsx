@@ -55,6 +55,11 @@ export default function InsuranceDetailsBuilder(props: Props) {
   return (
     <FormField field={field}>
       <div className="flex flex-col gap-3">
+        {props.value?.length === 0 && (
+          <span className="text-center text-gray-500 py-16">
+            No insurance details added
+          </span>
+        )}
         {props.value?.map((policy, index) => (
           <InsuranceDetailEditCard
             key={index}
