@@ -128,21 +128,21 @@ export default function HCXPolicyEligibilityCheck({
           disabled={!insuranceDetails}
           optionDescription={(option) => (
             <div>
-              <div className="flex flex-wrap gap-3">
-                <span>
-                  {"Subscriber ID "}
+              <div className="flex flex-col">
+                <span className="flex gap-2 w-full">
+                  <span className="w-24">Medical ID</span>
                   <span className="font-medium tracking-wide">
                     {option.subscriber_id}
                   </span>
                 </span>
-                <span>
-                  {"Insurer ID "}
+                <span className="flex gap-2 w-full">
+                  <span className="w-24">Insurer ID</span>
                   <span className="font-medium tracking-wide">
                     {option.insurer_id}
                   </span>
                 </span>
-                <span>
-                  {"Insurer Name "}
+                <span className="flex gap-2 w-full">
+                  <span className="w-24">Insurer Name</span>
                   <span className="font-medium tracking-wide">
                     {option.insurer_name}
                   </span>
