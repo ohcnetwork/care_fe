@@ -21,7 +21,7 @@ interface Props {
   use?: "preauthorization" | "claim";
 }
 
-export function useKnownProcedureIfAvailable({ procedure }: any) {
+export function useKnownProcedureIfAvailable({ procedure }: any): HCXItemModel {
   const knownProcedure = PROCEDURES.find((o) => o.code === procedure);
 
   if (knownProcedure) {
@@ -29,6 +29,7 @@ export function useKnownProcedureIfAvailable({ procedure }: any) {
       id: knownProcedure.code,
       name: knownProcedure.name || knownProcedure.code,
       price: knownProcedure.price,
+      category: "HBP",
     };
   }
 
@@ -36,6 +37,7 @@ export function useKnownProcedureIfAvailable({ procedure }: any) {
     id: procedure,
     name: procedure,
     price: 0.0,
+    category: "HBP",
   };
 }
 
@@ -66,7 +68,7 @@ export default function CreateClaimCard({
         ).find((o) => o.outcome === "Processing Complete");
         if (latestApprovedPreAuth) {
           setPolicy(latestApprovedPreAuth.policy_object);
-          setItems(latestApprovedPreAuth.procedures);
+          setItems(latestApprovedPreAuth.procedures || []);
           return;
         }
       }
@@ -76,7 +78,7 @@ export default function CreateClaimCard({
       if (res.data && Array.isArray(res.data.procedure)) {
         setItems(res.data.procedure.map(useKnownProcedureIfAvailable));
       } else {
-        setItems([{ id: "", name: "", price: 0 }]);
+        setItems([]);
       }
     }
 

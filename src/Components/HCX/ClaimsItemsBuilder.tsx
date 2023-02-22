@@ -9,6 +9,7 @@ import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
+import { ITEM_CATEGORIES } from "./constants";
 import { HCXItemModel } from "./models";
 
 type Props = FormFieldBaseProps<HCXItemModel[]>;
@@ -42,13 +43,6 @@ export default function ClaimsItemsBuilder(props: Props) {
     };
   };
 
-  const itemOptions = (current?: HCXItemModel) => {
-    if (!current) return PROCEDURES;
-    const knownProcedure = PROCEDURES.find((o) => o.code === current.id);
-    if (knownProcedure) return PROCEDURES;
-    return [{ ...current, code: current.id }, ...PROCEDURES];
-  };
-
   return (
     <FormField field={field}>
       <div className="flex flex-col gap-3">
@@ -78,33 +72,28 @@ export default function ClaimsItemsBuilder(props: Props) {
 
               <div className="p-2 flex flex-row gap-2">
                 <AutocompleteFormField
-                  className="flex-[3]"
+                  className="flex-[2]"
                   required
                   name="id"
                   label="ID"
                   placeholder="Eg. PROCEDURE-001"
-                  options={itemOptions(obj)}
+                  options={PROCEDURES}
                   optionLabel={(o) => o.code}
                   optionDescription={(o) => o.name || ""}
                   optionValue={(o) => o.code}
-                  onChange={(event) => {
-                    const knownProcedure = PROCEDURES.find(
-                      (p) => p.code === event.value
-                    );
-
-                    if (knownProcedure) {
-                      handleUpdates(index)({
-                        id: knownProcedure.code,
-                        name: knownProcedure.name || knownProcedure.code,
-                        price: knownProcedure.price,
-                      });
-                    } else {
-                      handleUpdate(index)(event);
-                    }
+                  onChange={(e) => {
+                    const known = PROCEDURES.find((p) => p.code === e.value);
+                    if (!known) return handleUpdate(index)(e);
+                    handleUpdates(index)({
+                      id: known.code,
+                      name: known.name || known.code,
+                      price: known.price,
+                    });
                   }}
                   value={obj.id}
                   disabled={props.disabled}
                   errorClassName="hidden"
+                  allowRawInput
                 />
                 <AutocompleteFormField
                   className="flex-[3]"
@@ -113,27 +102,22 @@ export default function ClaimsItemsBuilder(props: Props) {
                   label="Name"
                   placeholder="Eg. Knee Replacement"
                   value={obj.name}
-                  onChange={(event) => {
-                    const knownProcedure = PROCEDURES.find(
-                      (p) => p.name === event.value
-                    );
-
-                    if (knownProcedure) {
-                      handleUpdates(index)({
-                        id: knownProcedure.code,
-                        name: knownProcedure.name || knownProcedure.code,
-                        price: knownProcedure.price,
-                      });
-                    } else {
-                      handleUpdate(index)(event);
-                    }
+                  onChange={(e) => {
+                    const known = PROCEDURES.find((p) => p.code === e.value);
+                    if (!known) return handleUpdate(index)(e);
+                    handleUpdates(index)({
+                      id: known.code,
+                      name: known.name || known.code,
+                      price: known.price,
+                    });
                   }}
                   optionLabel={(o) => o.name || o.code}
                   optionDescription={(o) => o.code}
                   optionValue={(o) => o.name || o.code}
                   disabled={props.disabled}
                   errorClassName="hidden"
-                  options={itemOptions(obj)}
+                  options={PROCEDURES}
+                  allowRawInput
                 />
                 <TextFormField
                   className="flex-[2]"
@@ -152,6 +136,18 @@ export default function ClaimsItemsBuilder(props: Props) {
                   }
                   disabled={props.disabled}
                   errorClassName="hidden"
+                />
+                <AutocompleteFormField
+                  className="flex-[2]"
+                  name="category"
+                  label="Category"
+                  placeholder="Optional"
+                  options={ITEM_CATEGORIES}
+                  optionLabel={(o) => o.display}
+                  optionValue={(o) => o.code}
+                  value={obj.category}
+                  onChange={handleUpdate(index)}
+                  disabled={props.disabled}
                 />
               </div>
             </div>

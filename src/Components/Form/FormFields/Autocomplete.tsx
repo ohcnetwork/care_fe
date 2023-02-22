@@ -101,7 +101,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
   });
 
   const getOptions = () => {
-    if (!query || !props.value) return mappedOptions;
+    if (!query) return mappedOptions;
 
     const knownOption = mappedOptions.find(
       (o) => o.value == props.value || o.label == props.value
@@ -120,7 +120,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
     ];
   };
 
-  const options = getOptions();
+  const options = props.allowRawInput ? getOptions() : mappedOptions;
 
   const value = options.find((o) => props.value == o.value);
   const filteredOptions = options.filter((o) => o.search.includes(query));

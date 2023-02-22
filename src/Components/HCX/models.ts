@@ -41,6 +41,7 @@ export interface HCXItemModel {
   id: string;
   name: string;
   price: number;
+  category?: string;
 }
 
 export type HCXClaimUse = "Claim" | "Pre-Authorization" | "Pre-Determination";

@@ -70,7 +70,7 @@ export default function ConsultationClaims({
         }}
       />
 
-      <div className="flex flex-col gap-16 w-full max-w-3xl mx-auto">
+      <div className="flex flex-col justify-center gap-16 w-full max-w-5xl mx-auto">
         <div className="p-8 bg-white rounded-lg">
           <CreateClaimCard
             consultationId={consultationId}
@@ -80,7 +80,7 @@ export default function ConsultationClaims({
           />
         </div>
 
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8 w-full max-w-3xl mx-auto">
           {claims?.map((claim) => (
             <div className="p-8 bg-white rounded-lg">
               <ClaimDetailCard claim={claim} />
