@@ -796,6 +796,11 @@ const routes: Routes = {
 
   // HCX Endpoints
 
+  hcxInsurerRegistry: {
+    path: "/mock_insurer_registry.json",
+    method: "GET",
+  },
+
   hcxCheckEligibility: {
     path: "/api/v1/hcx/check_eligibility/",
     method: "POST",

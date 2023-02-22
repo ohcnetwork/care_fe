@@ -830,6 +830,11 @@ export const HCXActions = {
     return fireRequest("hcxCheckEligibility", [], { policy });
   },
 
+  listInsurersFromHCXRegistry: (_query: string) => {
+    // return fireRequest("hcxInsurerRegistry", [], { query });
+    return fireRequestForFiles("hcxInsurerRegistry");
+  },
+
   policies: {
     list(params: object) {
       return fireRequest("listHCXPolicies", [], params);
