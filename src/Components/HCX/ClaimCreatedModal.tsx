@@ -13,15 +13,11 @@ export default function ClaimCreatedModal({ claim, ...props }: Props) {
     <DialogModal
       show={props.show}
       onClose={props.onClose}
-      title={
-        claim.use === "Pre-Authorization"
-          ? "Pre-Authorization requested successfully"
-          : "Claim created successfully"
-      }
+      title="Add supporting documents"
+      description={`${claim.use} ID: #${claim.id}`}
       className="w-full max-w-screen-md"
-      description="Upload the relevant documents"
     >
-      <FileUpload type="CLAIM" claimId={claim.id!} hideBack audio unspecified />
+      <FileUpload type="CLAIM" claimId={claim.id!} hideBack unspecified />
     </DialogModal>
   );
 }

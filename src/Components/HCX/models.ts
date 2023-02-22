@@ -60,7 +60,7 @@ export interface HCXClaimModel {
   consultation_object?: ConsultationModel;
   policy: string;
   policy_object?: HCXPolicyModel;
-  procedures?: HCXItemModel[];
+  items?: HCXItemModel[];
   total_claim_amount?: number;
   total_amount_approved?: number;
   use?: HCXClaimUse;

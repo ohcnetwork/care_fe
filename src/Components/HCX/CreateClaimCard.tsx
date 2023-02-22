@@ -68,7 +68,7 @@ export default function CreateClaimCard({
         ).find((o) => o.outcome === "Processing Complete");
         if (latestApprovedPreAuth) {
           setPolicy(latestApprovedPreAuth.policy_object);
-          setItems(latestApprovedPreAuth.procedures || []);
+          setItems(latestApprovedPreAuth.items || []);
           return;
         }
       }
@@ -114,24 +114,23 @@ export default function CreateClaimCard({
     const res = await dispatch(
       HCXActions.claims.create({
         policy: policy?.id,
-        procedures: items,
+        items,
         consultation: consultationId,
         use,
       })
     );
 
     if (res.data) {
-      Notification.Success({ msg: "Pre-authorization requested" });
-      const makeClaimRes = await dispatch(HCXActions.makeClaim(res.data.id));
-
-      if (makeClaimRes.status === 200 && makeClaimRes.data) {
-        setItems([]);
-      }
+      setItems([]);
+      setItemsError(undefined);
+      setPolicy(undefined);
+      setCreatedClaim(res.data);
+      // const makeClaimRes = await dispatch(HCXActions.makeClaim(res.data.id));
+      // Notification.Success({ msg: "Pre-authorization requested" });
     } else {
-      Notification.Error({ msg: "Failed to request pre-authorization" });
+      Notification.Error({ msg: "Failed to create pre-authorization" });
     }
 
-    setCreatedClaim(res.data);
     setIsCreating(false);
   };
 
@@ -227,8 +226,11 @@ export default function CreateClaimCard({
         >
           {isCreating && <CareIcon className="care-l-spinner animate-spin" />}
           {isCreating
+            ? `Creating ${use === "claim" ? "Claim" : "Pre-Authorization"}...`
+            : "Proceed"}
+          {/* {isCreating
             ? `Requesting ${use === "claim" ? "Claim" : "Pre-Authorization"}...`
-            : `Request ${use === "claim" ? "Claim" : "Pre-Authorization"}`}
+            : `Request ${use === "claim" ? "Claim" : "Pre-Authorization"}`} */}
         </Submit>
       </div>
     </div>

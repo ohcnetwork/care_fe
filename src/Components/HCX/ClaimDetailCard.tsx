@@ -94,18 +94,16 @@ export default function ClaimDetailCard({ claim }: IProps) {
             </tr>
           </thead>
           <tbody>
-            {claim.procedures?.map((procedure) => (
-              <tr key={procedure.id} className="border-b border-gray-200">
+            {claim.items?.map((item) => (
+              <tr key={item.id} className="border-b border-gray-200">
                 <td className="py-4 pl-6 pr-3 text-sm sm:pl-0">
-                  <div className="font-medium text-gray-900">
-                    {procedure.name}
-                  </div>
-                  <div className="mt-0.5 text-gray-500">{procedure.id}</div>
+                  <div className="font-medium text-gray-900">{item.name}</div>
+                  <div className="mt-0.5 text-gray-500">{item.id}</div>
                 </td>
                 <td></td>
                 <td></td>
                 <td className="py-4 pl-3 pr-6 text-right text-sm text-gray-500 sm:pr-0">
-                  {formatCurrency(procedure.price)}
+                  {formatCurrency(item.price)}
                 </td>
               </tr>
             ))}

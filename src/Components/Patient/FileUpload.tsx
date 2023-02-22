@@ -87,7 +87,7 @@ interface FileUploadProps {
   facilityId?: any;
   consultationId?: any;
   hideBack: boolean;
-  audio: boolean;
+  audio?: boolean;
   unspecified: boolean;
   sampleId?: number;
   claimId?: string;
