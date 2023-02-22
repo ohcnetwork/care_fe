@@ -908,11 +908,20 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       );
       if (res && res.data && res.status != 400) {
         await Promise.all(
-          insuranceDetails.map((obj) => {
+          insuranceDetails.map(async (obj) => {
             const policy: HCXPolicyModel = { ...obj, patient: res.data.id };
-            return policy.id
+            const policyRes = await (policy.id
               ? dispatchAction(HCXActions.policies.update(policy.id, policy))
-              : dispatchAction(HCXActions.policies.create(policy));
+              : dispatchAction(HCXActions.policies.create(policy)));
+
+            const eligibilityCheckRes = await dispatchAction(
+              HCXActions.checkEligibility(policyRes.data.id)
+            );
+            if (eligibilityCheckRes.status === 200) {
+              Notification.Success({ msg: "Checking Policy Eligibility..." });
+            } else {
+              Notification.Error({ msg: "Something Went Wrong..." });
+            }
           })
         );
 

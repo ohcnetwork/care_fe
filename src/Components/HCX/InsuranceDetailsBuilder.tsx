@@ -11,8 +11,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { useDispatch } from "react-redux";
 import { HCXActions } from "../../Redux/actions";
 import { classNames } from "../../Utils/utils";
-import InsurerAutocomplete, { InsurerOptionModel } from "./InsurerAutocomplete";
-import { useEffect, useState } from "react";
+import InsurerAutocomplete from "./InsurerAutocomplete";
 
 type Props = FormFieldBaseProps<HCXPolicyModel[]> & { gridView?: boolean };
 
@@ -34,7 +33,7 @@ export default function InsuranceDetailsBuilder(props: Props) {
     return (diffs: object) => {
       field.handleChange(
         (props.value || [])?.map((obj, i) =>
-          i === index ? { ...obj, diffs } : obj
+          i === index ? { ...obj, ...diffs } : obj
         )
       );
     };
@@ -84,23 +83,12 @@ const InsuranceDetailEditCard = ({
   handleRemove: () => void;
   gridView?: boolean;
 }) => {
-  const [insurer, setInsurer] = useState<InsurerOptionModel | undefined>(() =>
+  const seletedInsurer =
     policy.insurer_id || policy.insurer_name
       ? { id: policy.insurer_id, name: policy.insurer_name }
-      : undefined
-  );
+      : undefined;
 
-  useEffect(() => {
-    if (
-      insurer &&
-      (insurer.id !== policy.insurer_id || insurer.name !== policy.insurer_name)
-    ) {
-      handleUpdates({
-        insurer_id: insurer.id,
-        insurer_name: insurer.name,
-      });
-    }
-  }, [insurer]);
+  console.log("seletedInsurer", seletedInsurer);
 
   return (
     <div className="border-2 border-gray-200 border-dashed p-4 rounded-lg">
@@ -141,8 +129,13 @@ const InsuranceDetailEditCard = ({
           name="insurer_"
           label="Insurer"
           placeholder="Eg. GICOFINDIA"
-          value={insurer}
-          onChange={({ value }) => setInsurer(value)}
+          value={seletedInsurer}
+          onChange={({ value }) =>
+            handleUpdates({
+              insurer_id: value.id,
+              insurer_name: value.name,
+            })
+          }
         />
       </div>
     </div>
