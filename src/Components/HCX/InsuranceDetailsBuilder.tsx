@@ -85,7 +85,10 @@ const InsuranceDetailEditCard = ({
 }) => {
   const seletedInsurer =
     policy.insurer_id || policy.insurer_name
-      ? { id: policy.insurer_id, name: policy.insurer_name }
+      ? {
+          participant_code: policy.insurer_id,
+          participant_name: policy.insurer_name,
+        }
       : undefined;
 
   return (
@@ -130,8 +133,8 @@ const InsuranceDetailEditCard = ({
           value={seletedInsurer}
           onChange={({ value }) =>
             handleUpdates({
-              insurer_id: value.id,
-              insurer_name: value.name,
+              insurer_id: value.participant_code,
+              insurer_name: value.participant_name,
             })
           }
         />
