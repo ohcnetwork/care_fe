@@ -30,6 +30,11 @@ export default function ClaimDetailCard({ claim }: IProps) {
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 flex items-center justify-center gap-3">
+          {claim.use && (
+            <span className="font-bold text-sm p-1 px-2 rounded shadow bg-primary-100 text-primary-500">
+              {claim.use}
+            </span>
+          )}
           <span
             className={classNames(
               "text-white font-bold text-sm p-1 px-2 rounded shadow",
