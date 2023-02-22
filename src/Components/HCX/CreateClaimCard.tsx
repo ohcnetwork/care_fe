@@ -125,8 +125,6 @@ export default function CreateClaimCard({
       setItemsError(undefined);
       setPolicy(undefined);
       setCreatedClaim(res.data);
-      // const makeClaimRes = await dispatch(HCXActions.makeClaim(res.data.id));
-      // Notification.Success({ msg: "Pre-authorization requested" });
     } else {
       Notification.Error({ msg: "Failed to create pre-authorization" });
     }
@@ -228,9 +226,6 @@ export default function CreateClaimCard({
           {isCreating
             ? `Creating ${use === "claim" ? "Claim" : "Pre-Authorization"}...`
             : "Proceed"}
-          {/* {isCreating
-            ? `Requesting ${use === "claim" ? "Claim" : "Pre-Authorization"}...`
-            : `Request ${use === "claim" ? "Claim" : "Pre-Authorization"}`} */}
         </Submit>
       </div>
     </div>

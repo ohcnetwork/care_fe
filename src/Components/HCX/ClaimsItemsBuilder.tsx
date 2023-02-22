@@ -148,6 +148,7 @@ export default function ClaimsItemsBuilder(props: Props) {
                   value={obj.category}
                   onChange={handleUpdate(index)}
                   disabled={props.disabled}
+                  errorClassName="hidden"
                 />
               </div>
             </div>

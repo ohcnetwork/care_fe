@@ -9,6 +9,7 @@ type DialogProps = {
   onClose: () => void;
   children: React.ReactNode;
   className?: string;
+  titleAction?: React.ReactNode;
 };
 
 const DialogModal = (props: DialogProps) => {
@@ -48,12 +49,15 @@ const DialogModal = (props: DialogProps) => {
                 >
                   <Dialog.Title
                     as="h4"
-                    className="text-lg font-medium leading-6 text-gray-900"
+                    className="text-lg font-medium leading-6 text-gray-900 flex justify-between"
                   >
-                    <h4>{title}</h4>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-600">{description}</p>
+                    <div>
+                      <h4>{title}</h4>
+                      <p className="mt-2 text-sm text-gray-600">
+                        {description}
+                      </p>
                     </div>
+                    {props.titleAction}
                   </Dialog.Title>
                   {children}
                 </Dialog.Panel>
