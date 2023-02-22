@@ -823,6 +823,9 @@ export const listAssetTransaction = (params: object) =>
 export const getAssetTransaction = (id: string) =>
   fireRequest("getAssetTransaction", [], {}, { id });
 
+export const listPMJYPackages = (query?: string) =>
+  fireRequest("listPMJYPackages", [], { query });
+
 // HCX Actions
 
 export const HCXActions = {

@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import AutocompleteFormField from "../../Form/FormFields/Autocomplete";
-import PROCEDURES from "../../../Common/procedures";
+import { ProceduresSelectFormField } from "../ProceduresSelectFormField";
 
 export type ProcedureType = {
   procedure?: string;
@@ -65,21 +64,16 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     <CareIcon className="care-l-trash-alt w-4 h-4" />
                   </button>
                 </div>
-                <AutocompleteFormField
+                <ProceduresSelectFormField
                   required
                   labelClassName="text-sm text-gray-700"
                   label="Procedure"
-                  placeholder="Procedure"
                   name="procedure_name"
-                  options={PROCEDURES}
-                  optionLabel={(o) => o.code}
-                  optionDescription={(o) => o.name || ""}
-                  optionValue={(o) => o.code}
                   value={procedure.procedure}
                   onChange={({ value }) =>
                     setItem({ ...procedure, procedure: value }, i)
                   }
-                  allowRawInput
+                  // allowRawInput
                   errorClassName="hidden"
                 />
                 <div className="flex gap-2 md:gap-4 flex-col md:flex-row">

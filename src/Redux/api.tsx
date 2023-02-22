@@ -796,6 +796,11 @@ const routes: Routes = {
 
   // HCX Endpoints
 
+  listPMJYPackages: {
+    path: "/api/v1/hcx/pmjy_packages/",
+    method: "GET",
+  },
+
   hcxListPayors: {
     path: "/api/v1/hcx/payors/",
     method: "GET",
