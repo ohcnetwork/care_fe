@@ -163,12 +163,6 @@ export const TriageForm = (props: triageFormProps) => {
           if (!state.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
-          } else if (
-            moment(state.form.entry_date).format("YYYY-MM-DD") >
-            new Date().toLocaleDateString("en-ca")
-          ) {
-            errors[field] = "Date cannot be in future";
-            invalidForm = true;
           }
           return;
         default:
@@ -319,6 +313,7 @@ export const TriageForm = (props: triageFormProps) => {
             <CardContent>
               <div className="max-w-[250px] pb-4">
                 <DateFormField
+                  required
                   name="entry_date"
                   label="Entry Date"
                   value={state.form.entry_date}
