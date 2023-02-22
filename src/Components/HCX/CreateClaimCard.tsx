@@ -11,6 +11,7 @@ import HCXPolicyEligibilityCheck from "./PolicyEligibilityCheck";
 import PROCEDURES from "../../Common/procedures";
 import DialogModal from "../Common/Dialog";
 import PatientInsuranceDetailsEditor from "./PatientInsuranceDetailsEditor";
+import ClaimCreatedModal from "./ClaimCreatedModal";
 
 interface Props {
   consultationId: string;
@@ -50,6 +51,7 @@ export default function CreateClaimCard({
   const [policy, setPolicy] = useState<HCXPolicyModel>();
   const [procedures, setProcedures] = useState<HCXProcedureModel[]>();
   const [proceduresError, setProceduresError] = useState<string>();
+  const [createdClaim, setCreatedClaim] = useState<HCXClaimModel>();
 
   useEffect(() => {
     async function autoFill() {
@@ -127,11 +129,19 @@ export default function CreateClaimCard({
       Notification.Error({ msg: "Failed to request pre-authorization" });
     }
 
+    setCreatedClaim(res.data);
     setIsCreating(false);
   };
 
   return (
     <div className="flex flex-col gap-8">
+      {createdClaim && (
+        <ClaimCreatedModal
+          show
+          claim={createdClaim}
+          onClose={() => setCreatedClaim(undefined)}
+        />
+      )}
       <DialogModal
         title="Edit Patient Insurance Details"
         show={showAddPolicy}

@@ -90,7 +90,7 @@ interface FileUploadProps {
   audio: boolean;
   unspecified: boolean;
   sampleId?: number;
-  claimId?: number;
+  claimId?: string;
 }
 
 interface URLS {
@@ -247,11 +247,13 @@ export const FileUpload = (props: FileUploadProps) => {
     PATIENT: "Upload Patient Files",
     CONSULTATION: "Upload Consultation Files",
     SAMPLE_MANAGEMENT: "Upload Sample Report",
+    CLAIM: "Upload Supporting Info",
   };
   const VIEW_HEADING: { [index: string]: string } = {
     PATIENT: "View Patient Files",
     CONSULTATION: "View Consultation Files",
     SAMPLE_MANAGEMENT: "View Sample Report",
+    CLAIM: "Supporting Info",
   };
 
   const handleClose = () => {
