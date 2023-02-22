@@ -319,7 +319,7 @@ export const TriageForm = (props: triageFormProps) => {
                   value={state.form.entry_date}
                   disableFuture
                   onChange={handleFormFieldChange}
-                  position="CENTER"
+                  position="RIGHT"
                   placeholder="Entry Date"
                   error={state.errors.entry_date}
                 />
