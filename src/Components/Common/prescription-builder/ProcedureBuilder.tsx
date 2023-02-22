@@ -36,13 +36,6 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
     );
   };
 
-  const procedureOptions = (currentProcedure?: string) => {
-    if (!currentProcedure) return PROCEDURES;
-    const knownProcedure = PROCEDURES.find((o) => o.code === currentProcedure);
-    if (knownProcedure) return PROCEDURES;
-    return [{ code: currentProcedure, name: currentProcedure }, ...PROCEDURES];
-  };
-
   return (
     <div className="mt-2">
       {procedures.map((procedure, i) => {
@@ -78,7 +71,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   label="Procedure"
                   placeholder="Procedure"
                   name="procedure_name"
-                  options={procedureOptions(procedure.procedure)}
+                  options={PROCEDURES}
                   optionLabel={(o) => o.code}
                   optionDescription={(o) => o.name || ""}
                   optionValue={(o) => o.code}
@@ -86,6 +79,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   onChange={({ value }) =>
                     setItem({ ...procedure, procedure: value }, i)
                   }
+                  allowRawInput
                   errorClassName="hidden"
                 />
                 <div className="flex gap-2 md:gap-4 flex-col md:flex-row">

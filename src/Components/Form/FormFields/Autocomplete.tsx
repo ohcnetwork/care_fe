@@ -17,6 +17,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   optionIcon?: OptionCallback<T, React.ReactNode>;
   onQuery?: (query: string) => void;
   dropdownIcon?: React.ReactNode | undefined;
+  allowRawInput?: boolean;
 };
 
 const AutocompleteFormField = <T, V>(
@@ -39,6 +40,7 @@ const AutocompleteFormField = <T, V>(
         optionValue={props.optionValue}
         optionDescription={props.optionDescription}
         onQuery={props.onQuery}
+        allowRawInput={props.allowRawInput}
       />
     </FormField>
   );
@@ -59,6 +61,7 @@ type AutocompleteProps<T, V = T> = {
   className?: string;
   onQuery?: (query: string) => void;
   isLoading?: boolean;
+  allowRawInput?: boolean;
 } & (
   | {
       required?: false;
@@ -83,7 +86,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
     props.onQuery && props.onQuery(query);
   }, [query]);
 
-  const options = props.options.map((option) => {
+  const mappedOptions = props.options.map((option) => {
     const label = props.optionLabel(option);
     const description =
       props.optionDescription && props.optionDescription(option);
@@ -96,6 +99,28 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
       value: props.optionValue ? props.optionValue(option) : option,
     };
   });
+
+  const getOptions = () => {
+    if (!query || !props.value) return mappedOptions;
+
+    const knownOption = mappedOptions.find(
+      (o) => o.value == props.value || o.label == props.value
+    );
+
+    if (knownOption) return mappedOptions;
+    return [
+      {
+        label: query,
+        description: undefined,
+        search: query.toLowerCase(),
+        icon: <CareIcon className="care-l-plus" />,
+        value: query,
+      },
+      ...mappedOptions,
+    ];
+  };
+
+  const options = getOptions();
 
   const value = options.find((o) => props.value == o.value);
   const filteredOptions = options.filter((o) => o.search.includes(query));
