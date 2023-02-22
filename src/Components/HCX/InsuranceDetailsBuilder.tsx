@@ -138,38 +138,12 @@ const InsuranceDetailEditCard = ({
         />
         <InsurerAutocomplete
           required
-          name="insurer_id"
-          label="Insurer ID"
+          name="insurer_"
+          label="Insurer"
           placeholder="Eg. GICOFINDIA"
           value={insurer}
           onChange={({ value }) => setInsurer(value)}
-          for="id"
         />
-        {/* <TextFormField
-          required
-          name="insurer_id"
-          label="Insurer ID"
-          placeholder="Eg. GICOFINDIA"
-          value={policy.insurer_id}
-          onChange={handleUpdate}
-        /> */}
-        <InsurerAutocomplete
-          required
-          name="insurer_name"
-          label="Insurer Name"
-          placeholder="Eg. GICOFINDIA"
-          value={insurer}
-          onChange={({ value }) => setInsurer(value)}
-          for="name"
-        />
-        {/* <TextFormField
-          required
-          name="insurer_name"
-          label="Insurer Name"
-          placeholder="Eg. GICOFINDIA"
-          value={policy.insurer_name}
-          onChange={handleUpdate}
-        /> */}
       </div>
     </div>
   );

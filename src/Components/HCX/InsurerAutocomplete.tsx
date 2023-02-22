@@ -13,7 +13,6 @@ export type InsurerOptionModel = {
 };
 
 type Props = FormFieldBaseProps<InsurerOptionModel> & {
-  for: keyof InsurerOptionModel;
   placeholder?: string;
 };
 
@@ -31,10 +30,8 @@ export default function InsurerAutocomplete(props: Props) {
         value={field.value}
         onChange={field.handleChange}
         options={options(props.value && [props.value])}
-        optionLabel={(option) => (props.for === "id" ? option.id : option.name)}
-        optionDescription={(option) =>
-          props.for === "id" ? option.name : option.id
-        }
+        optionLabel={(option) => option.name}
+        optionDescription={(option) => option.id}
         optionValue={(option) => option}
         onQuery={(query) =>
           fetchOptions(HCXActions.listInsurersFromHCXRegistry(query))

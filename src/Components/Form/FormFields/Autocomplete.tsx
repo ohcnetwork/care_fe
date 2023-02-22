@@ -85,12 +85,15 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
 
   const options = props.options.map((option) => {
     const label = props.optionLabel(option);
+    const description =
+      props.optionDescription && props.optionDescription(option);
     return {
       label,
-      search: label.toLowerCase(),
+      description,
+      search:
+        label.toLowerCase() + (description ? description.toLowerCase() : ""),
       icon: props.optionIcon && props.optionIcon(option),
       value: props.optionValue ? props.optionValue(option) : option,
-      description: props.optionDescription && props.optionDescription(option),
     };
   });
 
