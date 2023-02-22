@@ -700,7 +700,6 @@ export const UserAdd = (props: UserProps) => {
 
               <SelectFormField
                 {...field("home_facility")}
-                required
                 label="Home facility"
                 options={selectedFacility || []}
                 optionLabel={(option) => option.name}
