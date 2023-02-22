@@ -58,10 +58,12 @@ export default function CreateClaimCard({
         // TODO: offload outcome filter to server side once payer server is back
         const latestApprovedPreAuth = (
           latestApprovedPreAuthsRes.data.results as HCXClaimModel[]
-        ).filter((o) => o.outcome === "Processing Complete")[0];
-        setPolicy(latestApprovedPreAuth.policy_object);
-        setProcedures(latestApprovedPreAuth.procedures);
-        return;
+        ).find((o) => o.outcome === "Processing Complete");
+        if (latestApprovedPreAuth) {
+          setPolicy(latestApprovedPreAuth.policy_object);
+          setProcedures(latestApprovedPreAuth.procedures);
+          return;
+        }
       }
 
       const res = await dispatch(getConsultation(consultationId as any));
@@ -145,10 +147,7 @@ export default function CreateClaimCard({
             variant="alert"
             border
             ghost={procedures?.length !== 0}
-            disabled={
-              procedures === undefined ||
-              !(policy?.outcome === "Processing Complete")
-            }
+            disabled={procedures === undefined || !policy}
             onClick={() =>
               setProcedures([
                 ...(procedures || []),
