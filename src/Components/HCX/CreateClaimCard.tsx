@@ -9,6 +9,8 @@ import ClaimsProceduresBuilder from "./ClaimsProceduresBuilder";
 import { HCXClaimModel, HCXPolicyModel, HCXProcedureModel } from "./models";
 import HCXPolicyEligibilityCheck from "./PolicyEligibilityCheck";
 import PROCEDURES from "../../Common/procedures";
+import DialogModal from "../Common/Dialog";
+import PatientInsuranceDetailsEditor from "./PatientInsuranceDetailsEditor";
 
 interface Props {
   consultationId: string;
@@ -44,6 +46,7 @@ export default function CreateClaimCard({
   use = "preauthorization",
 }: Props) {
   const dispatch = useDispatch<any>();
+  const [showAddPolicy, setShowAddPolicy] = useState(false);
   const [policy, setPolicy] = useState<HCXPolicyModel>();
   const [procedures, setProcedures] = useState<HCXProcedureModel[]>();
   const [proceduresError, setProceduresError] = useState<string>();
@@ -127,11 +130,29 @@ export default function CreateClaimCard({
 
   return (
     <div className="flex flex-col gap-8">
+      <DialogModal
+        title="Edit Patient Insurance Details"
+        show={showAddPolicy}
+        onClose={() => setShowAddPolicy(false)}
+        description="Add or edit patient's insurance details"
+        className="w-full max-w-screen-md"
+      >
+        <PatientInsuranceDetailsEditor
+          patient={patientId}
+          onCancel={() => setShowAddPolicy(false)}
+        />
+      </DialogModal>
       {/* Check Insurance Policy Eligibility */}
       <div className="flex flex-col gap-4">
-        <h1 className="text-lg font-bold">
-          Check Insurance Policy Eligibility
-        </h1>
+        <div className="flex justify-between pb-4">
+          <h1 className="text-lg font-bold">
+            Check Insurance Policy Eligibility
+          </h1>
+          <ButtonV2 onClick={() => setShowAddPolicy(true)} ghost border>
+            <CareIcon className="care-l-edit-alt text-lg" />
+            Edit Patient Insurance Details
+          </ButtonV2>
+        </div>
         <HCXPolicyEligibilityCheck
           patient={patientId}
           onEligiblePolicySelected={setPolicy}
