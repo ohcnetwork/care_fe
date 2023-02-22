@@ -2120,7 +2120,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         }
                       >
                         <CareIcon className="care-l-plus text-lg" />
-                        <span>Add Policy</span>
+                        <span>Add Insurance Details</span>
                       </ButtonV2>
                     </div>
                     <InsuranceDetailsBuilder
