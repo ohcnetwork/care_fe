@@ -114,7 +114,7 @@ const InsuranceDetailEditCard = ({
         <TextFormField
           required
           name="subscriber_id"
-          label="Medical ID"
+          label="Member ID"
           placeholder="Eg. SUB001"
           value={policy.subscriber_id}
           onChange={handleUpdate}
