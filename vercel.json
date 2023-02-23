@@ -1,8 +1,8 @@
 {
     "rewrites": [
         {
-          "source": "/api/(.*)",
-          "destination": "https://local.kha.vin/api/$1"
+            "source": "/api/(.*)",
+            "destination": "https://carehcxapi.coronasafe.in/api/$1"
         },
         {
             "source": "/(.*)",
