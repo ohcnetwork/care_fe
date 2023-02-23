@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { ProceduresSelectFormField } from "../ProceduresSelectFormField";
+import PMJAYProcedurePackageAutocomplete from "../PMJAYProcedurePackageAutocomplete";
 
 export type ProcedureType = {
   procedure?: string;
@@ -11,7 +11,7 @@ export type ProcedureType = {
   notes?: string;
 
   package_name?: string;
-  procedure_price?: string;
+  procedure_price?: number;
   package_code?: string;
 };
 
@@ -68,7 +68,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     <CareIcon className="care-l-trash-alt w-4 h-4" />
                   </button>
                 </div>
-                <ProceduresSelectFormField
+                <PMJAYProcedurePackageAutocomplete
                   required
                   labelClassName="text-sm text-gray-700"
                   label="Procedure"

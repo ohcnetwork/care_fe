@@ -8,10 +8,10 @@ import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import ClaimsItemsBuilder from "./ClaimsItemsBuilder";
 import { HCXClaimModel, HCXPolicyModel, HCXItemModel } from "./models";
 import HCXPolicyEligibilityCheck from "./PolicyEligibilityCheck";
-import PROCEDURES from "../../Common/procedures";
 import DialogModal from "../Common/Dialog";
 import PatientInsuranceDetailsEditor from "./PatientInsuranceDetailsEditor";
 import ClaimCreatedModal from "./ClaimCreatedModal";
+import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 
 interface Props {
   consultationId: string;
@@ -19,26 +19,6 @@ interface Props {
   setIsCreating: (creating: boolean) => void;
   isCreating: boolean;
   use?: "preauthorization" | "claim";
-}
-
-export function useKnownProcedureIfAvailable({ procedure }: any): HCXItemModel {
-  const knownProcedure = PROCEDURES.find((o) => o.code === procedure);
-
-  if (knownProcedure) {
-    return {
-      id: knownProcedure.code,
-      name: knownProcedure.name || knownProcedure.code,
-      price: knownProcedure.price,
-      category: "HBP",
-    };
-  }
-
-  return {
-    id: procedure,
-    name: procedure,
-    price: 0.0,
-    category: "HBP",
-  };
 }
 
 export default function CreateClaimCard({
@@ -76,7 +56,16 @@ export default function CreateClaimCard({
       const res = await dispatch(getConsultation(consultationId as any));
 
       if (res.data && Array.isArray(res.data.procedure)) {
-        setItems(res.data.procedure.map(useKnownProcedureIfAvailable));
+        setItems(
+          res.data.procedure.map((obj: ProcedureType) => {
+            return {
+              id: obj.package_code,
+              name: obj.package_name || obj.procedure,
+              price: obj.procedure_price,
+              category: "HBP",
+            };
+          })
+        );
       } else {
         setItems([]);
       }

@@ -10,13 +10,13 @@ import {
 type PMJAYPackageItem = {
   name?: string;
   code?: string;
-  price?: string;
+  price?: number;
   package_name?: string;
 };
 
 type Props = FormFieldBaseProps<PMJAYPackageItem>;
 
-export function ProceduresSelectFormField(props: Props) {
+export default function PMJAYProcedurePackageAutocomplete(props: Props) {
   const field = useFormFieldPropsResolver(props as any);
 
   const { fetchOptions, isLoading, options } =
@@ -30,7 +30,14 @@ export function ProceduresSelectFormField(props: Props) {
         disabled={field.disabled}
         value={field.value}
         onChange={field.handleChange}
-        options={options(field.value ? [field.value] : [])}
+        options={options(field.value ? [field.value] : []).map((o) => {
+          // TODO: update backend to return price as number instead
+          return {
+            ...o,
+            price:
+              o.price && parseFloat(o.price?.toString().replaceAll(",", "")),
+          };
+        })}
         optionLabel={optionLabel}
         optionDescription={optionDescription}
         optionValue={(option) => option}
