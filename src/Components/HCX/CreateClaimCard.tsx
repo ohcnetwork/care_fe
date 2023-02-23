@@ -208,9 +208,8 @@ export default function CreateClaimCard({
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 mt-4 items-center">
+      <div className="flex gap-4 mt-4 items-center">
         <SelectFormField
-          placeholder="Use"
           name="use"
           label="Use"
           options={[
