@@ -127,7 +127,7 @@ export default function HCXPolicyEligibilityCheck({
             <div>
               <div className="flex flex-col">
                 <span className="flex gap-2 w-full">
-                  <span className="w-24">Medical ID</span>
+                  <span className="w-24">Member ID</span>
                   <span className="font-medium tracking-wide">
                     {option.subscriber_id}
                   </span>
