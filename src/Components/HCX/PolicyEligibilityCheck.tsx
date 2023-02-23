@@ -68,7 +68,7 @@ export default function HCXPolicyEligibilityCheck({
     } else {
       onEligiblePolicySelected(undefined);
     }
-  }, [policy, insuranceDetails]);
+  }, [policy, insuranceDetails, eligibility, onEligiblePolicySelected]);
 
   const checkEligibility = async () => {
     if (!policy) return;
