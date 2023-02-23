@@ -9,6 +9,10 @@ export type ProcedureType = {
   time?: string;
   frequency?: string;
   notes?: string;
+
+  package_name?: string;
+  procedure_price?: string;
+  package_code?: string;
 };
 
 const FREQUENCY = [
@@ -37,7 +41,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
 
   return (
     <div className="mt-2">
-      {procedures.map((procedure, i) => {
+      {procedures.map((obj, i) => {
         return (
           <div
             key={i}
@@ -69,9 +73,23 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   labelClassName="text-sm text-gray-700"
                   label="Procedure"
                   name="procedure_name"
-                  value={procedure.procedure}
+                  value={{
+                    code: obj.package_code,
+                    name: obj.procedure,
+                    package_name: obj.package_name,
+                    price: obj.procedure_price,
+                  }}
                   onChange={({ value }) =>
-                    setItem({ ...procedure, procedure: value }, i)
+                    setItem(
+                      {
+                        ...obj,
+                        procedure: value?.name,
+                        package_code: value?.code,
+                        package_name: value?.package_name,
+                        procedure_price: value?.price,
+                      },
+                      i
+                    )
                   }
                   // allowRawInput
                   errorClassName="hidden"
@@ -85,11 +103,11 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                       onFocus={() => setActiveIdx(i)}
                       onBlur={() => setActiveIdx(null)}
                       className="inline-block rounded-md w-[18px] h-[18px]"
-                      checked={procedure?.repetitive || false}
+                      checked={obj?.repetitive || false}
                       onChange={(e) => {
                         setItem(
                           {
-                            ...procedure,
+                            ...obj,
                             repetitive: e.currentTarget.checked,
                           },
                           i
@@ -97,7 +115,7 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                       }}
                     />
                   </div>
-                  {procedure.repetitive ? (
+                  {obj.repetitive ? (
                     <div className="w-full">
                       <div className="mb-1">
                         Frequency<span className="text-danger-500">{" *"}</span>
@@ -107,11 +125,11 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                         onBlur={() => setActiveIdx(null)}
                         placeholder="Frequency"
                         options={FREQUENCY}
-                        value={procedure.frequency || ""}
+                        value={obj.frequency || ""}
                         setValue={(frequency: string) => {
                           setItem(
                             {
-                              ...procedure,
+                              ...obj,
                               frequency,
                             },
                             i
@@ -127,13 +145,13 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                       <input
                         type="datetime-local"
                         className="w-[calc(100%-5px)] focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                        value={procedure.time || ""}
+                        value={obj.time || ""}
                         onFocus={() => setActiveIdx(i)}
                         onBlur={() => setActiveIdx(null)}
                         onChange={(e) => {
                           setItem(
                             {
-                              ...procedure,
+                              ...obj,
                               time: e.currentTarget.value,
                             },
                             i
@@ -150,13 +168,13 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     type="text"
                     className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
                     placeholder="Notes"
-                    value={procedure.notes || ""}
+                    value={obj.notes || ""}
                     onFocus={() => setActiveIdx(i)}
                     onBlur={() => setActiveIdx(null)}
                     onChange={(e) => {
                       setItem(
                         {
-                          ...procedure,
+                          ...obj,
                           notes: e.currentTarget.value,
                         },
                         i

@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
 import { listPMJYPackages } from "../../Redux/actions";
 import { Autocomplete } from "../Form/FormFields/Autocomplete";
 import FormField from "../Form/FormFields/FormField";
@@ -8,46 +7,48 @@ import {
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
 
-type Props = FormFieldBaseProps<string>;
+type PMJAYPackageItem = {
+  name?: string;
+  code?: string;
+  price?: string;
+  package_name?: string;
+};
+
+type Props = FormFieldBaseProps<PMJAYPackageItem>;
 
 export function ProceduresSelectFormField(props: Props) {
   const field = useFormFieldPropsResolver(props as any);
-  const dispatch = useDispatch<any>();
-  const [options, setOptions] = useState<string[]>([]);
 
-  const query = async (query: string) => {
-    const res = await dispatch(listPMJYPackages(query));
-    if (res?.data) {
-      setOptions(res.data.map((o: any) => o.name));
-    }
-  };
-
-  useEffect(() => {
-    query(props.value ?? "");
-  }, []);
-
-  console.log("Options", options);
-  console.log("Field:", field.value, "|", options.includes(field.value));
-  console.log("Props", props);
+  const { fetchOptions, isLoading, options } =
+    useAsyncOptions<PMJAYPackageItem>("code");
 
   return (
     <FormField field={field}>
       <Autocomplete
-        required={false}
+        required
         id={field.id}
         disabled={field.disabled}
-        value={field.value || []}
-        onChange={(o) => {
-          console.log("onChange", o);
-          field.handleChange(o);
-        }}
-        options={options}
-        optionLabel={(option) => option}
+        value={field.value}
+        onChange={field.handleChange}
+        options={options(field.value ? [field.value] : [])}
+        optionLabel={optionLabel}
+        optionDescription={optionDescription}
         optionValue={(option) => option}
-        onQuery={query}
-        // isLoading={isLoading}
-        allowRawInput
+        onQuery={(query) => fetchOptions(listPMJYPackages(query))}
+        isLoading={isLoading}
       />
     </FormField>
   );
 }
+
+const optionLabel = (option: PMJAYPackageItem) => {
+  if (option.name) return option.name;
+  if (option.package_name) return `${option.package_name} (Package)`;
+  return "Unknown";
+};
+
+const optionDescription = (option: PMJAYPackageItem) => {
+  const code = option.code || "Unknown";
+  const packageName = option.package_name || "Unknown";
+  return `Package: ${packageName} (${code})`;
+};

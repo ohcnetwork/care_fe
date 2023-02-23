@@ -87,7 +87,6 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
   }, [query]);
 
   const mappedOptions = props.options.map((option) => {
-    console.log("Option", option);
     const label = props.optionLabel(option);
     const description =
       props.optionDescription && props.optionDescription(option);
