@@ -208,7 +208,7 @@ export default function CreateClaimCard({
         </div>
       </div>
 
-      <div className="flex gap-4 mt-4 items-center">
+      <div className="flex gap-4 mt-4 items-center justify-between">
         <SelectFormField
           name="use"
           label="Use"
@@ -227,6 +227,7 @@ export default function CreateClaimCard({
         <Submit
           disabled={items?.length === 0 || !policy || isCreating}
           onClick={handleSubmit}
+          className="min-w-[200px]"
         >
           {isCreating && <CareIcon className="care-l-spinner animate-spin" />}
           {isCreating
