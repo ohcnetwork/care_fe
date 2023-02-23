@@ -12,6 +12,7 @@ import DialogModal from "../Common/Dialog";
 import PatientInsuranceDetailsEditor from "./PatientInsuranceDetailsEditor";
 import ClaimCreatedModal from "./ClaimCreatedModal";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 
 interface Props {
   consultationId: string;
@@ -34,6 +35,7 @@ export default function CreateClaimCard({
   const [items, setItems] = useState<HCXItemModel[]>();
   const [itemsError, setItemsError] = useState<string>();
   const [createdClaim, setCreatedClaim] = useState<HCXClaimModel>();
+  const [use_, setUse_] = useState(use);
 
   useEffect(() => {
     async function autoFill() {
@@ -206,7 +208,23 @@ export default function CreateClaimCard({
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 mt-4">
+      <div className="flex flex-col gap-4 mt-4 items-center">
+        <SelectFormField
+          placeholder="Use"
+          name="use"
+          label="Use"
+          options={[
+            { id: "preauthorization", label: "Pre-Authorization" },
+            { id: "claim", label: "Claim" },
+          ]}
+          value={use_}
+          onChange={({ value }) =>
+            setUse_(value as "preauthorization" | "claim")
+          }
+          position="below"
+          optionLabel={(value) => value.label}
+          optionValue={(value) => value.id as "preauthorization" | "claim"}
+        />
         <Submit
           disabled={items?.length === 0 || !policy || isCreating}
           onClick={handleSubmit}
