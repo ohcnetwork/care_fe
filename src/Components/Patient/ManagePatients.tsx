@@ -670,7 +670,7 @@ export const PatientManager = () => {
             }}
           >
             <CareIcon className="care-l-plus text-lg" />
-            <p>Add Patient Details</p>
+            <p className="lg:my-[2px]">Add Patient Details</p>
           </ButtonV2>
           <ButtonV2
             ghost
@@ -707,7 +707,7 @@ export const PatientManager = () => {
                 {" "}
               </line>
             </svg>
-            <span>Advanced Filters</span>
+            <span className="lg:my-[2px]">Advanced Filters</span>
           </ButtonV2>
           <DropdownMenu
             title="Sort by"
@@ -751,11 +751,10 @@ export const PatientManager = () => {
                     });
                   }, 500);
                 }}
-                variant="secondary"
-                className="lg:w-fit w-full"
+                className="lg:w-fit w-full mr-5"
               >
                 <CareIcon className="care-l-import" />
-                Export
+                <span className="lg:my-[3px]">Export</span>
               </ButtonV2>
             ) : (
               <ExportMenu
