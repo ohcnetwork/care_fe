@@ -254,7 +254,12 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
           </div>
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}>
-            <div className="btn btn-primary w-full mt-6"> {str("Complete")} </div>
+            <button
+              onClick={_ =>
+                Notifications.success({msg: "Critical care log updates are filed successfully"})}
+              className="btn btn-primary w-full mt-6">
+              {str("Complete")}
+            </button>
           </Link>
         </div>
       }}

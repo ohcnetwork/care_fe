@@ -5,6 +5,7 @@ import SlideOver from "../../CAREUI/interactive/SlideOver";
 import { getFacilityUsers } from "../../Redux/actions";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export default function DoctorVideoSlideover(props: {
   show: boolean;
@@ -138,13 +139,44 @@ function UserListItem(props: { user: UserAssignedModel }) {
             }
           </div>
           <div className="ml-4 flex-auto">
-            <p className="flex gap-2 text-sm font-medium text-gray-700">
+            <p className="flex justify-between gap-2 text-sm font-medium text-gray-700">
               <span>
                 {user.first_name} {user.last_name}
               </span>
-              {user.user_type === "Doctor" && (
-                <span>{user.doctor_qualification}</span>
-              )}
+              <div className="flex gap-2">
+                <a
+                  href={
+                    user.alt_phone_number
+                      ? `https://api.whatsapp.com/send/?phone=${encodeURIComponent(
+                          user.alt_phone_number
+                        )}&text=${encodeURIComponent(
+                          `Hey ${user.first_name} ${user.last_name}, I have a query regarding a patient.\n\nPatient Link: ${window.location.href}`
+                        )}`
+                      : "#"
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <div className="tooltip">
+                    <span className="tooltip-text tooltip-left">
+                      Connect on WhatsApp
+                    </span>
+                    <CareIcon className="care-l-whatsapp w-5 h-5" />
+                  </div>
+                </a>
+                <a
+                  href={
+                    user.alt_phone_number ? `tel:${user.alt_phone_number}` : "#"
+                  }
+                >
+                  <div className="tooltip">
+                    <span className="tooltip-text tooltip-left">
+                      Connect on Phone
+                    </span>
+                    <CareIcon className="care-l-phone-alt w-5 h-5" />
+                  </div>
+                </a>
+              </div>
             </p>
             {!!user.skills.length && (
               <div className="mt-1 text-sm leading-5 text-gray-900">
@@ -158,6 +190,22 @@ function UserListItem(props: { user: UserAssignedModel }) {
               </div>
             )}
             <p className="text-sm text-gray-500 flex gap-2 divide-gray-800">
+              <a
+                role="button"
+                href="#"
+                onClick={async () =>
+                  await navigator.clipboard.writeText(
+                    user?.alt_phone_number || ""
+                  )
+                }
+              >
+                <div className="tooltip">
+                  <span className="tooltip-text tooltip-top">
+                    Copy Phone number
+                  </span>
+                  <CareIcon className="care-l-clipboard w-5 h-5" />
+                </div>
+              </a>
               <span>{user.alt_phone_number}</span>
               {user.last_login && (
                 <span>{moment(user.last_login).fromNow()}</span>

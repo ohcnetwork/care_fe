@@ -250,10 +250,10 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
             </div>
             <div>
               <div className="flex justify-between flex-col md:flex-row mt-4">
-                <div className="flex flex-row w-full sm:w-auto gap-4">
+                <div className="flex flex-row w-full sm:w-auto gap-4 mt-2">
                   <Cancel onClick={() => handleClose()} />
                 </div>
-                <div className="flex flex-row w-full sm:w-auto flex-wrap gap-2">
+                <div className="flex flex-row w-full sm:w-auto flex-wrap gap-2 mt-2">
                   {!isLastOptionType &&
                     headerText === "Add Doctor Capacity" && (
                       <Submit
