@@ -476,7 +476,7 @@ export default function PatientFilterV2(props: any) {
         </div>
 
         <div className="w-full flex-none">
-          <FieldLabel className="text-sm">Disease Status</FieldLabel>
+          <FieldLabel className="text-sm">COVID Disease status</FieldLabel>
           <SelectMenuV2
             placeholder="Show all"
             options={DISEASE_STATUS}
@@ -488,7 +488,7 @@ export default function PatientFilterV2(props: any) {
           />
         </div>
         <div className="w-full flex-none">
-          <FieldLabel className="text-sm">Vaccinated</FieldLabel>
+          <FieldLabel className="text-sm">Vaccinated against COVID</FieldLabel>
           <SelectMenuV2
             placeholder="Show all"
             options={VACCINATED_FILTER}
@@ -578,7 +578,7 @@ export default function PatientFilterV2(props: any) {
         <DateRangeFormField
           labelClassName="text-sm"
           name="date_of_result"
-          label="Date of result"
+          label="Date of COVID test result"
           value={{
             start: getDate(filterState.date_of_result_after),
             end: getDate(filterState.date_of_result_before),
@@ -589,7 +589,7 @@ export default function PatientFilterV2(props: any) {
         <DateRangeFormField
           labelClassName="text-sm"
           name="date_declared_positive"
-          label="Date Declared Positive"
+          label="Date declared COVID positive"
           value={{
             start: getDate(filterState.date_declared_positive_after),
             end: getDate(filterState.date_declared_positive_before),
@@ -600,7 +600,7 @@ export default function PatientFilterV2(props: any) {
         <DateRangeFormField
           labelClassName="text-sm"
           name="created_date"
-          label="Created Date"
+          label="Registration Date"
           value={{
             start: getDate(filterState.created_date_after),
             end: getDate(filterState.created_date_before),
@@ -659,7 +659,7 @@ export default function PatientFilterV2(props: any) {
         <DateRangeFormField
           labelClassName="text-sm"
           name="last_vaccinated_date"
-          label="Vaccination Date"
+          label="COVID Vaccination Date"
           value={{
             start: getDate(filterState.last_vaccinated_date_after),
             end: getDate(filterState.last_vaccinated_date_before),
