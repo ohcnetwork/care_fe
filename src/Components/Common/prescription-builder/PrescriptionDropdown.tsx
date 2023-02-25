@@ -51,7 +51,7 @@ export function PrescriptionDropdown(props: {
       <div
         ref={dropRef}
         className={classNames(
-          "absolute z-40 top-[calc(100%+10px)] left-0 w-full rounded-md shadow-lg bg-white max-h-[300px] overflow-auto",
+          "absolute z-40 top-[calc(100%+15px)] left-0 w-full rounded-md shadow-lg bg-white max-h-[300px] overflow-auto",
           !open && "hidden"
         )}
       >

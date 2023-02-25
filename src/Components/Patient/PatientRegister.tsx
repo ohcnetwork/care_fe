@@ -15,12 +15,9 @@ import loadable from "@loadable/component";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
-  BLOOD_GROUPS,
   DISEASE_STATUS,
   GENDER_TYPES,
-  MEDICAL_HISTORY_CHOICES,
   TEST_TYPE,
-  VACCINES,
 } from "../../Common/constants";
 import countryList from "../../Common/static/countries.json";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -42,7 +39,6 @@ import AlertDialog from "../Common/AlertDialog";
 import {
   LegacyCheckboxField,
   LegacyDateInputField,
-  LegacyErrorHelperText,
   LegacySelectField,
   LegacyTextInputField,
 } from "../Common/HelperInputFields";
@@ -82,24 +78,15 @@ interface PatientRegisterProps extends PatientModel {
   facilityId: number;
 }
 
-interface medicalHistoryModel {
-  id?: number;
-  disease: string | number;
-  details: string;
-}
-
-const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
-  (acc: Array<{ [x: string]: string }>, cur) => [
-    ...acc,
-    { [`medical_history_${cur.id}`]: "" },
-  ],
-  []
-);
-const genderTypes = GENDER_TYPES;
+const genderTypes = [
+  {
+    id: 0,
+    text: "Select",
+  },
+  ...GENDER_TYPES,
+];
 const diseaseStatus = [...DISEASE_STATUS];
-const bloodGroups = [...BLOOD_GROUPS];
 const testType = [...TEST_TYPE];
-const vaccines = ["Select", ...VACCINES];
 
 const initForm: any = {
   name: "",
@@ -122,15 +109,12 @@ const initForm: any = {
   address: "",
   permanent_address: "",
   village: "",
-  allergies: "",
   pincode: "",
   present_health: "",
   contact_with_confirmed_carrier: "false",
   contact_with_suspected_carrier: "false",
-
   estimated_contact_date: null,
   date_of_return: null,
-
   number_of_primary_contacts: "",
   number_of_secondary_contacts: "",
   is_antenatal: "false",
@@ -146,10 +130,6 @@ const initForm: any = {
   cluster_name: "",
   covin_id: "",
   is_vaccinated: "false",
-  number_of_doses: "0",
-  vaccine_name: null,
-  last_vaccinated_date: null,
-  ...medicalHistoryChoices,
 };
 
 const initError = Object.assign(
@@ -327,7 +307,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ? res.data.test_id
         : state.form.test_id;
       form["srf_id"] = res.data.srf_id ? res.data.srf_id : state.form.srf_id;
-
       form["state"] = res.data.district_object
         ? res.data.district_object.state
         : state.form.state;
@@ -385,22 +364,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
             state: res.data.state ? res.data.state : "",
             district: res.data.district ? res.data.district : "",
-            blood_group: res.data.blood_group
-              ? res.data.blood_group === "UNKNOWN"
-                ? "UNK"
-                : res.data.blood_group
-              : "",
             local_body: res.data.local_body ? res.data.local_body : "",
             ward: res.data.ward_object ? res.data.ward_object.id : undefined,
             village: res.data.village ? res.data.village : "",
-            medical_history: [],
             is_antenatal: String(!!res.data.is_antenatal),
             allergies: res.data.allergies ? res.data.allergies : "",
             pincode: res.data.pincode ? res.data.pincode : "",
             ongoing_medication: res.data.ongoing_medication
               ? res.data.ongoing_medication
               : "",
-
             is_declared_positive: res.data.is_declared_positive
               ? String(res.data.is_declared_positive)
               : "false",
@@ -412,7 +384,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               .instituion_of_health_care_worker
               ? res.data.instituion_of_health_care_worker
               : "",
-
             number_of_primary_contacts: res.data.number_of_primary_contacts
               ? res.data.number_of_primary_contacts
               : "",
@@ -428,27 +399,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               ? String(res.data.contact_with_suspected_carrier)
               : "false",
             is_vaccinated: String(res.data.is_vaccinated),
-            number_of_doses: res.data.number_of_doses
-              ? String(res.data.number_of_doses)
-              : "0",
-            vaccine_name: res.data.vaccine_name ? res.data.vaccine_name : null,
-            last_vaccinated_date: res.data.last_vaccinated_date
-              ? res.data.last_vaccinated_date
-              : null,
           };
           if (res.data.address !== res.data.permanent_address) {
             setSameAddress(false);
           }
-          res.data.medical_history.forEach((i: any) => {
-            const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
-              (j: any) =>
-                String(j.text).toLowerCase() === String(i.disease).toLowerCase()
-            );
-            if (medicalHistory) {
-              formData.medical_history.push(medicalHistory.id);
-              formData[`medical_history_${medicalHistory.id}`] = i.details;
-            }
-          });
           dispatch({
             type: "set_form",
             form: formData,
@@ -650,39 +604,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
-        case "blood_group":
-          if (!state.form[field]) {
-            errors[field] = "Please select a blood group";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
-
-        case "is_vaccinated":
-          if (state.form.is_vaccinated === "true") {
-            if (state.form.number_of_doses === "0") {
-              errors["number_of_doses"] =
-                "Please fill the number of doses taken";
-              if (!error_div) error_div = field;
-              invalidForm = true;
-            }
-            if (
-              state.form.vaccine_name === null ||
-              state.form.vaccine_name === "Select"
-            ) {
-              errors["vaccine_name"] = "Please select vaccine name";
-              if (!error_div) error_div = field;
-              invalidForm = true;
-            }
-
-            if (!state.form.last_vaccinated_date) {
-              errors["last_vaccinated_date"] =
-                "Please enter last vaccinated date";
-              if (!error_div) error_div = field;
-              invalidForm = true;
-            }
-          }
-          return;
 
         case "date_of_result":
           if (state.form[field] < state.form.date_of_test) {
@@ -771,17 +692,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       scrollTo(error_div);
     } else {
       setIsLoading(true);
-      const medical_history: Array<medicalHistoryModel> = [];
-      state.form.medical_history.forEach((id: number) => {
-        const medData = MEDICAL_HISTORY_CHOICES.find((i) => i.id === id);
-        if (medData) {
-          const details = state.form[`medical_history_${medData.id}`];
-          medical_history.push({
-            disease: medData.text,
-            details: details ? details : "",
-          });
-        }
-      });
       const data = {
         phone_number: parsePhoneNumberFromString(
           state.form.phone_number
@@ -799,7 +709,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           : undefined,
         date_declared_positive:
           JSON.parse(state.form.is_declared_positive) &&
-          state.form.date_declared_positive
+            state.form.date_declared_positive
             ? state.form.date_declared_positive
             : null,
         test_id: state.form.test_id,
@@ -807,22 +717,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         covin_id:
           state.form.is_vaccinated === "true" ? state.form.covin_id : undefined,
         is_vaccinated: state.form.is_vaccinated,
-        number_of_doses:
-          state.form.is_vaccinated === "true"
-            ? Number(state.form.number_of_doses)
-            : Number("0"),
-        vaccine_name:
-          state.form.vaccine_name &&
-          state.form.vaccine_name !== "Select" &&
-          state.form.is_vaccinated === "true"
-            ? state.form.vaccine_name
-            : null,
-        last_vaccinated_date:
-          state.form.is_vaccinated === "true"
-            ? state.form.last_vaccinated_date
-              ? state.form.last_vaccinated_date
-              : null
-            : null,
         test_type: state.form.test_type,
         name: state.form.name,
         pincode: state.form.pincode ? state.form.pincode : undefined,
@@ -847,8 +741,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         permanent_address: sameAddress
           ? state.form.address
           : state.form.permanent_address
-          ? state.form.permanent_address
-          : undefined,
+            ? state.form.permanent_address
+            : undefined,
         present_health: state.form.present_health
           ? state.form.present_health
           : undefined,
@@ -861,13 +755,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         estimated_contact_date:
           (JSON.parse(state.form.contact_with_confirmed_carrier) ||
             JSON.parse(state.form.contact_with_suspected_carrier)) &&
-          state.form.estimated_contact_date
+            state.form.estimated_contact_date
             ? state.form.estimated_contact_date
             : null,
         cluster_name:
           (JSON.parse(state.form.contact_with_confirmed_carrier) ||
             JSON.parse(state.form.contact_with_suspected_carrier)) &&
-          state.form.cluster_name
+            state.form.cluster_name
             ? state.form.cluster_name
             : null,
         allergies: state.form.allergies,
@@ -887,10 +781,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           state.form.designation_of_health_care_worker,
         instituion_of_health_care_worker:
           state.form.instituion_of_health_care_worker,
-        blood_group: state.form.blood_group
-          ? state.form.blood_group
-          : undefined,
-        medical_history,
         is_active: true,
       };
       const res = await dispatchAction(
@@ -909,14 +799,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             };
             const policyRes = await (policy.id
               ? dispatchAction(
-                  HCXActions.policies.update(
-                    policy.id,
-                    policy as HCXPolicyModel
-                  )
+                HCXActions.policies.update(
+                  policy.id,
+                  policy as HCXPolicyModel
                 )
+              )
               : dispatchAction(
-                  HCXActions.policies.create(policy as HCXPolicyModel)
-                ));
+                HCXActions.policies.create(policy as HCXPolicyModel)
+              ));
 
             if (enable_hcx) {
               const eligibilityCheckRes = await dispatchAction(
@@ -1000,18 +890,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  const handleMedicalCheckboxChange = (e: any, id: number) => {
-    const form = { ...state.form };
-    const values = state.form.medical_history;
-    if (e.target.checked) {
-      values.push(id);
-    } else {
-      values.splice(values.indexOf(id), 1);
-    }
-    form["medical_history"] = values;
-    dispatch({ type: "set_form", form });
-  };
-
   const duplicateCheck = useCallback(
     debounce(async (phoneNo: string) => {
       if (phoneNo && parsePhoneNumberFromString(phoneNo)?.isPossible()) {
@@ -1023,8 +901,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           const duplicateList = !id
             ? res.data.results
             : res.data.results.filter(
-                (item: DupPatientModel) => item.patient_id !== id
-              );
+              (item: DupPatientModel) => item.patient_id !== id
+            );
           if (duplicateList.length) {
             setStatusDialog({
               show: true,
@@ -1045,35 +923,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     } else {
       setStatusDialog({ show: false, transfer: false, patientList: [] });
     }
-  };
-
-  const renderMedicalHistory = (id: number, title: string) => {
-    const checkboxField = `medical_history_check_${id}`;
-    const textField = `medical_history_${id}`;
-    return (
-      <div key={textField}>
-        <div>
-          <LegacyCheckboxField
-            checked={state.form.medical_history.includes(id)}
-            onChange={(e) => handleMedicalCheckboxChange(e, id)}
-            name={checkboxField}
-            label={id !== 1 ? title : "NONE"}
-          />
-        </div>
-        {id !== 1 && state.form.medical_history.includes(id) && (
-          <div className="mx-4">
-            <TextAreaFormField
-              placeholder="Details"
-              rows={2}
-              name={textField}
-              value={state.form[textField]}
-              onChange={handleFormFieldChange}
-              error={state.errors[textField]}
-            />
-          </div>
-        )}
-      </div>
-    );
   };
 
   if (isLoading) {
@@ -1606,88 +1455,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     errors={state.errors.covin_id}
                                   />
                                 </div>
-                                <div id="number_of_doses-div">
-                                  <FieldLabel
-                                    id="doses-label"
-                                    htmlFor="number_of_doses"
-                                  >
-                                    Number of doses
-                                  </FieldLabel>
-                                  <RadioGroup
-                                    aria-label="number_of_doses"
-                                    id="number_of_doses"
-                                    name="number_of_doses"
-                                    value={state.form.number_of_doses}
-                                    onChange={handleChange}
-                                    style={{ padding: "0px 5px" }}
-                                  >
-                                    <div className="flex flex-wrap">
-                                      <FormControlLabel
-                                        value="1"
-                                        control={<Radio />}
-                                        label="1"
-                                      />
-                                      <FormControlLabel
-                                        value="2"
-                                        control={<Radio />}
-                                        label="2"
-                                      />
-                                      <FormControlLabel
-                                        value="3"
-                                        control={<Radio />}
-                                        label="3 (Booster/Precautionary Dose)"
-                                      />
-                                    </div>
-                                  </RadioGroup>
-                                  <LegacyErrorHelperText
-                                    error={state.errors.number_of_doses}
-                                  />
-                                </div>
-                                <div id="vaccine_name-div">
-                                  <FieldLabel
-                                    id="vaccine-name-label"
-                                    htmlFor="vaccine_name"
-                                    required
-                                  >
-                                    Vaccine Name
-                                  </FieldLabel>
-                                  <LegacySelectField
-                                    labelId="vaccine_name"
-                                    name="vaccine_name"
-                                    variant="outlined"
-                                    margin="dense"
-                                    optionArray={true}
-                                    value={state.form.vaccine_name}
-                                    options={vaccines}
-                                    onChange={handleChange}
-                                    errors={state.errors.vaccine_name}
-                                  />
-                                </div>
-                                <div id="last_vaccinated_date-div">
-                                  <FieldLabel
-                                    id="last_vaccinated_date-label"
-                                    htmlFor="last_vaccinated_date"
-                                    required
-                                  >
-                                    Last Date of Vaccination
-                                  </FieldLabel>
-                                  <LegacyDateInputField
-                                    id="last_vaccinated_date"
-                                    fullWidth={true}
-                                    value={state.form.last_vaccinated_date}
-                                    onChange={(date) =>
-                                      handleDateChange(
-                                        date,
-                                        "last_vaccinated_date"
-                                      )
-                                    }
-                                    errors={state.errors.last_vaccinated_date}
-                                    inputVariant="outlined"
-                                    margin="dense"
-                                    openTo="year"
-                                    disableFuture={true}
-                                  />
-                                </div>
                               </div>
                             }
                           </CollapseV2>
@@ -2011,92 +1778,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         </div>
                       </div>
                     </AccordionV2>
-                  </Card>
-                  <Card elevation={0} className="mb-8 rounded overflow-visible">
-                    <CardContent>
-                      <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
-                        Medical History
-                      </h1>
-                      <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                        <div id="present_health-div">
-                          <FieldLabel
-                            id="present_health-label"
-                            htmlFor="present_health"
-                          >
-                            Present Health Condition
-                          </FieldLabel>
-                          <TextAreaFormField
-                            rows={3}
-                            id="present_health"
-                            name="present_health"
-                            placeholder="Optional Information"
-                            value={state.form.present_health}
-                            onChange={handleFormFieldChange}
-                            error={state.errors.present_health}
-                          />
-                        </div>
-
-                        <div id="ongoing_medication-div">
-                          <FieldLabel
-                            htmlFor="ongoing_medication"
-                            id="ongoing_medication-label"
-                          >
-                            Ongoing Medication
-                          </FieldLabel>
-                          <TextAreaFormField
-                            rows={3}
-                            id="ongoing_medication"
-                            name="ongoing_medication"
-                            placeholder="Optional Information"
-                            value={state.form.ongoing_medication}
-                            onChange={handleFormFieldChange}
-                            error={state.errors.ongoing_medication}
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <FieldLabel id="med-history-label" required>
-                            Any medical history? (Comorbidities)
-                          </FieldLabel>
-                          <div className="flex flex-wrap">
-                            {MEDICAL_HISTORY_CHOICES.map((i) => {
-                              return renderMedicalHistory(i.id, i.text);
-                            })}
-                          </div>
-                          <LegacyErrorHelperText
-                            error={state.errors.medical_history}
-                          />
-                        </div>
-
-                        <div id="allergies-div">
-                          <FieldLabel htmlFor="allergies" id="allergies_label">
-                            Allergies
-                          </FieldLabel>
-                          <TextAreaFormField
-                            rows={1}
-                            id="allergies"
-                            name="allergies"
-                            placeholder="Optional Information"
-                            value={state.form.allergies}
-                            onChange={handleFormFieldChange}
-                            error={state.errors.allergies}
-                          />
-                        </div>
-
-                        <div data-testid="blood-group" id="blood_group-div">
-                          <SelectFormField
-                            position="above"
-                            label="Blood Group"
-                            name="blood_group"
-                            required
-                            value={state.form.blood_group}
-                            options={bloodGroups}
-                            optionLabel={(o: any) => o}
-                            onChange={handleFormFieldChange}
-                            error={state.errors.blood_group}
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
                   </Card>
                   <div className="bg-white rounded flex flex-col gap-4 w-full p-4">
                     <div className="flex w-full items-center justify-between">

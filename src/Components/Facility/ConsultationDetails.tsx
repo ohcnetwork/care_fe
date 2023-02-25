@@ -768,7 +768,14 @@ export const ConsultationDetails = (props: any) => {
                   ]}
                   label="Diagnosis (as per ICD-11 recommended by WHO)"
                 />
-
+                {consultationData?.health_details_object?.allergies && (
+                  <div className="capitalize">
+                    <span className="font-semibold leading-relaxed">
+                      Allergies:{" "}
+                    </span>
+                    {consultationData?.health_details_object?.allergies}
+                  </div>
+                )}
                 {consultationData.verified_by && (
                   <div className="text-sm mt-2">
                     <span className="font-semibold leading-relaxed">

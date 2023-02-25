@@ -79,6 +79,32 @@ export type PatientCategory =
   | "Abnormal"
   | "Critical";
 
+export interface HealthDetailsModel {
+  family_details?: string;
+  has_allergy?: boolean;
+  allergies?: string;
+  blood_group?: string;
+  height?: number;
+  weight?: number;
+  vaccination_history?: {
+    vaccine?: string;
+    doses?: number;
+    date?: string;
+    precision?: number;
+  }[];
+}
+
+export interface MedicalHistoyModel {
+  ongoing_medication?: string;
+  present_health?: string;
+  patient_diseases?: {
+    disease?: string;
+    details?: string;
+    date?: string;
+    precision?: number;
+  }[];
+}
+
 export interface ConsultationModel {
   admission_date?: string;
   admitted?: boolean;
@@ -93,6 +119,10 @@ export interface ConsultationModel {
   discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;
+  health_details?: string;
+  health_details_object?: HealthDetailsModel;
+  medical_history?: string;
+  medical_history_object?: MedicalHistoyModel;
   facility?: number;
   facility_name?: string;
   id?: number;

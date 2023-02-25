@@ -45,6 +45,8 @@ import InvestigationBuilder, {
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
+import { VaccinationDetails } from "../Common/prescription-builder/VaccinationBuilder";
+import { DiseaseDetails } from "../Common/prescription-builder/DiseaseBuilder";
 import { ICD11DiagnosisModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -106,13 +108,33 @@ type FormDetails = {
   assigned_to_object: UserModel | null;
   special_instruction: string;
   review_interval: number;
-  weight: string;
-  height: string;
   bed: BedModel | null;
   discharge_reason: string;
   cause_of_death: string;
   death_datetime: string;
   death_confirmed_doctor: string;
+  // Health Details
+  family_details: string;
+  has_allergy: BooleanStrings;
+  allergies: string;
+  blood_group: string;
+  height: number;
+  weight: number;
+  vaccination_history: {
+    vaccine: string;
+    doses: number;
+    date: string;
+    precision: number;
+  }[];
+  // Medical History
+  ongoing_medication: string;
+  present_health: string;
+  patient_diseases: {
+    disease: string;
+    details: string;
+    date: string;
+    precision: number;
+  }[];
 };
 
 type Action =
@@ -155,13 +177,21 @@ const initForm: FormDetails = {
   assigned_to_object: null,
   special_instruction: "",
   review_interval: -1,
-  weight: "",
-  height: "",
   bed: null,
   discharge_reason: "",
   cause_of_death: "",
   death_datetime: "",
   death_confirmed_doctor: "",
+  family_details: "",
+  has_allergy: "false",
+  allergies: "",
+  blood_group: "",
+  height: 0.0,
+  weight: 0.0,
+  vaccination_history: [],
+  ongoing_medication: "",
+  present_health: "",
+  patient_diseases: [],
 };
 
 const initError = Object.assign(
@@ -221,6 +251,8 @@ export const ConsultationForm = (props: any) => {
     InvestigationType[]
   >([]);
   const [procedures, setProcedures] = useState<ProcedureType[]>([]);
+  const [vaccination, setVaccination] = useState<VaccinationDetails[]>([]);
+  const [diseases, setDiseases] = useState<DiseaseDetails[]>([]);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
@@ -298,6 +330,17 @@ export const ConsultationForm = (props: any) => {
           setSelectedFacility({ id: -1, name: res.data.referred_to_external });
         else setSelectedFacility(res.data.referred_to_object);
       }
+      setVaccination(
+        !Array.isArray(res.data.health_details_object?.vaccination_history)
+          ? []
+          : res.data.health_details_object?.vaccination_history
+      );
+      setDiseases(
+        !Array.isArray(res.data.medical_history_object?.patient_diseases)
+          ? []
+          : res.data.medical_history_object?.patient_diseases
+      );
+
       if (!status.aborted) {
         if (res && res.data) {
           const formData = {
@@ -308,7 +351,7 @@ export const ConsultationForm = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
               ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
-                  ?.id || "Comfort"
+                ?.id || "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             op_no: res.data.op_no ? res.data.op_no : "",
@@ -319,13 +362,26 @@ export const ConsultationForm = (props: any) => {
             assigned_to: res.data.assigned_to || "",
             ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
             special_instruction: res.data.special_instruction || "",
-            weight: res.data.weight ? res.data.weight : "",
-            height: res.data.height ? res.data.height : "",
             bed: res.data?.current_bed?.bed_object || null,
             discharge_reason: res.data?.discharge_reason || "",
             cause_of_death: res.data?.discharge_notes || "",
             death_datetime: res.data?.death_datetime || "",
             death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
+            family_details:
+              res.data.health_details_object?.family_details || "",
+            has_allergy:
+              `${res.data.health_details_object?.has_allergy}` || "false",
+            allergies: res.data.health_details_object?.allergies || "",
+            blood_group: res.data.health_details_object?.blood_group
+              ? res.data.health_details_object?.blood_group === "UNKNOWN"
+                ? "UNK"
+                : res.data.health_details_object?.blood_group
+              : "",
+            height: res.data.health_details_object?.height || 0.0,
+            weight: res.data.health_details_object?.weight || 0.0,
+            ongoing_medication:
+              res.data.medical_history_object?.ongoing_medication,
+            present_health: res.data.medical_history_object?.present_health,
           };
           dispatch({ type: "set_form", form: formData });
           setBed(formData.bed);
@@ -561,6 +617,65 @@ export const ConsultationForm = (props: any) => {
           return;
         }
 
+        case "blood_group":
+          if (!state.form[field]) {
+            errors[field] = "Please select a blood group";
+            invalidForm = true;
+          }
+          return;
+
+        case "has_allergy":
+          if (state.form.has_allergy === "true") {
+            if (state.form.allergies === "") {
+              errors["allergies"] = "Please enter Patient's allergies";
+              invalidForm = true;
+            }
+          }
+          return;
+
+        case "vaccination_history": {
+          let invalid = false;
+          for (const f of vaccination) {
+            if (
+              !f.vaccine?.replace(/\s/g, "").length ||
+              !f.date?.replace(/\s/g, "").length
+            ) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "Vaccination field can not be empty";
+            invalidForm = true;
+          }
+          return;
+        }
+        case "patient_diseases": {
+          let invalid = false;
+          for (const f of diseases) {
+            if (
+              !f.disease?.replace(/\s/g, "").length ||
+              !f.details?.replace(/\s/g, "").length ||
+              !f.date?.replace(/\s/g, "").length
+            ) {
+              invalid = true;
+              break;
+            }
+          }
+          if (invalid) {
+            errors[field] = "Disease field can not be empty";
+            invalidForm = true;
+          }
+          return;
+        }
+        case "weight":
+        case "height":
+          if (!state.form[field]) {
+            errors[field] = "Please enter a value";
+            invalidForm = true;
+          }
+          return;
+
         default:
           return;
       }
@@ -661,6 +776,23 @@ export const ConsultationForm = (props: any) => {
         weight: Number(state.form.weight),
         height: Number(state.form.height),
         bed: bed && bed instanceof Array ? bed[0]?.id : bed?.id,
+        new_health_details: {
+          family_details: state.form.family_details,
+          has_allergy: state.form.has_allergy,
+          allergies:
+            state.form.has_allergy === "true" ? state.form.allergies : "",
+          blood_group: state.form.blood_group
+            ? state.form.blood_group
+            : undefined,
+          height: state.form.height,
+          weight: state.form.weight,
+          vaccination_history: vaccination,
+        },
+        new_medical_history: {
+          ongoing_medication: state.form.ongoing_medication,
+          present_health: state.form.present_health,
+          patient_diseases: diseases,
+        },
       };
 
       const res = await dispatchAction(
@@ -845,9 +977,8 @@ export const ConsultationForm = (props: any) => {
             const section = sections[sectionTitle as ConsultationFormSection];
             return (
               <button
-                className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
-                  isCurrent ? "bg-white text-primary-500" : "bg-transparent"
-                } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
+                className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${isCurrent ? "bg-white text-primary-500" : "bg-transparent"
+                  } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
                 onClick={() => {
                   section.ref.current?.scrollIntoView({
                     behavior: "smooth",
@@ -951,7 +1082,7 @@ export const ConsultationForm = (props: any) => {
                         {Math.sqrt(
                           (Number(state.form.weight) *
                             Number(state.form.height)) /
-                            3600
+                          3600
                         ).toFixed(2)}
                         m<sup>2</sup>
                       </span>

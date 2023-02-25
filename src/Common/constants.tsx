@@ -430,26 +430,16 @@ export const TEST_TYPE = [
   "POCPCR",
 ];
 
-export const VACCINES = [
-  "CoviShield",
-  "Covaxin",
-  "Sputnik",
-  "Moderna",
-  "Pfizer",
-  "Janssen",
-  "Sinovac",
-];
-
 export const BLOOD_GROUPS = [
-  "UNK",
-  "A+",
-  "A-",
-  "B+",
-  "B-",
-  "AB+",
-  "AB-",
-  "O+",
-  "O-",
+  { id: 0, text: "UNK" },
+  { id: 1, text: "A+" },
+  { id: 2, text: "A-" },
+  { id: 3, text: "B+" },
+  { id: 4, text: "B-" },
+  { id: 5, text: "AB+" },
+  { id: 6, text: "AB-" },
+  { id: 7, text: "O+" },
+  { id: 8, text: "O-" },
 ];
 
 export const SAMPLE_TYPE_CHOICES = [
