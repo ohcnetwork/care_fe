@@ -159,7 +159,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     return () => clearTimeout(timeout);
   }, [camTimeout]);
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
-    StreamStatus.Offline
+    StreamStatus.Loading
   );
 
   const url = !isIOS
@@ -220,7 +220,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       streamStatus !== StreamStatus.Playing &&
       streamStatus !== StreamStatus.Offline
     ) {
-      setStreamStatus(StreamStatus.Loading);
+      setStreamStatus(StreamStatus.Retrying);
       tId = setTimeout(() => {
         startStream({
           onSuccess: () => setStreamStatus(StreamStatus.Playing),
@@ -484,6 +484,14 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                 STATUS: <span className="text-red-600"> LOADING</span>
               </p>
               <p className="font-semibold ">Fetching latest feed.</p>
+            </div>
+          )}
+          {streamStatus === StreamStatus.Retrying && (
+            <div className="text-center">
+              <p className="font-bold ">
+                STATUS: <span className="text-red-600"> RETRYING</span>
+              </p>
+              <p className="font-semibold ">Retrying to connect.</p>
             </div>
           )}
         </div>

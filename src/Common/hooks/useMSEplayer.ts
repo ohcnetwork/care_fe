@@ -26,6 +26,7 @@ export enum StreamStatus {
   Playing,
   Stop,
   Loading,
+  Retrying,
   Offline,
 }
 
@@ -183,6 +184,7 @@ export const useMSEMediaPlayer = ({
             wsRef.current = new WebSocket(url);
             const ws = wsRef.current;
             ws.onerror = function (error: any) {
+              console.log("encountered error", error);
               onError?.(error);
               ws.close();
             };
