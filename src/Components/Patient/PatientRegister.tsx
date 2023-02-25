@@ -63,9 +63,11 @@ import { debounce } from "lodash";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import DateFormField from "../Form/FormFields/DateFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -499,9 +501,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       switch (field) {
         case "address":
         case "name":
-        case "gender":
           if (!state.form[field]) {
             errors[field] = "Field is required";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
+        case "gender":
+          if (!state.form[field]) {
+            errors[field] = (
+              <span className="text-red-500">Please select Gender</span>
+            );
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -527,7 +537,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             state.form.nationality === "India" &&
             !Number(state.form[field])
           ) {
-            errors[field] = "Please select local body";
+            errors[field] = (
+              <span className="text-red-500">Please select local body</span>
+            );
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -537,7 +549,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             state.form.nationality === "India" &&
             !Number(state.form[field])
           ) {
-            errors[field] = "Please select ward";
+            errors[field] = (
+              <span className="text-red-500">Please select ward</span>
+            );
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -547,7 +561,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             state.form.nationality === "India" &&
             !Number(state.form[field])
           ) {
-            errors[field] = "Please select district";
+            errors[field] = (
+              <span className="text-red-500">Please select district</span>
+            );
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -557,7 +573,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             state.form.nationality === "India" &&
             !Number(state.form[field])
           ) {
-            errors[field] = "Please enter the state";
+            errors[field] = (
+              <span className="text-red-500">Please enter the state</span>
+            );
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -621,7 +639,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
         case "blood_group":
           if (!state.form[field]) {
-            errors[field] = "Please select a blood group";
+            errors[field] = (
+              <span className="text-red-500">Please enter the Blood group</span>
+            );
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -677,7 +697,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
         case "medical_history":
           if (!state.form[field].length) {
-            errors[field] = "Please fill the medical history";
+            errors[field] = (
+              <span className="text-red-500">
+                Please fill the medical history
+              </span>
+            );
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -923,6 +947,17 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       dispatch({ type: "set_form", form });
     }
   };
+  const handleDOBChange = (e: FieldChangeEvent<Date>) => {
+    if (moment(e.value).isValid()) {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          [e.name]: moment(e.value).format("YYYY-MM-DD"),
+        },
+      });
+    }
+  };
 
   const handleMedicalCheckboxChange = (e: any, id: number) => {
     const form = { ...state.form };
@@ -1144,38 +1179,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           <FieldLabel htmlFor="name" id="name-label" required>
                             Name
                           </FieldLabel>
-                          <TextInputField
+                          <TextFormField
                             id="name"
                             name="name"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
-                            autoComplete="no"
                             value={state.form.name}
-                            onChange={handleChange}
-                            errors={state.errors.name}
+                            onChange={handleFormFieldChange}
+                            error={state.errors.name}
                           />
                         </div>
-                        <div data-testid="date-of-birth" id="date_of_birth-div">
-                          <FieldLabel
-                            htmlFor="date_of_birth"
-                            id="date_of_birth-label"
-                            required
-                          >
-                            Date of birth
-                          </FieldLabel>
-                          <DateInputField
-                            fullWidth={true}
+                        <div>
+                          <DateFormField
                             id="date_of_birth"
+                            name="date_of_birth"
+                            label="Date of Birth"
+                            required
                             value={state.form.date_of_birth}
-                            onChange={(date) =>
-                              handleDateChange(date, "date_of_birth")
-                            }
-                            errors={state.errors.date_of_birth}
-                            inputVariant="outlined"
-                            margin="dense"
-                            openTo="year"
-                            disableFuture={true}
+                            onChange={handleDOBChange}
+                            error={state.errors.date_of_birth}
+                            position="LEFT"
+                            disableFuture
                           />
                         </div>
                         <div data-testid="Gender" id="gender-div">
@@ -1291,15 +1313,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           >
                             Pincode
                           </FieldLabel>
-                          <TextInputField
+                          <TextFormField
                             id="pincode"
                             name="pincode"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
                             value={state.form.pincode}
                             onChange={handlePincodeChange}
-                            errors={state.errors.pincode}
+                            error={state.errors.pincode}
                           />
                           {showAutoFilledPincode && (
                             <div>
@@ -1469,14 +1488,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Passport Number
                             </FieldLabel>
-                            <TextInputField
+                            <TextFormField
                               id="passport_no"
                               name="passport_no"
-                              variant="outlined"
-                              margin="dense"
                               value={state.form.passport_no}
-                              onChange={handleChange}
-                              errors={state.errors.passport_no}
+                              onChange={handleFormFieldChange}
+                              error={state.errors.passport_no}
                             />
                           </div>
                         )}
