@@ -1,8 +1,7 @@
-import { PrescriptionDropdown } from "./PrescriptionDropdown";
-
 import vaccines from "./assets/vaccines.json";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { useState } from "react";
+import AutoCompleteAsync from "../../Form/AutoCompleteAsync";
 
 interface VaccinationBuilderProps<T> {
   vaccinations: T[];
@@ -64,7 +63,7 @@ export default function VaccinationBuilder(
               </h4>
               <button
                 type="button"
-                className="h-full flex justify-center items-center gap-2 text-gray-100 rounded-md text-sm transition hover:bg-red-600 px-3 py-1 bg-red-500"
+                className="h-full flex justify-center items-center gap-1.5 text-gray-100 rounded-md text-sm transition hover:bg-red-600 px-3 py-1 bg-red-500"
                 onClick={() => {
                   setVaccinations(
                     vaccinations.filter((_, index) => i != index)
@@ -75,60 +74,74 @@ export default function VaccinationBuilder(
                 <CareIcon className="care-l-trash-alt w-4 h-4" />
               </button>
             </div>
-            <div className="flex gap-2 flex-col md:flex-row">
-              <div>
-                Vaccine
-                <PrescriptionDropdown
+            <div className="flex gap-2 flex-col md:flex-row items-center md:mb-4">
+              <div className="w-full">
+                <div className="mb-2">
+                  Vaccine
+                  <span className="font-bold text-danger-500">{" *"}</span>
+                </div>
+                <AutoCompleteAsync
                   placeholder="Vaccine"
-                  options={vaccines}
-                  value={vaccination.vaccine || ""}
-                  setValue={setVaccine}
+                  selected={vaccination.vaccine}
+                  fetchData={(search) => {
+                    return Promise.resolve(
+                      vaccines.filter((vaccine: string) =>
+                        vaccine.toLowerCase().includes(search.toLowerCase())
+                      )
+                    );
+                  }}
+                  optionLabel={(option) => option}
+                  onChange={setVaccine}
+                  className="-mt-1"
+                  showNOptions={vaccines.length}
                   onFocus={() => setActiveIdx(i)}
                   onBlur={() => setActiveIdx(null)}
                 />
               </div>
-              <div>
-                Doses
-                <input
-                  type="number"
-                  className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                  value={vaccination.doses}
-                  placeholder="Doses"
-                  min={0}
-                  onChange={(e) => {
-                    let value = parseInt(e.target.value);
-                    if (value < 0) {
-                      value = 0;
-                    }
-                    setItem(
-                      {
-                        ...vaccination,
-                        doses: value,
-                      },
-                      i
-                    );
-                  }}
-                  required
-                />
-              </div>
-              <div>
-                Date
-                <input
-                  type="date"
-                  className="focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                  value={vaccination.date}
-                  placeholder="Date"
-                  onChange={(e) => {
-                    setItem(
-                      {
-                        ...vaccination,
-                        date: e.target.value,
-                      },
-                      i
-                    );
-                  }}
-                  required
-                />
+              <div className="flex gap-2">
+                <div>
+                  <div className="mb-1">Doses</div>
+                  <input
+                    type="number"
+                    className="cui-input-base"
+                    value={vaccination.doses}
+                    placeholder="Doses"
+                    min={0}
+                    onChange={(e) => {
+                      let value = parseInt(e.target.value);
+                      if (value < 0) {
+                        value = 0;
+                      }
+                      setItem(
+                        {
+                          ...vaccination,
+                          doses: value,
+                        },
+                        i
+                      );
+                    }}
+                    required
+                  />
+                </div>
+                <div>
+                  <div className="mb-1">Date</div>
+                  <input
+                    type="date"
+                    className="cui-input-base"
+                    value={vaccination.date}
+                    placeholder="Date"
+                    onChange={(e) => {
+                      setItem(
+                        {
+                          ...vaccination,
+                          date: e.target.value,
+                        },
+                        i
+                      );
+                    }}
+                    required
+                  />
+                </div>
               </div>
             </div>
           </div>

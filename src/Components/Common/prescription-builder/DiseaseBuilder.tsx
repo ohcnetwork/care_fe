@@ -1,4 +1,8 @@
-import { DiseaseSelect } from "../DiseaseSelect";
+import { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { listICD11Diagnosis } from "../../../Redux/actions";
+import AutoCompleteAsync from "../../Form/AutoCompleteAsync";
 
 interface DiseaseBuilderProps<T> {
   diseases: T[];
@@ -23,6 +27,17 @@ export default function DiseaseBuilder(
   props: DiseaseBuilderProps<DiseaseDetails>
 ) {
   const { diseases, setDiseases } = props;
+  const dispatch: any = useDispatch();
+  const fetchDisease = useCallback(
+    async (search: string) => {
+      const res = await dispatch(listICD11Diagnosis({ query: search }, ""));
+      return (res?.data as Array<any>).reduce(
+        (disease, cur) => disease.concat(cur.label),
+        []
+      );
+    },
+    [dispatch]
+  );
 
   const setItem = (object: DiseaseDetails, i: number) => {
     setDiseases(
@@ -30,44 +45,69 @@ export default function DiseaseBuilder(
     );
   };
 
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+
   return (
     <div className="mt-2">
-      {diseases.map((disease, i) => {
-        const setDisease = (selected: string) => {
-          setItem(
-            {
-              ...disease,
-              disease: selected,
-            },
-            i
-          );
-        };
-
-        return (
-          <div
-            key={i}
-            className="border-b border-b-gray-500 border-dashed py-2 text-xs text-gray-600"
-          >
-            <div className="flex gap-2 flex-col md:flex-row">
-              <div>
+      {diseases.map((cur, i) => (
+        <div
+          key={i}
+          className={`border-2 ${
+            activeIdx === i ? "border-primary-500" : "border-gray-500"
+          } mb-2 border-dashed border-spacing-2 p-3 rounded-md text-sm text-gray-600`}
+        >
+          <div className="flex flex-wrap md:flex-row md:gap-4 gap-2 items-center mb-2">
+            <h4 className="text-base font-medium text-gray-700">
+              Disease No. {i + 1}
+            </h4>
+            <button
+              type="button"
+              className="h-full flex justify-center items-center gap-1.5 text-gray-100 rounded-md text-sm transition hover:bg-red-600 px-3 py-1 bg-red-500"
+              onClick={() => {
+                setDiseases(diseases.filter((_, index) => i != index));
+              }}
+            >
+              Delete Disease
+              <CareIcon className="care-l-trash-alt w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex gap-2 flex-col">
+            <div className="w-full">
+              <div className="mb-2">
                 Disease
-                <DiseaseSelect
-                  name="disease"
-                  selected={disease.disease}
-                  setSelected={setDisease}
-                />
+                <span className="font-bold text-danger-500">{" *"}</span>
               </div>
-              <div>
-                Details
+              <AutoCompleteAsync
+                placeholder="Disease"
+                selected={cur.disease}
+                fetchData={fetchDisease}
+                optionLabel={(option) => option}
+                onChange={(selected) => {
+                  setItem(
+                    {
+                      ...cur,
+                      disease: selected,
+                    },
+                    i
+                  );
+                }}
+                className="-mt-1 z-10"
+                onFocus={() => setActiveIdx(i)}
+                onBlur={() => setActiveIdx(null)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <div className="w-full">
+                <div className="mb-1">Details</div>
                 <input
-                  type="string"
-                  className="w-full  focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-3 mt-1 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                  value={disease.details}
+                  type="text"
+                  className="cui-input-base"
+                  value={cur.details}
                   placeholder="Details"
                   onChange={(e) => {
                     setItem(
                       {
-                        ...disease,
+                        ...cur,
                         details: e.target.value,
                       },
                       i
@@ -76,17 +116,17 @@ export default function DiseaseBuilder(
                   required
                 />
               </div>
-              <div>
-                Date
+              <div className="w-full">
+                <div className="mb-1">Date</div>
                 <input
                   type="date"
-                  className="focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-3 mt-1 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                  value={disease.date}
+                  className="cui-input-base"
+                  value={cur.date}
                   placeholder="Date"
                   onChange={(e) => {
                     setItem(
                       {
-                        ...disease,
+                        ...cur,
                         date: e.target.value,
                       },
                       i
@@ -95,19 +135,10 @@ export default function DiseaseBuilder(
                   required
                 />
               </div>
-              <button
-                type="button"
-                className="text-gray-400 text-base transition hover:text-red-500"
-                onClick={() => {
-                  setDiseases(diseases.filter((disease, index) => i != index));
-                }}
-              >
-                <i className="fas fa-trash" />
-              </button>
             </div>
           </div>
-        );
-      })}
+        </div>
+      ))}
       <button
         type="button"
         onClick={() => {
