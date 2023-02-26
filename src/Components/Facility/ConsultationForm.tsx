@@ -866,12 +866,15 @@ export const ConsultationForm = (props: any) => {
           </>
         )}
 
-        <TextAreaFormField
-          label="General Instructions (Advice)"
-          required
-          placeholder="Consultation Notes"
-          {...field("consultation_notes")}
-        />
+        {state.form.suggestion !== "DD" && (
+          <TextAreaFormField
+            label="General Instructions (Advice)"
+            required
+            placeholder="Consultation Notes"
+            {...field("consultation_notes")}
+          />
+        )}
+
 
         <div id="investigation">
           <FieldLabel>Investigation Suggestions</FieldLabel>
@@ -881,7 +884,17 @@ export const ConsultationForm = (props: any) => {
           />
           <ErrorHelperText error={state.errors.investigation} />
         </div>
-
+        
+        <div id="investigation">
+          <FieldLabel>Investigation Suggestions</FieldLabel>
+          <InvestigationBuilder
+            investigations={InvestigationAdvice}
+            setInvestigations={setInvestigationAdvice}
+          />
+          <ErrorHelperText error={state.errors.investigation} />
+        </div>
+        
+        {state.form.suggestion !== "DD" && (
         <div id="discharge_advice">
           <FieldLabel>Prescription Medication</FieldLabel>
           <PrescriptionBuilder
@@ -890,7 +903,9 @@ export const ConsultationForm = (props: any) => {
           />
           <ErrorHelperText error={state.errors.discharge_advice} />
         </div>
+        )}
 
+      {state.form.suggestion !== "DD" && (
         <div id="prn_prescription">
           <FieldLabel>PRN Prescription</FieldLabel>
           <PRNPrescriptionBuilder
@@ -899,7 +914,9 @@ export const ConsultationForm = (props: any) => {
           />
           <ErrorHelperText error={state.errors.prn_prescription} />
         </div>
+      )}
 
+      {state.form.suggestion !== "DD" && (
         <div id="procedure">
           <FieldLabel>Procedures</FieldLabel>
           <ProcedureBuilder
@@ -908,6 +925,7 @@ export const ConsultationForm = (props: any) => {
           />
           <ErrorHelperText error={state.errors.procedure} />
         </div>
+      )}
 
         <TextFormField
           {...field("ip_no")}
@@ -961,52 +979,56 @@ export const ConsultationForm = (props: any) => {
           </div>
         )}
 
-        {/* Telemedicine Fields */}
-        <div id="is_telemedicine">
-          <FieldLabel>Telemedicine</FieldLabel>
-          <RadioGroup
-            aria-label="covid"
-            name="is_telemedicine"
-            value={state.form.is_telemedicine}
-            onChange={handleTelemedicineChange}
-            style={{ padding: "0px 5px" }}
-          >
-            <Box display="flex" flexDirection="row">
-              <FormControlLabel value="true" control={<Radio />} label="Yes" />
-              <FormControlLabel value="false" control={<Radio />} label="No" />
-            </Box>
-          </RadioGroup>
-          <ErrorHelperText error={state.errors.is_telemedicine} />
-        </div>
+        {state.form.suggestion !== "DD" && (
+          {/* Telemedicine Fields */}
+          <div id="is_telemedicine">
+            <FieldLabel>Telemedicine</FieldLabel>
+            <RadioGroup
+              aria-label="covid"
+              name="is_telemedicine"
+              value={state.form.is_telemedicine}
+              onChange={handleTelemedicineChange}
+              style={{ padding: "0px 5px" }}
+            >
+              <Box display="flex" flexDirection="row">
+                <FormControlLabel value="true" control={<Radio />} label="Yes" />
+                <FormControlLabel value="false" control={<Radio />} label="No" />
+              </Box>
+            </RadioGroup>
+            <ErrorHelperText error={state.errors.is_telemedicine} />
+          </div>
+        )}
 
-        {JSON.parse(state.form.is_telemedicine) && (
-          <div className="flex flex-col md:flex-row justify-between gap-3">
-            <SelectFormField
-              {...selectField("review_interval")}
-              label="Review After"
-              options={REVIEW_AT_CHOICES}
-            />
+        {state.form.suggestion !== "DD" && (
+          {JSON.parse(state.form.is_telemedicine) && (
+            <div className="flex flex-col md:flex-row justify-between gap-3">
+              <SelectFormField
+                {...selectField("review_interval")}
+                label="Review After"
+                options={REVIEW_AT_CHOICES}
+              />
 
-            <div className="flex-1">
-              <OnlineUsersSelect
-                userId={state.form.assigned_to}
-                selectedUser={state.form.assigned_to_object}
-                onSelect={handleDoctorSelect}
-                user_type="Doctor"
-                outline
+              <div className="flex-1">
+                <OnlineUsersSelect
+                  userId={state.form.assigned_to}
+                  selectedUser={state.form.assigned_to_object}
+                  onSelect={handleDoctorSelect}
+                  user_type="Doctor"
+                  outline
+                />
+              </div>
+
+              <SelectFormField
+                className="flex-1"
+                {...field("action")}
+                label="Action"
+                required
+                options={TELEMEDICINE_ACTIONS}
+                optionLabel={(option) => option.desc}
+                optionValue={(option) => option.text}
               />
             </div>
-
-            <SelectFormField
-              className="flex-1"
-              {...field("action")}
-              label="Action"
-              required
-              options={TELEMEDICINE_ACTIONS}
-              optionLabel={(option) => option.desc}
-              optionValue={(option) => option.text}
-            />
-          </div>
+          )}
         )}
 
         <TextAreaFormField
