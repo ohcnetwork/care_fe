@@ -38,6 +38,7 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
+import * as Notification from "../../Utils/Notifications.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -674,7 +675,7 @@ export const PatientManager = () => {
             }}
           >
             <CareIcon className="care-l-plus text-lg" />
-            <p>Add Patient Details</p>
+            <p className="lg:my-[2px]">Add Patient Details</p>
           </ButtonV2>
           <ButtonV2
             ghost
@@ -711,7 +712,7 @@ export const PatientManager = () => {
                 {" "}
               </line>
             </svg>
-            <span>Advanced Filters</span>
+            <span className="lg:my-[2px]">Advanced Filters</span>
           </ButtonV2>
           <DropdownMenu
             title="Sort by"
@@ -743,20 +744,40 @@ export const PatientManager = () => {
             })}
           </DropdownMenu>
           <div className="tooltip">
-            <ExportMenu
-              disabled={!isExportAllowed}
-              exportItems={[
-                {
-                  label:
-                    tabValue === 0 ? "Live patients" : "Discharged patients",
-                  action: exportPatients(true),
-                },
-                {
-                  label: "All patients",
-                  action: exportPatients(false),
-                },
-              ]}
-            />
+            {!isExportAllowed ? (
+              <ButtonV2
+                onClick={() => {
+                  advancedFilter.setShow(true);
+                  setTimeout(() => {
+                    const element = document.getElementById("bed-type-select");
+                    if (element) element.scrollIntoView({ behavior: "smooth" });
+                    Notification.Warn({
+                      msg: "Please select a seven day period.",
+                    });
+                  }, 500);
+                }}
+                className="lg:w-fit w-full mr-5"
+              >
+                <CareIcon className="care-l-import" />
+                <span className="lg:my-[3px]">Export</span>
+              </ButtonV2>
+            ) : (
+              <ExportMenu
+                disabled={!isExportAllowed}
+                exportItems={[
+                  {
+                    label:
+                      tabValue === 0 ? "Live patients" : "Discharged patients",
+                    action: exportPatients(true),
+                  },
+                  {
+                    label: "All patients",
+                    action: exportPatients(false),
+                  },
+                ]}
+              />
+            )}
+
             {!isExportAllowed && (
               <span className="tooltip-text tooltip-bottom -translate-x-1/2">
                 Select a seven day period
