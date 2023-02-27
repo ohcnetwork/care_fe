@@ -1,4 +1,4 @@
-import { Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent } from "@material-ui/core";
 import loadable from "@loadable/component";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -10,14 +10,13 @@ import {
   updateFacilityBed,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  MultilineInputField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { SelectField } from "../Common/HelperInputFields";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import TextFormField from "../Form/FormFields/TextFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import { FieldLabel } from "../Form/FormFields/FormField";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -158,33 +157,32 @@ export const AddBedForm = (props: BedFormProps) => {
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1">
                 <div>
-                  <InputLabel id="name">Name*</InputLabel>
-                  <TextInputField
+                  <TextFormField
                     name="name"
-                    variant="outlined"
-                    margin="dense"
                     type="text"
+                    label="Name"
+                    id="name"
+                    required
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    errors={errors.name}
+                    onChange={(e) => setName(e.value)}
+                    error={errors.name}
                   />
                 </div>
                 <div>
-                  <InputLabel id="description">Description</InputLabel>
-                  <MultilineInputField
+                  <TextAreaFormField
                     rows={5}
+                    label="Description"
                     name="description"
-                    variant="outlined"
-                    margin="dense"
-                    type="float"
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    errors={errors.description}
+                    onChange={(e) => setDescription(e.value)}
+                    error={errors.description}
                   />
                 </div>
 
                 <div>
-                  <InputLabel id="bedType">Bed Type*</InputLabel>
+                  <FieldLabel required id="bedType">
+                    Bed Type
+                  </FieldLabel>
                   <SelectField
                     id="bed-type"
                     fullWidth
