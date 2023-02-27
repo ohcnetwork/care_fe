@@ -570,7 +570,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           <a
                             href={url[item.id]}
                             download={item.name}
-                            className="Button outline-offset-1 button-size-default button-shape-square button-primary-default m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500 flex justify-center"
+                            className="Button gap-2 outline-offset-1 button-size-default button-shape-square button-primary-default m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500 flex justify-center"
                           >
                             <CareIcon className="care-l-arrow-circle-down text-lg" />{" "}
                             DOWNLOAD
