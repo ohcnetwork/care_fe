@@ -1,9 +1,8 @@
 import React, { useEffect, useReducer, useState } from "react";
-import { MultiSelectField } from "../../Common/HelperInputFields";
 import { TestTable } from "./Table";
 import { useDispatch } from "react-redux";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import { Checkbox, TextField, InputLabel } from "@material-ui/core";
+import { Checkbox, TextField } from "@material-ui/core";
 import {
   createInvestigation,
   listInvestigationGroups,
@@ -13,6 +12,7 @@ import {
 import * as Notification from "../../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
+import { FieldLabel } from "../../Form/FormFields/FormField";
 
 const Loading = loadable(() => import("../../Common/Loading"));
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
@@ -57,7 +57,7 @@ const testFormReducer = (state = initialState, action: any) => {
   }
 };
 
-let listOfInvestigations = (
+const listOfInvestigations = (
   group_id: string,
   investigations: InvestigationType[]
 ) => {
@@ -66,7 +66,7 @@ let listOfInvestigations = (
   );
 };
 
-let findGroup = (group_id: string, groups: Group[]) => {
+const findGroup = (group_id: string, groups: Group[]) => {
   return groups.find((g) => g.external_id === group_id);
 };
 
@@ -75,7 +75,7 @@ const Investigation = (props: {
   patientId: string;
   facilityId: string;
 }) => {
-  const { consultationId, patientId, facilityId } = props;
+  const { patientId, facilityId } = props;
 
   const dispatch: any = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState<string[]>([]);
@@ -140,12 +140,12 @@ const Investigation = (props: {
   }, [props.consultationId]);
 
   const initialiseForm = () => {
-    let investigationsArray = selectedGroup.map((group_id: string) => {
+    const investigationsArray = selectedGroup.map((group_id: string) => {
       return listOfInvestigations(group_id, investigations);
     });
 
-    let flatInvestigations = investigationsArray.flat();
-    let form: any = {};
+    const flatInvestigations = investigationsArray.flat();
+    const form: any = {};
 
     flatInvestigations.forEach(
       (i: InvestigationType) =>
@@ -163,7 +163,7 @@ const Investigation = (props: {
     setState({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async () => {
     initialiseForm();
     if (!saving) {
       setSaving(true);
@@ -220,9 +220,9 @@ const Investigation = (props: {
         }}
       />
       <div className="mt-5">
-        <label className="text-sm" id="investigation-group-label">
+        <FieldLabel className="text-sm" id="investigation-group-label">
           Search Investigations & Groups
-        </label>
+        </FieldLabel>
         <Autocomplete
           multiple
           id="search-by-test"
