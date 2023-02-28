@@ -798,6 +798,20 @@ function UserFacilities(props: { user: any }) {
               </div>
             </div>
           )}
+          {!user?.home_facility_object && facilities.length === 0 && (
+            <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
+              <div className="w-full">
+                <img
+                  src={`${process.env.PUBLIC_URL}/images/404.svg`}
+                  alt="Error 404"
+                  className="w-80 mx-auto"
+                />
+              </div>
+              <p className="text-lg font-semibold text-center text-primary pt-4">
+                No Linked Facilities
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
