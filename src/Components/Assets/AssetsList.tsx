@@ -2,7 +2,7 @@ import { useDispatch } from "react-redux";
 import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
-import PageTitle from "../Common/PageTitle";
+import Page from "../Common/components/Page";
 import {
   getAnyFacility,
   listAssets,
@@ -280,7 +280,7 @@ const AssetsList = () => {
   return (
     <div className="px-6">
       <div className="flex justify-between items-center">
-        <PageTitle title="Assets" breadcrumbs={false} hideBack />
+        <Page title="Assets" breadcrumbs={false} hideBack />
         {authorizedForImportExport && (
           <div className="tooltip">
             <ExportMenu
