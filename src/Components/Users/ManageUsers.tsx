@@ -803,7 +803,7 @@ function UserFacilities(props: { user: any }) {
               <div className="w-full">
                 <img
                   src={`${process.env.PUBLIC_URL}/images/404.svg`}
-                  alt="Error 404"
+                  alt="No linked facilities"
                   className="w-80 mx-auto"
                 />
               </div>
