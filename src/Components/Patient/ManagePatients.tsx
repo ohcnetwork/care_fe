@@ -36,8 +36,10 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
+import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -74,6 +76,7 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
 };
 
 export const PatientManager = () => {
+  const { t } = useTranslation();
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>();
   const [isLoading, setIsLoading] = useState(false);
@@ -485,16 +488,15 @@ export const PatientManager = () => {
                   <div className="mb-2">
                     <div className="flex flex-wrap items-center">
                       <p className="text-sm font-medium text-gray-700 mr-2">
-                        {" "}
                         {patient.facility_object.name}
                       </p>
-                      <p className="text-sm">
-                        <span className="text-gray-600">last updated</span>{" "}
-                        <span className="font-medium text-gray-900">
-                          {" "}
-                          {moment(patient.modified_date).fromNow()}
-                        </span>
-                      </p>
+                      <RecordMeta
+                        className="text-sm text-gray-900"
+                        prefix={
+                          <span className="text-gray-600">{t("updated")}</span>
+                        }
+                        time={patient.modified_date}
+                      />
                     </div>
                   </div>
                 )}

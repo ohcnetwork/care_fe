@@ -30,6 +30,7 @@ import DialogModal from "../Common/Dialog";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -534,14 +535,16 @@ export const FileUpload = (props: FileUploadProps) => {
                         </span>{" "}
                         {item.uploaded_by ? item.uploaded_by.username : null}
                       </div>
-                      <div>
-                        <span className="font-semibold leading-relaxed">
-                          Created On :
-                        </span>{" "}
-                        {item.created_date
-                          ? formatDate(item.created_date)
-                          : "-"}
-                      </div>
+                      {item.created_date && (
+                        <RecordMeta
+                          prefix={
+                            <span className="font-semibold leading-relaxed">
+                              {t("created")}:
+                            </span>
+                          }
+                          time={item.created_date}
+                        />
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -653,14 +656,16 @@ export const FileUpload = (props: FileUploadProps) => {
                         </span>{" "}
                         {item.uploaded_by ? item.uploaded_by.username : null}
                       </div>
-                      <div>
-                        <span className="font-semibold leading-relaxed">
-                          Created On :
-                        </span>{" "}
-                        {item.created_date
-                          ? formatDate(item.created_date)
-                          : "-"}
-                      </div>
+                      {item.created_date && (
+                        <RecordMeta
+                          prefix={
+                            <span className="font-semibold leading-relaxed">
+                              {t("created")}:
+                            </span>
+                          }
+                          time={item.created_date}
+                        />
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center">
@@ -779,12 +784,16 @@ export const FileUpload = (props: FileUploadProps) => {
                       </span>{" "}
                       {item.uploaded_by ? item.uploaded_by.username : null}
                     </div>
-                    <div>
-                      <span className="font-semibold leading-relaxed">
-                        Created On :
-                      </span>{" "}
-                      {item.created_date ? formatDate(item.created_date) : "-"}
-                    </div>
+                    {item.created_date && (
+                      <RecordMeta
+                        prefix={
+                          <span className="font-semibold leading-relaxed">
+                            {t("created")}:
+                          </span>
+                        }
+                        time={item.created_date}
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center">
