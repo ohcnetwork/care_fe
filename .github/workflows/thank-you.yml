@@ -1,0 +1,45 @@
+name: Say thanks for the contributors
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  if_merged:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+    permissions:
+      issues: write
+    steps:
+      - name: Add thankyou note
+        uses: actions/github-script@v6.3.3
+        with:
+          script: |
+            const thankyouNote = 'We truly appreciate your efforts. Thank you for taking the time to contribute, this is a very valuable contribution to us :1st_place_medal:. We always welcome your contribution :slightly_smiling_face:, so feel free to contribute to anything anytime, and never lose that spirit of innovation :raised_hands:.'
+            const options = {
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            }
+
+            const result = await github.rest.issues.get({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+
+            const { assignees } = result.data
+
+            if (assignees.length == 0) {
+              await github.rest.issues.createComment({ ...options, body })
+              return
+            }
+
+            const assignees_tagged = assignees.map((user) => '@' + user.login).join(' ')
+            await github.rest.issues.createComment({
+              ...options,
+              body: `${assignees_tagged} ${thankyouNote}`,
+            })
+
