@@ -401,11 +401,13 @@ export const PatientHome = (props: any) => {
       <div id="revamp">
         <PageTitle
           title={"Patient Details"}
-          backUrl="/patients"
           crumbsReplacements={{
             [facilityId]: { name: patientData?.facility_object?.name },
             [id]: { name: patientData?.name },
           }}
+          backUrl={
+            facilityId ? `/facility/${facilityId}/patients` : "/patients"
+          }
         />
 
         <div className="relative mt-2">
@@ -666,11 +668,7 @@ export const PatientHome = (props: any) => {
                         Countries travelled
                       </div>
                       <div className="mt-1 text-sm leading-5 font-medium">
-                        {Array.isArray(patientData.countries_travelled)
-                          ? patientData.countries_travelled.join(", ")
-                          : patientData.countries_travelled
-                              .split(",")
-                              .join(", ")}
+                        {patientData.countries_travelled.join(", ")}
                       </div>
                     </div>
                   )}

@@ -254,7 +254,7 @@ export default function ShiftDetails(props: { id: string }) {
             <>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  {t("State")}:{" "}
+                  {t("state")}:{" "}
                 </span>
                 {patientData?.state_object?.name}
               </div>
@@ -340,9 +340,7 @@ export default function ShiftDetails(props: { id: string }) {
                 <span className="font-semibold leading-relaxed">
                   {t("countries_travelled")}:{" "}
                 </span>
-                {Array.isArray(patientData?.countries_travelled)
-                  ? patientData?.countries_travelled.join(", ")
-                  : patientData?.countries_travelled.split(",").join(", ")}
+                {patientData?.countries_travelled.join(", ")}
               </div>
             )}
           {patientData?.ongoing_medication && (
@@ -411,7 +409,7 @@ export default function ShiftDetails(props: { id: string }) {
         </div>
         <div>
           <span className="font-semibold leading-relaxed mr-1">
-            {t("State")}:{" "}
+            {t("state")}:{" "}
           </span>
           {facilityData?.state_object?.name || "--"}
         </div>
@@ -645,7 +643,10 @@ export default function ShiftDetails(props: { id: string }) {
       ) : (
         <div className="mx-3 md:mx-8 mb-10">
           <div className="my-4 md:flex justify-between items-center mx-1">
-            <PageTitle title={t("shifting_details")} />
+            <PageTitle
+              title={t("shifting_details")}
+              backUrl="/shifting/board-view"
+            />
             <div className="md:flex items-center space-y-2 md:space-y-0 md:space-x-2">
               <div>
                 <Button

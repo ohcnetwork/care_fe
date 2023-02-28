@@ -339,6 +339,7 @@ export const FacilityHome = (props: any) => {
         title={facilityData.name || "Facility"}
         crumbsReplacements={{ [facilityId]: { name: facilityData.name } }}
         focusOnLoad={true}
+        backUrl="/facility"
       />
       <Dialog
         maxWidth={"md"}
@@ -776,6 +777,14 @@ export const FacilityHome = (props: any) => {
               const doctorRes = await dispatch(listDoctor({}, { facilityId }));
               if (doctorRes && doctorRes.data) {
                 setDoctorData(doctorRes.data.results);
+                // update total doctors count
+                setTotalDoctors(
+                  doctorRes.data.results.reduce(
+                    (acc: number, doctor: DoctorModal) =>
+                      acc + (doctor.count || 0),
+                    0
+                  )
+                );
               }
             }}
           />

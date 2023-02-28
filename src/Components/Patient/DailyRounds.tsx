@@ -35,10 +35,11 @@ import {
   getPatient,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { formatDate, goBack } from "../../Utils/utils";
+import { formatDate } from "../../Utils/utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -101,6 +102,7 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
 };
 
 export const DailyRounds = (props: any) => {
+  const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, consultationId, id } = props;
   const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
@@ -503,6 +505,11 @@ export const DailyRounds = (props: any) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={
+          id
+            ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
+            : `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+        }
       />
       <div className="mt-4">
         <div className="bg-white rounded shadow">

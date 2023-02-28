@@ -573,7 +573,7 @@ export const FileUpload = (props: FileUploadProps) => {
                           <a
                             href={url[item.id]}
                             download={item.name}
-                            className="Button outline-offset-1 button-size-default button-shape-square button-primary-default m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500"
+                            className="Button gap-2 outline-offset-1 button-size-default button-shape-square button-primary-default m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500 flex justify-center"
                           >
                             <CareIcon className="care-l-arrow-circle-down text-lg" />{" "}
                             DOWNLOAD
@@ -1187,7 +1187,14 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
             <Cancel onClick={() => setModalOpenForEdit(false)} />
-            <Submit disabled={btnloader} label="Proceed" />
+            <Submit
+              disabled={
+                btnloader ||
+                modalDetails?.name === editFileName ||
+                editFileName.length === 0
+              }
+              label="Proceed"
+            />
           </div>
         </form>
       </DialogModal>
@@ -1283,6 +1290,11 @@ export const FileUpload = (props: FileUploadProps) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={
+          type === "CONSULTATION"
+            ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+            : `/facility/${facilityId}/patient/${patientId}`
+        }
       />
       <div className="mt-4">
         <div className="md:grid grid-cols-2 gap-4">

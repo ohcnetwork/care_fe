@@ -248,6 +248,7 @@ export const BedManagement = (props: BedManagementProps) => {
             uri: `/facility/${facilityId}/location`,
           },
         }}
+        backUrl={`/facility/${facilityId}/location/${locationId}`}
       />
       <div className="container px-4 py-2 sm:px-8">
         <div className="flex justify-end">

@@ -179,35 +179,36 @@ export const Login = (props: { forgot?: boolean }) => {
 
   return (
     <div className="flex flex-col-reverse md:flex-row md:h-screen relative overflow-hidden">
-      <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-center md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
-        <div className="hidden md:flex gap-6 items-center">
-          {state_logo && (
-            <>
+      <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-between md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
+        <div></div>
+        <div className="mt-4 md:mt-12 rounded-lg py-4 flex flex-col items-start">
+          <div className="hidden md:flex gap-6 mb-4">
+            {state_logo && (
+              <>
+                <img
+                  src={state_logo}
+                  className={classNames(
+                    "rounded-lg p-3 h-24",
+                    state_logo_white && "invert brightness-0"
+                  )}
+                  alt="state logo"
+                />
+                <div className="w-0.5 bg-white/50 h-10 rounded-full" />
+              </>
+            )}
+            <a
+              href={coronasafe_url}
+              className="inline-block"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <img
-                src={state_logo}
-                className={classNames(
-                  "rounded-lg p-3 h-24",
-                  state_logo_white && "invert brightness-0"
-                )}
-                alt="state logo"
+                src={static_light_logo}
+                className="h-8"
+                alt="coronasafe logo"
               />
-              <div className="w-0.5 bg-white/50 h-10 rounded-full" />
-            </>
-          )}
-          <a
-            href={coronasafe_url}
-            className="inline-block"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img
-              src={static_light_logo}
-              className="h-8"
-              alt="coronasafe logo"
-            />
-          </a>
-        </div>
-        <div className="mt-4 md:mt-12 rounded-lg py-4">
+            </a>
+          </div>
           <div className="max-w-lg">
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight tracking-wider">
               {t("care")}
@@ -217,7 +218,7 @@ export const Login = (props: { forgot?: boolean }) => {
             </div>
           </div>
         </div>
-        <div className="flex items-center lg:absolute lg:inset-x-0 lg:py-12 lg:px-16 pb-10 lg:bottom-0 lg:z-20">
+        <div className="flex items-center mb-6">
           <div className="text-xs md:text-sm max-w-lg">
             <div className="ml-1 flex items-center gap-4 mb-2">
               <a href={dpg_url} rel="noopener noreferrer" target="_blank">
