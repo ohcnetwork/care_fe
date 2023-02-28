@@ -19,10 +19,10 @@ import {
 import { SampleTestModel, FacilityNameModel } from "./models";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -78,6 +78,7 @@ const sampleTestFormReducer = (state = initialState, action: any) => {
 };
 
 export const SampleTest = (props: any) => {
+  const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId } = props;
   const [state, dispatch] = useReducer(sampleTestFormReducer, initialState);
@@ -267,6 +268,7 @@ export const SampleTest = (props: any) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={`/facility/${facilityId}/patient/${patientId}`}
       />
       <div className="mt-4">
         <Card>

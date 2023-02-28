@@ -4,9 +4,16 @@ import { useEffect, useState } from "react";
 import ButtonV2 from "../Components/Common/components/ButtonV2";
 import CareIcon from "../CAREUI/icons/CareIcon";
 export const VoiceRecorder = (props: any) => {
-  const { createAudioBlob } = props;
-  const [audioURL, isRecording, startRecording, stopRecording, newBlob] =
-    useRecorder();
+  const { createAudioBlob, confirmAudioBlobExists, reset, setResetRecording } =
+    props;
+  const [
+    audioURL,
+    isRecording,
+    startRecording,
+    stopRecording,
+    newBlob,
+    resetRecording,
+  ] = useRecorder();
   const [time, setTime] = useState(0);
   createAudioBlob(newBlob);
   useEffect(() => {
@@ -19,14 +26,15 @@ export const VoiceRecorder = (props: any) => {
       clearInterval(interval);
       setTime(0);
     }
+    if (reset) {
+      resetRecording();
+      setResetRecording(false);
+    }
     return () => clearInterval(interval);
-  }, [isRecording]);
+  }, [isRecording, reset, setResetRecording, resetRecording]);
 
   return (
     <div>
-      <div className="text-xs">
-        Please allow browser permission before you start speaking
-      </div>
       <div>
         {isRecording ? (
           <>
@@ -35,7 +43,12 @@ export const VoiceRecorder = (props: any) => {
                 <i className="fas fa-microphone-alt animate-pulse mr-2"></i>
                 Recording...
               </div>
-              <ButtonV2 onClick={stopRecording}>
+              <ButtonV2
+                onClick={() => {
+                  stopRecording();
+                  confirmAudioBlobExists();
+                }}
+              >
                 <CareIcon className={"care-l-microphone-slash text-lg"} />
                 Stop
               </ButtonV2>
@@ -46,10 +59,14 @@ export const VoiceRecorder = (props: any) => {
             </div>
           </>
         ) : (
-          <ButtonV2 onClick={startRecording}>
-            <CareIcon className={"care-l-microphone text-lg"} />
-            {audioURL ? "Re-Record" : "Record"}
-          </ButtonV2>
+          <div>
+            {!audioURL && (
+              <ButtonV2 onClick={startRecording}>
+                <CareIcon className={"care-l-microphone text-lg"} />
+                Record
+              </ButtonV2>
+            )}
+          </div>
         )}
       </div>
       {audioURL && (

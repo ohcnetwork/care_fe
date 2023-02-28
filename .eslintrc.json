@@ -8,12 +8,6 @@
     "react": {
       "version": "detect"
     }
-    // "@flycode-org/react-i18next": {
-    //   "translationFiles": {
-    //     "location": "src/Locale/*/*.json",
-    //     "format": "flat"
-    //   }
-    // }
   },
   "extends": [
     "eslint:recommended",
@@ -33,8 +27,7 @@
   },
   "plugins": [
     "@typescript-eslint", 
-    "i18next",
-    "@flycode-org/react-i18next"
+    "i18next"
   ],
   "rules": {
     "quotes": ["error", "double"],

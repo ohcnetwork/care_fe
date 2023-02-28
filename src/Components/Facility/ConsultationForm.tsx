@@ -40,7 +40,6 @@ import PrescriptionBuilder, {
 import PRNPrescriptionBuilder, {
   PRNPrescriptionType,
 } from "../Common/prescription-builder/PRNPrescriptionBuilder";
-import { goBack } from "../../Utils/utils";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
@@ -59,6 +58,7 @@ import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import DateFormField from "../Form/FormFields/DateFormField";
 import useConfig from "../../Common/hooks/useConfig";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -191,6 +191,7 @@ const scrollTo = (id: any) => {
 };
 
 export const ConsultationForm = (props: any) => {
+  const { goBack } = useAppHistory();
   const { kasp_enabled, kasp_string } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
@@ -726,6 +727,11 @@ export const ConsultationForm = (props: any) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={
+          id
+            ? `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
+            : `/facility/${facilityId}/patient/${patientId}`
+        }
       />
 
       <form
@@ -749,6 +755,7 @@ export const ConsultationForm = (props: any) => {
             disableFuture
             required
             label="Date of onset of the symptoms"
+            position="LEFT"
           />
         )}
 
@@ -839,6 +846,7 @@ export const ConsultationForm = (props: any) => {
               {...field("admission_date")}
               required
               label="Admission date"
+              position="LEFT"
             />
 
             {!isUpdate && (

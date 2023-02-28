@@ -60,6 +60,7 @@ import PRNPrescriptionBuilder, {
   PRNPrescriptionType,
 } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { formatDate } from "../../Utils/utils";
+import Chip from "../../CAREUI/display/Chip";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -581,6 +582,7 @@ export const ConsultationDetails = (props: any) => {
               },
             }}
             breadcrumbs={true}
+            backUrl={"/patients"}
           />
           <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
@@ -794,25 +796,84 @@ export const ConsultationDetails = (props: any) => {
                 {consultationData.symptoms_text && (
                   <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="px-4 py-5 sm:p-6">
-                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900 mb-4">
                         Symptoms
                       </h3>
                       <div className="">
-                        <div className="capitalize">
-                          {consultationData.symptoms_text}
+                        <div className="font-semibold uppercase text-sm">
+                          Last Daily Update
+                        </div>
+                        {consultationData.last_daily_round
+                          ?.additional_symptoms && (
+                          <>
+                            <div className="flex flex-wrap items-center gap-2 my-4">
+                              {consultationData.last_daily_round?.additional_symptoms.map(
+                                (symptom: any, index: number) => (
+                                  <Chip
+                                    key={index}
+                                    text={
+                                      SYMPTOM_CHOICES.find(
+                                        (choice) => choice.id === symptom
+                                      )?.text || "Err. Unknown"
+                                    }
+                                    color={"primary"}
+                                    size={"small"}
+                                  />
+                                )
+                              )}
+                            </div>
+                            {consultationData.last_daily_round
+                              ?.other_symptoms && (
+                              <div className="capitalize">
+                                <div className="font-semibold text-xs">
+                                  Other Symptoms:
+                                </div>
+                                {
+                                  consultationData.last_daily_round
+                                    ?.other_symptoms
+                                }
+                              </div>
+                            )}
+                            <span className="font-semibold leading-relaxed text-gray-800 text-xs">
+                              from{" "}
+                              {moment(
+                                consultationData.last_daily_round.created_at
+                              ).format("DD/MM/YYYY")}
+                            </span>
+                          </>
+                        )}
+                        <hr className="border border-gray-300 my-4" />
+                        <div className="font-semibold uppercase text-sm">
+                          Consultation Update
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 my-4">
+                          {consultationData.symptoms?.map((symptom, index) => (
+                            <Chip
+                              key={index}
+                              text={
+                                SYMPTOM_CHOICES.find(
+                                  (choice) => choice.id === symptom
+                                )?.text || "Err. Unknown"
+                              }
+                              color={"primary"}
+                              size={"small"}
+                            />
+                          ))}
                         </div>
                         {consultationData.other_symptoms && (
                           <div className="capitalize">
-                            <span className="font-semibold leading-relaxed">
-                              Other Symptoms:{" "}
-                            </span>
+                            <div className="font-semibold text-xs">
+                              Other Symptoms:
+                            </div>
                             {consultationData.other_symptoms}
                           </div>
                         )}
                         <span className="font-semibold leading-relaxed text-gray-800 text-xs">
                           from{" "}
                           {consultationData.symptoms_onset_date
-                            ? formatDate(consultationData.symptoms_onset_date)
+                            ? moment(
+                                consultationData.symptoms_onset_date
+                              ).format("DD/MM/YYYY")
                             : "--:--"}
                         </span>
                       </div>
@@ -1267,7 +1328,7 @@ export const ConsultationDetails = (props: any) => {
         {tab === "VENTILATOR" && (
           <div>
             <PageTitle
-              title="Ventilator Parameters"
+              title="Respiratory Support"
               hideBack={true}
               breadcrumbs={false}
             />

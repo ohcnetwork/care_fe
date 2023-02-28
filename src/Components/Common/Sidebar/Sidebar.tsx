@@ -56,6 +56,7 @@ const StatelessSidebar = ({
 
   const indicatorRef = useRef<HTMLDivElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
+  const [isOverflowVisible, setOverflowVisisble] = useState(false);
 
   useEffect(() => {
     if (!indicatorRef.current) return;
@@ -72,11 +73,9 @@ const StatelessSidebar = ({
       e.style.display = "block";
 
       if (indexDifference > 0) {
-        console.log("indexDifference > 0");
         e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
         e.style.bottom = "auto";
       } else {
-        console.log("indexDifference < 0");
         e.style.bottom =
           itemHeight * (NavItems.length + bottomItemOffset) -
           lastIndicatorPosition * itemHeight -
@@ -111,12 +110,19 @@ const StatelessSidebar = ({
       indicatorRef.current.style.display = "none";
     }
   }, [activeLink]);
+  const handleOverflow = (value: boolean) => {
+    setOverflowVisisble(value);
+  };
 
   return (
     <nav
       className={`h-screen group flex flex-col bg-primary-800 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
-      } transition-all duration-300 ease-in-out overflow-y-auto overflow-x-hidden`}
+      } transition-all duration-300 ease-in-out ${
+        isOverflowVisible && shrinked
+          ? " overflow-visible "
+          : " overflow-y-auto overflow-x-hidden "
+      }`}
     >
       <div className="h-3" /> {/* flexible spacing */}
       <Link href="/">
@@ -146,12 +152,14 @@ const StatelessSidebar = ({
                 icon={<CareIcon className={`${i.icon} h-5`} />}
                 selected={i.to === activeLink}
                 do={() => onItemClick && onItemClick(false)}
+                handleOverflow={handleOverflow}
               />
             );
           })}
 
           <NotificationItem
             shrinked={shrinked}
+            handleOverflow={handleOverflow}
             onClickCB={() => onItemClick && onItemClick(false)}
           />
           <Item
@@ -159,6 +167,7 @@ const StatelessSidebar = ({
             to={dashboard_url}
             icon={<CareIcon className="care-l-dashboard text-lg" />}
             external
+            handleOverflow={handleOverflow}
           />
         </div>
         <div className="hidden md:block md:flex-1" />

@@ -102,6 +102,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
             },
           }),
         }}
+        backUrl={`/facility/${facilityId}/location`}
       />
       <div className="mt-10">
         <Card>
