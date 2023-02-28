@@ -92,7 +92,7 @@
     "react-transition-group": "^4.4.5",
     "react-webcam": "^7.0.1",
     "read-excel-file": "^5.5.3",
-    "redux": "^4.1.0",
+    "redux": "^4.2.1",
     "redux-thunk": "^2.3.0",
     "rescript-material-ui": "^2.1.2",
     "rescript-webapi": "^0.6.1",
