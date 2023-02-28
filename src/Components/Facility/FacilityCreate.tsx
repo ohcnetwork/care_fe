@@ -628,7 +628,6 @@ export const FacilityCreate = (props: FacilityProps) => {
       </div>
     );
   }
-
   let doctorList: any = null;
   if (!doctorData || !doctorData.length) {
     doctorList = (
@@ -878,7 +877,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                       type="number"
                       placeholder="0"
                       label={t("liquid_oxygen_capacity")}
-                      required
                       trailingPadding=" "
                       trailing={<FieldUnit unit={t("litres")} />}
                       min={0}
@@ -887,7 +885,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                       {...field("expected_oxygen_requirement")}
                       type="number"
                       placeholder="0"
-                      required
                       trailingPadding=" "
                       trailing={<FieldUnit unit={t("litres_per_day")} />}
                       label={t("expected_burn_rate")}
@@ -898,7 +895,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                       {...field("type_b_cylinders")}
                       type="number"
                       placeholder="0"
-                      required
                       trailingPadding=" "
                       trailing={<FieldUnit unit={t("cylinders")} />}
                       min={0}
@@ -907,7 +903,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                       {...field("expected_type_b_cylinders")}
                       type="number"
                       placeholder="0"
-                      required
                       label={t("expected_burn_rate")}
                       trailingPadding=" "
                       trailing={<FieldUnit unit={t("cylinders_per_day")} />}
@@ -917,7 +912,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                       {...field("type_c_cylinders")}
                       type="number"
                       placeholder="0"
-                      required
                       trailingPadding=" "
                       trailing={<FieldUnit unit={t("cylinders")} />}
                       min={0}
@@ -926,7 +920,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                       {...field("expected_type_c_cylinders")}
                       type="number"
                       placeholder="0"
-                      required
                       trailingPadding=" "
                       trailing={<FieldUnit unit={t("cylinders_per_day")} />}
                       label={t("expected_burn_rate")}
@@ -936,7 +929,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                       {...field("type_d_cylinders")}
                       type="number"
                       placeholder="0"
-                      required
                       trailingPadding=" "
                       trailing={<FieldUnit unit={t("cylinders")} />}
                       min={0}
@@ -945,7 +937,6 @@ export const FacilityCreate = (props: FacilityProps) => {
                       {...field("expected_type_d_cylinders")}
                       type="number"
                       placeholder="0"
-                      required
                       label={t("expected_burn_rate")}
                       trailingPadding=" "
                       trailing={<FieldUnit unit={t("cylinders_per_day")} />}

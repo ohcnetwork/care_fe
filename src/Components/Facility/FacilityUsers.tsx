@@ -257,6 +257,7 @@ export default function FacilityUsers(props: any) {
           <UnlinkFacilityDialog
             facilityName={unlinkFacilityData.facility?.name || ""}
             userName={unlinkFacilityData.userName}
+            isHomeFacility={false}
             handleCancel={hideUnlinkFacilityModal}
             handleOk={handleUnlinkFacilitySubmit}
           />

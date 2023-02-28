@@ -95,9 +95,15 @@ export const deleteUserFacility = (username: string, facility: string) => {
     { username }
   );
 };
+
+export const clearHomeFacility = (username: string) => {
+  return fireRequest("clearHomeFacility", [], {}, { username });
+};
+
 export const getPermittedFacilities = (params: object) => {
   return fireRequest("getPermittedFacilities", [], params);
 };
+
 export const getAllFacilities = (params: object) => {
   return fireRequest("getAllFacilities", [], params);
 };

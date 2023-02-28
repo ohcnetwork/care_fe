@@ -755,6 +755,7 @@ export const ConsultationForm = (props: any) => {
             disableFuture
             required
             label="Date of onset of the symptoms"
+            position="LEFT"
           />
         )}
 
@@ -845,6 +846,7 @@ export const ConsultationForm = (props: any) => {
               {...field("admission_date")}
               required
               label="Admission date"
+              position="LEFT"
             />
 
             {!isUpdate && (

@@ -406,7 +406,7 @@ export const PatientHome = (props: any) => {
             [id]: { name: patientData?.name },
           }}
           backUrl={
-            facilityId ? `/facility/${facilityId}/patients` : `/patients`
+            facilityId ? `/facility/${facilityId}/patients` : "/patients"
           }
         />
 
