@@ -85,14 +85,9 @@ export const PatientManager = () => {
     Pagination,
     FilterBadges,
     resultsPerPage,
-  } = useFilters(
-    {
-      limit: 12,
-    },
-    {
-      ordering: "-modified_date",
-    }
-  );
+  } = useFilters({
+    limit: 12,
+  });
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
@@ -168,7 +163,7 @@ export const PatientManager = () => {
     created_date_after: qParams.created_date_after || undefined,
     modified_date_before: qParams.modified_date_before || undefined,
     modified_date_after: qParams.modified_date_after || undefined,
-    ordering: qParams.ordering || undefined,
+    ordering: qParams.ordering || "-modified_date",
     category: qParams.category || undefined,
     gender: qParams.gender || undefined,
     age_min: qParams.age_min || undefined,

@@ -3,7 +3,6 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
-import { useAbortableEffect } from "../utils";
 import useConfig from "./useConfig";
 
 export type FilterState = Record<string, unknown>;
@@ -18,20 +17,11 @@ interface FilterBadgeProps {
  * A custom hook wrapped around raviger's `useQueryParams` hook to ease handling
  * of pagination and filters.
  */
-export default function useFilters(
-  { limit = 14 }: { limit?: number },
-  defaults?: any
-) {
+export default function useFilters({ limit = 14 }: { limit?: number }) {
   const { kasp_string } = useConfig();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
   const [qParams, setQueryParams] = useQueryParams();
-
-  useAbortableEffect(() => {
-    if (defaults) {
-      setQueryParams(defaults, { replace: true });
-    }
-  }, [defaults]);
 
   const updateQuery = (filter: FilterState) => {
     filter = hasPagination ? { page: 1, limit, ...filter } : filter;
