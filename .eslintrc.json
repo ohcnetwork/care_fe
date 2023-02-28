@@ -51,7 +51,6 @@
         }
       }
     ]
-    // "@flycode-org/react-i18next/valid-key": "error"
   },
   "ignorePatterns": [
     "dist",
