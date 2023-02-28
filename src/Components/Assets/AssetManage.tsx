@@ -20,6 +20,8 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { UserRole, USER_TYPES } from "../../Common/constants";
 import moment from "moment";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
+import { useTranslation } from "react-i18next";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -35,6 +37,7 @@ const checkAuthority = (type: string, cutoff: string) => {
 };
 
 const AssetManage = (props: AssetManageProps) => {
+  const { t } = useTranslation();
   const { assetId, facilityId } = props;
   const [asset, setAsset] = useState<AssetData>();
   const [isPrintMode, setIsPrintMode] = useState<boolean>(false);
@@ -355,14 +358,13 @@ const AssetManage = (props: AssetManageProps) => {
               </div>
             </div>
 
-            <div className="text-xs text-gray-900 break-words">
-              <i className="text-gray-700">Created: </i>
-              {asset?.created_date &&
-                moment(asset?.created_date).format("DD/MM/YYYY LT")}
-              <br />
-              <i className="text-gray-700">Last Modified: </i>
-              {asset?.modified_date &&
-                moment(asset?.created_date).format("DD/MM/YYYY LT")}
+            <div className="flex flex-col text-sm text-gray-600 break-words justify-end">
+              {asset?.created_date && (
+                <RecordMeta prefix={t("created")} time={asset?.created_date} />
+              )}
+              {asset?.modified_date && (
+                <RecordMeta prefix={t("updated")} time={asset?.modified_date} />
+              )}
             </div>
           </div>
         </div>

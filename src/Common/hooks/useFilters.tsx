@@ -115,8 +115,10 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
 
   const FilterBadges = ({
     badges,
+    children,
   }: {
     badges: (utils: typeof badgeUtils) => FilterBadgeProps[];
+    children?: React.ReactNode;
   }) => {
     const compiledBadges = badges(badgeUtils);
     const { t } = useTranslation();
@@ -125,6 +127,7 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
+        {children}
       </div>
     );
   };

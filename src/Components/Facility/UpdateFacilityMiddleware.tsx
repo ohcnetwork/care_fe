@@ -85,6 +85,24 @@ export const UpdateFacilityMiddleware = (props: any) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
+    if (!state.form.middleware_address) {
+      Notification.Error({
+        msg: "Middleware Address is required",
+      });
+      setIsLoading(false);
+      return;
+    }
+    if (
+      state.form.middleware_address.match(
+        /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/
+      ) === null
+    ) {
+      Notification.Error({
+        msg: "Invalid Middleware Address",
+      });
+      setIsLoading(false);
+      return;
+    }
     const data: any = {
       ...state.form,
       middleware_address: state.form.middleware_address,

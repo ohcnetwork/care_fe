@@ -20,7 +20,6 @@ import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
-import AssetImportModal from "./AssetImportModal";
 import { FacilityModel } from "../Facility/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
@@ -29,6 +28,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import ExportMenu from "../Common/Export";
 import CountBlock from "../../CAREUI/display/Count";
+import AssetImportModal from "./AssetImportModal";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -83,11 +83,17 @@ const AssetsList = () => {
         else {
           setAssets(data.results);
           setTotalCount(data.count);
+          if (qParams.facility) {
+            const fetchFacility = await dispatch(
+              getAnyFacility(qParams.facility)
+            );
+            setSelectedFacility(fetchFacility.data as FacilityModel);
+          }
         }
       }
     },
     [
-      dispatch,
+      resultsPerPage,
       qParams.page,
       qParams.search,
       qParams.facility,
@@ -95,6 +101,7 @@ const AssetsList = () => {
       qParams.asset_class,
       qParams.location,
       qParams.status,
+      dispatch,
     ]
   );
 
@@ -196,7 +203,7 @@ const AssetsList = () => {
         </button>
         <QrReader
           delay={300}
-          onScan={async (value) => {
+          onScan={async (value: string | null) => {
             if (value) {
               const assetId = await getAssetIdFromQR(value);
               checkValidAssetId(assetId ?? value);
@@ -340,7 +347,13 @@ const AssetsList = () => {
           <div className="flex flex-col md:flex-row w-full">
             <ButtonV2
               className="w-full inline-flex items-center justify-center"
-              onClick={() => setShowFacilityDialog(true)}
+              onClick={() => {
+                if (qParams.facility) {
+                  navigate(`/facility/${qParams.facility}/assets/new`);
+                } else {
+                  setShowFacilityDialog(true);
+                }
+              }}
             >
               <CareIcon className="care-l-plus-circle text-lg" />
               <span>Create Asset</span>

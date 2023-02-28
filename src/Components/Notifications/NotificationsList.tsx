@@ -145,11 +145,13 @@ const NotificationTile = ({
 interface NotificationsListProps {
   shrinked: boolean;
   onClickCB?: () => void;
+  handleOverflow: any;
 }
 
 export default function NotificationsList({
   shrinked,
   onClickCB,
+  handleOverflow,
 }: NotificationsListProps) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -191,7 +193,6 @@ export default function NotificationsList({
         setIsSubscribed("SubscribedOnAnotherDevice");
       }
     } catch (error) {
-      console.error(`Service worker error...Details: ${error}`);
       Sentry.captureException(error);
     }
   };
@@ -266,7 +267,6 @@ export default function NotificationsList({
           });
       })
       .catch(function (_e) {
-        console.error(`Service worker error...Details: ${_e}`);
         Sentry.captureException(_e);
       });
   };
@@ -305,8 +305,6 @@ export default function NotificationsList({
 
     if (res.status >= 200 && res.status <= 300) {
       setIsSubscribed("SubscribedOnThisDevice");
-    } else {
-      console.log("Error saving web push info.");
     }
     setIsSubscribing(false);
   }
@@ -387,8 +385,10 @@ export default function NotificationsList({
     );
   } else if (data && data.length === 0) {
     manageResults = (
-      <div className="px-4 pt-3 lg:px-8">
-        <h5> {t("no_results_found")} </h5>
+      <div className="px-4 pt-3 lg:px-8 flex justify-center">
+        <h5 className="text-gray-600 text-xl font-bold">
+          {t("no_results_found")}
+        </h5>
       </div>
     );
   }
@@ -402,6 +402,7 @@ export default function NotificationsList({
         do={() => setOpen(!open)}
         icon={<CareIcon className="care-l-bell h-5" />}
         badgeCount={unreadCount}
+        handleOverflow={handleOverflow}
       />
       <SlideOver
         open={open}

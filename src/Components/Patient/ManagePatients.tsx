@@ -36,9 +36,12 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 import CountBlock from "../../CAREUI/display/Count";
+import { useTranslation } from "react-i18next";
+import * as Notification from "../../Utils/Notifications.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -74,6 +77,7 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
 };
 
 export const PatientManager = () => {
+  const { t } = useTranslation();
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>();
   const [isLoading, setIsLoading] = useState(false);
@@ -252,6 +256,12 @@ export const PatientManager = () => {
 
   useEffect(() => {
     setIsLoading(true);
+    if (!params.phone_number) {
+      setPhoneNumber("+91");
+    }
+    if (!params.emergency_phone_number) {
+      setEmergencyPhoneNumber("+91");
+    }
     dispatch(getAllPatient(params, "listPatients")).then((res: any) => {
       if (res && res.data) {
         setData(res.data.results);
@@ -359,7 +369,6 @@ export const PatientManager = () => {
     },
     [fetchFacilityBadgeName]
   );
-
   const LastAdmittedToTypeBadges = () => {
     const badge = (key: string, value: any, id: string) => {
       return (
@@ -368,13 +377,13 @@ export const PatientManager = () => {
             name={key}
             value={value}
             onRemove={() => {
-              const lcat = qParams.last_consultation_admitted_to_list
+              const lcat = qParams.last_consultation_admitted_bed_type_list
                 .split(",")
                 .filter((x: string) => x != id)
                 .join(",");
               updateQuery({
                 ...qParams,
-                last_consultation_admitted_to_list: lcat,
+                last_consultation_admitted_bed_type_list: lcat,
               });
             }}
           />
@@ -480,16 +489,15 @@ export const PatientManager = () => {
                   <div className="mb-2">
                     <div className="flex flex-wrap items-center">
                       <p className="text-sm font-medium text-gray-700 mr-2">
-                        {" "}
                         {patient.facility_object.name}
                       </p>
-                      <p className="text-sm">
-                        <span className="text-gray-600">last updated</span>{" "}
-                        <span className="font-medium text-gray-900">
-                          {" "}
-                          {moment(patient.modified_date).fromNow()}
-                        </span>
-                      </p>
+                      <RecordMeta
+                        className="text-sm text-gray-900"
+                        prefix={
+                          <span className="text-gray-600">{t("updated")}</span>
+                        }
+                        time={patient.modified_date}
+                      />
                     </div>
                   </div>
                 )}
@@ -670,7 +678,7 @@ export const PatientManager = () => {
             }}
           >
             <CareIcon className="care-l-plus text-lg" />
-            <p>Add Patient Details</p>
+            <p className="lg:my-[2px]">Add Patient Details</p>
           </ButtonV2>
           <ButtonV2
             ghost
@@ -707,7 +715,7 @@ export const PatientManager = () => {
                 {" "}
               </line>
             </svg>
-            <span>Advanced Filters</span>
+            <span className="lg:my-[2px]">Advanced Filters</span>
           </ButtonV2>
           <DropdownMenu
             title="Sort by"
@@ -739,20 +747,40 @@ export const PatientManager = () => {
             })}
           </DropdownMenu>
           <div className="tooltip">
-            <ExportMenu
-              disabled={!isExportAllowed}
-              exportItems={[
-                {
-                  label:
-                    tabValue === 0 ? "Live patients" : "Discharged patients",
-                  action: exportPatients(true),
-                },
-                {
-                  label: "All patients",
-                  action: exportPatients(false),
-                },
-              ]}
-            />
+            {!isExportAllowed ? (
+              <ButtonV2
+                onClick={() => {
+                  advancedFilter.setShow(true);
+                  setTimeout(() => {
+                    const element = document.getElementById("bed-type-select");
+                    if (element) element.scrollIntoView({ behavior: "smooth" });
+                    Notification.Warn({
+                      msg: "Please select a seven day period.",
+                    });
+                  }, 500);
+                }}
+                className="lg:w-fit w-full mr-5"
+              >
+                <CareIcon className="care-l-import" />
+                <span className="lg:my-[3px]">Export</span>
+              </ButtonV2>
+            ) : (
+              <ExportMenu
+                disabled={!isExportAllowed}
+                exportItems={[
+                  {
+                    label:
+                      tabValue === 0 ? "Live patients" : "Discharged patients",
+                    action: exportPatients(true),
+                  },
+                  {
+                    label: "All patients",
+                    action: exportPatients(false),
+                  },
+                ]}
+              />
+            )}
+
             {!isExportAllowed && (
               <span className="tooltip-text tooltip-bottom -translate-x-1/2">
                 Select a seven day period
@@ -825,7 +853,7 @@ export const PatientManager = () => {
           </div>
         </div>
       </div>
-      <div className="flex flex-wrap w-full col-span-3 mt-6">
+      <div className="flex flex-wrap col-span-3 mt-6">
         <FilterBadges
           badges={({ badge, value, kasp, phoneNumber, dateRange, range }) => [
             phoneNumber("Primary number", "phone_number"),
@@ -873,9 +901,11 @@ export const PatientManager = () => {
               paramKey: "last_consultation_is_telemedicine",
             },
           ]}
+          children={
+            qParams.last_consultation_admitted_bed_type_list &&
+            LastAdmittedToTypeBadges()
+          }
         />
-        {qParams.last_consultation_admitted_bed_type_list &&
-          LastAdmittedToTypeBadges()}
       </div>
       <div>
         <SlideOver {...advancedFilter}>

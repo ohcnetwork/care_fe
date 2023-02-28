@@ -703,6 +703,7 @@ export const PhoneNumberField = (props: any) => {
           variant="secondary"
           type="button"
           ghost
+          disabled={disabled}
           onClick={() => onChange("+91")}
         >
           <CareIcon className="care-l-multiply" />
