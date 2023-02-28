@@ -1,4 +1,4 @@
-import { Card, CardContent, InputLabel } from "@material-ui/core";
+import { Card, CardContent } from "@material-ui/core";
 import loadable from "@loadable/component";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -9,12 +9,10 @@ import {
   updateFacilityAssetLocation,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  MultilineInputField,
-  TextInputField,
-} from "../Common/HelperInputFields";
 import { navigate } from "raviger";
 import { Submit, Cancel } from "../Common/components/ButtonV2";
+import TextFormField from "../Form/FormFields/TextFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -110,29 +108,24 @@ export const AddLocationForm = (props: LocationFormProps) => {
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1">
                 <div>
-                  <InputLabel id="name">Name *</InputLabel>
-                  <TextInputField
+                  <TextFormField
                     name="name"
-                    variant="outlined"
-                    margin="dense"
                     type="text"
+                    label="Name"
                     required
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    errors=""
+                    onChange={(e) => setName(e.value)}
+                    error=""
                   />
                 </div>
                 <div>
-                  <InputLabel id="description">Description</InputLabel>
-                  <MultilineInputField
+                  <TextAreaFormField
                     rows={5}
                     name="description"
-                    variant="outlined"
-                    margin="dense"
-                    type="float"
+                    label="Description"
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    errors=""
+                    onChange={(e) => setDescription(e.value)}
+                    error=""
                   />
                 </div>
               </div>
