@@ -11,7 +11,7 @@ import { PatientCategory } from "../models";
 import { PATIENT_CATEGORIES } from "../../../Common/constants";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import RelativeTime from "../../../CAREUI/display/RelativeTime";
+import RecordMeta from "../../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
@@ -161,7 +161,7 @@ export const DailyRoundsList = (props: any) => {
                   )}
                   <Grid item xs={6}>
                     {itemData.created_date && (
-                      <RelativeTime
+                      <RecordMeta
                         className="text-xs text-gray-700"
                         prefix={t("created")}
                         time={itemData.created_date}
@@ -170,7 +170,7 @@ export const DailyRoundsList = (props: any) => {
                   </Grid>
                   <Grid item xs={6}>
                     {itemData.modified_date && (
-                      <RelativeTime
+                      <RecordMeta
                         className="text-gray-700 text-xs"
                         prefix={t("updated")}
                         time={itemData.modified_date}

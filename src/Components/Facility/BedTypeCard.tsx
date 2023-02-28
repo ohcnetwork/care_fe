@@ -8,7 +8,7 @@ import DialogModal from "../Common/Dialog";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import RelativeTime from "../../CAREUI/display/RelativeTime";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 import { useTranslation } from "react-i18next";
 
@@ -153,7 +153,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
             {facilityId && (
               <div className="flex items-center justify-between gap-2 pt-6">
                 {lastUpdated && (
-                  <RelativeTime
+                  <RecordMeta
                     className="text-xs text-gray-600 font-normal"
                     prefix={t("updated")}
                     time={lastUpdated}

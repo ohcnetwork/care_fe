@@ -30,7 +30,7 @@ import DialogModal from "../Common/Dialog";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import RelativeTime from "../../CAREUI/display/RelativeTime";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -536,7 +536,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         {item.uploaded_by ? item.uploaded_by.username : null}
                       </div>
                       {item.created_date && (
-                        <RelativeTime
+                        <RecordMeta
                           prefix={
                             <span className="font-semibold leading-relaxed">
                               {t("created")}:
@@ -657,7 +657,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         {item.uploaded_by ? item.uploaded_by.username : null}
                       </div>
                       {item.created_date && (
-                        <RelativeTime
+                        <RecordMeta
                           prefix={
                             <span className="font-semibold leading-relaxed">
                               {t("created")}:
@@ -785,7 +785,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       {item.uploaded_by ? item.uploaded_by.username : null}
                     </div>
                     {item.created_date && (
-                      <RelativeTime
+                      <RecordMeta
                         prefix={
                           <span className="font-semibold leading-relaxed">
                             {t("created")}:

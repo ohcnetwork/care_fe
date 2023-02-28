@@ -18,7 +18,7 @@ import CommentSection from "./CommentsSection";
 import { formatDate } from "../../Utils/utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { useTranslation } from "react-i18next";
-import RelativeTime from "../../CAREUI/display/RelativeTime";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -803,7 +803,7 @@ export default function ShiftDetails(props: { id: string }) {
                 <span className="ml-2">{data.comments || "--"}</span>
               </div>
 
-              <RelativeTime
+              <RecordMeta
                 prefix={
                   <span className="font-semibold leading-relaxed">
                     {t("created")}:
@@ -811,7 +811,7 @@ export default function ShiftDetails(props: { id: string }) {
                 }
                 time={data.created_date}
               />
-              <RelativeTime
+              <RecordMeta
                 prefix={
                   <span className="font-semibold leading-relaxed">
                     {t("updated")}:

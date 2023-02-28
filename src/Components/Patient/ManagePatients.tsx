@@ -36,7 +36,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import RelativeTime from "../../CAREUI/display/RelativeTime";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 import { useTranslation } from "react-i18next";
@@ -490,7 +490,7 @@ export const PatientManager = () => {
                       <p className="text-sm font-medium text-gray-700 mr-2">
                         {patient.facility_object.name}
                       </p>
-                      <RelativeTime
+                      <RecordMeta
                         className="text-sm text-gray-900"
                         prefix={
                           <span className="text-gray-600">{t("updated")}</span>

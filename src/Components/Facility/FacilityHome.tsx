@@ -42,7 +42,7 @@ import { BedCapacity } from "./BedCapacity";
 import { DoctorCapacity } from "./DoctorCapacity";
 import DialogModal from "../Common/Dialog";
 import useConfig from "../../Common/hooks/useConfig";
-import RelativeTime from "../../CAREUI/display/RelativeTime";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -446,7 +446,7 @@ export const FacilityHome = (props: any) => {
                 <div>
                   <h1 className="text-3xl font-bold">{facilityData.name}</h1>
                   {facilityData?.modified_date && (
-                    <RelativeTime
+                    <RecordMeta
                       className="mt-1 text-sm text-gray-700"
                       prefix={t("updated")}
                       time={facilityData?.modified_date}

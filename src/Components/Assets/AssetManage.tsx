@@ -20,7 +20,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { UserRole, USER_TYPES } from "../../Common/constants";
 import moment from "moment";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
-import RelativeTime from "../../CAREUI/display/RelativeTime";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
@@ -360,16 +360,10 @@ const AssetManage = (props: AssetManageProps) => {
 
             <div className="flex flex-col text-sm text-gray-600 break-words justify-end">
               {asset?.created_date && (
-                <RelativeTime
-                  prefix={t("created")}
-                  time={asset?.created_date}
-                />
+                <RecordMeta prefix={t("created")} time={asset?.created_date} />
               )}
               {asset?.modified_date && (
-                <RelativeTime
-                  prefix={t("updated")}
-                  time={asset?.modified_date}
-                />
+                <RecordMeta prefix={t("updated")} time={asset?.modified_date} />
               )}
             </div>
           </div>

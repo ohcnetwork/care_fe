@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import moment from "moment";
 import CareIcon from "../icons/CareIcon";
 
@@ -17,16 +16,8 @@ interface Props {
  * A generic component to display relative time along with a tooltip and a user
  * if provided.
  */
-const RelativeTime = ({ time, user, prefix, className }: Props) => {
-  const [relativeTime, setRelativeTime] = useState(moment(time).fromNow());
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setRelativeTime(moment(time).fromNow());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [time]);
+const RecordMeta = ({ time, user, prefix, className }: Props) => {
+  const relativeTime = moment(time).fromNow();
 
   const isOnline =
     user?.last_login &&
@@ -63,4 +54,4 @@ const RelativeTime = ({ time, user, prefix, className }: Props) => {
   return <div className={className}>{child}</div>;
 };
 
-export default RelativeTime;
+export default RecordMeta;
