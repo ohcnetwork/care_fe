@@ -308,7 +308,7 @@ const AssetsList = () => {
           </div>
         )}
       </div>
-      <div className="lg:flex mt-5 space-y-2">
+      <div className="lg:flex mt-5 space-y-2 gap-3">
         <CountBlock
           text="Total Assets"
           count={totalCount}
