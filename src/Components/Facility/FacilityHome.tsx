@@ -30,7 +30,6 @@ import {
   FacilityModel,
   PatientStatsModel,
 } from "./models";
-import moment from "moment";
 import CoverImageEditModal from "./CoverImageEditModal";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import Table from "../Common/components/Table";
@@ -43,6 +42,8 @@ import { BedCapacity } from "./BedCapacity";
 import { DoctorCapacity } from "./DoctorCapacity";
 import DialogModal from "../Common/Dialog";
 import useConfig from "../../Common/hooks/useConfig";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
+import { useTranslation } from "react-i18next";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -58,6 +59,7 @@ export const getFacilityFeatureIcon = (featureId: number) => {
 };
 
 export const FacilityHome = (props: any) => {
+  const { t } = useTranslation();
   const { facilityId } = props;
   const dispatch: any = useDispatch();
   const [facilityData, setFacilityData] = useState<FacilityModel>({});
@@ -174,8 +176,7 @@ export const FacilityHome = (props: any) => {
     capacityList = (
       <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-7 w-full">
         <BedTypeCard
-          label={"Total Beds"}
-          bedCapacityId={0}
+          label="Total Beds"
           used={totalOccupiedBedCount}
           total={totalBedCount}
           handleUpdate={() => {
@@ -444,11 +445,13 @@ export const FacilityHome = (props: any) => {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold">{facilityData.name}</h1>
-                  <p className="mt-1 text-sm text-gray-700">
-                    Last updated:{" "}
-                    {facilityData?.modified_date &&
-                      moment(facilityData?.modified_date).fromNow()}
-                  </p>
+                  {facilityData?.modified_date && (
+                    <RecordMeta
+                      className="mt-1 text-sm text-gray-700"
+                      prefix={t("updated")}
+                      time={facilityData?.modified_date}
+                    />
+                  )}
                 </div>
               </div>
               <div className="flex items-center flex-1">

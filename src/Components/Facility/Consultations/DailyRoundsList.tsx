@@ -1,4 +1,3 @@
-import { Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -9,10 +8,12 @@ import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
 import VirtualNursingAssistantLogUpdateCard from "./DailyRounds/VirtualNursingAssistantLogUpdateCard";
 import DefaultLogUpdateCard from "./DailyRounds/DefaultLogUpdateCard";
+import { useTranslation } from "react-i18next";
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
 export const DailyRoundsList = (props: any) => {
+  const { t } = useTranslation();
   const { facilityId, patientId, consultationId, consultationData } = props;
   const dispatch: any = useDispatch();
   const [isDailyRoundLoading, setIsDailyRoundLoading] = useState(false);
@@ -77,7 +78,7 @@ export const DailyRoundsList = (props: any) => {
     );
   } else if (dailyRoundsListData.length === 0) {
     roundsList = (
-      <Typography>No Consultation Update data is available.</Typography>
+      <span className="text-gray-700">{t("no_consultation_updates")}</span>
     );
   } else if (dailyRoundsListData.length) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
@@ -126,7 +127,7 @@ export const DailyRoundsList = (props: any) => {
       <div>
         <div className="md:hidden">
           <PageTitle
-            title="Consultation Update"
+            title={t("consultation_updates")}
             hideBack={true}
             breadcrumbs={false}
           />

@@ -343,11 +343,17 @@ export const UserAdd = (props: UserProps) => {
   };
 
   useAbortableEffect(() => {
-    phoneIsWhatsApp &&
+    if (phoneIsWhatsApp) {
       handleFieldChange({
         name: "alt_phone_number",
         value: state.form.phone_number,
       });
+    } else {
+      handleFieldChange({
+        name: "alt_phone_number",
+        value: "+91",
+      });
+    }
   }, [phoneIsWhatsApp, state.form.phone_number]);
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
@@ -694,7 +700,6 @@ export const UserAdd = (props: UserProps) => {
 
               <SelectFormField
                 {...field("home_facility")}
-                required
                 label="Home facility"
                 options={selectedFacility || []}
                 optionLabel={(option) => option.name}

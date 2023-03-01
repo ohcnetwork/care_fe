@@ -54,9 +54,13 @@ Authenticate to staging API with any of the following credentials
   password: Coronasafe@123
   role: District Admin
 
-- username: devstaff
+- username: dev-staff
   password: Coronasafe@123
   role: Staff
+
+- username: dev-doctor
+  password: Coronasafe@123
+  role: Doctor
 ```
 
 #### 🏷️ Make use labels to update the PR/issue status

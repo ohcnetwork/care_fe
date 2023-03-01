@@ -1,4 +1,5 @@
-import RelativeTime from "../../../../CAREUI/display/RelativeTime";
+import { useTranslation } from "react-i18next";
+import RecordMeta from "../../../../CAREUI/display/RecordMeta";
 import CareIcon from "../../../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../../../Common/components/ButtonV2";
 import { DailyRoundsModel } from "../../../Patient/models";
@@ -16,6 +17,7 @@ const getName = (item: any) => {
 };
 
 const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
+  const { t } = useTranslation();
   const telemedicine_doctor_update =
     round.created_by_telemedicine || round.last_updated_by_telemedicine;
 
@@ -38,7 +40,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
           </span>
         </div>
         <span className="flex gap-1 text-xs text-gray-700">
-          Created <RelativeTime time={round.created_date} />
+          {t("created")} <RecordMeta time={round.created_date} />
         </span>
       </div>
       <div className="flex flex-col gap-2">
@@ -69,7 +71,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
             onClick={props.onViewDetails}
           >
             <CareIcon className="care-l-eye text-lg" />
-            <span>View Details</span>
+            <span>{t("view_details")}</span>
           </ButtonV2>
           {props.onUpdateLog && (
             <ButtonV2
@@ -80,7 +82,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
               onClick={props.onUpdateLog}
             >
               <CareIcon className="care-l-pen text-lg" />
-              <span>Update Log</span>
+              <span>{t("update_log")}</span>
             </ButtonV2>
           )}
         </div>

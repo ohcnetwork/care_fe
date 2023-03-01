@@ -72,7 +72,6 @@ const StatelessSidebar = ({
       const indexDifference = index - lastIndicatorPosition;
       e.style.display = "block";
 
-
       if (indexDifference > 0) {
         e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
         e.style.bottom = "auto";

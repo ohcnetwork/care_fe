@@ -1,4 +1,5 @@
-import RelativeTime from "../../../../CAREUI/display/RelativeTime";
+import { useTranslation } from "react-i18next";
+import RecordMeta from "../../../../CAREUI/display/RecordMeta";
 import CareIcon from "../../../../CAREUI/icons/CareIcon";
 import { DailyRoundsModel } from "../../../Patient/models";
 import LogUpdateCardAttribute from "./LogUpdateCardAttribute";
@@ -56,6 +57,7 @@ const extractVirtualNursingAssistantFields = (round?: DailyRoundsModel) => {
 };
 
 const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
+  const { t } = useTranslation();
   const diff: Partial<ReturnType<typeof extractVirtualNursingAssistantFields>> =
     getDeepDiff(
       extractVirtualNursingAssistantFields(props.round),
@@ -72,11 +74,11 @@ const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
             <CareIcon className="care-l-robot text-lg" />
           </div>
           <span className="text-sm font-semibold tracking-wider whitespace-nowrap pr-3">
-            Virtual Nursing Assistant
+            {t("virtual_nursing_assistant")}
           </span>
         </div>
         <span className="flex gap-1 text-xs text-gray-700">
-          Created <RelativeTime time={props.round.created_date} />
+          {t("created")} <RecordMeta time={props.round.created_date} />
         </span>
       </div>
       <div className="flex flex-col gap-2">
@@ -90,7 +92,7 @@ const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
           ))
         ) : (
           <span className="text-sm italic text-gray-600">
-            No changes since last log update
+            {t("no_log_update_delta")}
           </span>
         )}
       </div>

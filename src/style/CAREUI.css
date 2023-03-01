@@ -35,22 +35,22 @@
 .tooltip .tooltip-text {
     visibility: hidden;
     opacity: 0;
-    @apply bg-black/50 backdrop-blur text-white text-center px-2 py-1 rounded absolute z-50 text-sm block transition-all whitespace-nowrap
+    @apply bg-black/75 backdrop-blur text-white text-center p-2 rounded absolute z-50 text-sm block transition-all whitespace-nowrap
 }
 
-.tooltip .tooltip-left{
+.tooltip .tooltip-left {
     transform: translateX(20px);
 }
 
-.tooltip .tooltip-right{
+.tooltip .tooltip-right {
     transform: translateX(-20px);
 }
 
-.tooltip .tooltip-top{
+.tooltip .tooltip-top {
     transform: translateY(20px);
 }
 
-.tooltip .tooltip-bottom{
+.tooltip .tooltip-bottom {
     transform: translateY(-20px);
 }
 
