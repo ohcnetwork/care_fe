@@ -47,10 +47,16 @@ export default function LinkABHANumberModal({
   const [currentStep, setCurrentStep] = useState<Step>("AadhaarVerification");
   const [transactionId, setTransactionId] = useState<string>("sds");
 
+  console.log(currentStep);
+
   const title = (
-    <div className="flex gap-3">
+    <div className="flex gap-3 items-center">
       <CareIcon className="care-l-link text-xl" />
-      <h2 className="text-xl text-black font-bold">Link ABHA Number</h2>
+      <h2 className="text-xl text-black font-bold">
+        {currentStep === "ScanExistingQR"
+          ? "Link Existing ABHA Number"
+          : "Generate ABHA number"}
+      </h2>
     </div>
   );
 
@@ -124,6 +130,7 @@ const ScanABHAQRSection = ({
   const [selectedAuthMethod, setSelectedAuthMethod] = useState("");
   const [txnId, setTxnId] = useState("");
   const [otp, setOtp] = useState("");
+  const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(false);
 
   const supportedAuthMethods = ["MOBILE_OTP", "AADHAAR_OTP"];
 
@@ -155,6 +162,23 @@ const ScanABHAQRSection = ({
           }
         }}
       />
+
+      {!txnId && (
+        <div>
+          <span className="text-gray-800 text-xs items-center">
+            <input
+              type="checkbox"
+              checked={acceptedDisclaimer}
+              onChange={(e) => {
+                setAcceptedDisclaimer(e.target.checked);
+              }}
+              className="border-gray-700 rounded shadow-sm ring-offset-0 ring-0 mr-2"
+            />
+            I declare that the ABHA No. of the patient is voluntarily provided
+            by the patient (or guardian or next of kin of the patient).
+          </span>
+        </div>
+      )}
 
       {txnId && (
         <OtpFormField
@@ -228,7 +252,7 @@ const ScanABHAQRSection = ({
             </Dropdown>
           ) : (
             <ButtonV2
-              disabled={!qrValue}
+              disabled={!qrValue || !acceptedDisclaimer}
               onClick={async () => {
                 const response = await dispatch(searchByHealthId(qrValue));
 
@@ -273,6 +297,8 @@ const VerifyAadhaarSection = ({
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [verified, setIsVerified] = useState(false);
+  const [acceptedDisclaimer1, setAcceptedDisclaimer1] = useState(false);
+  const [acceptedDisclaimer2, setAcceptedDisclaimer2] = useState(false);
 
   useEffect(() => {
     if (verified && txnId) {
@@ -387,6 +413,43 @@ const VerifyAadhaarSection = ({
         </span>
       </div>
 
+      {!otpSent && (
+        <div className="flex flex-col gap-2">
+          <span className="text-gray-800 text-xs items-center">
+            <input
+              type="checkbox"
+              checked={acceptedDisclaimer1}
+              onChange={(e) => {
+                setAcceptedDisclaimer1(e.target.checked);
+              }}
+              className="border-gray-700 rounded shadow-sm ring-offset-0 ring-0 mr-2"
+            />
+            I declare that consent of the patient (or guardian or next of kin of
+            the patient) is obtained for generation of such ABHA Number.
+          </span>
+
+          <span className="text-gray-800 text-xs items-center">
+            <input
+              type="checkbox"
+              checked={acceptedDisclaimer2}
+              onChange={(e) => {
+                setAcceptedDisclaimer2(e.target.checked);
+              }}
+              className="border-gray-700 rounded shadow-sm ring-offset-0 ring-0 mr-2"
+            />
+            I declare that the Aadhaar Number and demographic details of the
+            patient are shared voluntarily by the patient (or guardian or next
+            of kin of the patient) through CARE with NHA for the sole purpose of
+            creation of ABHA Number. The patient understands that such data of
+            the patient will be collected, stored and utilized as per ABDM
+            Health Data Management Policy. The patient authorizes NHA to use the
+            Aadhaar number for performing Aadhaar based authentication with
+            UIDAI as per the provisions of Aadhaar Act 2016 for the aforesaid
+            purpose.
+          </span>
+        </div>
+      )}
+
       {otpSent && (
         <OtpFormField
           name="otp"
@@ -407,7 +470,9 @@ const VerifyAadhaarSection = ({
         </span>
         <>
           <ButtonV2
-            disabled={isSendingOtp}
+            disabled={
+              isSendingOtp || !acceptedDisclaimer1 || !acceptedDisclaimer2
+            }
             onClick={otpSent ? resendOtp : sendOtp}
             variant={otpSent ? "secondary" : "primary"}
           >
