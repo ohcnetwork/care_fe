@@ -24,7 +24,7 @@ NPM_FLAGS = "--legacy-peer-deps"
 
 [[redirects]]
 from = "/api/*"
-to = "https://local.kha.vin/api/:splat"
+to = "https://careapi-m1.coronasafe.in/api/:splat"
 status = 200
 force = true
 
