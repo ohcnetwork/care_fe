@@ -712,7 +712,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   };
 
   const handlePincodeChange = async (e: any) => {
-    handleChange(e);
+    handleFormFieldChange(e);
 
     if (!validatePincode(e.target.value)) return;
 
