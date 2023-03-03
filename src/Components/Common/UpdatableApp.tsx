@@ -10,6 +10,7 @@ const APP_UPDATED_KEY = "app-updated";
 
 interface UpdatableAppProps {
   children: ReactNode;
+  silentlyAutoUpdate?: boolean;
 }
 
 const checkForUpdate = async () => {
@@ -32,6 +33,11 @@ const checkForUpdate = async () => {
 
   const meta = await res.json();
 
+  if (appVersion === null) {
+    // Skip updating since the app potentially is the latest version.
+    localStorage.setItem(APP_VERSION_KEY, meta.version);
+  }
+
   if (appVersion !== meta.version) {
     // Trigger an update if key: 'app-version' not present in localStorage
     // or does not match with metaVersion.
@@ -40,7 +46,7 @@ const checkForUpdate = async () => {
   }
 };
 
-const UpdatableApp = ({ children }: UpdatableAppProps) => {
+const UpdatableApp = ({ children, silentlyAutoUpdate }: UpdatableAppProps) => {
   const [newVersion, setNewVersion] = useState<string>();
   const [appUpdated, setAppUpdated] = useState(false);
 
@@ -66,23 +72,27 @@ const UpdatableApp = ({ children }: UpdatableAppProps) => {
     if (!newVersion) return;
 
     // Service worker cache should be cleared with caches.delete()
-    if ("caches" in window) {
-      caches.keys().then((names) => names.forEach(caches.delete));
-    }
+    caches.keys().then((names) => names.forEach((name) => caches.delete(name)));
 
     // A second of delay to appreciate the update animation.
-    setTimeout(() => {
+    const updateLocalStorageAndReload = () => {
       localStorage.setItem(APP_UPDATED_KEY, "true");
       window.location.reload();
       localStorage.setItem(APP_VERSION_KEY, newVersion);
-    }, 1000);
+    };
+
+    silentlyAutoUpdate
+      ? updateLocalStorageAndReload()
+      : setTimeout(updateLocalStorageAndReload, 1000);
   };
+
+  if (newVersion && silentlyAutoUpdate) updateApp();
 
   return (
     <div className="relative">
       {children}
       {newVersion && <UpdateAppPopup onUpdate={updateApp} />}
-      <AppUpdatedAlert show={appUpdated && !newVersion} />
+      <AppUpdatedAlert show={appUpdated} />
     </div>
   );
 };

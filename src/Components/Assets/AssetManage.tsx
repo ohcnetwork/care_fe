@@ -19,6 +19,9 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { UserRole, USER_TYPES } from "../../Common/constants";
 import moment from "moment";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
+import { useTranslation } from "react-i18next";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -34,6 +37,7 @@ const checkAuthority = (type: string, cutoff: string) => {
 };
 
 const AssetManage = (props: AssetManageProps) => {
+  const { t } = useTranslation();
   const { assetId, facilityId } = props;
   const [asset, setAsset] = useState<AssetData>();
   const [isPrintMode, setIsPrintMode] = useState<boolean>(false);
@@ -49,6 +53,7 @@ const AssetManage = (props: AssetManageProps) => {
   const limit = 14;
   const { currentUser }: any = useSelector((state) => state);
   const user_type = currentUser.data.user_type;
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -190,10 +195,7 @@ const AssetManage = (props: AssetManageProps) => {
   };
 
   const handleDelete = async () => {
-    const confirm = window.confirm(
-      "Are you sure you want to delete this asset?"
-    );
-    if (asset && confirm) {
+    if (asset) {
       const response = await dispatch(deleteAsset(asset.id));
       if (response && response.status === 204) {
         navigate("/assets");
@@ -212,9 +214,19 @@ const AssetManage = (props: AssetManageProps) => {
             name: asset?.name,
           },
         }}
+        backUrl="/assets"
+      />
+      <ConfirmDialogV2
+        title="Delete Asset"
+        description="Are you sure you want to delete this asset?"
+        action="Confirm"
+        variant="danger"
+        show={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
       />
       <div className="flex flex-col xl:flex-row gap-8">
-        <div className="bg-white rounded-lg md:rounded-xl w-full flex flex-col md:flex-row">
+        <div className="bg-white rounded-lg md:rounded-xl w-full flex service-panel">
           <div className="w-full md:p-8 md:pt-6 p-6 pt-4 flex flex-col justify-between gap-6">
             <div>
               <div className="flex flex-wrap items-center gap-2 justify-between w-full">
@@ -275,6 +287,11 @@ const AssetManage = (props: AssetManageProps) => {
                   content: assetClassProp.name,
                 },
                 {
+                  label: "Asset QR Code ID",
+                  icon: "qrcode-scan",
+                  content: asset?.qr_code_id,
+                },
+                {
                   label: "Not working reason",
                   icon: "exclamation-circle",
                   content: asset?.not_working_reason,
@@ -310,7 +327,7 @@ const AssetManage = (props: AssetManageProps) => {
               )}
               {checkAuthority(user_type, "DistrictAdmin") && (
                 <ButtonV2
-                  onClick={handleDelete}
+                  onClick={() => setShowDeleteDialog(true)}
                   variant={"danger"}
                   className="inline-flex"
                 >
@@ -341,14 +358,13 @@ const AssetManage = (props: AssetManageProps) => {
               </div>
             </div>
 
-            <div className="text-xs text-gray-900 break-words">
-              <i className="text-gray-700">Created: </i>
-              {asset?.created_date &&
-                moment(asset?.created_date).format("DD/MM/YYYY LT")}
-              <br />
-              <i className="text-gray-700">Last Modified: </i>
-              {asset?.modified_date &&
-                moment(asset?.created_date).format("DD/MM/YYYY LT")}
+            <div className="flex flex-col text-sm text-gray-600 break-words justify-end">
+              {asset?.created_date && (
+                <RecordMeta prefix={t("created")} time={asset?.created_date} />
+              )}
+              {asset?.modified_date && (
+                <RecordMeta prefix={t("updated")} time={asset?.modified_date} />
+              )}
             </div>
           </div>
         </div>

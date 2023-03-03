@@ -1,13 +1,7 @@
 import { useReducer, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  TextInputField,
-  MultilineInputField,
-  ErrorHelperText,
-  PhoneNumberField,
-  SelectField,
-} from "../Common/HelperInputFields";
+import { ErrorHelperText, SelectField } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
@@ -20,7 +14,6 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import {
   Card,
   CardContent,
-  InputLabel,
   Radio,
   RadioGroup,
   Box,
@@ -29,8 +22,13 @@ import {
 import { phonePreg } from "../../Common/validation";
 
 import { createShift, getPatient } from "../../Redux/actions";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -91,6 +89,7 @@ const initialState = {
 };
 
 export const ShiftCreate = (props: patientShiftProps) => {
+  const { goBack } = useAppHistory();
   const { facilityId, patientId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -136,27 +135,31 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
   const validateForm = () => {
     const errors = { ...initError };
+
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
-      const phoneNumber = parsePhoneNumberFromString(state.form[field]);
       switch (field) {
-        case "refering_facility_contact_number":
+        case "refering_facility_contact_number": {
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
           } else if (
-            !phoneNumber?.isPossible() ||
-            !phonePreg(String(phoneNumber?.number))
+            !parsePhoneNumberFromString(state.form[field])?.isPossible() ||
+            !phonePreg(
+              String(parsePhoneNumberFromString(state.form[field])?.number)
+            )
           ) {
             errors[field] = requiredFields[field].invalidText;
             isInvalidForm = true;
           }
           return;
-        default:
+        }
+        default: {
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
           }
+        }
       }
     });
 
@@ -171,10 +174,24 @@ export const ShiftCreate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
+  const handleTextFormFieldChange = (e: any) => {
+    const form = { ...state.form };
+    const { name, value } = e;
+    form[name] = value;
+    dispatch({ type: "set_form", form });
+  };
+
   const handleValueChange = (value: any, name: string) => {
     const form = { ...state.form };
     form[name] = value;
     dispatch({ type: "set_form", form });
+  };
+
+  const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [event.name]: event.value },
+    });
   };
 
   const handleSubmit = async () => {
@@ -234,38 +251,40 @@ export const ShiftCreate = (props: patientShiftProps) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={`/facility/${facilityId}/patient/${patientId}`}
       />
       <div className="mt-4">
         <Card>
           <CardContent>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
-                <InputLabel>Contact person at the facility*</InputLabel>
-                <TextInputField
-                  fullWidth
+                <TextFormField
+                  label="Contact person at the facility"
+                  required
                   name="refering_facility_contact_name"
-                  variant="outlined"
-                  margin="dense"
                   value={state.form.refering_facility_contact_name}
-                  onChange={handleChange}
-                  errors={state.errors.refering_facility_contact_name}
+                  onChange={handleTextFormFieldChange}
+                  error={state.errors.refering_facility_contact_name}
                 />
               </div>
 
               <div>
-                <PhoneNumberField
-                  label="Contact person phone*"
-                  onlyIndia={true}
+                <PhoneNumberFormField
+                  label="Contact person phone"
+                  name="refering_facility_contact_number"
+                  required
+                  onlyIndia
                   value={state.form.refering_facility_contact_number}
-                  onChange={(value: any) =>
-                    handleValueChange(value, "refering_facility_contact_number")
-                  }
-                  errors={state.errors.refering_facility_contact_number}
+                  onChange={handleFormFieldChange}
+                  error={state.errors.refering_facility_contact_number}
                 />
               </div>
 
               <div>
-                <InputLabel>Name of shifting approving facility*</InputLabel>
+                <FieldLabel>
+                  Name of shifting approving facility{" "}
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
                 <FacilitySelect
                   multiple={false}
                   facilityType={1300}
@@ -279,9 +298,9 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>
+                <FieldLabel>
                   What facility would you like to assign the patient to
-                </InputLabel>
+                </FieldLabel>
                 <FacilitySelect
                   multiple={false}
                   name="assigned_facility"
@@ -294,7 +313,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>Is this an emergency?</InputLabel>
+                <FieldLabel>Is this an emergency?</FieldLabel>
                 <RadioGroup
                   aria-label="emergency"
                   name="emergency"
@@ -319,7 +338,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>Is this an upshift?</InputLabel>
+                <FieldLabel>Is this an upshift?</FieldLabel>
                 <RadioGroup
                   aria-label="is it upshift"
                   name="is_up_shift"
@@ -356,7 +375,9 @@ export const ShiftCreate = (props: patientShiftProps) => {
                                 />
                             </div> */}
               <div className="md:col-span-1">
-                <InputLabel>Preferred Vehicle*</InputLabel>
+                <FieldLabel>
+                  Preferred Vehicle <span className="text-red-500">*</span>
+                </FieldLabel>
                 <SelectField
                   name="preferred_vehicle_choice"
                   variant="outlined"
@@ -370,7 +391,10 @@ export const ShiftCreate = (props: patientShiftProps) => {
                 />
               </div>
               <div className="md:col-span-1">
-                <InputLabel>Preferred Facility Type*</InputLabel>
+                <FieldLabel>
+                  Preferred Facility Type{" "}
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
                 <SelectField
                   name="assigned_facility_type"
                   variant="outlined"
@@ -384,7 +408,10 @@ export const ShiftCreate = (props: patientShiftProps) => {
                 />
               </div>
               <div className="md:col-span-1">
-                <InputLabel>Severity of Breathlessness*</InputLabel>
+                <FieldLabel>
+                  Severity of Breathlessness{" "}
+                  <span className="text-red-500">*</span>
+                </FieldLabel>
                 <SelectField
                   name="breathlessness_level"
                   variant="outlined"
@@ -399,32 +426,26 @@ export const ShiftCreate = (props: patientShiftProps) => {
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel>Reason for shift*</InputLabel>
-                <MultilineInputField
+                <TextAreaFormField
+                  label="Reason for shift"
+                  required
                   rows={5}
                   name="reason"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
                   placeholder="Type your reason here"
                   value={state.form.reason}
-                  onChange={handleChange}
-                  errors={state.errors.reason}
+                  onChange={handleTextFormFieldChange}
+                  error={state.errors.reason}
                 />
               </div>
 
               <div className="md:col-span-2">
-                <InputLabel>Any other comments</InputLabel>
-                <MultilineInputField
-                  rows={5}
+                <TextAreaFormField
                   name="comments"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
+                  label="Any other comments"
                   placeholder="type any extra comments here"
                   value={state.form.comments}
-                  onChange={handleChange}
-                  errors={state.errors.comments}
+                  onChange={handleTextFormFieldChange}
+                  error={state.errors.comments}
                 />
               </div>
 

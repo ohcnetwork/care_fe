@@ -40,7 +40,7 @@ export default function ResponsiveMedicineTable(props: {
             </tr>
           </thead>
           <tbody>
-            {props.list.map((med: any, index: number) => (
+            {props.list?.map?.((med: any, index: number) => (
               <tr className="bg-white" key={index}>
                 {props.objectKeys.map((key, idx) => {
                   if (idx === 0)
@@ -62,7 +62,7 @@ export default function ResponsiveMedicineTable(props: {
         </table>
       ) : (
         <div className="rounded-md shadow-sm">
-          {props.list.map((med: any, index: number) => (
+          {props.list?.map?.((med: any, index: number) => (
             <AccordionV2
               title={
                 <div className="grid">

@@ -12,6 +12,7 @@ import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import useMergeState from "../../Common/hooks/useMergeState";
+import FilterButtons from "../Common/FilterButtons";
 
 export default function UserFilter(props: any) {
   const { filter, onChange, closeFilter } = props;
@@ -26,14 +27,6 @@ export default function UserFilter(props: any) {
 
   const [isFacilityLoading, setFacilityLoading] = useState(false);
   const dispatch: any = useDispatch();
-
-  const clearFilterState = {
-    status: "",
-    result: "",
-    facility: "",
-    facility_ref: null,
-    sample_type: "",
-  };
 
   const handleChange = (event: any) => {
     const { name, value } = event.target;
@@ -71,28 +64,17 @@ export default function UserFilter(props: any) {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <button className="btn btn-default" onClick={closeFilter}>
-          <i className="fas fa-times mr-2" />
-          Cancel
-        </button>
-        <button
-          className="btn btn-default"
-          onClick={(_) => {
+      <div className="pb-10">
+        <FilterButtons
+          onClose={closeFilter}
+          onApply={applyFilter}
+          onClear={() => {
             navigate("/sample");
-            setFilterState(clearFilterState);
+            setFilterState(filterState);
             closeFilter();
           }}
-        >
-          <i className="fas fa-times mr-2" />
-          Clear Filter
-        </button>
-        <button className="btn btn-primary" onClick={applyFilter}>
-          <i className="fas fa-check mr-2" />
-          Apply
-        </button>
+        />
       </div>
-
       <div className="font-light text-md mt-2">Filter By:</div>
       <div className="flex flex-wrap gap-2">
         <div className="w-full flex-none">

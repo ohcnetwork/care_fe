@@ -1,6 +1,7 @@
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import useAppHistory from "../../../Common/hooks/useAppHistory";
 
 export type SidebarIcon = React.ReactNode;
 
@@ -10,6 +11,7 @@ type SidebarItemProps = {
   external?: true | undefined;
   badgeCount?: number | undefined;
   selected?: boolean | undefined;
+  handleOverflow?: any;
 } & ({ to: string; do?: undefined } | { to?: string; do: () => void });
 
 type SidebarItemBaseProps = SidebarItemProps & { shrinked?: boolean };
@@ -19,10 +21,11 @@ const SidebarItemBase = ({
   ...props
 }: SidebarItemBaseProps) => {
   const { t } = useTranslation();
+  const { resetHistory } = useAppHistory();
 
   return (
     <Link
-      className={`relative mx-1 h-full rounded-lg flex-1 min-h-[40px] md:flex-none md:h-11 text-white tooltip transition-all duration-200 ease-in-out cursor-pointer
+      className={`relative mr-3 ml-1  h-full rounded-lg flex-1 min-h-[40px] md:flex-none md:h-11 text-white tooltip transition-all duration-200 ease-in-out cursor-pointer
         ${
           props.selected
             ? "font-bold bg-primary-900"
@@ -31,7 +34,13 @@ const SidebarItemBase = ({
       target={external && "_blank"}
       rel={external && "noreferrer"}
       href={props.to ?? ""}
-      onClick={props.do}
+      onClick={props.do ?? resetHistory}
+      onMouseEnter={() => {
+        props.handleOverflow(true);
+      }}
+      onMouseLeave={() => {
+        props.handleOverflow(false);
+      }}
     >
       <span className={`tooltip-text tooltip-right ${!shrinked && "hidden"}`}>
         {t(props.text)}

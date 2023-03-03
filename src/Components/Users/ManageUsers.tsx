@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
@@ -11,13 +11,12 @@ import {
   deleteUser,
   getDistrict,
   partialUpdateUser,
+  clearHomeFacility,
 } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { USER_TYPES } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
-
-import { IconButton, CircularProgress } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
+import { CircularProgress, Button } from "@material-ui/core";
 import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
@@ -27,10 +26,13 @@ import UserDetails from "../Common/UserDetails";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import SearchInput from "../Form/SearchInput";
+import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
 import useFilters from "../../Common/hooks/useFilters";
 import { classNames } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import SkillsSlideOver from "./SkillsSlideOver";
+import { FacilitySelect } from "../Common/FacilitySelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -44,15 +46,17 @@ export default function ManageUsers() {
     FilterBadges,
     advancedFilter,
     resultsPerPage,
-  } = useFilters({ limit: 15 });
+  } = useFilters({ limit: 18 });
   const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageUsers: any = null;
   const [users, setUsers] = useState(initialData);
   const [isLoading, setIsLoading] = useState(false);
-  const [isFacilityLoading, setIsFacilityLoading] = useState(false);
+  const [expandSkillList, setExpandSkillList] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [districtName, setDistrictName] = useState<string>();
+  const [expandFacilityList, setExpandFacilityList] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
   const isSuperuser = currentUser.data.is_superuser;
@@ -61,22 +65,12 @@ export default function ManageUsers() {
   const userTypes = isSuperuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
-  const [linkFacility, setLinkFacility] = useState<{
-    show: boolean;
-    username: string;
-  }>({ show: false, username: "" });
 
   const [userData, setUserData] = useState<{
     show: boolean;
     username: string;
     name: string;
   }>({ show: false, username: "", name: "" });
-
-  const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
-    show: boolean;
-    userName: string;
-    facility?: FacilityModel;
-  }>({ show: false, userName: "", facility: undefined });
 
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
@@ -137,56 +131,11 @@ export default function ManageUsers() {
   );
 
   const addUser = (
-    <button
-      className="px-4 py-1 w-full md:w-auto rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
-      onClick={() => navigate("/users/add")}
-    >
-      <i className="fas fa-plus mr-2"></i>
-      Add New User
-    </button>
+    <ButtonV2 className="w-full" onClick={() => navigate("/users/add")}>
+      <CareIcon className="care-l-plus text-lg w-full" />
+      <p>Add New User</p>
+    </ButtonV2>
   );
-
-  const loadFacilities = async (username: string) => {
-    if (isFacilityLoading) {
-      return;
-    }
-    setIsFacilityLoading(true);
-    const res = await dispatch(getUserListFacility({ username }));
-    if (res && res.data) {
-      const updated = users.map((user) => {
-        return user.username === username
-          ? {
-              ...user,
-              facilities: res.data,
-            }
-          : user;
-      });
-      setUsers(updated);
-    }
-    setIsFacilityLoading(false);
-  };
-
-  const showLinkFacilityModal = (username: string) => {
-    setLinkFacility({
-      show: true,
-      username,
-    });
-  };
-
-  const hideUnlinkFacilityModal = () => {
-    setUnlinkFacilityData({
-      show: false,
-      facility: undefined,
-      userName: "",
-    });
-  };
-
-  const hideLinkFacilityModal = () => {
-    setLinkFacility({
-      show: false,
-      username: "",
-    });
-  };
 
   const handleCancel = () => {
     setUserData({ show: false, username: "", name: "" });
@@ -209,125 +158,12 @@ export default function ManageUsers() {
     fetchData({ aborted: false });
   };
 
-  const handleUnlinkFacilitySubmit = async () => {
-    setIsFacilityLoading(true);
-    await dispatch(
-      deleteUserFacility(
-        unlinkFacilityData.userName,
-        String(unlinkFacilityData?.facility?.id)
-      )
-    );
-    setIsFacilityLoading(false);
-    loadFacilities(unlinkFacilityData.userName);
-    hideUnlinkFacilityModal();
-  };
-
   const handleDelete = (user: any) => {
     setUserData({
       show: true,
       username: user.username,
       name: `${user.first_name} ${user.last_name}`,
     });
-  };
-
-  const facilityClassname = classNames(
-    "align-baseline font-bold text-sm",
-    isFacilityLoading ? "text-gray-500" : "text-blue-500 hover:text-blue-800"
-  );
-
-  const showLinkFacility = (username: string) => {
-    return (
-      <a
-        onClick={() => showLinkFacilityModal(username)}
-        className={facilityClassname}
-        href="#"
-      >
-        Link new facility
-      </a>
-    );
-  };
-
-  const updateHomeFacility = async (username: string, facility: any) => {
-    setIsFacilityLoading(true);
-    await dispatch(partialUpdateUser(username, { home_facility: facility.id }));
-    setIsFacilityLoading(false);
-    fetchData({ aborted: false });
-  };
-
-  const showFacilities = (username: string, facilities: FacilityModel[]) => {
-    if (!facilities || !facilities.length) {
-      return (
-        <>
-          <div className="font-semibold">No Facilities!</div>
-          {showLinkFacility(username)}
-        </>
-      );
-    }
-    return (
-      <div>
-        <div className="sm:col-start-2 col-span-full sm:col-span-3 max-h-48 overflow-scroll mb-2">
-          <div className="mb-2">
-            {facilities.map((facility, i) => (
-              <div
-                key={`facility_${i}`}
-                className="border-2 font-gbold inline-block rounded-md pl-3 py-1 mr-3 mt-2"
-              >
-                <div className="flex items-center  space-x-1">
-                  <div className="font-semibold">{facility.name}</div>
-                  <i
-                    className="fas fa-home text-gray-500 hover:bg-gray-200 hover:text-gray-600 rounded-full p-2"
-                    onClick={() => updateHomeFacility(username, facility)}
-                  ></i>
-                  <IconButton
-                    size="small"
-                    color="secondary"
-                    disabled={isFacilityLoading}
-                    onClick={() =>
-                      setUnlinkFacilityData({
-                        show: true,
-                        facility: facility,
-                        userName: username,
-                      })
-                    }
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        {showLinkFacility(username)}
-      </div>
-    );
-  };
-
-  const hideFacilities = (username: string) => {
-    setUsers(
-      users.filter((user) => {
-        if (user.username === username) {
-          user.facilities = null;
-        }
-        return user;
-      })
-    );
-  };
-
-  const addFacility = async (username: string, facility: any) => {
-    hideLinkFacilityModal();
-    setIsFacilityLoading(true);
-    const res = await dispatch(addUserFacility(username, String(facility.id)));
-    if (res?.status === 201) {
-      Notification.Success({
-        msg: "Facility linked successfully",
-      });
-    } else {
-      Notification.Error({
-        msg: "Error while linking facility",
-      });
-    }
-    setIsFacilityLoading(false);
-    loadFacilities(username);
   };
 
   const showDelete = (user: any) => {
@@ -354,21 +190,25 @@ export default function ManageUsers() {
 
   users &&
     users.length &&
-    (userList = users.map((user: any) => {
+    (userList = users.map((user: any, idx) => {
       const cur_online = moment()
         .subtract(5, "minutes")
         .isBefore(user.last_login);
       return (
         <div
           key={`usr_${user.id}`}
+          id={`usr_${idx}`}
           className=" w-full lg:w-1/2 xl:w-1/3 mt-6 md:px-4"
         >
-          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
-            <div className="h-full flex flex-col justify-between">
+          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-visible relative">
+            <div className="h-full flex flex-col justify-between pb-20 sm:pb-16">
               <div className="px-6 py-4">
                 <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
                   {user.username && (
-                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit">
+                    <div
+                      id="username"
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit"
+                    >
                       {user.username}
                     </div>
                   )}
@@ -399,7 +239,7 @@ export default function ManageUsers() {
                     )}
                   </div>
                 </div>
-                <div className="font-bold text-2xl capitalize mt-2">
+                <div id="name" className="font-bold text-2xl capitalize mt-2">
                   {`${user.first_name} ${user.last_name}`}
 
                   {user.last_login && cur_online ? (
@@ -423,12 +263,12 @@ export default function ManageUsers() {
                   className={`flex ${
                     isExtremeSmallScreen
                       ? " flex-wrap "
-                      : " flex-row justify-between "
+                      : " flex-col md:flex-row justify-between "
                   } md:grid md:grid-cols-4 gap-2`}
                 >
                   {user.user_type && (
                     <div className="col-span-2">
-                      <UserDetails title="Role">
+                      <UserDetails id="role" title="Role">
                         <div className="font-semibold break-all">
                           {user.user_type}
                         </div>
@@ -437,16 +277,64 @@ export default function ManageUsers() {
                   )}
                   {user.district_object && (
                     <div className="col-span-2">
-                      <UserDetails title="District">
+                      <UserDetails id="district" title="District">
                         <div className="font-semibold">
                           {user.district_object.name}
                         </div>
                       </UserDetails>
                     </div>
                   )}
+                  {user.user_type === "Doctor" && (
+                    <>
+                      <div className="col-span-2">
+                        <UserDetails
+                          id="doctor-qualification"
+                          title="Qualification"
+                        >
+                          {user.doctor_qualification ? (
+                            <span className="font-semibold">
+                              {user.doctor_qualification}
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">Unknown</span>
+                          )}
+                        </UserDetails>
+                      </div>
+                      <div className="col-span-2">
+                        <UserDetails id="doctor-experience" title="Experience">
+                          {user.doctor_experience_commenced_on ? (
+                            <span className="font-semibold">
+                              {moment().diff(
+                                user.doctor_experience_commenced_on,
+                                "years",
+                                false
+                              )}{" "}
+                              years
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">Unknown</span>
+                          )}
+                        </UserDetails>
+                      </div>
+                      <div className="col-span-2">
+                        <UserDetails
+                          id="medical-council-registration"
+                          title="Medical Council Registration"
+                        >
+                          {user.doctor_medical_council_registration ? (
+                            <span className="font-semibold">
+                              {user.doctor_medical_council_registration}
+                            </span>
+                          ) : (
+                            <span className="text-gray-600">Unknown</span>
+                          )}
+                        </UserDetails>
+                      </div>
+                    </>
+                  )}
                 </div>
                 {user.local_body_object && (
-                  <UserDetails title="Location">
+                  <UserDetails id="local_body" title="Location">
                     <div className="font-semibold">
                       {user.local_body_object.name}
                     </div>
@@ -461,33 +349,16 @@ export default function ManageUsers() {
                 >
                   {user.created_by && (
                     <div className="col-span-2">
-                      <UserDetails title="Created by">
+                      <UserDetails id="created_by" title="Created by">
                         <div className="font-semibold break-all">
                           {user.created_by}
                         </div>
                       </UserDetails>
                     </div>
                   )}
-                  {user.phone_number && (
-                    <div className="mt-2 bg-gray-50 border-t px-6 py-2 col-span-2">
-                      <div className="flex py-4 justify-between">
-                        <div>
-                          <div className="text-gray-500 leading-relaxed">
-                            Phone:
-                          </div>
-                          <a
-                            href={`tel:${user.phone_number}`}
-                            className="font-semibold"
-                          >
-                            {user.phone_number || "-"}
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                   {user.username && (
                     <div className="col-span-2">
-                      <UserDetails title="Home Facility">
+                      <UserDetails id="home_facility" title="Home Facility">
                         <span
                           className="font-semibold block"
                           data-cy="home-facility"
@@ -499,8 +370,8 @@ export default function ManageUsers() {
                     </div>
                   )}
                   {user.username && (
-                    <div className="col-span-4">
-                      <div className="flex text-gray-800">
+                    <div id="facilities" className="col-span-4">
+                      <div className="flex text-gray-800 absolute bottom-12 sm:bottom-9 left-6">
                         <p className="flex items-center">Linked Facilities: </p>
                         <ButtonV2
                           ghost
@@ -508,31 +379,43 @@ export default function ManageUsers() {
                           variant="secondary"
                           className="tooltip flex items-center"
                           onClick={() => {
-                            if (!user.facilities) {
-                              loadFacilities(user.username);
-                            } else {
-                              hideFacilities(user.username);
-                            }
+                            setExpandFacilityList(!expandFacilityList);
+                            setSelectedUser(user);
                           }}
                         >
                           <CareIcon
                             className={`${
                               !user.facilities
                                 ? "care-l-eye"
-                                : "care-l-eye-slash"
+                                : expandFacilityList
+                                ? "care-l-eye-slash"
+                                : "care-l-eye"
                             } text-xl`}
                           />
                           <span className="tooltip-text tooltip-bottom">
-                            {!user.facilities ? "View" : "Hide"} Linked
-                            Facilities
+                            {!user.facilities
+                              ? "View"
+                              : expandFacilityList
+                              ? "Hide"
+                              : "View"}{" "}
+                            Linked Facilities
                           </span>
                         </ButtonV2>
                       </div>
-                      {user.facilities &&
-                        showFacilities(user.username, user.facilities)}
                     </div>
                   )}
                 </div>
+                {user.username && (
+                  <div
+                    onClick={() => {
+                      setExpandSkillList(true);
+                      setSelectedUser(user.username);
+                    }}
+                    className="col-span-4 mt-2 align-baseline font-bold text-sm text-blue-500 hover:text-blue-800 absolute bottom-3"
+                  >
+                    Click here to show linked skills
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -545,7 +428,6 @@ export default function ManageUsers() {
   } else if (users && users.length) {
     manageUsers = (
       <div>
-        {userTypes.length && addUser}
         <div className="flex flex-wrap md:-mx-4">{userList}</div>
         <Pagination totalCount={totalCount} />
       </div>
@@ -553,21 +435,18 @@ export default function ManageUsers() {
   } else if (users && users.length === 0) {
     manageUsers = (
       <div>
-        {userTypes.length && addUser}
-        <div>
-          <h5> No Users Found</h5>
-        </div>
+        <h5> No Users Found</h5>
       </div>
     );
   }
 
   return (
     <div>
-      {linkFacility.show && (
-        <LinkFacilityDialog
-          username={linkFacility.username}
-          handleOk={addFacility}
-          handleCancel={hideLinkFacilityModal}
+      {expandSkillList && (
+        <SkillsSlideOver
+          show={expandSkillList}
+          setShow={setExpandSkillList}
+          username={selectedUser}
         />
       )}
       <PageTitle
@@ -576,6 +455,18 @@ export default function ManageUsers() {
         className="mx-5 px-2"
         breadcrumbs={false}
       />
+      <SlideOverCustom
+        open={expandFacilityList}
+        setOpen={setExpandFacilityList}
+        slideFrom="right"
+        title="Facilities"
+        dialogClass="w-[350px]"
+        onCloseClick={() => {
+          //fetchData({ aborted: false });
+        }}
+      >
+        <UserFacilities user={selectedUser} />
+      </SlideOverCustom>
 
       <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-2">
         <div className="bg-white overflow-hidden shadow col-span-1 rounded-lg">
@@ -590,13 +481,17 @@ export default function ManageUsers() {
                   <CircularProgress className="text-primary-500" />
                 </dd>
               ) : (
-                <dd className="mt-4 text-5xl lg:text-5xl md:text-4xl leading-9 font-semibold text-gray-900">
+                <dd
+                  id="count"
+                  className="mt-4 text-5xl lg:text-5xl md:text-4xl leading-9 font-semibold text-gray-900"
+                >
                   {totalCount}
                 </dd>
               )}
             </dl>
           </div>
         </div>
+
         <div className="flex flex-col lg:flex-row justify-between col-span-2 lg:px-3 space-y-3 lg:space-y-0 lg:space-x-4 my-2">
           <div className="w-full">
             <SearchInput
@@ -606,9 +501,8 @@ export default function ManageUsers() {
               placeholder="Search by username"
             />
           </div>
-
           <div>
-            <div className="flex items-start mb-2">
+            <div className="flex flex-col items-center mb-2 gap-2">
               <button
                 className="btn btn-primary-ghost w-full"
                 onClick={() => advancedFilter.setShow(true)}
@@ -644,6 +538,7 @@ export default function ManageUsers() {
                 </svg>
                 <span>Advanced Filters</span>
               </button>
+              {userTypes.length && addUser}
             </div>
           </div>
 
@@ -679,13 +574,234 @@ export default function ManageUsers() {
           handleOk={handleSubmit}
         />
       )}
+    </div>
+  );
+}
+
+function UserFacilities(props: { user: any }) {
+  const { user } = props;
+  const username = user.username;
+  const dispatch: any = useDispatch();
+  const [facilities, setFacilities] = useState<any>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [facility, setFacility] = useState<any>(null);
+  const [unlinkFacilityData, setUnlinkFacilityData] = useState<{
+    show: boolean;
+    userName: string;
+    facility?: FacilityModel;
+    isHomeFacility: boolean;
+  }>({ show: false, userName: "", facility: undefined, isHomeFacility: false });
+  const [linkFacility, setLinkFacility] = useState<{
+    show: boolean;
+    username: string;
+  }>({ show: false, username: "" });
+  const hideUnlinkFacilityModal = () => {
+    setUnlinkFacilityData({
+      show: false,
+      facility: undefined,
+      userName: "",
+      isHomeFacility: false,
+    });
+  };
+
+  const fetchFacilities = async () => {
+    setIsLoading(true);
+    const res = await dispatch(getUserListFacility({ username }));
+    if (res && res.data) {
+      setFacilities(res.data);
+    }
+    setIsLoading(false);
+  };
+
+  const updateHomeFacility = async (username: string, facility: any) => {
+    setIsLoading(true);
+    const res = await dispatch(
+      partialUpdateUser(username, { home_facility: facility.id })
+    );
+    if (res && res.status === 200) user.home_facility_object = facility;
+    fetchFacilities();
+    setIsLoading(false);
+  };
+
+  const handleUnlinkFacilitySubmit = async () => {
+    setIsLoading(true);
+    if (unlinkFacilityData.isHomeFacility) {
+      const res = await dispatch(
+        clearHomeFacility(unlinkFacilityData.userName)
+      );
+      if (res && res.status === 204) user.home_facility_object = null;
+    } else {
+      await dispatch(
+        deleteUserFacility(
+          unlinkFacilityData.userName,
+          String(unlinkFacilityData?.facility?.id)
+        )
+      );
+    }
+    fetchFacilities();
+    setIsLoading(false);
+    hideUnlinkFacilityModal();
+  };
+
+  const hideLinkFacilityModal = () => {
+    setLinkFacility({
+      show: false,
+      username: "",
+    });
+  };
+
+  const addFacility = async (username: string, facility: any) => {
+    hideLinkFacilityModal();
+    setIsLoading(true);
+    const res = await dispatch(addUserFacility(username, String(facility.id)));
+    if (res?.status !== 201) {
+      Notification.Error({
+        msg: "Error while linking facility",
+      });
+    }
+    setIsLoading(false);
+    setFacility(null);
+    fetchFacilities();
+  };
+
+  useEffect(() => {
+    fetchFacilities();
+  }, []);
+
+  return (
+    <div className="h-full">
+      {linkFacility.show && (
+        <LinkFacilityDialog
+          username={linkFacility.username}
+          handleOk={addFacility}
+          handleCancel={hideLinkFacilityModal}
+        />
+      )}
       {unlinkFacilityData.show && (
         <UnlinkFacilityDialog
           facilityName={unlinkFacilityData.facility?.name || ""}
           userName={unlinkFacilityData.userName}
+          isHomeFacility={unlinkFacilityData.isHomeFacility}
           handleCancel={hideUnlinkFacilityModal}
           handleOk={handleUnlinkFacilitySubmit}
         />
+      )}
+      <div className="flex gap-2 mb-4 items-stretch">
+        <FacilitySelect
+          multiple={false}
+          name="facility"
+          showAll={false} // Show only facilities that user has access to link (not all facilities)
+          showNOptions={8}
+          selected={facility}
+          setSelected={setFacility}
+          errors=""
+          className="z-40"
+        />
+        <Button
+          color="primary"
+          disabled={!facility}
+          className="mt-1"
+          onClick={() => addFacility(username, facility)}
+          autoFocus
+        >
+          Add
+        </Button>
+      </div>
+      {isLoading ? (
+        <div className="flex justify-center items-center">
+          <CircularProgress className="text-primary-500" />
+        </div>
+      ) : (
+        <div className="flex flex-col">
+          {/* Home Facility section */}
+          {user?.home_facility_object && (
+            <div className="mt-2">
+              <div className="text-lg font-bold mb-2 ml-2">Home Facility</div>
+              <div className="relative p-2 hover:bg-gray-200 focus:bg-gray-200 transition rounded md:rounded-lg cursor-pointer">
+                <div className="flex justify-between items-center">
+                  <div className="">{user?.home_facility_object?.name}</div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      className="tooltip text-lg text-red-600"
+                      onClick={() =>
+                        setUnlinkFacilityData({
+                          show: true,
+                          facility: user?.home_facility_object,
+                          userName: username,
+                          isHomeFacility: true,
+                        })
+                      }
+                    >
+                      <CareIcon className="care-l-link-broken" />
+                      <span className="tooltip-text tooltip-left">
+                        Clear Home Facility
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <hr className="my-2 border-gray-300" />
+            </div>
+          )}
+
+          {/* Linked Facilities section */}
+          {facilities.length > 0 && (
+            <div className="mt-2">
+              <div className="text-lg font-bold mb-2 ml-2">
+                Linked Facilities
+              </div>
+              <div className="flex flex-col">
+                {facilities.map((facility: any, i: number) => {
+                  if (user?.home_facility_object?.id === facility.id) {
+                    // skip if it's a home facility
+                    return null;
+                  }
+                  return (
+                    <div
+                      key={`facility_${i}`}
+                      className={classNames(
+                        "relative p-2 hover:bg-gray-200 focus:bg-gray-200 transition rounded md:rounded-lg cursor-pointer"
+                      )}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="">{facility.name}</div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="tooltip text-lg hover:text-primary-500"
+                            onClick={() =>
+                              updateHomeFacility(username, facility)
+                            }
+                          >
+                            <CareIcon className="care-l-estate" />
+                            <span className="tooltip-text tooltip-left">
+                              Set as home facility
+                            </span>
+                          </button>
+                          <button
+                            className="tooltip text-lg text-red-600"
+                            onClick={() =>
+                              setUnlinkFacilityData({
+                                show: true,
+                                facility: facility,
+                                userName: username,
+                                isHomeFacility: false,
+                              })
+                            }
+                          >
+                            <CareIcon className="care-l-link-broken" />
+                            <span className="tooltip-text tooltip-left">
+                              Unlink Facility
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

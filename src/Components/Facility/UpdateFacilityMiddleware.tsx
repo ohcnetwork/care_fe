@@ -10,7 +10,7 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
+import TextFormField from "../Form/FormFields/TextFormField";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -85,6 +85,24 @@ export const UpdateFacilityMiddleware = (props: any) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
+    if (!state.form.middleware_address) {
+      Notification.Error({
+        msg: "Middleware Address is required",
+      });
+      setIsLoading(false);
+      return;
+    }
+    if (
+      state.form.middleware_address.match(
+        /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/
+      ) === null
+    ) {
+      Notification.Error({
+        msg: "Invalid Middleware Address",
+      });
+      setIsLoading(false);
+      return;
+    }
     const data: any = {
       ...state.form,
       middleware_address: state.form.middleware_address,
@@ -109,7 +127,7 @@ export const UpdateFacilityMiddleware = (props: any) => {
   const handleChange = (e: any) => {
     dispatch({
       type: "set_form",
-      form: { ...state.form, [e.target.name]: e.target.value },
+      form: { ...state.form, [e.name]: e.value },
     });
   };
 
@@ -131,11 +149,11 @@ export const UpdateFacilityMiddleware = (props: any) => {
             <CardContent>
               <div className="mt-2 grid gap-4 grid-cols-1">
                 <div>
-                  <TextInputFieldV2
+                  <TextFormField
                     name="middleware_address"
                     label="Facility Middleware Address"
                     value={state.form.middleware_address}
-                    onChange={handleChange}
+                    onChange={(e) => handleChange(e)}
                   />
                 </div>
               </div>

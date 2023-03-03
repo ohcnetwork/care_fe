@@ -219,12 +219,12 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
             value={Belt.Int.toString(
               switch value {
               | Some(value) => value
-              | _ => 0
+              | _ => Pervasives.int_of_string(option["start"])
               },
             )}
             setValue={s => send(handleChange(Belt.Int.fromString(s)))}
             getLabel={VentilatorParameters.getStatus(option["min"], "Low", option["max"], "High")}
-            hasError={ValidationUtils.isInputInRangeFloat(option["start"], option["end"], Some(Belt.Int.toFloat(switch value { | None => 0 | Some(v) => v })))}
+            hasError={ValidationUtils.isInputInRangeFloat(option["start"], option["end"], Some(Belt.Int.toFloat(switch value { | None => Pervasives.int_of_string(option["start"]) | Some(v) => v })))}
           />
         })
         |> React.array}

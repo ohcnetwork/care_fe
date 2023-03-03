@@ -14,16 +14,24 @@ let symptoms = [
   "BREATHLESSNESS",
   "MYALGIA",
   "ABDOMINAL DISCOMFORT",
-  "VOMITING/DIARRHOEA",
+  "VOMITING",
   "OTHERS",
-  "SARI",
+  "",
   "SPUTUM",
   "NAUSEA",
   "CHEST PAIN",
   "HEMOPTYSIS",
   "NASAL DISCHARGE",
   "BODY ACHE",
-]
+  "DIARRHOEA",
+  "PAIN",
+  "PEDAL EDEMA",
+  "WOUND",
+  "CONSTIPATION",
+  "HEAD ACHE",
+  "BLEEDING",
+  "DIZZINESS"
+];
 
 @react.component
 let make = (~others, ~renderOptionalDescription, ~title) => {

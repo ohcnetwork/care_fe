@@ -1,7 +1,7 @@
 import axios from "axios";
 import api from "./api";
 import * as Notification from "../Utils/Notifications.js";
-import querystring from "querystring";
+import { isEmpty, omitBy } from "lodash";
 const requestMap: any = api;
 export const actions = {
   FETCH_REQUEST: "FETCH_REQUEST",
@@ -68,9 +68,14 @@ export const fireRequest = (
     }
     if (request.method === undefined || request.method === "GET") {
       request.method = "GET";
-      const qs = querystring.stringify(params);
-      if (qs !== "") {
-        request.path += `?${qs}`;
+      let qString = "";
+      Object.keys(params).forEach((param: any) => {
+        if (params[param] !== undefined && params[param] !== "") {
+          qString += `${param}=${encodeURIComponent(params[param])}&`;
+        }
+      });
+      if (qString !== "") {
+        request.path += `?${qString}`;
       }
     }
     // set dynamic params in the URL
@@ -188,7 +193,7 @@ export const fireRequestV2 = (
   }
   if (request.method === undefined || request.method === "GET") {
     request.method = "GET";
-    const qs = querystring.stringify(params);
+    const qs = new URLSearchParams(omitBy(params, isEmpty)).toString();
     if (qs !== "") {
       request.path += `?${qs}`;
     }
@@ -296,7 +301,7 @@ export const fireRequestForFiles = (
     }
     if (request.method === undefined || request.method === "GET") {
       request.method = "GET";
-      const qs = querystring.stringify(params);
+      const qs = new URLSearchParams(omitBy(params, isEmpty)).toString();
       if (qs !== "") {
         request.path += `?${qs}`;
       }

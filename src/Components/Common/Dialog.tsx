@@ -1,5 +1,6 @@
 import React from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { classNames } from "../../Utils/utils";
 
 type DialogProps = {
   title: React.ReactNode;
@@ -7,10 +8,11 @@ type DialogProps = {
   show: boolean;
   onClose: () => void;
   children: React.ReactNode;
+  className?: string;
 };
 
 const DialogModal = (props: DialogProps) => {
-  const { title, description, show, onClose, children } = props;
+  const { title, description, show, onClose, children, className } = props;
   return (
     <div>
       <Transition appear show={show} as={React.Fragment}>
@@ -38,7 +40,12 @@ const DialogModal = (props: DialogProps) => {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Panel
+                  className={classNames(
+                    className,
+                    "w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                  )}
+                >
                   <Dialog.Title
                     as="h4"
                     className="text-lg font-medium leading-6 text-gray-900"
@@ -46,7 +53,7 @@ const DialogModal = (props: DialogProps) => {
                     <h4>{title}</h4>
                   </Dialog.Title>
                   <div className="mt-2">
-                    <p className="text-sm text-gray-500">{description}</p>
+                    <p className="text-sm text-gray-600">{description}</p>
                   </div>
                   {children}
                 </Dialog.Panel>

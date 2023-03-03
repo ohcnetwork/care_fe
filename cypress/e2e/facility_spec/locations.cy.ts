@@ -9,7 +9,7 @@ describe("Location Management Section", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/");
-    cy.get("[name='facility-details']").first().click();
+    cy.get("[id='facility-details']").first().click();
     cy.get("[id=manage-facility-dropdown]").should("exist").click();
     cy.get("[id=location-management]").click();
   });

@@ -2,14 +2,16 @@ import loadable from "@loadable/component";
 import _ from "lodash";
 import { navigate } from "raviger";
 import { useState } from "react";
-//@ts-ignore
 import CSVReader from "react-csv-reader";
 import { useDispatch } from "react-redux";
+import useConfig from "../../Common/hooks/useConfig";
 import { externalResultUploadCsv } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
+import { useTranslation } from "react-i18next";
 
 export default function ExternalResultUpload() {
+  const { sample_format_external_result_import } = useConfig();
   const dispatch: any = useDispatch();
   // for disabling save button once clicked
   const [loading, setLoading] = useState(false);
@@ -18,6 +20,7 @@ export default function ExternalResultUpload() {
   const handleForce = (data: any) => {
     setCsvData(data);
   };
+  const { t } = useTranslation();
 
   const papaparseOptions = {
     header: true,
@@ -52,7 +55,7 @@ export default function ExternalResultUpload() {
       }
     } else {
       Notification.Error({
-        msg: "Please Upload A CSV file !!!",
+        msg: t("please_upload_a_csv_file"),
       });
       setLoading(false);
     }
@@ -61,7 +64,7 @@ export default function ExternalResultUpload() {
   return (
     <div className="px-4">
       <PageTitle
-        title="Upload External Results"
+        title={t("upload_external_results")}
         backUrl="/external_results"
         className="mt-4"
       />
@@ -87,19 +90,20 @@ export default function ExternalResultUpload() {
                   </svg>
                 </span>
                 <CSVReader
+                  inputId="result-upload"
                   cssLabelClass="mx-auto text-sm leading-5 font-medium text-gray-700"
                   cssClass="flex flex-col react-csv-input"
                   cssInputClass="csv-input"
-                  label="Select a CSV file in the specified format"
+                  label={t("csv_file_in_the_specified_format")}
                   onFileLoaded={handleForce}
                   parserOptions={papaparseOptions}
                 />
                 <a
                   className="mt-4 ml-auto mr-auto max-w-xs items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                  href="https://docs.google.com/spreadsheets/d/17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE/export?format=csv&id=17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE"
+                  href={sample_format_external_result_import}
                 >
                   <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
-                  <span>Sample Format</span>
+                  <span>{t("sample_format")}</span>
                 </a>
               </div>
             </div>
@@ -134,7 +138,7 @@ export default function ExternalResultUpload() {
               className="block btn btn-primary mx-auto"
               onClick={handleSubmit}
             >
-              Save
+              {t("save")}
             </button>
           </div>
         </div>

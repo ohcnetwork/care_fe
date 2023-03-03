@@ -6,6 +6,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { getConfig, getCurrentUser } from "./Redux/actions";
 import { useAbortableEffect, statusType } from "./Common/utils";
 import axios from "axios";
+import { HistoryAPIProvider } from "./CAREUI/misc/HistoryAPIProvider";
+import * as Sentry from "@sentry/browser";
+import { IConfig } from "./Common/hooks/useConfig";
 
 const Loading = loadable(() => import("./Components/Common/Loading"));
 
@@ -18,7 +21,16 @@ const App: React.FC = () => {
   useAbortableEffect(async () => {
     const res = await dispatch(getConfig());
     if (res.data && res.status < 400) {
-      localStorage.setItem("config", JSON.stringify(res.data));
+      const config = res.data as IConfig;
+
+      if (config.sentry_dsn && process.env.NODE_ENV === "production") {
+        Sentry.init({
+          environment: config.sentry_environment,
+          dsn: config.sentry_dsn,
+        });
+      }
+
+      localStorage.setItem("config", JSON.stringify(config));
     }
   }, [dispatch]);
 
@@ -57,6 +69,17 @@ const App: React.FC = () => {
     [dispatch]
   );
 
+  useEffect(() => {
+    const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
+    const favicon: any = document.querySelector("link[rel~='icon']");
+    console.log(favicon);
+    if (darkThemeMq.matches) {
+      favicon.href = "/favicon-light.ico";
+    } else {
+      favicon.href = "/favicon-dark.ico";
+    }
+  }, []);
+
   if (
     !currentUser ||
     currentUser.isFetching ||
@@ -68,7 +91,11 @@ const App: React.FC = () => {
   }
 
   if (currentUser?.data) {
-    return <AppRouter />;
+    return (
+      <HistoryAPIProvider>
+        <AppRouter />
+      </HistoryAPIProvider>
+    );
   } else {
     return <SessionRouter />;
   }

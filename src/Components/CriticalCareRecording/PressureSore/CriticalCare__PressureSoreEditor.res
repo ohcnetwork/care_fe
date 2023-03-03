@@ -5,7 +5,6 @@
 @val external innerHeight: int = "window.innerHeight"
 
 @val external document: 'a = "document"
-%%raw("import './styles.css'")
 
 let str = React.string
 open CriticalCare__Types
@@ -369,7 +368,7 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~previewMod
           </>
         : React.null}
     </div>
-    <div className="flex md:flex-row flex-col justify-between">
+    <div className="flex lg:flex-row flex-col justify-between">
       {renderBody(state, send, "Front", PressureSore.anteriorParts, 8)}
       {renderBody(state, send, "Back", PressureSore.posteriorParts, 9)}
     </div>
