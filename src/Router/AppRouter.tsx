@@ -67,6 +67,7 @@ import {
 import { BLACKLISTED_PATHS } from "../Common/constants";
 import { UpdateFacilityMiddleware } from "../Components/Facility/UpdateFacilityMiddleware";
 import useConfig from "../Common/hooks/useConfig";
+import FacilityCNS from "../Components/Facility/FacilityCNS";
 
 const routes = {
   "/hub": () => <HubDashboard />,
@@ -303,6 +304,9 @@ const routes = {
     assetId,
     facilityId,
   }: any) => <AssetConfigure assetId={assetId} facilityId={facilityId} />,
+  "/facility/:facilityId/cns": ({ facilityId }: any) => (
+    <FacilityCNS facilityId={facilityId} />
+  ),
 
   "/shifting": () =>
     localStorage.getItem("defaultShiftView") === "list" ? (
