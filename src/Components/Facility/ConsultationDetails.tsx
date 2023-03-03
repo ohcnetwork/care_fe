@@ -912,6 +912,7 @@ export const ConsultationDetails = (props: any) => {
                     </div>
                   </div>
                 )}
+
                 {consultationData.prescribed_medication && (
                   <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="px-4 py-5 sm:p-6">
@@ -927,6 +928,7 @@ export const ConsultationDetails = (props: any) => {
                     </div>
                   </div>
                 )}
+
                 {consultationData.consultation_notes && (
                   <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="px-4 py-5 sm:p-6">
@@ -937,6 +939,36 @@ export const ConsultationDetails = (props: any) => {
                         <ReadMore
                           text={consultationData.consultation_notes}
                           minChars={250}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {consultationData.procedure && (
+                  <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Procedure
+                      </h3>
+                      <div className="mt-2">
+                        <ResponsiveMedicineTable
+                          theads={[
+                            "Procedure",
+                            "Repetitive",
+                            "Time",
+                            "Frequency",
+                            "Notes",
+                          ]}
+                          list={consultationData.procedure}
+                          objectKeys={[
+                            "procedure",
+                            "repetitive",
+                            "time",
+                            "frequency",
+                            "notes",
+                          ]}
+                          fieldsToDisplay={[0, 1, 2, 3, 4]}
                         />
                       </div>
                     </div>
