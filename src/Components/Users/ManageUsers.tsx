@@ -634,9 +634,6 @@ function UserFacilities(props: { user: any }) {
 
   const updateHomeFacility = async (username: string, facility: any) => {
     setIsLoading(true);
-    if (user?.home_facility_object) {
-      // show popup for confirmation
-    }
     const res = await dispatch(
       partialUpdateUser(username, { home_facility: facility.id })
     );
@@ -792,6 +789,7 @@ function UserFacilities(props: { user: any }) {
                             className="tooltip text-lg hover:text-primary-500"
                             onClick={() => {
                               if (user?.home_facility_object) {
+                                // has previous home facility
                                 setReplaceHomeFacility({
                                   show: true,
                                   userName: username,
@@ -799,6 +797,7 @@ function UserFacilities(props: { user: any }) {
                                   newFacility: facility,
                                 });
                               } else {
+                                // no previous home facility
                                 updateHomeFacility(username, facility);
                               }
                             }}
