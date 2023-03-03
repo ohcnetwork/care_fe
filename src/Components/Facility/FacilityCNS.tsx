@@ -7,6 +7,7 @@ import {
 } from "../../Redux/actions";
 import { AssetData } from "../Assets/AssetTypes";
 import Page from "../Common/components/Page";
+import Loading from "../Common/Loading";
 import { PatientModel } from "../Patient/models";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
 import { FacilityModel } from "./models";
@@ -87,6 +88,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
     fetchMonitors();
   }, [dispatch, facility, facilityId]);
 
+  if (!monitors) return <Loading />;
   return (
     <Page
       title="Central Nursing Station"
@@ -94,14 +96,14 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
       backUrl={`/facility/${facilityId}`}
       noImplicitPadding
     >
-      <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-2">
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-2">
         {monitors?.map(({ patient, socketUrl }) => (
-          <div className="p-2 rounded-lg bg-black">
+          <div className="group p-2 rounded-lg bg-black">
             <div className="flex flex-wrap gap-4 text-white w-full tracking-wider p-2">
               <span className="font-bold uppercase">{patient.name}</span>
               <span>Age {patient.age}</span>
             </div>
-            <PatientVitalsCard socketUrl={socketUrl} />
+            <PatientVitalsCard socketUrl={socketUrl} shrinked />
           </div>
         ))}
       </div>
