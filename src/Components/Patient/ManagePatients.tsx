@@ -513,21 +513,6 @@ export const PatientManager = () => {
                           text="Review Missed"
                         />
                       )}
-                    {patient.allow_transfer ? (
-                      <Chip
-                        size="small"
-                        color="yellow"
-                        startIcon="unlock"
-                        text="Transfer Allowed"
-                      />
-                    ) : (
-                      <Chip
-                        size="small"
-                        color="primary"
-                        startIcon="lock"
-                        text="Transfer Blocked"
-                      />
-                    )}
                     {patient.disease_status === "POSITIVE" && (
                       <Chip
                         size="small"
