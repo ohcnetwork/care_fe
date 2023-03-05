@@ -57,7 +57,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
               <img
                 src={facility.read_cover_image_url}
                 alt={facility.name}
-                className="w-full h-[210px] object-cover"
+                className="object-cover w-full h-full"
               />
             )) || (
               <i className="fas fa-hospital text-4xl block text-gray-500" />

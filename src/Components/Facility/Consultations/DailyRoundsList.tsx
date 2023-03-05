@@ -7,11 +7,12 @@ import { getDailyReport } from "../../../Redux/actions";
 import loadable from "@loadable/component";
 import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
-import { formatDate } from "../../../Utils/utils";
 import { PatientCategory } from "../models";
 import { PATIENT_CATEGORIES } from "../../../Common/constants";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import RecordMeta from "../../../CAREUI/display/RecordMeta";
+import { useTranslation } from "react-i18next";
 
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
@@ -37,6 +38,7 @@ const getName = (item: any) => {
 };
 
 export const DailyRoundsList = (props: any) => {
+  const { t } = useTranslation();
   const { facilityId, patientId, consultationId, consultationData } = props;
   const dispatch: any = useDispatch();
   const [isDailyRoundLoading, setIsDailyRoundLoading] = useState(false);
@@ -158,24 +160,22 @@ export const DailyRoundsList = (props: any) => {
                     </Grid>
                   )}
                   <Grid item xs={6}>
-                    <div className="text-xs">
-                      <span className="text-gray-700">Created At:</span>{" "}
-                      <div className="text-xs">
-                        {itemData.created_date
-                          ? formatDate(itemData.created_date)
-                          : "-"}
-                      </div>
-                    </div>
+                    {itemData.created_date && (
+                      <RecordMeta
+                        className="text-xs text-gray-700"
+                        prefix={t("created")}
+                        time={itemData.created_date}
+                      />
+                    )}
                   </Grid>
                   <Grid item xs={6}>
-                    <div className="text-xs">
-                      <span className="text-gray-700">Updated At:</span>{" "}
-                      <div className="text-xs">
-                        {itemData.modified_date
-                          ? formatDate(itemData.modified_date)
-                          : "-"}
-                      </div>
-                    </div>
+                    {itemData.modified_date && (
+                      <RecordMeta
+                        className="text-gray-700 text-xs"
+                        prefix={t("updated")}
+                        time={itemData.modified_date}
+                      />
+                    )}
                   </Grid>
 
                   {itemData.physical_examination_info && (

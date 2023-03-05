@@ -728,10 +728,7 @@ const AssetCreate = (props: AssetProps) => {
                       name="WarrantyAMCExpiry"
                       value={warranty_amc_end_of_validity}
                       onChange={(date) => {
-                        if (
-                          moment(date.value).format("YYYY-MM-DD") <
-                          new Date().toLocaleDateString("en-ca")
-                        ) {
+                        if (moment(date.value).isBefore()) {
                           Notification.Error({
                             msg: "Warranty / AMC Expiry date can't be in past",
                           });
