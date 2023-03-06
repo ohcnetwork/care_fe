@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { postForgotPassword, postLogin } from "../../Redux/actions";
-import { Grid, CircularProgress } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
 import * as Notification from "../../Utils/Notifications.js";
@@ -11,6 +10,7 @@ import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useConfig from "../../Common/hooks/useConfig";
 import { classNames } from "../../Utils/utils";
+import CircularProgress from "../Common/components/CircularProgress";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
@@ -306,15 +306,15 @@ export const Login = (props: { forgot?: boolean }) => {
                   size="large"
                   className="font-extrabold"
                 />
-                <Grid container justify="center">
+                <div className="grid justify-center ">
                   {isCaptchaEnabled && (
-                    <Grid item className="px-8 py-4">
+                    <div className="px-8 py-4 grid">
                       <ReCaptcha
                         sitekey={recaptcha_site_key}
                         onChange={onCaptchaChange}
                       />
                       <span className="text-red-500">{errors.captcha}</span>
-                    </Grid>
+                    </div>
                   )}
 
                   <div className="w-full flex justify-between items-center py-4">
@@ -341,7 +341,7 @@ export const Login = (props: { forgot?: boolean }) => {
                       {t("login")}
                     </button>
                   )}
-                </Grid>
+                </div>
               </div>
             </form>
             <LanguageSelectorLogin />
@@ -390,7 +390,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   size="large"
                   className="font-extrabold"
                 />
-                <Grid container justify="center">
+                <div className="grid justify-center">
                   {loading ? (
                     <div className="flex items-center justify-center">
                       <CircularProgress className="text-primary-500" />
@@ -403,7 +403,7 @@ export const Login = (props: { forgot?: boolean }) => {
                       {t("send_reset_link")}
                     </button>
                   )}
-                </Grid>
+                </div>
               </div>
             </form>
             <LanguageSelectorLogin />
