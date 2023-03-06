@@ -1197,7 +1197,7 @@ export const FileUpload = (props: FileUploadProps) => {
         title={
           <div className="flex flex-row">
             <div className="rounded-full bg-primary-100 py-4 px-5">
-              <CareIcon className="care-l-edit-alt text-primary-500 text-lg" />
+              <CareIcon className="care-l-camera-change text-lg text-primary-500" />
             </div>
             <div className="m-4">
               <h1 className="text-black text-xl "> Camera</h1>
@@ -1207,17 +1207,6 @@ export const FileUpload = (props: FileUploadProps) => {
         className="max-w-2xl"
         onClose={() => setModalOpenForCamera(false)}
       >
-        {/* <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-          <Cancel onClick={() => setModalOpenForCamera(false)} />
-          <Submit
-            disabled={
-              btnloader ||
-              modalDetails?.name === editFileName ||
-              editFileName.length === 0
-            }
-            label="Proceed"
-          />
-        </div> */}
         <div>
           {!previewImage ? (
             <div className="m-3">
