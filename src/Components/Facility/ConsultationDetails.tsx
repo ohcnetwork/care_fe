@@ -42,6 +42,7 @@ import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
 import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
+import ResponsiveProcedureTable from "../Common/components/ResponsiveProcedureTables";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -952,7 +953,7 @@ export const ConsultationDetails = (props: any) => {
                         Procedure
                       </h3>
                       <div className="mt-2">
-                        <ResponsiveMedicineTable
+                        <ResponsiveProcedureTable
                           theads={[
                             "Procedure",
                             "Repetitive",
