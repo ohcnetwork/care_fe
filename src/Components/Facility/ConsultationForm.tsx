@@ -921,76 +921,116 @@ export const ConsultationForm = (props: any) => {
           required={state.form.suggestion === "A"}
         />
 
-        <Card elevation={0} className="rounded">
-          <Accordion>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1a-content"
-              id="panel1a-header"
-              className="p-0"
-            >
-              <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
-                Treatment Plan
-              </h1>
-            </AccordionSummary>
-            <AccordionDetails className="p-0">
-              <div className="w-full grid gap-4 grid-cols-1">
-                <div id="investigation">
-                  <FieldLabel>Investigation Suggestions</FieldLabel>
-                  <InvestigationBuilder
-                    investigations={InvestigationAdvice}
-                    setInvestigations={setInvestigationAdvice}
+        {state.form.suggestion !== "DD" && (
+          <Card elevation={0} className="rounded">
+            <Accordion>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1a-content"
+                id="panel1a-header"
+                className="p-0"
+              >
+                <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                  Treatment Plan
+                </h1>
+              </AccordionSummary>
+              <AccordionDetails className="p-0">
+                <div className="w-full grid gap-4 grid-cols-1">
+                  <div id="investigation">
+                    <FieldLabel>Investigation Suggestions</FieldLabel>
+                    <InvestigationBuilder
+                      investigations={InvestigationAdvice}
+                      setInvestigations={setInvestigationAdvice}
+                    />
+                    <ErrorHelperText error={state.errors.investigation} />
+                  </div>
+
+                  <div id="discharge_advice">
+                    <FieldLabel>Prescription Medication</FieldLabel>
+                    <PrescriptionBuilder
+                      prescriptions={dischargeAdvice}
+                      setPrescriptions={setDischargeAdvice}
+                    />
+                    <ErrorHelperText error={state.errors.discharge_advice} />
+                  </div>
+
+                  <div id="prn_prescription">
+                    <FieldLabel>PRN Prescription</FieldLabel>
+                    <PRNPrescriptionBuilder
+                      prescriptions={PRNAdvice}
+                      setPrescriptions={setPRNAdvice}
+                    />
+                    <ErrorHelperText error={state.errors.prn_prescription} />
+                  </div>
+
+                  <div id="procedure">
+                    <FieldLabel>Procedures</FieldLabel>
+                    <ProcedureBuilder
+                      procedures={procedures}
+                      setProcedures={setProcedures}
+                    />
+                    <ErrorHelperText error={state.errors.procedure} />
+                  </div>
+
+                  <TextAreaFormField
+                    {...field("prescribed_medication")}
+                    label="Treatment Plan / Treatment Summary"
+                    placeholder="Optional information"
                   />
-                  <ErrorHelperText error={state.errors.investigation} />
-                </div>
 
-                <div id="discharge_advice">
-                  <FieldLabel>Prescription Medication</FieldLabel>
-                  <PrescriptionBuilder
-                    prescriptions={dischargeAdvice}
-                    setPrescriptions={setDischargeAdvice}
+                  <TextAreaFormField
+                    label="General Instructions (Advice)"
+                    required
+                    placeholder="Consultation Notes"
+                    {...field("consultation_notes")}
                   />
-                  <ErrorHelperText error={state.errors.discharge_advice} />
-                </div>
 
-                <div id="prn_prescription">
-                  <FieldLabel>PRN Prescription</FieldLabel>
-                  <PRNPrescriptionBuilder
-                    prescriptions={PRNAdvice}
-                    setPrescriptions={setPRNAdvice}
+                  {kasp_enabled && (
+                    <div className="flex-1" id="is_kasp">
+                      <FieldLabel required>{kasp_string}</FieldLabel>
+                      <RadioGroup
+                        aria-label="covid"
+                        name="is_kasp"
+                        value={state.form.is_kasp}
+                        onChange={handleTelemedicineChange}
+                        style={{ padding: "0px 5px" }}
+                      >
+                        <Box display="flex" flexDirection="row">
+                          <FormControlLabel
+                            value="true"
+                            control={<Radio />}
+                            label="Yes"
+                          />
+                          <FormControlLabel
+                            value="false"
+                            control={<Radio />}
+                            label="No"
+                          />
+                        </Box>
+                      </RadioGroup>
+                      <ErrorHelperText error={state.errors.is_kasp} />
+                    </div>
+                  )}
+
+                  <TextAreaFormField
+                    label="Special Instructions"
+                    placeholder="Optional information"
+                    {...field("special_instruction")}
                   />
-                  <ErrorHelperText error={state.errors.prn_prescription} />
-                </div>
 
-                <div id="procedure">
-                  <FieldLabel>Procedures</FieldLabel>
-                  <ProcedureBuilder
-                    procedures={procedures}
-                    setProcedures={setProcedures}
+                  <TextAreaFormField
+                    {...field("verified_by")}
+                    label="Verified by"
+                    required
+                    placeholder="Attending Doctors Name and Designation"
                   />
-                  <ErrorHelperText error={state.errors.procedure} />
-                </div>
 
-                <TextAreaFormField
-                  {...field("prescribed_medication")}
-                  label="Treatment Plan / Treatment Summary"
-                  placeholder="Optional information"
-                />
-
-                <TextAreaFormField
-                  label="General Instructions (Advice)"
-                  required
-                  placeholder="Consultation Notes"
-                  {...field("consultation_notes")}
-                />
-
-                {kasp_enabled && (
-                  <div className="flex-1" id="is_kasp">
-                    <FieldLabel required>{kasp_string}</FieldLabel>
+                  <div id="is_telemedicine">
+                    <FieldLabel>Telemedicine</FieldLabel>
                     <RadioGroup
                       aria-label="covid"
-                      name="is_kasp"
-                      value={state.form.is_kasp}
+                      name="is_telemedicine"
+                      value={state.form.is_telemedicine}
                       onChange={handleTelemedicineChange}
                       style={{ padding: "0px 5px" }}
                     >
@@ -1007,81 +1047,43 @@ export const ConsultationForm = (props: any) => {
                         />
                       </Box>
                     </RadioGroup>
-                    <ErrorHelperText error={state.errors.is_kasp} />
+                    <ErrorHelperText error={state.errors.is_telemedicine} />
                   </div>
-                )}
 
-                <TextAreaFormField
-                  label="Special Instructions"
-                  placeholder="Optional information"
-                  {...field("special_instruction")}
-                />
-
-                <TextAreaFormField
-                  {...field("verified_by")}
-                  label="Verified by"
-                  required
-                  placeholder="Attending Doctors Name and Designation"
-                />
-
-                <div id="is_telemedicine">
-                  <FieldLabel>Telemedicine</FieldLabel>
-                  <RadioGroup
-                    aria-label="covid"
-                    name="is_telemedicine"
-                    value={state.form.is_telemedicine}
-                    onChange={handleTelemedicineChange}
-                    style={{ padding: "0px 5px" }}
-                  >
-                    <Box display="flex" flexDirection="row">
-                      <FormControlLabel
-                        value="true"
-                        control={<Radio />}
-                        label="Yes"
+                  {JSON.parse(state.form.is_telemedicine) && (
+                    <div className="flex flex-col md:flex-row justify-between gap-3">
+                      <SelectFormField
+                        {...selectField("review_interval")}
+                        label="Review After"
+                        options={REVIEW_AT_CHOICES}
                       />
-                      <FormControlLabel
-                        value="false"
-                        control={<Radio />}
-                        label="No"
-                      />
-                    </Box>
-                  </RadioGroup>
-                  <ErrorHelperText error={state.errors.is_telemedicine} />
-                </div>
 
-                {JSON.parse(state.form.is_telemedicine) && (
-                  <div className="flex flex-col md:flex-row justify-between gap-3">
-                    <SelectFormField
-                      {...selectField("review_interval")}
-                      label="Review After"
-                      options={REVIEW_AT_CHOICES}
-                    />
+                      <div className="flex-1">
+                        <OnlineUsersSelect
+                          userId={state.form.assigned_to}
+                          selectedUser={state.form.assigned_to_object}
+                          onSelect={handleDoctorSelect}
+                          user_type="Doctor"
+                          outline
+                        />
+                      </div>
 
-                    <div className="flex-1">
-                      <OnlineUsersSelect
-                        userId={state.form.assigned_to}
-                        selectedUser={state.form.assigned_to_object}
-                        onSelect={handleDoctorSelect}
-                        user_type="Doctor"
-                        outline
+                      <SelectFormField
+                        className="flex-1"
+                        {...field("action")}
+                        label="Action"
+                        required
+                        options={TELEMEDICINE_ACTIONS}
+                        optionLabel={(option) => option.desc}
+                        optionValue={(option) => option.text}
                       />
                     </div>
-
-                    <SelectFormField
-                      className="flex-1"
-                      {...field("action")}
-                      label="Action"
-                      required
-                      options={TELEMEDICINE_ACTIONS}
-                      optionLabel={(option) => option.desc}
-                      optionValue={(option) => option.text}
-                    />
-                  </div>
-                )}
-              </div>
-            </AccordionDetails>
-          </Accordion>
-        </Card>
+                  )}
+                </div>
+              </AccordionDetails>
+            </Accordion>
+          </Card>
+        )}
 
         <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
           <Cancel
