@@ -1607,7 +1607,8 @@ export const FileUpload = (props: FileUploadProps) => {
                         }}
                         className="btn btn-primary"
                       >
-                        <i className="fas fa-cloud-arrow-up mr-2"></i>
+                        {/* <i className="fas fa-cloud-arrow-up mr-2"></i> */}
+                        <CareIcon className="care-l-camera text-lg mr-2" />
                         Open Camera
                       </button>
                       <button
