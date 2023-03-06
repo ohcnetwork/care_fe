@@ -239,11 +239,11 @@ let renderBody = (state, send, title, partPaths, substr) => {
     }
   `)
 
-  <div className=" w-full text-center mx-2">
+  <div className="md:w-full text-center mx-2">
     <div className="text-2xl font-bold mt-8"> {str(title)} </div>
     // Badges
     <div className="mx-auto overflow-x-scroll my-3 border-2">
-      <div className="grid grid-rows-3 grid-flow-col auto-cols-max md:flex md:flex-wrap">
+      <div className="grid grid-rows-3 md:grid-flow-col md:auto-cols-max md:flex md:flex-wrap">
         {Js.Array.mapi((part, index) => {
           let regionType = Pain.regionForPath(part)
           let selectedPart = Js.Array.find(p => Pain.region(p) === regionType, state.parts)
