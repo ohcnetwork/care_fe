@@ -714,12 +714,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const handlePincodeChange = async (e: any) => {
     handleFormFieldChange(e);
 
-    if (!validatePincode(e.target.value)) return;
+    if (!validatePincode(e.value)) return;
 
-    const pincodeDetails = await getPincodeDetails(
-      e.target.value,
-      gov_data_api_key
-    );
+    const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
     if (!pincodeDetails) return;
 
     const matchedState = states.find((state) => {
@@ -741,7 +738,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ...state.form,
         state: matchedState.id,
         district: matchedDistrict.id,
-        pincode: e.target.value,
+        pincode: e.value,
       },
     });
 
@@ -2017,6 +2014,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           <SelectFormField
                             label="Blood Group"
                             name="blood_group"
+                            required
                             value={state.form.blood_group}
                             options={bloodGroups}
                             optionLabel={(o: any) => o}
