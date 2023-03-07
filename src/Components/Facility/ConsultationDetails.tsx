@@ -594,7 +594,7 @@ export const ConsultationDetails = (props: any) => {
           )}
         </div>
 
-        {
+        {JSON.parse(process.env.REACT_APP_ENABLE_HCX || "false") && (
           // TODO: if policy and approved pre-auth exists
           <div className="my-5 shadow rounded p-5">
             <h2 className="mb-2">Claim Insurance</h2>
@@ -610,7 +610,7 @@ export const ConsultationDetails = (props: any) => {
               />
             )}
           </div>
-        }
+        )}
 
         <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
           <Cancel onClick={handleDischargeClose} />

@@ -238,54 +238,61 @@ export default function PatientInfoCard(props: {
               "file-medical",
               patient.last_consultation?.id,
             ],
-            [
-              `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/claims`,
-              "Claims",
-              "copy-landscape",
-              patient.last_consultation?.id,
-            ],
-          ].map(
-            (action: any, i) =>
-              action[3] && (
-                <div className="relative">
-                  <ButtonV2
-                    key={i}
-                    variant={action[4] && action[4][0] ? "danger" : "primary"}
-                    href={
-                      patient.last_consultation?.admitted &&
-                      !patient.last_consultation?.current_bed &&
-                      i === 1
-                        ? undefined
-                        : `${action[0]}`
-                    }
-                    onClick={() => {
-                      if (
+          ]
+            .concat(
+              JSON.parse(process.env.REACT_APP_ENABLE_HCX || "false")
+                ? [
+                    [
+                      `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/claims`,
+                      "Claims",
+                      "copy-landscape",
+                      patient.last_consultation?.id,
+                    ],
+                  ]
+                : []
+            )
+            .map(
+              (action: any, i) =>
+                action[3] && (
+                  <div className="relative">
+                    <ButtonV2
+                      key={i}
+                      variant={action[4] && action[4][0] ? "danger" : "primary"}
+                      href={
                         patient.last_consultation?.admitted &&
                         !patient.last_consultation?.current_bed &&
                         i === 1
-                      ) {
-                        Notification.Error({
-                          msg: "Please assign a bed to the patient",
-                        });
-                        setOpen(true);
+                          ? undefined
+                          : `${action[0]}`
                       }
-                    }}
-                    align="start"
-                    className="w-full"
-                  >
-                    <CareIcon className={`care-l-${action[2]} text-lg`} />
-                    <p className="font-semibold">{action[1]}</p>
-                  </ButtonV2>
-                  {action[4] && action[4][0] && (
-                    <>
-                      <p className="text-xs text-red-500 mt-1">
-                        {action[4][1]}
-                      </p>
-                    </>
-                  )}
-                </div>
-              )
-          )}
+                      onClick={() => {
+                        if (
+                          patient.last_consultation?.admitted &&
+                          !patient.last_consultation?.current_bed &&
+                          i === 1
+                        ) {
+                          Notification.Error({
+                            msg: "Please assign a bed to the patient",
+                          });
+                          setOpen(true);
+                        }
+                      }}
+                      align="start"
+                      className="w-full"
+                    >
+                      <CareIcon className={`care-l-${action[2]} text-lg`} />
+                      <p className="font-semibold">{action[1]}</p>
+                    </ButtonV2>
+                    {action[4] && action[4][0] && (
+                      <>
+                        <p className="text-xs text-red-500 mt-1">
+                          {action[4][1]}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )
+            )}
         </div>
       </section>
     </>

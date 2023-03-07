@@ -154,8 +154,6 @@ const routes = {
   }: any) => (
     <ConsultationForm facilityId={facilityId} patientId={patientId} id={id} />
   ),
-  "/facility/:facilityId/patient/:patientId/consultation/:consultationId/claims":
-    (pathParams: any) => <ConsultationClaims {...pathParams} />,
   "/facility/:facilityId/patient/:patientId/consultation/:id/files/": ({
     facilityId,
     patientId,
@@ -378,6 +376,11 @@ const routes = {
       />
     ),
   "/not-found": () => <Error404 />,
+
+  ...(JSON.parse(process.env.REACT_APP_ENABLE_HCX || "false") && {
+    "/facility/:facilityId/patient/:patientId/consultation/:consultationId/claims":
+      (pathParams: any) => <ConsultationClaims {...pathParams} />,
+  }),
 };
 
 export default function AppRouter() {
