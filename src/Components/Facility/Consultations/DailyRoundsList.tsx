@@ -82,7 +82,7 @@ export const DailyRoundsList = (props: any) => {
     );
   } else if (dailyRoundsListData.length) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
-      if (itemData.rounds_type === "AUTOMATED" || idx % 2 === 0) {
+      if (itemData.rounds_type === "AUTOMATED") {
         return (
           <VirtualNursingAssistantLogUpdateCard
             round={itemData}
