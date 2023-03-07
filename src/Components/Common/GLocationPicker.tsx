@@ -2,7 +2,6 @@ import React from "react";
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { deepEqual } from "../../Common/utils";
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
-import PersonPinIcon from "@material-ui/icons/PersonPin";
 import Spinner from "./Spinner";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useConfig from "../../Common/hooks/useConfig";
@@ -222,7 +221,7 @@ const Map: React.FC<MapProps> = ({
               )
             }
           >
-            <PersonPinIcon />
+            <CareIcon className="care-l-user-location text-2xl fill-black" />
           </div>
         )}
       </>
