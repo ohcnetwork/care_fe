@@ -9,6 +9,7 @@ import axios from "axios";
 import { HistoryAPIProvider } from "./CAREUI/misc/HistoryAPIProvider";
 import * as Sentry from "@sentry/browser";
 import { IConfig } from "./Common/hooks/useConfig";
+import { LocalStorageKeys } from "./Common/constants";
 
 const Loading = loadable(() => import("./Components/Common/Loading"));
 
@@ -35,10 +36,10 @@ const App: React.FC = () => {
   }, [dispatch]);
 
   const updateRefreshToken = () => {
-    const refresh = localStorage.getItem("care_refresh_token");
-    const access = localStorage.getItem("care_access_token");
+    const refresh = localStorage.getItem(LocalStorageKeys.refreshToken);
+    const access = localStorage.getItem(LocalStorageKeys.accessToken);
     if (!access && refresh) {
-      localStorage.removeItem("care_refresh_token");
+      localStorage.removeItem(LocalStorageKeys.refreshToken);
       document.location.reload();
       return;
     }
@@ -50,8 +51,8 @@ const App: React.FC = () => {
         refresh,
       })
       .then((resp) => {
-        localStorage.setItem("care_access_token", resp.data.access);
-        localStorage.setItem("care_refresh_token", resp.data.refresh);
+        localStorage.setItem(LocalStorageKeys.accessToken, resp.data.access);
+        localStorage.setItem(LocalStorageKeys.refreshToken, resp.data.refresh);
       });
   };
   useEffect(() => {

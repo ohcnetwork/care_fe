@@ -33,6 +33,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import SkillsSlideOver from "./SkillsSlideOver";
 import { FacilitySelect } from "../Common/FacilitySelect";
+import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -588,6 +589,27 @@ function UserFacilities(props: { user: any }) {
     facility?: FacilityModel;
     isHomeFacility: boolean;
   }>({ show: false, userName: "", facility: undefined, isHomeFacility: false });
+
+  const [replaceHomeFacility, setReplaceHomeFacility] = useState<{
+    show: boolean;
+    userName: string;
+    previousFacility?: FacilityModel;
+    newFacility?: FacilityModel;
+  }>({
+    show: false,
+    userName: "",
+    previousFacility: undefined,
+    newFacility: undefined,
+  });
+  const hideReplaceHomeFacilityModal = () => {
+    setReplaceHomeFacility({
+      show: false,
+      previousFacility: undefined,
+      userName: "",
+      newFacility: undefined,
+    });
+  };
+
   const [linkFacility, setLinkFacility] = useState<{
     show: boolean;
     username: string;
@@ -765,9 +787,20 @@ function UserFacilities(props: { user: any }) {
                         <div className="flex items-center gap-2">
                           <button
                             className="tooltip text-lg hover:text-primary-500"
-                            onClick={() =>
-                              updateHomeFacility(username, facility)
-                            }
+                            onClick={() => {
+                              if (user?.home_facility_object) {
+                                // has previous home facility
+                                setReplaceHomeFacility({
+                                  show: true,
+                                  userName: username,
+                                  previousFacility: user?.home_facility_object,
+                                  newFacility: facility,
+                                });
+                              } else {
+                                // no previous home facility
+                                updateHomeFacility(username, facility);
+                              }
+                            }}
                           >
                             <CareIcon className="care-l-estate" />
                             <span className="tooltip-text tooltip-left">
@@ -798,7 +831,43 @@ function UserFacilities(props: { user: any }) {
               </div>
             </div>
           )}
+          {!user?.home_facility_object && facilities.length === 0 && (
+            <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
+              <div className="w-full">
+                <img
+                  src={`${process.env.PUBLIC_URL}/images/404.svg`}
+                  alt="No linked facilities"
+                  className="w-80 mx-auto"
+                />
+              </div>
+              <p className="text-lg font-semibold text-center text-primary pt-4">
+                No Linked Facilities
+              </p>
+            </div>
+          )}
         </div>
+      )}
+      {replaceHomeFacility.show && (
+        <ConfirmHomeFacilityUpdateDialog
+          previousFacilityName={
+            replaceHomeFacility.previousFacility?.name || ""
+          }
+          userName={replaceHomeFacility.userName}
+          newFacilityName={replaceHomeFacility.newFacility?.name || ""}
+          handleCancel={hideReplaceHomeFacilityModal}
+          handleOk={() => {
+            updateHomeFacility(
+              replaceHomeFacility.userName,
+              replaceHomeFacility.newFacility
+            );
+            setReplaceHomeFacility({
+              show: false,
+              previousFacility: undefined,
+              userName: "",
+              newFacility: undefined,
+            });
+          }}
+        />
       )}
     </div>
   );

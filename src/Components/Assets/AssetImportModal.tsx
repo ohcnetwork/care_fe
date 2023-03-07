@@ -11,7 +11,10 @@ import { useDispatch } from "react-redux";
 import { Link } from "raviger";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import readXlsxFile from "read-excel-file";
-import { XLSXAssetImportSchema } from "../../Common/constants";
+import {
+  LocalStorageKeys,
+  XLSXAssetImportSchema,
+} from "../../Common/constants";
 import { parseCsvFile } from "../../Utils/utils";
 import useConfig from "../../Common/hooks/useConfig";
 
@@ -133,7 +136,8 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("care_access_token"),
+          Authorization:
+            "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
         },
         body: asset_data,
       });
