@@ -175,7 +175,7 @@ const ScanABHAQRSection = ({
               className="border-gray-700 rounded shadow-sm ring-offset-0 ring-0 mr-2"
             />
             I declare that the ABHA No. of the patient is voluntarily provided
-            by the patient (or guardian or next of kin of the patient).
+            by the patient (or guardian or nominee of the patient).
           </span>
         </div>
       )}
@@ -424,8 +424,12 @@ const VerifyAadhaarSection = ({
               }}
               className="border-gray-700 rounded shadow-sm ring-offset-0 ring-0 mr-2"
             />
-            I declare that consent of the patient (or guardian or next of kin of
-            the patient) is obtained for generation of such ABHA Number.
+            I declare that consent of the patient (or guardian or nominee of the
+            patient) is obtained for generation of such ABHA Number as per the{" "}
+            <a href="https://docs.coronasafe.network/coronasafe-care-documentation/privacy-policy/privacy-policy-as-per-abdm-guidelines">
+              Privacy Policy
+            </a>
+            .
           </span>
 
           <span className="text-gray-800 text-xs items-center">
@@ -438,14 +442,16 @@ const VerifyAadhaarSection = ({
               className="border-gray-700 rounded shadow-sm ring-offset-0 ring-0 mr-2"
             />
             I declare that the Aadhaar Number and demographic details of the
-            patient are shared voluntarily by the patient (or guardian or next
-            of kin of the patient) through CARE with NHA for the sole purpose of
-            creation of ABHA Number. The patient understands that such data of
-            the patient will be collected, stored and utilized as per ABDM
-            Health Data Management Policy. The patient authorizes NHA to use the
-            Aadhaar number for performing Aadhaar based authentication with
-            UIDAI as per the provisions of Aadhaar Act 2016 for the aforesaid
-            purpose.
+            patient are shared voluntarily by the patient (or guardian or
+            nominee of the patient) through CARE with NHA for the sole purpose
+            of creation of ABHA Number. The patient understands that such data
+            of the patient will be collected, stored and utilized as per{" "}
+            <a href="https://abdm.gov.in/publications/policies_regulations/health_data_management_policy">
+              ABDM Health Data Management Policy
+            </a>
+            . The patient authorizes NHA to use the Aadhaar number for
+            performing Aadhaar based authentication with UIDAI as per the
+            provisions of Aadhaar Act 2016 for the aforesaid purpose.
           </span>
         </div>
       )}
