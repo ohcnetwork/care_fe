@@ -3,7 +3,11 @@ import { navigate } from "raviger";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
+import {
+  GENDER_TYPES,
+  RESPIRATORY_SUPPORT,
+  SAMPLE_TEST_STATUS,
+} from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
@@ -550,6 +554,21 @@ export const PatientHome = (props: any) => {
                         color="purple"
                         startIcon="phone"
                         text="Telemedicine"
+                      />
+                    )}
+                    {patientData.last_consultation?.last_daily_round
+                      ?.ventilator_interface && (
+                      <Chip
+                        color="purple"
+                        startIcon="lungs"
+                        text={
+                          RESPIRATORY_SUPPORT.find(
+                            (resp) =>
+                              resp.text ===
+                              patientData.last_consultation?.last_daily_round
+                                ?.ventilator_interface
+                          )?.id || "UNKNOWN"
+                        }
                       />
                     )}
                   </div>

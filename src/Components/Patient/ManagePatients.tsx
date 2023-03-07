@@ -20,6 +20,7 @@ import {
   GENDER_TYPES,
   PATIENT_CATEGORIES,
   PATIENT_FILTER_ORDER,
+  RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -484,6 +485,19 @@ export const PatientManager = () => {
                       </span>
                     )}
                   </div>
+                  {patient.last_consultation?.last_daily_round
+                    ?.ventilator_interface && (
+                    <div className="rounded-full p-1 border border-black text-center bg-cyan-100 font-semibold text-sm">
+                      {
+                        RESPIRATORY_SUPPORT.find(
+                          (resp) =>
+                            resp.text ===
+                            patient.last_consultation?.last_daily_round
+                              ?.ventilator_interface
+                        )?.id
+                      }
+                    </div>
+                  )}
                 </div>
                 {patient.facility_object && (
                   <div className="mb-2">
