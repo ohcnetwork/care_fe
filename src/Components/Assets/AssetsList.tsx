@@ -244,7 +244,7 @@ const AssetsList = () => {
                           assetClassProps[asset.asset_class]) ||
                         assetClassProps.NONE
                       ).icon
-                    } text-lg`}
+                    } text-2xl`}
                   />
                 </span>
                 <p className="truncate w-48">{asset.name}</p>
