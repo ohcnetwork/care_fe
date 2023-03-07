@@ -391,7 +391,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   size="large"
                   className="font-extrabold"
                 />
-                <div className="grid justify-center">
+                <div className="justify-start">
                   {loading ? (
                     <div className="flex items-center justify-center">
                       <CircularProgress className="text-primary-500" />
