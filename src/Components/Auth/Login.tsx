@@ -307,7 +307,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   size="large"
                   className="font-extrabold"
                 />
-                <div className="grid justify-center ">
+                <div className="justify-start">
                   {isCaptchaEnabled && (
                     <div className="px-8 py-4 grid">
                       <ReCaptcha
