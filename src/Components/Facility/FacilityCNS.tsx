@@ -101,7 +101,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
             <div className="flex flex-wrap gap-4 text-white w-full tracking-wider p-2">
               <Link
                 href={`/facility/${facilityId}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
-                className="font-bold uppercase"
+                className="font-bold uppercase text-white"
               >
                 {patient.name}
               </Link>
