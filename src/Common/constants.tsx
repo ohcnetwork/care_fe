@@ -284,9 +284,9 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
 ];
 
 export const GENDER_TYPES = [
-  { id: 1, text: "Male", icon: <i className="fa-solid fa-person" /> },
-  { id: 2, text: "Female", icon: <i className="fa-solid fa-person-dress" /> },
-  { id: 3, text: "Non-binary", icon: <i className="fa-solid fa-genderless" /> },
+  { id: 1, text: "Male", icon: "M" },
+  { id: 2, text: "Female", icon: "F" },
+  { id: 3, text: "Non-binary", icon: "NB" },
 ];
 
 export const SAMPLE_TEST_RESULT = [
