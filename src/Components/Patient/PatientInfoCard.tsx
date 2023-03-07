@@ -189,7 +189,18 @@ export default function PatientInfoCard(props: {
                       suggestion.id === patient.last_consultation?.suggestion
                   )?.text
                 }{" "}
-                on {moment(patient.last_consultation?.created_date).format("L")}
+                on{" "}
+                {patient.last_consultation?.suggestion === "A"
+                  ? moment(patient.last_consultation?.admission_date).format(
+                      "DD/MM/YYYY"
+                    )
+                  : patient.last_consultation?.suggestion === "DD"
+                  ? moment(patient.last_consultation?.death_datetime).format(
+                      "DD/MM/YYYY"
+                    )
+                  : moment(patient.last_consultation?.created_date).format(
+                      "DD/MM/YYYY"
+                    )}
               </div>
               {patient.is_active === false &&
                 patient.last_consultation?.suggestion !== "OP" &&
@@ -197,7 +208,7 @@ export default function PatientInfoCard(props: {
                   <div>
                     Discharged on{" "}
                     {moment(patient.last_consultation?.discharge_date).format(
-                      "L"
+                      "DD/MM/YYYY"
                     )}
                   </div>
                 )}
