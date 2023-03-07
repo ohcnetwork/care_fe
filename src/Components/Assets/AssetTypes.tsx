@@ -31,7 +31,7 @@ export const assetClassProps = {
   HL7MONITOR: {
     name: "HL7 Vitals Monitor",
     description: "",
-    icon: "heart-rate",
+    icon: "monitor-heart-rate",
   },
   NONE: {
     name: "N/A",
