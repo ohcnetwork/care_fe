@@ -2012,6 +2012,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                         <div data-testid="blood-group" id="blood_group-div">
                           <SelectFormField
+                            position="above"
                             label="Blood Group"
                             name="blood_group"
                             required
