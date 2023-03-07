@@ -128,6 +128,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
     const errors = { ...initForm };
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
+      console.log(state.form[field]);
       if (!state.form[field]) {
         errors[field] = "Field is required";
         invalidForm = true;
@@ -180,8 +181,8 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
         }
       }
       handleUpdate();
+      if (btnType == "Save and Exit") handleClose();
     }
-    if (btnType == "Save and Exit") handleClose();
   };
 
   return (
@@ -226,6 +227,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
                 value={doctorTypes.find((type) => type.id == state.form.area)}
                 options={doctorTypes.filter((type) => !type.disabled)}
                 optionLabel={(option) => option.text}
+                requiredError={state.errors.area.length !== 0}
                 onChange={(e) =>
                   handleFormFieldChange({
                     name: "area",
