@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { GENDER_TYPES } from "../../Common/constants";
 import {
   getAllPatient,
   getPermittedFacility,
@@ -63,6 +65,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
         (assetBed: any) =>
           assetBed.asset_object.meta?.asset_type === "HL7MONITOR"
       )?.asset_object as AssetData | undefined;
+
       if (!asset) return;
 
       const socketUrl = `wss://${middlewareHostname}/observations/${asset.meta?.local_ip_address}`;
@@ -70,22 +73,17 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
       return { patient, asset, socketUrl } as Monitor;
     }
 
-    async function fetchPatientMonitorAssets(patients: PatientModel[]) {
+    async function fetchMonitors() {
+      const patients = await fetchPatients();
+      if (!patients) return;
+
       const monitors = await Promise.all(
         patients.map((patient) => fetchPatientMonitorAsset(patient))
       );
       return monitors.filter((monitor) => !!monitor) as Monitor[];
     }
 
-    async function fetchMonitors() {
-      const patients = await fetchPatients();
-      if (!patients) return;
-
-      const monitors = await fetchPatientMonitorAssets(patients);
-      setMonitors(monitors);
-    }
-
-    fetchMonitors();
+    fetchMonitors().then(setMonitors);
   }, [dispatch, facility, facilityId]);
 
   if (!monitors) return <Loading />;
@@ -101,7 +99,16 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
           <div className="group p-2 rounded-lg bg-black">
             <div className="flex flex-wrap gap-4 text-white w-full tracking-wider p-2">
               <span className="font-bold uppercase">{patient.name}</span>
-              <span>Age {patient.age}</span>
+              <div className="flex space-x-2 divide-x divide-white">
+                <span>{patient.age}y</span>
+                <span className="font-bold">
+                  {GENDER_TYPES.find((g) => g.id === patient.gender)?.text}
+                </span>
+              </div>
+              <span className="flex-1 flex items-center justify-end gap-2 text-end">
+                <CareIcon className="care-l-bed text-lg" />
+                {patient.last_consultation?.current_bed?.bed_object?.name}
+              </span>
             </div>
             <PatientVitalsCard socketUrl={socketUrl} shrinked />
           </div>
