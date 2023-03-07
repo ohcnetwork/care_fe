@@ -24,6 +24,7 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
+import * as Notification from "../../Utils/Notifications.js";
 
 interface AssetManageProps {
   assetId: string;
@@ -58,16 +59,31 @@ const AssetManage = (props: AssetManageProps) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [assetData, transactionsData]: any = await Promise.all([
-        dispatch(getAsset(assetId)),
-        dispatch(listAssetTransaction({ asset: assetId, limit, offset })),
-      ]);
+      const assetData = await dispatch(getAsset(assetId));
       if (!status.aborted) {
         setIsLoading(false);
         if (assetData && assetData.data) {
           setAsset(assetData.data);
-          setTransactions(transactionsData.data.results);
-          setTotalCount(transactionsData.data.count);
+
+          const transactionFilter = assetData.qr_code_id
+            ? { qr_code_id: assetData.qr_code_id }
+            : { external_id: assetId };
+
+          const transactionsData = await dispatch(
+            listAssetTransaction({
+              ...transactionFilter,
+              limit,
+              offset,
+            })
+          );
+          if (transactionsData && transactionsData.data) {
+            setTransactions(transactionsData.data.results);
+            setTotalCount(transactionsData.data.count);
+          } else {
+            Notification.Error({
+              msg: "Error fetching transactions",
+            });
+          }
         } else {
           navigate("/not-found");
         }

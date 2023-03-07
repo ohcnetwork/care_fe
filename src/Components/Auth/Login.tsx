@@ -11,6 +11,7 @@ import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useConfig from "../../Common/hooks/useConfig";
 import { classNames } from "../../Utils/utils";
+import { LocalStorageKeys } from "../../Common/constants";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
@@ -105,8 +106,8 @@ export const Login = (props: { forgot?: boolean }) => {
           // captcha displayed set back to login button
           setLoading(false);
         } else if (res && statusCode === 200) {
-          localStorage.setItem("care_access_token", res.access);
-          localStorage.setItem("care_refresh_token", res.refresh);
+          localStorage.setItem(LocalStorageKeys.accessToken, res.access);
+          localStorage.setItem(LocalStorageKeys.refreshToken, res.refresh);
 
           if (
             window.location.pathname === "/" ||

@@ -403,9 +403,9 @@ const AssetsList = () => {
           </div>
         </>
       )}
-      {typeof facility === "undefined" && importAssetModalOpen && (
+      {typeof facility === "undefined" && (
         <FacilitiesSelectDialogue
-          show={true}
+          show={importAssetModalOpen}
           setSelected={(e) => setFacility(e)}
           selectedFacility={
             facility ?? {
@@ -416,7 +416,7 @@ const AssetsList = () => {
             return undefined;
           }}
           handleCancel={() => {
-            return undefined;
+            return setImportAssetModalOpen(false);
           }}
         />
       )}
