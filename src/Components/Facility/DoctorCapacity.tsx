@@ -128,7 +128,6 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
     const errors = { ...initForm };
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
-      console.log(state.form[field]);
       if (!state.form[field]) {
         errors[field] = "Field is required";
         invalidForm = true;
