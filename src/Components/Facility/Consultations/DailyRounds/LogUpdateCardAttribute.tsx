@@ -39,9 +39,6 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
           <span className="font-semibold text-sm text-gray-700">
             {attributeValue.systolic}/{attributeValue.diastolic} mmHg
           </span>
-          <span className="text-sm text-gray-600">
-            Mean {attributeValue.mean.toFixed(2)} mmHg
-          </span>
         </div>
       );
 

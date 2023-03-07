@@ -3,18 +3,22 @@ import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { getDailyReport } from "../../../Redux/actions";
-import loadable from "@loadable/component";
 import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
 import VirtualNursingAssistantLogUpdateCard from "./DailyRounds/VirtualNursingAssistantLogUpdateCard";
 import DefaultLogUpdateCard from "./DailyRounds/DefaultLogUpdateCard";
 import { useTranslation } from "react-i18next";
-
-const PageTitle = loadable(() => import("../../Common/PageTitle"));
+import LoadingLogUpdateCard from "./DailyRounds/LoadingCard";
 
 export const DailyRoundsList = (props: any) => {
   const { t } = useTranslation();
-  const { facilityId, patientId, consultationId, consultationData } = props;
+  const {
+    facilityId,
+    patientId,
+    consultationId,
+    consultationData,
+    showAutomatedRounds,
+  } = props;
   const dispatch: any = useDispatch();
   const [isDailyRoundLoading, setIsDailyRoundLoading] = useState(false);
   const [dailyRoundsListData, setDailyRoundsListData] = useState<
@@ -30,7 +34,11 @@ export const DailyRoundsList = (props: any) => {
       setIsDailyRoundLoading(true);
       const res = await dispatch(
         getDailyReport(
-          { limit, offset, rounds_type: "NORMAL,VENTILATOR,ICU" },
+          {
+            limit,
+            offset,
+            rounds_type: showAutomatedRounds ? "" : "NORMAL,VENTILATOR,ICU",
+          },
           { consultationId }
         )
       );
@@ -42,14 +50,14 @@ export const DailyRoundsList = (props: any) => {
         setIsDailyRoundLoading(false);
       }
     },
-    [consultationId, dispatch, offset]
+    [consultationId, dispatch, offset, showAutomatedRounds]
   );
 
   useAbortableEffect(
     (status: statusType) => {
       fetchDailyRounds(status);
     },
-    [currentPage]
+    [currentPage, showAutomatedRounds]
   );
 
   const handlePagination = (page: number, limit: number) => {
@@ -62,19 +70,11 @@ export const DailyRoundsList = (props: any) => {
 
   if (isDailyRoundLoading) {
     roundsList = (
-      <div className="m-1">
-        <div className="border border-gray-300 bg-white shadow rounded-md p-4 max-w-sm w-full mx-auto">
-          <div className="animate-pulse flex space-x-4 ">
-            <div className="flex-1 space-y-4 py-1">
-              <div className="h-4 bg-gray-400 rounded w-3/4"></div>
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-400 rounded"></div>
-                <div className="h-4 bg-gray-400 rounded w-5/6"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <>
+        {Array.from({ length: 3 }).map((_, i) => (
+          <LoadingLogUpdateCard key={i} />
+        ))}
+      </>
     );
   } else if (dailyRoundsListData.length === 0) {
     roundsList = (
@@ -123,31 +123,20 @@ export const DailyRoundsList = (props: any) => {
   }
 
   return (
-    <div>
-      <div>
-        <div className="md:hidden">
-          <PageTitle
-            title={t("consultation_updates")}
-            hideBack={true}
-            breadcrumbs={false}
+    <div className="flex flex-col gap-4 w-full">
+      <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden max-h-[85vh] px-3">
+        {roundsList}
+      </div>
+      {!isDailyRoundLoading && totalCount > limit && (
+        <div className="flex justify-center">
+          <Pagination
+            cPage={currentPage}
+            defaultPerPage={limit}
+            data={{ totalCount }}
+            onChange={handlePagination}
           />
         </div>
-        <div className={!isDailyRoundLoading ? "flex flex-wrap" : ""}>
-          <div className="overflow-y-auto overflow-x-visible h-[85vh] space-y-4 p-2">
-            {roundsList}
-          </div>
-          {!isDailyRoundLoading && totalCount > limit && (
-            <div className="mt-4 flex justify-center">
-              <Pagination
-                cPage={currentPage}
-                defaultPerPage={limit}
-                data={{ totalCount }}
-                onChange={handlePagination}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 };

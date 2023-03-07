@@ -81,7 +81,7 @@ const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
           {t("created")} <RecordMeta time={props.round.created_date} />
         </span>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1">
         {diffKeys.length > 0 ? (
           Object.keys(diff).map((key) => (
             <LogUpdateCardAttribute
