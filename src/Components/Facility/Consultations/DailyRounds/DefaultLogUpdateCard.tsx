@@ -21,22 +21,24 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
   const telemedicine_doctor_update =
     round.created_by_telemedicine || round.last_updated_by_telemedicine;
 
+  const by = props.consultationData.assigned_to_object || round.created_by;
+
   return (
     <div
       className={`p-4 flex flex-col gap-4 w-full rounded-lg shadow ${
         telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
       }`}
     >
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-1 md:flex-row items-start md:items-center justify-between">
         <div className="rounded-full bg-gray-50 border flex gap-2 w-min items-center text-gray-500">
           <div className="px-1.5 py-0.5 rounded-full bg-gray-100">
             <CareIcon className="care-l-user-nurse text-lg" />
           </div>
-          <span className="text-sm font-semibold tracking-wider whitespace-nowrap pr-3">
-            {telemedicine_doctor_update &&
-            props.consultationData.assigned_to_object
-              ? getName(props.consultationData.assigned_to_object)
-              : getName(round.created_by)}
+          <span className="flex gap-1 text-sm tracking-wider whitespace-nowrap pr-3">
+            <span className="font-semibold">{`${by?.first_name} ${by?.last_name}`}</span>
+            <span className="font-medium hidden md:block">
+              ({by?.user_type})
+            </span>
           </span>
         </div>
         <span className="flex gap-1 text-xs text-gray-700">
