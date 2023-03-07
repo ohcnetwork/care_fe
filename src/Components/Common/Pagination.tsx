@@ -113,7 +113,7 @@ const Pagination = (props: PaginationProps) => {
         tooltip="Next"
         children={<CareIcon className="care-l-angle-right text-lg" />}
         onClick={() => goToPage(currentPage + 1)}
-        disabled={currentPage + 1 >= totalPage}
+        disabled={currentPage + 1 > totalPage}
       />
     ),
 
