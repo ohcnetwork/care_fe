@@ -29,7 +29,9 @@ export const LanguageSelectorLogin = () => {
             onClick={() => handleLanguage(e)}
             className={classNames(
               "text-primary-400 hover:text-primary-600",
-              (i18n.language === e || !i18n.language && e === "en") && "text-primary-600 underline"
+              (i18n.language === e ||
+                (i18n.language === "en-US" && e === "en")) &&
+                "text-primary-600 underline"
             )}
           >
             {LANGUAGE_NAMES[e]}
