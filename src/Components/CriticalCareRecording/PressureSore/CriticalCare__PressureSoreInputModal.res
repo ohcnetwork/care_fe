@@ -43,6 +43,7 @@ let make = (
     let region = PressureSore.regionToString(state.region)
     if (state.length > 0.0 && state.width == 0.0) || (state.length == 0.0 && state.width > 0.0) {
       Notifications.error({msg: `Please fill in both width and length for ${region} part`})
+      setState(prev => {...prev, length: 0.0, width: 0.0})
     } else {
       Notifications.success({msg: `${region} part updated`})
     }
