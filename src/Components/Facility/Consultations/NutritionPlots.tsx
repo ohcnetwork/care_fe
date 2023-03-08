@@ -3,12 +3,11 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { LinePlot } from "./components/LinePlot";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import { StackedLinePlot } from "./components/StackedLinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDate } from "../../../Utils/utils";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export const NutritionPlots = (props: any) => {
   const { facilityId, patientId, consultationId } = props;
@@ -191,7 +190,11 @@ export const NutritionPlots = (props: any) => {
           onClick={() => setShowIO(!showIO)}
         >
           <div> IO Balance Plots</div>
-          {showIO ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          {showIO ? (
+            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+          ) : (
+            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+          )}
         </div>
 
         <div
@@ -229,7 +232,11 @@ export const NutritionPlots = (props: any) => {
           onClick={() => setShowIntake(!showIntake)}
         >
           <div>Intake</div>
-          {showIntake ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          {showIntake ? (
+            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+          ) : (
+            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+          )}
         </div>
         <div className={showIntake ? "grid md:grid-cols-2 gap-4" : "hidden"}>
           <div className="pt-4 px-4 bg-white border rounded-lg md:col-span-2">
@@ -332,7 +339,11 @@ export const NutritionPlots = (props: any) => {
           onClick={() => setShowOutput(!showOutput)}
         >
           <div> Output</div>
-          {showOutput ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          {showOutput ? (
+            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+          ) : (
+            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+          )}
         </div>
         <div
           className={
