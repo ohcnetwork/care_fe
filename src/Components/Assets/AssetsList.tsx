@@ -2,7 +2,6 @@ import { useDispatch } from "react-redux";
 import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
-import PageTitle from "../Common/PageTitle";
 import {
   getAnyFacility,
   listAssets,
@@ -14,7 +13,6 @@ import { useState, useCallback, useEffect } from "react";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import { make as SlideOver } from "../Common/SlideOver.gen";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import AssetFilter from "./AssetFilter";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
@@ -29,6 +27,8 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import ExportMenu from "../Common/Export";
 import AssetImportModal from "./AssetImportModal";
+import Page from "../Common/components/Page";
+import Spinner from "../Common/Spinner";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -279,42 +279,47 @@ const AssetsList = () => {
   }
 
   return (
-    <div className="px-6">
-      <div className="flex justify-between items-center">
-        <PageTitle title="Assets" breadcrumbs={false} hideBack />
-        {authorizedForImportExport && (
-          <div className="tooltip">
-            <ExportMenu
-              label={importAssetModalOpen ? "Importing..." : "Import/Export"}
-              exportItems={[
-                {
-                  label: "Import Assets",
-                  options: {
-                    icon: <CareIcon className="care-l-import" />,
-                    onClick: () => setImportAssetModalOpen(true),
+    <Page
+      title="Assets"
+      breadcrumbs={false}
+      hideBack
+      options={
+        <>
+          {authorizedForImportExport && (
+            <div className="tooltip">
+              <ExportMenu
+                label={importAssetModalOpen ? "Importing..." : "Import/Export"}
+                exportItems={[
+                  {
+                    label: "Import Assets",
+                    options: {
+                      icon: <CareIcon className="care-l-import" />,
+                      onClick: () => setImportAssetModalOpen(true),
+                    },
                   },
-                },
-                {
-                  label: "Export Assets",
-                  action: () =>
-                    authorizedForImportExport &&
-                    listAssets({
-                      ...qParams,
-                      json: true,
-                      limit: totalCount,
-                    }),
-                  type: "json",
-                  filePrefix: `assets_${facility?.name}`,
-                  options: {
-                    icon: <CareIcon className="care-l-export" />,
-                    disabled: totalCount === 0 || !authorizedForImportExport,
+                  {
+                    label: "Export Assets",
+                    action: () =>
+                      authorizedForImportExport &&
+                      listAssets({
+                        ...qParams,
+                        json: true,
+                        limit: totalCount,
+                      }),
+                    type: "json",
+                    filePrefix: `assets_${facility?.name}`,
+                    options: {
+                      icon: <CareIcon className="care-l-export" />,
+                      disabled: totalCount === 0 || !authorizedForImportExport,
+                    },
                   },
-                },
-              ]}
-            />
-          </div>
-        )}
-      </div>
+                ]}
+              />
+            </div>
+          )}
+        </>
+      }
+    >
       <div className="lg:flex mt-5 space-y-2">
         <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
           <div className="px-4 py-5 sm:p-6">
@@ -325,7 +330,10 @@ const AssetsList = () => {
               {/* Show spinner until count is fetched from server */}
               {isLoading ? (
                 <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
+                  <Spinner
+                    path={{ fill: "#0d9f6e" }}
+                    className="h-[48px] w-[48px]"
+                  />
                 </dd>
               ) : (
                 <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
@@ -445,7 +453,7 @@ const AssetsList = () => {
           setSelectedFacility({ name: "" });
         }}
       />
-    </div>
+    </Page>
   );
 };
 
