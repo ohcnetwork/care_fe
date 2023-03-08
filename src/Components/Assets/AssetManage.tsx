@@ -299,7 +299,7 @@ const AssetManage = (props: AssetManageProps) => {
                 },
                 {
                   label: "Asset Class",
-                  icon: assetClassProp.uicon,
+                  icon: assetClassProp.icon,
                   content: assetClassProp.name,
                 },
                 {

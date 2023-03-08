@@ -237,14 +237,14 @@ const AssetsList = () => {
             <div className="md:flex">
               <p className="text-xl flex font-medium capitalize break-words">
                 <span className="mr-2 text-primary-500">
-                  <i
-                    className={`fas fa-${
+                  <CareIcon
+                    className={`care-l-${
                       (
                         (asset.asset_class &&
                           assetClassProps[asset.asset_class]) ||
                         assetClassProps.NONE
                       ).icon
-                    }`}
+                    } text-2xl`}
                   />
                 </span>
                 <p className="truncate w-48">{asset.name}</p>
