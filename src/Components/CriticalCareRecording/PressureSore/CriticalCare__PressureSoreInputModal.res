@@ -37,6 +37,18 @@ let make = (
     None
   }, [state])
 
+  let handleSubmit = e => {
+    updatePart(state)
+    hideModal(e)
+    let region = PressureSore.regionToString(state.region)
+    if (state.length > 0.0 && state.width == 0.0) || (state.length == 0.0 && state.width > 0.0) {
+      Notifications.error({msg: `Please fill in both width and length for ${region} part`})
+      setState(prev => {...prev, length: 0.0, width: 0.0})
+    } else {
+      Notifications.success({msg: `${region} part updated`})
+    }
+  }
+
   let handleClickOutside = %raw(`
     function (event, ref, hideModal) {
       if (ref.current && !ref.current.contains(event.target)) {
@@ -179,10 +191,7 @@ let make = (
             {!previewMode
               ? <button
                   type_="button"
-                  onClick={e => {
-                    updatePart(state)
-                    hideModal(e)
-                  }}
+                  onClick={handleSubmit}
                   className="inline-flex w-full justify-center rounded-md border border-transparent bg-primary-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm">
                   {str("Apply")}
                 </button>
