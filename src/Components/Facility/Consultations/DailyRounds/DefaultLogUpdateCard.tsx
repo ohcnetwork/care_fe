@@ -29,7 +29,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
         telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
       }`}
     >
-      <div className="flex flex-col gap-1 md:flex-row items-start md:items-center justify-between">
+      <div className="flex flex-col gap-1 items-start">
         <div className="rounded-full bg-gray-50 border flex gap-2 w-min items-center text-gray-500">
           <div className="px-1.5 py-0.5 rounded-full bg-gray-100">
             <CareIcon className="care-l-user-nurse text-lg" />

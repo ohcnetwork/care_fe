@@ -68,7 +68,7 @@ const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
 
   return (
     <div className="p-4 flex flex-col gap-4 w-full rounded-lg bg-white shadow shadow-primary-500/20 border border-green-300">
-      <div className="flex flex-col gap-1 md:flex-row items-start md:items-center justify-between">
+      <div className="flex flex-col gap-1 items-start">
         <div className="rounded-full bg-green-50 border flex gap-2 w-min items-center text-primary-400">
           <div className="px-1.5 py-0.5 rounded-full bg-green-100">
             <CareIcon className="care-l-robot text-lg" />
