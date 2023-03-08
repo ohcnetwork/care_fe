@@ -1,30 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { Typography, CardContent, Button } from "@material-ui/core";
-import { TextInputField, ErrorHelperText } from "../Common/HelperInputFields";
+import { useEffect, useState } from "react";
+import { ErrorHelperText } from "../Common/HelperInputFields";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import { postResetPassword, checkResetToken } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { LocalStorageKeys } from "../../Common/constants";
-
-const panelStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: "100%",
-    },
-    heading: {
-      fontSize: theme.typography.pxToRem(15),
-    },
-  })
-);
+import ButtonV2, { Cancel } from "../Common/components/ButtonV2";
+import TextFormField from "../Form/FormFields/TextFormField";
+import CollapseV2 from "../Common/components/CollapseV2";
 
 export const ResetPassword = (props: any) => {
-  const panel = panelStyles();
-
   const dispatch: any = useDispatch();
   const initForm: any = {
     password: "",
@@ -37,7 +23,7 @@ export const ResetPassword = (props: any) => {
   const [passReg, setPassReg] = useState(0);
   const { t } = useTranslation();
   const handleChange = (e: any) => {
-    const { value, name } = e.target;
+    const { value, name } = e;
     const fieldValue = Object.assign({}, form);
     const errorField = Object.assign({}, errors);
     if (errorField[name]) {
@@ -73,6 +59,8 @@ export const ResetPassword = (props: any) => {
     if (hasError) {
       setErrors(err);
       return false;
+    } else {
+      setErrors({});
     }
     return form;
   };
@@ -122,63 +110,42 @@ export const ResetPassword = (props: any) => {
               handleSubmit(e);
             }}
           >
-            <div className="text-xl font-bold pt-4 text-center">
+            <div className="text-xl font-bold py-4 text-center">
               {t("reset_password")}
             </div>
-            <CardContent>
-              <TextInputField
+            <div className="px-4">
+              <TextFormField
                 type="password"
                 name="password"
                 placeholder={t("new_password")}
-                variant="outlined"
-                margin="dense"
                 onChange={handleChange}
-                errors={errors.password}
+                error={errors.password}
               />
-              {passReg === 0 && (
-                <div className={panel.root}>
-                  <ExpansionPanel>
-                    <ExpansionPanelDetails>
-                      <Typography className="text-red-500">
-                        <li>{t("min_password_len_8")}</li>
-                        <li>{t("req_atleast_one_digit")}</li>
-                        <li>{t("req_atleast_one_uppercase")}</li>
-                        <li>{t("req_atleast_one_lowercase")}</li>
-                        <li>{t("req_atleast_one_symbol")}</li>
-                      </Typography>
-                    </ExpansionPanelDetails>
-                  </ExpansionPanel>
+              <CollapseV2 opened={passReg === 0}>
+                <div className="mb-4 px-4">
+                  <ul className="text-red-500 list-disc">
+                    <li>{t("min_password_len_8")}</li>
+                    <li>{t("req_atleast_one_digit")}</li>
+                    <li>{t("req_atleast_one_uppercase")}</li>
+                    <li>{t("req_atleast_one_lowercase")}</li>
+                    <li>{t("req_atleast_one_symbol")}</li>
+                  </ul>
                 </div>
-              )}
-              <TextInputField
+              </CollapseV2>
+              <TextFormField
                 type="password"
                 name="confirm"
                 placeholder={t("confirm_password")}
-                variant="outlined"
-                margin="dense"
                 onChange={handleChange}
-                errors={errors.confirm}
+                error={errors.confirm}
               />
               <ErrorHelperText error={errors.token} />
-            </CardContent>
-            <div className="mt-4 sm:flex sm:justify-between grid p-4">
-              <Button
-                color="default"
-                variant="contained"
-                onClick={() => navigate("/login")}
-                type="button"
-              >
-                Cancel{" "}
-              </Button>
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                onClick={(e) => handleSubmit(e)}
-              >
+            </div>
+            <div className="sm:flex sm:justify-between grid p-4">
+              <Cancel onClick={() => navigate("/login")} />
+              <ButtonV2 type="submit" onClick={(e) => handleSubmit(e)}>
                 {t("reset")}
-              </Button>
+              </ButtonV2>
             </div>
           </form>
         </div>
