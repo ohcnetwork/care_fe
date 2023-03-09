@@ -200,6 +200,10 @@ const routes = {
       consultationId={id}
     />
   ),
+  ...(JSON.parse(process.env.REACT_APP_ENABLE_HCX || "false") && {
+    "/facility/:facilityId/patient/:patientId/consultation/:consultationId/claims":
+      (pathParams: any) => <ConsultationClaims {...pathParams} />,
+  }),
   "/facility/:facilityId/patient/:patientId/consultation/:consultationId/daily-rounds/:id/update":
     ({ facilityId, patientId, consultationId, id }: any) => (
       <DailyRounds
@@ -376,12 +380,9 @@ const routes = {
       />
     ),
   "/not-found": () => <Error404 />,
-
-  ...(JSON.parse(process.env.REACT_APP_ENABLE_HCX || "false") && {
-    "/facility/:facilityId/patient/:patientId/consultation/:consultationId/claims":
-      (pathParams: any) => <ConsultationClaims {...pathParams} />,
-  }),
 };
+
+console.log(JSON.parse(process.env.REACT_APP_ENABLE_HCX || "false"), routes);
 
 export default function AppRouter() {
   const { static_black_logo } = useConfig();
