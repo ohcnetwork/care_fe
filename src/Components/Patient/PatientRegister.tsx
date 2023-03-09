@@ -1145,7 +1145,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               id="health-id-label"
                               htmlFor="health-id"
                             >
-                              Health ID
+                              Abha Address
                             </InputLabel>
                             {state.form.health_id ? (
                               <TextInputField
@@ -1160,7 +1160,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               />
                             ) : (
                               <div className="text-sm text-gray-500 mt-4">
-                                No Health ID Associated with this ABHA Number
+                                No Abha Address Associated with this ABHA Number
                               </div>
                             )}
                           </div>

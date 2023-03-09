@@ -663,7 +663,7 @@ const CreateHealthIDSection = ({
     );
     if (res.status === 200) {
       setAbha?.(res.data);
-      Notify.Success({ msg: "Health ID created" });
+      Notify.Success({ msg: "Abha Address created" });
       onCreateSuccess(res.data.txnId);
     } else {
       Notify.Error({ msg: JSON.stringify(res.data) });
@@ -675,8 +675,8 @@ const CreateHealthIDSection = ({
     <div className="flex flex-col gap-4">
       <TextFormField
         name="health-id"
-        label="Enter Health ID"
-        placeholder="Enter Health ID"
+        label="Enter Abha Address"
+        placeholder="Enter Abha Address"
         disabled={isCreating}
         value={healthId}
         onChange={({ value }) => setHealthId(value)}
@@ -684,7 +684,7 @@ const CreateHealthIDSection = ({
 
       <div className="flex gap-2 items-center justify-end mt-4">
         <ButtonV2 disabled={isCreating} onClick={handleCreateHealthId}>
-          {isCreating ? "Creating Health ID..." : "Create Health ID"}
+          {isCreating ? "Creating Abha Address..." : "Create Abha Address"}
         </ButtonV2>
       </div>
     </div>
