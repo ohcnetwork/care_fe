@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { useTranslation } from "react-i18next";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import { LANGUAGE_NAMES } from "../../Locale/config";
 import { classNames } from "../../Utils/utils";
 
@@ -38,7 +38,7 @@ export const LanguageSelector = (props: any) => {
         ))}
       </select>
       <div className="absolute right-0 mr-1 z-10 h-auto w-8 pointer-events-none">
-        <ExpandMoreIcon className={props.className} />
+        <CareIcon className={`care-l-user ${props.className}`} />
       </div>
     </div>
   );

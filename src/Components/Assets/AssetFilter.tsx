@@ -113,8 +113,8 @@ function AssetFilter(props: any) {
   const handleFacilitySelect = (selected: FacilityModel) => {
     setFacility(selected ? selected : { name: "" });
   };
-  const handleLocationSelect = (selected: AssetLocationObject) => {
-    setLocation(selected ? selected : initialLocation);
+  const handleLocationSelect = (selectedId: string) => {
+    setLocationId(selectedId);
   };
 
   return (
@@ -149,10 +149,10 @@ function AssetFilter(props: any) {
               <FieldLabel className="text-sm">Location</FieldLabel>
               <LocationSelect
                 name="Facilities"
-                setSelected={(selected) =>
-                  handleLocationSelect(selected as AssetLocationObject)
+                setSelected={(selectedId) =>
+                  handleLocationSelect((selectedId as string) || "")
                 }
-                selected={location}
+                selected={location.id}
                 errors=""
                 showAll={false}
                 multiple={false}
