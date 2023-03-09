@@ -1213,6 +1213,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             type="text"
                             autoComplete="no"
                             value={state.form.name}
+                            disabled={state.form.name && state.form.abha_number}
                             onChange={handleChange}
                             errors={state.errors.name}
                           />
@@ -1231,6 +1232,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             value={state.form.date_of_birth}
                             onChange={(date) =>
                               handleDateChange(date, "date_of_birth")
+                            }
+                            disabled={
+                              state.form.date_of_birth && state.form.abha_number
                             }
                             errors={state.errors.date_of_birth}
                             inputVariant="outlined"
@@ -1253,6 +1257,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             variant="outlined"
                             margin="dense"
                             value={state.form.gender}
+                            disabled={
+                              state.form.gender && state.form.abha_number
+                            }
                             options={genderTypes}
                             onChange={handleChange}
                             errors={state.errors.gender}
