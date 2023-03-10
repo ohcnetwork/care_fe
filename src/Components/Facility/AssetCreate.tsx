@@ -727,14 +727,17 @@ const AssetCreate = (props: AssetProps) => {
                     <TextFormField
                       name="WarrantyAMCExpiry"
                       value={warranty_amc_end_of_validity}
-                      onChange={(date) => {
-                        if (moment(date.value).isBefore()) {
+                      onChange={(event) => {
+                        const value = moment(event.value);
+                        const date = new Date(value.toDate().toDateString());
+                        const today = new Date(new Date().toDateString());
+                        if (date < today) {
                           Notification.Error({
                             msg: "Warranty / AMC Expiry date can't be in past",
                           });
                         } else {
                           setWarrantyAmcEndOfValidity(
-                            moment(date.value).format("YYYY-MM-DD")
+                            value.format("YYYY-MM-DD")
                           );
                         }
                       }}
