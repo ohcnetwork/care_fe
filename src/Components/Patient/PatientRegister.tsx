@@ -72,7 +72,6 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import SelectMenuV2 from "../Form/SelectMenuV2";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -462,7 +461,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, fetchDistricts, fetchLocalBody, fetchWards, id, goBack]
+    [dispatchAction, fetchDistricts, fetchLocalBody, fetchWards, id]
   );
 
   const fetchStates = useCallback(
@@ -1189,7 +1188,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           />
                         </div>
                         <div data-testid="Gender" id="gender-div">
-
                           <SelectFormField
                             name="gender"
                             required
@@ -1200,9 +1198,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             onChange={handleFormFieldChange}
                             error={state.errors.gender}
                             optionValue={(o: any) => o.id}
-                            error={state.errors.gender.length !== 0}
+                            requiredError={state.errors.state.length !== 0}
                           />
-                          <ErrorHelperText error={state.errors.gender} />
                         </div>
 
                         <CollapseV2 opened={String(state.form.gender) === "2"}>
@@ -1369,6 +1366,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     fetchDistricts(e.value),
                                   ]}
                                   error={state.errors.state}
+                                  requiredError={
+                                    state.errors.state.length !== 0
+                                  }
                                 />
                               )}
                             </div>
@@ -1392,6 +1392,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     fetchLocalBody(String(e.value)),
                                   ]}
                                   error={state.errors.district}
+                                  requiredError={
+                                    state.errors.district.length !== 0
+                                  }
                                 />
                               )}
                             </div>
