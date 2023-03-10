@@ -7,6 +7,14 @@ export const KeralaLogo = "images/kerala-logo.png";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
+
+/**
+ * Contains local storage keys that are potentially used in multiple places.
+ */
+export const LocalStorageKeys = {
+  accessToken: "care_access_token",
+  refreshToken: "care_refresh_token",
+};
 export interface OptionsType {
   id: number;
   text: string;
