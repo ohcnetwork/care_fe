@@ -728,7 +728,7 @@ const AssetCreate = (props: AssetProps) => {
                       name="WarrantyAMCExpiry"
                       value={warranty_amc_end_of_validity}
                       onChange={(date) => {
-                        if (moment(date.value).isBefore()) {
+                        if (!moment(date.value).isAfter()) {
                           Notification.Error({
                             msg: "Warranty / AMC Expiry date can't be in past",
                           });
@@ -739,7 +739,7 @@ const AssetCreate = (props: AssetProps) => {
                         }
                       }}
                       type="date"
-                      min={moment().format("YYYY-MM-DD")}
+                      min={moment().subtract(1, "days").format("YYYY-MM-DD")}
                     />
                     <ErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}
