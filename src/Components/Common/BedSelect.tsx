@@ -31,7 +31,7 @@ export const BedSelect = (props: BedSelectProps) => {
     className = "",
     facility,
     location,
-    showNOptions = 10,
+    showNOptions = 20,
   } = props;
   const dispatchAction: any = useDispatch();
 
