@@ -14,6 +14,7 @@ type SelectFormFieldProps<T, V = T> = FormFieldBaseProps<V> & {
   optionDescription?: OptionCallback<T, React.ReactNode>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
+  error?: boolean;
 };
 
 export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
@@ -34,6 +35,7 @@ export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
         optionDescription={props.optionDescription}
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
+        requiredError={props.error}
       />
     </FormField>
   );
