@@ -11,7 +11,7 @@ type rhythm =
 
 @genType
 type t = {
-  pain: option<int>,
+  pain: array<CriticalCare__Pain.part>,
   bp: option<bp>,
   pulse: option<int>,
   spo2: option<int>,
@@ -69,7 +69,7 @@ let makeBPFromJs = bp => {
 }
 let makeFromJs = dailyRound => {
   make(
-    ~pain=dailyRound["pain"]->Js.Nullable.toOption,
+    ~pain=CriticalCare__Pain.makeFromJs(dailyRound),
     ~bp=makeBPFromJs(dailyRound["bp"]),
     ~pulse=dailyRound["pulse"]->Js.Nullable.toOption,
     ~spo2=dailyRound["ventilator_spo2"]->Js.Nullable.toOption,

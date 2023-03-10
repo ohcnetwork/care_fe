@@ -51,7 +51,14 @@ let make = (
       "Low",
       "High",
     )}
-    {renderOptionalInt("Pain Scale", HemodynamicParameters.pain(hemodynamicParameter))}
+    <h3 className="mt-4"> {str("Pain Scale")} </h3>
+    <CriticalCare__PainEditor
+        previewMode={true}
+        painParameter={HemodynamicParameters.pain(hemodynamicParameter)}
+        updateCB={_ => ()}
+        id={""}
+        consultationId={""}
+      />
     {renderLine(
       "Rhythm",
       HemodynamicParameters.rhythmToString(HemodynamicParameters.rhythm(hemodynamicParameter)),
