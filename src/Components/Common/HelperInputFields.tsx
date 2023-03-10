@@ -273,7 +273,7 @@ export const ErrorHelperText = (props: { error?: string }) => {
   return (
     <span
       className={`error-text mt-2 ml-1 transition-all duration-300 ${
-        error ? "opacity-100" : "opacity-0"
+        error ? "opacity-100 text-red-500" : "opacity-0"
       }`}
     >
       {error}

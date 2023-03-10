@@ -69,6 +69,7 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import SelectMenuV2 from "../Form/SelectMenuV2";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -88,13 +89,7 @@ const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
   ],
   []
 );
-const genderTypes = [
-  {
-    id: 0,
-    text: "Select",
-  },
-  ...GENDER_TYPES,
-];
+const genderTypes = GENDER_TYPES;
 const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
 const testType = [...TEST_TYPE];
@@ -451,7 +446,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsLoading(false);
       }
     },
-    [dispatchAction, fetchDistricts, fetchLocalBody, fetchWards, id]
+    [dispatchAction, fetchDistricts, fetchLocalBody, fetchWards, id, goBack]
   );
 
   const fetchStates = useCallback(
@@ -459,7 +454,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       setIsStateLoading(true);
       const statesRes = await dispatchAction(getStates());
       if (!status.aborted && statesRes.data.results) {
-        setStates([...initialStates, ...statesRes.data.results]);
+        setStates(statesRes.data.results);
       }
       setIsStateLoading(false);
     },
@@ -1186,16 +1181,22 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           >
                             Gender
                           </FieldLabel>
-                          <SelectField
-                            labelId="gender"
-                            name="gender"
-                            variant="outlined"
-                            margin="dense"
-                            value={state.form.gender}
+                          <SelectMenuV2
+                            id="patient-gender"
+                            value={genderTypes.find(
+                              (type) => type.id === state.form.gender
+                            )}
                             options={genderTypes}
-                            onChange={handleChange}
-                            errors={state.errors.gender}
+                            optionLabel={(option) => option.text}
+                            onChange={(e) =>
+                              handleFormFieldChange({
+                                name: "gender",
+                                value: (e && e.id) || "",
+                              })
+                            }
+                            requiredError={state.errors.gender.length !== 0}
                           />
+                          <ErrorHelperText error={state.errors.gender} />
                         </div>
 
                         <CollapseV2 opened={String(state.form.gender) === "2"}>
@@ -1346,7 +1347,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         </div>
                         {state.form.nationality === "India" ? (
                           <>
-                            <div data-testid="state" id="state-div">
+                            <div id="state-div">
                               <FieldLabel
                                 htmlFor="state"
                                 id="state-label"
@@ -1357,20 +1358,33 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               {isStateLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
-                                <SelectField
-                                  labelId="state"
-                                  name="state"
-                                  variant="outlined"
-                                  margin="dense"
-                                  value={state.form.state}
-                                  options={states}
-                                  optionValue="name"
-                                  onChange={(e) => [
-                                    handleChange(e),
-                                    fetchDistricts(e.target.value),
-                                  ]}
-                                  errors={state.errors.state}
-                                />
+                                <div>
+                                  <SelectMenuV2
+                                    id="patient-state"
+                                    value={states.find(
+                                      (type) => type.id === state.form.state
+                                    )}
+                                    options={states}
+                                    optionLabel={(states) => states.name}
+                                    placeholder={"Choose State"}
+                                    onChange={(e) => {
+                                      console.log(e);
+                                      handleChange({
+                                        target: {
+                                          name: "state",
+                                          value: (e && e.id) || "",
+                                        },
+                                      });
+                                      if (e && e.id) {
+                                        fetchDistricts(e.id);
+                                      }
+                                    }}
+                                    requiredError={
+                                      state.errors.state.length !== 0
+                                    }
+                                  />
+                                  <ErrorHelperText error={state.errors.state} />
+                                </div>
                               )}
                             </div>
 
@@ -1381,20 +1395,34 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               {isDistrictLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
-                                <SelectField
-                                  labelId="district"
-                                  name="district"
-                                  variant="outlined"
-                                  margin="dense"
-                                  value={state.form.district}
-                                  options={districts}
-                                  optionValue="name"
-                                  onChange={(e) => [
-                                    handleChange(e),
-                                    fetchLocalBody(String(e.target.value)),
-                                  ]}
-                                  errors={state.errors.district}
-                                />
+                                <div>
+                                  <SelectMenuV2
+                                    id="patient-district"
+                                    value={districts.find(
+                                      (type) => type.id === state.form.district
+                                    )}
+                                    options={districts}
+                                    optionLabel={(districts) => districts.name}
+                                    onChange={(e) => {
+                                      console.log(e);
+                                      handleChange({
+                                        target: {
+                                          name: "district",
+                                          value: (e && e.id) || "",
+                                        },
+                                      });
+                                      if (e && e.id) {
+                                        fetchLocalBody(e.name);
+                                      }
+                                    }}
+                                    requiredError={
+                                      state.errors.district.length !== 0
+                                    }
+                                  />
+                                  <ErrorHelperText
+                                    error={state.errors.district}
+                                  />
+                                </div>
                               )}
                             </div>
 
