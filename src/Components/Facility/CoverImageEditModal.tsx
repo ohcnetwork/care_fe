@@ -19,6 +19,7 @@ import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import * as Notification from "../../Utils/Notifications.js";
 import { useTranslation } from "react-i18next";
+import { LocalStorageKeys } from "../../Common/constants";
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -116,7 +117,7 @@ const CoverImageEditModal = ({
           headers: {
             "Content-Type": "multipart/form-data",
             Authorization:
-              "Bearer " + localStorage.getItem("care_access_token"),
+              "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
           },
         }
       );

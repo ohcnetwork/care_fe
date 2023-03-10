@@ -166,7 +166,7 @@ export const PatientManager = () => {
     created_date_after: qParams.created_date_after || undefined,
     modified_date_before: qParams.modified_date_before || undefined,
     modified_date_after: qParams.modified_date_after || undefined,
-    ordering: qParams.ordering || undefined,
+    ordering: qParams.ordering || "-modified_date",
     category: qParams.category || undefined,
     gender: qParams.gender || undefined,
     age_min: qParams.age_min || undefined,
@@ -513,21 +513,6 @@ export const PatientManager = () => {
                           text="Review Missed"
                         />
                       )}
-                    {patient.allow_transfer ? (
-                      <Chip
-                        size="small"
-                        color="yellow"
-                        startIcon="unlock"
-                        text="Transfer Allowed"
-                      />
-                    ) : (
-                      <Chip
-                        size="small"
-                        color="primary"
-                        startIcon="lock"
-                        text="Transfer Blocked"
-                      />
-                    )}
                     {patient.disease_status === "POSITIVE" && (
                       <Chip
                         size="small"

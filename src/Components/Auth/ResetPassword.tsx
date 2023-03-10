@@ -9,6 +9,7 @@ import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import { postResetPassword, checkResetToken } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
+import { LocalStorageKeys } from "../../Common/constants";
 
 const panelStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -84,7 +85,7 @@ export const ResetPassword = (props: any) => {
       dispatch(postResetPassword(valid)).then((resp: any) => {
         const res = resp && resp.data;
         if (res && res.status === "OK") {
-          localStorage.removeItem("care_access_token");
+          localStorage.removeItem(LocalStorageKeys.accessToken);
           Notification.Success({
             msg: t("password_reset_success"),
           });
