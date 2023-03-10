@@ -11,6 +11,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
+      pull-requests: write
+      contents: write
     steps:
       - name: Add thankyou note
         uses: actions/github-script@v6.3.3
@@ -29,16 +31,13 @@ jobs:
               repo: context.repo.repo,
             })
 
-            const { assignees } = result.data
-
-            if (assignees.length == 0) {
-              await github.rest.issues.createComment({ ...options, body })
-              return
-            }
+            const { assignees, user } = result.data
 
             const assignees_tagged = assignees.map((user) => '@' + user.login).join(' ')
-            await github.rest.issues.createComment({
-              ...options,
-              body: `${assignees_tagged} ${thankyouNote}`,
-            })
+            const owner_tagged = '@' + user.login
 
+            if (assignees.length == 0) {
+              await github.rest.issues.createComment({ ...options, body: `${owner_tagged} ${thankyouNote}` })
+            } else {
+              await github.rest.issues.createComment({ ...options, body: `${assignees_tagged} ${owner_tagged} ${thankyouNote}` })
+            }

@@ -176,7 +176,13 @@ let make = (
         <div className="grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Pressure Sore" />
-          <DailyRound__PressureSore pressureSoreParameter />
+          <CriticalCare__PressureSoreEditor
+            pressureSoreParameter={pressureSoreParameter}
+            previewMode={true}
+            updateCB={_ => ()}
+            id={id}
+            consultationId={consultationId}
+          />
         </div>
         <div className="grow border-t border-gray-400 mt-4" />
         <div>

@@ -125,15 +125,13 @@ export const DailyRoundListDetails = (props: any) => {
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Taken at: </span>
-            {dailyRoundListDetailsData.temperature_measured_at
-              ? moment(
-                  dailyRoundListDetailsData.temperature_measured_at
-                ).format("lll")
+            {dailyRoundListDetailsData.taken_at
+              ? moment(dailyRoundListDetailsData.taken_at).format("lll")
               : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">SpO2: </span>
-            {dailyRoundListDetailsData.spo2 || "-"}
+            {dailyRoundListDetailsData.ventilator_spo2 || "-"}
           </div>
           <div className="md:col-span-2 capitalize">
             <span className="font-semibold leading-relaxed">
