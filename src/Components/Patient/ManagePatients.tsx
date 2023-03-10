@@ -791,12 +791,15 @@ export const PatientManager = () => {
       </div>
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-4 my-4 px-2 md:px-0 mb-[-12px]">
         <div className="flex flex-col xl:flex-row mt-2 h-full gap-3">
-          <CountBlock
-            text="Total Patients"
-            count={totalCount}
-            loading={isLoading}
-            icon={"user-injured"}
-          />
+          <div className="flex-1">
+            <CountBlock
+              text="Total Patients"
+              count={totalCount}
+              loading={isLoading}
+              icon={"user-injured"}
+              containerClass="pb-8"
+            />
+          </div>
           {/*<div className="bg-white overflow-hidden shadow rounded-lg flex-1">
               <div className="p-4">
                 <dl>

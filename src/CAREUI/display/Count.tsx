@@ -6,11 +6,19 @@ export default function CountBlock(props: {
   loading: boolean;
   icon: string;
   color?: string;
+  containerClass?: string;
 }) {
-  const { count, text, loading, icon, color = "primary" } = props;
+  const {
+    count,
+    text,
+    loading,
+    icon,
+    color = "primary",
+    containerClass,
+  } = props;
 
   return (
-    <div className="rounded-lg p-4 shadow flex-1 bg-white">
+    <div className={"rounded-lg p-4 shadow flex-1 bg-white " + containerClass}>
       <dl className="">
         <div
           className={`flex items-center justify-center rounded-lg text-xl w-10 h-10 bg-${color}-100`}
