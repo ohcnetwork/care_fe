@@ -673,7 +673,6 @@ export const UserAdd = (props: UserProps) => {
                   o.role + ((o.readOnly && " (Read Only)") || "")
                 }
                 optionValue={(o) => o.id}
-                requiredError={state.errors.user_type.length !== 0}
               />
 
               {state.form.user_type === "Doctor" && (
@@ -721,7 +720,6 @@ export const UserAdd = (props: UserProps) => {
                   label="Phone Number"
                   required
                   onlyIndia
-                  requiredError={state.errors.phone_number.length !== 0}
                 />
                 <Checkbox
                   checked={phoneIsWhatsApp}
@@ -890,7 +888,6 @@ export const UserAdd = (props: UserProps) => {
                 options={GENDER_TYPES}
                 optionLabel={(o) => o.text}
                 optionValue={(o) => o.text}
-                requiredError={state.errors.gender.length !== 0}
               />
 
               {isStateLoading ? (
@@ -908,7 +905,6 @@ export const UserAdd = (props: UserProps) => {
                     handleFieldChange(e);
                     if (e) fetchDistricts(e.value);
                   }}
-                  requiredError={state.errors.state.length !== 0}
                 />
               )}
 
@@ -927,7 +923,6 @@ export const UserAdd = (props: UserProps) => {
                     handleFieldChange(e);
                     if (e) fetchLocalBody(e.value);
                   }}
-                  requiredError={state.errors.district.length !== 0}
                 />
               )}
 
@@ -945,7 +940,6 @@ export const UserAdd = (props: UserProps) => {
                       options={localBodies}
                       optionLabel={(o) => o.name}
                       optionValue={(o) => o.id}
-                      requiredError={state.errors.local_body.length !== 0}
                     />
                   </>
                 ))}

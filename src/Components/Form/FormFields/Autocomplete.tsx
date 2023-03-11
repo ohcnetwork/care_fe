@@ -16,7 +16,6 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   optionIcon?: OptionCallback<T, React.ReactNode>;
   onQuery?: (query: string) => void;
   dropdownIcon?: React.ReactNode | undefined;
-  requiredError?: boolean;
 };
 
 const AutocompleteFormField = <T, V>(
@@ -38,7 +37,7 @@ const AutocompleteFormField = <T, V>(
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
         onQuery={props.onQuery}
-        requiredError={props.requiredError}
+        requiredError={field.error ? props.required : false}
       />
     </FormField>
   );

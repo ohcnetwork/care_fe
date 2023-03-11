@@ -240,7 +240,6 @@ export const BedCapacity = (props: BedCapacityProps) => {
             onChange={handleChange}
             disabled={!!id}
             error={state.errors.bedType}
-            requiredError={state.errors.bedType.length !== 0}
           />
           <div className="flex flex-col md:flex-row gap-7">
             <TextFormField
