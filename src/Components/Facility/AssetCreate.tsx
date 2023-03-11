@@ -536,6 +536,7 @@ const AssetCreate = (props: AssetProps) => {
                       value={location}
                       onChange={({ value }) => setLocation(value)}
                       error={state.errors.location}
+                      requiredError={state.errors.location.length !== 0}
                     />
                   </div>
 
@@ -566,6 +567,7 @@ const AssetCreate = (props: AssetProps) => {
                         optionValue={({ value }) => value}
                         onChange={({ value }) => setAssetType(value)}
                         error={state.errors.asset_type}
+                        requiredError={state.errors.asset_type.length !== 0}
                       />
                     </div>
 
