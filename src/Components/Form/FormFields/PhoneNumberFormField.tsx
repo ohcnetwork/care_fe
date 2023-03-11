@@ -9,6 +9,7 @@ type Props = FormFieldBaseProps<string> & {
   tollFree?: boolean;
   onlyIndia?: boolean;
   countryCodeEditable?: boolean;
+  requiredError?: boolean;
 };
 
 const PhoneNumberFormField = (props: Props) => {
@@ -26,6 +27,7 @@ const PhoneNumberFormField = (props: Props) => {
         enableTollFree={props.tollFree}
         countryCodeEditable={!!props.countryCodeEditable}
         className="my-0"
+        requiredError={props.requiredError}
       />
     </FormField>
   );

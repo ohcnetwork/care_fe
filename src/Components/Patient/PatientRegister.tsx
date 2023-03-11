@@ -1148,6 +1148,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               handleFormFieldChange(event);
                             }}
                             error={state.errors.phone_number}
+                            requiredError={
+                              state.errors.phone_number.length !== 0
+                            }
                           />
                         </div>
                         <div
@@ -1161,6 +1164,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             value={state.form.emergency_phone_number}
                             onChange={handleFormFieldChange}
                             error={state.errors.emergency_phone_number}
+                            requiredError={
+                              state.errors.emergency_phone_number.length !== 0
+                            }
                           />
                         </div>
                         <div data-testid="name" id="name-div">
