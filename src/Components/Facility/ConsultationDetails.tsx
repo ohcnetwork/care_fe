@@ -954,17 +954,10 @@ export const ConsultationDetails = (props: any) => {
                       </h3>
                       <div className="mt-2">
                         <ResponsiveProcedureTable
-                          theads={[
-                            "Procedure",
-                            "Repetitive",
-                            "Time",
-                            "Frequency",
-                            "Notes",
-                          ]}
+                          theads={["Procedure", "Time", "Frequency", "Notes"]}
                           list={consultationData.procedure}
                           objectKeys={[
                             "procedure",
-                            "repetitive",
                             "time",
                             "frequency",
                             "notes",
