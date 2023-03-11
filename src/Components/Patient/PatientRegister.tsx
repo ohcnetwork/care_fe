@@ -1418,6 +1418,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     fetchWards(String(e.value)),
                                   ]}
                                   error={state.errors.local_body}
+                                  requiredError={
+                                    state.errors.local_body.length !== 0
+                                  }
                                 />
                               )}
                             </div>
@@ -1444,6 +1447,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   optionValue={(o: any) => o.id}
                                   onChange={handleFormFieldChange}
                                   error={state.errors.ward}
+                                  requiredError={state.errors.ward.length !== 0}
                                 />
                               )}
                             </div>
@@ -2022,6 +2026,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             optionLabel={(o: any) => o}
                             onChange={handleFormFieldChange}
                             error={state.errors.blood_group}
+                            requiredError={
+                              state.errors.blood_group.length !== 0
+                            }
                           />
                         </div>
                       </div>
