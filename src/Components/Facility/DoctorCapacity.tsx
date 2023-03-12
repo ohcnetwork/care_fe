@@ -239,6 +239,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
             </div>
             <div>
               <TextFormField
+                required
                 id="count"
                 label="Count"
                 name="count"
