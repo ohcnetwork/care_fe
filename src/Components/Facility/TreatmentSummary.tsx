@@ -189,9 +189,11 @@ const TreatmentSummary = (props: any) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {patientData.medical_history &&
-                      patientData.medical_history.length > 0 ? (
-                        patientData.medical_history.map(
+                      {patientData?.last_consultation?.medical_history_object
+                        ?.patient_diseases &&
+                      patientData?.last_consultation?.medical_history_object
+                        ?.patient_diseases?.length > 0 ? (
+                        patientData?.last_consultation?.medical_history_object?.patient_diseases?.map(
                           (obj: any, index: number) => {
                             return (
                               <tr key={index}>

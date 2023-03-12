@@ -156,8 +156,8 @@ export const PatientManager = () => {
       : undefined,
     emergency_phone_number: qParams.emergency_phone_number
       ? parsePhoneNumberFromString(qParams.emergency_phone_number)?.format(
-          "E.164"
-        )
+        "E.164"
+      )
       : undefined,
     local_body: qParams.lsgBody || undefined,
     facility: qParams.facility,
@@ -437,8 +437,8 @@ export const PatientManager = () => {
           <div className="flex flex-col md:flex-row gap-4 items-start">
             <div className="w-full md:w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
               {patient?.last_consultation &&
-              patient?.last_consultation?.current_bed &&
-              patient?.last_consultation?.discharge_date === null ? (
+                patient?.last_consultation?.current_bed &&
+                patient?.last_consultation?.discharge_date === null ? (
                 <div className="flex flex-col items-center justify-center h-full">
                   <Tooltip
                     title={
@@ -554,19 +554,19 @@ export const PatientManager = () => {
                     patient.last_consultation?.facility !== patient.facility ||
                     (patient.last_consultation?.discharge_date &&
                       patient.is_active)) && (
-                    <span className="relative inline-flex">
-                      <Chip
-                        size="small"
-                        color="red"
-                        startIcon="notes-medical"
-                        text="No Consultation Filed"
-                      />
-                      <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
-                        <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                      <span className="relative inline-flex">
+                        <Chip
+                          size="small"
+                          color="red"
+                          startIcon="notes-medical"
+                          text="No Consultation Filed"
+                        />
+                        <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
+                          <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
+                          <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                        </span>
                       </span>
-                    </span>
-                  )}
+                    )}
                   {!(
                     patient.last_consultation?.facility !== patient.facility
                   ) &&
@@ -589,6 +589,14 @@ export const PatientManager = () => {
                           <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
                         </span>
                       </span>
+                    )}
+                  {patient.last_consultation?.health_details_object
+                    ?.allergies && (
+                      <Chip
+                        color="red"
+                        startIcon="exclamation-triangle"
+                        text="Allergies"
+                      />
                     )}
                 </div>
               </div>
@@ -808,51 +816,51 @@ export const PatientManager = () => {
             range,
             ordering,
           }) => [
-            phoneNumber("Primary number", "phone_number"),
-            phoneNumber("Emergency number", "emergency_phone_number"),
-            badge("Patient name", "name"),
-            badge("IP number", "ip_no"),
-            ...dateRange("Modified", "modified_date"),
-            ...dateRange("Created", "created_date"),
-            ...dateRange("Admitted", "last_consultation_admission_date"),
-            ...dateRange("Discharged", "last_consultation_discharge_date"),
-            // Admitted to type badges
-            badge("No. of vaccination doses", "number_of_doses"),
-            kasp(),
-            badge("COWIN ID", "covin_id"),
-            badge("Is Antenatal", "is_antenatal"),
-            value("Facility", "facility", facilityBadgeName),
-            badge("Facility Type", "facility_type"),
-            value("District", "district", districtName),
-            ordering(),
-            badge("Category", "category"),
-            badge("Disease Status", "disease_status"),
-            value(
-              "Gender",
-              "gender",
-              parseOptionId(GENDER_TYPES, qParams.gender) || ""
-            ),
-            {
-              name: "Admitted to",
-              value: ADMITTED_TO[qParams.last_consultation_admitted_to],
-              paramKey: "last_consultation_admitted_to",
-            },
-            ...range("Age", "age"),
-            badge("SRF ID", "srf_id"),
-            { name: "LSG Body", value: localbodyName, paramKey: "lsgBody" },
-            badge("Declared Status", "is_declared_positive"),
-            ...dateRange("Result", "date_of_result"),
-            ...dateRange("Declared positive", "date_declared_positive"),
-            ...dateRange(
-              "Symptoms onset",
-              "last_consultation_symptoms_onset_date"
-            ),
-            ...dateRange("Last vaccinated", "last_vaccinated_date"),
-            {
-              name: "Telemedicine",
-              paramKey: "last_consultation_is_telemedicine",
-            },
-          ]}
+              phoneNumber("Primary number", "phone_number"),
+              phoneNumber("Emergency number", "emergency_phone_number"),
+              badge("Patient name", "name"),
+              badge("IP number", "ip_no"),
+              ...dateRange("Modified", "modified_date"),
+              ...dateRange("Created", "created_date"),
+              ...dateRange("Admitted", "last_consultation_admission_date"),
+              ...dateRange("Discharged", "last_consultation_discharge_date"),
+              // Admitted to type badges
+              badge("No. of vaccination doses", "number_of_doses"),
+              kasp(),
+              badge("COWIN ID", "covin_id"),
+              badge("Is Antenatal", "is_antenatal"),
+              value("Facility", "facility", facilityBadgeName),
+              badge("Facility Type", "facility_type"),
+              value("District", "district", districtName),
+              ordering(),
+              badge("Category", "category"),
+              badge("Disease Status", "disease_status"),
+              value(
+                "Gender",
+                "gender",
+                parseOptionId(GENDER_TYPES, qParams.gender) || ""
+              ),
+              {
+                name: "Admitted to",
+                value: ADMITTED_TO[qParams.last_consultation_admitted_to],
+                paramKey: "last_consultation_admitted_to",
+              },
+              ...range("Age", "age"),
+              badge("SRF ID", "srf_id"),
+              { name: "LSG Body", value: localbodyName, paramKey: "lsgBody" },
+              badge("Declared Status", "is_declared_positive"),
+              ...dateRange("Result", "date_of_result"),
+              ...dateRange("Declared positive", "date_declared_positive"),
+              ...dateRange(
+                "Symptoms onset",
+                "last_consultation_symptoms_onset_date"
+              ),
+              ...dateRange("Last vaccinated", "last_vaccinated_date"),
+              {
+                name: "Telemedicine",
+                paramKey: "last_consultation_is_telemedicine",
+              },
+            ]}
           children={
             qParams.last_consultation_admitted_bed_type_list &&
             LastAdmittedToTypeBadges()

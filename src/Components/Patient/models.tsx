@@ -37,14 +37,12 @@ export interface PatientModel {
   phone_number?: string;
   emergency_phone_number?: string;
   allergies?: string;
-  medical_history?: Array<{ disease: string | number; details: string }>;
   facility_object?: {
     id: number;
     name: string;
     facility_type?: { id: number; name: string };
   };
   contact_with_carrier?: boolean;
-  medical_history_details?: string;
   is_active?: boolean;
   is_antenatal?: boolean;
   is_migrant_worker?: boolean;
@@ -66,12 +64,10 @@ export interface PatientModel {
   frontline_worker?: string;
   estimated_contact_date?: string;
   past_travel?: boolean;
-  ongoing_medication?: string;
   countries_travelled?: Array<string>;
   transit_details?: string;
   number_of_primary_contacts?: number;
   number_of_secondary_contacts?: number;
-  present_health?: string;
   has_SARI?: boolean;
   local_body?: number;
   district?: number;
@@ -85,11 +81,7 @@ export interface PatientModel {
   srf_id?: string;
   covin_id?: string;
   is_vaccinated?: boolean;
-  vaccine_name?: string;
-  number_of_doses?: number;
-  last_vaccinated_date?: string;
   date_of_birth?: string;
-  blood_group?: string;
   review_interval?: number;
   review_time?: string;
   date_of_return?: string;

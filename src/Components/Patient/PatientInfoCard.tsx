@@ -166,7 +166,13 @@ export default function PatientInfoCard(props: {
             </p>
             <div className="text-sm flex flex-col sm:flex-row items-center gap-2 lg:mt-4">
               {[
-                ["Blood Group", patient.blood_group, patient.blood_group],
+                [
+                  "Blood Group",
+                  patient?.last_consultation?.health_details_object
+                    ?.blood_group,
+                  patient?.last_consultation?.health_details_object
+                    ?.blood_group,
+                ],
                 [
                   "Weight",
                   getDimensionOrDash(patient.last_consultation?.weight, " kg"),

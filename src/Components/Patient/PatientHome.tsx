@@ -536,7 +536,9 @@ export const PatientHome = (props: any) => {
                   {patientData.facility_object?.name || "-"}
                 </h3>
                 <p className="text-sm text-zinc-500 mt-4 mb-7 font-medium">
-                  {patientGender} | {patientData.blood_group || "-"}
+                  {patientGender} |{" "}
+                  {patientData?.last_consultation?.health_details_object
+                    ?.blood_group || "-"}
                 </p>
               </div>
               <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 md:grid-cols-2 lg:grid-cols-3 mt-2 mb-8 items-center">

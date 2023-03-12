@@ -94,12 +94,10 @@ const initForm: any = {
   gender: "",
   phone_number: "",
   emergency_phone_number: "",
-  blood_group: "",
   disease_status: diseaseStatus[2],
   is_declared_positive: "false",
   date_declared_positive: new Date(),
   date_of_birth: null,
-  medical_history: [],
   nationality: "India",
   passport_no: "",
   state: "",
@@ -110,7 +108,6 @@ const initForm: any = {
   permanent_address: "",
   village: "",
   pincode: "",
-  present_health: "",
   contact_with_confirmed_carrier: "false",
   contact_with_suspected_carrier: "false",
   estimated_contact_date: null,
@@ -124,7 +121,6 @@ const initForm: any = {
   srf_id: "",
   test_type: testType[0],
   prescribed_medication: false,
-  ongoing_medication: "",
   designation_of_health_care_worker: "",
   instituion_of_health_care_worker: "",
   cluster_name: "",
@@ -370,9 +366,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             is_antenatal: String(!!res.data.is_antenatal),
             allergies: res.data.allergies ? res.data.allergies : "",
             pincode: res.data.pincode ? res.data.pincode : "",
-            ongoing_medication: res.data.ongoing_medication
-              ? res.data.ongoing_medication
-              : "",
             is_declared_positive: res.data.is_declared_positive
               ? String(res.data.is_declared_positive)
               : "false",
@@ -627,17 +620,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
-        case "medical_history":
-          if (!state.form[field].length) {
-            errors[field] = (
-              <span className="text-red-500">
-                Please fill the medical history
-              </span>
-            );
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
         default:
           return;
       }
@@ -709,7 +691,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           : undefined,
         date_declared_positive:
           JSON.parse(state.form.is_declared_positive) &&
-            state.form.date_declared_positive
+          state.form.date_declared_positive
             ? state.form.date_declared_positive
             : null,
         test_id: state.form.test_id,
@@ -741,10 +723,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         permanent_address: sameAddress
           ? state.form.address
           : state.form.permanent_address
-            ? state.form.permanent_address
-            : undefined,
-        present_health: state.form.present_health
-          ? state.form.present_health
+          ? state.form.permanent_address
           : undefined,
         contact_with_confirmed_carrier: JSON.parse(
           state.form.contact_with_confirmed_carrier
@@ -755,16 +734,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         estimated_contact_date:
           (JSON.parse(state.form.contact_with_confirmed_carrier) ||
             JSON.parse(state.form.contact_with_suspected_carrier)) &&
-            state.form.estimated_contact_date
+          state.form.estimated_contact_date
             ? state.form.estimated_contact_date
             : null,
         cluster_name:
           (JSON.parse(state.form.contact_with_confirmed_carrier) ||
             JSON.parse(state.form.contact_with_suspected_carrier)) &&
-            state.form.cluster_name
+          state.form.cluster_name
             ? state.form.cluster_name
             : null,
-        allergies: state.form.allergies,
         number_of_primary_contacts: Number(
           state.form.number_of_primary_contacts
         )
@@ -775,7 +753,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         )
           ? Number(state.form.number_of_secondary_contacts)
           : undefined,
-        ongoing_medication: state.form.ongoing_medication,
         is_declared_positive: JSON.parse(state.form.is_declared_positive),
         designation_of_health_care_worker:
           state.form.designation_of_health_care_worker,
@@ -901,8 +878,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           const duplicateList = !id
             ? res.data.results
             : res.data.results.filter(
-              (item: DupPatientModel) => item.patient_id !== id
-            );
+                (item: DupPatientModel) => item.patient_id !== id
+              );
           if (duplicateList.length) {
             setStatusDialog({
               show: true,

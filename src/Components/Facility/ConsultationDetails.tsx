@@ -1331,7 +1331,8 @@ export const ConsultationDetails = (props: any) => {
                     <div>
                       Blood Group {" - "}
                       <span className="font-semibold">
-                        {patientData.blood_group || "-"}
+                        {patientData?.last_consultation?.health_details_object
+                          ?.blood_group || "-"}
                       </span>
                     </div>
                   </div>
