@@ -6,6 +6,7 @@ import { getFacilityUsers } from "../../Redux/actions";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Link } from "raviger";
 
 export default function DoctorVideoSlideover(props: {
   show: boolean;
@@ -85,7 +86,13 @@ export default function DoctorVideoSlideover(props: {
                 );
               })
               .map((doctor) => {
-                return <UserListItem key={doctor.id} user={doctor} />;
+                return (
+                  <UserListItem
+                    key={doctor.id}
+                    user={doctor}
+                    facilityId={facilityId}
+                  />
+                );
               })}
           </ul>
         </div>
@@ -94,7 +101,7 @@ export default function DoctorVideoSlideover(props: {
   );
 }
 
-function UserListItem(props: { user: UserAssignedModel }) {
+function UserListItem(props: { user: UserAssignedModel; facilityId: string }) {
   const user = props.user;
   const icon =
     user.user_type === "Doctor" ? "fa-user-doctor " : " fa-user-nurse";
@@ -144,6 +151,18 @@ function UserListItem(props: { user: UserAssignedModel }) {
                 {user.first_name} {user.last_name}
               </span>
               <div className="flex gap-2">
+                <Link
+                  href={`/facility/${props.facilityId}/live_connect/${user.id}/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <div className="tooltip">
+                    <span className="tooltip-text tooltip-left">
+                      Connect on Care
+                    </span>
+                    <CareIcon className="care-l-video w-5 h-5" />
+                  </div>
+                </Link>
                 <a
                   href={
                     user.alt_phone_number

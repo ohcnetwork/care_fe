@@ -15,7 +15,7 @@
     "coronasafe Contributors"
   ],
   "homepage": "https://care.coronasafe.in",
-  "proxy": "https://careapi.coronasafe.in",
+  "proxy": "http://127.0.0.1:8000",
   "main": "./src/index.tsx",
   "keywords": [
     "Coronasafe",
@@ -35,6 +35,8 @@
     "@googlemaps/react-wrapper": "^1.1.35",
     "@googlemaps/typescript-guards": "^2.0.0",
     "@headlessui/react": "^1.7.3",
+    "@livekit/components-react": "^0.4.1",
+    "@livekit/react-components": "^1.1.0",
     "@loadable/component": "^5.15.0",
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
@@ -69,6 +71,7 @@
     "i18next": "^22.0.6",
     "i18next-browser-languagedetector": "^7.0.0",
     "libphonenumber-js": "^1.10.13",
+    "livekit-client": "^1.6.8",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "postcss-loader": "^7.0.2",

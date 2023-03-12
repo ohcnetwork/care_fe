@@ -15,6 +15,10 @@ body {
     @apply font-sans text-gray-900 w-full h-full antialiased;
 }
 
+.react-tiny-popover-container {
+    color: white !important;
+}
+
 h1,
 h2,
 h3,

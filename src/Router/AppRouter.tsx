@@ -68,6 +68,7 @@ import { BLACKLISTED_PATHS, LocalStorageKeys } from "../Common/constants";
 import { UpdateFacilityMiddleware } from "../Components/Facility/UpdateFacilityMiddleware";
 import useConfig from "../Common/hooks/useConfig";
 import { handleSignOut } from "../Utils/utils";
+import DoctorLiveConnect from "../Components/Facility/DoctorLiveConnect";
 
 const routes = {
   "/hub": () => <HubDashboard />,
@@ -375,6 +376,10 @@ const routes = {
         tab={tab}
       />
     ),
+  "/facility/:facilityId/live_connect/:userId": ({
+    facilityId,
+    userId,
+  }: any) => <DoctorLiveConnect facilityId={facilityId} userId={userId} />,
   "/not-found": () => <Error404 />,
 };
 
