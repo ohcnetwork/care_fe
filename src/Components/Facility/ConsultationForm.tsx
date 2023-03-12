@@ -234,7 +234,11 @@ const consultationFormReducer = (state = initialState, action: Action) => {
   }
 };
 
-type ConsultationFormSection = "Consultation Details" | "Treatment Plan";
+type ConsultationFormSection =
+  | "Consultation Details"
+  | "Treatment Plan"
+  | "Health Details"
+  | "Medical History";
 
 export const ConsultationForm = (props: any) => {
   const { goBack } = useAppHistory();
@@ -266,6 +270,8 @@ export const ConsultationForm = (props: any) => {
   );
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
   const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
+  const [healthDetailsVisible, healthDetailsRef] = useVisibility(-300);
+  const [medicalHistoryVisible, medicalHistoryRef] = useVisibility(-300);
 
   const sections = {
     "Consultation Details": {
@@ -278,6 +284,16 @@ export const ConsultationForm = (props: any) => {
       visible: treatmentPlanVisible,
       ref: treatmentPlanRef,
     },
+    "Health Details": {
+      iconClass: "fa-solid fa-syringe",
+      visible: healthDetailsVisible,
+      ref: healthDetailsRef,
+    },
+    "Medical History": {
+      iconClass: "fa-solid fa-book-medical",
+      visible: medicalHistoryVisible,
+      ref: medicalHistoryRef,
+    },
   };
 
   useEffect(() => {
@@ -285,9 +301,16 @@ export const ConsultationForm = (props: any) => {
       let sectionNow = currentSection;
       if (consultationDetailsVisible) sectionNow = "Consultation Details";
       if (treatmentPlanVisible) sectionNow = "Treatment Plan";
+      if (healthDetailsVisible) sectionNow = "Health Details";
+      if (medicalHistoryVisible) sectionNow = "Medical History";
       return sectionNow;
     });
-  }, [consultationDetailsVisible, treatmentPlanVisible]);
+  }, [
+    consultationDetailsVisible,
+    treatmentPlanVisible,
+    healthDetailsVisible,
+    medicalHistoryVisible,
+  ]);
 
   useEffect(() => {
     async function fetchPatientName() {
