@@ -39,6 +39,7 @@ let make = (
   ~setValue: string => unit,
   ~getLabel: float => (string, string),
   ~interval: string,
+  ~disabled: bool=false,
   ~hasError=None,
   ~className="",
 ) => {
@@ -86,6 +87,7 @@ let make = (
             | None => React.null
             }}
             <input
+              disabled={disabled}
               name="measure"
               type_="number"
               step={step}
@@ -107,7 +109,7 @@ let make = (
         </div>
       </div>
       <div
-        className="range-slider min-w-full"
+        className={`range-slider min-w-full ${disabled ? "cursor-not-allowed" : ""}`}
         style={ReactDOM.Style.unsafeAddStyle(
           ReactDOM.Style.make(),
           {
@@ -123,6 +125,8 @@ let make = (
         )}>
         <input
           type_="range"
+          disabled={disabled}
+          className={disabled ? "cursor-not-allowed" : ""}
           step={step}
           max={end}
           min={start}
