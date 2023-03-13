@@ -506,12 +506,6 @@ export const ConsultationForm = (props: any) => {
               invalidForm = true;
               break;
             }
-            if (!i.repetitive && !i.time?.replace(/\s/g, "").length) {
-              errors[field] = "Time field can not be empty";
-              if (!error_div) error_div = field;
-              invalidForm = true;
-              break;
-            }
             if (i.repetitive && !i.frequency?.replace(/\s/g, "").length) {
               errors[field] = "Frequency field can not be empty";
               if (!error_div) error_div = field;
