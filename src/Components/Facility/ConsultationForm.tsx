@@ -522,13 +522,30 @@ export const ConsultationForm = (props: any) => {
           return;
         }
 
-        case "verified_by":
+        case "verified_by": {
           if (!state.form[field].replace(/\s/g, "").length) {
             errors[field] = "Please fill verified by";
             if (!error_div) error_div = field;
             invalidForm = true;
+            break;
           }
           return;
+        }
+
+        case "icd11_provisional_diagnoses_object": {
+          if (
+            state.form[field].length === 0 &&
+            state.form["icd11_diagnoses_object"].length === 0
+          ) {
+            for (const err_field of [field, "icd11_diagnoses_object"])
+              errors[err_field] =
+                "Please select either Provisional Diagnosis or Final Diagnosis";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+            break;
+          }
+          return;
+        }
 
         default:
           return;

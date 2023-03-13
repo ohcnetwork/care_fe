@@ -4,7 +4,6 @@ import {
   DialogContent,
   DialogTitle,
 } from "@material-ui/core";
-import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import React, { useEffect, useState, useReducer } from "react";
 import axios from "axios";
 import {
@@ -19,6 +18,7 @@ import { createUpload } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
   sample: SampleTestModel;
@@ -241,7 +241,7 @@ const UpdateStatusDialog = (props: Props) => {
                   onClick={handleUpload}
                   disabled={uploadDone}
                 >
-                  <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
+                  <CareIcon className="care-l-cloud-upload text-2xl font-bold" />
                   <span>Upload</span>
                 </Submit>
               </div>

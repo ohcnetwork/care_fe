@@ -2,7 +2,6 @@ import { useDispatch } from "react-redux";
 import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
-import PageTitle from "../Common/PageTitle";
 import {
   getAnyFacility,
   listAssets,
@@ -29,6 +28,7 @@ import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue
 import ExportMenu from "../Common/Export";
 import CountBlock from "../../CAREUI/display/Count";
 import AssetImportModal from "./AssetImportModal";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -279,42 +279,47 @@ const AssetsList = () => {
   }
 
   return (
-    <div className="px-6">
-      <div className="flex justify-between items-center">
-        <PageTitle title="Assets" breadcrumbs={false} hideBack />
-        {authorizedForImportExport && (
-          <div className="tooltip">
-            <ExportMenu
-              label={importAssetModalOpen ? "Importing..." : "Import/Export"}
-              exportItems={[
-                {
-                  label: "Import Assets",
-                  options: {
-                    icon: <CareIcon className="care-l-import" />,
-                    onClick: () => setImportAssetModalOpen(true),
+    <Page
+      title="Assets"
+      breadcrumbs={false}
+      hideBack
+      options={
+        <>
+          {authorizedForImportExport && (
+            <div className="tooltip">
+              <ExportMenu
+                label={importAssetModalOpen ? "Importing..." : "Import/Export"}
+                exportItems={[
+                  {
+                    label: "Import Assets",
+                    options: {
+                      icon: <CareIcon className="care-l-import" />,
+                      onClick: () => setImportAssetModalOpen(true),
+                    },
                   },
-                },
-                {
-                  label: "Export Assets",
-                  action: () =>
-                    authorizedForImportExport &&
-                    listAssets({
-                      ...qParams,
-                      json: true,
-                      limit: totalCount,
-                    }),
-                  type: "json",
-                  filePrefix: `assets_${facility?.name}`,
-                  options: {
-                    icon: <CareIcon className="care-l-export" />,
-                    disabled: totalCount === 0 || !authorizedForImportExport,
+                  {
+                    label: "Export Assets",
+                    action: () =>
+                      authorizedForImportExport &&
+                      listAssets({
+                        ...qParams,
+                        json: true,
+                        limit: totalCount,
+                      }),
+                    type: "json",
+                    filePrefix: `assets_${facility?.name}`,
+                    options: {
+                      icon: <CareIcon className="care-l-export" />,
+                      disabled: totalCount === 0 || !authorizedForImportExport,
+                    },
                   },
-                },
-              ]}
-            />
-          </div>
-        )}
-      </div>
+                ]}
+              />
+            </div>
+          )}
+        </>
+      }
+    >
       <div className="lg:flex mt-5 space-y-2 gap-3">
         <CountBlock
           text="Total Assets"
@@ -432,7 +437,7 @@ const AssetsList = () => {
           setSelectedFacility({ name: "" });
         }}
       />
-    </div>
+    </Page>
   );
 };
 

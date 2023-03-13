@@ -16,7 +16,6 @@ import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
 
 import { IconButton } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
 import LinkFacilityDialog from "../Users/LinkFacilityDialog";
 import UserDeleteDialog from "../Users/UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
@@ -24,6 +23,7 @@ import UserDetails from "../Common/UserDetails";
 import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
 import { classNames } from "../../Utils/utils";
 import CountBlock from "../../CAREUI/display/Count";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -247,7 +247,7 @@ export default function FacilityUsers(props: any) {
                     })
                   }
                 >
-                  <CloseIcon />
+                  <CareIcon className="care-l-multiply text-xl font-bold" />
                 </IconButton>
               </div>
             </div>
