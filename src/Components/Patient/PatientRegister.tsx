@@ -527,7 +527,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
         case "date_of_birth":
           if (!state.form[field]) {
-            errors[field] = "Please enter date in DD/MM/YYYY format";
+            errors[field] = "Please enter date in YYYY/MM/DD format";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -538,16 +538,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             !Number(state.form[field])
           ) {
             errors[field] = "Please select local body";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
-        case "ward":
-          if (
-            state.form.nationality === "India" &&
-            !Number(state.form[field])
-          ) {
-            errors[field] = "Please select ward";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
