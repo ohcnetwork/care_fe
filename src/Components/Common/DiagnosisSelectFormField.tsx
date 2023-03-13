@@ -35,7 +35,9 @@ export function DiagnosisSelectFormField(props: Props) {
         options={options(props.value)}
         optionLabel={(option) => option.label}
         optionValue={(option) => option}
-        onQuery={(query) => fetchOptions(listICD11Diagnosis({ query }, ""))}
+        onQuery={(query) =>
+          fetchOptions(listICD11Diagnosis({ query }, field.id || ""))
+        }
         isLoading={isLoading}
       />
     </FormField>
