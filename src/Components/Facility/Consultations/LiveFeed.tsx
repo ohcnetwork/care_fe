@@ -9,7 +9,6 @@ import {
   partialUpdateAssetBed,
   deleteAssetBed,
 } from "../../../Redux/actions";
-import RefreshIcon from "@material-ui/icons/Refresh";
 import { getCameraPTZ } from "../../../Common/constants";
 import {
   StreamStatus,
@@ -32,6 +31,7 @@ import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../models";
 import { TextInputField } from "../../Common/HelperInputFields";
 import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -637,7 +637,7 @@ const LiveFeed = (props: any) => {
                     fetchCameraPresets();
                   }}
                 >
-                  <RefreshIcon /> Refresh
+                  <CareIcon className="care-l-redo text-lg h-4" /> Refresh
                 </button>
               )}
             </div>

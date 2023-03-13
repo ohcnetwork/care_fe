@@ -50,8 +50,6 @@ import { DupPatientModel } from "../Facility/models";
 import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
-import { InfoOutlined } from "@material-ui/icons";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -63,6 +61,9 @@ import { debounce } from "lodash";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -191,6 +192,9 @@ const scrollTo = (id: string | boolean) => {
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
+const getDate = (value: any) =>
+  value && moment(value).isValid() && moment(value).toDate();
+
 export const PatientRegister = (props: PatientRegisterProps) => {
   const { goBack } = useAppHistory();
   const { gov_data_api_key } = useConfig();
@@ -264,6 +268,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     },
     [dispatchAction]
   );
+
+  const field = (name: string) => {
+    return {
+      id: name,
+      name,
+      onChange: handleChange,
+      value: state.form[name],
+      error: state.errors[name],
+    };
+  };
 
   const fetchWards = useCallback(
     async (id: string) => {
@@ -677,7 +691,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
         case "medical_history":
           if (!state.form[field].length) {
-            errors[field] = "Please fill the medical history";
+            errors[field] = (
+              <span className="text-red-500">
+                Please fill the medical history
+              </span>
+            );
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -692,14 +710,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   };
 
   const handlePincodeChange = async (e: any) => {
-    handleChange(e);
+    handleFormFieldChange(e);
 
-    if (!validatePincode(e.target.value)) return;
+    if (!validatePincode(e.value)) return;
 
-    const pincodeDetails = await getPincodeDetails(
-      e.target.value,
-      gov_data_api_key
-    );
+    const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
     if (!pincodeDetails) return;
 
     const matchedState = states.find((state) => {
@@ -721,7 +736,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ...state.form,
         state: matchedState.id,
         district: matchedDistrict.id,
-        pincode: e.target.value,
+        pincode: e.value,
       },
     });
 
@@ -924,6 +939,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
+  const handleDOBChange = (e: FieldChangeEvent<Date>) => {
+    if (moment(e.value).isValid()) {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          [e.name]: moment(e.value).format("YYYY-MM-DD"),
+        },
+      });
+    }
+  };
+
   const handleMedicalCheckboxChange = (e: any, id: number) => {
     const form = { ...state.form };
     const values = state.form.medical_history;
@@ -1043,8 +1070,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <div className="mt-4">
         <div className="bg-purple-100 text-purple-800 p-4 font-semibold text-xs my-8 rounded mx-4">
           <div className="text-lg font-bold flex items-center mb-1">
-            <InfoOutlined className="mr-2" /> Please enter the correct date of
-            birth for the patient
+            <CareIcon className=" care-l-info-circle text-2xl font-bold mr-1" />{" "}
+            Please enter the correct date of birth for the patient
           </div>
           <p className="text-sm text-black font-normal">
             Each patient in the system is uniquely identifiable by the number
@@ -1108,7 +1135,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   Import From External Results
                 </ButtonV2>
                 <form onSubmit={(e) => handleSubmit(e)}>
-                  <Card elevation={0} className="mb-8 rounded">
+                  <Card elevation={0} className="mb-8 rounded overflow-visible">
                     <CardContent>
                       <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
                         Personal Details
@@ -1144,57 +1171,37 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           <FieldLabel htmlFor="name" id="name-label" required>
                             Name
                           </FieldLabel>
-                          <TextInputField
+                          <TextFormField
                             id="name"
                             name="name"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
-                            autoComplete="no"
                             value={state.form.name}
-                            onChange={handleChange}
-                            errors={state.errors.name}
+                            onChange={handleFormFieldChange}
+                            error={state.errors.name}
                           />
                         </div>
                         <div data-testid="date-of-birth" id="date_of_birth-div">
-                          <FieldLabel
-                            htmlFor="date_of_birth"
-                            id="date_of_birth-label"
+                          <DateFormField
+                            name="date_of_birth"
+                            label="Date of Birth"
                             required
-                          >
-                            Date of birth
-                          </FieldLabel>
-                          <DateInputField
-                            fullWidth={true}
-                            id="date_of_birth"
-                            value={state.form.date_of_birth}
-                            onChange={(date) =>
-                              handleDateChange(date, "date_of_birth")
-                            }
-                            errors={state.errors.date_of_birth}
-                            inputVariant="outlined"
-                            margin="dense"
-                            openTo="year"
-                            disableFuture={true}
+                            value={getDate(state.form.date_of_birth)}
+                            onChange={handleDOBChange}
+                            error={state.errors.date_of_birth}
+                            position="LEFT"
+                            disableFuture
                           />
                         </div>
                         <div data-testid="Gender" id="gender-div">
-                          <FieldLabel
-                            htmlFor="gender"
-                            id="gender-label"
-                            required
-                          >
-                            Gender
-                          </FieldLabel>
-                          <SelectField
-                            labelId="gender"
+                          <SelectFormField
                             name="gender"
-                            variant="outlined"
-                            margin="dense"
+                            required
+                            label="Gender"
+                            optionLabel={(o: any) => o.text}
                             value={state.form.gender}
                             options={genderTypes}
-                            onChange={handleChange}
-                            errors={state.errors.gender}
+                            onChange={handleFormFieldChange}
+                            error={state.errors.gender}
+                            optionValue={(o: any) => o.id}
                           />
                         </div>
 
@@ -1291,15 +1298,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           >
                             Pincode
                           </FieldLabel>
-                          <TextInputField
+                          <TextFormField
                             id="pincode"
                             name="pincode"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
                             value={state.form.pincode}
                             onChange={handlePincodeChange}
-                            errors={state.errors.pincode}
+                            error={state.errors.pincode}
                           />
                           {showAutoFilledPincode && (
                             <div>
@@ -1347,81 +1351,70 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         {state.form.nationality === "India" ? (
                           <>
                             <div data-testid="state" id="state-div">
-                              <FieldLabel
-                                htmlFor="state"
-                                id="state-label"
-                                required
-                              >
-                                State
-                              </FieldLabel>
                               {isStateLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
-                                <SelectField
-                                  labelId="state"
+                                <SelectFormField
+                                  {...field("state")}
                                   name="state"
-                                  variant="outlined"
-                                  margin="dense"
+                                  label="State"
+                                  required
+                                  placeholder="Choose State"
                                   value={state.form.state}
                                   options={states}
-                                  optionValue="name"
-                                  onChange={(e) => [
-                                    handleChange(e),
-                                    fetchDistricts(e.target.value),
+                                  optionLabel={(o: any) => o.name}
+                                  optionValue={(o: any) => o.id}
+                                  onChange={(e: any) => [
+                                    handleFormFieldChange(e),
+                                    fetchDistricts(e.value),
                                   ]}
-                                  errors={state.errors.state}
+                                  error={state.errors.state}
                                 />
                               )}
                             </div>
 
                             <div data-testid="district" id="district-div">
-                              <FieldLabel id="district-label" required>
-                                District
-                              </FieldLabel>
                               {isDistrictLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
-                                <SelectField
-                                  labelId="district"
+                                <SelectFormField
+                                  {...field("district")}
                                   name="district"
-                                  variant="outlined"
-                                  margin="dense"
+                                  label="District"
+                                  required
+                                  placeholder="Choose District"
                                   value={state.form.district}
                                   options={districts}
-                                  optionValue="name"
-                                  onChange={(e) => [
-                                    handleChange(e),
-                                    fetchLocalBody(String(e.target.value)),
+                                  optionLabel={(o: any) => o.name}
+                                  optionValue={(o: any) => o.id}
+                                  onChange={(e: any) => [
+                                    handleFormFieldChange(e),
+                                    fetchLocalBody(String(e.value)),
                                   ]}
-                                  errors={state.errors.district}
+                                  error={state.errors.district}
                                 />
                               )}
                             </div>
 
                             <div data-testid="localbody" id="local_body-div">
-                              <FieldLabel
-                                htmlFor="local_body"
-                                id="local_body-label"
-                                required
-                              >
-                                Localbody
-                              </FieldLabel>
                               {isLocalbodyLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
-                                <SelectField
-                                  labelId="local_body"
+                                <SelectFormField
+                                  {...field("local_body")}
                                   name="local_body"
-                                  variant="outlined"
-                                  margin="dense"
+                                  label="Localbody"
+                                  required
+                                  placeholder="Choose localbody"
                                   value={state.form.local_body}
                                   options={localBody}
-                                  optionValue="name"
-                                  onChange={(e) => [
-                                    handleChange(e),
-                                    fetchWards(String(e.target.value)),
+                                  optionLabel={(o: any) => o.name}
+                                  optionValue={(o: any) => o.id}
+                                  onChange={(e: any) => [
+                                    handleFormFieldChange(e),
+                                    fetchWards(String(e.value)),
                                   ]}
-                                  errors={state.errors.local_body}
+                                  error={state.errors.local_body}
                                 />
                               )}
                             </div>
@@ -1429,21 +1422,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               data-testid="ward-respective-lsgi"
                               id="ward-div"
                             >
-                              <FieldLabel
-                                htmlFor="ward"
-                                id="ward-label"
-                                required
-                              >
-                                Ward/Division of respective LSGI
-                              </FieldLabel>
                               {isWardLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
-                                <SelectField
-                                  labelId="ward"
+                                <SelectFormField
+                                  label="Ward"
                                   name="ward"
-                                  variant="outlined"
-                                  margin="dense"
                                   options={ward
                                     .sort((a, b) => a.number - b.number)
                                     .map((e) => {
@@ -1453,9 +1437,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       };
                                     })}
                                   value={state.form.ward}
-                                  optionValue="name"
-                                  onChange={handleChange}
-                                  errors={state.errors.ward}
+                                  optionLabel={(o: any) => o.name}
+                                  optionValue={(o: any) => o.id}
+                                  onChange={handleFormFieldChange}
+                                  error={state.errors.ward}
                                 />
                               )}
                             </div>
@@ -1486,7 +1471,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <Card elevation={0} className="mb-8 rounded">
                     <AccordionV2
                       className="mt-2 lg:mt-0 md:mt-0 bg-white shadow-sm rounded-lg p-3 relative"
-                      expandIcon={<ExpandMoreIcon />}
+                      expandIcon={
+                        <CareIcon className="care-l-angle-down text-2xl font-bold" />
+                      }
                       title={
                         <h1 className="font-bold text-purple-500 text-left text-xl">
                           COVID Details
@@ -1953,7 +1940,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </div>
                     </AccordionV2>
                   </Card>
-                  <Card elevation={0} className="mb-8 rounded">
+                  <Card elevation={0} className="mb-8 rounded overflow-visible">
                     <CardContent>
                       <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
                         Medical History
@@ -2024,24 +2011,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         </div>
 
                         <div data-testid="blood-group" id="blood_group-div">
-                          <FieldLabel
-                            id="blood_group-label"
-                            htmlFor="blood_group"
-                            required
-                          >
-                            Blood Group
-                          </FieldLabel>
-                          <SelectField
-                            labelId="blood_group"
+                          <SelectFormField
+                            position="above"
+                            label="Blood Group"
                             name="blood_group"
-                            variant="outlined"
-                            margin="dense"
-                            showEmpty={true}
-                            optionArray={true}
+                            required
                             value={state.form.blood_group}
                             options={bloodGroups}
-                            onChange={handleChange}
-                            errors={state.errors.blood_group}
+                            optionLabel={(o: any) => o}
+                            onChange={handleFormFieldChange}
+                            error={state.errors.blood_group}
                           />
                         </div>
                       </div>
