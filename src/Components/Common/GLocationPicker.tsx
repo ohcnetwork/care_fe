@@ -197,7 +197,7 @@ const Map: React.FC<MapProps> = ({
           id="pac-input"
           ref={searchRef}
           type="text"
-          className="rounded m-[10px] p-2 w-[60%] border-0"
+          className="m-[10px] py-2.5 w-[60%] cui-input-base peer"
           placeholder="Start typing to search"
         />
         {handleOnClose && (
@@ -207,7 +207,7 @@ const Map: React.FC<MapProps> = ({
             ref={mapCloseRef}
             onClick={handleOnClose}
           >
-            <CareIcon className="care-l-times-circle text-lg" />
+            <CareIcon className="care-l-times-circle text-2xl text-gray-800" />
           </div>
         )}
         {handleOnSelectCurrentLocation && (
@@ -221,7 +221,7 @@ const Map: React.FC<MapProps> = ({
               )
             }
           >
-            <CareIcon className="care-l-user-location text-2xl fill-black" />
+            <CareIcon className="care-l-user-location text-2xl text-gray-800" />
           </div>
         )}
       </>
