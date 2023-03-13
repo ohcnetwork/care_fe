@@ -1,5 +1,4 @@
 import { CircularProgress } from "@material-ui/core";
-import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
@@ -26,6 +25,7 @@ import { formatDate } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -232,7 +232,7 @@ export default function SampleViewAdmin() {
                       Contact:{" "}
                     </span>
                     Confirmed carrier
-                    <WarningRoundedIcon className="text-red-500"></WarningRoundedIcon>
+                    <CareIcon className="care-l-exclamation-triangle text-red-500 text-xl font-bold" />
                   </div>
                 )}
                 {item.patient_has_suspected_contact &&
@@ -242,7 +242,7 @@ export default function SampleViewAdmin() {
                         Contact:{" "}
                       </span>
                       Suspected carrier
-                      <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
+                      <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-yellow-500" />
                     </div>
                   )}
                 {item.has_sari && (
@@ -251,14 +251,14 @@ export default function SampleViewAdmin() {
                       SARI:{" "}
                     </span>
                     Severe Acute Respiratory illness
-                    <WarningRoundedIcon className="text-orange-500"></WarningRoundedIcon>
+                    <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-orange-500" />
                   </div>
                 )}
                 {item.has_ari && !item.has_sari && (
                   <div>
                     <span className="font-semibold leading-relaxed">ARI: </span>
                     Acute Respiratory illness
-                    <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
+                    <CareIcon className=" care-l-exclamation-triangle text-xl font-bold text-yellow-500" />
                   </div>
                 )}
               </div>
