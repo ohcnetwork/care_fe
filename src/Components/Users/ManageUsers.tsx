@@ -33,6 +33,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import SkillsSlideOver from "./SkillsSlideOver";
 import { FacilitySelect } from "../Common/FacilitySelect";
+import CountBlock from "../../CAREUI/display/Count";
 import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -467,29 +468,12 @@ export default function ManageUsers() {
       </SlideOverCustom>
 
       <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-2">
-        <div className="bg-white overflow-hidden shadow col-span-1 rounded-lg">
-          <div className="p-5 w-fit sm:p-6">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Users
-              </dt>
-              {/* Show spinner until count is fetched from server */}
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
-                </dd>
-              ) : (
-                <dd
-                  id="count"
-                  className="mt-4 text-5xl lg:text-5xl md:text-4xl leading-9 font-semibold text-gray-900"
-                >
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
-          </div>
-        </div>
-
+        <CountBlock
+          text="Total Users"
+          count={totalCount}
+          loading={isLoading}
+          icon={"user-injured"}
+        />
         <div className="flex flex-col lg:flex-row justify-between col-span-2 lg:px-3 space-y-3 lg:space-y-0 lg:space-x-4 my-2">
           <div className="w-full">
             <SearchInput

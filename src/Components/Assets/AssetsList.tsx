@@ -26,9 +26,9 @@ import AuthorizeFor from "../../Utils/AuthorizeFor";
 import ButtonV2 from "../Common/components/ButtonV2";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import ExportMenu from "../Common/Export";
+import CountBlock from "../../CAREUI/display/Count";
 import AssetImportModal from "./AssetImportModal";
 import Page from "../Common/components/Page";
-import Spinner from "../Common/Spinner";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -320,29 +320,13 @@ const AssetsList = () => {
         </>
       }
     >
-      <div className="lg:flex mt-5 space-y-2">
-        <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
-          <div className="px-4 py-5 sm:p-6">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Assets
-              </dt>
-              {/* Show spinner until count is fetched from server */}
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <Spinner
-                    path={{ fill: "#0d9f6e" }}
-                    className="h-[48px] w-[48px]"
-                  />
-                </dd>
-              ) : (
-                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
-          </div>
-        </div>
+      <div className="lg:flex mt-5 space-y-2 gap-3">
+        <CountBlock
+          text="Total Assets"
+          count={totalCount}
+          loading={isLoading}
+          icon={"monitor-heart-rate"}
+        />
         <div className="flex-1">
           <SearchInput
             name="search"
