@@ -6,7 +6,7 @@ import { postResetPassword, checkResetToken } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import { LocalStorageKeys } from "../../Common/constants";
-import ButtonV2, { Cancel } from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import CollapseV2 from "../Common/components/CollapseV2";
 
@@ -143,9 +143,7 @@ export const ResetPassword = (props: any) => {
             </div>
             <div className="sm:flex sm:justify-between grid p-4">
               <Cancel onClick={() => navigate("/login")} />
-              <ButtonV2 type="submit" onClick={(e) => handleSubmit(e)}>
-                {t("reset")}
-              </ButtonV2>
+              <Submit onClick={(e) => handleSubmit(e)} label="reset" />
             </div>
           </form>
         </div>
