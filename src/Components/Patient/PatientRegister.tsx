@@ -50,8 +50,6 @@ import { DupPatientModel } from "../Facility/models";
 import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
-import { InfoOutlined } from "@material-ui/icons";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -1056,8 +1054,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <div className="mt-4">
         <div className="bg-purple-100 text-purple-800 p-4 font-semibold text-xs my-8 rounded mx-4">
           <div className="text-lg font-bold flex items-center mb-1">
-            <InfoOutlined className="mr-2" /> Please enter the correct date of
-            birth for the patient
+            <CareIcon className=" care-l-info-circle text-2xl font-bold mr-1" />{" "}
+            Please enter the correct date of birth for the patient
           </div>
           <p className="text-sm text-black font-normal">
             Each patient in the system is uniquely identifiable by the number
@@ -1457,7 +1455,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <Card elevation={0} className="mb-8 rounded">
                     <AccordionV2
                       className="mt-2 lg:mt-0 md:mt-0 bg-white shadow-sm rounded-lg p-3 relative"
-                      expandIcon={<ExpandMoreIcon />}
+                      expandIcon={
+                        <CareIcon className="care-l-angle-down text-2xl font-bold" />
+                      }
                       title={
                         <h1 className="font-bold text-purple-500 text-left text-xl">
                           COVID Details

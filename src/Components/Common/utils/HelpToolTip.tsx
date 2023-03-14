@@ -1,6 +1,6 @@
 import React from "react";
 import Tooltip from "@material-ui/core/Tooltip";
-import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export default function HelpToolTip(props: any) {
   const { text, link, place = "right" } = props;
@@ -23,7 +23,7 @@ export default function HelpToolTip(props: any) {
       arrow
       placement={place}
     >
-      <HelpOutlineIcon></HelpOutlineIcon>
+      <CareIcon className="care-l-question-circle text-2xl" />
     </Tooltip>
   );
 }

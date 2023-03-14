@@ -1,10 +1,10 @@
 import { Box } from "@material-ui/core";
-import { Close } from "@material-ui/icons";
 import moment from "moment";
 import React from "react";
 import { DateRangePicker as DateRange } from "react-dates";
 import "react-dates/initialize";
 import "react-dates/lib/css/_datepicker.css";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface IDateRangePickerProps {
   label?: string;
@@ -55,7 +55,7 @@ export const DateRangePicker: React.FC<IDateRangePickerProps> = ({
         regular={size === "regular"}
         block
         displayFormat="DD/MM/yyyy"
-        customCloseIcon={<Close />}
+        customCloseIcon={<CareIcon className="care-l-multiply" />}
       />
     </Box>
   );

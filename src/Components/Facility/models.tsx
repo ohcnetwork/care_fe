@@ -130,6 +130,9 @@ export interface ConsultationModel {
   last_daily_round?: any;
   current_bed?: CurrentBed;
   review_interval?: number;
+  cause_of_death?: string;
+  death_datetime?: string;
+  death_confirmed_doctor?: string;
 }
 export interface PatientStatsModel {
   id?: number;
