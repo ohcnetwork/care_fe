@@ -8,7 +8,9 @@ import {
   getPermittedFacility,
   listAssetBeds,
 } from "../../Redux/actions";
+import { classNames } from "../../Utils/utils";
 import { AssetData } from "../Assets/AssetTypes";
+import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import Loading from "../Common/Loading";
 import Pagination from "../Common/Pagination";
@@ -26,9 +28,18 @@ const PER_PAGE_LIMIT = 6;
 
 export default function FacilityCNS({ facilityId }: { facilityId: string }) {
   const dispatch = useDispatch<any>();
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [monitors, setMonitors] = useState<Monitor[]>();
   const [facility, setFacility] = useState<FacilityModel>();
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    const onFullscreenChange = () =>
+      setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () =>
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
 
   useEffect(() => {
     async function fetchFacility() {
@@ -102,13 +113,40 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
       noImplicitPadding
       breadcrumbs={false}
       options={
-        <Pagination
-          className=""
-          cPage={currentPage}
-          onChange={(page) => setCurrentPage(page)}
-          data={{ totalCount: monitors.length }}
-          defaultPerPage={PER_PAGE_LIMIT}
-        />
+        <div className="flex gap-2 items-center">
+          <ButtonV2
+            variant="secondary"
+            ghost
+            border
+            onClick={() => {
+              if (isFullscreen) {
+                document.exitFullscreen();
+              } else {
+                document.documentElement.requestFullscreen();
+              }
+            }}
+            className="tooltip"
+          >
+            <CareIcon
+              className={classNames(
+                isFullscreen
+                  ? "care-l-compress-arrows"
+                  : "care-l-expand-arrows-alt",
+                "text-lg"
+              )}
+            />
+            <span className="tooltip-text tooltip-bottom -translate-x-1/2">
+              {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+            </span>
+          </ButtonV2>
+          <Pagination
+            className="border-gray-400 border rounded-lg"
+            cPage={currentPage}
+            onChange={(page) => setCurrentPage(page)}
+            data={{ totalCount: monitors.length }}
+            defaultPerPage={PER_PAGE_LIMIT}
+          />
+        </div>
       }
     >
       {monitors.length === 0 && (
