@@ -137,6 +137,7 @@ const Beds = (props: BedsProps) => {
                 error=""
                 multiple={false}
                 facility={facilityId}
+                unoccupiedOnly
               />
             </div>
             <TextFormField

@@ -83,6 +83,11 @@ const routes: Routes = {
     method: "DELETE",
   },
 
+  clearHomeFacility: {
+    path: "/api/v1/users/{username}/clear_home_facility/",
+    method: "DELETE",
+  },
+
   deleteUserSkill: {
     path: "/api/v1/users/{username}/skill/{id}/",
     method: "DELETE",

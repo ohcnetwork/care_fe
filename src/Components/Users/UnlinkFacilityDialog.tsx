@@ -4,12 +4,14 @@ import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 interface ConfirmDialogProps {
   facilityName: string;
   userName: string;
+  isHomeFacility: boolean;
   handleCancel: () => void;
   handleOk: () => void;
 }
 
 const UnlinkFacilityDialog = (props: ConfirmDialogProps) => {
-  const { facilityName, userName, handleCancel, handleOk } = props;
+  const { facilityName, userName, isHomeFacility, handleCancel, handleOk } =
+    props;
 
   const [disable, setDisable] = useState(false);
 
@@ -19,9 +21,13 @@ const UnlinkFacilityDialog = (props: ConfirmDialogProps) => {
   };
   return (
     <ConfirmDialogV2
-      title={<span>Unlink User Facility</span>}
+      title={
+        <span>
+          {isHomeFacility ? "Clear Home Facility" : "Unlink User Facility"}
+        </span>
+      }
       show={true}
-      action="Unlink"
+      action={isHomeFacility ? "Clear" : "Unlink"}
       onClose={handleCancel}
       onConfirm={handleSubmit}
       disabled={disable}
@@ -29,10 +35,12 @@ const UnlinkFacilityDialog = (props: ConfirmDialogProps) => {
     >
       <div className="flex text-gray-800 leading-relaxed">
         <div>
-          Are you sure you want to unlink the facility{" "}
-          <strong>{facilityName}</strong> from user <strong>{userName}</strong>?
+          Are you sure you want to{" "}
+          {isHomeFacility ? "clear the home facility" : "unlink the facility"}{" "}
+          <strong>{facilityName}</strong> from user <strong>{userName}</strong>{" "}
+          ?
           <br />
-          The user will lose access to the facility.
+          {!isHomeFacility && "The user will lose access to the facility."}
         </div>
       </div>
     </ConfirmDialogV2>

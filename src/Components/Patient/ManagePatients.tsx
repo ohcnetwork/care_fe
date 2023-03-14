@@ -6,7 +6,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import { CircularProgress, Tooltip } from "@material-ui/core";
+import { Tooltip } from "@material-ui/core";
 
 import {
   getAllPatient,
@@ -36,8 +36,12 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
+import CountBlock from "../../CAREUI/display/Count";
+import { useTranslation } from "react-i18next";
+import * as Notification from "../../Utils/Notifications.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -73,6 +77,7 @@ const PatientCategoryDisplayText: Record<PatientCategory, string> = {
 };
 
 export const PatientManager = () => {
+  const { t } = useTranslation();
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>();
   const [isLoading, setIsLoading] = useState(false);
@@ -102,7 +107,8 @@ export const PatientManager = () => {
   const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
     useState("");
 
-  useEffect(() => {
+  const setPhoneNum = (phone_number: string) => {
+    setPhoneNumber(phone_number);
     if (phone_number.length === 15) {
       setPhoneNumberError("");
       updateQuery({ phone_number });
@@ -116,9 +122,10 @@ export const PatientManager = () => {
     }
 
     setPhoneNumberError("Enter a valid number");
-  }, [phone_number]);
+  };
 
-  useEffect(() => {
+  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
+    setEmergencyPhoneNumber(emergency_phone_number);
     if (emergency_phone_number.length === 15) {
       setEmergencyPhoneNumberError("");
       updateQuery({ emergency_phone_number });
@@ -132,7 +139,7 @@ export const PatientManager = () => {
     }
 
     setEmergencyPhoneNumberError("Enter a valid number");
-  }, [emergency_phone_number]);
+  };
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
@@ -160,7 +167,7 @@ export const PatientManager = () => {
     created_date_after: qParams.created_date_after || undefined,
     modified_date_before: qParams.modified_date_before || undefined,
     modified_date_after: qParams.modified_date_after || undefined,
-    ordering: qParams.ordering || undefined,
+    ordering: qParams.ordering || "-modified_date",
     category: qParams.category || undefined,
     gender: qParams.gender || undefined,
     age_min: qParams.age_min || undefined,
@@ -249,6 +256,12 @@ export const PatientManager = () => {
 
   useEffect(() => {
     setIsLoading(true);
+    if (!params.phone_number) {
+      setPhoneNumber("+91");
+    }
+    if (!params.emergency_phone_number) {
+      setEmergencyPhoneNumber("+91");
+    }
     dispatch(getAllPatient(params, "listPatients")).then((res: any) => {
       if (res && res.data) {
         setData(res.data.results);
@@ -356,7 +369,6 @@ export const PatientManager = () => {
     },
     [fetchFacilityBadgeName]
   );
-
   const LastAdmittedToTypeBadges = () => {
     const badge = (key: string, value: any, id: string) => {
       return (
@@ -365,13 +377,13 @@ export const PatientManager = () => {
             name={key}
             value={value}
             onRemove={() => {
-              const lcat = qParams.last_consultation_admitted_to_list
+              const lcat = qParams.last_consultation_admitted_bed_type_list
                 .split(",")
                 .filter((x: string) => x != id)
                 .join(",");
               updateQuery({
                 ...qParams,
-                last_consultation_admitted_to_list: lcat,
+                last_consultation_admitted_bed_type_list: lcat,
               });
             }}
           />
@@ -477,16 +489,15 @@ export const PatientManager = () => {
                   <div className="mb-2">
                     <div className="flex flex-wrap items-center">
                       <p className="text-sm font-medium text-gray-700 mr-2">
-                        {" "}
                         {patient.facility_object.name}
                       </p>
-                      <p className="text-sm">
-                        <span className="text-gray-600">last updated</span>{" "}
-                        <span className="font-medium text-gray-900">
-                          {" "}
-                          {moment(patient.modified_date).fromNow()}
-                        </span>
-                      </p>
+                      <RecordMeta
+                        className="text-sm text-gray-900"
+                        prefix={
+                          <span className="text-gray-600">{t("updated")}</span>
+                        }
+                        time={patient.modified_date}
+                      />
                     </div>
                   </div>
                 )}
@@ -503,21 +514,6 @@ export const PatientManager = () => {
                           text="Review Missed"
                         />
                       )}
-                    {patient.allow_transfer ? (
-                      <Chip
-                        size="small"
-                        color="yellow"
-                        startIcon="unlock"
-                        text="Transfer Allowed"
-                      />
-                    ) : (
-                      <Chip
-                        size="small"
-                        color="primary"
-                        startIcon="lock"
-                        text="Transfer Blocked"
-                      />
-                    )}
                     {patient.disease_status === "POSITIVE" && (
                       <Chip
                         size="small"
@@ -631,7 +627,7 @@ export const PatientManager = () => {
       name,
       value: qParams[name] || defaultValue,
       onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
-      className: "grow lg:max-w-sm w-full mb-2",
+      className: "grow w-full mb-2",
     };
   };
 
@@ -667,7 +663,7 @@ export const PatientManager = () => {
             }}
           >
             <CareIcon className="care-l-plus text-lg" />
-            <p>Add Patient Details</p>
+            <p className="lg:my-[2px]">Add Patient Details</p>
           </ButtonV2>
           <ButtonV2
             ghost
@@ -704,7 +700,7 @@ export const PatientManager = () => {
                 {" "}
               </line>
             </svg>
-            <span>Advanced Filters</span>
+            <span className="lg:my-[2px]">Advanced Filters</span>
           </ButtonV2>
           <DropdownMenu
             title="Sort by"
@@ -736,20 +732,40 @@ export const PatientManager = () => {
             })}
           </DropdownMenu>
           <div className="tooltip">
-            <ExportMenu
-              disabled={!isExportAllowed}
-              exportItems={[
-                {
-                  label:
-                    tabValue === 0 ? "Live patients" : "Discharged patients",
-                  action: exportPatients(true),
-                },
-                {
-                  label: "All patients",
-                  action: exportPatients(false),
-                },
-              ]}
-            />
+            {!isExportAllowed ? (
+              <ButtonV2
+                onClick={() => {
+                  advancedFilter.setShow(true);
+                  setTimeout(() => {
+                    const element = document.getElementById("bed-type-select");
+                    if (element) element.scrollIntoView({ behavior: "smooth" });
+                    Notification.Warn({
+                      msg: "Please select a seven day period.",
+                    });
+                  }, 500);
+                }}
+                className="lg:w-fit w-full mr-5"
+              >
+                <CareIcon className="care-l-import" />
+                <span className="lg:my-[3px]">Export</span>
+              </ButtonV2>
+            ) : (
+              <ExportMenu
+                disabled={!isExportAllowed}
+                exportItems={[
+                  {
+                    label:
+                      tabValue === 0 ? "Live patients" : "Discharged patients",
+                    action: exportPatients(true),
+                  },
+                  {
+                    label: "All patients",
+                    action: exportPatients(false),
+                  },
+                ]}
+              />
+            )}
+
             {!isExportAllowed && (
               <span className="tooltip-text tooltip-bottom -translate-x-1/2">
                 Select a seven day period
@@ -758,69 +774,74 @@ export const PatientManager = () => {
           </div>
         </div>
       </div>
-      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-12px]">
-        <div>
-          <div className="flex flex-col mt-2 h-full">
-            <div className="bg-white overflow-hidden shadow rounded-lg mb-2">
-              <div className="px-4 py-24 sm:p-[47px]">
+      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-4 my-4 px-2 md:px-0 mb-[-12px]">
+        <div className="flex flex-col xl:flex-row mt-2 h-full gap-3">
+          <div className="flex-1">
+            <CountBlock
+              text="Total Patients"
+              count={totalCount}
+              loading={isLoading}
+              icon={"user-injured"}
+              containerClass="pb-8"
+            />
+          </div>
+          {/*<div className="bg-white overflow-hidden shadow rounded-lg flex-1">
+              <div className="p-4">
                 <dl>
-                  <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                    Total Patients
+                  <div className="flex items-center justify-center rounded-lg text-xl w-10 h-10 bg-yellow-100">
+                    <CareIcon className="care-l-accessible-icon-alt text-yellow-600" />
+                  </div>
+                  <dt className="text-sm font-semibold text-gray-800 truncate mt-2">
+                    Discharged Patients
                   </dt>
-                  {/* Show spinner until count is fetched from server */}
                   {isLoading ? (
-                    <dd className="mt-4 text-5xl leading-9">
+                    <dd className=" text-5xl leading-9">
                       <CircularProgress className="text-primary-500" />
                     </dd>
                   ) : (
-                    <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                    <dd className="text-4xl leading-9 font-bold">
                       {totalCount}
                     </dd>
                   )}
                 </dl>
               </div>
-            </div>
-          </div>
+            </div>*/}
         </div>
-        <div className="w-full col-span-2">
+        <div className="w-full col-span-3">
           <div className="col-span-2 mt-2">
-            <div>
-              <div>
-                <div className="md:flex md:gap-4 mt-1">
-                  <SearchInput
-                    label="Search by Patient"
-                    placeholder="Enter patient name"
-                    {...queryField("name")}
-                  />
-                  <SearchInput
-                    label="Search by IP Number"
-                    placeholder="Enter IP Number"
-                    secondary
-                    {...queryField("ip_no")}
-                  />
-                </div>
-              </div>
+            <div className="md:flex md:gap-4 mt-1">
+              <SearchInput
+                label="Search by Patient"
+                placeholder="Enter patient name"
+                {...queryField("name")}
+              />
+              <SearchInput
+                label="Search by IP Number"
+                placeholder="Enter IP Number"
+                secondary
+                {...queryField("ip_no")}
+              />
             </div>
             <div className="md:flex md:gap-4">
               <PhoneNumberFormField
                 label="Search by Primary Number"
                 {...queryField("phone_number", "+91")}
                 value={phone_number}
-                onChange={(e) => setPhoneNumber(e.value)}
+                onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
               />
               <PhoneNumberFormField
                 label="Search by Emergency Number"
                 {...queryField("emergency_phone_number", "+91")}
                 value={emergency_phone_number}
-                onChange={(e) => setEmergencyPhoneNumber(e.value)}
+                onChange={(e) => setEmergencyPhoneNum(e.value)}
                 error={emergencyPhoneNumberError}
               />
             </div>
           </div>
         </div>
       </div>
-      <div className="flex flex-wrap w-full col-span-3 mt-6">
+      <div className="flex flex-wrap col-span-3 mt-6">
         <FilterBadges
           badges={({ badge, value, kasp, phoneNumber, dateRange, range }) => [
             phoneNumber("Primary number", "phone_number"),
@@ -868,9 +889,11 @@ export const PatientManager = () => {
               paramKey: "last_consultation_is_telemedicine",
             },
           ]}
+          children={
+            qParams.last_consultation_admitted_bed_type_list &&
+            LastAdmittedToTypeBadges()
+          }
         />
-        {qParams.last_consultation_admitted_bed_type_list &&
-          LastAdmittedToTypeBadges()}
       </div>
       <div>
         <SlideOver {...advancedFilter}>

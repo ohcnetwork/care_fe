@@ -29,7 +29,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 
-import { classNames, getExperienceSuffix, goBack } from "../../Utils/utils";
+import { classNames, getExperienceSuffix } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -39,6 +39,7 @@ import MonthFormField from "../Form/FormFields/Month";
 import Checkbox from "../Common/components/CheckBox";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -131,6 +132,7 @@ const getDate = (value: any) =>
   value && moment(value).isValid() && moment(value).toDate();
 
 export const UserAdd = (props: UserProps) => {
+  const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const { userId } = props;
 
@@ -341,11 +343,17 @@ export const UserAdd = (props: UserProps) => {
   };
 
   useAbortableEffect(() => {
-    phoneIsWhatsApp &&
+    if (phoneIsWhatsApp) {
       handleFieldChange({
         name: "alt_phone_number",
         value: state.form.phone_number,
       });
+    } else {
+      handleFieldChange({
+        name: "alt_phone_number",
+        value: "+91",
+      });
+    }
   }, [phoneIsWhatsApp, state.form.phone_number]);
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
@@ -479,7 +487,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "email":
           if (
-            state.form[field].length &&
+            state.form[field].length === 0 ||
             !validateEmailAddress(state.form[field])
           ) {
             errors[field] = "Please enter a valid email address";
@@ -488,7 +496,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "date_of_birth":
           if (!state.form[field]) {
-            errors[field] = "Please enter date in DD/MM/YYYY format";
+            errors[field] = "Please enter date in YYYY/MM/DD format";
             invalidForm = true;
           }
           return;
@@ -501,6 +509,12 @@ export const UserAdd = (props: UserProps) => {
         case "district":
           if (!Number(state.form[field]) || state.form[field] === "") {
             errors[field] = "Please select the district";
+            invalidForm = true;
+          }
+          return;
+        case "local_body":
+          if (!Number(state.form[field])) {
+            errors[field] = "Please select the local body";
             invalidForm = true;
           }
           return;
@@ -692,7 +706,6 @@ export const UserAdd = (props: UserProps) => {
 
               <SelectFormField
                 {...field("home_facility")}
-                required
                 label="Home facility"
                 options={selectedFacility || []}
                 optionLabel={(option) => option.name}

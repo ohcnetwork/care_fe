@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { postForgotPassword, postLogin } from "../../Redux/actions";
-import { Grid, CircularProgress } from "@material-ui/core";
 import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
 import * as Notification from "../../Utils/Notifications.js";
@@ -11,6 +10,8 @@ import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useConfig from "../../Common/hooks/useConfig";
 import { classNames } from "../../Utils/utils";
+import CircularProgress from "../Common/components/CircularProgress";
+import { LocalStorageKeys } from "../../Common/constants";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
@@ -105,8 +106,8 @@ export const Login = (props: { forgot?: boolean }) => {
           // captcha displayed set back to login button
           setLoading(false);
         } else if (res && statusCode === 200) {
-          localStorage.setItem("care_access_token", res.access);
-          localStorage.setItem("care_refresh_token", res.refresh);
+          localStorage.setItem(LocalStorageKeys.accessToken, res.access);
+          localStorage.setItem(LocalStorageKeys.refreshToken, res.refresh);
 
           if (
             window.location.pathname === "/" ||
@@ -179,35 +180,36 @@ export const Login = (props: { forgot?: boolean }) => {
 
   return (
     <div className="flex flex-col-reverse md:flex-row md:h-screen relative overflow-hidden">
-      <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-center md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
-        <div className="hidden md:flex gap-6 items-center">
-          {state_logo && (
-            <>
+      <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-between md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
+        <div></div>
+        <div className="mt-4 md:mt-12 rounded-lg py-4 flex flex-col items-start">
+          <div className="hidden md:flex gap-6 mb-4">
+            {state_logo && (
+              <>
+                <img
+                  src={state_logo}
+                  className={classNames(
+                    "rounded-lg p-3 h-24",
+                    state_logo_white && "invert brightness-0"
+                  )}
+                  alt="state logo"
+                />
+                <div className="w-0.5 bg-white/50 h-10 rounded-full" />
+              </>
+            )}
+            <a
+              href={coronasafe_url}
+              className="inline-block"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <img
-                src={state_logo}
-                className={classNames(
-                  "rounded-lg p-3 h-24",
-                  state_logo_white && "invert brightness-0"
-                )}
-                alt="state logo"
+                src={static_light_logo}
+                className="h-8"
+                alt="coronasafe logo"
               />
-              <div className="w-0.5 bg-white/50 h-10 rounded-full" />
-            </>
-          )}
-          <a
-            href={coronasafe_url}
-            className="inline-block"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <img
-              src={static_light_logo}
-              className="h-8"
-              alt="coronasafe logo"
-            />
-          </a>
-        </div>
-        <div className="mt-4 md:mt-12 rounded-lg py-4">
+            </a>
+          </div>
           <div className="max-w-lg">
             <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight tracking-wider">
               {t("care")}
@@ -217,7 +219,7 @@ export const Login = (props: { forgot?: boolean }) => {
             </div>
           </div>
         </div>
-        <div className="flex items-center lg:absolute lg:inset-x-0 lg:py-12 lg:px-16 pb-10 lg:bottom-0 lg:z-20">
+        <div className="flex items-center mb-6">
           <div className="text-xs md:text-sm max-w-lg">
             <div className="ml-1 flex items-center gap-4 mb-2">
               <a href={dpg_url} rel="noopener noreferrer" target="_blank">
@@ -305,15 +307,15 @@ export const Login = (props: { forgot?: boolean }) => {
                   size="large"
                   className="font-extrabold"
                 />
-                <Grid container justify="center">
+                <div className="justify-start">
                   {isCaptchaEnabled && (
-                    <Grid item className="px-8 py-4">
+                    <div className="px-8 py-4 grid">
                       <ReCaptcha
                         sitekey={recaptcha_site_key}
                         onChange={onCaptchaChange}
                       />
                       <span className="text-red-500">{errors.captcha}</span>
-                    </Grid>
+                    </div>
                   )}
 
                   <div className="w-full flex justify-between items-center py-4">
@@ -340,7 +342,7 @@ export const Login = (props: { forgot?: boolean }) => {
                       {t("login")}
                     </button>
                   )}
-                </Grid>
+                </div>
               </div>
             </form>
             <LanguageSelectorLogin />
@@ -389,7 +391,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   size="large"
                   className="font-extrabold"
                 />
-                <Grid container justify="center">
+                <div className="justify-start">
                   {loading ? (
                     <div className="flex items-center justify-center">
                       <CircularProgress className="text-primary-500" />
@@ -402,7 +404,7 @@ export const Login = (props: { forgot?: boolean }) => {
                       {t("send_reset_link")}
                     </button>
                   )}
-                </Grid>
+                </div>
               </div>
             </form>
             <LanguageSelectorLogin />

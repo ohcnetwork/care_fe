@@ -27,18 +27,15 @@ export const assetClassProps = {
     name: "ONVIF Camera",
     description: "",
     icon: "camera",
-    uicon: "camera",
   },
   HL7MONITOR: {
     name: "HL7 Vitals Monitor",
     description: "",
-    icon: "tv",
-    uicon: "tv-retro",
+    icon: "monitor-heart-rate",
   },
   NONE: {
     name: "N/A",
-    icon: "cart-plus",
-    uicon: "shopping-cart",
+    icon: "box",
   },
 };
 

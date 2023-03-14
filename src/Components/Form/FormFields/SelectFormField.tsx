@@ -34,6 +34,7 @@ export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
         optionDescription={props.optionDescription}
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
+        requiredError={field.error ? props.required : false}
       />
     </FormField>
   );

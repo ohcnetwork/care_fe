@@ -73,6 +73,11 @@ export const Error = ({ msg }) => {
   notify(msg, "error");
 };
 
+/** Warning message handler */
+export const Warn = ({ msg }) => {
+  notify(msg, "notice");
+};
+
 /** 400 Bad Request handler */
 export const BadRequest = ({ errs }) => {
   if (Array.isArray(errs)) {

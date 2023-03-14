@@ -10,10 +10,19 @@ type DialogProps = {
   children: React.ReactNode;
   className?: string;
   titleAction?: React.ReactNode;
+  fixedWidth?: boolean;
 };
 
 const DialogModal = (props: DialogProps) => {
-  const { title, description, show, onClose, children, className } = props;
+  const {
+    title,
+    description,
+    show,
+    onClose,
+    children,
+    className,
+    fixedWidth = true,
+  } = props;
   return (
     <div>
       <Transition appear show={show} as={React.Fragment}>
@@ -44,7 +53,8 @@ const DialogModal = (props: DialogProps) => {
                 <Dialog.Panel
                   className={classNames(
                     className,
-                    "w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                    fixedWidth && "max-w-md w-full",
+                    "transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
                   )}
                 >
                   <Dialog.Title

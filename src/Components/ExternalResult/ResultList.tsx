@@ -1,6 +1,5 @@
 import loadable from "@loadable/component";
 import { Button } from "@material-ui/core";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -15,6 +14,7 @@ import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ExportMenu from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import CountBlock from "../../CAREUI/display/Count";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -254,25 +254,13 @@ export default function ResultList() {
           ]}
         />
       </div>
-      <div className="mt-5 lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Results
-              </dt>
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
-                </dd>
-              ) : (
-                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
-          </div>
-        </div>
+      <div className="lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
+        <CountBlock
+          text="Total Results"
+          count={totalCount}
+          loading={isLoading}
+          icon={"clipboard-notes"}
+        />
         <div className="mt-2">
           <SearchInput
             label="Search by name"

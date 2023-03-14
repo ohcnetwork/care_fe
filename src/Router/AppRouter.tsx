@@ -64,10 +64,11 @@ import {
   DesktopSidebar,
   MobileSidebar,
 } from "../Components/Common/Sidebar/Sidebar";
-import { BLACKLISTED_PATHS } from "../Common/constants";
+import { BLACKLISTED_PATHS, LocalStorageKeys } from "../Common/constants";
 import { UpdateFacilityMiddleware } from "../Components/Facility/UpdateFacilityMiddleware";
 import useConfig from "../Common/hooks/useConfig";
 import ConsultationClaims from "../Components/Facility/ConsultationClaims";
+import { handleSignOut } from "../Utils/utils";
 
 const routes = {
   "/hub": () => <HubDashboard />,
@@ -391,6 +392,14 @@ export default function AppRouter() {
   const pages = useRoutes(routes) || <Error404 />;
   const path = usePath();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    addEventListener("storage", (event: any) => {
+      if (event.key === LocalStorageKeys.accessToken && !event.newValue) {
+        handleSignOut(true);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     setSidebarOpen(false);

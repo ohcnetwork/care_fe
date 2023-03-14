@@ -41,6 +41,7 @@ const AutocompleteFormField = <T, V>(
         optionDescription={props.optionDescription}
         onQuery={props.onQuery}
         allowRawInput={props.allowRawInput}
+        requiredError={field.error ? props.required : false}
       />
     </FormField>
   );
@@ -60,6 +61,7 @@ type AutocompleteProps<T, V = T> = {
   optionDescription?: OptionCallback<T, string>;
   className?: string;
   onQuery?: (query: string) => void;
+  requiredError?: boolean;
   isLoading?: boolean;
   allowRawInput?: boolean;
 } & (
@@ -126,7 +128,14 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
   const filteredOptions = options.filter((o) => o.search.includes(query));
 
   return (
-    <div className={props.className} id={props.id}>
+    <div
+      className={
+        props.requiredError
+          ? "border rounded border-red-500 " + props.className
+          : props.className
+      }
+      id={props.id}
+    >
       <Combobox
         disabled={props.disabled}
         value={value}

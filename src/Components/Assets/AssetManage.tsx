@@ -20,8 +20,11 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { UserRole, USER_TYPES } from "../../Common/constants";
 import moment from "moment";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
+import { useTranslation } from "react-i18next";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
+import * as Notification from "../../Utils/Notifications.js";
 
 interface AssetManageProps {
   assetId: string;
@@ -35,6 +38,7 @@ const checkAuthority = (type: string, cutoff: string) => {
 };
 
 const AssetManage = (props: AssetManageProps) => {
+  const { t } = useTranslation();
   const { assetId, facilityId } = props;
   const [asset, setAsset] = useState<AssetData>();
   const [isPrintMode, setIsPrintMode] = useState<boolean>(false);
@@ -55,16 +59,31 @@ const AssetManage = (props: AssetManageProps) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const [assetData, transactionsData]: any = await Promise.all([
-        dispatch(getAsset(assetId)),
-        dispatch(listAssetTransaction({ asset: assetId, limit, offset })),
-      ]);
+      const assetData = await dispatch(getAsset(assetId));
       if (!status.aborted) {
         setIsLoading(false);
         if (assetData && assetData.data) {
           setAsset(assetData.data);
-          setTransactions(transactionsData.data.results);
-          setTotalCount(transactionsData.data.count);
+
+          const transactionFilter = assetData.qr_code_id
+            ? { qr_code_id: assetData.qr_code_id }
+            : { external_id: assetId };
+
+          const transactionsData = await dispatch(
+            listAssetTransaction({
+              ...transactionFilter,
+              limit,
+              offset,
+            })
+          );
+          if (transactionsData && transactionsData.data) {
+            setTransactions(transactionsData.data.results);
+            setTotalCount(transactionsData.data.count);
+          } else {
+            Notification.Error({
+              msg: "Error fetching transactions",
+            });
+          }
         } else {
           navigate("/not-found");
         }
@@ -280,7 +299,7 @@ const AssetManage = (props: AssetManageProps) => {
                 },
                 {
                   label: "Asset Class",
-                  icon: assetClassProp.uicon,
+                  icon: assetClassProp.icon,
                   content: assetClassProp.name,
                 },
                 {
@@ -355,14 +374,13 @@ const AssetManage = (props: AssetManageProps) => {
               </div>
             </div>
 
-            <div className="text-xs text-gray-900 break-words">
-              <i className="text-gray-700">Created: </i>
-              {asset?.created_date &&
-                moment(asset?.created_date).format("DD/MM/YYYY LT")}
-              <br />
-              <i className="text-gray-700">Last Modified: </i>
-              {asset?.modified_date &&
-                moment(asset?.created_date).format("DD/MM/YYYY LT")}
+            <div className="flex flex-col text-sm text-gray-600 break-words justify-end">
+              {asset?.created_date && (
+                <RecordMeta prefix={t("created")} time={asset?.created_date} />
+              )}
+              {asset?.modified_date && (
+                <RecordMeta prefix={t("updated")} time={asset?.modified_date} />
+              )}
             </div>
           </div>
         </div>

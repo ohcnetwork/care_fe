@@ -35,10 +35,11 @@ import {
   getPatient,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { formatDate, goBack } from "../../Utils/utils";
+import { formatDate } from "../../Utils/utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -101,6 +102,7 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
 };
 
 export const DailyRounds = (props: any) => {
+  const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, consultationId, id } = props;
   const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
@@ -916,7 +918,13 @@ export const DailyRounds = (props: any) => {
                           <SelectField
                             name="rhythm"
                             variant="standard"
-                            value={state.form.rhythm}
+                            value={
+                              RHYTHM_CHOICES.find(
+                                (choice) =>
+                                  choice.text.toUpperCase() ===
+                                  state.form.rhythm
+                              )?.id
+                            }
                             options={RHYTHM_CHOICES}
                             onChange={handleChange}
                             errors={state.errors.rhythm}

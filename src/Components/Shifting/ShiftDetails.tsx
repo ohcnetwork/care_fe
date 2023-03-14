@@ -18,6 +18,7 @@ import CommentSection from "./CommentsSection";
 import { formatDate } from "../../Utils/utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { useTranslation } from "react-i18next";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -253,7 +254,7 @@ export default function ShiftDetails(props: { id: string }) {
             <>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  {t("State")}:{" "}
+                  {t("state")}:{" "}
                 </span>
                 {patientData?.state_object?.name}
               </div>
@@ -408,7 +409,7 @@ export default function ShiftDetails(props: { id: string }) {
         </div>
         <div>
           <span className="font-semibold leading-relaxed mr-1">
-            {t("State")}:{" "}
+            {t("state")}:{" "}
           </span>
           {facilityData?.state_object?.name || "--"}
         </div>
@@ -802,21 +803,22 @@ export default function ShiftDetails(props: { id: string }) {
                 <span className="ml-2">{data.comments || "--"}</span>
               </div>
 
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {" "}
-                  {t("record_created_at")}:{" "}
-                </span>
-                {formatDate(data.created_date) || "--"}
-              </div>
-
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {" "}
-                  {t("last_updated_on")}:{" "}
-                </span>
-                {formatDate(data.modified_date) || "--"}
-              </div>
+              <RecordMeta
+                prefix={
+                  <span className="font-semibold leading-relaxed">
+                    {t("created")}:
+                  </span>
+                }
+                time={data.created_date}
+              />
+              <RecordMeta
+                prefix={
+                  <span className="font-semibold leading-relaxed">
+                    {t("updated")}:
+                  </span>
+                }
+                time={data.modified_date}
+              />
             </div>
 
             <div className="flex justify-end mt-4">
