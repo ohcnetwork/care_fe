@@ -61,9 +61,9 @@ export default function CreateClaimCard({
         setItems(
           res.data.procedure.map((obj: ProcedureType) => {
             return {
-              id: obj.package_code,
-              name: obj.package_name || obj.procedure,
-              price: obj.procedure_price,
+              id: obj.procedure,
+              name: obj.procedure,
+              price: 0.0,
               category: "HBP",
             };
           })

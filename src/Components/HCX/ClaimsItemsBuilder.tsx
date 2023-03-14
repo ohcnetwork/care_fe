@@ -26,16 +26,6 @@ export default function ClaimsItemsBuilder(props: Props) {
     };
   };
 
-  // const handleUpdates = (index: number) => {
-  //   return (updates: HCXItemModel) => {
-  //     field.handleChange(
-  //       (props.value || [])?.map((obj, i) =>
-  //         i === index ? { ...obj, ...updates } : obj
-  //       )
-  //     );
-  //   };
-  // };
-
   const handleRemove = (index: number) => {
     return () => {
       field.handleChange((props.value || [])?.filter((obj, i) => i !== index));
