@@ -37,6 +37,8 @@ export default function CreateClaimCard({
   const [createdClaim, setCreatedClaim] = useState<HCXClaimModel>();
   const [use_, setUse_] = useState(use);
 
+  console.log(items);
+
   useEffect(() => {
     async function autoFill() {
       const latestApprovedPreAuthsRes = await dispatch(
@@ -64,7 +66,7 @@ export default function CreateClaimCard({
               id: obj.procedure,
               name: obj.procedure,
               price: 0.0,
-              category: "HBP",
+              category: "900000", // provider's packages
             };
           })
         );
