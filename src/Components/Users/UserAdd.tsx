@@ -487,7 +487,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "email":
           if (
-            state.form[field].length &&
+            state.form[field].length === 0 ||
             !validateEmailAddress(state.form[field])
           ) {
             errors[field] = "Please enter a valid email address";
@@ -496,7 +496,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "date_of_birth":
           if (!state.form[field]) {
-            errors[field] = "Please enter date in DD/MM/YYYY format";
+            errors[field] = "Please enter date in YYYY/MM/DD format";
             invalidForm = true;
           }
           return;
@@ -509,6 +509,12 @@ export const UserAdd = (props: UserProps) => {
         case "district":
           if (!Number(state.form[field]) || state.form[field] === "") {
             errors[field] = "Please select the district";
+            invalidForm = true;
+          }
+          return;
+        case "local_body":
+          if (!Number(state.form[field])) {
+            errors[field] = "Please select the local body";
             invalidForm = true;
           }
           return;

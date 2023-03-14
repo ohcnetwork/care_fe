@@ -89,13 +89,7 @@ const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
   ],
   []
 );
-const genderTypes = [
-  {
-    id: 0,
-    text: "Select",
-  },
-  ...GENDER_TYPES,
-];
+const genderTypes = GENDER_TYPES;
 const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
 const testType = [...TEST_TYPE];
@@ -473,7 +467,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       setIsStateLoading(true);
       const statesRes = await dispatchAction(getStates());
       if (!status.aborted && statesRes.data.results) {
-        setStates([...initialStates, ...statesRes.data.results]);
+        setStates(statesRes.data.results);
       }
       setIsStateLoading(false);
     },
@@ -531,7 +525,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
         case "date_of_birth":
           if (!state.form[field]) {
-            errors[field] = "Please enter date in DD/MM/YYYY format";
+            errors[field] = "Please enter date in YYYY/MM/DD format";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -542,16 +536,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             !Number(state.form[field])
           ) {
             errors[field] = "Please select local body";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
-        case "ward":
-          if (
-            state.form.nationality === "India" &&
-            !Number(state.form[field])
-          ) {
-            errors[field] = "Please select ward";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
