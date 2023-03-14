@@ -11,6 +11,7 @@ import {
 import { AssetData } from "../Assets/AssetTypes";
 import Page from "../Common/components/Page";
 import Loading from "../Common/Loading";
+import Pagination from "../Common/Pagination";
 import { PatientModel } from "../Patient/models";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
 import { FacilityModel } from "./models";
@@ -21,10 +22,13 @@ interface Monitor {
   socketUrl: string;
 }
 
+const PER_PAGE_LIMIT = 6;
+
 export default function FacilityCNS({ facilityId }: { facilityId: string }) {
   const dispatch = useDispatch<any>();
   const [monitors, setMonitors] = useState<Monitor[]>();
   const [facility, setFacility] = useState<FacilityModel>();
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     async function fetchFacility() {
@@ -84,39 +88,61 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
       return monitors.filter((monitor) => !!monitor) as Monitor[];
     }
 
-    fetchMonitors().then(setMonitors);
+    fetchMonitors().then((monitors) => {
+      setCurrentPage(1);
+      setMonitors(monitors);
+    });
   }, [dispatch, facility, facilityId]);
 
   if (!monitors) return <Loading />;
   return (
     <Page
-      title="Central Nursing Station"
-      crumbsReplacements={{ [facilityId]: { name: facility?.name } }}
+      title={`${facility?.name}: Central Nursing Station`}
       backUrl={`/facility/${facilityId}`}
       noImplicitPadding
+      breadcrumbs={false}
+      options={
+        <Pagination
+          className=""
+          cPage={currentPage}
+          onChange={(page) => setCurrentPage(page)}
+          data={{ totalCount: monitors.length }}
+          defaultPerPage={PER_PAGE_LIMIT}
+        />
+      }
     >
+      {monitors.length === 0 && (
+        <div className="flex w-full h-[80vh] items-center justify-center text-black text-center">
+          No patients are currently monitored
+        </div>
+      )}
       <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-2">
-        {monitors?.map(({ patient, socketUrl }) => (
-          <div className="group p-2 rounded-lg bg-black">
-            <div className="flex flex-wrap gap-4 text-white w-full tracking-wider p-2">
-              <Link
-                href={`/facility/${facilityId}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
-                className="font-bold uppercase text-white"
-              >
-                {patient.name}
-              </Link>
-              <span>
-                {patient.age}y |{" "}
-                {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
-              </span>
-              <span className="flex-1 flex items-center justify-end gap-2 text-end">
-                <CareIcon className="care-l-bed text-lg" />
-                {patient.last_consultation?.current_bed?.bed_object?.name}
-              </span>
+        {monitors
+          ?.slice(
+            (currentPage - 1) * PER_PAGE_LIMIT,
+            currentPage * PER_PAGE_LIMIT
+          )
+          .map(({ patient, socketUrl }) => (
+            <div key={patient.id} className="group p-2 rounded-lg bg-black">
+              <div className="flex flex-wrap gap-4 text-white w-full tracking-wider p-2">
+                <Link
+                  href={`/facility/${facilityId}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
+                  className="font-bold uppercase text-white"
+                >
+                  {patient.name}
+                </Link>
+                <span>
+                  {patient.age}y |{" "}
+                  {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
+                </span>
+                <span className="flex-1 flex items-center justify-end gap-2 text-end">
+                  <CareIcon className="care-l-bed text-lg" />
+                  {patient.last_consultation?.current_bed?.bed_object?.name}
+                </span>
+              </div>
+              <PatientVitalsCard socketUrl={socketUrl} shrinked />
             </div>
-            <PatientVitalsCard socketUrl={socketUrl} shrinked />
-          </div>
-        ))}
+          ))}
       </div>
     </Page>
   );
