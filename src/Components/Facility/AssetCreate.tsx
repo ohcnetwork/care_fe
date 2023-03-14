@@ -7,7 +7,6 @@ import {
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
@@ -17,7 +16,6 @@ import {
 } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
-import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
@@ -31,6 +29,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -399,7 +398,7 @@ const AssetCreate = (props: AssetProps) => {
         <section className="text-center">
           <h1 className="text-6xl flex items-center flex-col py-10">
             <div className="p-5 rounded-full flex items-center justify-center bg-gray-200 w-40 h-40">
-              <LocationOnOutlined fontSize="inherit" color="primary" />
+              <CareIcon className="care-l-map-marker text-green-600" />
             </div>
           </h1>
           <p className="text-gray-600">
@@ -692,7 +691,9 @@ const AssetCreate = (props: AssetProps) => {
                       margin="dense"
                       value={qrCodeId}
                       onChange={(e) => setQrCodeId(e.target.value)}
-                      actionIcon={<CropFreeIcon className="cursor-pointer" />}
+                      actionIcon={
+                        <CareIcon className="care-l-focus cursor-pointer text-lg" />
+                      }
                       action={() => setIsScannerActive(true)}
                       errors={state.errors.qr_code_id}
                     />
@@ -727,14 +728,17 @@ const AssetCreate = (props: AssetProps) => {
                     <TextFormField
                       name="WarrantyAMCExpiry"
                       value={warranty_amc_end_of_validity}
-                      onChange={(date) => {
-                        if (moment(date.value).isBefore()) {
+                      onChange={(event) => {
+                        const value = moment(event.value);
+                        const date = new Date(value.toDate().toDateString());
+                        const today = new Date(new Date().toDateString());
+                        if (date < today) {
                           Notification.Error({
                             msg: "Warranty / AMC Expiry date can't be in past",
                           });
                         } else {
                           setWarrantyAmcEndOfValidity(
-                            moment(date.value).format("YYYY-MM-DD")
+                            value.format("YYYY-MM-DD")
                           );
                         }
                       }}

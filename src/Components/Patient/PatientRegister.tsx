@@ -50,8 +50,6 @@ import { DupPatientModel } from "../Facility/models";
 import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
-import { InfoOutlined } from "@material-ui/icons";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -91,13 +89,7 @@ const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
   ],
   []
 );
-const genderTypes = [
-  {
-    id: 0,
-    text: "Select",
-  },
-  ...GENDER_TYPES,
-];
+const genderTypes = GENDER_TYPES;
 const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
 const testType = [...TEST_TYPE];
@@ -475,7 +467,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       setIsStateLoading(true);
       const statesRes = await dispatchAction(getStates());
       if (!status.aborted && statesRes.data.results) {
-        setStates([...initialStates, ...statesRes.data.results]);
+        setStates(statesRes.data.results);
       }
       setIsStateLoading(false);
     },
@@ -533,7 +525,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
         case "date_of_birth":
           if (!state.form[field]) {
-            errors[field] = "Please enter date in DD/MM/YYYY format";
+            errors[field] = "Please enter date in YYYY/MM/DD format";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -544,16 +536,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             !Number(state.form[field])
           ) {
             errors[field] = "Please select local body";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
-        case "ward":
-          if (
-            state.form.nationality === "India" &&
-            !Number(state.form[field])
-          ) {
-            errors[field] = "Please select ward";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -1072,8 +1054,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <div className="mt-4">
         <div className="bg-purple-100 text-purple-800 p-4 font-semibold text-xs my-8 rounded mx-4">
           <div className="text-lg font-bold flex items-center mb-1">
-            <InfoOutlined className="mr-2" /> Please enter the correct date of
-            birth for the patient
+            <CareIcon className=" care-l-info-circle text-2xl font-bold mr-1" />{" "}
+            Please enter the correct date of birth for the patient
           </div>
           <p className="text-sm text-black font-normal">
             Each patient in the system is uniquely identifiable by the number
@@ -1473,7 +1455,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <Card elevation={0} className="mb-8 rounded">
                     <AccordionV2
                       className="mt-2 lg:mt-0 md:mt-0 bg-white shadow-sm rounded-lg p-3 relative"
-                      expandIcon={<ExpandMoreIcon />}
+                      expandIcon={
+                        <CareIcon className="care-l-angle-down text-2xl font-bold" />
+                      }
                       title={
                         <h1 className="font-bold text-purple-500 text-left text-xl">
                           COVID Details
