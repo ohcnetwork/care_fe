@@ -487,7 +487,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "email":
           if (
-            state.form[field].length == 0 ||
+            state.form[field].length === 0 ||
             !validateEmailAddress(state.form[field])
           ) {
             errors[field] = "Please enter a valid email address";
