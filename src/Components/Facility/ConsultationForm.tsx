@@ -885,7 +885,7 @@ export const ConsultationForm = (props: any) => {
         />
 
         <div id="investigation">
-          <FieldLabel>Investigation Suggestions</FieldLabel>
+          <FieldLabel>Investigations Suggested</FieldLabel>
           <InvestigationBuilder
             investigations={InvestigationAdvice}
             setInvestigations={setInvestigationAdvice}

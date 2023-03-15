@@ -1,13 +1,17 @@
+import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { getConsultation } from "../../../Redux/actions";
 import { formatDate } from "../../../Utils/utils";
+import ButtonV2 from "../../Common/components/ButtonV2";
 import { InvestigationType } from "../../Common/prescription-builder/InvestigationBuilder";
 
 export default function ViewInvestigationSuggestions(props: {
   consultationId: any;
+  logUrl?: string;
 }) {
-  const { consultationId } = props;
+  const { consultationId, logUrl } = props;
   const dispatch = useDispatch<any>();
 
   const [investigations, setInvestigations] = useState<
@@ -25,13 +29,13 @@ export default function ViewInvestigationSuggestions(props: {
 
   return (
     <div className="mt-5">
-      <h3>Investigation Suggestions</h3>
+      <h3>Investigations Suggested</h3>
       <table className="hidden md:table w-full bg-white shadow rounded-xl mt-3">
         <thead className="text-left bg-gray-200">
           <tr>
             <th className="p-4">Investigations</th>
             <th className="p-4">To be conducted</th>
-            <th className="p-4">Notes</th>
+            {logUrl && <th className="p-4">Log Report</th>}
           </tr>
         </thead>
         <tbody>
@@ -44,20 +48,54 @@ export default function ViewInvestigationSuggestions(props: {
                       <li key={index}>{type}</li>
                     ))}
                   </ul>
+                  <div className="text-sm mt-4">
+                    <span className="font-bold">Notes:</span>{" "}
+                    {investigation.notes || "none"}
+                  </div>
                 </td>
                 <td className="p-4">
-                  {investigation.repetitive ? (
+                  {investigation.repetitive && (
                     <div>after every {investigation.frequency}</div>
-                  ) : (
-                    <div>
-                      at{" "}
-                      {investigation.time
-                        ? formatDate(investigation.time)
-                        : "--:--"}
-                    </div>
                   )}
+                  <div>
+                    {investigation.repetitive && "next "}at{" "}
+                    {investigation.time
+                      ? moment(investigation.time).format(
+                          "hh:mm A on DD/MM/YYYY"
+                        )
+                      : investigation.frequency
+                      ? moment()
+                          .add(
+                            moment.duration({
+                              hours:
+                                parseInt(
+                                  investigation.frequency.split(" ")[0]
+                                ) /
+                                (investigation.frequency
+                                  .split(" ")[1]
+                                  .includes("hr")
+                                  ? 1
+                                  : 60),
+                            })
+                          )
+                          .format("hh:mm A on DD/MM/YYYY")
+                      : "--:--"}
+                  </div>
                 </td>
-                <td className="p-4">{investigation.notes}</td>
+                {logUrl && (
+                  <td className="p-4">
+                    <ButtonV2
+                      href={
+                        logUrl +
+                        "?investigations=" +
+                        investigation.type?.join("_-_")
+                      }
+                    >
+                      <CareIcon className="care-l-plus" />
+                      <span>Log Report</span>
+                    </ButtonV2>
+                  </td>
+                )}
               </tr>
             ))
           ) : (

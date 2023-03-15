@@ -1411,7 +1411,14 @@ export const ConsultationDetails = (props: any) => {
               facilityId={facilityId}
               patientId={patientId}
             />
-            <ViewInvestigationSuggestions consultationId={consultationId} />
+            <ViewInvestigationSuggestions
+              consultationId={consultationId}
+              logUrl={
+                patientData.is_active
+                  ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation`
+                  : undefined
+              }
+            />
           </div>
         )}
       </div>

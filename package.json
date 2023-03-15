@@ -249,7 +249,7 @@
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
       "prettier --write --ignore-unknown",
-      "eslint --fix",
+      "eslint --fix --quiet",
       "git update-index --again"
     ]
   },
