@@ -78,7 +78,9 @@ export const DailyRoundsList = (props: any) => {
     );
   } else if (dailyRoundsListData.length === 0) {
     roundsList = (
-      <span className="text-gray-700">{t("no_consultation_updates")}</span>
+      <span className="text-gray-700 bg-white rounded-lg shadow p-2 flex justify-center">
+        {t("no_consultation_updates")}
+      </span>
     );
   } else if (dailyRoundsListData.length) {
     roundsList = dailyRoundsListData.map((itemData, idx) => {
