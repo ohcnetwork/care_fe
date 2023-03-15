@@ -37,6 +37,7 @@ const AutocompleteFormField = <T, V>(
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
         onQuery={props.onQuery}
+        requiredError={field.error ? props.required : false}
       />
     </FormField>
   );
@@ -55,6 +56,7 @@ type AutocompleteProps<T, V = T> = {
   optionValue?: OptionCallback<T, V>;
   className?: string;
   onQuery?: (query: string) => void;
+  requiredError?: boolean;
   isLoading?: boolean;
 } & (
   | {
@@ -94,7 +96,14 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
   const filteredOptions = options.filter((o) => o.search.includes(query));
 
   return (
-    <div className={props.className} id={props.id}>
+    <div
+      className={
+        props.requiredError
+          ? "border rounded border-red-500 " + props.className
+          : props.className
+      }
+      id={props.id}
+    >
       <Combobox
         disabled={props.disabled}
         value={value}
