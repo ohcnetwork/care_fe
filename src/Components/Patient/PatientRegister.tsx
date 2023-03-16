@@ -907,18 +907,32 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       if (res && res.data && res.status != 400) {
         await Promise.all(
           insuranceDetails.map(async (obj) => {
-            const policy: HCXPolicyModel = { ...obj, patient: res.data.id };
+            const policy = {
+              ...obj,
+              patient: res.data.id,
+              insurer_id: obj.insurer_id || undefined,
+              insurer_name: obj.insurer_name || undefined,
+            };
             const policyRes = await (policy.id
-              ? dispatchAction(HCXActions.policies.update(policy.id, policy))
-              : dispatchAction(HCXActions.policies.create(policy)));
+              ? dispatchAction(
+                  HCXActions.policies.update(
+                    policy.id,
+                    policy as HCXPolicyModel
+                  )
+                )
+              : dispatchAction(
+                  HCXActions.policies.create(policy as HCXPolicyModel)
+                ));
 
-            const eligibilityCheckRes = await dispatchAction(
-              HCXActions.checkEligibility(policyRes.data.id)
-            );
-            if (eligibilityCheckRes.status === 200) {
-              Notification.Success({ msg: "Checking Policy Eligibility..." });
-            } else {
-              Notification.Error({ msg: "Something Went Wrong..." });
+            if (JSON.parse(process.env.REACT_APP_ENABLE_HCX || "false")) {
+              const eligibilityCheckRes = await dispatchAction(
+                HCXActions.checkEligibility(policyRes.data.id)
+              );
+              if (eligibilityCheckRes.status === 200) {
+                Notification.Success({ msg: "Checking Policy Eligibility..." });
+              } else {
+                Notification.Error({ msg: "Something Went Wrong..." });
+              }
             }
           })
         );

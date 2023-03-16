@@ -127,19 +127,21 @@ const InsuranceDetailEditCard = ({
           value={policy.policy_id}
           onChange={handleUpdate}
         />
-        <InsurerAutocomplete
-          required
-          name="insurer_"
-          label="Insurer"
-          placeholder="Eg. GICOFINDIA"
-          value={seletedInsurer}
-          onChange={({ value }) =>
-            handleUpdates({
-              insurer_id: value.code,
-              insurer_name: value.name,
-            })
-          }
-        />
+        {JSON.parse(process.env.REACT_APP_ENABLE_HCX || "false") && (
+          <InsurerAutocomplete
+            required
+            name="insurer_"
+            label="Insurer"
+            placeholder="Eg. GICOFINDIA"
+            value={seletedInsurer}
+            onChange={({ value }) =>
+              handleUpdates({
+                insurer_id: value.code,
+                insurer_name: value.name,
+              })
+            }
+          />
+        )}
       </div>
     </div>
   );

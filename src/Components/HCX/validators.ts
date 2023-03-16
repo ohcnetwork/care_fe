@@ -5,8 +5,8 @@ const HCXPolicyValidator: FieldValidator<HCXPolicyModel> = (value) => {
   if (
     !value.policy_id.trim() ||
     !value.subscriber_id.trim() ||
-    !value.insurer_id.trim() ||
-    !value.insurer_name.trim()
+    (JSON.parse(process.env.REACT_APP_ENABLE_HCX || "false") &&
+      (!value.insurer_id.trim() || !value.insurer_name.trim()))
   )
     return "All fields are mandatory";
 };
