@@ -171,6 +171,20 @@ export const PATIENT_FILTER_ORDER: (OptionsType & { order: string })[] = [
   { id: 4, text: "-modified_date", desc: "Modified Date", order: "Descending" },
   { id: 5, text: "review_time", desc: "Review Time", order: "Ascending" },
   { id: 6, text: "-review_time", desc: "Review Time", order: "Descending" },
+  { id: 7, text: "name", desc: "Patient Name", order: "Ascending" },
+  { id: 8, text: "-name", desc: "Patient Name", order: "Descending" },
+  {
+    id: 7,
+    text: "facility__name,last_consultation__current_bed__bed__name",
+    desc: "Bed Number",
+    order: "Ascending",
+  },
+  {
+    id: 8,
+    text: "facility__name,-last_consultation__current_bed__bed__name",
+    desc: "Bed Number",
+    order: "Descending",
+  },
 ];
 
 export const getBedTypes = ({
