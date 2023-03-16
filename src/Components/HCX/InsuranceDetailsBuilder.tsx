@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { HCXActions } from "../../Redux/actions";
 import { classNames } from "../../Utils/utils";
 import InsurerAutocomplete from "./InsurerAutocomplete";
+import useConfig from "../../Common/hooks/useConfig";
 
 type Props = FormFieldBaseProps<HCXPolicyModel[]> & { gridView?: boolean };
 
@@ -88,6 +89,7 @@ const InsuranceDetailEditCard = ({
   handleRemove: () => void;
   gridView?: boolean;
 }) => {
+  const { enable_hcx } = useConfig();
   const seletedInsurer =
     policy.insurer_id || policy.insurer_name
       ? { code: policy.insurer_id, name: policy.insurer_name }
@@ -127,7 +129,7 @@ const InsuranceDetailEditCard = ({
           value={policy.policy_id}
           onChange={handleUpdate}
         />
-        {JSON.parse(process.env.REACT_APP_ENABLE_HCX || "false") && (
+        {enable_hcx && (
           <InsurerAutocomplete
             required
             name="insurer_"

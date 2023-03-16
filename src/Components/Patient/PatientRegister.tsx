@@ -197,7 +197,7 @@ const getDate = (value: any) =>
 
 export const PatientRegister = (props: PatientRegisterProps) => {
   const { goBack } = useAppHistory();
-  const { gov_data_api_key } = useConfig();
+  const { gov_data_api_key, enable_hcx } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
@@ -924,7 +924,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   HCXActions.policies.create(policy as HCXPolicyModel)
                 ));
 
-            if (JSON.parse(process.env.REACT_APP_ENABLE_HCX || "false")) {
+            if (enable_hcx) {
               const eligibilityCheckRes = await dispatchAction(
                 HCXActions.checkEligibility(policyRes.data.id)
               );

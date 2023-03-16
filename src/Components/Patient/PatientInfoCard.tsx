@@ -14,6 +14,7 @@ import moment from "moment";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import * as Notification from "../../Utils/Notifications.js";
+import useConfig from "../../Common/hooks/useConfig";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -21,6 +22,7 @@ export default function PatientInfoCard(props: {
   fetchPatientData?: (state: { aborted: boolean }) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const { enable_hcx } = useConfig();
 
   const patient = props.patient;
   const ip_no = props.ip_no;
@@ -277,7 +279,7 @@ export default function PatientInfoCard(props: {
             ],
           ]
             .concat(
-              JSON.parse(process.env.REACT_APP_ENABLE_HCX || "false")
+              enable_hcx
                 ? [
                     [
                       `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/claims`,

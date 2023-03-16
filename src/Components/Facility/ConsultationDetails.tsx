@@ -65,6 +65,7 @@ import { HCXClaimModel } from "../HCX/models";
 import ClaimDetailCard from "../HCX/ClaimDetailCard";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import Chip from "../../CAREUI/display/Chip";
+import useConfig from "../../Common/hooks/useConfig";
 
 interface PreDischargeFormInterface {
   discharge_reason: string;
@@ -119,6 +120,7 @@ export const ConsultationDetails = (props: any) => {
 
   const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
   const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
+  const { enable_hcx } = useConfig();
 
   const fetchLatestClaim = useCallback(async () => {
     const res = await dispatch(
@@ -596,7 +598,7 @@ export const ConsultationDetails = (props: any) => {
           )}
         </div>
 
-        {JSON.parse(process.env.REACT_APP_ENABLE_HCX || "false") && (
+        {enable_hcx && (
           // TODO: if policy and approved pre-auth exists
           <div className="my-5 shadow rounded p-5">
             <h2 className="mb-2">Claim Insurance</h2>
