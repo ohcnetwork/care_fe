@@ -49,6 +49,10 @@ export interface IConfig {
    * URL of the sample format for external result import.
    */
   sample_format_external_result_import: string;
+  /**
+   * Env to enable HCX features
+   */
+  enable_hcx: boolean;
 }
 
 const useConfig = () => {
