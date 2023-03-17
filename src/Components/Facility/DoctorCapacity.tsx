@@ -180,7 +180,8 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
         }
       }
       handleUpdate();
-      if (e.target.id === "submit") handleClose();
+
+      if (e.nativeEvent.submitter.id === "save-and-exit") handleClose();
     }
   };
 
@@ -252,16 +253,9 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
                 <div className="flex flex-row w-full sm:w-auto flex-wrap gap-2 mt-2">
                   {!isLastOptionType &&
                     headerText === "Add Doctor Capacity" && (
-                      <Submit
-                        onClick={(e) => handleSubmit(e)}
-                        label="Save Doctor Capacity"
-                      />
+                      <Submit id="save-and-exit" label="Save Doctor Capacity" />
                     )}
-                  <Submit
-                    id="doctor-save"
-                    onClick={(e) => handleSubmit(e)}
-                    label={buttonText}
-                  />
+                  <Submit id="doctor-save" label={buttonText} />
                 </div>
               </div>
             </div>

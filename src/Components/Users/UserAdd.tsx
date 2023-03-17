@@ -513,7 +513,7 @@ export const UserAdd = (props: UserProps) => {
           }
           return;
         case "local_body":
-          if (!Number(state.form[field])) {
+          if (showLocalbody && !Number(state.form[field])) {
             errors[field] = "Please select the local body";
             invalidForm = true;
           }
