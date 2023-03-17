@@ -183,7 +183,7 @@ export const Login = (props: { forgot?: boolean }) => {
       <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-between md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
         <div></div>
         <div className="mt-4 md:mt-12 rounded-lg py-4 flex flex-col items-start">
-          <div className="hidden md:flex gap-6 mb-4">
+          <div className="gap-6 mb-4 min-w-full max-w-lg">
             {state_logo && (
               <>
                 <img
@@ -199,7 +199,7 @@ export const Login = (props: { forgot?: boolean }) => {
             )}
             <a
               href={coronasafe_url}
-              className="inline-block"
+              className="flex flex-col items-center"
               target="_blank"
               rel="noopener noreferrer"
             >
