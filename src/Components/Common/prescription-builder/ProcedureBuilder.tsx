@@ -106,7 +106,6 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                       }}
                     />
                   </div>
-                  ;
                   {procedure.repetitive ? (
                     <div className="w-full">
                       <div className="mb-1">
