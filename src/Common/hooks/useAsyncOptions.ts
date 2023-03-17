@@ -50,9 +50,9 @@ export function useAsyncOptions<T extends Record<string, unknown>>(
     if (!selected?.length) return queryOptions;
 
     return [
-      ...queryOptions,
-      ...selected.filter(
-        (obj) => !queryOptions.some((s) => s[uniqueKey] === obj[uniqueKey])
+      ...selected,
+      ...queryOptions.filter(
+        (option) => !selected.find((s) => s[uniqueKey] === option[uniqueKey])
       ),
     ];
   };

@@ -2,7 +2,6 @@ import { useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { listFacilityBeds } from "../../Redux/actions";
 import { BedModel } from "../Facility/models";
-import { LOCATION_BED_TYPES } from "../../Common/constants";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 interface BedSelectProps {
   name: string;
@@ -31,7 +30,7 @@ export const BedSelect = (props: BedSelectProps) => {
     className = "",
     facility,
     location,
-    showNOptions = 10,
+    showNOptions = 20,
   } = props;
   const dispatchAction: any = useDispatch();
 
@@ -71,10 +70,8 @@ export const BedSelect = (props: BedSelectProps) => {
       optionLabel={(option: any) => {
         if (Object.keys(option).length === 0) return "";
         return (
-          `${option.name} ${
-            LOCATION_BED_TYPES.find((x) => x.id === option.bed_type)?.name ||
-            "Unknown"
-          } ` || option?.location_object?.name
+          `${option.name} ${option?.location_object?.name || "Unknown"}` ||
+          option?.location_object?.name
         );
       }}
       compareBy="id"

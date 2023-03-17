@@ -3,17 +3,15 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { LinePlot } from "./components/LinePlot";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import { StackedLinePlot } from "./components/StackedLinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDate } from "../../../Utils/utils";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export const NutritionPlots = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState({});
   const [showIO, setShowIO] = useState(true);
   const [showIntake, setShowIntake] = useState(false);
@@ -23,7 +21,6 @@ export const NutritionPlots = (props: any) => {
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
@@ -45,7 +42,6 @@ export const NutritionPlots = (props: any) => {
           setResults(res.data.results);
           setTotalCount(res.data.count);
         }
-        setIsLoading(false);
       }
     },
     [consultationId, dispatch, currentPage]
@@ -58,7 +54,7 @@ export const NutritionPlots = (props: any) => {
     [currentPage]
   );
 
-  const handlePagination = (page: number, limit: number) => {
+  const handlePagination = (page: number) => {
     setCurrentPage(page);
   };
 
@@ -87,7 +83,7 @@ export const NutritionPlots = (props: any) => {
     )
   );
 
-  let infusionsData: any = {};
+  const infusionsData: any = {};
   infusionList.map(
     (x: any) =>
       (infusionsData[x] = {
@@ -113,7 +109,7 @@ export const NutritionPlots = (props: any) => {
     )
   );
 
-  let IVFluidsData: any = {};
+  const IVFluidsData: any = {};
   IVFluidsList.map(
     (x: any) =>
       (IVFluidsData[x] = {
@@ -139,7 +135,7 @@ export const NutritionPlots = (props: any) => {
     )
   );
 
-  let FeedsData: any = {};
+  const FeedsData: any = {};
   FeedsList.map(
     (x: any) =>
       (FeedsData[x] = {
@@ -165,7 +161,7 @@ export const NutritionPlots = (props: any) => {
     )
   );
 
-  let OutputData: any = {};
+  const OutputData: any = {};
   OutputList.map(
     (x: any) =>
       (OutputData[x] = {
@@ -191,7 +187,11 @@ export const NutritionPlots = (props: any) => {
           onClick={() => setShowIO(!showIO)}
         >
           <div> IO Balance Plots</div>
-          {showIO ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          {showIO ? (
+            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+          ) : (
+            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+          )}
         </div>
 
         <div
@@ -229,7 +229,11 @@ export const NutritionPlots = (props: any) => {
           onClick={() => setShowIntake(!showIntake)}
         >
           <div>Intake</div>
-          {showIntake ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          {showIntake ? (
+            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+          ) : (
+            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+          )}
         </div>
         <div className={showIntake ? "grid md:grid-cols-2 gap-4" : "hidden"}>
           <div className="pt-4 px-4 bg-white border rounded-lg md:col-span-2">
@@ -332,7 +336,11 @@ export const NutritionPlots = (props: any) => {
           onClick={() => setShowOutput(!showOutput)}
         >
           <div> Output</div>
-          {showOutput ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          {showOutput ? (
+            <CareIcon className="care-l-angle-up text-2xl font-bold" />
+          ) : (
+            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+          )}
         </div>
         <div
           className={

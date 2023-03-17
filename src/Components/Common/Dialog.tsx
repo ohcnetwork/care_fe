@@ -9,10 +9,20 @@ type DialogProps = {
   onClose: () => void;
   children: React.ReactNode;
   className?: string;
+  titleAction?: React.ReactNode;
+  fixedWidth?: boolean;
 };
 
 const DialogModal = (props: DialogProps) => {
-  const { title, description, show, onClose, children, className } = props;
+  const {
+    title,
+    description,
+    show,
+    onClose,
+    children,
+    className,
+    fixedWidth = true,
+  } = props;
   return (
     <div>
       <Transition appear show={show} as={React.Fragment}>
@@ -26,7 +36,7 @@ const DialogModal = (props: DialogProps) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-all" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
@@ -43,18 +53,22 @@ const DialogModal = (props: DialogProps) => {
                 <Dialog.Panel
                   className={classNames(
                     className,
-                    "w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                    fixedWidth && "max-w-md w-full",
+                    "transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
                   )}
                 >
                   <Dialog.Title
                     as="h4"
-                    className="text-lg font-medium leading-6 text-gray-900"
+                    className="text-lg font-medium leading-6 text-gray-900 flex justify-between"
                   >
-                    <h4>{title}</h4>
+                    <div>
+                      <h4>{title}</h4>
+                      <p className="mt-2 text-sm text-gray-600">
+                        {description}
+                      </p>
+                    </div>
+                    {props.titleAction}
                   </Dialog.Title>
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-600">{description}</p>
-                  </div>
                   {children}
                 </Dialog.Panel>
               </Transition.Child>

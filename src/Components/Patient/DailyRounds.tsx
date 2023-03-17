@@ -918,7 +918,13 @@ export const DailyRounds = (props: any) => {
                           <SelectField
                             name="rhythm"
                             variant="standard"
-                            value={state.form.rhythm}
+                            value={
+                              RHYTHM_CHOICES.find(
+                                (choice) =>
+                                  choice.text.toUpperCase() ===
+                                  state.form.rhythm
+                              )?.id
+                            }
                             options={RHYTHM_CHOICES}
                             onChange={handleChange}
                             errors={state.errors.rhythm}
