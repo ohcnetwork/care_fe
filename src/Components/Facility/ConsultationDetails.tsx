@@ -28,7 +28,6 @@ import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { NutritionPlots } from "./Consultations/NutritionPlots";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
-import ViewInvestigations from "./Investigations/ViewInvestigations";
 import DoctorVideoSlideover from "./DoctorVideoSlideover";
 import { Feed } from "./Consultations/Feed";
 import { validateEmailAddress } from "../../Common/validation";
@@ -40,7 +39,6 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import { TextInputField } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
-import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
@@ -61,6 +59,7 @@ import PRNPrescriptionBuilder, {
 } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { formatDate } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
+import InvestigationTab from "./Investigations/investigationsTab";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -1406,18 +1405,11 @@ export const ConsultationDetails = (props: any) => {
                 </ButtonV2>
               </div>
             </div>
-            <ViewInvestigations
+            <InvestigationTab
               consultationId={consultationId}
               facilityId={facilityId}
               patientId={patientId}
-            />
-            <ViewInvestigationSuggestions
-              consultationId={consultationId}
-              logUrl={
-                patientData.is_active
-                  ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/investigation`
-                  : undefined
-              }
+              patientData={patientData}
             />
           </div>
         )}

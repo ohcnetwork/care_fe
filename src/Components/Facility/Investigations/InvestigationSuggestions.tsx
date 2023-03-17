@@ -10,6 +10,7 @@ import { InvestigationType } from "../../Common/prescription-builder/Investigati
 export default function ViewInvestigationSuggestions(props: {
   consultationId: any;
   logUrl?: string;
+  investigations?: InvestigationType[];
 }) {
   const { consultationId, logUrl } = props;
   const dispatch = useDispatch<any>();
@@ -40,64 +41,69 @@ export default function ViewInvestigationSuggestions(props: {
         </thead>
         <tbody>
           {Array.isArray(investigations) ? (
-            investigations.map((investigation, index) => (
-              <tr key={index} className="border-b border-b-gray-200">
-                <td className="p-4">
-                  <ul className="list-decimal ml-4">
-                    {investigation.type?.map((type, index) => (
-                      <li key={index}>{type}</li>
-                    ))}
-                  </ul>
-                  <div className="text-sm mt-4">
-                    <span className="font-bold">Notes:</span>{" "}
-                    {investigation.notes || "none"}
-                  </div>
-                </td>
-                <td className="p-4">
-                  {investigation.repetitive && (
-                    <div>after every {investigation.frequency}</div>
-                  )}
-                  <div>
-                    {investigation.repetitive && "next "}at{" "}
-                    {investigation.time
-                      ? moment(investigation.time).format(
-                          "hh:mm A on DD/MM/YYYY"
-                        )
-                      : investigation.frequency
-                      ? moment()
-                          .add(
-                            moment.duration({
-                              hours:
-                                parseInt(
-                                  investigation.frequency.split(" ")[0]
-                                ) /
-                                (investigation.frequency
-                                  .split(" ")[1]
-                                  .includes("hr")
-                                  ? 1
-                                  : 60),
-                            })
-                          )
-                          .format("hh:mm A on DD/MM/YYYY")
-                      : "--:--"}
-                  </div>
-                </td>
-                {logUrl && (
+            investigations.map((investigation, index) => {
+              /*const relativeFrequencyTime = investigation.frequency && moment()
+                .add(
+                  moment.duration({
+                    hours:
+                      parseInt(
+                        investigation.frequency.split(" ")[0]
+                      ) /
+                      (investigation.frequency
+                        .split(" ")[1]
+                        .includes("hr")
+                        ? 1
+                        : 60),
+                  })
+                )
+              */
+              return (
+                <tr key={index} className="border-b border-b-gray-200">
                   <td className="p-4">
-                    <ButtonV2
-                      href={
-                        logUrl +
-                        "?investigations=" +
-                        investigation.type?.join("_-_")
-                      }
-                    >
-                      <CareIcon className="care-l-plus" />
-                      <span>Log Report</span>
-                    </ButtonV2>
+                    <ul className="list-decimal ml-4">
+                      {investigation.type?.map((type, index) => (
+                        <li key={index}>{type}</li>
+                      ))}
+                    </ul>
+                    <div className="text-sm mt-4">
+                      <span className="font-bold">Notes:</span>{" "}
+                      {investigation.notes || "none"}
+                    </div>
                   </td>
-                )}
-              </tr>
-            ))
+                  <td className="p-4">
+                    {investigation.repetitive && (
+                      <div>after every {investigation.frequency}</div>
+                    )}
+                    <div>
+                      {investigation.repetitive || (
+                        <>
+                          at{" "}
+                          {investigation.time
+                            ? moment(investigation.time).format(
+                                "hh:mm A on DD/MM/YYYY"
+                              )
+                            : "--:--"}
+                        </>
+                      )}
+                    </div>
+                  </td>
+                  {logUrl && (
+                    <td className="p-4">
+                      <ButtonV2
+                        href={
+                          logUrl +
+                          "?investigations=" +
+                          investigation.type?.join("_-_")
+                        }
+                      >
+                        <CareIcon className="care-l-plus" />
+                        <span>Log Report</span>
+                      </ButtonV2>
+                    </td>
+                  )}
+                </tr>
+              );
+            })
           ) : (
             <tr>
               <td className="p-4" colSpan={3}>
