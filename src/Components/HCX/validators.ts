@@ -1,9 +1,10 @@
-import useConfig from "../../Common/hooks/useConfig";
 import { FieldValidator } from "../Form/FieldValidators";
 import { HCXPolicyModel } from "./models";
 
-const HCXPolicyValidator: FieldValidator<HCXPolicyModel> = (value) => {
-  const { enable_hcx } = useConfig();
+const HCXPolicyValidator: FieldValidator<HCXPolicyModel> = (
+  value,
+  enable_hcx
+) => {
   if (
     !value.policy_id.trim() ||
     !value.subscriber_id.trim() ||

@@ -532,7 +532,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     let error_div = "";
 
     const insuranceDetailsError = insuranceDetails
-      .map(HCXPolicyValidator)
+      .map((policy) => HCXPolicyValidator(policy, enable_hcx))
       .find((error) => !!error);
     setInsuranceDetailsError(insuranceDetailsError);
 
