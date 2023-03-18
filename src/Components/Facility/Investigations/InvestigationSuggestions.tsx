@@ -47,21 +47,7 @@ export default function ViewInvestigationSuggestions(props: {
         <tbody>
           {Array.isArray(investigations) ? (
             investigations.map((investigation, index) => {
-              /*const relativeFrequencyTime = investigation.frequency && moment()
-                .add(
-                  moment.duration({
-                    hours:
-                      parseInt(
-                        investigation.frequency.split(" ")[0]
-                      ) /
-                      (investigation.frequency
-                        .split(" ")[1]
-                        .includes("hr")
-                        ? 1
-                        : 60),
-                  })
-                )
-              */
+              let nextInvestigationAt: any = undefined;
 
               return (
                 <tr key={index} className="border-b border-b-gray-200">
@@ -88,14 +74,72 @@ export default function ViewInvestigationSuggestions(props: {
                             previousInvestigation.investigation_object.name ===
                             investigationType.name
                         );
-                        //const investigatedDate = investigated && moment(investigated.session_object.session_created_date);
+                        const investigatedDate =
+                          investigated &&
+                          moment(
+                            investigated.session_object.session_created_date
+                          );
+                        const nextInvestigationTime =
+                          investigatedDate && investigation.frequency
+                            ? investigatedDate.add(
+                                moment.duration({
+                                  hours:
+                                    parseInt(
+                                      investigation.frequency.split(" ")[0]
+                                    ) /
+                                    (investigation.frequency
+                                      .split(" ")[1]
+                                      .includes("hr")
+                                      ? 1
+                                      : 60),
+                                })
+                              )
+                            : investigation.time
+                            ? moment(investigation.time)
+                            : undefined;
+
+                        if (
+                          !nextInvestigationAt ||
+                          nextInvestigationAt.isBefore(nextInvestigationTime)
+                        ) {
+                          nextInvestigationAt = nextInvestigationTime;
+                        }
+
+                        const investigationMissed =
+                          nextInvestigationTime &&
+                          moment().isAfter(nextInvestigationTime);
+                        console.log(
+                          type,
+                          nextInvestigationAt,
+                          nextInvestigationTime
+                        );
 
                         return (
                           <li
                             key={index}
-                            className={investigated ? "line-through" : ""}
+                            className={`${
+                              investigated &&
+                              !investigationMissed &&
+                              "text-green-500"
+                            } ${investigationMissed && "text-red-500"}`}
                           >
                             {type}
+                            {investigationMissed && (
+                              <div className="tooltip text-red-400 inline-block cursor-pointer">
+                                <i className="fas fa-triangle-exclamation" />
+                                <div className="tooltip-text">
+                                  Investigation Missed!
+                                </div>
+                              </div>
+                            )}
+                            {investigated && !investigationMissed && (
+                              <div className="tooltip text-green-400 inline-block cursor-pointer">
+                                <i className="fas fa-check" />
+                                <div className="tooltip-text">
+                                  Investigation Recorded
+                                </div>
+                              </div>
+                            )}
                           </li>
                         );
                       })}
@@ -110,16 +154,12 @@ export default function ViewInvestigationSuggestions(props: {
                       <div>after every {investigation.frequency}</div>
                     )}
                     <div>
-                      {investigation.repetitive || (
-                        <>
-                          at{" "}
-                          {investigation.time
-                            ? moment(investigation.time).format(
-                                "hh:mm A on DD/MM/YYYY"
-                              )
-                            : "--:--"}
-                        </>
-                      )}
+                      <>
+                        {investigation.frequency && "next"} at{" "}
+                        {nextInvestigationAt
+                          ? nextInvestigationAt.format("hh:mm A on DD/MM/YYYY")
+                          : "-- / --"}
+                      </>
                     </div>
                   </td>
                   {logUrl && (
