@@ -33,6 +33,9 @@ const initialState = {
   errors: { ...initError },
 };
 
+const getDate = (value: any) =>
+  value && moment(value).isValid() && moment(value).toDate();
+
 const patientFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
     case "set_form": {
@@ -66,17 +69,15 @@ const TransferPatientDialog = (props: Props) => {
 
   const handleChange = (e: any) => {
     const form = { ...state.form };
-    // form[e.target.name] = e.target.value;
-    console.log(e.name);
-    console.log(e.value);
     form[e.name] = e.value;
     dispatch({ type: "set_form", form });
   };
 
-  const handleDateChange = (date: any, field: string) => {
-    if (moment(date).isValid()) {
+  const handleDateChange = (e: any) => {
+    if (moment(e.value).isValid()) {
       const form = { ...state.form };
-      form[field] = date.value.toISOString();
+      console.log(e.value);
+      form[e.name] = moment(e.value).format("YYYY-MM-DD");
       dispatch({ type: "set_form", form });
     }
   };
@@ -150,11 +151,14 @@ const TransferPatientDialog = (props: Props) => {
           </div>
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
             <div>
-              <FieldLabel className="text-sm">Patient</FieldLabel>
+              <FieldLabel required className="text-sm">
+                Patient
+              </FieldLabel>
               <SelectFormField
                 id="patient"
                 name="patient"
                 required
+                placeholder="Select patient"
                 options={patientOptions}
                 optionLabel={(patient) => patient.text}
                 optionValue={(patient) => patient.text}
@@ -168,9 +172,9 @@ const TransferPatientDialog = (props: Props) => {
                 required
                 name="date_of_birth"
                 label="Date of birth"
-                value={state.form.date_of_birth}
+                value={getDate(state.form.date_of_birth)}
                 disableFuture
-                onChange={(date) => handleDateChange(date, "date_of_birth")}
+                onChange={handleDateChange}
                 position="LEFT"
                 placeholder="Entry Date"
                 error={state.errors.date_of_birth}
@@ -179,7 +183,7 @@ const TransferPatientDialog = (props: Props) => {
           </div>
         </div>
       </div>
-      <div className="justify-between flex flex-col md:flex-row gap-2">
+      <div className="justify-between flex flex-col md:flex-row gap-2 pt-4">
         <Cancel onClick={handleCancel} disabled={isLoading} />
         <Submit
           disabled={isLoading}
