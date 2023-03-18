@@ -70,6 +70,7 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import DialogModal from "../Common/Dialog";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -1026,12 +1027,19 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         />
       )}
       {statusDialog.transfer && (
-        <TransferPatientDialog
-          patientList={statusDialog.patientList}
-          handleOk={() => handleDialogClose("close")}
-          handleCancel={() => handleDialogClose("back")}
-          facilityId={facilityId}
-        />
+        <DialogModal
+          show={statusDialog.transfer}
+          onClose={() => handleDialogClose("back")}
+          title="Patient Transfer Form"
+          className="max-w-md md:min-w-[600px]"
+        >
+          <TransferPatientDialog
+            patientList={statusDialog.patientList}
+            handleOk={() => handleDialogClose("close")}
+            handleCancel={() => handleDialogClose("back")}
+            facilityId={facilityId}
+          />
+        </DialogModal>
       )}
       <PageTitle
         title={headerText}
