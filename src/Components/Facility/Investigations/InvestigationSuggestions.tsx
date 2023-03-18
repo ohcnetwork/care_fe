@@ -6,13 +6,18 @@ import { getConsultation } from "../../../Redux/actions";
 import { formatDate } from "../../../Utils/utils";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import { InvestigationType } from "../../Common/prescription-builder/InvestigationBuilder";
+import { InvestigationResponse } from "./Reports/types";
 
 export default function ViewInvestigationSuggestions(props: {
   consultationId: any;
   logUrl?: string;
-  investigations?: InvestigationType[];
+  investigations?: InvestigationResponse;
 }) {
-  const { consultationId, logUrl } = props;
+  const {
+    consultationId,
+    logUrl,
+    investigations: previousInvestigations,
+  } = props;
   const dispatch = useDispatch<any>();
 
   const [investigations, setInvestigations] = useState<
@@ -57,13 +62,43 @@ export default function ViewInvestigationSuggestions(props: {
                   })
                 )
               */
+
               return (
                 <tr key={index} className="border-b border-b-gray-200">
                   <td className="p-4">
                     <ul className="list-decimal ml-4">
-                      {investigation.type?.map((type, index) => (
-                        <li key={index}>{type}</li>
-                      ))}
+                      {investigation.type?.map((type, index) => {
+                        const investigationType = type.includes(" (GROUP)")
+                          ? {
+                              isGroup: true,
+                              name: type.replace(" (GROUP)", ""),
+                            }
+                          : {
+                              isGroup: false,
+                              name: type.split(" -- ")[0],
+                              groups: type
+                                .split(" -- ")[1]
+                                .split(",")
+                                .map(
+                                  (group) => group.split("( ")[1].split(" )")[0]
+                                ),
+                            };
+                        const investigated = previousInvestigations?.find(
+                          (previousInvestigation) =>
+                            previousInvestigation.investigation_object.name ===
+                            investigationType.name
+                        );
+                        //const investigatedDate = investigated && moment(investigated.session_object.session_created_date);
+
+                        return (
+                          <li
+                            key={index}
+                            className={investigated ? "line-through" : ""}
+                          >
+                            {type}
+                          </li>
+                        );
+                      })}
                     </ul>
                     <div className="text-sm mt-4">
                       <span className="font-bold">Notes:</span>{" "}
