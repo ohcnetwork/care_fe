@@ -423,6 +423,13 @@ export const getPatientNotes = (
 export const addPatientNote = (patientId: string, params: object) => {
   return fireRequest("addPatientNote", [], params, { patientId });
 };
+export const updatePatientNote = (
+  patientId: string,
+  noteId: string,
+  params: object
+) => {
+  return fireRequest("updatePatientNote", [], params, { patientId, noteId });
+};
 
 export const getStates = () => {
   return fireRequest("statesList", []);

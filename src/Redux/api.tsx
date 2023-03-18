@@ -450,6 +450,10 @@ const routes: Routes = {
     path: "/api/v1/patient/{patientId}/notes/",
     method: "POST",
   },
+  updatePatientNote: {
+    path: "/api/v1/patient/{patientId}/notes/{noteId}/",
+    method: "PUT",
+  },
   sampleTestList: {
     path: "/api/v1/patient/{patientId}/test_sample/",
   },

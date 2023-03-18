@@ -5,6 +5,7 @@ import {
   getPatientNotes,
   addPatientNote,
   getPatient,
+  updatePatientNote,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import PageTitle from "../Common/PageTitle";
@@ -14,6 +15,9 @@ import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import Loading from "../Common/Loading";
 import { RoleButton } from "../Common/RoleButton";
 import { formatDate } from "../../Utils/utils";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../Common/components/ButtonV2";
+import moment from "moment";
 
 interface PatientNotesProps {
   patientId: any;
@@ -33,6 +37,11 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [patientActive, setPatientActive] = useState(true);
+  const [editMode, setEditMode] = useState({
+    edit: false,
+    id: "",
+    text: "",
+  });
 
   const fetchData = useCallback(
     async (page = 1, status: statusType = { aborted: false }) => {
@@ -83,21 +92,42 @@ const PatientNotes = (props: PatientNotesProps) => {
     fetchData(page);
   }
 
+  const validate = (note: string) => {
+    if (!/\S+/.test(note)) {
+      Notification.Error({
+        msg: "Note Should Contain At Least 1 Character",
+      });
+      return false;
+    }
+    return true;
+  };
+
   const onAddNote = () => {
     const payload = {
       note: noteField,
     };
-    if (!/\S+/.test(noteField)) {
-      Notification.Error({
-        msg: "Note Should Contain At Least 1 Character",
-      });
-      return;
-    }
+    if (!validate(noteField)) return;
     dispatch(addPatientNote(props.patientId, payload)).then(() => {
       Notification.Success({ msg: "Note added successfully" });
       setNoteField("");
       fetchData();
     });
+  };
+
+  const updateNote = (id: string, note: string) => {
+    const payload = {
+      note,
+    };
+    if (!validate(note)) return false;
+    dispatch(updatePatientNote(props.patientId, id, payload)).then(
+      (res: any) => {
+        if (res && res.status === 200) {
+          Notification.Success({ msg: "Note updated successfully" });
+          fetchData();
+        }
+      }
+    );
+    return true;
   };
 
   if (isLoading) {
@@ -122,10 +152,10 @@ const PatientNotes = (props: PatientNotesProps) => {
         className="mx-10 my-4 border border-gray-500 rounded-lg p-4 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
         onChange={(e) => setNoteField(e.target.value)}
       />
-      <div className="flex w-full justify-end pr-10">
+      <div className="flex w-full justify-end px-10">
         <RoleButton
           handleClickCB={onAddNote}
-          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
+          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm w-full md:w-fit"
           disableFor="readOnly"
           disabled={!patientActive}
           buttonType="materialUI"
@@ -142,10 +172,29 @@ const PatientNotes = (props: PatientNotesProps) => {
                 key={note.id}
                 className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
               >
-                <span className="whitespace-pre">{note.note}</span>
-                <div className="mt-3">
-                  <span className="text-xs text-gray-500">
-                    {formatDate(note.created_date) || "-"}
+                {editMode.edit && editMode.id === note.id ? (
+                  <div className="flex flex-col">
+                    <textarea
+                      rows={2}
+                      placeholder="Type your Note"
+                      className="border border-gray-500 rounded-lg p-4 focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                      onChange={(e) =>
+                        setEditMode({ ...editMode, text: e.target.value })
+                      }
+                      defaultValue={note.note}
+                    />
+                  </div>
+                ) : (
+                  <span className="md:whitespace-pre">{note.note}</span>
+                )}
+                <div className="my-3">
+                  <span className="text-xs text-gray-500 flex flex-col">
+                    {note.modified_date && (
+                      <div>Edited: {formatDate(note.modified_date)} </div>
+                    )}
+                    {note.created_date && (
+                      <div>Sent: {formatDate(note.created_date) || "-"}</div>
+                    )}
                   </span>
                 </div>
 
@@ -171,6 +220,48 @@ const PatientNotes = (props: PatientNotesProps) => {
                       {note.facility?.name || "Unknown"}
                     </span>
                   </div>
+                  {editMode.edit && editMode.id === note.id ? (
+                    <div className="flex flex-col ml-auto gap-2 md:flex-row">
+                      <ButtonV2
+                        onClick={() => {
+                          updateNote(note.id, editMode.text) &&
+                            setEditMode({ edit: false, id: "", text: "" });
+                        }}
+                        disabled={!patientActive}
+                      >
+                        Update
+                      </ButtonV2>
+                      <ButtonV2
+                        onClick={() =>
+                          setEditMode({ edit: false, id: "", text: "" })
+                        }
+                        variant="secondary"
+                        disabled={!patientActive}
+                      >
+                        Cancel
+                      </ButtonV2>
+                    </div>
+                  ) : (
+                    <>
+                      {patientActive &&
+                        moment().diff(moment(note.created_date), "seconds") <=
+                          note.edit_window && (
+                          <ButtonV2
+                            className="flex gap-2 ml-auto py-2 px-3 w-full md:w-fit"
+                            onClick={() =>
+                              setEditMode({
+                                edit: true,
+                                id: note.id,
+                                text: note.note,
+                              })
+                            }
+                          >
+                            <CareIcon className="care-l-pen h-4 mr-1" />
+                            Edit
+                          </ButtonV2>
+                        )}
+                    </>
+                  )}
                 </div>
               </div>
             ))
