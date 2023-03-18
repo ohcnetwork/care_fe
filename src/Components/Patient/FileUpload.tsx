@@ -84,13 +84,14 @@ export const LinearProgressWithLabel = (props: any) => {
 
 interface FileUploadProps {
   type: string;
-  patientId: any;
-  facilityId: any;
-  consultationId: any;
+  patientId?: any;
+  facilityId?: any;
+  consultationId?: any;
   hideBack: boolean;
-  audio: boolean;
+  audio?: boolean;
   unspecified: boolean;
   sampleId?: number;
+  claimId?: string;
 }
 
 interface URLS {
@@ -131,6 +132,7 @@ export const FileUpload = (props: FileUploadProps) => {
     audio,
     unspecified,
     sampleId,
+    claimId,
   } = props;
   const id = patientId;
   const dispatch: any = useDispatch();
@@ -246,11 +248,13 @@ export const FileUpload = (props: FileUploadProps) => {
     PATIENT: "Upload Patient Files",
     CONSULTATION: "Upload Consultation Files",
     SAMPLE_MANAGEMENT: "Upload Sample Report",
+    CLAIM: "Upload Supporting Info",
   };
   const VIEW_HEADING: { [index: string]: string } = {
     PATIENT: "View Patient Files",
     CONSULTATION: "View Consultation Files",
     SAMPLE_MANAGEMENT: "View Sample Report",
+    CLAIM: "Supporting Info",
   };
 
   const handleClose = () => {
@@ -266,15 +270,14 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const getAssociatedId = () => {
     switch (type) {
-      case "PATIENT": {
+      case "PATIENT":
         return patientId;
-      }
-      case "CONSULTATION": {
+      case "CONSULTATION":
         return consultationId;
-      }
-      case "SAMPLE_MANAGEMENT": {
+      case "SAMPLE_MANAGEMENT":
         return sampleId;
-      }
+      case "CLAIM":
+        return claimId;
     }
   };
 

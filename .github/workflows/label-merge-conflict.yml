@@ -12,6 +12,7 @@ on:
 
 jobs:
   auto-label:
+    if: github.repository == 'coronasafe/care_fe'
     runs-on: ubuntu-latest
     steps:
       - uses: prince-chrismc/label-merge-conflicts-action@v2
