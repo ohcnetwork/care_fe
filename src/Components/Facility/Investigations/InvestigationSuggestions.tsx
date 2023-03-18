@@ -47,7 +47,7 @@ export default function ViewInvestigationSuggestions(props: {
         <tbody>
           {Array.isArray(investigations) ? (
             investigations.map((investigation, index) => {
-              let nextInvestigationAt: any = undefined;
+              let nextFurthestInvestigation: any = undefined;
 
               return (
                 <tr key={index} className="border-b border-b-gray-200">
@@ -99,10 +99,13 @@ export default function ViewInvestigationSuggestions(props: {
                             : undefined;
 
                         if (
-                          !nextInvestigationAt ||
-                          nextInvestigationAt.isBefore(nextInvestigationTime)
+                          !nextFurthestInvestigation ||
+                          (nextInvestigationTime &&
+                            nextFurthestInvestigation.isBefore(
+                              nextInvestigationTime
+                            ))
                         ) {
-                          nextInvestigationAt = nextInvestigationTime;
+                          nextFurthestInvestigation = nextInvestigationTime;
                         }
 
                         const investigationMissed =
@@ -110,7 +113,7 @@ export default function ViewInvestigationSuggestions(props: {
                           moment().isAfter(nextInvestigationTime);
                         console.log(
                           type,
-                          nextInvestigationAt,
+                          nextFurthestInvestigation,
                           nextInvestigationTime
                         );
 
@@ -154,12 +157,22 @@ export default function ViewInvestigationSuggestions(props: {
                       <div>after every {investigation.frequency}</div>
                     )}
                     <div>
-                      <>
-                        {investigation.frequency && "next"} at{" "}
-                        {nextInvestigationAt
-                          ? nextInvestigationAt.format("hh:mm A on DD/MM/YYYY")
-                          : "-- / --"}
-                      </>
+                      {nextFurthestInvestigation ? (
+                        <div
+                          className={`${
+                            nextFurthestInvestigation.isBefore(moment())
+                              ? "text-red-500"
+                              : ""
+                          }`}
+                        >
+                          {investigation.frequency && "next"} at{" "}
+                          {nextFurthestInvestigation.format(
+                            "hh:mm A on DD/MM/YYYY"
+                          )}
+                        </div>
+                      ) : (
+                        "First investigation not recorded"
+                      )}
                     </div>
                   </td>
                   {logUrl && (
