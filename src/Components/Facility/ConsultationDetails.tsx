@@ -1,11 +1,11 @@
 import { navigate } from "raviger";
 import { Button, CircularProgress } from "@material-ui/core";
 import moment from "moment";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications";
-import { getConsultation, getPatient } from "../../Redux/actions";
+import { getConsultation, getPatient, HCXActions } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { ConsultationModel, ICD11DiagnosisModel } from "./models";
 import { PatientModel } from "../Patient/models";
@@ -58,8 +58,14 @@ import PRNPrescriptionBuilder, {
   PRNPrescriptionType,
 } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { formatDate } from "../../Utils/utils";
+import CreateClaimCard from "../HCX/CreateClaimCard";
+import { HCXClaimModel } from "../HCX/models";
+import ClaimDetailCard from "../HCX/ClaimDetailCard";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import Chip from "../../CAREUI/display/Chip";
 import InvestigationTab from "./Investigations/investigationsTab";
+import useConfig from "../../Common/hooks/useConfig";
+
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -110,6 +116,45 @@ export const ConsultationDetails = (props: any) => {
     []
   );
   const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
+
+  const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
+  const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
+  const { enable_hcx } = useConfig();
+
+  const fetchLatestClaim = useCallback(async () => {
+    const res = await dispatch(
+      HCXActions.claims.list({
+        ordering: "-modified_date",
+        use: "claim",
+        consultation: consultationId,
+      })
+    );
+
+    if (res.data?.results?.length) {
+      setLatestClaim(res.data.results[0]);
+      if (isCreateClaimLoading)
+        Notification.Success({ msg: "Fetched Claim Approval Results" });
+    } else {
+      setLatestClaim(undefined);
+      if (isCreateClaimLoading)
+        Notification.Success({ msg: "Error Fetched Claim Approval Results" });
+    }
+    setIsCreateClaimLoading(false);
+  }, [consultationId, dispatch]);
+
+  useEffect(() => {
+    fetchLatestClaim();
+  }, [fetchLatestClaim]);
+
+  useMessageListener((data) => {
+    if (
+      data.type === "MESSAGE" &&
+      (data.from === "claim/on_submit" || data.from === "preauth/on_submit") &&
+      data.message === "success"
+    ) {
+      fetchLatestClaim();
+    }
+  });
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -445,7 +490,7 @@ export const ConsultationDetails = (props: any) => {
         }
         show={openDischargeDialog}
         onClose={handleDischargeClose}
-        className="md:max-w-2xl"
+        className="md:max-w-3xl"
       >
         <div className="mt-6 flex flex-col">
           <SelectFormField
@@ -552,6 +597,24 @@ export const ConsultationDetails = (props: any) => {
           )}
         </div>
 
+        {enable_hcx && (
+          // TODO: if policy and approved pre-auth exists
+          <div className="my-5 shadow rounded p-5">
+            <h2 className="mb-2">Claim Insurance</h2>
+            {latestClaim ? (
+              <ClaimDetailCard claim={latestClaim} />
+            ) : (
+              <CreateClaimCard
+                consultationId={consultationId}
+                patientId={patientId}
+                use="claim"
+                isCreating={isCreateClaimLoading}
+                setIsCreating={setIsCreateClaimLoading}
+              />
+            )}
+          </div>
+        )}
+
         <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
           <Cancel onClick={handleDischargeClose} />
           {isSendingDischargeApi ? (
@@ -582,7 +645,7 @@ export const ConsultationDetails = (props: any) => {
               },
             }}
             breadcrumbs={true}
-            backUrl={"/patients"}
+            backUrl="/patients"
           />
           <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
