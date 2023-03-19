@@ -76,7 +76,6 @@ const TransferPatientDialog = (props: Props) => {
   const handleDateChange = (e: any) => {
     if (moment(e.value).isValid()) {
       const form = { ...state.form };
-      console.log(e.value);
       form[e.name] = moment(e.value).format("YYYY-MM-DD");
       dispatch({ type: "set_form", form });
     }
