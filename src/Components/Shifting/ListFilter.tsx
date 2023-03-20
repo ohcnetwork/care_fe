@@ -11,7 +11,6 @@ import {
 import moment from "moment";
 import { getAnyFacility, getUserList } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { CircularProgress } from "@material-ui/core";
 import { SHIFTING_CHOICES } from "../../Common/constants";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import parsePhoneNumberFromString from "libphonenumber-js";
@@ -21,6 +20,7 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { useTranslation } from "react-i18next";
 import FilterButtons from "../Common/FilterButtons";
+import CircularProgress from "../Common/components/CircularProgress";
 
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
@@ -265,7 +265,7 @@ export default function ListFilter(props: any) {
           <span className="text-sm font-semibold">{t("origin_facility")}</span>
           <div className="">
             {isOriginLoading ? (
-              <CircularProgress size={20} />
+              <CircularProgress />
             ) : (
               <FacilitySelect
                 multiple={false}
@@ -285,7 +285,7 @@ export default function ListFilter(props: any) {
           </span>
           <div className="">
             {isShiftingLoading ? (
-              <CircularProgress size={20} />
+              <CircularProgress />
             ) : (
               <FacilitySelect
                 multiple={false}
@@ -307,7 +307,7 @@ export default function ListFilter(props: any) {
           </span>
           <div className="">
             {isAssignedLoading ? (
-              <CircularProgress size={20} />
+              <CircularProgress />
             ) : (
               <FacilitySelect
                 multiple={false}
@@ -325,7 +325,7 @@ export default function ListFilter(props: any) {
           <span className="text-sm font-semibold">{t("assigned_to")}</span>
           <div className="">
             {isAssignedUserLoading ? (
-              <CircularProgress size={20} />
+              <CircularProgress />
             ) : (
               <UserSelect
                 name="assigned_to"
