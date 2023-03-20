@@ -15,7 +15,7 @@ import {
   BREATHLESSNESS_LEVEL,
 } from "../../Common/constants";
 import { UserSelect } from "../Common/UserSelect";
-import { CircularProgress } from "@material-ui/core";
+import CircularProgress from "../Common/components/CircularProgress";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -271,7 +271,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 <FieldLabel>{t("assigned_to")}</FieldLabel>
                 <div>
                   {assignedUserLoading ? (
-                    <CircularProgress size={20} />
+                    <CircularProgress />
                   ) : (
                     <UserSelect
                       multiple={false}
