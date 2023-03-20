@@ -164,6 +164,47 @@ export const DailyRoundListDetails = (props: any) => {
             {dailyRoundListDetailsData.other_details || "-"}
           </div>
           <div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Pulse(bpm): </span>
+            {dailyRoundListDetailsData.pulse || "-"}
+          </div>
+          <div className="md:col-span-2 ">
+            <span className="font-semibold leading-relaxed">BP</span>
+            <div className="flex flex-row space-x-20">
+              <div className="flex">
+                <span className="font-semibold leading-relaxed">
+                  Systolic:{" "}
+                </span>
+                {dailyRoundListDetailsData.bp?.systolic || "-"}
+              </div>
+              <div className="flex">
+                {" "}
+                <span className="font-semibold leading-relaxed">
+                  Diastolic:
+                </span>
+                {dailyRoundListDetailsData.bp?.diastolic || "-"}
+              </div>
+            </div>
+          </div>
+
+          <div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">
+              Respiratory Rate (bpm):
+            </span>
+
+            {dailyRoundListDetailsData.resp || "-"}
+          </div>
+          <div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Rhythm: </span>
+            {dailyRoundListDetailsData.rhythm || "-"}
+          </div>
+          <div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">
+              Rhythm Description:{" "}
+            </span>
+            {dailyRoundListDetailsData.rhythm_detail || "-"}
+          </div>
+
+          <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Medication: </span>
             {dailyRoundListDetailsData?.medication_given && (
               <div className="mt-4">
