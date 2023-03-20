@@ -160,7 +160,7 @@ const TransferPatientDialog = (props: Props) => {
                 placeholder="Select patient"
                 options={patientOptions}
                 optionLabel={(patient) => patient.text}
-                optionValue={(patient) => patient.text}
+                optionValue={(patient) => patient.id}
                 value={state.form.patient}
                 onChange={handleChange}
                 error={state.errors.patient}
