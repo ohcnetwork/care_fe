@@ -80,67 +80,97 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
             </Link>
 
             <div className="flex flex-col justify-between w-full h-fit md:h-full">
-              <div className="px-4 py-4 w-full ">
-                <div className="flow-root">
-                  {facility.kasp_empanelled && (
-                    <div className="float-right mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
-                      {kasp_string}
-                    </div>
-                  )}
-                  <Link
-                    href={`/facility/${facility.id}`}
-                    className="float-left font-bold text-xl capitalize text-inherit hover:text-inherit"
-                  >
-                    {facility.name}
-                  </Link>
-                </div>
+              <div className="w-full flex">
+                <div className="px-4 py-4">
+                  <div className="flow-root">
+                    {facility.kasp_empanelled && (
+                      <div className="float-right mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
+                        {kasp_string}
+                      </div>
+                    )}
+                    <Link
+                      href={`/facility/${facility.id}`}
+                      className="float-left font-bold text-xl capitalize text-inherit hover:text-inherit"
+                    >
+                      {facility.name}
+                    </Link>
+                  </div>
 
-                <div className="flex gap-1 flex-wrap mt-2">
-                  <Chip
-                    text={facility.facility_type}
-                    color="blue"
-                    hideBorder
-                    size="small"
-                  />
-                  {facility.features?.map(
-                    (feature: number, i: number) =>
-                      FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
-                        <Chip
-                          hideBorder
-                          key={i}
-                          text={
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature
-                            )[0]?.name
-                          }
-                          color="primary"
-                          size="small"
-                          startIcon={
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature
-                            )[0]?.icon
-                          }
-                        />
-                      )
-                  )}
-                </div>
+                  <div className="flex gap-1 flex-wrap mt-2">
+                    <Chip
+                      text={facility.facility_type}
+                      color="blue"
+                      hideBorder
+                      size="small"
+                    />
+                    {facility.features?.map(
+                      (feature: number, i: number) =>
+                        FACILITY_FEATURE_TYPES.some(
+                          (f) => f.id === feature
+                        ) && (
+                          <Chip
+                            hideBorder
+                            key={i}
+                            text={
+                              FACILITY_FEATURE_TYPES.filter(
+                                (f) => f.id === feature
+                              )[0]?.name
+                            }
+                            color="primary"
+                            size="small"
+                            startIcon={
+                              FACILITY_FEATURE_TYPES.filter(
+                                (f) => f.id === feature
+                              )[0]?.icon
+                            }
+                          />
+                        )
+                    )}
+                  </div>
 
-                <div className="mt-2 flex justify-between">
-                  <div className="flex flex-col">
-                    <div className="font-semibold">
-                      {facility.local_body_object?.name}
+                  <div className="mt-2 flex justify-between">
+                    <div className="flex flex-col">
+                      <div className="font-semibold">
+                        {facility.local_body_object?.name}
+                      </div>
                     </div>
                   </div>
+                  <a
+                    href={`tel:${facility.phone_number}`}
+                    className="font-semibold tracking-wider text-sm"
+                  >
+                    {parsePhoneNumber(
+                      facility.phone_number as string,
+                      "IN"
+                    ).formatInternational() || "-"}
+                  </a>
                 </div>
-                <a
-                  href={`tel:${facility.phone_number}`}
-                  className="font-semibold tracking-wider text-sm"
+                <div
+                  className={`flex flex-col items-center justify-center rounded-lg text-xl h-14 w-14 px-2 ml-auto mr-3 mt-3 ${
+                    facility.patient_count / facility.bed_count > 0.85
+                      ? "bg-danger-400"
+                      : "bg-primary-100"
+                  }`}
                 >
-                  {parsePhoneNumber(
-                    facility.phone_number as string,
-                    "IN"
-                  ).formatInternational() || "-"}
-                </a>
+                  {" "}
+                  <CareIcon
+                    className={`care-l-bed text-${
+                      facility.patient_count / facility.bed_count > 0.85
+                        ? "white"
+                        : "primary-600"
+                    }`}
+                  />{" "}
+                  <dt
+                    className={`text-sm font-semibold text-${
+                      facility.patient_count / facility.bed_count > 0.85
+                        ? "white"
+                        : "gray-700"
+                    } my-1`}
+                  >
+                    {" "}
+                    {facility.patient_count} / {facility.bed_count}{" "}
+                  </dt>{" "}
+                </div>
               </div>
               <div className="bg-gray-50 border-t px-2 md:px-3 py-1 flex-none">
                 <div className="flex py-2 justify-between">
