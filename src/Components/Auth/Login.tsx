@@ -183,7 +183,7 @@ export const Login = (props: { forgot?: boolean }) => {
       <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-between md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
         <div></div>
         <div className="mt-4 md:mt-12 rounded-lg py-4 flex flex-col items-start">
-          <div className="hidden md:flex gap-6 mb-4">
+          <div className="hidden md:flex items-center gap-6 mb-4">
             {state_logo && (
               <>
                 <img
