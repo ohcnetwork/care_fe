@@ -82,7 +82,6 @@ const CommentSection = (props: CommentSectionProps) => {
       <div className="flex w-full justify-end">
         <ButtonV2
           onClick={onSubmitComment}
-          className="bg-white border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-green-100 capitalize my-2 text-sm"
         >
           Post Your Comment
         </ButtonV2>
