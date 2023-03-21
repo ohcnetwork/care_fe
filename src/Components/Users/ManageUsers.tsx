@@ -405,14 +405,25 @@ export default function ManageUsers() {
                   )}
                 </div>
                 {user.username && (
-                  <div
-                    onClick={() => {
-                      setExpandSkillList(true);
-                      setSelectedUser(user.username);
-                    }}
-                    className="col-span-4 mt-2 align-baseline font-bold text-sm text-blue-500 hover:text-blue-800 absolute bottom-3"
-                  >
-                    Click here to show linked skills
+                  <div id="skills" className="">
+                    <div className="flex text-gray-800 absolute bottom-3 sm:bottom-2 left-6">
+                      <p className="flex items-center">Linked Skills: </p>
+                      <ButtonV2
+                        ghost
+                        circle
+                        variant="secondary"
+                        className="tooltip flex items-center"
+                        onClick={() => {
+                          setExpandSkillList(true);
+                          setSelectedUser(user.username);
+                        }}
+                      >
+                        <CareIcon className="care-l-eye text-xl" />
+                        <span className="tooltip-text tooltip-bottom">
+                          View Linked Skills
+                        </span>
+                      </ButtonV2>
+                    </div>
                   </div>
                 )}
               </div>
