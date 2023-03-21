@@ -94,6 +94,16 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     >
                       {facility.name}
                     </Link>
+                    {userType !== "Staff" ? (
+                      <div
+                        className="h-[38px]"
+                        onClick={(_) => setNotifyModalFor(facility.id)}
+                      >
+                        <CareIcon className="care-l-megaphone text-lg text-black hover:text-primary-500 ml-2 hover:cursor-pointer" />
+                      </div>
+                    ) : (
+                      <></>
+                    )}
                   </div>
 
                   <div className="flex gap-1 flex-wrap mt-2">
@@ -145,51 +155,37 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     ).formatInternational() || "-"}
                   </a>
                 </div>
-                <div
-                  className={`flex flex-col items-center justify-center rounded-lg text-xl h-14 w-14 px-2 ml-auto mr-3 mt-3 ${
-                    facility.patient_count / facility.bed_count > 0.85
-                      ? "bg-danger-400"
-                      : "bg-primary-100"
-                  }`}
-                >
-                  {" "}
-                  <CareIcon
-                    className={`care-l-bed text-${
-                      facility.patient_count / facility.bed_count > 0.85
-                        ? "white"
-                        : "primary-600"
-                    }`}
-                  />{" "}
-                  <dt
-                    className={`text-sm font-semibold text-${
-                      facility.patient_count / facility.bed_count > 0.85
-                        ? "white"
-                        : "gray-700"
-                    } my-1`}
-                  >
-                    {" "}
-                    {facility.patient_count} / {facility.bed_count}{" "}
-                  </dt>{" "}
-                </div>
               </div>
               <div className="bg-gray-50 border-t px-2 md:px-3 py-1 flex-none">
                 <div className="flex py-2 justify-between">
                   <div className="flex justify-between w-full flex-wrap gap-2">
-                    <div>
-                      {userType !== "Staff" ? (
-                        <ButtonV2
-                          id="facility-notify"
-                          ghost
-                          border
-                          className="h-[38px]"
-                          onClick={(_) => setNotifyModalFor(facility.id)}
+                    <div className="w-fit">
+                      <div
+                        className={`flex items-center justify-center rounded-lg text-xl h-[38px] w-fit px-2 ml-auto ${
+                          facility.patient_count / facility.bed_count > 0.85
+                            ? "bg-red-500"
+                            : "bg-primary-100"
+                        }`}
+                      >
+                        {" "}
+                        <CareIcon
+                          className={`care-l-bed text-${
+                            facility.patient_count / facility.bed_count > 0.85
+                              ? "white"
+                              : "primary-600"
+                          } mr-2`}
+                        />{" "}
+                        <dt
+                          className={`text-sm font-semibold text-${
+                            facility.patient_count / facility.bed_count > 0.85
+                              ? "white"
+                              : "gray-700"
+                          } my-1`}
                         >
-                          <CareIcon className="care-l-megaphone text-lg" />
-                          <span className="md:block hidden">Notify</span>
-                        </ButtonV2>
-                      ) : (
-                        <></>
-                      )}
+                          {" "}
+                          {facility.patient_count} / {facility.bed_count}{" "}
+                        </dt>{" "}
+                      </div>
                       <DialogModal
                         show={notifyModalFor === facility.id}
                         title={
