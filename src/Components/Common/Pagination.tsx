@@ -8,24 +8,30 @@ interface PaginationProps {
   onChange: (page: number, rowsPerPage: number) => void;
   defaultPerPage: number;
   cPage: number;
+  className?: string;
 }
-const Pagination = (props: PaginationProps) => {
-  const { data, onChange } = props;
+const Pagination = ({
+  className = "mx-auto my-4",
+  data,
+  onChange,
+  defaultPerPage,
+  cPage,
+}: PaginationProps) => {
   const [rowsPerPage, setRowsPerPage] = useState(3);
   const [currentPage, setCurrentPage] = useState(1);
 
   useAbortableEffect(
     (status: statusType) => {
       if (!status.aborted) {
-        if (props.defaultPerPage) {
-          setRowsPerPage(props.defaultPerPage);
+        if (defaultPerPage) {
+          setRowsPerPage(defaultPerPage);
         }
-        if (props.cPage) {
-          setCurrentPage(parseInt(`${props.cPage}`));
+        if (cPage) {
+          setCurrentPage(parseInt(`${cPage}`));
         }
       }
     },
-    [props]
+    [defaultPerPage, cPage]
   );
 
   const getPageNumbers = () => {
@@ -128,7 +134,7 @@ const Pagination = (props: PaginationProps) => {
   };
 
   return (
-    <div className="mx-auto my-4">
+    <div className={className}>
       {/* Mobile view */}
       <div className="flex-1 flex justify-between sm:hidden">
         <NavButtons.Previous />
