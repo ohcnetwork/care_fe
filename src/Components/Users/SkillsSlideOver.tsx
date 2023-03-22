@@ -13,11 +13,9 @@ import { useDispatch } from "react-redux";
 import ButtonV2 from "../Common/components/ButtonV2";
 import AuthorizeFor from "../../Utils/AuthorizeFor";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
-import {
-  AddSkillsPlaceholder,
-  SkillsArray,
-} from "./SkillsSlideOver.Components";
-import Spinner from "../Common/Spinner";
+import { AddSkillsPlaceholder, SkillsArray } from "./SkillsSlideOverComponents";
+import { useTranslation } from "react-i18next";
+import CircularProgress from "../Common/components/CircularProgress";
 
 interface IProps {
   username: string;
@@ -25,10 +23,9 @@ interface IProps {
   setShow: (show: boolean) => void;
 }
 
-const CONTACT_YOUR_ADMIN_COPY = "Contact your admin to add skills";
-const ADD_COPY = "Add";
-
 export default ({ show, setShow, username }: IProps) => {
+  /* added const {t} hook here and relevant text to Common.json to avoid eslint error  */
+  const { t } = useTranslation();
   const [skills, setSkills] = useState<SkillModel[]>([]);
   const [selectedSkill, setSelectedSkill] = useState<SkillObjectModel | null>(
     null
@@ -121,18 +118,21 @@ export default ({ show, setShow, username }: IProps) => {
                 disabled={!authorizeForAddSkill}
                 onClick={() => addSkill(username, selectedSkill)}
               >
-                {ADD_COPY}
+                {/* Replace "Add" in button with CircularProgress */}
+                {isLoading ? <CircularProgress /> : t("add")}
               </ButtonV2>
-              {isLoading ? <Spinner /> : null}
               {!authorizeForAddSkill && (
                 <span className="tooltip-text tooltip-bottom -translate-x-24 translate-y-2">
-                  {CONTACT_YOUR_ADMIN_COPY}
+                  {t("contact_your_admin_to_add_skills")}
                 </span>
               )}
             </div>
-            {/* While loading skills, we want to hide the skills panel because we
-            are showing the loading spinner next to the add button */}
-            {isLoading ? null : (
+            {/* While loading skills, we display an additional circular progress to show we are fetching the information*/}
+            {isLoading ? (
+              <div className="mt-4 flex justify-center">
+                <CircularProgress />
+              </div>
+            ) : (
               <div className="mb-2 mt-4">
                 {hasSkills ? (
                   <SkillsArray

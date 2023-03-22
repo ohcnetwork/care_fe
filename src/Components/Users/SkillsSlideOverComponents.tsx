@@ -1,12 +1,12 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { SkillModel } from "./models";
 
-const SELECT_SKILLS_COPY = "Select and add some skills";
-
 export const AddSkillsPlaceholder = () => {
+  const { t } = useTranslation();
   return (
     <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
       <div className="w-full">
@@ -17,7 +17,7 @@ export const AddSkillsPlaceholder = () => {
         />
       </div>
       <p className="text-lg font-semibold text-center text-primary pt-4">
-        {SELECT_SKILLS_COPY}
+        {t("select_skills")}
       </p>
     </div>
   );
