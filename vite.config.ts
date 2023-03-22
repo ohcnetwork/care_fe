@@ -8,6 +8,22 @@ export default defineConfig({
   build: {
     outDir: "build",
     minify: false,
+
+    // workaround for react-phone-input-2 https://github.com/vitejs/vite/issues/2139#issuecomment-1405624744
+    commonjsOptions: {
+      defaultIsModuleExports(id) {
+        try {
+          const module = require(id);
+          if (module?.default) {
+            return false;
+          }
+          return 'auto';
+        } catch (error) {
+          return 'auto';
+        }
+      },
+      transformMixedEsModules: true,
+    },
   },
   server: {
     port: 4000,
