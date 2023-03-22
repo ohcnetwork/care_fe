@@ -34,7 +34,7 @@
     "build": "npm run build:res && npm run generate-build-meta && npm run build:react",
     "dev:res": "rescript clean && rescript build -w",
     "dev:react": "vite",
-    "dev": "npm run build:res && start:react",
+    "dev": "npm run build:res && npm run dev:react",
     "preview": "cross-env NODE_ENV=production vite preview",
     "generate-build-meta": "node ./build-scripts/generate-build-version.js",
     "test": "snyk test",
