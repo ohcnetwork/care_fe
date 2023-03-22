@@ -39,7 +39,6 @@
     "@livekit/react-components": "^1.1.0",
     "@loadable/component": "^5.15.0",
     "@material-ui/core": "^4.11.4",
-    "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.58",
     "@material-ui/pickers": "^3.3.10",
     "@material-ui/styles": "^4.11.4",

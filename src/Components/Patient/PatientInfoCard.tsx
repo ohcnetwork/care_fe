@@ -5,11 +5,16 @@ import DialogModal from "../Common/Dialog";
 import Beds from "../Facility/Consultations/Beds";
 import { useState } from "react";
 import { PatientCategory } from "../Facility/models";
-import { DISCHARGE_REASONS, PATIENT_CATEGORIES } from "../../Common/constants";
+import {
+  CONSULTATION_SUGGESTION,
+  DISCHARGE_REASONS,
+  PATIENT_CATEGORIES,
+} from "../../Common/constants";
 import moment from "moment";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import * as Notification from "../../Utils/Notifications.js";
+import useConfig from "../../Common/hooks/useConfig";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -17,6 +22,7 @@ export default function PatientInfoCard(props: {
   fetchPatientData?: (state: { aborted: boolean }) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const { enable_hcx } = useConfig();
 
   const patient = props.patient;
   const ip_no = props.ip_no;
@@ -177,8 +183,41 @@ export default function PatientInfoCard(props: {
                 );
               })}
             </div>
+            <div className="flex gap-4 text-sm mt-3 px-3 py-1 font-medium bg-cyan-300">
+              <div>
+                {
+                  CONSULTATION_SUGGESTION.find(
+                    (suggestion) =>
+                      suggestion.id === patient.last_consultation?.suggestion
+                  )?.text
+                }{" "}
+                on{" "}
+                {patient.last_consultation?.suggestion === "A"
+                  ? moment(patient.last_consultation?.admission_date).format(
+                      "DD/MM/YYYY"
+                    )
+                  : patient.last_consultation?.suggestion === "DD"
+                  ? moment(patient.last_consultation?.death_datetime).format(
+                      "DD/MM/YYYY"
+                    )
+                  : moment(patient.last_consultation?.created_date).format(
+                      "DD/MM/YYYY"
+                    )}
+              </div>
+              {patient.is_active === false &&
+                patient.last_consultation?.suggestion !== "OP" &&
+                patient.last_consultation?.suggestion !== "DD" && (
+                  <div>
+                    Discharged on{" "}
+                    {moment(patient.last_consultation?.discharge_date).format(
+                      "DD/MM/YYYY"
+                    )}
+                  </div>
+                )}
+            </div>
           </div>
         </div>
+
         <div className="w-full lg:w-fit flex gap-2 flex-col px-4 py-1 lg:p-6">
           {patient.is_active === false && (
             <div className="flex flex-col justify-center items-center">
@@ -238,48 +277,61 @@ export default function PatientInfoCard(props: {
               "file-medical",
               patient.last_consultation?.id,
             ],
-          ].map(
-            (action: any, i) =>
-              action[3] && (
-                <div className="relative">
-                  <ButtonV2
-                    key={i}
-                    variant={action[4] && action[4][0] ? "danger" : "primary"}
-                    href={
-                      patient.last_consultation?.admitted &&
-                      !patient.last_consultation?.current_bed &&
-                      i === 1
-                        ? undefined
-                        : `${action[0]}`
-                    }
-                    onClick={() => {
-                      if (
+          ]
+            .concat(
+              enable_hcx
+                ? [
+                    [
+                      `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/claims`,
+                      "Claims",
+                      "copy-landscape",
+                      patient.last_consultation?.id,
+                    ],
+                  ]
+                : []
+            )
+            .map(
+              (action: any, i) =>
+                action[3] && (
+                  <div className="relative">
+                    <ButtonV2
+                      key={i}
+                      variant={action[4] && action[4][0] ? "danger" : "primary"}
+                      href={
                         patient.last_consultation?.admitted &&
                         !patient.last_consultation?.current_bed &&
                         i === 1
-                      ) {
-                        Notification.Error({
-                          msg: "Please assign a bed to the patient",
-                        });
-                        setOpen(true);
+                          ? undefined
+                          : `${action[0]}`
                       }
-                    }}
-                    align="start"
-                    className="w-full"
-                  >
-                    <CareIcon className={`care-l-${action[2]} text-lg`} />
-                    <p className="font-semibold">{action[1]}</p>
-                  </ButtonV2>
-                  {action[4] && action[4][0] && (
-                    <>
-                      <p className="text-xs text-red-500 mt-1">
-                        {action[4][1]}
-                      </p>
-                    </>
-                  )}
-                </div>
-              )
-          )}
+                      onClick={() => {
+                        if (
+                          patient.last_consultation?.admitted &&
+                          !patient.last_consultation?.current_bed &&
+                          i === 1
+                        ) {
+                          Notification.Error({
+                            msg: "Please assign a bed to the patient",
+                          });
+                          setOpen(true);
+                        }
+                      }}
+                      align="start"
+                      className="w-full"
+                    >
+                      <CareIcon className={`care-l-${action[2]} text-lg`} />
+                      <p className="font-semibold">{action[1]}</p>
+                    </ButtonV2>
+                    {action[4] && action[4][0] && (
+                      <>
+                        <p className="text-xs text-red-500 mt-1">
+                          {action[4][1]}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )
+            )}
         </div>
       </section>
     </>

@@ -17,7 +17,7 @@ type SelectFormFieldProps<T, V = T> = FormFieldBaseProps<V> & {
 };
 
 export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
-  const field = useFormFieldPropsResolver(props);
+  const field = useFormFieldPropsResolver<V>(props);
   return (
     <FormField field={field}>
       <SelectMenuV2
@@ -34,6 +34,7 @@ export const SelectFormField = <T, V>(props: SelectFormFieldProps<T, V>) => {
         optionDescription={props.optionDescription}
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
+        requiredError={field.error ? props.required : false}
       />
     </FormField>
   );
