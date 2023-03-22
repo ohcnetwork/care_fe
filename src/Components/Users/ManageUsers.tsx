@@ -382,22 +382,9 @@ export default function ManageUsers() {
                             setSelectedUser(user);
                           }}
                         >
-                          <CareIcon
-                            className={`${
-                              !user.facilities
-                                ? "care-l-eye"
-                                : expandFacilityList
-                                ? "care-l-eye-slash"
-                                : "care-l-eye"
-                            } text-xl`}
-                          />
+                          <CareIcon className="care-l-eye text-xl" />
                           <span className="tooltip-text tooltip-bottom">
-                            {!user.facilities
-                              ? "View"
-                              : expandFacilityList
-                              ? "Hide"
-                              : "View"}{" "}
-                            Linked Facilities
+                            View Linked Facilities
                           </span>
                         </ButtonV2>
                       </div>
