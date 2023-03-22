@@ -15,20 +15,41 @@
     "coronasafe Contributors"
   ],
   "homepage": "https://care.coronasafe.in",
-  "proxy": "https://careapi.coronasafe.in",
-  "main": "./src/index.tsx",
   "keywords": [
     "Coronasafe",
     "care",
     "react",
-    "reason-react",
+    "rescript",
     "tailwind",
     "pwa",
     "material-ui",
-    "typescritps"
+    "typescritp",
+    "vite"
   ],
   "author": "Coronsafe Care Contributors",
   "license": "MIT",
+  "scripts": {
+    "build:res": "rescript clean && rescript build",
+    "build:react": "cross-env NODE_ENV=production vite build",
+    "build": "npm run build:res && npm run generate-build-meta && npm run build:react",
+    "dev:res": "rescript clean && rescript build -w",
+    "dev:react": "vite",
+    "dev": "npm run build:res && start:react",
+    "preview": "cross-env NODE_ENV=production vite preview",
+    "generate-build-meta": "node ./build-scripts/generate-build-version.js",
+    "test": "snyk test",
+    "cypress:open": "cross-env NODE_ENV=development cypress open",
+    "cypress:run": "cross-env NODE_ENV=development cypress run",
+    "cypress:run:gui": "cross-env NODE_ENV=development cypress run --headed",
+    "cypress:install": "cross-env NODE_ENV=development cypress install",
+    "prepare": "husky install",
+    "lint": "eslint ./src",
+    "lint-fix": "eslint ./src --fix",
+    "format": "prettier ./src --write",
+    "storybook": "start-storybook -p 6006 -s public",
+    "build-storybook": "build-storybook -s public",
+    "serve-storybook": "serve storybook-static"
+  },
   "dependencies": {
     "@date-io/date-fns": "^1.3.13",
     "@glennsl/bs-json": "^5.0.3",
@@ -41,22 +62,11 @@
     "@material-ui/pickers": "^3.3.10",
     "@material-ui/styles": "^4.11.4",
     "@material-ui/types": "^5.1.0",
+    "@pnotify/core": "^5.2.0",
+    "@pnotify/mobile": "^5.2.0",
     "@react-spring/web": "^9.6.1",
     "@rescript/react": "^0.10.3",
     "@sentry/browser": "^7.22.0",
-    "@types/echarts": "^4.9.16",
-    "@types/google.maps": "^3.50.4",
-    "@types/loadable__component": "^5.13.3",
-    "@types/lodash": "^4.14.186",
-    "@types/node": "^18.11.18",
-    "@types/prop-types": "*",
-    "@types/qrcode.react": "^1.0.1",
-    "@types/react": "18.0.21",
-    "@types/react-csv": "^1.1.3",
-    "@types/react-dom": "^18.0.9",
-    "@types/react-google-recaptcha": "^2.1.0",
-    "@types/react-swipeable-views": "^0.13.0",
-    "@types/react-transition-group": "^4.4.5",
     "@yaireo/ui-range": "^2.1.15",
     "axios": "^0.27.2",
     "browser-image-compression": "^2.0.0",
@@ -97,47 +107,10 @@
     "rescript-material-ui": "^2.1.2",
     "rescript-webapi": "^0.6.1",
     "screenfull": "^5.1.0",
-    "typescript": "^4.8.4",
     "use-keyboard-shortcut": "^1.1.6",
     "uuid": "^8.3.2"
   },
-  "scripts": {
-    "build:react": "DISABLE_ESLINT_PLUGIN='true' cross-env NODE_ENV=production react-scripts build",
-    "build": "INLINE_RUNTIME_CHUNK=false npm run re:build && npm run generate-build-meta && npm run build:react",
-    "start:react": "cross-env PORT=4000 react-scripts start",
-    "start": "npm run re:build && run-p start:react",
-    "start:Dev": "cross-env NODE_ENV=production http-server dist",
-    "re:build": "rescript clean && rescript build",
-    "re:watch": "rescript clean && rescript build -w",
-    "generate-build-meta": "node ./build-scripts/generate-build-version.js",
-    "test": "snyk test",
-    "cypress:open": "cross-env NODE_ENV=development cypress open",
-    "cypress:run": "cross-env NODE_ENV=development cypress run",
-    "cypress:run:gui": "cross-env NODE_ENV=development cypress run --headed",
-    "cypress:install": "cross-env NODE_ENV=development cypress install",
-    "prepare": "husky install",
-    "lint": "eslint ./src",
-    "lint-fix": "eslint ./src --fix",
-    "format": "prettier ./src --write",
-    "storybook": "start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public",
-    "serve-storybook": "serve storybook-static"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
   "devDependencies": {
-    "@pnotify/core": "^5.2.0",
-    "@pnotify/mobile": "^5.2.0",
     "@storybook/addon-actions": "^6.5.12",
     "@storybook/addon-essentials": "^6.5.12",
     "@storybook/addon-interactions": "^6.5.12",
@@ -152,14 +125,27 @@
     "@tailwindcss/aspect-ratio": "^0.4.0",
     "@tailwindcss/forms": "^0.5.1",
     "@tailwindcss/typography": "^0.5.2",
-    "@testing-library/jest-dom": "^5.12.0",
     "@types/cypress": "^1.1.3",
+    "@types/echarts": "^4.9.16",
+    "@types/google.maps": "^3.50.4",
+    "@types/loadable__component": "^5.13.3",
+    "@types/lodash": "^4.14.186",
     "@types/lodash.get": "^4.4.6",
+    "@types/node": "^18.11.18",
+    "@types/prop-types": "*",
+    "@types/qrcode.react": "^1.0.1",
+    "@types/react": "18.0.21",
     "@types/react-copy-to-clipboard": "^5.0.0",
+    "@types/react-csv": "^1.1.3",
     "@types/react-dates": "^21.8.2",
+    "@types/react-dom": "^18.0.9",
+    "@types/react-google-recaptcha": "^2.1.0",
     "@types/react-qr-reader": "^2.1.3",
+    "@types/react-swipeable-views": "^0.13.0",
+    "@types/react-transition-group": "^4.4.5",
     "@typescript-eslint/eslint-plugin": "^5.13.0",
     "@typescript-eslint/parser": "^5.13.0",
+    "@vitejs/plugin-react-swc": "^3.2.0",
     "autoprefixer": "^10.4.12",
     "cypress": "^10.11.0",
     "cypress-localstorage-commands": "^2.1.0",
@@ -176,74 +162,29 @@
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.3.0",
     "gentype": "^4.1.0",
-    "http-server": "^0.12.3",
     "husky": "^6.0.0",
-    "jest": "26.6.0",
-    "jest-environment-jsdom-fourteen": "^1.0.1",
-    "jest-watch-typeahead": "^0.6.4",
     "lint-staged": "^11.0.0",
     "local-cypress": "^1.2.1",
     "postcss": "^8.4.14",
     "prettier": "^2.3.0",
-    "react-scripts": "5.0.0",
     "redux-devtools-extension": "^2.13.9",
     "rescript": "^9.1.4",
     "snyk": "^1.618.0",
     "storybook-dark-mode": "^1.1.2",
     "tailwindcss": "^3.2.4",
-    "yarn-run-all": "^3.1.1"
+    "typescript": "^4.8.4",
+    "vite": "^4.2.1"
   },
-  "jest": {
-    "roots": [
-      "<rootDir>/src"
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
     ],
-    "collectCoverageFrom": [
-      "src/**/*.{js,jsx,ts,tsx}",
-      "!src/**/*.d.ts"
-    ],
-    "setupFiles": [
-      "react-app-polyfill/jsdom"
-    ],
-    "setupFilesAfterEnv": [],
-    "testMatch": [
-      "<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}",
-      "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"
-    ],
-    "testEnvironment": "jest-environment-jsdom-fourteen",
-    "transform": {
-      "^.+\\.(js|jsx|ts|tsx)$": "<rootDir>/node_modules/babel-jest",
-      "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
-      "^(?!.*\\.(js|jsx|ts|tsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
-    },
-    "transformIgnorePatterns": [
-      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|ts|tsx)$",
-      "^.+\\.module\\.(css|sass|scss)$"
-    ],
-    "modulePaths": [],
-    "moduleNameMapper": {
-      "^react-native$": "react-native-web",
-      "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy"
-    },
-    "moduleFileExtensions": [
-      "web.js",
-      "js",
-      "web.ts",
-      "ts",
-      "web.tsx",
-      "tsx",
-      "json",
-      "web.jsx",
-      "jsx",
-      "node"
-    ],
-    "watchPlugins": [
-      "jest-watch-typeahead/filename",
-      "jest-watch-typeahead/testname"
-    ]
-  },
-  "babel": {
-    "presets": [
-      "react-app"
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
     ]
   },
   "lint-staged": {
