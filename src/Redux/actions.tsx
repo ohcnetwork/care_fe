@@ -911,3 +911,7 @@ export const HCXActions = {
     return fireRequest("hcxMakeClaim", [], { claim });
   },
 };
+
+export const getLiveKitToken = (params: object) => {
+  return fireRequest("getLiveKitToken", [], params);
+};

@@ -2,23 +2,34 @@ import { LiveKitRoom } from "@livekit/react-components";
 import "@livekit/react-components/dist/index.css";
 import { useEffect, useState } from "react";
 import ButtonV2 from "../Components/Common/components/ButtonV2";
+import { getLiveKitToken } from "../Redux/actions";
+import { Error } from "../Utils/Notifications";
+import { useDispatch } from "react-redux";
 
 export const LiveKit = (props: {
   sourceUsername: string;
   targetUsername: string;
 }) => {
+  const dispatch = useDispatch<any>();
   const [status, setStatus] = useState("Disconnected");
   const [connect, setConnect] = useState(false);
   const [token, setToken] = useState("");
 
-  const getToken = () => {
-    const url = `http://127.0.0.1:8000/api/v1/livekit/get_token?source_username=${props.sourceUsername}&target_username=${props.targetUsername}`;
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-        setToken(data.access);
-        console.log(data);
+  const getToken = async () => {
+    const tokenData = await dispatch(
+      getLiveKitToken({
+        source: props.sourceUsername,
+        target: props.targetUsername,
+      })
+    );
+    if (tokenData) {
+      setToken(tokenData.access);
+      console.log(tokenData);
+    } else {
+      Error({
+        msg: "Error fetching token",
       });
+    }
   };
 
   useEffect(() => {

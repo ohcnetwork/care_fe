@@ -880,6 +880,11 @@ const routes: Routes = {
     path: "/api/v1/hcx/make_claim/",
     method: "POST",
   },
+
+  getLiveKitToken: {
+    path: "/api/v1/livekit/get_token/",
+    method: "POST",
+  },
 };
 
 export default routes;
