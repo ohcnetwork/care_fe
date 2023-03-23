@@ -117,9 +117,14 @@ export default ({ show, setShow, username }: IProps) => {
               <ButtonV2
                 disabled={!authorizeForAddSkill}
                 onClick={() => addSkill(username, selectedSkill)}
+                className="w-6rem"
               >
                 {/* Replace "Add" in button with CircularProgress */}
-                {isLoading ? <CircularProgress /> : t("add")}
+                {isLoading ? (
+                  <CircularProgress className="h-5 w-5" />
+                ) : (
+                  t("add")
+                )}
               </ButtonV2>
               {!authorizeForAddSkill && (
                 <span className="tooltip-text tooltip-bottom -translate-x-24 translate-y-2">
