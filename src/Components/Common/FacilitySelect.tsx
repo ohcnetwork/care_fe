@@ -14,6 +14,7 @@ interface FacilitySelectProps {
   district?: string;
   showAll?: boolean;
   showNOptions?: number;
+  freeText?: boolean;
   selected: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
 }
@@ -30,6 +31,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     className = "",
     facilityType,
     district,
+    freeText = false,
     errors = "",
   } = props;
 
@@ -49,7 +51,11 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
       const res = await dispatchAction(
         showAll ? getAllFacilities(params) : getPermittedFacilities(params)
       );
-
+      if (freeText)
+        res?.data?.results?.push({
+          id: -1,
+          name: text,
+        });
       return res?.data?.results;
     },
     [dispatchAction, searchAll, showAll, facilityType, district]
