@@ -23,13 +23,13 @@ import moment from "moment";
 import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { LocationSelect } from "../Common/LocationSelect";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -524,17 +524,16 @@ const AssetCreate = (props: AssetProps) => {
 
                   {/* Location */}
                   <div ref={fieldRef["location"]} className="col-span-6">
-                    <AutocompleteFormField
-                      name="location"
-                      label="Location"
-                      required
-                      placeholder="Select the location of the asset"
-                      options={locations}
-                      optionLabel={({ name }) => name}
-                      optionValue={({ id }) => id}
-                      value={location}
-                      onChange={({ value }) => setLocation(value)}
-                      error={state.errors.location}
+                    <LocationSelect
+                      name="Facilities"
+                      setSelected={(selectedId) =>
+                        setLocation((selectedId as string) || "")
+                      }
+                      selected={location}
+                      errors=""
+                      showAll={false}
+                      multiple={false}
+                      facilityId={facilityId as unknown as number}
                     />
                   </div>
 
