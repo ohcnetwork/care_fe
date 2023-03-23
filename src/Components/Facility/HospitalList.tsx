@@ -15,7 +15,6 @@ import {
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { FacilityModel } from "./models";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacilityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
 import SearchInput from "../Form/SearchInput";
@@ -295,13 +294,7 @@ export const HospitalList = () => {
         </div>
       </div>
 
-      <div>
-        <SlideOver {...advancedFilter}>
-          <div className="bg-white min-h-screen p-4">
-            <FacilityFilter {...advancedFilter} />
-          </div>
-        </SlideOver>
-      </div>
+      <FacilityFilter {...advancedFilter} />
       <FilterBadges
         badges={({ badge, value, kasp }) => [
           badge("Facility/District Name", "search"),
