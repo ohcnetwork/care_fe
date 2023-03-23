@@ -315,23 +315,21 @@ export default function ListFilter(props: any) {
 
       <div>
         <FieldLabel>{t("assigned_to")}</FieldLabel>
-        <div className="">
-          {isAssignedUserLoading ? (
-            <CircularProgress size={20} />
-          ) : (
-            <UserSelect
-              name="assigned_to"
-              multiple={false}
-              selected={filterState.assigned_user_ref}
-              setSelected={(obj) => setAssignedUser(obj)}
-              className="shifting-page-filter-dropdown"
-              errors={""}
-            />
-          )}
-        </div>
+        {isAssignedUserLoading ? (
+          <CircularProgress size={20} />
+        ) : (
+          <UserSelect
+            name="assigned_to"
+            multiple={false}
+            selected={filterState.assigned_user_ref}
+            setSelected={(obj) => setAssignedUser(obj)}
+            className="shifting-page-filter-dropdown"
+            errors={""}
+          />
+        )}
       </div>
 
-      <div>
+      <div className="-mt-6">
         <FieldLabel>{t("ordering")}</FieldLabel>
         <SelectField
           name="ordering"
@@ -437,6 +435,7 @@ export default function ListFilter(props: any) {
         name="patient_phone_number"
         value={filterState.patient_phone_number}
         onChange={handleFormFieldChange}
+        errorClassName="hidden"
       />
 
       <DateRangePicker
