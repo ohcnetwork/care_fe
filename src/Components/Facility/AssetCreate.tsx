@@ -30,6 +30,7 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { LocationSelect } from "../Common/LocationSelect";
+import { FieldLabel } from "../Form/FormFields/FormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -509,7 +510,6 @@ const AssetCreate = (props: AssetProps) => {
                 <div className="grid grid-cols-6 gap-x-6">
                   {/* General Details Section */}
                   {sectionTitle("General Details")}
-
                   {/* Asset Name */}
                   <div className="col-span-6" ref={fieldRef["name"]}>
                     <TextFormField
@@ -521,7 +521,9 @@ const AssetCreate = (props: AssetProps) => {
                       error={state.errors.name}
                     />
                   </div>
-
+                  <FieldLabel className="text-sm w-max" required>
+                    Asset Location
+                  </FieldLabel>
                   {/* Location */}
                   <div ref={fieldRef["location"]} className="col-span-6">
                     <LocationSelect
@@ -536,7 +538,6 @@ const AssetCreate = (props: AssetProps) => {
                       facilityId={facilityId as unknown as number}
                     />
                   </div>
-
                   <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
                     {/* Asset Type */}
                     <div ref={fieldRef["asset_type"]} className="flex-1">
@@ -587,7 +588,6 @@ const AssetCreate = (props: AssetProps) => {
                       />
                     </div>
                   </div>
-
                   {/* Description */}
                   <div className="col-span-6">
                     <TextAreaFormField
@@ -599,7 +599,6 @@ const AssetCreate = (props: AssetProps) => {
                       error={state.errors.description}
                     />
                   </div>
-
                   {/* Divider */}
                   <div className="col-span-6">
                     <hr
@@ -611,7 +610,6 @@ const AssetCreate = (props: AssetProps) => {
                       }
                     />
                   </div>
-
                   {/* Working Status */}
                   <div ref={fieldRef["is_working"]} className="col-span-6">
                     <SwitchV2
@@ -637,7 +635,6 @@ const AssetCreate = (props: AssetProps) => {
                       error={state.errors.is_working}
                     />
                   </div>
-
                   {/* Not Working Reason */}
                   <div
                     className={
@@ -665,7 +662,6 @@ const AssetCreate = (props: AssetProps) => {
                     />
                     <ErrorHelperText error={state.errors.not_working_reason} />
                   </div>
-
                   {/* Divider */}
                   <div className="col-span-6">
                     <hr
@@ -677,7 +673,6 @@ const AssetCreate = (props: AssetProps) => {
                       }
                     />
                   </div>
-
                   {/* Asset QR ID */}
                   <div className="col-span-6">
                     <label htmlFor="asset-qr-id">Asset QR ID</label>

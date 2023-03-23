@@ -35,7 +35,7 @@ export const LocationSelect = (props: LocationSelectProps) => {
 
   const handleValueChange = (current: string[]) => {
     if (multiple) setSelected(current);
-    else setSelected([current ? current[0] : ""]);
+    else setSelected(current ? current[0] : "");
   };
 
   useEffect(() => {
