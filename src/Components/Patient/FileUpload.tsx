@@ -167,8 +167,6 @@ export const FileUpload = (props: FileUploadProps) => {
   const { width } = useWindowDimensions();
   const LaptopScreenBreakpoint = 640;
   const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
-  console.log(width);
-  console.log(isLaptopScreen);
   const handleSwitchCamera = useCallback(() => {
     setFacingMode((prevState: any) =>
       prevState === FACING_MODE_USER
@@ -240,7 +238,6 @@ export const FileUpload = (props: FileUploadProps) => {
           type: blob.type,
         });
         setFile(myFile);
-        // setSelectedFile(myFile);
       });
   };
 
