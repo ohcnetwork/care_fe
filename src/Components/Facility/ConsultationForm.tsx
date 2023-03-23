@@ -808,6 +808,9 @@ export const ConsultationForm = (props: any) => {
       <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
         <div className="hidden xl:flex flex-col w-72 fixed h-full">
           {Object.keys(sections).map((sectionTitle) => {
+            if (state.form.consultation_status === 1) {
+              return null;
+            }
             const isCurrent = currentSection === sectionTitle;
             const section = sections[sectionTitle as ConsultationFormSection];
             return (
@@ -912,14 +915,14 @@ export const ConsultationForm = (props: any) => {
 
                   <div className="col-span-6">
                     <div className="flex flex-col w-full md:flex-row gap-x-3">
-                      <div ref={fieldRef["weight"]}>
+                      <div className="w-1/2" ref={fieldRef["weight"]}>
                         <TextFormField
                           {...field("weight")}
                           label="Weight (kg)"
                           placeholder="kg"
                         />
                       </div>
-                      <div ref={fieldRef["height"]}>
+                      <div className="w-1/2" ref={fieldRef["height"]}>
                         <TextFormField
                           {...field("height")}
                           label="Height (cm)"
@@ -1083,9 +1086,9 @@ export const ConsultationForm = (props: any) => {
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 gap-x-6">
-                  {sectionTitle("Treatment Plan")}
                   {String(state.form.consultation_status) !== "1" && (
                     <>
+                      {sectionTitle("Treatment Plan")}
                       {state.form.suggestion !== "DD" && (
                         <>
                           <div
