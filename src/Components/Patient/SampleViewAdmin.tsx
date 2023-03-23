@@ -1,4 +1,3 @@
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
@@ -411,11 +410,7 @@ export default function SampleViewAdmin() {
                 <span>Advanced Filters</span>
               </button>
             </div>
-            <SlideOver {...advancedFilter}>
-              <div className="bg-white min-h-screen p-4">
-                <SampleFilter {...advancedFilter} />
-              </div>
-            </SlideOver>
+            <SampleFilter {...advancedFilter} />
           </div>
         </div>
         <FilterBadges
