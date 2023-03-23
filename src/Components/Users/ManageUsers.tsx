@@ -21,7 +21,6 @@ import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import UserFilter from "./UserFilter";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
@@ -523,12 +522,7 @@ export default function ManageUsers() {
               {userTypes.length && addUser}
             </div>
           </div>
-
-          <SlideOver {...advancedFilter}>
-            <div className="bg-white min-h-screen p-4">
-              <UserFilter {...advancedFilter} />
-            </div>
-          </SlideOver>
+          <UserFilter {...advancedFilter} />
         </div>
       </div>
 
