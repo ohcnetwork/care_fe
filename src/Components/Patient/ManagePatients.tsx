@@ -22,7 +22,6 @@ import {
   PATIENT_FILTER_ORDER,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import PatientFilter from "./PatientFilter";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -896,11 +895,7 @@ export const PatientManager = () => {
         />
       </div>
       <div>
-        <SlideOver {...advancedFilter}>
-          <div className="bg-white min-h-screen p-4">
-            <PatientFilter {...advancedFilter} />
-          </div>
-        </SlideOver>
+        <PatientFilter {...advancedFilter} />
         <NavTabs
           onChange={(tab) => updateQuery({ is_active: tab ? "False" : "True" })}
           options={[
