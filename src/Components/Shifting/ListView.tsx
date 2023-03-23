@@ -8,7 +8,6 @@ import {
   completeTransfer,
   downloadShiftRequests,
 } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import { Modal, Button } from "@material-ui/core";
 import { formatFilter } from "./Commons";
@@ -372,11 +371,7 @@ export default function ListView() {
           </div>
         )}
       </div>
-      <SlideOver {...advancedFilter}>
-        <div className="bg-white min-h-screen p-4">
-          <ListFilter showShiftingStatus={true} {...advancedFilter} />
-        </div>
-      </SlideOver>
+      <ListFilter showShiftingStatus={true} {...advancedFilter} />
     </div>
   );
 }
