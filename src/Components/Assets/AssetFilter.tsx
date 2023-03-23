@@ -8,10 +8,9 @@ import { getAnyFacility, getFacilityAssetLocation } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { LocationSelect } from "../Common/LocationSelect";
 import { AssetClass, AssetLocationObject } from "./AssetTypes";
-import FilterButtons from "../Common/FilterButtons";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 
 const initialLocation = {
   id: "",
@@ -118,113 +117,84 @@ function AssetFilter(props: any) {
   };
 
   return (
-    <div>
-      <FilterButtons
-        onClose={closeFilter}
-        onClear={clearFilter}
-        onApply={applyFilter}
-      />
-      <div className="w-full flex-none pt-14">
-        <div className="text-md my-6 flex items-center text-gray-700 gap-2">
-          <CareIcon className="care-l-filter text-lg" />
-          <p>Filter by</p>
-        </div>
-
-        <div className="flex flex-wrap gap-4">
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Facility</FieldLabel>
-            <FacilitySelect
-              name="Facilities"
-              setSelected={(selected) =>
-                handleFacilitySelect(selected as FacilityModel)
-              }
-              selected={facility}
-              errors=""
-              showAll
-              multiple={false}
-            />
-          </div>
-          {facilityId && (
-            <div className="w-full flex-none">
-              <FieldLabel className="text-sm">Location</FieldLabel>
-              <LocationSelect
-                name="Facilities"
-                setSelected={(selectedId) =>
-                  handleLocationSelect((selectedId as string) || "")
-                }
-                selected={location.id}
-                errors=""
-                showAll={false}
-                multiple={false}
-                facilityId={facilityId}
-              />
-            </div>
-          )}
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Asset Type</FieldLabel>
-            <SelectFormField
-              id="asset-type"
-              name="asset_type"
-              options={[
-                {
-                  value: "EXTERNAL",
-                  title: "EXTERNAL",
-                },
-                {
-                  value: "INTERNAL",
-                  title: "INTERNAL",
-                },
-              ]}
-              optionLabel={({ title }) => title}
-              optionValue={({ value }) => value}
-              value={asset_type}
-              onChange={({ value }) => setAssetType(value)}
-            />
-          </div>
-
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Asset Status</FieldLabel>
-            <SelectFormField
-              id="asset-status"
-              name="asset_status"
-              options={[
-                {
-                  value: "ACTIVE",
-                  title: "ACTIVE",
-                },
-                {
-                  value: "TRANSFER_IN_PROGRESS",
-                  title: "TRANSFER IN PROGRESS",
-                },
-              ]}
-              optionLabel={({ title }) => title}
-              optionValue={({ value }) => value}
-              value={asset_status}
-              onChange={({ value }) => setAssetStatus(value)}
-            />
-          </div>
-
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Asset Class</FieldLabel>
-            <SelectFormField
-              id="asset-class"
-              name="asset_class"
-              options={[
-                { title: "ONVIF Camera", value: AssetClass.ONVIF },
-                {
-                  title: "HL7 Vitals Monitor",
-                  value: AssetClass.HL7MONITOR,
-                },
-              ]}
-              optionLabel={({ title }) => title}
-              optionValue={({ value }) => value}
-              value={asset_class}
-              onChange={({ value }) => setAssetClass(value)}
-            />
-          </div>
-        </div>
+    <FiltersSlideover
+      advancedFilter={props}
+      onClear={clearFilter}
+      onApply={applyFilter}
+    >
+      <div className="w-full flex-none">
+        <FieldLabel>Facility</FieldLabel>
+        <FacilitySelect
+          name="Facilities"
+          setSelected={(selected) =>
+            handleFacilitySelect(selected as FacilityModel)
+          }
+          selected={facility}
+          errors=""
+          showAll
+          multiple={false}
+        />
       </div>
-    </div>
+
+      {facilityId && (
+        <div className="w-full flex-none">
+          <FieldLabel>Location</FieldLabel>
+          <LocationSelect
+            name="Facilities"
+            setSelected={(selectedId) =>
+              handleLocationSelect((selectedId as string) || "")
+            }
+            selected={location.id}
+            errors=""
+            showAll={false}
+            multiple={false}
+            facilityId={facilityId}
+          />
+        </div>
+      )}
+
+      <SelectFormField
+        label="Asset Type"
+        errorClassName="hidden"
+        id="asset-type"
+        name="asset_type"
+        options={["EXTERNAL", "INTERNAL"]}
+        optionLabel={(o) => o}
+        optionValue={(o) => o}
+        value={asset_type}
+        onChange={({ value }) => setAssetType(value)}
+      />
+
+      <SelectFormField
+        id="asset-status"
+        name="asset_status"
+        label="Asset Status"
+        errorClassName="hidden"
+        options={["ACTIVE", "TRANSFER_IN_PROGRESS"]}
+        optionLabel={(o) => o}
+        optionValue={(o) => o}
+        value={asset_status}
+        onChange={({ value }) => setAssetStatus(value)}
+      />
+
+      <SelectFormField
+        id="asset-class"
+        name="asset_class"
+        label="Asset Class"
+        errorClassName="hidden"
+        options={[
+          { title: "ONVIF Camera", value: AssetClass.ONVIF },
+          {
+            title: "HL7 Vitals Monitor",
+            value: AssetClass.HL7MONITOR,
+          },
+        ]}
+        optionLabel={({ title }) => title}
+        optionValue={({ value }) => value}
+        value={asset_class}
+        onChange={({ value }) => setAssetClass(value)}
+      />
+    </FiltersSlideover>
   );
 }
 

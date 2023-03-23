@@ -12,7 +12,6 @@ import { getAsset } from "../../Redux/actions";
 import { useState, useCallback, useEffect } from "react";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import AssetFilter from "./AssetFilter";
 import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
@@ -366,13 +365,7 @@ const AssetsList = () => {
           </div>
         </div>
       </div>
-      <div>
-        <SlideOver {...advancedFilter}>
-          <div className="bg-white min-h-screen p-4">
-            <AssetFilter {...advancedFilter} />
-          </div>
-        </SlideOver>
-      </div>
+      <AssetFilter {...advancedFilter} />
       {isLoading ? (
         <Loading />
       ) : (
