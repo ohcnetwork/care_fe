@@ -7,7 +7,7 @@ import SlideOver from "./SlideOver";
 type AdvancedFilter = ReturnType<typeof useFilters>["advancedFilter"];
 
 interface Props {
-  children: JSX.Element | JSX.Element[];
+  children: any;
   advancedFilter: AdvancedFilter;
   onClear?: () => void;
   onApply?: () => void;
@@ -39,9 +39,9 @@ export default function FiltersSlideover({
           </div>
         </div>
       }
-      dialogClass="w-full max-w-lg"
+      dialogClass="w-full md:!max-w-md"
     >
-      <div className="flex flex-col gap-4">{children}</div>
+      <div className="flex flex-col gap-4 p-2">{children}</div>
     </SlideOver>
   );
 }
