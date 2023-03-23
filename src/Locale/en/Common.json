@@ -27,7 +27,7 @@
   "updated": "Updated",
   "assigned_to": "Assigned to",
   "cancel": "Cancel",
-  "clear_filters": "Clear Filters",
+  "clear": "Clear",
   "apply": "Apply",
   "filter_by": "Filter By",
   "ordering": "Ordering",
@@ -110,5 +110,7 @@
   "submit": "Submit",
   "camera": "Camera",
   "submitting": "Submitting",
-  "view_details": "View Details"
+  "view_details": "View Details",
+  "type_to_search": "Type to search",
+  "show_all": "Show All"
 }

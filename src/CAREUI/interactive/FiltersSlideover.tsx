@@ -31,10 +31,10 @@ export default function FiltersSlideover({
           <div className="flex items-center justify-end gap-1 mr-2">
             <ButtonV2 variant="danger" ghost onClick={onClear}>
               <CareIcon className="care-l-filter-slash text-lg" />
-              <span>Clear</span>
+              <span>{t("clear")}</span>
             </ButtonV2>
             <ButtonV2 ghost onClick={onApply}>
-              {t("Apply")}
+              {t("apply")}
             </ButtonV2>
           </div>
         </div>

@@ -10,12 +10,14 @@ import LocalBodySelect from "./LocalBodySelect";
 import useMergeState from "../../../Common/hooks/useMergeState";
 import useConfig from "../../../Common/hooks/useConfig";
 import FiltersSlideover from "../../../CAREUI/interactive/FiltersSlideover";
+import { useTranslation } from "react-i18next";
 
 const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
 
 function FacilityFilter(props: any) {
+  const { t } = useTranslation();
   const { filter, onChange, closeFilter } = props;
   const { kasp_string } = useConfig();
   const dispatchAction: any = useDispatch();
@@ -116,7 +118,7 @@ function FacilityFilter(props: any) {
       }}
     >
       <div className="w-full flex-none">
-        <span className="text-sm font-semibold">State</span>
+        <span className="text-sm font-semibold">{t("state")}</span>
         <div>
           {isStateLoading ? (
             <CircularProgress size={20} />
@@ -135,7 +137,7 @@ function FacilityFilter(props: any) {
       </div>
 
       <div className="w-full flex-none">
-        <span className="text-sm font-semibold">District</span>
+        <span className="text-sm font-semibold">{t("district")}</span>
         <div>
           {isDistrictLoading ? (
             <CircularProgress size={20} />
@@ -154,7 +156,7 @@ function FacilityFilter(props: any) {
       </div>
 
       <div className="w-full flex-none">
-        <span className="text-sm font-semibold">Local Body</span>
+        <span className="text-sm font-semibold">{t("local_body")}</span>
         <div>
           <LocalBodySelect
             name="local_body"
@@ -167,13 +169,13 @@ function FacilityFilter(props: any) {
       </div>
 
       <div className="w-full flex-none">
-        <span className="text-sm font-semibold">Facility type</span>
+        <span className="text-sm font-semibold">{t("facility_type")}</span>
         <SelectField
           name="facility_type"
           variant="outlined"
           margin="dense"
           value={filterState.facility_type}
-          options={[{ id: "", text: "Show All" }, ...FACILITY_TYPES]}
+          options={[{ id: "", text: t("show_all") }, ...FACILITY_TYPES]}
           onChange={handleChange}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
@@ -187,9 +189,9 @@ function FacilityFilter(props: any) {
           margin="dense"
           value={filterState.kasp_empanelled}
           options={[
-            { id: "", text: "Show All" },
-            { id: true, text: "Yes" },
-            { id: false, text: "No" },
+            { id: "", text: t("show_all") },
+            { id: true, text: t("yes") },
+            { id: false, text: t("no") },
           ]}
           onChange={handleChange}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
