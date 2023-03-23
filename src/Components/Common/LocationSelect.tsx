@@ -1,9 +1,8 @@
-import React, { useCallback, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listFacilityAssetLocation } from "../../Redux/actions";
-import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
-import { AssetLocationObject } from "../Assets/AssetTypes";
-import { debounce } from "lodash";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete";
+import AutocompleteMultiSelectFormField from "../Form/FormFields/AutocompleteMultiselect";
 interface LocationSelectProps {
   name: string;
   margin?: string;
@@ -13,10 +12,8 @@ interface LocationSelectProps {
   multiple?: boolean;
   facilityId: number;
   showAll?: boolean;
-  selected: AssetLocationObject | AssetLocationObject[] | null;
-  setSelected: (
-    selected: AssetLocationObject | AssetLocationObject[] | null
-  ) => void;
+  selected: string | string[] | null;
+  setSelected: (selected: string | string[] | null) => void;
 }
 
 export const LocationSelect = (props: LocationSelectProps) => {
@@ -25,94 +22,65 @@ export const LocationSelect = (props: LocationSelectProps) => {
     multiple,
     selected,
     setSelected,
-    margin,
     errors,
-    searchAll,
     className = "",
     facilityId,
   } = props;
+  const [locations, setLocations] = useState<{ name: string; id: string }[]>(
+    []
+  );
+  const [query, setQuery] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const dispatchAction: any = useDispatch();
-  const [facilityLoading, isFacilityLoading] = useState(false);
-  const [hasSearchText, setHasSearchText] = useState(false);
-  const [locationList, setLocationList] = useState<Array<AssetLocationObject>>(
-    []
-  );
 
-  const handleValueChange = (
-    current: AssetLocationObject | AssetLocationObject[] | null
-  ) => {
-    if (!current) {
-      setLocationList([]);
-      isFacilityLoading(false);
-      setHasSearchText(false);
-    }
-    setSelected(current);
+  const handleValueChange = (current: string[]) => {
+    if (multiple) setSelected(current);
+    else setSelected(current ? current[0] : "");
   };
 
-  const handelSearch = (e: any) => {
-    isFacilityLoading(true);
-    setHasSearchText(!!e.target.value);
-    onFacilitySearch(e.target.value);
-  };
+  useEffect(() => {
+    const params = {
+      limit: 14,
+      search_text: query,
+    };
+    setLoading(true);
+    dispatchAction(
+      listFacilityAssetLocation(params, { facility_external_id: facilityId })
+    ).then(({ data }: any) => {
+      setLocations(data.results);
+      setLoading(false);
+    });
+  }, [query, facilityId]);
 
-  const onFacilitySearch = useCallback(
-    debounce(async (text: string) => {
-      if (text) {
-        const params = {
-          limit: 50,
-          offset: 0,
-          search_text: text,
-          all: searchAll,
-        };
-
-        const res = await dispatchAction(
-          listFacilityAssetLocation(params, {
-            facility_external_id: facilityId,
-          })
-        );
-
-        if (res && res.data) {
-          setLocationList(res.data.results);
-        }
-        isFacilityLoading(false);
-      } else {
-        setLocationList([]);
-        isFacilityLoading(false);
-      }
-    }, 300),
-    []
-  );
-
-  return (
-    <AutoCompleteAsyncField
+  return props.multiple ? (
+    <AutocompleteMultiSelectFormField
       name={name}
-      multiple={multiple}
-      variant="outlined"
-      margin={margin}
-      value={selected}
-      options={locationList}
-      onSearch={handelSearch}
-      onChange={(e: any, selected: any) => handleValueChange(selected)}
-      loading={facilityLoading}
+      value={selected as unknown as string[]}
+      options={locations}
+      onChange={({ value }) => handleValueChange(value as unknown as string[])}
+      onQuery={(query) => {
+        setQuery(query);
+      }}
       placeholder="Search by location name"
-      noOptionsText={
-        hasSearchText
-          ? "No Location found, please try again"
-          : "Start typing to begin search"
-      }
-      renderOption={(option: any) => (
-        <div>
-          {option.name}
-          {option.district_object ? `, ${option.district_object.name}` : ""}
-        </div>
-      )}
-      getOptionSelected={(option: any, value: any) => option.id === value.id}
-      getOptionLabel={(option: any) =>
-        option.name +
-        (option.district_object ? `, ${option.district_object.name}` : "")
-      }
-      filterOptions={(options: AssetLocationObject[]) => options}
-      errors={errors}
+      optionLabel={(option) => option.name}
+      optionValue={(option) => option.id}
+      error={errors}
+      className={className}
+    />
+  ) : (
+    <AutocompleteFormField
+      name={name}
+      value={selected as string}
+      options={locations}
+      onChange={({ value }) => handleValueChange([value])}
+      onQuery={(query) => {
+        setQuery(query);
+      }}
+      isLoading={loading}
+      placeholder="Search by location name"
+      optionLabel={(option) => option.name}
+      optionValue={(option) => option.id}
+      error={errors}
       className={className}
     />
   );

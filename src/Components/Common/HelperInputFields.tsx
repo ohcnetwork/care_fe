@@ -272,7 +272,7 @@ export const ErrorHelperText = (props: { error?: string }) => {
   const { error } = props;
   return (
     <span
-      className={`error-text mt-2 ml-1 transition-all duration-300 ${
+      className={`error-text text-red-500 mt-2 ml-1 transition-all duration-300 ${
         error ? "opacity-100" : "opacity-0"
       }`}
     >
@@ -658,6 +658,7 @@ export const PhoneNumberField = (props: any) => {
     countryCodeEditable = false,
     className,
     name,
+    requiredError = false,
   } = props;
   const [maxLength, setMaxLength] = useState(15);
 
@@ -680,7 +681,11 @@ export const PhoneNumberField = (props: any) => {
   return (
     <>
       {label && <InputLabel>{label}</InputLabel>}
-      <div className="relative flex items-center">
+      <div
+        className={`${
+          requiredError ? "border border-red-500 rounded" : ""
+        } relative flex items-center`}
+      >
         <PhoneInput
           inputClass="cui-input-base pl-14 pr-10 py-5 tracking-widest"
           containerClass={className}

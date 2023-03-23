@@ -1,5 +1,3 @@
-import { CircularProgress } from "@material-ui/core";
-import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
 import { make as SlideOver } from "../Common/SlideOver.gen";
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
@@ -26,6 +24,8 @@ import { formatDate } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
+import CountBlock from "../../CAREUI/display/Count";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -232,7 +232,7 @@ export default function SampleViewAdmin() {
                       Contact:{" "}
                     </span>
                     Confirmed carrier
-                    <WarningRoundedIcon className="text-red-500"></WarningRoundedIcon>
+                    <CareIcon className="care-l-exclamation-triangle text-red-500 text-xl font-bold" />
                   </div>
                 )}
                 {item.patient_has_suspected_contact &&
@@ -242,7 +242,7 @@ export default function SampleViewAdmin() {
                         Contact:{" "}
                       </span>
                       Suspected carrier
-                      <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
+                      <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-yellow-500" />
                     </div>
                   )}
                 {item.has_sari && (
@@ -251,14 +251,14 @@ export default function SampleViewAdmin() {
                       SARI:{" "}
                     </span>
                     Severe Acute Respiratory illness
-                    <WarningRoundedIcon className="text-orange-500"></WarningRoundedIcon>
+                    <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-orange-500" />
                   </div>
                 )}
                 {item.has_ari && !item.has_sari && (
                   <div>
                     <span className="font-semibold leading-relaxed">ARI: </span>
                     Acute Respiratory illness
-                    <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
+                    <CareIcon className=" care-l-exclamation-triangle text-xl font-bold text-yellow-500" />
                   </div>
                 )}
               </div>
@@ -306,7 +306,11 @@ export default function SampleViewAdmin() {
   }
 
   if (isLoading || !sample) {
-    manageSamples = <Loading />;
+    manageSamples = (
+      <div className="flex justify-center w-full">
+        <Loading />
+      </div>
+    );
   } else if (sample && sample.length) {
     manageSamples = (
       <>
@@ -348,22 +352,13 @@ export default function SampleViewAdmin() {
       />
       <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
         <div className="flex flex-col lg:flex-row gap-6 justify-between">
-          <div className="bg-white overflow-hidden shadow rounded-lg px-4 py-5 sm:p-6 w-full">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Samples Taken
-              </dt>
-              {/* Show spinner until count is fetched from server */}
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
-                </dd>
-              ) : (
-                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
+          <div className="w-full">
+            <CountBlock
+              text="Total Samples Taken"
+              count={totalCount}
+              loading={isLoading}
+              icon={"thermometer"}
+            />
           </div>
 
           <div className="w-full flex flex-col gap-3 p-2">

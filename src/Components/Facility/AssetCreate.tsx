@@ -7,7 +7,6 @@ import {
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
@@ -17,7 +16,6 @@ import {
 } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
-import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
@@ -25,12 +23,14 @@ import moment from "moment";
 import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { LocationSelect } from "../Common/LocationSelect";
+import { FieldLabel } from "../Form/FormFields/FormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -399,7 +399,7 @@ const AssetCreate = (props: AssetProps) => {
         <section className="text-center">
           <h1 className="text-6xl flex items-center flex-col py-10">
             <div className="p-5 rounded-full flex items-center justify-center bg-gray-200 w-40 h-40">
-              <LocationOnOutlined fontSize="inherit" color="primary" />
+              <CareIcon className="care-l-map-marker text-green-600" />
             </div>
           </h1>
           <p className="text-gray-600">
@@ -510,7 +510,6 @@ const AssetCreate = (props: AssetProps) => {
                 <div className="grid grid-cols-6 gap-x-6">
                   {/* General Details Section */}
                   {sectionTitle("General Details")}
-
                   {/* Asset Name */}
                   <div className="col-span-6" ref={fieldRef["name"]}>
                     <TextFormField
@@ -522,23 +521,23 @@ const AssetCreate = (props: AssetProps) => {
                       error={state.errors.name}
                     />
                   </div>
-
+                  <FieldLabel className="text-sm w-max" required>
+                    Asset Location
+                  </FieldLabel>
                   {/* Location */}
                   <div ref={fieldRef["location"]} className="col-span-6">
-                    <AutocompleteFormField
-                      name="location"
-                      label="Location"
-                      required
-                      placeholder="Select the location of the asset"
-                      options={locations}
-                      optionLabel={({ name }) => name}
-                      optionValue={({ id }) => id}
-                      value={location}
-                      onChange={({ value }) => setLocation(value)}
-                      error={state.errors.location}
+                    <LocationSelect
+                      name="Facilities"
+                      setSelected={(selectedId) =>
+                        setLocation((selectedId as string) || "")
+                      }
+                      selected={location}
+                      errors=""
+                      showAll={false}
+                      multiple={false}
+                      facilityId={facilityId as unknown as number}
                     />
                   </div>
-
                   <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
                     {/* Asset Type */}
                     <div ref={fieldRef["asset_type"]} className="flex-1">
@@ -589,7 +588,6 @@ const AssetCreate = (props: AssetProps) => {
                       />
                     </div>
                   </div>
-
                   {/* Description */}
                   <div className="col-span-6">
                     <TextAreaFormField
@@ -601,7 +599,6 @@ const AssetCreate = (props: AssetProps) => {
                       error={state.errors.description}
                     />
                   </div>
-
                   {/* Divider */}
                   <div className="col-span-6">
                     <hr
@@ -613,7 +610,6 @@ const AssetCreate = (props: AssetProps) => {
                       }
                     />
                   </div>
-
                   {/* Working Status */}
                   <div ref={fieldRef["is_working"]} className="col-span-6">
                     <SwitchV2
@@ -639,7 +635,6 @@ const AssetCreate = (props: AssetProps) => {
                       error={state.errors.is_working}
                     />
                   </div>
-
                   {/* Not Working Reason */}
                   <div
                     className={
@@ -667,7 +662,6 @@ const AssetCreate = (props: AssetProps) => {
                     />
                     <ErrorHelperText error={state.errors.not_working_reason} />
                   </div>
-
                   {/* Divider */}
                   <div className="col-span-6">
                     <hr
@@ -679,7 +673,6 @@ const AssetCreate = (props: AssetProps) => {
                       }
                     />
                   </div>
-
                   {/* Asset QR ID */}
                   <div className="col-span-6">
                     <label htmlFor="asset-qr-id">Asset QR ID</label>
@@ -692,7 +685,9 @@ const AssetCreate = (props: AssetProps) => {
                       margin="dense"
                       value={qrCodeId}
                       onChange={(e) => setQrCodeId(e.target.value)}
-                      actionIcon={<CropFreeIcon className="cursor-pointer" />}
+                      actionIcon={
+                        <CareIcon className="care-l-focus cursor-pointer text-lg" />
+                      }
                       action={() => setIsScannerActive(true)}
                       errors={state.errors.qr_code_id}
                     />
