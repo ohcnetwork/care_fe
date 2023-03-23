@@ -262,7 +262,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsLocalbodyLoading(false);
         setLocalBody(localBodyList.data);
       } else {
-        setLocalBody([] as any);
+        setLocalBody([]);
       }
     },
     [dispatchAction]
@@ -286,7 +286,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsWardLoading(false);
         setWard(wardList.data.results);
       } else {
-        setWard([] as any);
+        setWard([]);
       }
     },
     [dispatchAction]
