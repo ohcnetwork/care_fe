@@ -23,7 +23,7 @@ import {
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
-import PatientFilterV2 from "./PatientFilterV2";
+import PatientFilter from "./PatientFilter";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Chip from "../../CAREUI/display/Chip";
@@ -898,7 +898,7 @@ export const PatientManager = () => {
       <div>
         <SlideOver {...advancedFilter}>
           <div className="bg-white min-h-screen p-4">
-            <PatientFilterV2 {...advancedFilter} />
+            <PatientFilter {...advancedFilter} />
           </div>
         </SlideOver>
         <NavTabs
