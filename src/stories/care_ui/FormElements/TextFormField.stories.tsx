@@ -1,4 +1,4 @@
-import { ComponentStory } from "@storybook/react";
+import { StoryFn } from "@storybook/react";
 import Component from "../../../Components/Form/FormFields/TextFormField";
 
 export default {
@@ -6,7 +6,7 @@ export default {
   component: Component,
 };
 
-const Template: ComponentStory<typeof Component> = (args) => (
+const Template: StoryFn<typeof Component> = (args) => (
   <Component {...args} />
 );
 

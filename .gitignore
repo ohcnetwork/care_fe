@@ -23,7 +23,9 @@ yarn-debug.log*
 yarn-error.log*
 .idea
 dist
+dev-dist
 build
+build-storybook
 .swp
 stats.json
 public/build-meta.json

@@ -1,4 +1,4 @@
-import { ComponentStory } from "@storybook/react";
+import { StoryFn } from "@storybook/react";
 import { useState } from "react";
 import { ADMITTED_TO } from "../../Common/constants";
 import MultiSelectMenuV2 from "../../Components/Form/MultiSelectMenuV2";
@@ -8,7 +8,7 @@ export default {
   component: MultiSelectMenuV2,
 };
 
-const Template: ComponentStory<typeof MultiSelectMenuV2> = (args) => {
+const Template: StoryFn<typeof MultiSelectMenuV2> = (args) => {
   const [state, setState] = useState<any>(undefined);
 
   return (

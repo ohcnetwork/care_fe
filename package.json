@@ -36,7 +36,7 @@
     "dev:react": "vite",
     "dev": "npm run build:res && npm run dev:react",
     "preview": "cross-env NODE_ENV=production vite preview",
-    "generate-build-meta": "node ./build-scripts/generate-build-version.js",
+    "generate-build-meta": "node ./scripts/generate-build-version.js",
     "test": "snyk test",
     "cypress:open": "cross-env NODE_ENV=development cypress open",
     "cypress:run": "cross-env NODE_ENV=development cypress run",
@@ -46,9 +46,9 @@
     "lint": "eslint ./src",
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src --write",
-    "storybook": "start-storybook -p 6006 -s public",
-    "build-storybook": "build-storybook -s public",
-    "serve-storybook": "serve storybook-static"
+    "dev:storybook": "storybook dev -p 6006 ",
+    "build:storybook": "storybook build -o build-storybook",
+    "preview:storybook": "vite preview --outDir build-storybook"
   },
   "dependencies": {
     "@date-io/date-fns": "^1.3.13",
@@ -111,17 +111,17 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@storybook/addon-actions": "^6.5.12",
-    "@storybook/addon-essentials": "^6.5.12",
-    "@storybook/addon-interactions": "^6.5.12",
-    "@storybook/addon-links": "^6.5.12",
+    "@storybook/addon-actions": "^7.0.0-rc.6",
+    "@storybook/addon-essentials": "^7.0.0-rc.6",
+    "@storybook/addon-interactions": "^7.0.0-rc.6",
+    "@storybook/addon-links": "^7.0.0-rc.6",
     "@storybook/addon-postcss": "^2.0.0",
-    "@storybook/builder-webpack5": "^6.5.12",
-    "@storybook/manager-webpack5": "^6.5.12",
-    "@storybook/node-logger": "^6.5.12",
-    "@storybook/preset-create-react-app": "^4.0.0",
-    "@storybook/react": "^6.5.12",
-    "@storybook/testing-library": "^0.0.13",
+    "@storybook/blocks": "^7.0.0-rc.6",
+    "@storybook/builder-vite": "^7.0.0-rc.6",
+    "@storybook/node-logger": "^7.0.0-rc.6",
+    "@storybook/react": "^7.0.0-rc.6",
+    "@storybook/react-vite": "^7.0.0-rc.6",
+    "@storybook/testing-library": "^0.0.14-next.1",
     "@tailwindcss/aspect-ratio": "^0.4.0",
     "@tailwindcss/forms": "^0.5.1",
     "@tailwindcss/typography": "^0.5.2",
@@ -167,13 +167,15 @@
     "local-cypress": "^1.2.1",
     "postcss": "^8.4.14",
     "prettier": "^2.3.0",
+    "prop-types": "^15.8.1",
     "redux-devtools-extension": "^2.13.9",
     "rescript": "^9.1.4",
     "snyk": "^1.618.0",
-    "storybook-dark-mode": "^1.1.2",
+    "storybook": "^7.0.0-rc.6",
     "tailwindcss": "^3.2.4",
     "typescript": "^4.8.4",
-    "vite": "^4.2.1"
+    "vite": "^4.2.1",
+    "vite-plugin-pwa": "^0.14.6"
   },
   "browserslist": {
     "production": [

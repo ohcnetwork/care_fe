@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_APP_COVER_IMAGE: string;
   readonly VITE_APP_COVER_IMAGE_ALT: string;
   readonly VITE_APP_CONFIG: string;
+  readonly VITE_PUBLIC_URL: string;
 }
 
 interface ImportMeta {

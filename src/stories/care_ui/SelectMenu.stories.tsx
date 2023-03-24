@@ -1,4 +1,4 @@
-import { ComponentStory } from "@storybook/react";
+import { StoryFn } from "@storybook/react";
 import { useState } from "react";
 import { GENDER_TYPES } from "../../Common/constants";
 import SelectMenuV2 from "../../Components/Form/SelectMenuV2";
@@ -8,7 +8,7 @@ export default {
   component: SelectMenuV2,
 };
 
-const Template: ComponentStory<typeof SelectMenuV2> = (args) => {
+const Template: StoryFn<typeof SelectMenuV2> = (args) => {
   const [state, setState] = useState<any>(undefined);
 
   return (

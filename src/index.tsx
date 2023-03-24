@@ -7,15 +7,17 @@ import { applyMiddleware, createStore } from "redux";
 import thunk from "redux-thunk";
 import { Provider } from "react-redux";
 import * as Sentry from "@sentry/browser";
-import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
-
 import "./style/index.css";
 import UpdatableApp from "./Components/Common/UpdatableApp";
+import { registerSW } from "virtual:pwa-register"
+
+console.log(import.meta.env.MODE);
+registerSW({ immediate: false })
 
 const store = createStore(reducer, applyMiddleware(thunk));
-if (process.env.NODE_ENV === "production") {
+if (import.meta.env.PROD) {
   Sentry.init({
-    environment: process.env.NODE_ENV,
+    environment: import.meta.env.MODE,
     dsn: "https://8801155bd0b848a09de9ebf6f387ebc8@sentry.io/5183632",
   });
 }
@@ -38,13 +40,3 @@ ReactDOM.render(
   </Provider>,
   document.getElementById("root")
 );
-
-/*
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/service-worker.js");
-  });
-}
-*/
-
-serviceWorkerRegistration.register();
