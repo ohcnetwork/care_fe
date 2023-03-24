@@ -244,8 +244,6 @@ export const DailyRounds = (props: any) => {
     return map.toFixed(2);
   };
 
-  console.log(state.form.review_interval);
-
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validForm = validateForm();
@@ -698,8 +696,8 @@ export const DailyRounds = (props: any) => {
                           <div className="flex flex-row justify-between">
                             <h4>BP</h4>
                             <p className="text-sm font-semibold">{`MAP: ${calculateMAP(
-                              state.form.systolic,
-                              state.form.diastolic
+                              state.form.bp?.systolic,
+                              state.form.bp?.diastolic
                             )}`}</p>
                           </div>
                           <div className="md:grid gap-2 grid-cols-1 md:grid-cols-2">

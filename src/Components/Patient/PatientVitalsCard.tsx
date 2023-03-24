@@ -1,6 +1,7 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listAssetBeds, getPermittedFacility } from "../../Redux/actions";
+import { classNames } from "../../Utils/utils";
 import { AssetData } from "../Assets/AssetTypes";
 import ToolTip from "../Common/utils/Tooltip";
 import { PatientModel } from "./models";
@@ -10,6 +11,7 @@ export interface IPatientVitalsCardProps {
   facilityId?: string;
   patient?: PatientModel;
   socketUrl?: string;
+  shrinked?: boolean;
 }
 
 const getVital = (
@@ -33,8 +35,12 @@ const getVital = (
   return "";
 };
 
-export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
-  const { patient, socketUrl, facilityId } = props;
+export default function PatientVitalsCard({
+  patient,
+  socketUrl,
+  facilityId,
+  shrinked,
+}: IPatientVitalsCardProps) {
   const wsClient = useRef<WebSocket>();
   const [waveforms, setWaveForms] = useState<WaveformType[] | null>(null);
   const dispatch: any = useDispatch();
@@ -140,7 +146,7 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
 
   const vitals: VitalType[] = [
     {
-      label: <>Pulse Rate</>,
+      label: shrinked ? "Pulse" : "Pulse Rate",
       liveKey: "pulse-rate",
       vitalKey: "pulse",
       waveformKey: "II",
@@ -149,7 +155,7 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
       wavetype: "REFRESH",
     },
     {
-      label: <>Blood Pressure</>,
+      label: shrinked ? "BP" : "Blood Pressure",
       liveKey: "bp",
       vitalKey: "bp",
     },
@@ -173,7 +179,7 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
       //waveformDefaultSpace: true
     },
     {
-      label: <>Temperature (F)</>,
+      label: shrinked ? "Temp. (°F)" : "Temperature (°F)",
       liveKey: "body-temperature1",
       vitalKey: "temperature",
     },
@@ -181,7 +187,12 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
 
   return (
     <div className=" w-full">
-      <div className="flex w-full items-stretch flex-col md:flex-row">
+      <div
+        className={classNames(
+          "flex w-full items-stretch flex-col md:flex-row",
+          shrinked && "bg-black"
+        )}
+      >
         <div className="w-full flex flex-col items-stretch py-2 bg-black h-auto text-gray-400 relative">
           {waveforms ? (
             <>
@@ -227,7 +238,12 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
             </div>
           )}
         </div>
-        <div className="flex flex-row md:flex-col flex-wrap md:flex-nowrap w-full md:w-[200px] border-l border-l-gray-400 p-3 justify-between md:justify-start shrink-0">
+        <div
+          className={classNames(
+            "flex flex-row md:flex-col flex-wrap md:flex-nowrap w-full border-l border-l-gray-400 justify-between md:justify-start shrink-0",
+            shrinked ? "md:w-[120px] p-2 text-gray-400" : "md:w-[200px] p-3"
+          )}
+        >
           {vitals.map((vital, i) => {
             const liveReading = getVital(patientObservations, vital.liveKey);
             return (
@@ -247,11 +263,18 @@ export default function PatientVitalsCard(props: IPatientVitalsCardProps) {
                         ]) ||
                     "--"}
                 </h2>
-                <div className="text-xs md:text-base">
-                  <i
-                    className={`fas fa-circle text-xs mr-2 ${
-                      liveReading ? "text-green-600" : "text-gray-400"
-                    }`}
+                <div
+                  className={classNames(
+                    "text-xs",
+                    shrinked ? "md:text-sm" : "md:text-base"
+                  )}
+                >
+                  <div
+                    className={classNames(
+                      "mr-2 rounded-full",
+                      shrinked ? "w-2 h-2" : "w-3 h-3",
+                      liveReading ? "text-green-500" : "text-gray-500"
+                    )}
                   />
                   {vital.label}
                 </div>
