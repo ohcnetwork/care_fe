@@ -9,7 +9,7 @@ import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDate } from "../../../Utils/utils";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-
+import { PainDiagrams } from "./PainDiagrams";
 interface PrimaryParametersPlotProps {
   facilityId: string;
   patientId: string;
@@ -31,7 +31,7 @@ export const PrimaryParametersPlot = ({
           {
             page: currentPage,
             fields: [
-              "pain",
+              "pain_scale_enhanced",
               "bp",
               "pulse",
               "temperature",
@@ -139,6 +139,7 @@ export const PrimaryParametersPlot = ({
       rhythmValues[key] = lst;
     }
   });
+
   return (
     <div>
       <div className="grid md:grid-cols-2 gap-4">
@@ -256,7 +257,7 @@ export const PrimaryParametersPlot = ({
           </div>
         </div>
       </div>
-
+      <PainDiagrams fetchData={results} consultationId={consultationId} />
       {totalCount > PAGINATION_LIMIT && (
         <div className="mt-4 flex w-full justify-center">
           <Pagination
