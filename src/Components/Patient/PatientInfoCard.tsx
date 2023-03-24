@@ -9,12 +9,14 @@ import {
   CONSULTATION_SUGGESTION,
   DISCHARGE_REASONS,
   PATIENT_CATEGORIES,
+  RESPIRATORY_SUPPORT,
 } from "../../Common/constants";
 import moment from "moment";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import * as Notification from "../../Utils/Notifications.js";
 import useConfig from "../../Common/hooks/useConfig";
+import Chip from "../../CAREUI/display/Chip";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -157,6 +159,23 @@ export default function PatientInfoCard(props: {
               <span className="mx-2">•</span>
               <span>{patient.gender}</span>
             </p>
+            <div className="lg:mt-2">
+              {patient.last_consultation?.last_daily_round
+                ?.ventilator_interface && (
+                <Chip
+                  color="purple"
+                  startIcon="lungs"
+                  text={
+                    RESPIRATORY_SUPPORT.find(
+                      (resp) =>
+                        resp.text ===
+                        patient.last_consultation?.last_daily_round
+                          ?.ventilator_interface
+                    )?.id || "UNKNOWN"
+                  }
+                />
+              )}
+            </div>
             <div className="text-sm flex flex-col sm:flex-row items-center gap-2 lg:mt-4">
               {[
                 ["Blood Group", patient.blood_group, patient.blood_group],
