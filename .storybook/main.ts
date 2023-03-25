@@ -15,7 +15,12 @@ const config: StorybookConfig = {
   },
   staticDirs: ["../public"],
   core: {
-    builder: "@storybook/builder-vite",
+    builder: {
+      name: "@storybook/builder-vite",
+      options: {
+        viteConfigPath: "./.storybook/vite.config.ts",
+      },
+    },
   },
 };
 export default config;
