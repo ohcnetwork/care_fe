@@ -41,7 +41,7 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Compile rescript files ⚙️
-        run: "npm run re:build"
+        run: "npm run build:res"
 
       - name: Cypress run 🥬
         uses: cypress-io/github-action@v4
