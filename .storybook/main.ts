@@ -1,21 +1,19 @@
-import type { StorybookConfig } from "@storybook/react-vite";
-
-const config: StorybookConfig = {
+const config = {
   stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|ts|tsx)"],
   addons: [
     "@storybook/addon-links",
     "@storybook/addon-essentials",
     "@storybook/addon-interactions",
-  ],
-  core: {
-    builder: {
-      name: "@storybook/builder-vite",
+    {
+      name: "@storybook/addon-postcss",
       options: {
-        viteConfigPath: "./.storybook/vite.config.ts",
+        postcssLoaderOptions: {
+          implementation: require("postcss"),
+        },
       },
     },
-  },
-  staticDirs: ["../public"],
+    "@storybook/addon-mdx-gfm",
+  ],
   framework: {
     name: "@storybook/react-vite",
     options: {},
@@ -24,5 +22,4 @@ const config: StorybookConfig = {
     autodocs: "tag",
   },
 };
-
 export default config;

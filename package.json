@@ -47,8 +47,8 @@
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src --write",
     "dev:storybook": "storybook dev -p 6006 ",
-    "build:storybook": "storybook build -o build-storybook",
-    "preview:storybook": "vite preview --outDir build-storybook"
+    "build:storybook": "storybook build -o storybook build",
+    "preview:storybook": "vite preview --outDir storybook build"
   },
   "dependencies": {
     "@date-io/date-fns": "^1.3.13",
@@ -115,9 +115,9 @@
     "@storybook/addon-essentials": "^7.0.0-rc.6",
     "@storybook/addon-interactions": "^7.0.0-rc.6",
     "@storybook/addon-links": "^7.0.0-rc.6",
+    "@storybook/addon-mdx-gfm": "^7.0.0-rc.6",
     "@storybook/addon-postcss": "^2.0.0",
     "@storybook/blocks": "^7.0.0-rc.6",
-    "@storybook/builder-vite": "^7.0.0-rc.6",
     "@storybook/node-logger": "^7.0.0-rc.6",
     "@storybook/react": "^7.0.0-rc.6",
     "@storybook/react-vite": "^7.0.0-rc.6",
