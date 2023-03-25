@@ -12,7 +12,7 @@ export default function Error404() {
     <div className="flex justify-center text-center items-center h-screen">
       <div className="text-center w-[500px]">
         <img
-          src={`${process.env.PUBLIC_URL}/images/404.svg`}
+          src={`${import.meta.env.VITE_PUBLIC_URL}/images/404.svg`}
           alt={t("error_404")}
           className="w-full"
         />
