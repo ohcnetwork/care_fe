@@ -47,7 +47,7 @@
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src --write",
     "storybook": "storybook dev -p 6006",
-    "build:storybook": "storybook build -o build-storybook"
+    "build-storybook": "storybook build -o build-storybook"
   },
   "dependencies": {
     "@date-io/date-fns": "^1.3.13",
