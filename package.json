@@ -47,7 +47,7 @@
     "lint-fix": "eslint ./src --fix",
     "format": "prettier ./src --write",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build:storybook": "storybook build -o build-storybook"
   },
   "dependencies": {
     "@date-io/date-fns": "^1.3.13",
@@ -66,6 +66,7 @@
     "@react-spring/web": "^9.6.1",
     "@rescript/react": "^0.10.3",
     "@sentry/browser": "^7.22.0",
+    "@storybook/builder-vite": "^7.0.0-rc.8",
     "@yaireo/ui-range": "^2.1.15",
     "axios": "^0.27.2",
     "browser-image-compression": "^2.0.0",
