@@ -248,7 +248,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     <Page
       title={t("update_shift_request")}
       backUrl={`/shifting/${props.id}`}
-      className="px-2 pb-2"
     >
       <div className="mt-4">
         <Card>
