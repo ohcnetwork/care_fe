@@ -32,7 +32,7 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
 
 interface patientShiftProps {
   id: string;
@@ -245,11 +245,11 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={t("update_shift_request")}
-        backUrl={`/shifting/${props.id}`}
-      />
+    <Page
+      title={t("update_shift_request")}
+      backUrl={`/shifting/${props.id}`}
+      className="px-2 pb-2"
+    >
       <div className="mt-4">
         <Card>
           <CardContent>
@@ -466,6 +466,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };
