@@ -450,52 +450,6 @@ export const LegacyCheckboxField = (props: CheckboxProps) => {
   );
 };
 
-interface AutoCompleteMultiFieldProps {
-  id: string;
-  options: Array<any>;
-  label: string;
-  variant: string;
-  placeholder: string;
-  errors?: string;
-  value: any;
-  onChange: (e: any, selected: any) => void;
-}
-
-export const AutoCompleteMultiField = (props: AutoCompleteMultiFieldProps) => {
-  const {
-    id,
-    options,
-    label,
-    variant,
-    placeholder,
-    errors = "",
-    onChange,
-    value,
-  } = props;
-  return (
-    <>
-      <Autocomplete
-        multiple
-        freeSolo
-        id={id}
-        options={options}
-        onChange={onChange}
-        value={value}
-        filterSelectedOptions
-        renderInput={(params: any) => (
-          <TextField
-            {...params}
-            variant={variant}
-            label={label}
-            placeholder={placeholder}
-          />
-        )}
-      />
-      <LegacyErrorHelperText error={errors} />
-    </>
-  );
-};
-
 interface AutoCompleteAsyncFieldProps {
   multiple?: boolean;
   className?: string;
