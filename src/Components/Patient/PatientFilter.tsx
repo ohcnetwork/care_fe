@@ -1,6 +1,6 @@
 import React from "react";
 import { DISEASE_STATUS } from "../../Common/constants";
-import { SelectField } from "../Common/HelperInputFields";
+import { LegacySelectField } from "../Common/HelperInputFields";
 
 const diseaseStatusOptions = ["Show All", ...DISEASE_STATUS];
 
@@ -18,7 +18,7 @@ export const PatientFilter = (props: PatientFilterProps) => {
   return (
     <div className="md:flex sticky top-0 bg-gray-100">
       <div className="w-56 flex items-center">
-        <SelectField
+        <LegacySelectField
           name="disease_status"
           variant="outlined"
           margin="dense"

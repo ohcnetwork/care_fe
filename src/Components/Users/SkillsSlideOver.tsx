@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
-import { classNames } from "../../Utils/utils";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import { SkillSelect } from "../Common/SkillSelect";
 import {
@@ -13,8 +12,10 @@ import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import ButtonV2 from "../Common/components/ButtonV2";
 import AuthorizeFor from "../../Utils/AuthorizeFor";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
+import { AddSkillsPlaceholder, SkillsArray } from "./SkillsSlideOverComponents";
+import { useTranslation } from "react-i18next";
+import CircularProgress from "../Common/components/CircularProgress";
 
 interface IProps {
   username: string;
@@ -23,6 +24,8 @@ interface IProps {
 }
 
 export default ({ show, setShow, username }: IProps) => {
+  /* added const {t} hook here and relevant text to Common.json to avoid eslint error  */
+  const { t } = useTranslation();
   const [skills, setSkills] = useState<SkillModel[]>([]);
   const [selectedSkill, setSelectedSkill] = useState<SkillObjectModel | null>(
     null
@@ -79,6 +82,8 @@ export default ({ show, setShow, username }: IProps) => {
     AuthorizeFor(["DistrictAdmin", "StateAdmin"])
   );
 
+  const hasSkills = useMemo(() => skills.length > 0, [skills]);
+
   return (
     <div className="col-span-4">
       {deleteSkill && (
@@ -112,57 +117,40 @@ export default ({ show, setShow, username }: IProps) => {
               <ButtonV2
                 disabled={!authorizeForAddSkill}
                 onClick={() => addSkill(username, selectedSkill)}
+                className="w-6rem"
               >
-                Add
+                {/* Replace "Add" in button with CircularProgress */}
+                {isLoading ? (
+                  <CircularProgress className="h-5 w-5" />
+                ) : (
+                  t("add")
+                )}
               </ButtonV2>
               {!authorizeForAddSkill && (
                 <span className="tooltip-text tooltip-bottom -translate-x-24 translate-y-2">
-                  Contact your admin to add skills
+                  {t("contact_your_admin_to_add_skills")}
                 </span>
               )}
             </div>
-            <div className="mb-2 mt-4">
-              {skills.length === 0 ? (
-                <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
-                  <div className="w-full">
-                    <img
-                      src={`${import.meta.env.VITE_PUBLIC_URL}/images/404.svg`}
-                      alt="Error 404"
-                      className="w-80 mx-auto"
-                    />
-                  </div>
-                  <p className="text-lg font-semibold text-center text-primary pt-4">
-                    Select and add some skills
-                  </p>
-                </div>
-              ) : (
-                skills.map((skill, i) => (
-                  <div
-                    key={`facility_${i}`}
-                    className={classNames(
-                      "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-200 rounded md:rounded-lg cursor-pointer"
-                    )}
-                  >
-                    <div className="flex justify-between">
-                      <div className="text-lg font-bold">
-                        {skill.skill_object.name}
-                      </div>
-                      <div>
-                        <ButtonV2
-                          size="small"
-                          variant="danger"
-                          ghost={true}
-                          disabled={isLoading || !authorizeForAddSkill}
-                          onClick={() => setDeleteSkill(skill)}
-                        >
-                          <CareIcon className="care-l-times text-lg" />
-                        </ButtonV2>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+            {/* While loading skills, we display an additional circular progress to show we are fetching the information*/}
+            {isLoading ? (
+              <div className="mt-4 flex justify-center">
+                <CircularProgress />
+              </div>
+            ) : (
+              <div className="mb-2 mt-4">
+                {hasSkills ? (
+                  <SkillsArray
+                    isLoading={isLoading}
+                    skills={skills}
+                    authorizeForAddSkill={authorizeForAddSkill}
+                    setDeleteSkill={setDeleteSkill}
+                  />
+                ) : (
+                  <AddSkillsPlaceholder />
+                )}
+              </div>
+            )}
           </div>
         </div>
       </SlideOverCustom>

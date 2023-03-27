@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { UserSelect } from "../Common/UserSelect2";
 import { navigate } from "raviger";
-import { SelectField } from "../Common/HelperInputFields";
+import { LegacySelectField } from "../Common/HelperInputFields";
 import {
   SHIFTING_FILTER_ORDER,
   DISEASE_STATUS,
@@ -249,7 +249,7 @@ export default function ListFilter(props: any) {
         {props.showShiftingStatus && (
           <div className="w-full flex-none">
             <span className="text-sm font-semibold">{t("status")}</span>
-            <SelectField
+            <LegacySelectField
               name="status"
               variant="outlined"
               margin="dense"
@@ -341,7 +341,7 @@ export default function ListFilter(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">{t("ordering")}</span>
-          <SelectField
+          <LegacySelectField
             name="ordering"
             variant="outlined"
             margin="dense"
@@ -358,7 +358,7 @@ export default function ListFilter(props: any) {
           <span className="text-sm font-semibold">
             {t("is_emergency_case")}
           </span>
-          <SelectField
+          <LegacySelectField
             name="emergency"
             variant="outlined"
             margin="dense"
@@ -375,7 +375,7 @@ export default function ListFilter(props: any) {
             <span className="text-sm font-semibold">{`${t(
               "is"
             )} ${kasp_string}`}</span>
-            <SelectField
+            <LegacySelectField
               name="is_kasp"
               variant="outlined"
               margin="dense"
@@ -390,7 +390,7 @@ export default function ListFilter(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">{t("is_upshift_case")}</span>
-          <SelectField
+          <LegacySelectField
             name="is_up_shift"
             variant="outlined"
             margin="dense"
@@ -404,7 +404,7 @@ export default function ListFilter(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">{t("disease_status")}</span>
-          <SelectField
+          <LegacySelectField
             name="disease_status"
             variant="outlined"
             margin="dense"
@@ -418,7 +418,7 @@ export default function ListFilter(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">{t("is_antenatal")}</span>
-          <SelectField
+          <LegacySelectField
             name="is_antenatal"
             variant="outlined"
             margin="dense"
@@ -434,7 +434,7 @@ export default function ListFilter(props: any) {
           <span className="text-sm font-semibold">
             {t("breathlessness_level")}
           </span>
-          <SelectField
+          <LegacySelectField
             name="breathlessness_level"
             variant="outlined"
             margin="dense"

@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import { navigate } from "raviger";
-import { SelectField } from "../../Common/HelperInputFields";
+import { LegacySelectField } from "../../Common/HelperInputFields";
 import { CircularProgress } from "@material-ui/core";
 import { FACILITY_TYPES } from "../../../Common/constants";
 import { getStates, getDistrictByState } from "../../../Redux/actions";
@@ -128,7 +128,7 @@ function FacilityFilter(props: any) {
             {isStateLoading ? (
               <CircularProgress size={20} />
             ) : (
-              <SelectField
+              <LegacySelectField
                 name="state"
                 variant="outlined"
                 margin="dense"
@@ -147,7 +147,7 @@ function FacilityFilter(props: any) {
             {isDistrictLoading ? (
               <CircularProgress size={20} />
             ) : (
-              <SelectField
+              <LegacySelectField
                 name="district"
                 variant="outlined"
                 margin="dense"
@@ -175,7 +175,7 @@ function FacilityFilter(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Facility type</span>
-          <SelectField
+          <LegacySelectField
             name="facility_type"
             variant="outlined"
             margin="dense"
@@ -190,7 +190,7 @@ function FacilityFilter(props: any) {
           <span className="text-sm font-semibold">
             {kasp_string} Empanelled
           </span>
-          <SelectField
+          <LegacySelectField
             name="kasp_empanelled"
             variant="outlined"
             margin="dense"
