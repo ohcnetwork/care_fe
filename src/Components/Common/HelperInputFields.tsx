@@ -567,7 +567,7 @@ export const LegacyAutoCompleteAsyncField = (
 /**
  * Deprecated. Use `PhoneNumberFormField` instead.
  */
-export const PhoneNumberField = (props: any) => {
+export const LegacyPhoneNumberField = (props: any) => {
   const {
     label,
     placeholder,
