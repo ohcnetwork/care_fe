@@ -24,7 +24,6 @@ import {
   DatePickerProps,
   KeyboardDatePicker,
   KeyboardDateTimePicker,
-  KeyboardTimePicker,
   MuiPickersUtilsProvider,
 } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
@@ -261,24 +260,6 @@ export const LegacyDateInputField = (props: DateInputFieldProps) => {
         {...restProps}
       />
       <ErrorHelperText error={errors} />
-    </MuiPickersUtilsProvider>
-  );
-};
-
-export const TimeInputField = (props: any) => {
-  const { value, onChange, label } = props;
-  return (
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <KeyboardTimePicker
-        margin="normal"
-        id="time-picker"
-        label={label}
-        value={value}
-        onChange={onChange}
-        KeyboardButtonProps={{
-          "aria-label": "change time",
-        }}
-      />
     </MuiPickersUtilsProvider>
   );
 };
