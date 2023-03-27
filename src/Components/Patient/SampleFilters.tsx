@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { SelectField } from "../Common/HelperInputFields";
+import { LegacySelectField } from "../Common/HelperInputFields";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
@@ -74,7 +74,7 @@ export default function UserFilter(props: any) {
     >
       <div className="w-full flex-none">
         <div className="text-sm font-semibold">Status</div>
-        <SelectField
+        <LegacySelectField
           name="status"
           variant="outlined"
           margin="dense"
@@ -92,7 +92,7 @@ export default function UserFilter(props: any) {
 
       <div className="w-full flex-none">
         <div className="text-sm font-semibold">Result</div>
-        <SelectField
+        <LegacySelectField
           name="result"
           variant="outlined"
           margin="dense"
@@ -105,7 +105,7 @@ export default function UserFilter(props: any) {
 
       <div className="w-full flex-none">
         <div className="text-sm font-semibold">Sample Test Type</div>
-        <SelectField
+        <LegacySelectField
           name="sample_type"
           variant="outlined"
           margin="dense"

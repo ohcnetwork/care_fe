@@ -26,7 +26,7 @@ import { SampleTestCard } from "./SampleTestCard";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { ErrorHelperText } from "../Common/HelperInputFields";
+import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import Modal from "@material-ui/core/Modal";
 import Chip from "../../CAREUI/display/Chip";
 import { classNames, formatDate } from "../../Utils/utils";
@@ -1481,7 +1481,7 @@ export const PatientHome = (props: any) => {
               user_type={"Volunteer"}
               outline={false}
             />
-            <ErrorHelperText error={errors.assignedVolunteer} />
+            <LegacyErrorHelperText error={errors.assignedVolunteer} />
           </div>
 
           <DialogActions>

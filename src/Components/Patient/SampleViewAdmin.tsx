@@ -305,7 +305,11 @@ export default function SampleViewAdmin() {
   }
 
   if (isLoading || !sample) {
-    manageSamples = <Loading />;
+    manageSamples = (
+      <div className="flex justify-center w-full">
+        <Loading />
+      </div>
+    );
   } else if (sample && sample.length) {
     manageSamples = (
       <>

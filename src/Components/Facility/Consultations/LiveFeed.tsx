@@ -29,7 +29,7 @@ import { AxiosError } from "axios";
 import { isNull } from "lodash";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../models";
-import { TextInputField } from "../../Common/HelperInputFields";
+import { LegacyTextInputField } from "../../Common/HelperInputFields";
 import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 
@@ -347,7 +347,7 @@ const LiveFeed = (props: any) => {
               </div>
               <div>
                 <InputLabel id="location">Preset Name</InputLabel>
-                <TextInputField
+                <LegacyTextInputField
                   name="name"
                   id="location"
                   variant="outlined"

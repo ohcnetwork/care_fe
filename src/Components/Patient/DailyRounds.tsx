@@ -19,13 +19,13 @@ import {
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  NativeSelectField,
-  CheckboxField,
-  SelectField,
-  ErrorHelperText,
-  DateTimeFiled,
-  MultiSelectField,
-  AutoCompleteAsyncField,
+  LegacyNativeSelectField,
+  LegacyCheckboxField,
+  LegacySelectField,
+  LegacyErrorHelperText,
+  LegacyDateTimeFiled,
+  LegacyMultiSelectField,
+  LegacyAutoCompleteAsyncField,
 } from "../Common/HelperInputFields";
 import {
   createDailyReport,
@@ -515,7 +515,7 @@ export const DailyRounds = (props: any) => {
             <CardContent>
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="w-full md:w-1/3">
-                  <DateTimeFiled
+                  <LegacyDateTimeFiled
                     label="Measured At"
                     margin="dense"
                     value={state.form.taken_at}
@@ -527,7 +527,7 @@ export const DailyRounds = (props: any) => {
                   />
                 </div>
                 <div className="w-full md:w-1/3">
-                  <SelectField
+                  <LegacySelectField
                     className=""
                     name="rounds_type"
                     variant="standard"
@@ -550,7 +550,7 @@ export const DailyRounds = (props: any) => {
                   />
                 </div>
                 <div className="w-full md:w-1/3">
-                  <SelectField
+                  <LegacySelectField
                     name="patient_category"
                     variant="standard"
                     margin="dense"
@@ -587,7 +587,7 @@ export const DailyRounds = (props: any) => {
                       />
                     </Box>
                   </RadioGroup>
-                  <ErrorHelperText error={state.errors.clone_last} />
+                  <LegacyErrorHelperText error={state.errors.clone_last} />
                 </div>
               )}
               {(state.form.clone_last === "false" || id) && (
@@ -617,14 +617,14 @@ export const DailyRounds = (props: any) => {
 
                     <div className="md:col-span-2">
                       <FieldLabel id="symptoms-label">Symptoms</FieldLabel>
-                      <MultiSelectField
+                      <LegacyMultiSelectField
                         name="additional_symptoms"
                         variant="outlined"
                         value={state.form.additional_symptoms}
                         options={symptomChoices}
                         onChange={handleSymptomChange}
                       />
-                      <ErrorHelperText
+                      <LegacyErrorHelperText
                         error={state.errors.additional_symptoms}
                       />
                     </div>
@@ -645,7 +645,7 @@ export const DailyRounds = (props: any) => {
 
                     <div className="flex-1">
                       <FieldLabel id="action-label">Action </FieldLabel>
-                      <NativeSelectField
+                      <LegacyNativeSelectField
                         name="action"
                         variant="outlined"
                         value={state.form.action}
@@ -654,14 +654,14 @@ export const DailyRounds = (props: any) => {
                         options={TELEMEDICINE_ACTIONS}
                         onChange={handleChange}
                       />
-                      <ErrorHelperText error={state.errors.action} />
+                      <LegacyErrorHelperText error={state.errors.action} />
                     </div>
 
                     <div className="flex-1">
                       <FieldLabel id="review_interval-label">
                         Review After{" "}
                       </FieldLabel>
-                      <SelectField
+                      <LegacySelectField
                         name="review_interval"
                         variant="standard"
                         value={state.form.review_interval || prevReviewInterval}
@@ -678,7 +678,7 @@ export const DailyRounds = (props: any) => {
                       </div>
                     </div>
                     <div>
-                      <CheckboxField
+                      <LegacyCheckboxField
                         checked={state.form.recommend_discharge}
                         onChange={handleCheckboxFieldChange}
                         name="recommend_discharge"
@@ -706,7 +706,7 @@ export const DailyRounds = (props: any) => {
                                 Systolic
                                 {getStatus(100, "Low", 140, "High", "systolic")}
                               </FieldLabel>
-                              <AutoCompleteAsyncField
+                              <LegacyAutoCompleteAsyncField
                                 name="systolic"
                                 multiple={false}
                                 variant="standard"
@@ -735,7 +735,7 @@ export const DailyRounds = (props: any) => {
                                 Diastolic{" "}
                                 {getStatus(50, "Low", 90, "High", "diastolic")}
                               </FieldLabel>
-                              <AutoCompleteAsyncField
+                              <LegacyAutoCompleteAsyncField
                                 name="diastolic"
                                 multiple={false}
                                 variant="standard"
@@ -772,7 +772,7 @@ export const DailyRounds = (props: any) => {
                               "pulse"
                             )}
                           </FieldLabel>
-                          <AutoCompleteAsyncField
+                          <LegacyAutoCompleteAsyncField
                             name="pulse"
                             multiple={false}
                             variant="standard"
@@ -813,7 +813,7 @@ export const DailyRounds = (props: any) => {
                           </FieldLabel>
                           <div className="flex flex-row">
                             <div className="grow mr-2">
-                              <AutoCompleteAsyncField
+                              <LegacyAutoCompleteAsyncField
                                 name="temperature"
                                 multiple={false}
                                 variant="standard"
@@ -857,7 +857,7 @@ export const DailyRounds = (props: any) => {
                             {"Respiratory Rate (bpm) *"}
                             {getStatus(12, "Low", 16, "High", "resp")}
                           </FieldLabel>
-                          <AutoCompleteAsyncField
+                          <LegacyAutoCompleteAsyncField
                             name="resp"
                             multiple={false}
                             variant="standard"
@@ -889,7 +889,7 @@ export const DailyRounds = (props: any) => {
                               "ventilator_spo2"
                             )}
                           </FieldLabel>
-                          <AutoCompleteAsyncField
+                          <LegacyAutoCompleteAsyncField
                             name="ventilator_spo2"
                             multiple={false}
                             variant="standard"
@@ -913,7 +913,7 @@ export const DailyRounds = (props: any) => {
                           <FieldLabel className="flex flex-row justify-between">
                             Rhythm
                           </FieldLabel>
-                          <SelectField
+                          <LegacySelectField
                             name="rhythm"
                             variant="standard"
                             value={

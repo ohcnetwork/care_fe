@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import {
-  AutoCompleteAsyncField,
-  TextInputField,
+  LegacyAutoCompleteAsyncField,
+  LegacyTextInputField,
 } from "../Common/HelperInputFields";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import { getAllLocalBodyByDistrict } from "../../Redux/actions";
@@ -189,7 +189,7 @@ export default function ListFilter(props: any) {
     >
       <div>
         <FieldLabel>{t("lsg")}</FieldLabel>
-        <AutoCompleteAsyncField
+        <LegacyAutoCompleteAsyncField
           className="-my-3"
           multiple
           name="local_bodies"
@@ -211,7 +211,7 @@ export default function ListFilter(props: any) {
 
       <div>
         <FieldLabel>{t("Ward")}</FieldLabel>
-        <AutoCompleteAsyncField
+        <LegacyAutoCompleteAsyncField
           className="-my-3"
           multiple={true}
           name="wards"
@@ -273,7 +273,7 @@ export default function ListFilter(props: any) {
 
       <div className="w-full flex-none">
         <FieldLabel>{t("srf_id")}</FieldLabel>
-        <TextInputField
+        <LegacyTextInputField
           id="srf_id"
           name="srf_id"
           variant="outlined"

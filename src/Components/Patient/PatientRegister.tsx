@@ -40,11 +40,11 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
 import {
-  CheckboxField,
-  DateInputField,
-  ErrorHelperText,
-  SelectField,
-  TextInputField,
+  LegacyCheckboxField,
+  LegacyDateInputField,
+  LegacyErrorHelperText,
+  LegacySelectField,
+  LegacyTextInputField,
 } from "../Common/HelperInputFields";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import { DupPatientModel } from "../Facility/models";
@@ -1059,7 +1059,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     return (
       <div key={textField}>
         <div>
-          <CheckboxField
+          <LegacyCheckboxField
             checked={state.form.medical_history.includes(id)}
             onChange={(e) => handleMedicalCheckboxChange(e, id)}
             name={checkboxField}
@@ -1156,7 +1156,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <FieldLabel htmlFor="care-external-results-id" required>
                     Enter Care External Results Id
                   </FieldLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     id="care-external-results-id"
                     name="care-external-results-id"
                     variant="outlined"
@@ -1344,7 +1344,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             error={state.errors.permanent_address}
                           />
 
-                          <CheckboxField
+                          <LegacyCheckboxField
                             checked={sameAddress}
                             onChange={() => setSameAddress(!sameAddress)}
                             label="Same as Current Address"
@@ -1380,7 +1380,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           <FieldLabel htmlFor="village" id="name-label">
                             Village
                           </FieldLabel>
-                          <TextInputField
+                          <LegacyTextInputField
                             id="village"
                             name="village"
                             variant="outlined"
@@ -1398,7 +1398,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           >
                             Nationality
                           </FieldLabel>
-                          <SelectField
+                          <LegacySelectField
                             labelId="nationality"
                             name="nationality"
                             variant="outlined"
@@ -1516,7 +1516,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Passport Number
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="passport_no"
                               name="passport_no"
                               variant="outlined"
@@ -1585,7 +1585,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   >
                                     COWIN ID
                                   </FieldLabel>
-                                  <TextInputField
+                                  <LegacyTextInputField
                                     id="covin_id"
                                     name="covin_id"
                                     variant="outlined"
@@ -1629,7 +1629,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       />
                                     </div>
                                   </RadioGroup>
-                                  <ErrorHelperText
+                                  <LegacyErrorHelperText
                                     error={state.errors.number_of_doses}
                                   />
                                 </div>
@@ -1641,7 +1641,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   >
                                     Vaccine Name
                                   </FieldLabel>
-                                  <SelectField
+                                  <LegacySelectField
                                     labelId="vaccine_name"
                                     name="vaccine_name"
                                     variant="outlined"
@@ -1661,7 +1661,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   >
                                     Last Date of Vaccination
                                   </FieldLabel>
-                                  <DateInputField
+                                  <LegacyDateInputField
                                     id="last_vaccinated_date"
                                     fullWidth={true}
                                     value={state.form.last_vaccinated_date}
@@ -1752,7 +1752,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 >
                                   Estimate date of contact
                                 </FieldLabel>
-                                <DateInputField
+                                <LegacyDateInputField
                                   fullWidth={true}
                                   id="estimated_contact_date"
                                   value={state.form.estimated_contact_date}
@@ -1777,7 +1777,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 >
                                   Name / Cluster of Contact
                                 </FieldLabel>
-                                <TextInputField
+                                <LegacyTextInputField
                                   id="cluster_name"
                                   name="cluster_name"
                                   variant="outlined"
@@ -1802,7 +1802,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               COVID Disease Status
                             </FieldLabel>
-                            <SelectField
+                            <LegacySelectField
                               labelId="disease_status"
                               name="disease_status"
                               variant="outlined"
@@ -1822,7 +1822,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               COVID Test Type
                             </FieldLabel>
-                            <SelectField
+                            <LegacySelectField
                               labelId="test_type"
                               name="test_type"
                               variant="outlined"
@@ -1838,7 +1838,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             <FieldLabel id="srf_id-label" htmlFor="srf_id">
                               SRF Id for COVID Test
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="srf_id"
                               name="srf_id"
                               variant="outlined"
@@ -1888,7 +1888,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <FieldLabel id="date_declared_positive-label">
                                   Date Patient is Declared Positive for COVID
                                 </FieldLabel>
-                                <DateInputField
+                                <LegacyDateInputField
                                   fullWidth={true}
                                   value={state.form.date_declared_positive}
                                   onChange={(date) =>
@@ -1909,7 +1909,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             <FieldLabel id="test_id-label" htmlFor="test_id">
                               COVID Positive ID issued by ICMR
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="test_id"
                               name="test_id"
                               variant="outlined"
@@ -1928,7 +1928,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Date of Sample given for COVID Test
                             </FieldLabel>
-                            <DateInputField
+                            <LegacyDateInputField
                               fullWidth={true}
                               id="date_of_test"
                               value={state.form.date_of_test}
@@ -1948,7 +1948,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Date of Result for COVID Test
                             </FieldLabel>
-                            <DateInputField
+                            <LegacyDateInputField
                               fullWidth={true}
                               id="date_of_result"
                               value={state.form.date_of_result}
@@ -1969,7 +1969,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Number Of Primary Contacts for COVID
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="number_of_primary_contacts"
                               name="number_of_primary_contacts"
                               variant="outlined"
@@ -1987,7 +1987,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Number Of Secondary Contacts for COVID
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="number_of_secondary_contacts"
                               name="number_of_secondary_contacts"
                               variant="outlined"
@@ -2052,7 +2052,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               return renderMedicalHistory(i.id, i.text);
                             })}
                           </div>
-                          <ErrorHelperText
+                          <LegacyErrorHelperText
                             error={state.errors.medical_history}
                           />
                         </div>

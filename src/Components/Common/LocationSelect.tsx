@@ -29,22 +29,28 @@ export const LocationSelect = (props: LocationSelectProps) => {
   const [locations, setLocations] = useState<{ name: string; id: string }[]>(
     []
   );
+  const [query, setQuery] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const dispatchAction: any = useDispatch();
 
   const handleValueChange = (current: string[]) => {
     if (multiple) setSelected(current);
-    else setSelected([current ? current[0] : ""]);
+    else setSelected(current ? current[0] : "");
   };
 
   useEffect(() => {
+    const params = {
+      limit: 14,
+      search_text: query,
+    };
+    setLoading(true);
     dispatchAction(
-      listFacilityAssetLocation({}, { facility_external_id: facilityId })
+      listFacilityAssetLocation(params, { facility_external_id: facilityId })
     ).then(({ data }: any) => {
-      if (data.count > 0) {
-        setLocations(data.results);
-      }
+      setLocations(data.results);
+      setLoading(false);
     });
-  }, [facilityId]);
+  }, [query, facilityId]);
 
   return props.multiple ? (
     <AutocompleteMultiSelectFormField
@@ -52,6 +58,9 @@ export const LocationSelect = (props: LocationSelectProps) => {
       value={selected as unknown as string[]}
       options={locations}
       onChange={({ value }) => handleValueChange(value as unknown as string[])}
+      onQuery={(query) => {
+        setQuery(query);
+      }}
       placeholder="Search by location name"
       optionLabel={(option) => option.name}
       optionValue={(option) => option.id}
@@ -64,6 +73,10 @@ export const LocationSelect = (props: LocationSelectProps) => {
       value={selected as string}
       options={locations}
       onChange={({ value }) => handleValueChange([value])}
+      onQuery={(query) => {
+        setQuery(query);
+      }}
+      isLoading={loading}
       placeholder="Search by location name"
       optionLabel={(option) => option.name}
       optionValue={(option) => option.id}
