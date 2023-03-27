@@ -19,7 +19,7 @@ import {
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  NativeSelectField,
+  LegacyNativeSelectField,
   CheckboxField,
   SelectField,
   LegacyErrorHelperText,
@@ -645,7 +645,7 @@ export const DailyRounds = (props: any) => {
 
                     <div className="flex-1">
                       <FieldLabel id="action-label">Action </FieldLabel>
-                      <NativeSelectField
+                      <LegacyNativeSelectField
                         name="action"
                         variant="outlined"
                         value={state.form.action}

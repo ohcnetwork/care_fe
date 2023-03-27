@@ -274,7 +274,10 @@ export const LegacyErrorHelperText = (props: { error?: string }) => {
   );
 };
 
-export const NativeSelectField = (props: any) => {
+/**
+ * Deprecated. Use `SelectFormField` instead.
+ */
+export const LegacyNativeSelectField = (props: any) => {
   const { options, variant, label, optionKey, optionValue, ...others } = props;
   return (
     <FormControl style={{ width: "100%" }} variant={variant} margin="dense">
