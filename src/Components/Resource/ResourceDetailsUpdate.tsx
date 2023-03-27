@@ -5,7 +5,7 @@ import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   LegacyTextInputField,
   LegacyMultilineInputField,
-  ErrorHelperText,
+  LegacyErrorHelperText,
 } from "../Common/HelperInputFields";
 
 import * as Notification from "../../Utils/Notifications.js";
@@ -370,7 +370,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                     />
                   </Box>
                 </RadioGroup>
-                <ErrorHelperText error={state.errors.emergency} />
+                <LegacyErrorHelperText error={state.errors.emergency} />
               </div>
 
               <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">

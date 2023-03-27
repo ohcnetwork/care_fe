@@ -1,7 +1,10 @@
 import { useReducer, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { ErrorHelperText, SelectField } from "../Common/HelperInputFields";
+import {
+  LegacyErrorHelperText,
+  SelectField,
+} from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
@@ -334,7 +337,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                     />
                   </Box>
                 </RadioGroup>
-                <ErrorHelperText error={state.errors.emergency} />
+                <LegacyErrorHelperText error={state.errors.emergency} />
               </div>
 
               <div>
@@ -359,7 +362,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                     />
                   </Box>
                 </RadioGroup>
-                <ErrorHelperText error={state.errors.is_up_shift} />
+                <LegacyErrorHelperText error={state.errors.is_up_shift} />
               </div>
 
               {/* <div>

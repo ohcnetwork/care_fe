@@ -1,7 +1,7 @@
 import { useReducer, useState, useCallback, useEffect } from "react";
 import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { ErrorHelperText } from "../Common/HelperInputFields";
+import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate, useQueryParams } from "raviger";
@@ -338,7 +338,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                     />
                   </Box>
                 </RadioGroup>
-                <ErrorHelperText error={state.errors.emergency} />
+                <LegacyErrorHelperText error={state.errors.emergency} />
               </div>
 
               <div>
@@ -365,7 +365,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                     />
                   </Box>
                 </RadioGroup>
-                <ErrorHelperText error={state.errors.is_kasp} />
+                <LegacyErrorHelperText error={state.errors.is_kasp} />
               </div>
 
               <div>
@@ -390,7 +390,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                     />
                   </Box>
                 </RadioGroup>
-                <ErrorHelperText error={state.errors.is_up_shift} />
+                <LegacyErrorHelperText error={state.errors.is_up_shift} />
               </div>
               <div className="md:col-span-1">
                 <FieldLabel>{t("preferred_vehicle")}</FieldLabel>

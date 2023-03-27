@@ -137,7 +137,7 @@ export const LegacyTextInputField = (props: TextFieldPropsExtended) => {
         onChange={handleChange}
         onKeyDown={handleKeyDown}
       />
-      <ErrorHelperText error={errors} />
+      <LegacyErrorHelperText error={errors} />
     </div>
   );
 };
@@ -185,7 +185,7 @@ export const LegacyActionTextInputField = (props: ActionTextFieldProps) => {
           </div>
         )}
       </div>
-      <ErrorHelperText error={errors} />
+      <LegacyErrorHelperText error={errors} />
     </div>
   );
 };
@@ -198,7 +198,7 @@ export const LegacyMultilineInputField = (props: TextFieldPropsExtended) => {
   return (
     <div>
       <TextField {...props} multiline fullWidth />
-      <ErrorHelperText error={errors} />
+      <LegacyErrorHelperText error={errors} />
     </div>
   );
 };
@@ -221,7 +221,7 @@ export const LegacyDateTimeFiled = (props: DateInputFieldProps) => {
         disabled={disabled}
         {...restProps}
       />
-      <ErrorHelperText error={errors} />
+      <LegacyErrorHelperText error={errors} />
     </MuiPickersUtilsProvider>
   );
 };
@@ -259,12 +259,16 @@ export const LegacyDateInputField = (props: DateInputFieldProps) => {
         }}
         {...restProps}
       />
-      <ErrorHelperText error={errors} />
+      <LegacyErrorHelperText error={errors} />
     </MuiPickersUtilsProvider>
   );
 };
 
-export const ErrorHelperText = (props: { error?: string }) => {
+/**
+ * Deprecated. Set `error` on the `FormField` component instead.
+ * Or use `FieldError` to break out of the design.
+ */
+export const LegacyErrorHelperText = (props: { error?: string }) => {
   const { error } = props;
   return (
     <span
@@ -396,7 +400,7 @@ export const SelectField = (props: DefaultSelectInputProps) => {
             })}
         </Select>
       </FormControl>
-      {!!errors && <ErrorHelperText error={errors} />}
+      {!!errors && <LegacyErrorHelperText error={errors} />}
     </>
   );
 };
@@ -472,7 +476,7 @@ export const MultiSelectField = (props: MultiSelectInputProps) => {
           })}
         </Select>
       </FormControl>
-      {!!errors && <ErrorHelperText error={errors} />}
+      {!!errors && <LegacyErrorHelperText error={errors} />}
     </>
   );
 };
@@ -529,7 +533,7 @@ export const AutoCompleteMultiField = (props: AutoCompleteMultiFieldProps) => {
           />
         )}
       />
-      <ErrorHelperText error={errors} />
+      <LegacyErrorHelperText error={errors} />
     </>
   );
 };
@@ -632,7 +636,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
           />
         )}
       />
-      <ErrorHelperText error={errors} />
+      <LegacyErrorHelperText error={errors} />
     </>
   );
 };
@@ -710,7 +714,7 @@ export const PhoneNumberField = (props: any) => {
           <CareIcon className="care-l-multiply" />
         </ButtonV2>
       </div>
-      {errors && <ErrorHelperText error={errors} />}
+      {errors && <LegacyErrorHelperText error={errors} />}
     </>
   );
 };

@@ -22,7 +22,7 @@ import {
   NativeSelectField,
   CheckboxField,
   SelectField,
-  ErrorHelperText,
+  LegacyErrorHelperText,
   LegacyDateTimeFiled,
   MultiSelectField,
   AutoCompleteAsyncField,
@@ -587,7 +587,7 @@ export const DailyRounds = (props: any) => {
                       />
                     </Box>
                   </RadioGroup>
-                  <ErrorHelperText error={state.errors.clone_last} />
+                  <LegacyErrorHelperText error={state.errors.clone_last} />
                 </div>
               )}
               {(state.form.clone_last === "false" || id) && (
@@ -624,7 +624,7 @@ export const DailyRounds = (props: any) => {
                         options={symptomChoices}
                         onChange={handleSymptomChange}
                       />
-                      <ErrorHelperText
+                      <LegacyErrorHelperText
                         error={state.errors.additional_symptoms}
                       />
                     </div>
@@ -654,7 +654,7 @@ export const DailyRounds = (props: any) => {
                         options={TELEMEDICINE_ACTIONS}
                         onChange={handleChange}
                       />
-                      <ErrorHelperText error={state.errors.action} />
+                      <LegacyErrorHelperText error={state.errors.action} />
                     </div>
 
                     <div className="flex-1">

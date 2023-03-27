@@ -42,7 +42,7 @@ import AlertDialog from "../Common/AlertDialog";
 import {
   CheckboxField,
   LegacyDateInputField,
-  ErrorHelperText,
+  LegacyErrorHelperText,
   SelectField,
   LegacyTextInputField,
 } from "../Common/HelperInputFields";
@@ -1629,7 +1629,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       />
                                     </div>
                                   </RadioGroup>
-                                  <ErrorHelperText
+                                  <LegacyErrorHelperText
                                     error={state.errors.number_of_doses}
                                   />
                                 </div>
@@ -2052,7 +2052,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               return renderMedicalHistory(i.id, i.text);
                             })}
                           </div>
-                          <ErrorHelperText
+                          <LegacyErrorHelperText
                             error={state.errors.medical_history}
                           />
                         </div>

@@ -28,7 +28,7 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { ErrorHelperText } from "../Common/HelperInputFields";
+import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { BedModel, FacilityModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
@@ -297,7 +297,7 @@ export const ConsultationForm = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
               ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
-                ?.id || "Comfort"
+                  ?.id || "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
@@ -815,8 +815,9 @@ export const ConsultationForm = (props: any) => {
             const section = sections[sectionTitle as ConsultationFormSection];
             return (
               <button
-                className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${isCurrent ? "bg-white text-primary-500" : "bg-transparent"
-                  } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
+                className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
+                  isCurrent ? "bg-white text-primary-500" : "bg-transparent"
+                } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
                 onClick={() => {
                   section.ref.current?.scrollIntoView({
                     behavior: "smooth",
@@ -935,7 +936,7 @@ export const ConsultationForm = (props: any) => {
                       {Math.sqrt(
                         (Number(state.form.weight) *
                           Number(state.form.height)) /
-                        3600
+                          3600
                       ).toFixed(2)}{" "}
                       m<sup>2</sup>
                     </div>
@@ -1101,7 +1102,7 @@ export const ConsultationForm = (props: any) => {
                               investigations={InvestigationAdvice}
                               setInvestigations={setInvestigationAdvice}
                             />
-                            <ErrorHelperText
+                            <LegacyErrorHelperText
                               error={state.errors.investigation}
                             />
                           </div>
@@ -1116,7 +1117,7 @@ export const ConsultationForm = (props: any) => {
                               prescriptions={dischargeAdvice}
                               setPrescriptions={setDischargeAdvice}
                             />
-                            <ErrorHelperText
+                            <LegacyErrorHelperText
                               error={state.errors.discharge_advice}
                             />
                           </div>
@@ -1131,7 +1132,7 @@ export const ConsultationForm = (props: any) => {
                               prescriptions={PRNAdvice}
                               setPrescriptions={setPRNAdvice}
                             />
-                            <ErrorHelperText
+                            <LegacyErrorHelperText
                               error={state.errors.prn_prescription}
                             />
                           </div>
@@ -1146,7 +1147,9 @@ export const ConsultationForm = (props: any) => {
                               procedures={procedures}
                               setProcedures={setProcedures}
                             />
-                            <ErrorHelperText error={state.errors.procedure} />
+                            <LegacyErrorHelperText
+                              error={state.errors.procedure}
+                            />
                           </div>
                           <div
                             className="col-span-6"
@@ -1193,7 +1196,9 @@ export const ConsultationForm = (props: any) => {
                                   />
                                 </Box>
                               </RadioGroup>
-                              <ErrorHelperText error={state.errors.is_kasp} />
+                              <LegacyErrorHelperText
+                                error={state.errors.is_kasp}
+                              />
                             </div>
                           )}
                           <div
@@ -1240,7 +1245,7 @@ export const ConsultationForm = (props: any) => {
                                 />
                               </Box>
                             </RadioGroup>
-                            <ErrorHelperText
+                            <LegacyErrorHelperText
                               error={state.errors.is_telemedicine}
                             />
                           </div>
