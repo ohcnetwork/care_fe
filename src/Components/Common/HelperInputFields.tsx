@@ -10,7 +10,6 @@ import {
   ListItemText,
   MenuItem,
   NativeSelect,
-  Radio,
   Select,
   TextField,
   TextFieldProps,
@@ -278,28 +277,6 @@ export const LegacyErrorHelperText = (props: { error?: string }) => {
     >
       {error}
     </span>
-  );
-};
-
-export const ShowRadioOptions = (props: OptionsProps) => {
-  const { options, onChange, values } = props;
-  return (
-    <div>
-      {options.map((opt: any, i: number) => {
-        const checked = values.findIndex((val: any) => val.answerId == opt.id);
-        return (
-          <div key={i}>
-            <Radio
-              checked={checked !== -1}
-              name="radioBtn"
-              value={opt.id}
-              onChange={onChange}
-            />{" "}
-            {opt.text}
-          </div>
-        );
-      })}
-    </div>
   );
 };
 
