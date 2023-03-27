@@ -299,7 +299,10 @@ export const LegacyNativeSelectField = (props: any) => {
   );
 };
 
-export const SelectField = (props: DefaultSelectInputProps) => {
+/**
+ * Deprecated. Use `SelectFormField` instead.
+ */
+export const LegacySelectField = (props: DefaultSelectInputProps) => {
   const {
     options,
     optionArray,

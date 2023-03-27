@@ -14,7 +14,7 @@ import { createStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { useState } from "react";
 import {
-  SelectField,
+  LegacySelectField,
   LegacyTextInputField,
 } from "../../Common/HelperInputFields";
 import _ from "lodash";
@@ -60,7 +60,7 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
       >
         {showForm ? (
           data?.investigation_object?.investigation_type === "Choice" ? (
-            <SelectField
+            <LegacySelectField
               name="preferred_vehicle_choice"
               variant="outlined"
               optionArray={true}

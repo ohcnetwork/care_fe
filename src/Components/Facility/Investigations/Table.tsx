@@ -10,7 +10,7 @@ import {
   Typography,
   Box,
 } from "@material-ui/core";
-import { SelectField } from "../../Common/HelperInputFields";
+import { LegacySelectField } from "../../Common/HelperInputFields";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { useState } from "react";
@@ -45,7 +45,7 @@ const TestRow = ({ data, value, onChange }: any) => {
       <TableCell className={className.tableCell}>{data.name}</TableCell>
       <TableCell className={className.tableCell} align="right">
         {data.investigation_type === "Choice" ? (
-          <SelectField
+          <LegacySelectField
             name="preferred_vehicle_choice"
             variant="outlined"
             optionArray={true}

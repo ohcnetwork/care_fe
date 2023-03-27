@@ -5,7 +5,10 @@ import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getItems, setMinQuantity, getAnyFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { SelectField, LegacyTextInputField } from "../Common/HelperInputFields";
+import {
+  LegacySelectField,
+  LegacyTextInputField,
+} from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -155,7 +158,7 @@ export const SetInventoryForm = (props: any) => {
                   <InputLabel id="inventory_name_label">
                     Inventory Name
                   </InputLabel>
-                  <SelectField
+                  <LegacySelectField
                     name="id"
                     variant="outlined"
                     margin="dense"

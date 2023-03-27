@@ -5,7 +5,7 @@ import {
   LegacyTextInputField,
   LegacyMultilineInputField,
   LegacyErrorHelperText,
-  SelectField,
+  LegacySelectField,
 } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
@@ -277,7 +277,7 @@ export default function ResourceCreate(props: resourceProps) {
 
               <div>
                 <InputLabel>Category</InputLabel>
-                <SelectField
+                <LegacySelectField
                   name="category"
                   variant="outlined"
                   fullWidth
@@ -292,7 +292,7 @@ export default function ResourceCreate(props: resourceProps) {
 
               <div>
                 <InputLabel>Subcategory</InputLabel>
-                <SelectField
+                <LegacySelectField
                   name="sub_category"
                   variant="outlined"
                   margin="dense"

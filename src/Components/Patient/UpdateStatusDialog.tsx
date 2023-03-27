@@ -11,7 +11,7 @@ import {
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
 } from "../../Common/constants";
-import { CheckboxField, SelectField } from "../Common/HelperInputFields";
+import { CheckboxField, LegacySelectField } from "../Common/HelperInputFields";
 import { SampleTestModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
 import { createUpload } from "../../Redux/actions";
@@ -195,7 +195,7 @@ const UpdateStatusDialog = (props: Props) => {
           <div className="md:col-span-2">{currentStatus?.desc}</div>
           <div className="font-semibold leading-relaxed">New Status :</div>
           <div className="md:col-span-2">
-            <SelectField
+            <LegacySelectField
               name="status"
               variant="standard"
               optionValue="desc"
@@ -210,7 +210,7 @@ const UpdateStatusDialog = (props: Props) => {
                 Result :
               </div>
               <div className="md:col-span-2">
-                <SelectField
+                <LegacySelectField
                   name="result"
                   variant="standard"
                   value={state.form.result}

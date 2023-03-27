@@ -43,7 +43,7 @@ import {
   CheckboxField,
   LegacyDateInputField,
   LegacyErrorHelperText,
-  SelectField,
+  LegacySelectField,
   LegacyTextInputField,
 } from "../Common/HelperInputFields";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
@@ -1398,7 +1398,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           >
                             Nationality
                           </FieldLabel>
-                          <SelectField
+                          <LegacySelectField
                             labelId="nationality"
                             name="nationality"
                             variant="outlined"
@@ -1641,7 +1641,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   >
                                     Vaccine Name
                                   </FieldLabel>
-                                  <SelectField
+                                  <LegacySelectField
                                     labelId="vaccine_name"
                                     name="vaccine_name"
                                     variant="outlined"
@@ -1802,7 +1802,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               COVID Disease Status
                             </FieldLabel>
-                            <SelectField
+                            <LegacySelectField
                               labelId="disease_status"
                               name="disease_status"
                               variant="outlined"
@@ -1822,7 +1822,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               COVID Test Type
                             </FieldLabel>
-                            <SelectField
+                            <LegacySelectField
                               labelId="test_type"
                               name="test_type"
                               variant="outlined"

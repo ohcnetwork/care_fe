@@ -13,7 +13,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   CheckboxField,
-  SelectField,
+  LegacySelectField,
   LegacyTextInputField,
 } from "../Common/HelperInputFields";
 import { SampleTestModel, FacilityNameModel } from "./models";
@@ -278,7 +278,7 @@ export const SampleTest = (props: any) => {
                 <div className="space-y-4">
                   <div>
                     <FieldLabel>Sample Test Type*</FieldLabel>
-                    <SelectField
+                    <LegacySelectField
                       name="sample_type"
                       variant="outlined"
                       margin="dense"
@@ -306,7 +306,7 @@ export const SampleTest = (props: any) => {
                 <div className="row-span-3 space-y-4">
                   <div>
                     <FieldLabel>ICMR Category (for COVID Test)</FieldLabel>
-                    <SelectField
+                    <LegacySelectField
                       name="icmr_category"
                       variant="outlined"
                       margin="dense"
@@ -360,7 +360,7 @@ export const SampleTest = (props: any) => {
                   </div>
                   <div className="mt-4 w-full">
                     <FieldLabel>Testing Facility Name</FieldLabel>
-                    <SelectField
+                    <LegacySelectField
                       name="testing_facility"
                       variant="outlined"
                       margin="dense"

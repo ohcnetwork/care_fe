@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftDetails, updateShift, getUserList } from "../../Redux/actions";
-import { SelectField } from "../Common/HelperInputFields";
+import { LegacySelectField } from "../Common/HelperInputFields";
 import {
   SHIFTING_CHOICES,
   FACILITY_TYPES,
@@ -256,7 +256,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="md:col-span-1">
                 <FieldLabel>{t("status")}</FieldLabel>
-                <SelectField
+                <LegacySelectField
                   name="status"
                   variant="outlined"
                   margin="dense"
@@ -394,7 +394,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               </div>
               <div className="md:col-span-1">
                 <FieldLabel>{t("preferred_vehicle")}</FieldLabel>
-                <SelectField
+                <LegacySelectField
                   name="preferred_vehicle_choice"
                   variant="outlined"
                   margin="dense"
@@ -408,7 +408,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               </div>
               <div className="md:col-span-1">
                 <FieldLabel>{t("preferred_facility_type")}*</FieldLabel>
-                <SelectField
+                <LegacySelectField
                   name="assigned_facility_type"
                   variant="outlined"
                   margin="dense"
@@ -422,7 +422,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               </div>
               <div className="md:col-span-1">
                 <FieldLabel>{t("severity_of_breathlessness")}*</FieldLabel>
-                <SelectField
+                <LegacySelectField
                   name="breathlessness_level"
                   variant="outlined"
                   margin="dense"

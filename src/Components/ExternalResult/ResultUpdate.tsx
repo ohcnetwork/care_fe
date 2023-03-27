@@ -20,7 +20,7 @@ import {
 } from "../../Redux/actions";
 import {
   LegacyMultilineInputField,
-  SelectField,
+  LegacySelectField,
 } from "../Common/HelperInputFields";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -266,7 +266,7 @@ export default function UpdateResult(props: any) {
               {isLocalbodyLoading ? (
                 <CircularProgress size={20} />
               ) : (
-                <SelectField
+                <LegacySelectField
                   name="local_body"
                   variant="outlined"
                   margin="dense"
@@ -288,7 +288,7 @@ export default function UpdateResult(props: any) {
               {isWardLoading ? (
                 <CircularProgress size={20} />
               ) : (
-                <SelectField
+                <LegacySelectField
                   name="ward"
                   variant="outlined"
                   margin="dense"

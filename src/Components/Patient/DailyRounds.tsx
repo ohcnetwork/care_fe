@@ -21,7 +21,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   LegacyNativeSelectField,
   CheckboxField,
-  SelectField,
+  LegacySelectField,
   LegacyErrorHelperText,
   LegacyDateTimeFiled,
   MultiSelectField,
@@ -527,7 +527,7 @@ export const DailyRounds = (props: any) => {
                   />
                 </div>
                 <div className="w-full md:w-1/3">
-                  <SelectField
+                  <LegacySelectField
                     className=""
                     name="rounds_type"
                     variant="standard"
@@ -550,7 +550,7 @@ export const DailyRounds = (props: any) => {
                   />
                 </div>
                 <div className="w-full md:w-1/3">
-                  <SelectField
+                  <LegacySelectField
                     name="patient_category"
                     variant="standard"
                     margin="dense"
@@ -661,7 +661,7 @@ export const DailyRounds = (props: any) => {
                       <FieldLabel id="review_interval-label">
                         Review After{" "}
                       </FieldLabel>
-                      <SelectField
+                      <LegacySelectField
                         name="review_interval"
                         variant="standard"
                         value={state.form.review_interval || prevReviewInterval}
@@ -913,7 +913,7 @@ export const DailyRounds = (props: any) => {
                           <FieldLabel className="flex flex-row justify-between">
                             Rhythm
                           </FieldLabel>
-                          <SelectField
+                          <LegacySelectField
                             name="rhythm"
                             variant="standard"
                             value={

@@ -17,7 +17,7 @@ import {
   updateResource,
   getUserList,
 } from "../../Redux/actions";
-import { SelectField } from "../Common/HelperInputFields";
+import { LegacySelectField } from "../Common/HelperInputFields";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import { UserSelect } from "../Common/UserSelect";
 import { CircularProgress } from "@material-ui/core";
@@ -235,7 +235,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="md:col-span-1">
                 <InputLabel>Status</InputLabel>
-                <SelectField
+                <LegacySelectField
                   name="status"
                   variant="outlined"
                   margin="dense"
