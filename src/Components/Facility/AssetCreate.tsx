@@ -11,7 +11,7 @@ import PageTitle from "../Common/PageTitle";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
-  ActionTextInputField,
+  LegacyActionTextInputField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
@@ -676,7 +676,7 @@ const AssetCreate = (props: AssetProps) => {
                   {/* Asset QR ID */}
                   <div className="col-span-6">
                     <label htmlFor="asset-qr-id">Asset QR ID</label>
-                    <ActionTextInputField
+                    <LegacyActionTextInputField
                       id="qr_code_id"
                       fullWidth
                       name="qr_code_id"

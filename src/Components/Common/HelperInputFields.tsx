@@ -143,7 +143,10 @@ export const LegacyTextInputField = (props: TextFieldPropsExtended) => {
   );
 };
 
-export const ActionTextInputField = (props: ActionTextFieldProps) => {
+/**
+ * Deprecated. Use `TextFormField` instead.
+ */
+export const LegacyActionTextInputField = (props: ActionTextFieldProps) => {
   const { onChange, type, errors, onKeyDown } = props;
   const inputType = type === "number" || type === "float" ? "text" : type;
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
