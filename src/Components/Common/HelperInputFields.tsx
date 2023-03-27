@@ -97,12 +97,6 @@ interface CheckboxProps extends Omit<FormControlLabelProps, "control"> {
   label: string;
 }
 
-interface OptionsProps {
-  options: Array<{ id: number | string; text: string }>;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void;
-  values: Array<{ answerId: number }>;
-}
-
 /**
  * Deprecated. Use `TextFormField` instead.
  */
@@ -277,31 +271,6 @@ export const LegacyErrorHelperText = (props: { error?: string }) => {
     >
       {error}
     </span>
-  );
-};
-
-export const ShowCheckboxOptions = (props: OptionsProps) => {
-  const { options, onChange, values } = props;
-  return (
-    <div>
-      {options.map((opt: any, i: number) => {
-        const checked = values.indexOf(opt.id) > -1;
-        return (
-          <div key={i}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={checked}
-                  value={opt.id}
-                  onChange={onChange}
-                />
-              }
-              label={opt.text}
-            />
-          </div>
-        );
-      })}
-    </div>
   );
 };
 
