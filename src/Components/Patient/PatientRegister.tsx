@@ -41,7 +41,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
 import {
   CheckboxField,
-  DateInputField,
+  LegacyDateInputField,
   ErrorHelperText,
   SelectField,
   LegacyTextInputField,
@@ -1661,7 +1661,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   >
                                     Last Date of Vaccination
                                   </FieldLabel>
-                                  <DateInputField
+                                  <LegacyDateInputField
                                     id="last_vaccinated_date"
                                     fullWidth={true}
                                     value={state.form.last_vaccinated_date}
@@ -1752,7 +1752,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 >
                                   Estimate date of contact
                                 </FieldLabel>
-                                <DateInputField
+                                <LegacyDateInputField
                                   fullWidth={true}
                                   id="estimated_contact_date"
                                   value={state.form.estimated_contact_date}
@@ -1888,7 +1888,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <FieldLabel id="date_declared_positive-label">
                                   Date Patient is Declared Positive for COVID
                                 </FieldLabel>
-                                <DateInputField
+                                <LegacyDateInputField
                                   fullWidth={true}
                                   value={state.form.date_declared_positive}
                                   onChange={(date) =>
@@ -1928,7 +1928,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Date of Sample given for COVID Test
                             </FieldLabel>
-                            <DateInputField
+                            <LegacyDateInputField
                               fullWidth={true}
                               id="date_of_test"
                               value={state.form.date_of_test}
@@ -1948,7 +1948,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Date of Result for COVID Test
                             </FieldLabel>
-                            <DateInputField
+                            <LegacyDateInputField
                               fullWidth={true}
                               id="date_of_result"
                               value={state.form.date_of_result}

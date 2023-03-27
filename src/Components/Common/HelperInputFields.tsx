@@ -227,7 +227,10 @@ export const LegacyDateTimeFiled = (props: DateInputFieldProps) => {
   );
 };
 
-export const DateInputField = (props: DateInputFieldProps) => {
+/**
+ * Deprecated. Use `DateFormField` instead.
+ */
+export const LegacyDateInputField = (props: DateInputFieldProps) => {
   const {
     value,
     onChange,
