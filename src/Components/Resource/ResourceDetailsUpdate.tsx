@@ -4,7 +4,7 @@ import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   LegacyTextInputField,
-  MultilineInputField,
+  LegacyMultilineInputField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
 
@@ -335,7 +335,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
               <div className="md:col-span-2">
                 <InputLabel>Description of request*</InputLabel>
-                <MultilineInputField
+                <LegacyMultilineInputField
                   rows={5}
                   name="reason"
                   variant="outlined"

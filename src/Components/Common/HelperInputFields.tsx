@@ -191,7 +191,10 @@ export const LegacyActionTextInputField = (props: ActionTextFieldProps) => {
   );
 };
 
-export const MultilineInputField = (props: TextFieldPropsExtended) => {
+/**
+ * Deprecated. Use `TextAreaFormField` instead.
+ */
+export const LegacyMultilineInputField = (props: TextFieldPropsExtended) => {
   const { errors } = props;
   return (
     <div>

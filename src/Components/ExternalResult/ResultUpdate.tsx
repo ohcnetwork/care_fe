@@ -18,7 +18,10 @@ import {
   externalResult,
   partialUpdateExternalResult,
 } from "../../Redux/actions";
-import { MultilineInputField, SelectField } from "../Common/HelperInputFields";
+import {
+  LegacyMultilineInputField,
+  SelectField,
+} from "../Common/HelperInputFields";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -246,7 +249,7 @@ export default function UpdateResult(props: any) {
           <div className="px-4 py-5 grid gap-4 grid-cols-1 md:grid-cols-2">
             <div data-testid="current-address">
               <InputLabel id="address-label">Current Address*</InputLabel>
-              <MultilineInputField
+              <LegacyMultilineInputField
                 rows={2}
                 name="address"
                 variant="outlined"

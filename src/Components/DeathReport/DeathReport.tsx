@@ -6,7 +6,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import {
   LegacyTextInputField,
-  MultilineInputField,
+  LegacyMultilineInputField,
 } from "../Common/HelperInputFields";
 import { InputLabel } from "@material-ui/core";
 import moment from "moment";
@@ -341,7 +341,7 @@ export default function PrintDeathReport(props: { id: string }) {
             </div>
             <div className="grid grid-cols-1 mt-4">
               <InputLabel htmlFor="address">Address</InputLabel>
-              <MultilineInputField
+              <LegacyMultilineInputField
                 name="address"
                 id="address"
                 variant="outlined"
