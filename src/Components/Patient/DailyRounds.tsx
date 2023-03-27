@@ -24,7 +24,7 @@ import {
   LegacySelectField,
   LegacyErrorHelperText,
   LegacyDateTimeFiled,
-  MultiSelectField,
+  LegacyMultiSelectField,
   AutoCompleteAsyncField,
 } from "../Common/HelperInputFields";
 import {
@@ -617,7 +617,7 @@ export const DailyRounds = (props: any) => {
 
                     <div className="md:col-span-2">
                       <FieldLabel id="symptoms-label">Symptoms</FieldLabel>
-                      <MultiSelectField
+                      <LegacyMultiSelectField
                         name="additional_symptoms"
                         variant="outlined"
                         value={state.form.additional_symptoms}

@@ -8,7 +8,7 @@ import {
   listInvestigations,
   getPatient,
 } from "../../../../Redux/actions";
-import { MultiSelectField } from "../../../Common/HelperInputFields";
+import { LegacyMultiSelectField } from "../../../Common/HelperInputFields";
 import PageTitle from "../../../Common/PageTitle";
 import { Button, ButtonGroup, Checkbox, TextField } from "@material-ui/core";
 import Loading from "../../../Common/Loading";
@@ -345,7 +345,7 @@ const InvestigationReports = ({ id }: any) => {
             <InputLabel required id="investigation-group-label">
               Select Investigation Groups
             </InputLabel>
-            <MultiSelectField
+            <LegacyMultiSelectField
               id="investigation-group-label"
               options={investigationGroups}
               value={selectedGroup}

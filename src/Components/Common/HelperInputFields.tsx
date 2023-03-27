@@ -357,7 +357,10 @@ export const LegacySelectField = (props: DefaultSelectInputProps) => {
   );
 };
 
-export const MultiSelectField = (props: MultiSelectInputProps) => {
+/**
+ * Deprecated. Use `MultiSelectFormField` instead.
+ */
+export const LegacyMultiSelectField = (props: MultiSelectInputProps) => {
   const {
     errors,
     options,
