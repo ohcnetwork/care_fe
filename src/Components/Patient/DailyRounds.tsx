@@ -23,7 +23,7 @@ import {
   CheckboxField,
   SelectField,
   ErrorHelperText,
-  DateTimeFiled,
+  LegacyDateTimeFiled,
   MultiSelectField,
   AutoCompleteAsyncField,
 } from "../Common/HelperInputFields";
@@ -515,7 +515,7 @@ export const DailyRounds = (props: any) => {
             <CardContent>
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="w-full md:w-1/3">
-                  <DateTimeFiled
+                  <LegacyDateTimeFiled
                     label="Measured At"
                     margin="dense"
                     value={state.form.taken_at}

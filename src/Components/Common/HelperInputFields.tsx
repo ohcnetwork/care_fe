@@ -204,7 +204,10 @@ export const LegacyMultilineInputField = (props: TextFieldPropsExtended) => {
   );
 };
 
-export const DateTimeFiled = (props: DateInputFieldProps) => {
+/**
+ * Deprecated. Use `TextFormField` with `type="datetime-local"` instead.
+ */
+export const LegacyDateTimeFiled = (props: DateInputFieldProps) => {
   const { label, errors, onChange, value, margin, disabled, ...restProps } =
     props;
   return (
