@@ -436,7 +436,10 @@ export const LegacyMultiSelectField = (props: MultiSelectInputProps) => {
   );
 };
 
-export const CheckboxField = (props: CheckboxProps) => {
+/**
+ * Deprecated.
+ */
+export const LegacyCheckboxField = (props: CheckboxProps) => {
   const { onChange, checked, name, style } = props;
   return (
     <FormControlLabel

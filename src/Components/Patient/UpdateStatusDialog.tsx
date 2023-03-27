@@ -11,7 +11,10 @@ import {
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
 } from "../../Common/constants";
-import { CheckboxField, LegacySelectField } from "../Common/HelperInputFields";
+import {
+  LegacyCheckboxField,
+  LegacySelectField,
+} from "../Common/HelperInputFields";
 import { SampleTestModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
 import { createUpload } from "../../Redux/actions";
@@ -248,7 +251,7 @@ const UpdateStatusDialog = (props: Props) => {
             </>
           )}
           <div className="md:col-span-3">
-            <CheckboxField
+            <LegacyCheckboxField
               checked={state.form.confirm}
               onChange={(e: any) =>
                 handleChange(e.target.name, e.target.checked)

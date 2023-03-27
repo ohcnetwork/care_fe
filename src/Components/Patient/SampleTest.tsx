@@ -12,7 +12,7 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  CheckboxField,
+  LegacyCheckboxField,
   LegacySelectField,
   LegacyTextInputField,
 } from "../Common/HelperInputFields";
@@ -375,7 +375,7 @@ export const SampleTest = (props: any) => {
                     />
                   </div>
                   <div className="flex items-center">
-                    <CheckboxField
+                    <LegacyCheckboxField
                       checked={state.form.isFastTrack}
                       onChange={handleCheckboxFieldChange}
                       name="isFastTrack"
@@ -411,7 +411,7 @@ export const SampleTest = (props: any) => {
                   />
                 </div>
                 <div className="flex items-center">
-                  <CheckboxField
+                  <LegacyCheckboxField
                     checked={state.form.is_atypical_presentation}
                     onChange={handleCheckboxFieldChange}
                     name="is_atypical_presentation"
@@ -464,7 +464,7 @@ export const SampleTest = (props: any) => {
               </div>
               <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div className="flex items-center">
-                  <CheckboxField
+                  <LegacyCheckboxField
                     checked={state.form.has_sari}
                     onChange={handleCheckboxFieldChange}
                     name="has_sari"
@@ -472,7 +472,7 @@ export const SampleTest = (props: any) => {
                   />
                 </div>
                 <div className="flex items-center">
-                  <CheckboxField
+                  <LegacyCheckboxField
                     checked={state.form.has_ari}
                     onChange={handleCheckboxFieldChange}
                     name="has_ari"
@@ -480,7 +480,7 @@ export const SampleTest = (props: any) => {
                   />
                 </div>
                 <div className="flex items-center">
-                  <CheckboxField
+                  <LegacyCheckboxField
                     checked={state.form.is_unusual_course}
                     onChange={handleCheckboxFieldChange}
                     name="is_unusual_course"

@@ -40,7 +40,7 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
 import {
-  CheckboxField,
+  LegacyCheckboxField,
   LegacyDateInputField,
   LegacyErrorHelperText,
   LegacySelectField,
@@ -1059,7 +1059,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     return (
       <div key={textField}>
         <div>
-          <CheckboxField
+          <LegacyCheckboxField
             checked={state.form.medical_history.includes(id)}
             onChange={(e) => handleMedicalCheckboxChange(e, id)}
             name={checkboxField}
@@ -1344,7 +1344,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             error={state.errors.permanent_address}
                           />
 
-                          <CheckboxField
+                          <LegacyCheckboxField
                             checked={sameAddress}
                             onChange={() => setSameAddress(!sameAddress)}
                             label="Same as Current Address"

@@ -20,7 +20,7 @@ import {
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   LegacyNativeSelectField,
-  CheckboxField,
+  LegacyCheckboxField,
   LegacySelectField,
   LegacyErrorHelperText,
   LegacyDateTimeFiled,
@@ -678,7 +678,7 @@ export const DailyRounds = (props: any) => {
                       </div>
                     </div>
                     <div>
-                      <CheckboxField
+                      <LegacyCheckboxField
                         checked={state.form.recommend_discharge}
                         onChange={handleCheckboxFieldChange}
                         name="recommend_discharge"
