@@ -1227,7 +1227,7 @@ export const ConsultationForm = (props: any) => {
                               </div>
 
                               <div
-                                className="flex-[3]"
+                                className="flex-[2]"
                                 ref={fieldRef["assigned_to"]}
                               >
                                 <OnlineUsersSelect
@@ -1238,10 +1238,7 @@ export const ConsultationForm = (props: any) => {
                                   outline
                                 />
                               </div>
-                              <div
-                                className="flex-[2]"
-                                ref={fieldRef["action"]}
-                              >
+                              <div className="flex-1" ref={fieldRef["action"]}>
                                 <SelectFormField
                                   {...field("action")}
                                   label="Action"
