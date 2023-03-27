@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ErrorHelperText } from "../Common/HelperInputFields";
+import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import { postResetPassword, checkResetToken } from "../../Redux/actions";
@@ -139,7 +139,7 @@ export const ResetPassword = (props: any) => {
                 onChange={handleChange}
                 error={errors.confirm}
               />
-              <ErrorHelperText error={errors.token} />
+              <LegacyErrorHelperText error={errors.token} />
             </div>
             <div className="sm:flex sm:justify-between grid p-4">
               <Cancel onClick={() => navigate("/login")} />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
-  AutoCompleteAsyncField,
-  TextInputField,
+  LegacyAutoCompleteAsyncField,
+  LegacyTextInputField,
 } from "../Common/HelperInputFields";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import { getAllLocalBodyByDistrict } from "../../Redux/actions";
@@ -193,7 +193,7 @@ export default function ListFilter(props: any) {
       <div className="flex flex-wrap gap-2">
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">{t("lsg")}</span>
-          <AutoCompleteAsyncField
+          <LegacyAutoCompleteAsyncField
             multiple={true}
             name="local_bodies"
             options={lsgList}
@@ -215,7 +215,7 @@ export default function ListFilter(props: any) {
       <div className="flex flex-wrap gap-2">
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">{t("Ward")}</span>
-          <AutoCompleteAsyncField
+          <LegacyAutoCompleteAsyncField
             multiple={true}
             name="wards"
             options={filterWards()}
@@ -283,7 +283,7 @@ export default function ListFilter(props: any) {
       </div>
       <div className="w-full flex-none">
         <span className="text-sm font-semibold">{t("srf_id")}</span>
-        <TextInputField
+        <LegacyTextInputField
           id="srf_id"
           name="srf_id"
           variant="outlined"

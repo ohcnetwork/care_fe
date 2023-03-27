@@ -11,8 +11,8 @@ import PageTitle from "../Common/PageTitle";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
-  ActionTextInputField,
-  ErrorHelperText,
+  LegacyActionTextInputField,
+  LegacyErrorHelperText,
 } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
@@ -660,7 +660,9 @@ const AssetCreate = (props: AssetProps) => {
                         setNotWorkingReason(e.target.value)
                       }
                     />
-                    <ErrorHelperText error={state.errors.not_working_reason} />
+                    <LegacyErrorHelperText
+                      error={state.errors.not_working_reason}
+                    />
                   </div>
                   {/* Divider */}
                   <div className="col-span-6">
@@ -676,7 +678,7 @@ const AssetCreate = (props: AssetProps) => {
                   {/* Asset QR ID */}
                   <div className="col-span-6">
                     <label htmlFor="asset-qr-id">Asset QR ID</label>
-                    <ActionTextInputField
+                    <LegacyActionTextInputField
                       id="qr_code_id"
                       fullWidth
                       name="qr_code_id"
@@ -691,7 +693,7 @@ const AssetCreate = (props: AssetProps) => {
                       action={() => setIsScannerActive(true)}
                       errors={state.errors.qr_code_id}
                     />
-                    <ErrorHelperText error={state.errors.qr_id} />
+                    <LegacyErrorHelperText error={state.errors.qr_id} />
                   </div>
                 </div>
                 <div className="grid grid-cols-6 gap-x-6">
@@ -739,7 +741,7 @@ const AssetCreate = (props: AssetProps) => {
                       type="date"
                       min={moment().format("YYYY-MM-DD")}
                     />
-                    <ErrorHelperText
+                    <LegacyErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}
                     />
                   </div>
@@ -855,7 +857,9 @@ const AssetCreate = (props: AssetProps) => {
                       type="date"
                       max={moment(new Date()).format("YYYY-MM-DD")}
                     />
-                    <ErrorHelperText error={state.errors.last_serviced_on} />
+                    <LegacyErrorHelperText
+                      error={state.errors.last_serviced_on}
+                    />
                   </div>
 
                   {/* Notes */}
@@ -874,7 +878,7 @@ const AssetCreate = (props: AssetProps) => {
                         setNotes(e.target.value)
                       }
                     />
-                    <ErrorHelperText error={state.errors.notes} />
+                    <LegacyErrorHelperText error={state.errors.notes} />
                   </div>
                 </div>
 

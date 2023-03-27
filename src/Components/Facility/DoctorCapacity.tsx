@@ -4,7 +4,7 @@ import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { ErrorHelperText } from "../Common/HelperInputFields";
+import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { DoctorModal, OptionsType } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
@@ -230,7 +230,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
                 }
                 disabled={!!id}
               />
-              <ErrorHelperText error={state.errors.area} />
+              <LegacyErrorHelperText error={state.errors.area} />
             </div>
             <div>
               <TextFormField
