@@ -39,7 +39,7 @@ export default function FiltersSlideover({
           </div>
         </div>
       }
-      dialogClass="w-[28rem]"
+      dialogClass="w-full max-w-[28rem]"
     >
       <div className="flex flex-col gap-6 p-2">{children}</div>
     </SlideOver>
