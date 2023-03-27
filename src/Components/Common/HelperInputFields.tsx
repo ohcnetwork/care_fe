@@ -477,7 +477,18 @@ interface AutoCompleteAsyncFieldProps {
   disabled?: boolean;
 }
 
-export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
+/**
+ * Deprecated.
+ *
+ * Alternatives:
+ * - Use `useAsyncOptions` hook along with `AutocompleteFormField` or
+ * `AutocompleteMultiSelectFormField` instead.
+ * - Use `AutocompleteAsync` component directly.
+ *
+ */
+export const LegacyAutoCompleteAsyncField = (
+  props: AutoCompleteAsyncFieldProps
+) => {
   const {
     name,
     margin,

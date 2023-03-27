@@ -25,7 +25,7 @@ import {
   LegacyErrorHelperText,
   LegacyDateTimeFiled,
   LegacyMultiSelectField,
-  AutoCompleteAsyncField,
+  LegacyAutoCompleteAsyncField,
 } from "../Common/HelperInputFields";
 import {
   createDailyReport,
@@ -706,7 +706,7 @@ export const DailyRounds = (props: any) => {
                                 Systolic
                                 {getStatus(100, "Low", 140, "High", "systolic")}
                               </FieldLabel>
-                              <AutoCompleteAsyncField
+                              <LegacyAutoCompleteAsyncField
                                 name="systolic"
                                 multiple={false}
                                 variant="standard"
@@ -735,7 +735,7 @@ export const DailyRounds = (props: any) => {
                                 Diastolic{" "}
                                 {getStatus(50, "Low", 90, "High", "diastolic")}
                               </FieldLabel>
-                              <AutoCompleteAsyncField
+                              <LegacyAutoCompleteAsyncField
                                 name="diastolic"
                                 multiple={false}
                                 variant="standard"
@@ -772,7 +772,7 @@ export const DailyRounds = (props: any) => {
                               "pulse"
                             )}
                           </FieldLabel>
-                          <AutoCompleteAsyncField
+                          <LegacyAutoCompleteAsyncField
                             name="pulse"
                             multiple={false}
                             variant="standard"
@@ -813,7 +813,7 @@ export const DailyRounds = (props: any) => {
                           </FieldLabel>
                           <div className="flex flex-row">
                             <div className="grow mr-2">
-                              <AutoCompleteAsyncField
+                              <LegacyAutoCompleteAsyncField
                                 name="temperature"
                                 multiple={false}
                                 variant="standard"
@@ -857,7 +857,7 @@ export const DailyRounds = (props: any) => {
                             {"Respiratory Rate (bpm) *"}
                             {getStatus(12, "Low", 16, "High", "resp")}
                           </FieldLabel>
-                          <AutoCompleteAsyncField
+                          <LegacyAutoCompleteAsyncField
                             name="resp"
                             multiple={false}
                             variant="standard"
@@ -889,7 +889,7 @@ export const DailyRounds = (props: any) => {
                               "ventilator_spo2"
                             )}
                           </FieldLabel>
-                          <AutoCompleteAsyncField
+                          <LegacyAutoCompleteAsyncField
                             name="ventilator_spo2"
                             multiple={false}
                             variant="standard"
