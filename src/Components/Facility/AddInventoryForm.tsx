@@ -10,7 +10,7 @@ import {
   getInventorySummary,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { SelectField, TextInputField } from "../Common/HelperInputFields";
+import { SelectField, LegacyTextInputField } from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -264,7 +264,7 @@ export const AddInventoryForm = (props: any) => {
                 </div>
                 <div>
                   <InputLabel id="quantity">Quantity</InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="quantity"
                     variant="outlined"
                     margin="dense"

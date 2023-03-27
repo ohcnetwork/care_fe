@@ -13,7 +13,10 @@ import {
 import { createStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { useState } from "react";
-import { SelectField, TextInputField } from "../../Common/HelperInputFields";
+import {
+  SelectField,
+  LegacyTextInputField,
+} from "../../Common/HelperInputFields";
 import _ from "lodash";
 import { classNames } from "../../../Utils/utils";
 
@@ -157,7 +160,7 @@ export const InvestigationTable = ({
         </div>
       </div>
       <InputLabel className="mt-4">Search Test</InputLabel>
-      <TextInputField
+      <LegacyTextInputField
         value={searchFilter}
         placeholder="Search test"
         errors=""

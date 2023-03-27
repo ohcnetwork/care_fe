@@ -105,7 +105,10 @@ interface OptionsProps {
   values: Array<{ answerId: number }>;
 }
 
-export const TextInputField = (props: TextFieldPropsExtended) => {
+/**
+ * Deprecated. Use `TextFormField` instead.
+ */
+export const LegacyTextInputField = (props: TextFieldPropsExtended) => {
   const { onChange, type, errors, onKeyDown } = props;
   const inputType = type === "number" || type === "float" ? "text" : type;
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {

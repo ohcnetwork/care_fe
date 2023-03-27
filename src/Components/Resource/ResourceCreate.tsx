@@ -2,7 +2,7 @@ import { useReducer, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
-  TextInputField,
+  LegacyTextInputField,
   MultilineInputField,
   ErrorHelperText,
   SelectField,
@@ -238,7 +238,7 @@ export default function ResourceCreate(props: resourceProps) {
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
                 <InputLabel>Name of Contact Person at Facility*</InputLabel>
-                <TextInputField
+                <LegacyTextInputField
                   fullWidth
                   name="refering_facility_contact_name"
                   variant="outlined"
@@ -306,7 +306,7 @@ export default function ResourceCreate(props: resourceProps) {
 
               <div className="md:col-span-1">
                 <InputLabel>Request Title*</InputLabel>
-                <TextInputField
+                <LegacyTextInputField
                   rows={5}
                   name="title"
                   variant="outlined"
@@ -322,7 +322,7 @@ export default function ResourceCreate(props: resourceProps) {
               <div className="md:col-span-1">
                 <div className="w-full">
                   <InputLabel>Required Quantity</InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="requested_quantity"
                     variant="outlined"
                     margin="dense"

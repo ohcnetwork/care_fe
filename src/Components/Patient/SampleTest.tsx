@@ -14,7 +14,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   CheckboxField,
   SelectField,
-  TextInputField,
+  LegacyTextInputField,
 } from "../Common/HelperInputFields";
 import { SampleTestModel, FacilityNameModel } from "./models";
 import Typography from "@material-ui/core/Typography";
@@ -349,7 +349,7 @@ export const SampleTest = (props: any) => {
                 <div className="space-y-4">
                   <div>
                     <FieldLabel required>Label</FieldLabel>
-                    <TextInputField
+                    <LegacyTextInputField
                       name="icmr_label"
                       variant="outlined"
                       margin="dense"
@@ -401,7 +401,7 @@ export const SampleTest = (props: any) => {
               <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
                   <FieldLabel>Doctor's Name</FieldLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="doctor_name"
                     variant="outlined"
                     margin="dense"

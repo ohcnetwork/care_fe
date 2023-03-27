@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   AutoCompleteAsyncField,
-  TextInputField,
+  LegacyTextInputField,
 } from "../Common/HelperInputFields";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import { getAllLocalBodyByDistrict } from "../../Redux/actions";
@@ -283,7 +283,7 @@ export default function ListFilter(props: any) {
       </div>
       <div className="w-full flex-none">
         <span className="text-sm font-semibold">{t("srf_id")}</span>
-        <TextInputField
+        <LegacyTextInputField
           id="srf_id"
           name="srf_id"
           variant="outlined"

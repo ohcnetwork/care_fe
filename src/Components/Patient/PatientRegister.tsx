@@ -44,7 +44,7 @@ import {
   DateInputField,
   ErrorHelperText,
   SelectField,
-  TextInputField,
+  LegacyTextInputField,
 } from "../Common/HelperInputFields";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import { DupPatientModel } from "../Facility/models";
@@ -1156,7 +1156,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <FieldLabel htmlFor="care-external-results-id" required>
                     Enter Care External Results Id
                   </FieldLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     id="care-external-results-id"
                     name="care-external-results-id"
                     variant="outlined"
@@ -1380,7 +1380,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           <FieldLabel htmlFor="village" id="name-label">
                             Village
                           </FieldLabel>
-                          <TextInputField
+                          <LegacyTextInputField
                             id="village"
                             name="village"
                             variant="outlined"
@@ -1516,7 +1516,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Passport Number
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="passport_no"
                               name="passport_no"
                               variant="outlined"
@@ -1585,7 +1585,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   >
                                     COWIN ID
                                   </FieldLabel>
-                                  <TextInputField
+                                  <LegacyTextInputField
                                     id="covin_id"
                                     name="covin_id"
                                     variant="outlined"
@@ -1777,7 +1777,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 >
                                   Name / Cluster of Contact
                                 </FieldLabel>
-                                <TextInputField
+                                <LegacyTextInputField
                                   id="cluster_name"
                                   name="cluster_name"
                                   variant="outlined"
@@ -1838,7 +1838,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             <FieldLabel id="srf_id-label" htmlFor="srf_id">
                               SRF Id for COVID Test
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="srf_id"
                               name="srf_id"
                               variant="outlined"
@@ -1909,7 +1909,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             <FieldLabel id="test_id-label" htmlFor="test_id">
                               COVID Positive ID issued by ICMR
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="test_id"
                               name="test_id"
                               variant="outlined"
@@ -1969,7 +1969,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Number Of Primary Contacts for COVID
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="number_of_primary_contacts"
                               name="number_of_primary_contacts"
                               variant="outlined"
@@ -1987,7 +1987,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Number Of Secondary Contacts for COVID
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="number_of_secondary_contacts"
                               name="number_of_secondary_contacts"
                               variant="outlined"

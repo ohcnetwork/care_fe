@@ -3,7 +3,7 @@ import loadable from "@loadable/component";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
-  TextInputField,
+  LegacyTextInputField,
   MultilineInputField,
   ErrorHelperText,
 } from "../Common/HelperInputFields";
@@ -294,7 +294,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               </div>
               <div>
                 <InputLabel>Required Quantity</InputLabel>
-                <TextInputField
+                <LegacyTextInputField
                   name="requested_quantity"
                   variant="outlined"
                   margin="dense"
@@ -306,7 +306,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               </div>
               <div>
                 <InputLabel>Approved Quantity</InputLabel>
-                <TextInputField
+                <LegacyTextInputField
                   name="assigned_quantity"
                   variant="outlined"
                   margin="dense"
@@ -320,7 +320,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
               <div className="md:col-span-2">
                 <InputLabel>Request Title*</InputLabel>
-                <TextInputField
+                <LegacyTextInputField
                   rows={5}
                   name="title"
                   variant="outlined"
