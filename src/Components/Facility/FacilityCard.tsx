@@ -87,7 +87,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       {kasp_string}
                     </div>
                   )}
-                  <div className="flex items-center justify-between">
+                  {/* <div className="flex items-center justify-between">
                     <Link
                       href={`/facility/${facility.id}`}
                       className="float-left font-bold text-xl capitalize text-inherit hover:text-inherit"
@@ -102,7 +102,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       <CareIcon className="care-l-monitor-heart-rate text-lg" />
                       <span>CNS</span>
                     </ButtonV2>
-                  </div>
+                  </div> */}
                 </div>
 
                 <div className="flex gap-1 flex-wrap mt-2">
