@@ -2,10 +2,11 @@ import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftComments, addShiftComments } from "../../Redux/actions";
-import { Button, CircularProgress } from "@material-ui/core";
+import CircularProgress from "../Common/components/CircularProgress";
 import * as Notification from "../../Utils/Notifications.js";
 import { formatDate } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 interface CommentSectionProps {
   id: string;
@@ -67,12 +68,9 @@ const CommentSection = (props: CommentSectionProps) => {
         onChange={(e) => setCommentBox(e.target.value)}
       />
       <div className="flex w-full justify-end">
-        <Button
-          onClick={onSubmitComment}
-          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
-        >
+        <ButtonV2 onClick={onSubmitComment} className="mt-4">
           {t("post_your_comment")}
-        </Button>
+        </ButtonV2>
       </div>
       <div className=" w-full">
         {isLoading ? (
