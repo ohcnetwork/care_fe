@@ -6,6 +6,7 @@ import { promises as fs } from "fs";
 
 
 export default defineConfig({
+  envPrefix: "REACT_",
   plugins: [
     react(),
     VitePWA({

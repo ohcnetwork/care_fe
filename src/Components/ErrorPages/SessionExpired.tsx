@@ -12,7 +12,7 @@ export default function SessionExpired() {
     <div className="flex justify-center text-center items-center h-screen">
       <div className="text-center w-[500px]">
         <img
-          src={`${import.meta.env.VITE_PUBLIC_URL}/images/session_expired.svg`}
+          src={`${import.meta.env.REACT_PUBLIC_URL}/images/session_expired.svg`}
           alt={t("session_expired")}
           className="w-full"
         />

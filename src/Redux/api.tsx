@@ -10,7 +10,7 @@ interface Routes {
 
 const routes: Routes = {
   config: {
-    path: import.meta.env.VITE_APP_CONFIG || "/config.json",
+    path: import.meta.env.REACT_APP_CONFIG || "/config.json",
     method: "GET",
     noAuth: true,
   },

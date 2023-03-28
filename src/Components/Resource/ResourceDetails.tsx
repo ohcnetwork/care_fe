@@ -104,7 +104,7 @@ export default function ResourceDetails(props: { id: string }) {
       <div id="section-to-print" className="print bg-white">
         <div className="flex justify-center">
           <img
-            src={`${import.meta.env.VITE_PUBLIC_URL}/${KeralaLogo}`}
+            src={`${import.meta.env.REACT_PUBLIC_URL}/${KeralaLogo}`}
             alt="kerala-logo"
           />
         </div>
