@@ -25,6 +25,7 @@ interface Monitor {
 }
 
 const PER_PAGE_LIMIT = 6;
+const CNS_REFRESH_INTERVAL = 15 * 60e3;
 
 export default function FacilityCNS({ facilityId }: { facilityId: string }) {
   const dispatch = useDispatch<any>();
@@ -106,6 +107,12 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
       setCurrentPage(1);
       setMonitors(monitors);
     });
+
+    const interval = setInterval(() => {
+      fetchMonitors().then(setMonitors);
+    }, CNS_REFRESH_INTERVAL);
+
+    return () => clearInterval(interval);
   }, [dispatch, facility, facilityId]);
 
   if (!monitors) return <Loading />;
