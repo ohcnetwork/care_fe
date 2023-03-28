@@ -55,7 +55,10 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
 
     async function fetchPatients() {
       const res = await dispatch(
-        getAllPatient({ facility: facilityId }, "cns-patient-list")
+        getAllPatient(
+          { facility: facilityId, is_active: "True" },
+          "cns-patient-list"
+        )
       );
       if (res.status === 200) {
         const patients = res.data.results as PatientModel[];
