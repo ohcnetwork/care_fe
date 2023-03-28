@@ -1099,7 +1099,7 @@ export const ConsultationForm = (props: any) => {
                             className="col-span-6"
                             ref={fieldRef["investigation"]}
                           >
-                            <FieldLabel>Investigation Suggestions</FieldLabel>
+                            <FieldLabel>Investigations Suggestions</FieldLabel>
                             <InvestigationBuilder
                               investigations={InvestigationAdvice}
                               setInvestigations={setInvestigationAdvice}
