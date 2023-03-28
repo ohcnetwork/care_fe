@@ -36,7 +36,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { TextInputField } from "../Common/HelperInputFields";
+import { LegacyTextInputField } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
@@ -455,7 +455,7 @@ export const ConsultationDetails = (props: any) => {
               Fill email input with my email.
             </a>
           </div>
-          <TextInputField
+          <LegacyTextInputField
             type="email"
             name="email"
             label="email"

@@ -129,7 +129,7 @@ const InsuranceDetailEditCard = ({
           value={policy.policy_id}
           onChange={handleUpdate}
         />
-        {enable_hcx && (
+        {enable_hcx ? (
           <InsurerAutocomplete
             required
             name="insurer_"
@@ -143,6 +143,23 @@ const InsuranceDetailEditCard = ({
               })
             }
           />
+        ) : (
+          <>
+            <TextFormField
+              name="insurer_id"
+              label="Insurer ID"
+              placeholder="Eg. GICOFINDIA"
+              value={policy.insurer_id}
+              onChange={handleUpdate}
+            />
+            <TextFormField
+              name="insurer_name"
+              label="Insurer Name"
+              placeholder="Eg. GICOFINDIA"
+              value={policy.insurer_name}
+              onChange={handleUpdate}
+            />
+          </>
         )}
       </div>
     </div>

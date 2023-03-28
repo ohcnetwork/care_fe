@@ -26,7 +26,7 @@ import { SampleTestCard } from "./SampleTestCard";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { ErrorHelperText } from "../Common/HelperInputFields";
+import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import Modal from "@material-ui/core/Modal";
 import Chip from "../../CAREUI/display/Chip";
 import { classNames, formatDate } from "../../Utils/utils";
@@ -651,16 +651,17 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 )}
-                {patientData.is_vaccinated && patientData.last_vaccinated_date && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-semibold text-zinc-400">
-                      Last Vaccinated on
+                {patientData.is_vaccinated &&
+                  patientData.last_vaccinated_date && (
+                    <div className="sm:col-span-1">
+                      <div className="text-sm leading-5 font-semibold text-zinc-400">
+                        Last Vaccinated on
+                      </div>
+                      <div className="mt-1 text-sm leading-5 font-medium">
+                        {formatDate(patientData.last_vaccinated_date)}
+                      </div>
                     </div>
-                    <div className="mt-1 text-sm leading-5 font-medium">
-                      {formatDate(patientData.last_vaccinated_date)}
-                    </div>
-                  </div>
-                )}
+                  )}
                 {patientData.countries_travelled &&
                   !!patientData.countries_travelled.length && (
                     <div className="sm:col-span-1">
@@ -1481,7 +1482,7 @@ export const PatientHome = (props: any) => {
               user_type={"Volunteer"}
               outline={false}
             />
-            <ErrorHelperText error={errors.assignedVolunteer} />
+            <LegacyErrorHelperText error={errors.assignedVolunteer} />
           </div>
 
           <DialogActions>

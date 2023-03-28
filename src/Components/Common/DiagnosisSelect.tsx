@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { listICD11Diagnosis } from "../../Redux/actions";
-import { AutoCompleteAsyncField } from "./HelperInputFields";
+import { LegacyAutoCompleteAsyncField } from "./HelperInputFields";
 import { debounce } from "lodash";
 import { ICD11DiagnosisModel } from "../Facility/models";
 
@@ -56,7 +56,7 @@ export const DiagnosisSelect = (props: DiagnosisSelectProps) => {
   );
 
   return (
-    <AutoCompleteAsyncField
+    <LegacyAutoCompleteAsyncField
       name={name}
       multiple={true}
       variant="outlined"
