@@ -80,11 +80,7 @@ const CommentSection = (props: CommentSectionProps) => {
         onChange={(e) => setCommentBox(e.target.value)}
       />
       <div className="flex w-full justify-end">
-        <ButtonV2
-          onClick={onSubmitComment}
-        >
-          Post Your Comment
-        </ButtonV2>
+        <ButtonV2 onClick={onSubmitComment}>Post Your Comment</ButtonV2>
       </div>
       <div className=" w-full">
         {isLoading ? (

@@ -10,7 +10,7 @@ import {
   getPatient,
 } from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import loadable from "@loadable/component";
 
 const Loading = loadable(() => import("../../Common/Loading"));
@@ -36,7 +36,7 @@ export interface InvestigationType {
   unit?: string;
   choices?: string;
   ideal_value?: string;
-  groups: [Group];
+  groups: Group[];
 }
 type SearchItem = Group | InvestigationType;
 function isInvestigation(e: SearchItem): e is InvestigationType {
@@ -75,6 +75,29 @@ const Investigation = (props: {
   facilityId: string;
 }) => {
   const { patientId, facilityId } = props;
+  const [{ investigations: queryInvestigationsRaw = undefined }] =
+    useQueryParams();
+  const queryInvestigations = queryInvestigationsRaw
+    ? queryInvestigationsRaw.split("_-_")
+    : [];
+
+  const preselectedInvestigations = queryInvestigations.map(
+    (investigation: string) => {
+      return investigation.includes(" (GROUP)")
+        ? {
+            isGroup: true,
+            name: investigation.replace(" (GROUP)", ""),
+          }
+        : {
+            isGroup: false,
+            name: investigation.split(" -- ")[0],
+            groups: investigation
+              .split(" -- ")[1]
+              .split(",")
+              .map((group) => group.split("( ")[1].split(" )")[0]),
+          };
+    }
+  );
 
   const dispatch: any = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState<string[]>([]);
@@ -95,6 +118,53 @@ const Investigation = (props: {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const searchOptions = [...investigationGroups, ...investigations];
+
+  useEffect(() => {
+    if (investigations.length > 0) {
+      const prefilledGroups = preselectedInvestigations
+        .filter((inv: any) => inv.isGroup)
+        .map((inv: any) =>
+          investigationGroups.find((group) => group.name === inv.name)
+        )
+        .map((group: any) => {
+          return {
+            external_id: group?.external_id || "",
+            name: group?.name || "",
+          };
+        });
+
+      const prefilledInvestigations = preselectedInvestigations
+        .filter((inv: any) => !inv.isGroup)
+        .map((inv: any) => {
+          const investigation = investigations.find(
+            (investigation) => investigation.name === inv.name
+          );
+          // check if investigation contains all groups
+          if (
+            inv.groups.every((group: string) =>
+              investigation?.groups.find(
+                (investigationGroup) => investigationGroup.name === group
+              )
+            )
+          ) {
+            return investigation;
+          }
+        })
+        .filter((investigation: any) => investigation);
+
+      setSelectedInvestigations(prefilledInvestigations);
+      const allGroups = [
+        ...prefilledGroups.map((group: any) => group?.external_id || ""),
+        ...prefilledInvestigations
+          .map((investigation: any) =>
+            investigation?.groups.map((group: any) => group.external_id)
+          )
+          .flat(),
+      ];
+      setSelectedGroup(Array.from(new Set(allGroups)));
+      selectItems([...prefilledGroups, ...prefilledInvestigations]);
+    }
+  }, [investigations, investigationGroups]);
 
   const fetchInvestigations = () => {
     setIsLoading({ ...isLoading, investigationLoading: true });
@@ -162,7 +232,7 @@ const Investigation = (props: {
     setState({ type: "set_form", form });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (_: any) => {
     initialiseForm();
     if (!saving) {
       setSaving(true);
@@ -231,7 +301,7 @@ const Investigation = (props: {
           disableCloseOnSelect
           inputValue={searchInputValue}
           getOptionLabel={(option) => option.name}
-          onInputChange={(e, value, reason) => {
+          onInputChange={(_, value, reason) => {
             if (reason === "input" || reason === "clear") {
               setSearchInputValue(value);
             }
