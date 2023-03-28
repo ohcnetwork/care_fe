@@ -892,19 +892,19 @@ export const ConsultationForm = (props: any) => {
                           />
                         </div>
                       )}
+                      <div
+                        className="col-span-6"
+                        ref={fieldRef["history_of_present_illness"]}
+                      >
+                        <TextAreaFormField
+                          {...field("history_of_present_illness")}
+                          label="History of present illness"
+                          placeholder="Optional information"
+                        />
+                      </div>
                     </>
                   )}
 
-                  <div
-                    className="col-span-6"
-                    ref={fieldRef["history_of_present_illness"]}
-                  >
-                    <TextAreaFormField
-                      {...field("history_of_present_illness")}
-                      label="History of present illness"
-                      placeholder="Optional information"
-                    />
-                  </div>
                   <div
                     className="col-span-6"
                     ref={fieldRef["examination_details"]}
