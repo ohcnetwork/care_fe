@@ -25,7 +25,7 @@ interface Monitor {
 }
 
 const PER_PAGE_LIMIT = 6;
-const CNS_REFRESH_INTERVAL = 15 * 60e3;
+const CNS_REFRESH_INTERVAL = 0.5 * 60e3;
 
 export default function FacilityCNS({ facilityId }: { facilityId: string }) {
   const dispatch = useDispatch<any>();
