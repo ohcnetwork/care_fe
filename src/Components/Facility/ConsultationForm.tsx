@@ -62,6 +62,7 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import useConfig from "../../Common/hooks/useConfig";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useVisibility from "../../Utils/useVisibility";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -232,12 +233,12 @@ export const ConsultationForm = (props: any) => {
 
   const sections = {
     "Consultation Details": {
-      iconClass: "fa-solid fa-suitcase-medical",
+      iconClass: "care-l-medkit",
       visible: consultationDetailsVisible,
       ref: consultationDetailsRef,
     },
     "Treatment Plan": {
-      iconClass: "fa-solid fa-prescription",
+      iconClass: "care-l-clipboard-alt",
       visible: treatmentPlanVisible,
       ref: treatmentPlanRef,
     },
@@ -753,7 +754,7 @@ export const ConsultationForm = (props: any) => {
         className="col-span-6 flex flex-row items-center mb-6 -ml-2"
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
-        <i className={`${section.iconClass} text-lg mr-3`} />
+        <CareIcon className={`${section.iconClass} text-xl mr-3`} />
         <label className="font-bold text-lg text-gray-900">
           {sectionTitle}
         </label>
@@ -828,7 +829,7 @@ export const ConsultationForm = (props: any) => {
                   setCurrentSection(sectionTitle as ConsultationFormSection);
                 }}
               >
-                <i className={`${section.iconClass} text-sm`} />
+                <CareIcon className={`${section.iconClass} text-lg`} />
                 <span>{sectionTitle}</span>
               </button>
             );
