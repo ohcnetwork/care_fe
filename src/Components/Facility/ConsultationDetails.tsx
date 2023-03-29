@@ -826,7 +826,10 @@ export const ConsultationDetails = (props: any) => {
               <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
-                    if (!consultationData?.current_bed?.bed_object?.id)
+                    if (
+                      !consultationData?.current_bed?.bed_object?.id ||
+                      consultationData?.discharge_date !== null
+                    )
                       return null;
                   }
                   return (
