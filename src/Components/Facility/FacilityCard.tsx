@@ -95,7 +95,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       {facility.name}
                     </Link>
                     <ButtonV2
-                      href={`/facility/${facility.id}/cns`}
+                      href={`/facility/${facility.id}/cns?page=1`}
                       border
                       ghost
                     >

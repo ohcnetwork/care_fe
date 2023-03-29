@@ -1,4 +1,4 @@
-import { Link } from "raviger";
+import { Link, navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -32,6 +32,15 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
   const [monitors, setMonitors] = useState<Monitor[]>();
   const [facility, setFacility] = useState<FacilityModel>();
   const [currentPage, setCurrentPage] = useState(1);
+  const searchParams = new URLSearchParams(window.location.search);
+
+  // this wil set ?page=1 param in url if it is not present
+  useEffect(() => {
+    if (!searchParams.get("page")) {
+      navigate(`/facility/${facilityId}/cns?page=1`);
+      location.reload();
+    }
+  }, []);
 
   useEffect(() => {
     const onFullscreenChange = () =>
@@ -103,7 +112,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
     }
 
     fetchMonitors().then((monitors) => {
-      setCurrentPage(1);
+      setCurrentPage(Number(searchParams.get("page")));
       setMonitors(monitors);
     });
   }, [dispatch, facility, facilityId]);
@@ -145,7 +154,10 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
           <Pagination
             className="border-gray-400 border rounded-lg"
             cPage={currentPage}
-            onChange={(page) => setCurrentPage(page)}
+            onChange={(page) => {
+              setCurrentPage(page);
+              navigate(`/facility/${facilityId}/cns?page=${page}`);
+            }}
             data={{ totalCount: monitors.length }}
             defaultPerPage={PER_PAGE_LIMIT}
           />
