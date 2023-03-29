@@ -379,6 +379,7 @@ export default function ManageUsers() {
                         setSelectedUser(user);
                       }}
                     >
+                      <CareIcon className="care-l-hospital text-lg" />
                       <p>Linked Facilities</p>
                     </ButtonV2>
                     <ButtonV2
@@ -389,6 +390,7 @@ export default function ManageUsers() {
                         setSelectedUser(user.username);
                       }}
                     >
+                      <CareIcon className="care-l-award text-lg" />
                       <p>Linked Skills</p>
                     </ButtonV2>
                   </div>
