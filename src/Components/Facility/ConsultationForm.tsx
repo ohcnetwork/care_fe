@@ -927,7 +927,7 @@ export const ConsultationForm = (props: any) => {
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row items-center sm:gap-3">
                       <TextFormField
                         className="w-full"
                         {...field("weight")}
