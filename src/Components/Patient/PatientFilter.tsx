@@ -166,6 +166,7 @@ export default function PatientFilter(props: any) {
     { id: "0", text: "Unvaccinated" },
     { id: "1", text: "1st dose only" },
     { id: "2", text: "Both doses" },
+    { id: "3", text: "Booster dose" },
   ];
 
   const DECLARED_FILTER = [

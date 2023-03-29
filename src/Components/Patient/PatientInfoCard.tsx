@@ -70,7 +70,8 @@ export default function PatientInfoCard(props: {
               className={`w-24 h-24 min-w-[5rem] bg-gray-200 ${categoryClass}-profile`}
             >
               {patient?.last_consultation &&
-              patient?.last_consultation?.current_bed ? (
+              patient?.last_consultation?.current_bed &&
+              patient?.last_consultation?.discharge_date === null ? (
                 <div
                   className="flex flex-col items-center justify-center h-full"
                   title={`

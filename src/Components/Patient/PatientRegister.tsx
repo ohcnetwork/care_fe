@@ -162,12 +162,6 @@ const initialState = {
   errors: { ...initError },
 };
 
-const initialStates = [{ id: 0, name: "Choose State" }];
-const selectStates = [{ id: 0, name: "Please select your state" }];
-const initialLocalbodies = [{ id: 0, name: "Choose Localbody", number: 0 }];
-const initialWard = [{ id: 0, name: "Choose Ward", number: 0 }];
-const selectDistrict = [{ id: 0, name: "Please select your district" }];
-
 const patientFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
     case "set_form": {
@@ -213,10 +207,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
-  const [states, setStates] = useState(initialStates);
-  const [districts, setDistricts] = useState(selectStates);
-  const [localBody, setLocalBody] = useState(selectDistrict);
-  const [ward, setWard] = useState(initialLocalbodies);
+  const [states, setStates] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<any[]>([]);
+  const [localBody, setLocalBody] = useState<any[]>([]);
+  const [ward, setWard] = useState<any[]>([]);
   const [statusDialog, setStatusDialog] = useState<{
     show?: boolean;
     transfer?: boolean;
@@ -249,7 +243,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsDistrictLoading(true);
         const districtList = await dispatchAction(getDistrictByState({ id }));
         if (districtList) {
-          setDistricts([...districtList.data]);
+          setDistricts(districtList.data);
         }
         setIsDistrictLoading(false);
         return districtList ? [...districtList.data] : [];
@@ -266,9 +260,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           getLocalbodyByDistrict({ id })
         );
         setIsLocalbodyLoading(false);
-        setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+        setLocalBody(localBodyList.data);
       } else {
-        setLocalBody(selectDistrict);
+        setLocalBody([]);
       }
     },
     [dispatchAction]
@@ -290,9 +284,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsWardLoading(true);
         const wardList = await dispatchAction(getWardByLocalBody({ id }));
         setIsWardLoading(false);
-        setWard([...initialWard, ...wardList.data.results]);
+        setWard(wardList.data.results);
       } else {
-        setWard(initialLocalbodies);
+        setWard([]);
       }
     },
     [dispatchAction]
@@ -397,7 +391,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 : res.data.blood_group
               : "",
             local_body: res.data.local_body ? res.data.local_body : "",
-            ward: res.data.ward_object ? res.data.ward_object.id : initialWard,
+            ward: res.data.ward_object ? res.data.ward_object.id : undefined,
             village: res.data.village ? res.data.village : "",
             medical_history: [],
             is_antenatal: String(!!res.data.is_antenatal),
@@ -740,7 +734,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
     if (!pincodeDetails) return;
 
-    const matchedState = states.find((state) => {
+    const matchedState = states?.find((state) => {
       return includesIgnoreCase(state.name, pincodeDetails.statename);
     });
     if (!matchedState) return;
@@ -1444,7 +1438,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   name="district"
                                   label="District"
                                   required
-                                  placeholder="Choose District"
+                                  placeholder={
+                                    state.form.state
+                                      ? "Choose District"
+                                      : "Select State First"
+                                  }
+                                  disabled={!state.form.state}
                                   value={state.form.district}
                                   options={districts}
                                   optionLabel={(o: any) => o.name}
@@ -1467,7 +1466,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   name="local_body"
                                   label="Localbody"
                                   required
-                                  placeholder="Choose localbody"
+                                  placeholder={
+                                    state.form.district
+                                      ? "Choose Localbody"
+                                      : "Select District First"
+                                  }
+                                  disabled={!state.form.district}
                                   value={state.form.local_body}
                                   options={localBody}
                                   optionLabel={(o: any) => o.name}
@@ -1499,6 +1503,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       };
                                     })}
                                   value={state.form.ward}
+                                  placeholder={
+                                    state.form.local_body
+                                      ? "Choose Ward"
+                                      : "Select Localbody First"
+                                  }
+                                  disabled={!state.form.local_body}
                                   optionLabel={(o: any) => o.name}
                                   optionValue={(o: any) => o.id}
                                   onChange={handleFormFieldChange}
