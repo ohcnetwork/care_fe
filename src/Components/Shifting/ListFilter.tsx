@@ -25,6 +25,30 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 
 const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
+const clearFilterState = {
+  orgin_facility: "",
+  orgin_facility_ref: "",
+  shifting_approving_facility: "",
+  shifting_approving_facility_ref: "",
+  assigned_facility: "",
+  assigned_facility_ref: "",
+  emergency: "",
+  is_up_shift: "",
+  created_date_before: "",
+  created_date_after: "",
+  modified_date_before: "",
+  modified_date_after: "",
+  patient_phone_number: "",
+  ordering: "",
+  is_kasp: "",
+  status: "",
+  assigned_user_ref: "",
+  assigned_to: "",
+  disease_status: "",
+  is_antenatal: "",
+  breathlessness_level: "",
+};
+
 export default function ListFilter(props: any) {
   const { kasp_enabled, kasp_string } = useConfig();
   const { filter, onChange, closeFilter } = props;
@@ -238,7 +262,7 @@ export default function ListFilter(props: any) {
       onApply={applyFilter}
       onClear={() => {
         navigate("/shifting");
-        setFilterState(filterState);
+        setFilterState(clearFilterState);
         closeFilter();
       }}
     >

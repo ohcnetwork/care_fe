@@ -16,6 +16,14 @@ const initialStates = [{ id: 0, name: "Choose State *" }];
 const initialDistricts = [{ id: 0, name: "Choose District" }];
 const selectStates = [{ id: 0, name: "Please select your state" }];
 
+const clearFilterState = {
+  state: "",
+  district: "",
+  local_body: "",
+  facility_type: "",
+  kasp_empanelled: "",
+};
+
 function FacilityFilter(props: any) {
   const { t } = useTranslation();
   const { filter, onChange, closeFilter } = props;
@@ -113,7 +121,7 @@ function FacilityFilter(props: any) {
       onApply={applyFilter}
       onClear={() => {
         navigate("/facility");
-        setFilterState(filterState);
+        setFilterState(clearFilterState);
         closeFilter();
       }}
     >

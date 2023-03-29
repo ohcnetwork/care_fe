@@ -13,6 +13,16 @@ import { useTranslation } from "react-i18next";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { FieldLabel } from "../Form/FormFields/FormField";
 
+const clearFilterState = {
+  created_date_before: "",
+  created_date_after: "",
+  result_date_before: "",
+  result_date_after: "",
+  sample_collection_date_before: "",
+  sample_collection_date_after: "",
+  srf_id: "",
+};
+
 export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter, dataList } = props;
   const [wardList, setWardList] = useState<any[]>([]);
@@ -183,7 +193,7 @@ export default function ListFilter(props: any) {
       onApply={applyFilter}
       onClear={() => {
         navigate("/external_results");
-        setFilterState(filterState);
+        setFilterState(clearFilterState);
         closeFilter();
       }}
     >

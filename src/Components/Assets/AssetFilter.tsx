@@ -46,6 +46,13 @@ function AssetFilter(props: any) {
   }, [facility, location]);
 
   const clearFilter = useCallback(() => {
+    setLocation(initialLocation);
+    setFacility({ name: "" });
+    setAssetType("");
+    setAssetStatus("");
+    setAssetClass("");
+    setFacilityId("");
+    setLocationId("");
     closeFilter();
     const searchQuery = qParams?.search && `?search=${qParams?.search}`;
     if (searchQuery) navigate(`/assets${searchQuery}`);

@@ -14,6 +14,14 @@ import { CircularProgress } from "@material-ui/core";
 import useMergeState from "../../Common/hooks/useMergeState";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 
+const clearFilterState = {
+  status: "",
+  result: "",
+  facility: "",
+  facility_ref: null,
+  sample_type: "",
+};
+
 export default function UserFilter(props: any) {
   const { filter, onChange, closeFilter } = props;
 
@@ -68,7 +76,7 @@ export default function UserFilter(props: any) {
       onApply={applyFilter}
       onClear={() => {
         navigate("/sample");
-        setFilterState(filterState);
+        setFilterState(clearFilterState);
         closeFilter();
       }}
     >

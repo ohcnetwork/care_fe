@@ -14,6 +14,22 @@ import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { FieldLabel } from "../Form/FormFields/FormField";
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
+const clearFilterState = {
+  orgin_facility: "",
+  orgin_facility_ref: "",
+  approving_facility: "",
+  approving_facility_ref: "",
+  assigned_facility: "",
+  assigned_facility_ref: "",
+  emergency: "",
+  created_date_before: "",
+  created_date_after: "",
+  modified_date_before: "",
+  modified_date_after: "",
+  ordering: "",
+  status: "",
+};
+
 export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
@@ -154,7 +170,7 @@ export default function ListFilter(props: any) {
       onApply={applyFilter}
       onClear={() => {
         navigate("/resource");
-        setFilterState(filterState);
+        setFilterState(clearFilterState);
         closeFilter();
       }}
     >
