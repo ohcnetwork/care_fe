@@ -1210,7 +1210,7 @@ export const ConsultationForm = (props: any) => {
                           <CheckBoxFormField
                             className="col-span-6"
                             {...field("is_telemedicine")}
-                            label="Is Telemedicine"
+                            label="Is Telemedicine required for the patient?"
                             onChange={handleTelemedicineChange}
                           />
 
