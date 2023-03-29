@@ -486,7 +486,7 @@ export const PatientManager = () => {
                 </div>
                 {patient.last_consultation?.last_daily_round
                   ?.ventilator_interface && (
-                  <div className="rounded-full p-1 w-9 h-9 border border-black text-center bg-cyan-100 font-semibold text-sm">
+                  <div className="rounded-full p-2 self-center border border-black text-center bg-cyan-100 font-semibold text-sm">
                     {
                       RESPIRATORY_SUPPORT.find(
                         (resp) =>
