@@ -13,7 +13,6 @@ import { useState, useCallback, useEffect } from "react";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import AssetFilter from "./AssetFilter";
-import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
 import SearchInput from "../Form/SearchInput";
@@ -28,6 +27,7 @@ import ExportMenu from "../Common/Export";
 import CountBlock from "../../CAREUI/display/Count";
 import AssetImportModal from "./AssetImportModal";
 import Page from "../Common/components/Page";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -340,7 +340,7 @@ const AssetsList = () => {
           <div className="flex flex-col md:flex-row gap-2 w-full lg:w-auto">
             <div className="w-full">
               <AdvancedFilterButton
-                setShowFilters={() => advancedFilter.setShow(true)}
+                onClick={() => advancedFilter.setShow(true)}
               />
             </div>
             <ButtonV2

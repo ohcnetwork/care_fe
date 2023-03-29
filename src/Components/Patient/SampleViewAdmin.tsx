@@ -25,6 +25,7 @@ import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -360,7 +361,7 @@ export default function SampleViewAdmin() {
             />
           </div>
 
-          <div className="w-full flex flex-col gap-3 p-2">
+          <div className="w-full flex flex-col gap-3">
             <SearchInput
               name="patient_name_search"
               value={qParams.patient_name}
@@ -376,46 +377,8 @@ export default function SampleViewAdmin() {
             />
           </div>
 
-          <div>
-            <div className="flex items-start mt-2 mb-2 ">
-              <button
-                className="btn btn-primary-ghost md:mt-7 w-full"
-                onClick={() => advancedFilter.setShow(true)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>Advanced Filters</span>
-              </button>
-            </div>
-            <SampleFilter {...advancedFilter} />
-          </div>
+          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
+          <SampleFilter {...advancedFilter} />
         </div>
         <FilterBadges
           badges={({ badge, value }) => [

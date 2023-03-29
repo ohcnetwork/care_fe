@@ -45,3 +45,18 @@ export default function FiltersSlideover({
     </SlideOver>
   );
 }
+
+export const AdvancedFilterButton = ({ onClick }: { onClick: () => void }) => {
+  const { t } = useTranslation();
+  return (
+    <ButtonV2
+      ghost
+      border
+      className="bg-white w-full sm:w-auto"
+      onClick={onClick}
+    >
+      <CareIcon className="care-l-list-ul text-lg" />
+      <span>{t("advanced_filters")}</span>
+    </ButtonV2>
+  );
+};
