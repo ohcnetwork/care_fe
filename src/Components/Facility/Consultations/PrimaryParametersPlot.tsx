@@ -10,6 +10,7 @@ import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDate } from "../../../Utils/utils";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { PainDiagrams } from "./PainDiagrams";
+import PageTitle from "../../Common/PageTitle";
 interface PrimaryParametersPlotProps {
   facilityId: string;
   patientId: string;
@@ -31,7 +32,6 @@ export const PrimaryParametersPlot = ({
           {
             page: currentPage,
             fields: [
-              "pain_scale_enhanced",
               "bp",
               "pulse",
               "temperature",
@@ -257,7 +257,10 @@ export const PrimaryParametersPlot = ({
           </div>
         </div>
       </div>
-      <PainDiagrams fetchData={results} consultationId={consultationId} />
+      <div>
+        <PageTitle title="Pain Scale" hideBack={true} breadcrumbs={false} />
+        <PainDiagrams consultationId={consultationId} />
+      </div>
       {totalCount > PAGINATION_LIMIT && (
         <div className="mt-4 flex w-full justify-center">
           <Pagination

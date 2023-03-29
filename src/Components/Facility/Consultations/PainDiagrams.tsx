@@ -1,41 +1,77 @@
-import { useState, useEffect } from "react";
-import { make as CriticalCare__PainViewer } from "../../CriticalCareRecording/Pain/CriticalCare__PainViewer.gen";
+import { useCallback, useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { statusType, useAbortableEffect } from "../../../Common/utils";
+import { dailyRoundsAnalyse } from "../../../Redux/actions";
+import { make as CriticalCare__PainViewer } from "../../CriticalCareRecording/Pain/CriticalCare__PainViewer.bs";
 import { formatDate } from "../../../Utils/utils";
 
 export const PainDiagrams = (props: any) => {
-  const { fetchData, consultationId } = props;
-  const [results, setResults] = useState({});
-  const [selectedData, setSelectedData] = useState<any>({
-    data: null,
+  const { consultationId } = props;
+  const dispatch: any = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<any>({});
+  const [selectedData, setData] = useState<any>({
+    data: [],
     id: "",
   });
 
-  useEffect(() => {
-    if (fetchData) {
-      const keys = Object.keys(fetchData || {}).filter(
-        (key) => fetchData[key].pain_scale_enhanced.length
+  const fetchDailyRounds = useCallback(
+    async (status: statusType) => {
+      setIsLoading(true);
+      const res = await dispatch(
+        dailyRoundsAnalyse(
+          {
+            fields: ["pain_scale_enhanced"],
+          },
+          { consultationId }
+        )
       );
-      const filterData: any = {};
-      keys.forEach((key) => (filterData[key] = fetchData[key]));
-      setResults(filterData);
-    }
-  }, [fetchData]);
+      if (!status.aborted) {
+        if (res && res.data) {
+          const keys = Object.keys(res.data.results || {}).filter(
+            (key) => res.data.results[key].pain_scale_enhanced.length
+          );
+          const data: any = {};
+          keys.forEach((key) => (data[key] = res.data.results[key]));
+
+          setResults(data);
+          if (keys.length > 0) {
+            setSelectedDateData(data, keys[0]);
+          }
+        }
+        setIsLoading(false);
+      }
+    },
+    [consultationId, dispatch]
+  );
 
   useEffect(() => {
     if (Object.keys(results).length > 0)
       setSelectedDateData(results, Object.keys(results)[0]);
   }, [results]);
 
-  const setSelectedDateData = (data: any, key: any) => {
-    setSelectedData({
-      data: data[key]?.["pain_scale_enhanced"],
-      id: data[key]?.["id"],
+  useAbortableEffect(
+    (status: statusType) => {
+      fetchDailyRounds(status);
+    },
+    [consultationId]
+  );
+
+  useEffect(() => {
+    if (Object.keys(results).length > 0)
+      setSelectedDateData(results, Object.keys(results)[0]);
+  }, [results]);
+
+  const setSelectedDateData = (results: any, key: any) => {
+    setData({
+      data: results[key]?.["pain_scale_enhanced"],
+      id: results[key]?.["id"],
     });
   };
 
-  const dates: any = [];
+  let dates: any = [];
   if (Object.keys(results).length > 0) {
-    dates.push(...Object.keys(results));
+    dates = Object.keys(results);
   }
 
   const dropdown = (dates: Array<any>) => {
@@ -74,7 +110,7 @@ export const PainDiagrams = (props: any) => {
   return (
     <div>
       {dates && dropdown(dates)}
-      {selectedData.data ? (
+      {!isLoading && selectedData.data ? (
         <CriticalCare__PainViewer
           painParameter={selectedData.data}
           id={selectedData.id}
