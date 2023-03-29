@@ -48,6 +48,9 @@
         "jsx-attributes": {
           "include": ["label", "placeholder", "error", "title"],
           "exclude": [".*"]
+        },
+        "callees": {
+          "exclude": [".*"]
         }
       }
     ]
