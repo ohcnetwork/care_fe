@@ -8,7 +8,6 @@ import thunk from "redux-thunk";
 import { Provider } from "react-redux";
 import * as Sentry from "@sentry/browser";
 import "./style/index.css";
-import UpdatableApp from "./Components/Common/UpdatableApp";
 import { registerSW } from "virtual:pwa-register"
 
 console.log(import.meta.env.MODE);
@@ -33,9 +32,7 @@ const theme = createMuiTheme({
 ReactDOM.render(
   <Provider store={store}>
     <ThemeProvider theme={theme}>
-      <UpdatableApp silentlyAutoUpdate>
-        <App />
-      </UpdatableApp>
+      <App />
     </ThemeProvider>
   </Provider>,
   document.getElementById("root")
