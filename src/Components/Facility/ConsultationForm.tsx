@@ -918,30 +918,45 @@ export const ConsultationForm = (props: any) => {
                   </div>
 
                   <div className="col-span-6">
-                    <div className="flex flex-col w-full md:flex-row gap-x-3">
-                      <div className="w-1/2" ref={fieldRef["weight"]}>
-                        <TextFormField
-                          {...field("weight")}
-                          label="Weight (kg)"
-                          placeholder="kg"
-                        />
-                      </div>
-                      <div className="w-1/2" ref={fieldRef["height"]}>
-                        <TextFormField
-                          {...field("height")}
-                          label="Height (cm)"
-                          placeholder="cm"
-                        />
-                      </div>
+                    <div className="flex items-center justify-between">
+                      <FieldLabel>Body Surface Area</FieldLabel>
+                      <span className="mb-2 text-black font-medium text-sm">
+                        {Math.sqrt(
+                          (Number(state.form.weight) *
+                            Number(state.form.height)) /
+                            3600
+                        ).toFixed(2)}
+                        m<sup>2</sup>
+                      </span>
                     </div>
-                    <div id="body_surface" className="flex-1">
-                      Body Surface area :{" "}
-                      {Math.sqrt(
-                        (Number(state.form.weight) *
-                          Number(state.form.height)) /
-                          3600
-                      ).toFixed(2)}{" "}
-                      m<sup>2</sup>
+
+                    <div className="flex flex-col sm:flex-row items-center sm:gap-3">
+                      <TextFormField
+                        className="w-full"
+                        {...field("weight")}
+                        type="number"
+                        placeholder="Weight"
+                        trailingPadding=" "
+                        trailing={
+                          <p className="text-sm text-gray-700 mr-8">
+                            Weight (kg)
+                          </p>
+                        }
+                        min={0}
+                      />
+                      <TextFormField
+                        className="w-full"
+                        {...field("height")}
+                        type="number"
+                        placeholder="Height"
+                        trailingPadding=" "
+                        trailing={
+                          <p className="text-sm text-gray-700 mr-8">
+                            Height (cm)
+                          </p>
+                        }
+                        min={0}
+                      />
                     </div>
                   </div>
 
