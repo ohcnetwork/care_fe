@@ -67,7 +67,11 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
       return { name, paramKey };
     },
     ordering(name = "Sort by", paramKey = "ordering") {
-      return { name, paramKey, value: t("SortOptions." + qParams[paramKey]) };
+      return {
+        name,
+        paramKey,
+        value: qParams[paramKey] && t("SortOptions." + qParams[paramKey]),
+      };
     },
     value(name: string, paramKey: FilterParamKeys, value: string) {
       return { name, value, paramKey };
