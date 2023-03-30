@@ -819,7 +819,15 @@ export const PatientManager = () => {
       </div>
       <div className="flex flex-wrap col-span-3 mt-6">
         <FilterBadges
-          badges={({ badge, value, kasp, phoneNumber, dateRange, range }) => [
+          badges={({
+            badge,
+            value,
+            kasp,
+            phoneNumber,
+            dateRange,
+            range,
+            ordering,
+          }) => [
             phoneNumber("Primary number", "phone_number"),
             phoneNumber("Emergency number", "emergency_phone_number"),
             badge("Patient name", "name"),
@@ -836,7 +844,7 @@ export const PatientManager = () => {
             value("Facility", "facility", facilityBadgeName),
             badge("Facility Type", "facility_type"),
             value("District", "district", districtName),
-            badge("Ordering", "ordering"),
+            ordering(),
             badge("Category", "category"),
             badge("Disease Status", "disease_status"),
             value(
