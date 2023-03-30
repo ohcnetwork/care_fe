@@ -625,7 +625,7 @@ export const FacilityHome = (props: any) => {
                 ghost
                 border
                 className="w-full md:w-auto flex flex-row mt-2 justify-center"
-                onClick={() => navigate(`/facility/${facilityId}/cns`)}
+                onClick={() => navigate(`/facility/${facilityId}/cns?page=1`)}
               >
                 <CareIcon className="care-l-monitor-heart-rate text-lg" />
                 <span>Central Nursing Station</span>
