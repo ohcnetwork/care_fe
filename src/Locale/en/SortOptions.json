@@ -1,12 +1,12 @@
 {
-    "-created_date": "Latest created date",
-    "created_date": "Oldest created date",
-    "-modified_date": "Latest updated date",
-    "modified_date": "Oldest updated date",
-    "facility__name,last_consultation__current_bed__bed__name": "Bed No. 1-N",
-    "facility__name,-last_consultation__current_bed__bed__name": "Bed No. N-1",
-    "-review_time": "Latest review date",
-    "review_time": "Oldest review date",
-    "name": "Patient name A-Z",
-    "-name": "Patient name Z-A"
+    "-created_date": "Latest created date first",
+    "created_date": "Oldest created date first",
+    "-modified_date": "Latest updated date first",
+    "modified_date": "Oldest updated date first",
+    "facility__name,last_consultation__current_bed__bed__name": "Bed No. 1-N first",
+    "facility__name,-last_consultation__current_bed__bed__name": "Bed No. N-1 first",
+    "-review_time": "Latest review date first",
+    "review_time": "Oldest review date first",
+    "name": "Patient name A-Z first",
+    "-name": "Patient name Z-A first"
 }
