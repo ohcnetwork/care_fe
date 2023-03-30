@@ -256,7 +256,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
               value={state.form.totalCapacity}
               onChange={handleChange}
               error={state.errors.totalCapacity}
-              min={0}
+              min={1}
             />
             <TextFormField
               className="w-full"
