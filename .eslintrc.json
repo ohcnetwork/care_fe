@@ -44,9 +44,12 @@
     "i18next/no-literal-string": [
       "warn",
       {
-        "mode": "all",
+        "mode": "jsx-only",
         "jsx-attributes": {
           "include": ["label", "placeholder", "error", "title"],
+          "exclude": [".*"]
+        },
+        "callees": {
           "exclude": [".*"]
         }
       }

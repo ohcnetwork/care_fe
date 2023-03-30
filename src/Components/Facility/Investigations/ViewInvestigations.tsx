@@ -1,76 +1,26 @@
-import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import {
-  getInvestigationSessions,
-  getInvestigation,
-} from "../../../Redux/actions";
 import { navigate } from "raviger";
 import ReportTable from "./Reports/ReportTable";
-import { InvestigationResponse } from "./Reports/types";
 import loadable from "@loadable/component";
 import { formatDate } from "../../../Utils/utils";
+import { InvestigationSessionType } from "./investigationsTab";
 const Loading = loadable(() => import("../../Common/Loading"));
 
-interface InvestigationSessionType {
-  session_external_id: string;
-  session_created_date: string;
-}
-
-export default function ViewInvestigations(props: any) {
-  const [isLoading, setIsLoading] = useState(false);
-  const { facilityId, patientId, consultationId }: any = props;
-  const dispatchAction: any = useDispatch();
-  const [investigations, setInvestigations] = useState<InvestigationResponse>(
-    []
-  );
-  const [investigationSessions, setInvestigationSessions] = useState<
-    InvestigationSessionType[]
-  >([]);
-
-  const fetchInvestigations = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(getInvestigation({}, consultationId));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setInvestigations(res.data.results);
-        }
-        setIsLoading(false);
-      }
-    },
-    [dispatchAction, consultationId]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchInvestigations(status);
-    },
-    [fetchInvestigations]
-  );
-
-  const fetchInvestigationSessions = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(
-        getInvestigationSessions({}, consultationId)
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setInvestigationSessions(res.data.reverse());
-        }
-        setIsLoading(false);
-      }
-    },
-    [dispatchAction, consultationId]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchInvestigationSessions(status);
-    },
-    [fetchInvestigationSessions]
-  );
+export default function ViewInvestigations(props: {
+  isLoading: boolean;
+  investigations: any;
+  investigationSessions: InvestigationSessionType[];
+  facilityId: string;
+  patientId: string;
+  consultationId: string;
+}) {
+  const {
+    isLoading,
+    investigations,
+    investigationSessions,
+    facilityId,
+    patientId,
+    consultationId,
+  } = props;
 
   return (
     <div className="max-w-7xl mx-auto">
