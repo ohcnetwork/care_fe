@@ -704,8 +704,9 @@ export const PatientManager = () => {
             <span className="lg:my-[2px]">Advanced Filters</span>
           </ButtonV2>
           <SortDropdownMenu
-            onSelect={updateQuery}
             options={PATIENT_SORT_OPTIONS}
+            selected={qParams.ordering}
+            onSelect={updateQuery}
           />
           <div className="tooltip">
             {!isExportAllowed ? (
