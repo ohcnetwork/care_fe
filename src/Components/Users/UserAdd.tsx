@@ -687,7 +687,7 @@ export const UserAdd = (props: UserProps) => {
                   <MonthFormField
                     {...field("doctor_experience_commenced_on")}
                     required
-                    label="Experience commenced on"
+                    label="Years of experience"
                     suffix={(date) => (
                       <span className="ml-2 text-sm whitespace-nowrap">
                         {getExperienceSuffix(date)}

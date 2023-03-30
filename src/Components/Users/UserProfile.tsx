@@ -588,7 +588,7 @@ export default function UserProfile() {
                               }
                               required
                               className="col-span-6 sm:col-span-3"
-                              label="Experience Commenced On"
+                              label="Years of experience"
                               suffix={(date) => (
                                 <span className="ml-2 text-sm whitespace-nowrap">
                                   {getExperienceSuffix(date)}
