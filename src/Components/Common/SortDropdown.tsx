@@ -55,7 +55,7 @@ export function SortDropdownOption({
         />
       }
     >
-      <span>{t(value)}</span>
+      <span>{t("SortOptions." + value)}</span>
     </DropdownItem>
   );
 }
