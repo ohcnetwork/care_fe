@@ -13,7 +13,10 @@ import {
 import { createStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { useState } from "react";
-import { SelectField, TextInputField } from "../../Common/HelperInputFields";
+import {
+  LegacySelectField,
+  LegacyTextInputField,
+} from "../../Common/HelperInputFields";
 import _ from "lodash";
 import { classNames } from "../../../Utils/utils";
 
@@ -57,7 +60,7 @@ const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
       >
         {showForm ? (
           data?.investigation_object?.investigation_type === "Choice" ? (
-            <SelectField
+            <LegacySelectField
               name="preferred_vehicle_choice"
               variant="outlined"
               optionArray={true}
@@ -157,7 +160,7 @@ export const InvestigationTable = ({
         </div>
       </div>
       <InputLabel className="mt-4">Search Test</InputLabel>
-      <TextInputField
+      <LegacyTextInputField
         value={searchFilter}
         placeholder="Search test"
         errors=""

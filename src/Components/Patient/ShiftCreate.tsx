@@ -1,7 +1,10 @@
 import { useReducer, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { ErrorHelperText, SelectField } from "../Common/HelperInputFields";
+import {
+  LegacyErrorHelperText,
+  LegacySelectField,
+} from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
@@ -334,7 +337,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                     />
                   </Box>
                 </RadioGroup>
-                <ErrorHelperText error={state.errors.emergency} />
+                <LegacyErrorHelperText error={state.errors.emergency} />
               </div>
 
               <div>
@@ -359,7 +362,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                     />
                   </Box>
                 </RadioGroup>
-                <ErrorHelperText error={state.errors.is_up_shift} />
+                <LegacyErrorHelperText error={state.errors.is_up_shift} />
               </div>
 
               {/* <div>
@@ -378,7 +381,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                 <FieldLabel>
                   Preferred Vehicle <span className="text-red-500">*</span>
                 </FieldLabel>
-                <SelectField
+                <LegacySelectField
                   name="preferred_vehicle_choice"
                   variant="outlined"
                   margin="dense"
@@ -395,7 +398,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                   Preferred Facility Type{" "}
                   <span className="text-red-500">*</span>
                 </FieldLabel>
-                <SelectField
+                <LegacySelectField
                   name="assigned_facility_type"
                   variant="outlined"
                   margin="dense"
@@ -412,7 +415,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                   Severity of Breathlessness{" "}
                   <span className="text-red-500">*</span>
                 </FieldLabel>
-                <SelectField
+                <LegacySelectField
                   name="breathlessness_level"
                   variant="outlined"
                   margin="dense"

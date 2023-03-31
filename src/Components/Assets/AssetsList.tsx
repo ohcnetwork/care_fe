@@ -251,7 +251,14 @@ const AssetsList = () => {
               </p>
             </div>
             <p className="font-normal text-sm">
-              {asset?.location_object?.name}
+              <span className="text-sm font-medium">
+                <CareIcon className="care-l-location-point mr-1 text-primary-500" />
+                {asset?.location_object?.name}
+              </span>
+              <span className="text-sm font-medium ml-2">
+                <CareIcon className="care-l-hospital mr-1 text-primary-500" />
+                {asset?.location_object?.facility?.name}
+              </span>
             </p>
 
             <div className="flex flex-wrap gap-2 mt-2">
@@ -260,11 +267,6 @@ const AssetsList = () => {
               ) : (
                 <Chip color="red" startIcon="cog" text="Not Working" />
               )}
-              <Chip
-                color="blue"
-                startIcon="location-arrow"
-                text={asset.status}
-              />
             </div>
           </div>
         ))}

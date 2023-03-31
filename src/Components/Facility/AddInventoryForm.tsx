@@ -10,7 +10,10 @@ import {
   getInventorySummary,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { SelectField, TextInputField } from "../Common/HelperInputFields";
+import {
+  LegacySelectField,
+  LegacyTextInputField,
+} from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -230,7 +233,7 @@ export const AddInventoryForm = (props: any) => {
                   <InputLabel id="inventory_name_label">
                     Inventory Name
                   </InputLabel>
-                  <SelectField
+                  <LegacySelectField
                     name="id"
                     variant="outlined"
                     margin="dense"
@@ -247,7 +250,7 @@ export const AddInventoryForm = (props: any) => {
                   <InputLabel id="inventory_description_label">
                     Status:
                   </InputLabel>
-                  <SelectField
+                  <LegacySelectField
                     name="isIncoming"
                     variant="outlined"
                     margin="dense"
@@ -264,7 +267,7 @@ export const AddInventoryForm = (props: any) => {
                 </div>
                 <div>
                   <InputLabel id="quantity">Quantity</InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="quantity"
                     variant="outlined"
                     margin="dense"
@@ -276,7 +279,7 @@ export const AddInventoryForm = (props: any) => {
                 </div>
                 <div>
                   <InputLabel id="unit">Unit</InputLabel>
-                  <SelectField
+                  <LegacySelectField
                     name="unit"
                     margin="dense"
                     variant="outlined"
