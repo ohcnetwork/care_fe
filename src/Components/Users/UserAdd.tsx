@@ -686,6 +686,7 @@ export const UserAdd = (props: UserProps) => {
                   <TextFormField
                     {...field("doctor_experience_commenced_on")}
                     required
+                    min={0}
                     type="number"
                     label="Years of experience"
                     placeholder="Years of experience of the Doctor"
