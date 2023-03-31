@@ -424,13 +424,14 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "consultation_notes":
-          if (!state.form[field]) {
-            errors[field] = "Required *";
-
-            invalidForm = true;
-          } else if (!state.form[field].replace(/\s/g, "").length) {
-            errors[field] = "Consultation notes can not be empty";
-            invalidForm = true;
+          if (state.form.consultation_status != 1) {
+            if (!state.form[field]) {
+              errors[field] = "Required *";
+              invalidForm = true;
+            } else if (!state.form[field].replace(/\s/g, "").length) {
+              errors[field] = "Consultation notes can not be empty";
+              invalidForm = true;
+            }
           }
           return;
         case "is_telemedicine":
