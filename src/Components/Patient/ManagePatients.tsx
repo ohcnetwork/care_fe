@@ -652,7 +652,8 @@ export const PatientManager = () => {
                 setShowDoctors(true);
               }}
             >
-              <p>Doctor Connect</p>
+              <CareIcon className="care-l-link text-lg" />
+              <p className="lg:my-[2px]">Doctor Connect</p>
             </ButtonV2>
           )}
           <ButtonV2
