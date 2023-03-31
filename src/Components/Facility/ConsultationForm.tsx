@@ -1080,7 +1080,7 @@ export const ConsultationForm = (props: any) => {
                       </div>
 
                       {!isUpdate && (
-                        <div className="col-span-6" ref={fieldRef["bed"]}>
+                        <div className="col-span-6 mb-6" ref={fieldRef["bed"]}>
                           <FieldLabel>Bed</FieldLabel>
                           <BedSelect
                             name="bed"
@@ -1095,6 +1095,7 @@ export const ConsultationForm = (props: any) => {
                       )}
                     </>
                   )}
+
                   <div className="col-span-6" ref={fieldRef["ip_no"]}>
                     <TextFormField
                       {...field("ip_no")}
