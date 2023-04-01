@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@material-ui/core";
 import { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import loadable from "@loadable/component";
@@ -11,8 +10,9 @@ import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
+import CardV2 from "../Common/components/CardV2";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const initForm = {
   name: "",
@@ -136,35 +136,33 @@ export const UpdateFacilityMiddleware = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle
-        title="Update Middleware"
-        crumbsReplacements={{
-          [facilityId]: { name: state.form.name },
-        }}
-      />
+    <Page
+      title="Update Middleware"
+      crumbsReplacements={{
+        [facilityId]: { name: state.form.name },
+      }}
+      className="max-w-3xl mx-auto"
+    >
       <div className="mt-4">
-        <Card>
+        <CardV2>
           <form onSubmit={(e) => handleSubmit(e)}>
-            <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1">
-                <div>
-                  <TextFormField
-                    name="middleware_address"
-                    label="Facility Middleware Address"
-                    value={state.form.middleware_address}
-                    onChange={(e) => handleChange(e)}
-                  />
-                </div>
+            <div className="mt-2 grid gap-4 grid-cols-1">
+              <div>
+                <TextFormField
+                  name="middleware_address"
+                  label="Facility Middleware Address"
+                  value={state.form.middleware_address}
+                  onChange={(e) => handleChange(e)}
+                />
               </div>
-              <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-                <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
-                <Submit onClick={handleSubmit} label="Update" />
-              </div>
-            </CardContent>
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+              <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
+              <Submit onClick={handleSubmit} label="Update" />
+            </div>
           </form>
-        </Card>
+        </CardV2>
       </div>
-    </div>
+    </Page>
   );
 };
