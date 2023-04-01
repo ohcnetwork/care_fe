@@ -571,7 +571,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   </div>
                   <div className="flex flex-wrap items-center">
                     {item.id ? (
-                      Object.keys(url).length > 0 ? (
+                      Object.keys(url).length > 0 && (
                         <div className="flex flex-wrap">
                           <a
                             href={url[item.id]}
@@ -628,8 +628,6 @@ export const FileUpload = (props: FileUploadProps) => {
                             <></>
                           )}
                         </div>
-                      ) : (
-                        <CircularProgress />
                       )
                     ) : (
                       <div>File Not found</div>
