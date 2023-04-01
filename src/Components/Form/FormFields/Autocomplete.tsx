@@ -17,6 +17,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   optionIcon?: OptionCallback<T, React.ReactNode>;
   onQuery?: (query: string) => void;
   dropdownIcon?: React.ReactNode | undefined;
+  isLoading?: boolean;
   allowRawInput?: boolean;
 };
 
@@ -40,6 +41,7 @@ const AutocompleteFormField = <T, V>(
         optionValue={props.optionValue}
         optionDescription={props.optionDescription}
         onQuery={props.onQuery}
+        isLoading={props.isLoading}
         allowRawInput={props.allowRawInput}
         requiredError={field.error ? props.required : false}
       />
@@ -162,6 +164,11 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
 
           <DropdownTransition>
             <Combobox.Options className="origin-top-right absolute z-10 mt-0.5 cui-dropdown-base">
+              {filteredOptions.length === 0 && (
+                <div className="p-2 text-sm text-gray-500">
+                  No options found
+                </div>
+              )}
               {filteredOptions.map((option, index) => (
                 <Combobox.Option
                   id={`${props.id}-option-${option.value}`}

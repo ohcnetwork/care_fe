@@ -1,5 +1,5 @@
 import { FieldLabel } from "../../Form/FormFields/FormField";
-import { ErrorHelperText } from "../HelperInputFields";
+import { LegacyErrorHelperText } from "../HelperInputFields";
 
 type SwitchProps<T> = {
   name?: string;
@@ -51,7 +51,7 @@ export default function SwitchV2<T>(props: SwitchProps<T>) {
           );
         })}
       </ul>
-      <ErrorHelperText error={props.error} />
+      <LegacyErrorHelperText error={props.error} />
     </div>
   );
 }
