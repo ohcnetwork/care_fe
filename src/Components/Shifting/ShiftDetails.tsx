@@ -4,14 +4,8 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftDetails, deleteShiftRecord } from "../../Redux/actions";
 import { navigate, Link } from "raviger";
-import Button from "@material-ui/core/Button";
 import QRCode from "qrcode.react";
 import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import CommentSection from "./CommentsSection";
@@ -19,9 +13,11 @@ import { formatDate } from "../../Utils/utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { useTranslation } from "react-i18next";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
+import ButtonV2 from "../Common/components/ButtonV2";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ShiftDetails(props: { id: string }) {
   const { static_header_logo, kasp_full_string } = useConfig();
@@ -624,57 +620,37 @@ export default function ShiftDetails(props: { id: string }) {
     <div>
       {isPrintMode ? (
         <div className="my-4">
-          <div className="my-4 flex justify-end ">
-            <button
-              onClick={(_) => window.print()}
-              className="btn btn-primary mr-2"
-            >
+          <div className="my-4 flex justify-end gap-3">
+            <ButtonV2 onClick={(_) => window.print()}>
               <i className="fas fa-print mr-2"></i> {t("print_referral_letter")}
-            </button>
-            <button
+            </ButtonV2>
+            <ButtonV2
               onClick={(_) => setIsPrintMode(false)}
-              className="btn btn-default"
+              variant="secondary"
             >
               <i className="fas fa-times mr-2"></i> {t("close")}
-            </button>
+            </ButtonV2>
           </div>
           {printData(data)}
         </div>
       ) : (
-        <div className="mx-3 md:mx-8 mb-10">
-          <div className="my-4 md:flex justify-between items-center mx-1">
-            <PageTitle
-              title={t("shifting_details")}
-              backUrl="/shifting/board-view"
-            />
-            <div className="md:flex items-center space-y-2 md:space-y-0 md:space-x-2">
-              <div>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  size="medium"
-                  onClick={() =>
-                    navigate(`/shifting/${data.external_id}/update`)
-                  }
-                >
-                  {t("update_status_details")}
-                </Button>
-              </div>
-              <div>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  size="medium"
-                  onClick={() => setIsPrintMode(true)}
-                >
-                  <i className="fas fa-file-alt mr-2"></i>{" "}
-                  {t("referral_letter")}
-                </Button>
-              </div>
+        <Page
+          title={t("shifting_details")}
+          backUrl="/shifting/board-view"
+          options={
+            <div className="flex gap-2">
+              <ButtonV2
+                onClick={() => navigate(`/shifting/${data.external_id}/update`)}
+              >
+                {t("update_status_details")}
+              </ButtonV2>
+
+              <ButtonV2 onClick={() => setIsPrintMode(true)}>
+                <i className="fas fa-file-alt mr-2"></i> {t("referral_letter")}
+              </ButtonV2>
             </div>
-          </div>
+          }
+        >
           {data.assigned_to_object && (
             <div className="relative rounded-lg shadow bg-primary-200">
               <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
@@ -823,50 +799,20 @@ export default function ShiftDetails(props: { id: string }) {
 
             <div className="flex justify-end mt-4">
               <div>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="secondary"
-                  size="small"
+                <ButtonV2
+                  variant="danger"
                   onClick={() => setOpenDeleteShiftDialog(true)}
                 >
                   {t("delete_record")}
-                </Button>
-
-                <Dialog
-                  open={openDeleteShiftDialog}
+                </ButtonV2>
+                <ConfirmDialogV2
+                  title={t("authorize_shift_delete")}
+                  description={t("record_delete_confirm")}
+                  action="Confirm"
+                  show={openDeleteShiftDialog}
                   onClose={() => setOpenDeleteShiftDialog(false)}
-                >
-                  <DialogTitle id="alert-dialog-title">
-                    {t("authorize_shift_delete")}
-                  </DialogTitle>
-                  <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                      {t("record_delete_confirm")}
-                    </DialogContentText>
-                  </DialogContent>
-                  <DialogActions>
-                    <div className="flex flex-col md:flex-row w-full gap-2 justify-end">
-                      <div>
-                        <button
-                          onClick={() => setOpenDeleteShiftDialog(false)}
-                          className="btn btn-primary w-full md:w-auto"
-                        >
-                          {t("no")}
-                        </button>
-                      </div>
-                      <div>
-                        <button
-                          onClick={handleShiftDelete}
-                          id="facility-delete-confirm"
-                          className="btn btn-danger w-full md:w-auto"
-                        >
-                          {t("yes")}
-                        </button>
-                      </div>
-                    </div>
-                  </DialogActions>
-                </Dialog>
+                  onConfirm={handleShiftDelete}
+                />
               </div>
             </div>
           </div>
@@ -936,7 +882,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
             </div>
           </div>
-        </div>
+        </Page>
       )}
     </div>
   );

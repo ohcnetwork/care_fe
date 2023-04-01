@@ -110,7 +110,7 @@ export const OnlineUsersSelect = (props: Props) => {
                   type="text"
                   placeholder="Search by name or username"
                   className={classNames(
-                    "pl-3 w-full outline-none border-0",
+                    "pl-3 w-full focus:outline-none border-0 focus:ring-0",
                     !isDropdownExpanded && "hidden"
                   )}
                   value={searchTerm}

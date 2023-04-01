@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getFacilityUsers } from "../../Redux/actions";
-import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
+import { LegacyAutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { UserModel } from "../Users/models";
 
 export const UserSelect = (props: any) => {
@@ -49,7 +49,7 @@ export const UserSelect = (props: any) => {
   }, [dispatchAction, facilityId]);
 
   return (
-    <AutoCompleteAsyncField
+    <LegacyAutoCompleteAsyncField
       freeSolo={false}
       multiple={multiple}
       variant="outlined"

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { SelectField } from "../Common/HelperInputFields";
+import { LegacySelectField } from "../Common/HelperInputFields";
 import { RESOURCE_FILTER_ORDER } from "../../Common/constants";
 import moment from "moment";
 import { getAnyFacility } from "../../Redux/actions";
@@ -165,7 +165,7 @@ export default function ListFilter(props: any) {
         {props.showResourceStatus && (
           <div className="w-full flex-none">
             <span className="text-sm font-semibold">Status</span>
-            <SelectField
+            <LegacySelectField
               name="status"
               variant="outlined"
               margin="dense"
@@ -234,7 +234,7 @@ export default function ListFilter(props: any) {
         </div>
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Ordering</span>
-          <SelectField
+          <LegacySelectField
             name="ordering"
             variant="outlined"
             margin="dense"
@@ -249,7 +249,7 @@ export default function ListFilter(props: any) {
 
         <div className="w-full flex-none">
           <span className="text-sm font-semibold">Is emergency case</span>
-          <SelectField
+          <LegacySelectField
             name="emergency"
             variant="outlined"
             margin="dense"

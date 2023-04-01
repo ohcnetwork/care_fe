@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getLocalbodyByDistrict } from "../../../Redux/actions";
-import { AutoCompleteAsyncField } from "../../Common/HelperInputFields";
+import { LegacyAutoCompleteAsyncField } from "../../Common/HelperInputFields";
 
 interface LocalBodySelectProps {
   name: string;
@@ -81,7 +81,7 @@ function LocalBodySelect(props: LocalBodySelectProps) {
   }, [dispatchAction, district, selected]);
 
   return (
-    <AutoCompleteAsyncField
+    <LegacyAutoCompleteAsyncField
       name={name}
       multiple={multiple}
       variant="outlined"
