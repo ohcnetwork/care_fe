@@ -424,13 +424,14 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "consultation_notes":
-          if (!state.form[field]) {
-            errors[field] = "Required *";
-
-            invalidForm = true;
-          } else if (!state.form[field].replace(/\s/g, "").length) {
-            errors[field] = "Consultation notes can not be empty";
-            invalidForm = true;
+          if (state.form.consultation_status != 1) {
+            if (!state.form[field]) {
+              errors[field] = "Required *";
+              invalidForm = true;
+            } else if (!state.form[field].replace(/\s/g, "").length) {
+              errors[field] = "Consultation notes can not be empty";
+              invalidForm = true;
+            }
           }
           return;
         case "is_telemedicine":
@@ -1080,7 +1081,7 @@ export const ConsultationForm = (props: any) => {
                       </div>
 
                       {!isUpdate && (
-                        <div className="col-span-6" ref={fieldRef["bed"]}>
+                        <div className="col-span-6 mb-6" ref={fieldRef["bed"]}>
                           <FieldLabel>Bed</FieldLabel>
                           <BedSelect
                             name="bed"
@@ -1095,6 +1096,7 @@ export const ConsultationForm = (props: any) => {
                       )}
                     </>
                   )}
+
                   <div className="col-span-6" ref={fieldRef["ip_no"]}>
                     <TextFormField
                       {...field("ip_no")}
