@@ -653,7 +653,7 @@ export const PatientManager = () => {
                 setShowDoctors(true);
               }}
             >
-              <CareIcon className="care-l-link text-lg" />
+              <CareIcon className="care-l-phone text-lg" />
               <p className="lg:my-[2px]">Doctor Connect</p>
             </ButtonV2>
           )}
