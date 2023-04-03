@@ -437,7 +437,8 @@ export const PatientManager = () => {
           <div className="flex gap-4 items-start">
             <div className="w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
               {patient?.last_consultation &&
-              patient?.last_consultation?.current_bed ? (
+              patient?.last_consultation?.current_bed &&
+              patient?.last_consultation?.discharge_date === null ? (
                 <div className="flex flex-col items-center justify-center h-full">
                   <Tooltip
                     title={
