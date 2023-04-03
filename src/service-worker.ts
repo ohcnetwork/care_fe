@@ -18,6 +18,9 @@ import { StaleWhileRevalidate } from "workbox-strategies";
 
 declare const self: ServiceWorkerGlobalScope;
 
+// eslint-disable-next-line no-restricted-globals
+const _ignored = self.__WB_MANIFEST;
+
 clientsClaim();
 
 // const toPrecache = self.__WB_MANIFEST.filter((file) => {
