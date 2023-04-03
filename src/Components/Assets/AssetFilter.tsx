@@ -151,7 +151,7 @@ function AssetFilter(props: any) {
             setSelected={(selectedId) =>
               handleLocationSelect((selectedId as string) || "")
             }
-            selected={location.id}
+            selected={locationId}
             errors=""
             showAll={false}
             multiple={false}
