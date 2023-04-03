@@ -15,12 +15,11 @@ import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { getExperienceSuffix, handleSignOut } from "../../Utils/utils";
+import { handleSignOut } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import MonthFormField from "../Form/FormFields/Month";
 import moment from "moment";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 
@@ -35,7 +34,7 @@ type EditForm = {
   phoneNumber: string;
   altPhoneNumber: string;
   doctor_qualification: string | undefined;
-  doctor_experience_commenced_on: string | undefined;
+  doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
 };
 type State = {
@@ -141,8 +140,10 @@ export default function UserProfile() {
             phoneNumber: res.data.phone_number,
             altPhoneNumber: res.data.alt_phone_number,
             doctor_qualification: res.data.doctor_qualification,
-            doctor_experience_commenced_on:
-              res.data.doctor_experience_commenced_on,
+            doctor_experience_commenced_on: moment().diff(
+              moment(res.data.doctor_experience_commenced_on),
+              "years"
+            ),
             doctor_medical_council_registration:
               res.data.doctor_medical_council_registration,
           };
@@ -292,9 +293,9 @@ export default function UserProfile() {
             : undefined,
         doctor_experience_commenced_on:
           details.user_type === "Doctor"
-            ? moment(states.form.doctor_experience_commenced_on).format(
-                "YYYY-MM-DD"
-              )
+            ? moment()
+                .subtract(states.form.doctor_experience_commenced_on, "years")
+                .format("YYYY-MM-DD")
             : undefined,
         doctor_medical_council_registration:
           details.user_type === "Doctor"
@@ -577,23 +578,14 @@ export default function UserProfile() {
                               label="Qualification"
                               placeholder="Doctor's Qualification"
                             />
-                            <MonthFormField
+                            <TextFormField
                               {...fieldProps("doctor_experience_commenced_on")}
-                              value={
-                                states.form.doctor_experience_commenced_on
-                                  ? moment(
-                                      states.form.doctor_experience_commenced_on
-                                    ).toDate()
-                                  : undefined
-                              }
                               required
                               className="col-span-6 sm:col-span-3"
+                              type="number"
+                              min={0}
                               label="Years of experience"
-                              suffix={(date) => (
-                                <span className="ml-2 text-sm whitespace-nowrap">
-                                  {getExperienceSuffix(date)}
-                                </span>
-                              )}
+                              placeholder="Years of experience of the Doctor"
                             />
                             <TextFormField
                               {...fieldProps(
