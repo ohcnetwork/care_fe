@@ -1,9 +1,7 @@
 import loadable from "@loadable/component";
-import { Box, FormControlLabel, Radio, RadioGroup } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
 import {
-  ChangeEventHandler,
   createRef,
   LegacyRef,
   useCallback,
@@ -50,7 +48,10 @@ import ProcedureBuilder, {
 import { ICD11DiagnosisModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
+import {
+  FieldChangeEvent,
+  FieldChangeEventHandler,
+} from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -61,6 +62,8 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import useConfig from "../../Common/hooks/useConfig";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useVisibility from "../../Utils/useVisibility";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -230,12 +233,12 @@ export const ConsultationForm = (props: any) => {
 
   const sections = {
     "Consultation Details": {
-      iconClass: "fa-solid fa-suitcase-medical",
+      iconClass: "care-l-medkit",
       visible: consultationDetailsVisible,
       ref: consultationDetailsRef,
     },
     "Treatment Plan": {
-      iconClass: "fa-solid fa-prescription",
+      iconClass: "care-l-clipboard-alt",
       visible: treatmentPlanVisible,
       ref: treatmentPlanRef,
     },
@@ -421,13 +424,14 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "consultation_notes":
-          if (!state.form[field]) {
-            errors[field] = "Required *";
-
-            invalidForm = true;
-          } else if (!state.form[field].replace(/\s/g, "").length) {
-            errors[field] = "Consultation notes can not be empty";
-            invalidForm = true;
+          if (state.form.consultation_status != 1) {
+            if (!state.form[field]) {
+              errors[field] = "Required *";
+              invalidForm = true;
+            } else if (!state.form[field].replace(/\s/g, "").length) {
+              errors[field] = "Consultation notes can not be empty";
+              invalidForm = true;
+            }
           }
           return;
         case "is_telemedicine":
@@ -703,19 +707,19 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleTelemedicineChange: ChangeEventHandler<HTMLInputElement> = (
-    e
-  ) => {
-    e &&
-      e.target &&
-      dispatch({
-        type: "set_form",
-        form: {
-          ...state.form,
-          [e.target.name]: e.target.value,
-          action: e.target.value === "false" ? "PENDING" : state.form.action,
-        },
-      });
+  const handleTelemedicineChange = ({
+    name,
+    value,
+  }: FieldChangeEvent<unknown>) => {
+    value = `${value}`;
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        [name]: value,
+        action: value === "false" ? "PENDING" : state.form.action,
+      },
+    });
   };
 
   const handleDoctorSelect = (doctor: UserModel | null) => {
@@ -751,7 +755,7 @@ export const ConsultationForm = (props: any) => {
         className="col-span-6 flex flex-row items-center mb-6 -ml-2"
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
-        <i className={`${section.iconClass} text-lg mr-3`} />
+        <CareIcon className={`${section.iconClass} text-xl mr-3`} />
         <label className="font-bold text-lg text-gray-900">
           {sectionTitle}
         </label>
@@ -826,7 +830,7 @@ export const ConsultationForm = (props: any) => {
                   setCurrentSection(sectionTitle as ConsultationFormSection);
                 }}
               >
-                <i className={`${section.iconClass} text-sm`} />
+                <CareIcon className={`${section.iconClass} text-lg`} />
                 <span>{sectionTitle}</span>
               </button>
             );
@@ -890,19 +894,19 @@ export const ConsultationForm = (props: any) => {
                           />
                         </div>
                       )}
+                      <div
+                        className="col-span-6"
+                        ref={fieldRef["history_of_present_illness"]}
+                      >
+                        <TextAreaFormField
+                          {...field("history_of_present_illness")}
+                          label="History of present illness"
+                          placeholder="Optional information"
+                        />
+                      </div>
                     </>
                   )}
 
-                  <div
-                    className="col-span-6"
-                    ref={fieldRef["history_of_present_illness"]}
-                  >
-                    <TextAreaFormField
-                      {...field("history_of_present_illness")}
-                      label="History of present illness"
-                      placeholder="Optional information"
-                    />
-                  </div>
                   <div
                     className="col-span-6"
                     ref={fieldRef["examination_details"]}
@@ -915,30 +919,45 @@ export const ConsultationForm = (props: any) => {
                   </div>
 
                   <div className="col-span-6">
-                    <div className="flex flex-col w-full md:flex-row gap-x-3">
-                      <div className="w-1/2" ref={fieldRef["weight"]}>
-                        <TextFormField
-                          {...field("weight")}
-                          label="Weight (kg)"
-                          placeholder="kg"
-                        />
-                      </div>
-                      <div className="w-1/2" ref={fieldRef["height"]}>
-                        <TextFormField
-                          {...field("height")}
-                          label="Height (cm)"
-                          placeholder="cm"
-                        />
-                      </div>
+                    <div className="flex items-center justify-between">
+                      <FieldLabel>Body Surface Area</FieldLabel>
+                      <span className="mb-2 text-black font-medium text-sm">
+                        {Math.sqrt(
+                          (Number(state.form.weight) *
+                            Number(state.form.height)) /
+                            3600
+                        ).toFixed(2)}
+                        m<sup>2</sup>
+                      </span>
                     </div>
-                    <div id="body_surface" className="flex-1">
-                      Body Surface area :{" "}
-                      {Math.sqrt(
-                        (Number(state.form.weight) *
-                          Number(state.form.height)) /
-                          3600
-                      ).toFixed(2)}{" "}
-                      m<sup>2</sup>
+
+                    <div className="flex flex-col sm:flex-row items-center sm:gap-3">
+                      <TextFormField
+                        className="w-full"
+                        {...field("weight")}
+                        type="number"
+                        placeholder="Weight"
+                        trailingPadding=" "
+                        trailing={
+                          <p className="text-sm text-gray-700 mr-8">
+                            Weight (kg)
+                          </p>
+                        }
+                        min={0}
+                      />
+                      <TextFormField
+                        className="w-full"
+                        {...field("height")}
+                        type="number"
+                        placeholder="Height"
+                        trailingPadding=" "
+                        trailing={
+                          <p className="text-sm text-gray-700 mr-8">
+                            Height (cm)
+                          </p>
+                        }
+                        min={0}
+                      />
                     </div>
                   </div>
 
@@ -1062,7 +1081,7 @@ export const ConsultationForm = (props: any) => {
                       </div>
 
                       {!isUpdate && (
-                        <div className="col-span-6" ref={fieldRef["bed"]}>
+                        <div className="col-span-6 mb-6" ref={fieldRef["bed"]}>
                           <FieldLabel>Bed</FieldLabel>
                           <BedSelect
                             name="bed"
@@ -1077,6 +1096,7 @@ export const ConsultationForm = (props: any) => {
                       )}
                     </>
                   )}
+
                   <div className="col-span-6" ref={fieldRef["ip_no"]}>
                     <TextFormField
                       {...field("ip_no")}
@@ -1097,7 +1117,7 @@ export const ConsultationForm = (props: any) => {
                             className="col-span-6"
                             ref={fieldRef["investigation"]}
                           >
-                            <FieldLabel>Investigation Suggestions</FieldLabel>
+                            <FieldLabel>Investigations Suggestions</FieldLabel>
                             <InvestigationBuilder
                               investigations={InvestigationAdvice}
                               setInvestigations={setInvestigationAdvice}
@@ -1174,32 +1194,13 @@ export const ConsultationForm = (props: any) => {
                           </div>
 
                           {kasp_enabled && (
-                            <div className="flex-1" id="is_kasp">
-                              <FieldLabel required>{kasp_string}</FieldLabel>
-                              <RadioGroup
-                                aria-label="covid"
-                                name="is_kasp"
-                                value={state.form.is_kasp}
-                                onChange={handleTelemedicineChange}
-                                style={{ padding: "0px 5px" }}
-                              >
-                                <Box display="flex" flexDirection="row">
-                                  <FormControlLabel
-                                    value="true"
-                                    control={<Radio />}
-                                    label="Yes"
-                                  />
-                                  <FormControlLabel
-                                    value="false"
-                                    control={<Radio />}
-                                    label="No"
-                                  />
-                                </Box>
-                              </RadioGroup>
-                              <LegacyErrorHelperText
-                                error={state.errors.is_kasp}
-                              />
-                            </div>
+                            <CheckBoxFormField
+                              {...field("is_kasp")}
+                              className="flex-1"
+                              required
+                              label={kasp_string}
+                              onChange={handleTelemedicineChange}
+                            />
                           )}
                           <div
                             className="col-span-6"
@@ -1223,38 +1224,18 @@ export const ConsultationForm = (props: any) => {
                             />
                           </div>
 
-                          <div id="is_telemedicine">
-                            <FieldLabel>Telemedicine</FieldLabel>
-                            <RadioGroup
-                              aria-label="covid"
-                              name="is_telemedicine"
-                              value={state.form.is_telemedicine}
-                              onChange={handleTelemedicineChange}
-                              style={{ padding: "0px 5px" }}
-                            >
-                              <Box display="flex" flexDirection="row">
-                                <FormControlLabel
-                                  value="true"
-                                  control={<Radio />}
-                                  label="Yes"
-                                />
-                                <FormControlLabel
-                                  value="false"
-                                  control={<Radio />}
-                                  label="No"
-                                />
-                              </Box>
-                            </RadioGroup>
-                            <LegacyErrorHelperText
-                              error={state.errors.is_telemedicine}
-                            />
-                          </div>
+                          <CheckBoxFormField
+                            className="col-span-6"
+                            {...field("is_telemedicine")}
+                            label="Is Telemedicine required for the patient?"
+                            onChange={handleTelemedicineChange}
+                          />
 
                           {JSON.parse(state.form.is_telemedicine) && (
-                            <div className="flex flex-col md:flex-row justify-between gap-3">
+                            <div className="flex flex-col md:flex-row gap-3 col-span-6">
                               <div
-                                className="col-span-6"
                                 ref={fieldRef["review_interval"]}
+                                className="flex-1"
                               >
                                 <SelectFormField
                                   {...selectField("review_interval")}
@@ -1264,7 +1245,7 @@ export const ConsultationForm = (props: any) => {
                               </div>
 
                               <div
-                                className="flex-1 col-span-6"
+                                className="flex-[2]"
                                 ref={fieldRef["assigned_to"]}
                               >
                                 <OnlineUsersSelect
@@ -1275,12 +1256,8 @@ export const ConsultationForm = (props: any) => {
                                   outline
                                 />
                               </div>
-                              <div
-                                className="col-span-6"
-                                ref={fieldRef["action"]}
-                              >
+                              <div className="flex-1" ref={fieldRef["action"]}>
                                 <SelectFormField
-                                  className="flex-1"
                                   {...field("action")}
                                   label="Action"
                                   required

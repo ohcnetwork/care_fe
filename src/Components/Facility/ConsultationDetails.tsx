@@ -28,7 +28,6 @@ import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { NutritionPlots } from "./Consultations/NutritionPlots";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
-import ViewInvestigations from "./Investigations/ViewInvestigations";
 import DoctorVideoSlideover from "./DoctorVideoSlideover";
 import { Feed } from "./Consultations/Feed";
 import { validateEmailAddress } from "../../Common/validation";
@@ -40,7 +39,6 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import { LegacyTextInputField } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
-import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
@@ -65,6 +63,7 @@ import { HCXClaimModel } from "../HCX/models";
 import ClaimDetailCard from "../HCX/ClaimDetailCard";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import Chip from "../../CAREUI/display/Chip";
+import InvestigationTab from "./Investigations/investigationsTab";
 import useConfig from "../../Common/hooks/useConfig";
 
 interface PreDischargeFormInterface {
@@ -306,9 +305,7 @@ export const ConsultationDetails = (props: any) => {
       setPreDischargeForm((form) => {
         return {
           ...form,
-          discharge_date: res.data.admission_date
-            ? res.data.admission_date
-            : new Date().toISOString(),
+          discharge_date: new Date().toISOString(),
         };
       });
       if (!status.aborted) {
@@ -596,6 +593,19 @@ export const ConsultationDetails = (props: any) => {
               />
             </div>
           )}
+          {["REF", "LAMA"].includes(preDischargeForm.discharge_reason) && (
+            <div>
+              <DateFormField
+                label="Date of Discharge"
+                name="discharge_date"
+                value={moment(preDischargeForm.discharge_date).toDate()}
+                min={moment(consultationData.admission_date).toDate()}
+                disableFuture={true}
+                required
+                onChange={handleDateChange}
+              />
+            </div>
+          )}
         </div>
 
         {enable_hcx && (
@@ -827,7 +837,10 @@ export const ConsultationDetails = (props: any) => {
               <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
-                    if (!consultationData?.current_bed?.bed_object?.id)
+                    if (
+                      !consultationData?.current_bed?.bed_object?.id ||
+                      consultationData?.discharge_date !== null
+                    )
                       return null;
                   }
                   return (
@@ -1469,12 +1482,12 @@ export const ConsultationDetails = (props: any) => {
                 </ButtonV2>
               </div>
             </div>
-            <ViewInvestigations
+            <InvestigationTab
               consultationId={consultationId}
               facilityId={facilityId}
               patientId={patientId}
+              patientData={patientData}
             />
-            <ViewInvestigationSuggestions consultationId={consultationId} />
           </div>
         )}
       </div>
