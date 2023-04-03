@@ -10,10 +10,12 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: "prompt",
-      injectRegister: "script",
-      workbox: {
-        maximumFileSizeToCacheInBytes: 6000000
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'service-worker.ts',
+      injectRegister: null,
+      injectManifest: {
+        maximumFileSizeToCacheInBytes: 7000000
       },
       manifest: {
         name: "Care",
@@ -21,6 +23,12 @@ export default defineConfig({
         theme_color: "#33bb17",
         background_color: "#2196f3",
         icons: [
+          {
+            src: "https://cdn.coronasafe.network/care-manifest/images/icons/icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any maskable",
+          },
           {
             src: "https://cdn.coronasafe.network/care-manifest/images/icons/icon-192x192.png",
             sizes: "192x192",

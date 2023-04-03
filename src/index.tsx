@@ -10,8 +10,9 @@ import * as Sentry from "@sentry/browser";
 import "./style/index.css";
 import { registerSW } from "virtual:pwa-register"
 
-console.log(import.meta.env.MODE);
-registerSW({ immediate: false })
+if (import.meta.env.PROD) {
+  registerSW({ immediate: false })
+}
 
 const store = createStore(reducer, applyMiddleware(thunk));
 if (import.meta.env.PROD) {
