@@ -305,9 +305,7 @@ export const ConsultationDetails = (props: any) => {
       setPreDischargeForm((form) => {
         return {
           ...form,
-          discharge_date: res.data.admission_date
-            ? res.data.admission_date
-            : new Date().toISOString(),
+          discharge_date: new Date().toISOString(),
         };
       });
       if (!status.aborted) {
@@ -592,6 +590,19 @@ export const ConsultationDetails = (props: any) => {
                 }}
                 required
                 placeholder="Attending Doctor's Name and Designation"
+              />
+            </div>
+          )}
+          {["REF", "LAMA"].includes(preDischargeForm.discharge_reason) && (
+            <div>
+              <DateFormField
+                label="Date of Discharge"
+                name="discharge_date"
+                value={moment(preDischargeForm.discharge_date).toDate()}
+                min={moment(consultationData.admission_date).toDate()}
+                disableFuture={true}
+                required
+                onChange={handleDateChange}
               />
             </div>
           )}

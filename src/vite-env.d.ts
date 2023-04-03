@@ -6,6 +6,8 @@ interface ImportMetaEnv {
   readonly REACT_APP_COVER_IMAGE_ALT: string;
   readonly REACT_APP_CONFIG: string;
   readonly REACT_PUBLIC_URL: string;
+  readonly REACT_APP_SITE_URL: string;
+  readonly REACT_APP_ANALYTICS_SERVER_URL: string;
 }
 
 interface ImportMeta {
