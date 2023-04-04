@@ -90,15 +90,18 @@ const App: React.FC = () => {
     return <Loading />;
   }
 
-  if (currentUser?.data) {
-    return (
-      <HistoryAPIProvider>
-        <AppRouter />
-      </HistoryAPIProvider>
-    );
-  } else {
-    return <SessionRouter />;
-  }
+  const configData = config.data as IConfig;
+
+  return (
+    <HistoryAPIProvider>
+      {currentUser?.data ? <AppRouter /> : <SessionRouter />}
+      <script
+        defer
+        data-domain={configData.site_url}
+        src={`${configData.analytics_server_url}/js/script.js`}
+      ></script>
+    </HistoryAPIProvider>
+  );
 };
 
 export default App;
