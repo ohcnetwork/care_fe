@@ -9,7 +9,7 @@ import {
   listAssetBeds,
 } from "../../Redux/actions";
 import { classNames } from "../../Utils/utils";
-import { AssetData } from "../Assets/AssetTypes";
+import { AssetData, AssetLocationObject } from "../Assets/AssetTypes";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import Loading from "../Common/Loading";
@@ -17,6 +17,8 @@ import Pagination from "../Common/Pagination";
 import { PatientModel } from "../Patient/models";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
 import { FacilityModel } from "./models";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete";
+import { uniqBy } from "lodash";
 
 interface Monitor {
   patient: PatientModel;
@@ -33,6 +35,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
   const [monitors, setMonitors] = useState<Monitor[]>();
   const [facility, setFacility] = useState<FacilityModel>();
   const [currentPage, setCurrentPage] = useState(1);
+  const [location, setLocation] = useState<AssetLocationObject>();
 
   useEffect(() => {
     const onFullscreenChange = () =>
@@ -104,7 +107,6 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
     }
 
     fetchMonitors().then((monitors) => {
-      setCurrentPage(1);
       setMonitors(monitors);
     });
 
@@ -118,16 +120,42 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
   if (!monitors) return <Loading />;
   return (
     <Page
-      title={`${facility?.name}: Central Nursing Station`}
+      title={`Central Nursing Station: ${facility?.name}`}
       backUrl={`/facility/${facilityId}`}
       noImplicitPadding
       breadcrumbs={false}
       options={
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-4 items-center">
+          <AutocompleteFormField
+            name="location"
+            placeholder="Filter by a specific location"
+            value={location}
+            onChange={({ value }) => setLocation(value)}
+            options={
+              monitors
+                ? uniqBy(
+                    monitors.map((m) => m.asset.location_object),
+                    "id"
+                  )
+                : []
+            }
+            optionLabel={(location) => location.name}
+            optionDescription={(location) => location.description}
+            optionValue={(location) => location}
+            optionIcon={() => (
+              <div className="flex gap-2">
+                <CareIcon className="care-l-bed text-lg" />
+                <CareIcon className="care-l-map-marker text-lg" />
+              </div>
+            )}
+            disabled={!monitors}
+            labelClassName="hidden"
+            errorClassName="hidden"
+          />
           <ButtonV2
             variant="secondary"
-            ghost
             border
+            ghost
             onClick={() => {
               if (isFullscreen) {
                 document.exitFullscreen();
@@ -135,7 +163,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
                 document.documentElement.requestFullscreen();
               }
             }}
-            className="tooltip"
+            className="tooltip !h-11"
           >
             <CareIcon
               className={classNames(
@@ -150,7 +178,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
             </span>
           </ButtonV2>
           <Pagination
-            className="border-gray-400 border rounded-lg"
+            className=""
             cPage={currentPage}
             onChange={(page) => setCurrentPage(page)}
             data={{ totalCount: monitors.length }}
@@ -164,8 +192,11 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
           No patients are currently monitored
         </div>
       )}
-      <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-2">
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-1">
         {monitors
+          ?.filter((m) =>
+            location ? m.asset.location_object.id === location?.id : true
+          )
           ?.slice(
             (currentPage - 1) * PER_PAGE_LIMIT,
             currentPage * PER_PAGE_LIMIT
