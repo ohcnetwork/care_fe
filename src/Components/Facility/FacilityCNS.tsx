@@ -16,7 +16,7 @@ import Loading from "../Common/Loading";
 import Pagination from "../Common/Pagination";
 import { PatientModel } from "../Patient/models";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
-import { FacilityModel } from "./models";
+import { BedModel, FacilityModel } from "./models";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { uniqBy } from "lodash";
 
@@ -216,7 +216,10 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
                 </span>
                 <span className="flex-1 flex items-center justify-end gap-2 text-end">
                   <CareIcon className="care-l-bed text-lg" />
-                  {patient.last_consultation?.current_bed?.bed_object?.name}
+                  {getBedName(
+                    patient.last_consultation?.current_bed
+                      ?.bed_object as BedModel
+                  )}
                 </span>
               </div>
               <PatientVitalsCard socketUrl={socketUrl} shrinked />
@@ -226,3 +229,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
     </Page>
   );
 }
+
+const getBedName = (bed: BedModel) => {
+  return `${bed.name} - ${bed.location_object?.name}`;
+};
