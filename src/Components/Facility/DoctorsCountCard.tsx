@@ -72,7 +72,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
             disableFor="readOnly"
             buttonType="html"
           >
-            <CareIcon className="care-l-edit-alt text-xl" />
+            <CareIcon className="care-l-edit-alt" />
             <span className="tooltip-text tooltip-bottom">Edit</span>
           </RoleButton>
           <RoleButton
@@ -81,7 +81,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
             disableFor="readOnly"
             buttonType="html"
           >
-            <CareIcon className="care-l-trash-alt text-xl" />
+            <CareIcon className="care-l-trash-alt" />
             <span className="tooltip-text tooltip-bottom">Delete</span>
           </RoleButton>
         </div>
