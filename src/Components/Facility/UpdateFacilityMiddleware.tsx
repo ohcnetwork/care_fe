@@ -10,7 +10,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
-import CardV2 from "../Common/components/CardV2";
 import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -143,25 +142,23 @@ export const UpdateFacilityMiddleware = (props: any) => {
       }}
       className="max-w-3xl mx-auto"
     >
-      <div className="mt-4">
-        <CardV2>
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <div className="mt-2 grid gap-4 grid-cols-1">
-              <div>
-                <TextFormField
-                  name="middleware_address"
-                  label="Facility Middleware Address"
-                  value={state.form.middleware_address}
-                  onChange={(e) => handleChange(e)}
-                />
-              </div>
+      <div className="cui-card mt-4">
+        <form onSubmit={(e) => handleSubmit(e)}>
+          <div className="mt-2 grid gap-4 grid-cols-1">
+            <div>
+              <TextFormField
+                name="middleware_address"
+                label="Facility Middleware Address"
+                value={state.form.middleware_address}
+                onChange={(e) => handleChange(e)}
+              />
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-              <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
-              <Submit onClick={handleSubmit} label="Update" />
-            </div>
-          </form>
-        </CardV2>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+            <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
+            <Submit onClick={handleSubmit} label="Update" />
+          </div>
+        </form>
       </div>
     </Page>
   );

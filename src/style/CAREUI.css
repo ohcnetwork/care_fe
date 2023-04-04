@@ -28,6 +28,10 @@
     @apply z-10 w-full rounded-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none
 }
 
+.cui-card {
+    @apply bg-white p-5 rounded-lg shadow
+}
+
 .tooltip {
     @apply relative
 }
