@@ -10,6 +10,7 @@ import { HistoryAPIProvider } from "./CAREUI/misc/HistoryAPIProvider";
 import * as Sentry from "@sentry/browser";
 import { IConfig } from "./Common/hooks/useConfig";
 import { LocalStorageKeys } from "./Common/constants";
+import Plausible from "./Components/Common/Plausible";
 
 const Loading = loadable(() => import("./Components/Common/Loading"));
 
@@ -90,16 +91,10 @@ const App: React.FC = () => {
     return <Loading />;
   }
 
-  const configData = config.data as IConfig;
-
   return (
     <HistoryAPIProvider>
       {currentUser?.data ? <AppRouter /> : <SessionRouter />}
-      <script
-        defer
-        data-domain={configData.site_url}
-        src={`${configData.analytics_server_url}/js/script.js`}
-      ></script>
+      <Plausible />
     </HistoryAPIProvider>
   );
 };
