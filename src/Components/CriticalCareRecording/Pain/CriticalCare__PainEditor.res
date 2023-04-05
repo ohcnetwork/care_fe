@@ -48,8 +48,7 @@ let reducer = (state, action) => {
   switch action {
   | AutoManageScale(part) => {
       let newParts = Js.Array.map(
-        p =>
-          Pain.region(p) === Pain.region(part) ? Pain.autoScale(part) : p,
+        p => Pain.region(p) === Pain.region(part) ? Pain.autoScale(part) : p,
         state.parts,
       )
       {
@@ -60,10 +59,7 @@ let reducer = (state, action) => {
     }
   | RemoveFromSelectedParts(part) => {
       ...state,
-      parts: Js.Array.filter(
-        p => Pain.region(p) !== Pain.region(part),
-        state.parts,
-      ),
+      parts: Js.Array.filter(p => Pain.region(p) !== Pain.region(part), state.parts),
       dirty: true,
     }
   | AddPain(region) => {
@@ -74,20 +70,20 @@ let reducer = (state, action) => {
   | AddSelectedPart(region) => {
       ...state,
       parts: Js.Array.concat(
-        Js.Array.filter(p => Pain.region(p) !== region, state.parts), 
+        Js.Array.filter(p => Pain.region(p) !== region, state.parts),
         [
           Belt.Option.getWithDefault(
-            Js.Array.find(p => Pain.region(p) === region, state.parts), 
-            Pain.makeDefault(region)
-          )
-        ]
+            Js.Array.find(p => Pain.region(p) === region, state.parts),
+            Pain.makeDefault(region),
+          ),
+        ],
       ),
       dirty: true,
     }
   | UpdateSelectedPart(part) => {
       ...state,
       parts: Js.Array.concat(
-        Js.Array.filter((item: Pain.part) => item.region != part.region, state.parts), 
+        Js.Array.filter((item: Pain.part) => item.region != part.region, state.parts),
         [part],
       ),
       dirty: true,
@@ -162,13 +158,20 @@ let initialState = (psp, previewMode) => {
 let selectedClass = (part: option<Pain.part>) => {
   switch part {
   | Some(p) =>
-    let score =  p.scale
-    if score <= 0 { "text-gray-400 hover:bg-red-400 tooltip" } 
-    else if score <= 3 { "text-red-200 hover:bg-red-400 tooltip" }
-    else if score <= 6 { "text-red-400 hover:bg-red-500 tooltip" }
-    else if score <= 10 { "text-red-500 hover:bg-red-600 tooltip" }
-    else if score <= 15 { "text-red-600 hover:bg-red-700 tooltip" }
-    else { "text-red-700 hover:bg-red-800 tooltip" }
+    let score = p.scale
+    if score <= 0 {
+      "text-gray-400 hover:bg-red-400 tooltip"
+    } else if score <= 3 {
+      "text-red-200 hover:bg-red-400 tooltip"
+    } else if score <= 6 {
+      "text-red-400 hover:bg-red-500 tooltip"
+    } else if score <= 10 {
+      "text-red-500 hover:bg-red-600 tooltip"
+    } else if score <= 15 {
+      "text-red-600 hover:bg-red-700 tooltip"
+    } else {
+      "text-red-700 hover:bg-red-800 tooltip"
+    }
   | None => "text-gray-400 hover:text-red-200 tooltip"
   }
 }
@@ -176,13 +179,20 @@ let selectedClass = (part: option<Pain.part>) => {
 let selectedLabelClass = (part: option<Pain.part>) => {
   switch part {
   | Some(p) =>
-    let score =  p.scale
-    if score <= 0 { "bg-gray-300 text-black hover:bg-gray-400" }
-    else if score <= 3 { "bg-red-200 text-red-700 hover:bg-red-400" }
-    else if score <= 6 { "bg-red-400 text-white hover:bg-red-500" }
-    else if score <= 10 { "bg-red-500 text-white hover:bg-red-600" }
-    else if score <= 15 { "bg-red-600 text-white hover:bg-red-700" }
-    else { "bg-red-700 text-white hover:bg-red-200" }
+    let score = p.scale
+    if score <= 0 {
+      "bg-gray-300 text-black hover:bg-gray-400"
+    } else if score <= 3 {
+      "bg-red-200 text-red-700 hover:bg-red-400"
+    } else if score <= 6 {
+      "bg-red-400 text-white hover:bg-red-500"
+    } else if score <= 10 {
+      "bg-red-500 text-white hover:bg-red-600"
+    } else if score <= 15 {
+      "bg-red-600 text-white hover:bg-red-700"
+    } else {
+      "bg-red-700 text-white hover:bg-red-200"
+    }
   | None => "bg-gray-300 text-black hover:bg-red-200"
   }
 }
@@ -225,8 +235,9 @@ let getIntoView = (region: string, isPart: bool) => {
 }
 
 let renderBody = (state, send, title, partPaths, substr) => {
-  
-  let show = state.selectedRegion !== Pain.Other && partPaths->Belt.Array.some(p => Pain.regionForPath(p) === state.selectedRegion)
+  let show =
+    state.selectedRegion !== Pain.Other &&
+      partPaths->Belt.Array.some(p => Pain.regionForPath(p) === state.selectedRegion)
 
   let inputModal = React.useRef(Js.Nullable.null)
   let isMouseOverInputModal = %raw(`
@@ -253,14 +264,17 @@ let renderBody = (state, send, title, partPaths, substr) => {
             className={"p-1 col-auto text-sm rounded m-1 cursor-pointer " ++
             selectedLabelClass(selectedPart)}
             id={Pain.regionToString(regionType)}
-            onClick={_ => getIntoView(Pain.regionToString(regionType), false)}
-          >
+            onClick={_ => getIntoView(Pain.regionToString(regionType), false)}>
             <div className="flex justify-between">
               <div className="border-white px-1">
                 {str(
                   Js.String.sliceToEnd(
                     ~from=substr,
-                    Pain.regionToString(regionType) ++ (painScoreValue(selectedPart) === "0" ? "" : " : " ++ painScoreValue(selectedPart)),
+                    Pain.regionToString(regionType) ++ (
+                      painScoreValue(selectedPart) === "0"
+                        ? ""
+                        : " : " ++ painScoreValue(selectedPart)
+                    ),
                   ),
                 )}
               </div>
@@ -287,17 +301,18 @@ let renderBody = (state, send, title, partPaths, substr) => {
           modalRef={ReactDOM.Ref.domRef(inputModal)}
           hideModal={_ => send(SetSelectedRegion(Pain.Other))}
           position={state.modalPosition}
-          part={
-            Belt.Option.getWithDefault(
-              Js.Array.find(p => Pain.region(p) === state.selectedRegion, state.parts), 
-              Pain.makeDefault(state.selectedRegion)
-            )
-          }
+          part={Belt.Option.getWithDefault(
+            Js.Array.find(p => Pain.region(p) === state.selectedRegion, state.parts),
+            Pain.makeDefault(state.selectedRegion),
+          )}
           updatePart={part => send(UpdateSelectedPart(part))}
           previewMode={state.previewMode}
         />
       </div>
-      <svg className="h-screen py-4 cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 344.7 932.661">
+      <svg
+        className="h-screen py-4 cursor-pointer"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 344.7 932.661">
         {Js.Array.mapi((part, renderIndex) => {
           let regionType = Pain.regionForPath(part)
           let selectedPart = Js.Array.find(p => Pain.region(p) === regionType, state.parts)
@@ -309,9 +324,13 @@ let renderBody = (state, send, title, partPaths, substr) => {
             fill="currentColor"
             id={"part" ++ Pain.regionToString(regionType)}
             onClick={e => {
-              send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
-            }}
-          >
+              send(
+                ShowInputModal(
+                  part.region,
+                  {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY},
+                ),
+              )
+            }}>
             <title className=""> {str(Pain.regionToString(regionType))} </title>
           </path>
         }, partPaths)->React.array}
@@ -323,17 +342,25 @@ let renderBody = (state, send, title, partPaths, substr) => {
 @react.component
 let make = (~painParameter, ~updateCB, ~id, ~consultationId, ~previewMode) => {
   let (state, send) = React.useReducer(reducer, initialState(painParameter, previewMode))
+  Js.log("Input")
+  Js.log(painParameter)
+  Js.log(state)
+
+  React.useEffect1(() => {
+    send(Update(painParameter))
+    None
+  }, [painParameter])
 
   React.useEffect1(() => {
     updateCB(state.parts)
     None
-  }, [state])
+  }, [state.parts])
 
   <div className="my-5">
     <div className="flex flex-col sm:flex-row justify-between">
       {!previewMode
         ? <>
-            <h2></h2>
+            <h2 />
             <label className="flex items-center cursor-pointer  sm:mt-0 mt-4">
               // Toggle
 
