@@ -21,7 +21,6 @@ import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import UserFilter from "./UserFilter";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
@@ -35,6 +34,7 @@ import SkillsSlideOver from "./SkillsSlideOver";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import CountBlock from "../../CAREUI/display/Count";
 import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -463,52 +463,14 @@ export default function ManageUsers() {
               placeholder="Search by username"
             />
           </div>
-          <div>
-            <div className="flex flex-col items-center mb-2 gap-2">
-              <button
-                className="btn btn-primary-ghost w-full"
-                onClick={() => advancedFilter.setShow(true)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>Advanced Filters</span>
-              </button>
-              {userTypes.length && addUser}
-            </div>
+          <div className="flex flex-col gap-2">
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+            {userTypes.length && addUser}
           </div>
 
-          <SlideOver {...advancedFilter}>
-            <div className="bg-white min-h-screen p-4">
-              <UserFilter {...advancedFilter} />
-            </div>
-          </SlideOver>
+          <UserFilter {...advancedFilter} />
         </div>
       </div>
 
