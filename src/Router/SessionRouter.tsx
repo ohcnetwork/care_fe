@@ -3,7 +3,7 @@ import { Login, ResetPassword } from "../Components/Auth";
 import { useRoutes } from "raviger";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
 import InvalidReset from "../Components/ErrorPages/InvalidReset";
-const TopBar = loadable(() => import("../Components/Common/TopBar"));
+import  TopBar from "../Components/Common/TopBar";
 
 const routes = {
   "/": () => <Login />,

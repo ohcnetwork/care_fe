@@ -62,7 +62,7 @@ precacheAndRoute(toPrecache);
 //     // Return true to signal that we want to use the handler.
 //     return true;
 //   },
-//   createHandlerBoundToURL(process.env.PUBLIC_URL + "/index.html")
+//   createHandlerBoundToURL(import.meta.env.REACT_PUBLIC_URL + "/index.html")
 // );
 
 registerRoute(

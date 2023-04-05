@@ -18,6 +18,7 @@ interface FilterBadgeProps {
  * of pagination and filters.
  */
 export default function useFilters({ limit = 14 }: { limit?: number }) {
+  const { t } = useTranslation();
   const { kasp_string } = useConfig();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
@@ -64,6 +65,13 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
   const badgeUtils = {
     badge(name: string, paramKey: FilterParamKeys) {
       return { name, paramKey };
+    },
+    ordering(name = "Sort by", paramKey = "ordering") {
+      return {
+        name,
+        paramKey,
+        value: qParams[paramKey] && t("SortOptions." + qParams[paramKey]),
+      };
     },
     value(name: string, paramKey: FilterParamKeys, value: string) {
       return { name, value, paramKey };
