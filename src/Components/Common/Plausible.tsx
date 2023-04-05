@@ -29,18 +29,18 @@ const triggerPageView = () => {
     if (!value) {
       url.searchParams.delete(key);
     } else {
-      url.searchParams.set(key, "[REDACTED]");
+      url.searchParams.set(key, "REDACTED");
     }
   });
 
-  // Replace all-numeric sequences between two slashes and uuids with "[ID_REDACTED]"
+  // Replace all `/<num>` and `/uuid` with "/_ID_REDACTED_"
   const redactedUrl = url
     .toString()
-    .replace(/\/\d+/g, "/[ID_REDACTED]")
     .replace(
       /[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}/gi,
-      "[ID_REDACTED]"
-    );
+      "ID_REDACTED"
+    )
+    .replace(/\/\d+/g, "/ID_REDACTED");
 
   // Send the pageview event to Plausible
   plausible("pageview", { u: redactedUrl });
