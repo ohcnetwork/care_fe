@@ -544,7 +544,7 @@ export const ConsultationDetails = (props: any) => {
                 />
               </div>
               <div>
-                <FieldLabel>Discharge SOS Prescription</FieldLabel>
+                <FieldLabel>Discharge PRN Prescription</FieldLabel>
                 <PRNPrescriptionBuilder
                   prescriptions={dischargeAdvice}
                   setPrescriptions={setDischargeAdvice}
