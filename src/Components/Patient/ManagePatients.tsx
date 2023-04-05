@@ -20,6 +20,8 @@ import {
   GENDER_TYPES,
   PATIENT_CATEGORIES,
   PATIENT_FILTER_ORDER,
+  RESPIRATORY_SUPPORT,
+  PATIENT_SORT_OPTIONS,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
 import PatientFilter from "./PatientFilter";
@@ -36,12 +38,12 @@ import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 import CountBlock from "../../CAREUI/display/Count";
 import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import SortDropdownMenu from "../Common/SortDropdown";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -468,98 +470,132 @@ export const PatientManager = () => {
                 </div>
               )}
             </div>
-            <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
-              <div>
-                <div className="md:flex justify-between w-full">
-                  <div className="text-xl font-semibold capitalize">
-                    <span>{patient.name}</span>
-                    <span className="text-gray-800">{" - " + patient.age}</span>
-                    {patient.action && patient.action != 10 && (
-                      <span className="font-semibold ml-2 text-gray-700">
-                        -{" "}
-                        {
-                          TELEMEDICINE_ACTIONS.find(
-                            (i) => i.id === patient.action
-                          )?.desc
-                        }
-                      </span>
-                    )}
-                  </div>
+            <div className="pl-2 md:block flex flex-col gap-2 w-full">
+              <div className="flex gap-2 justify-between w-full">
+                <div className="text-xl font-semibold capitalize">
+                  <span>{patient.name}</span>
+                  <span className="text-gray-800">{" - " + patient.age}</span>
+                  {patient.action && patient.action != 10 && (
+                    <span className="font-semibold ml-2 text-gray-700">
+                      -{" "}
+                      {
+                        TELEMEDICINE_ACTIONS.find(
+                          (i) => i.id === patient.action
+                        )?.desc
+                      }
+                    </span>
+                  )}
                 </div>
-                {patient.facility_object && (
-                  <div className="mb-2">
-                    <div className="flex flex-wrap items-center">
-                      <p className="text-sm font-medium text-gray-700 mr-2">
-                        {patient.facility_object.name}
-                      </p>
-                      <RecordMeta
-                        className="text-sm text-gray-900"
-                        prefix={
-                          <span className="text-gray-600">{t("updated")}</span>
-                        }
-                        time={patient.modified_date}
-                      />
-                    </div>
+                {patient.last_consultation?.last_daily_round
+                  ?.ventilator_interface && (
+                  <div className="rounded-full p-2 self-center border border-black text-center bg-cyan-100 font-semibold text-sm">
+                    {
+                      RESPIRATORY_SUPPORT.find(
+                        (resp) =>
+                          resp.text ===
+                          patient.last_consultation?.last_daily_round
+                            ?.ventilator_interface
+                      )?.id
+                    }
                   </div>
                 )}
-                <div className="flex w-full">
-                  <div className="flex flex-wrap gap-2 flex-row justify-start">
-                    {patient.review_time &&
-                      !patient.last_consultation?.discharge_date &&
-                      Number(patient.last_consultation?.review_interval) > 0 &&
-                      moment().isAfter(patient.review_time) && (
-                        <Chip
-                          size="small"
-                          color="red"
-                          startIcon="clock"
-                          text="Review Missed"
-                        />
-                      )}
-                    {patient.disease_status === "POSITIVE" && (
+              </div>
+              {patient.facility_object && (
+                <div className="mb-2">
+                  <div className="flex flex-wrap items-center">
+                    <p className="text-sm font-medium text-gray-700 mr-2">
+                      {patient.facility_object.name}
+                    </p>
+                    <RecordMeta
+                      className="text-sm text-gray-900"
+                      prefix={
+                        <span className="text-gray-600">{t("updated")}</span>
+                      }
+                      time={patient.modified_date}
+                    />
+                  </div>
+                </div>
+              )}
+              <div className="flex w-full">
+                <div className="flex flex-wrap gap-2 flex-row justify-start">
+                  {patient.review_time &&
+                    !patient.last_consultation?.discharge_date &&
+                    Number(patient.last_consultation?.review_interval) > 0 &&
+                    moment().isAfter(patient.review_time) && (
                       <Chip
                         size="small"
                         color="red"
-                        startIcon="radiation"
-                        text="Positive"
+                        startIcon="clock"
+                        text="Review Missed"
                       />
                     )}
-                    {patient.gender === 2 &&
-                      patient.is_antenatal &&
-                      patient.is_active && (
-                        <Chip
-                          size="small"
-                          color="blue"
-                          startIcon="baby-carriage"
-                          text="Antenatal"
-                        />
-                      )}
-                    {patient.is_medical_worker && patient.is_active && (
+                  {patient.disease_status === "POSITIVE" && (
+                    <Chip
+                      size="small"
+                      color="red"
+                      startIcon="radiation"
+                      text="Positive"
+                    />
+                  )}
+                  {patient.gender === 2 &&
+                    patient.is_antenatal &&
+                    patient.is_active && (
                       <Chip
                         size="small"
                         color="blue"
-                        startIcon="user-md"
-                        text="Medical Worker"
+                        startIcon="baby-carriage"
+                        text="Antenatal"
                       />
                     )}
-                    {patient.disease_status === "EXPIRED" && (
+                  {patient.is_medical_worker && patient.is_active && (
+                    <Chip
+                      size="small"
+                      color="blue"
+                      startIcon="user-md"
+                      text="Medical Worker"
+                    />
+                  )}
+                  {patient.disease_status === "EXPIRED" && (
+                    <Chip
+                      size="small"
+                      color="yellow"
+                      startIcon="exclamation-triangle"
+                      text="Patient Expired"
+                    />
+                  )}
+                  {(!patient.last_consultation ||
+                    patient.last_consultation?.facility !== patient.facility ||
+                    (patient.last_consultation?.discharge_date &&
+                      patient.is_active)) && (
+                    <span className="relative inline-flex">
                       <Chip
                         size="small"
-                        color="yellow"
-                        startIcon="exclamation-triangle"
-                        text="Patient Expired"
+                        color="red"
+                        startIcon="notes-medical"
+                        text="No Consultation Filed"
                       />
-                    )}
-                    {(!patient.last_consultation ||
-                      patient.last_consultation?.facility !==
-                        patient.facility ||
-                      (patient.last_consultation?.discharge_date &&
-                        patient.is_active)) && (
+                      <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
+                        <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                      </span>
+                    </span>
+                  )}
+                  {!(
+                    patient.last_consultation?.facility !== patient.facility
+                  ) &&
+                    !(
+                      patient.last_consultation?.discharge_date ||
+                      !patient.is_active
+                    ) &&
+                    moment(patient.last_consultation?.modified_date).isBefore(
+                      new Date().getTime() - 24 * 60 * 60 * 1000
+                    ) && (
                       <span className="relative inline-flex">
                         <Chip
                           size="small"
                           color="red"
-                          startIcon="notes-medical"
-                          text="No Consultation Filed"
+                          startIcon="circle-exclamation"
+                          text="No update in 24 hours"
                         />
                         <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
                           <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
@@ -567,30 +603,6 @@ export const PatientManager = () => {
                         </span>
                       </span>
                     )}
-                    {!(
-                      patient.last_consultation?.facility !== patient.facility
-                    ) &&
-                      !(
-                        patient.last_consultation?.discharge_date ||
-                        !patient.is_active
-                      ) &&
-                      moment(patient.last_consultation?.modified_date).isBefore(
-                        new Date().getTime() - 24 * 60 * 60 * 1000
-                      ) && (
-                        <span className="relative inline-flex">
-                          <Chip
-                            size="small"
-                            color="red"
-                            startIcon="circle-exclamation"
-                            text="No update in 24 hours"
-                          />
-                          <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
-                            <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
-                          </span>
-                        </span>
-                      )}
-                  </div>
                 </div>
               </div>
             </div>
@@ -653,7 +665,8 @@ export const PatientManager = () => {
                 setShowDoctors(true);
               }}
             >
-              <p>Doctor Connect</p>
+              <CareIcon className="care-l-phone text-lg" />
+              <p className="lg:my-[2px]">Doctor Connect</p>
             </ButtonV2>
           )}
           <ButtonV2
@@ -667,35 +680,11 @@ export const PatientManager = () => {
             <p className="lg:my-[2px]">Add Patient Details</p>
           </ButtonV2>
           <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
-          <DropdownMenu
-            title="Sort by"
-            variant="secondary"
-            className="border border-primary-500 bg-white"
-            icon={<CareIcon className="care-l-sort" />}
-          >
-            {PATIENT_FILTER_ORDER.map((ordering) => {
-              return (
-                <DropdownItem
-                  key={ordering.text}
-                  onClick={() => updateQuery({ ordering: ordering.text })}
-                  icon={
-                    <CareIcon
-                      className={
-                        ordering.order === "Ascending"
-                          ? "care-l-sort-amount-up"
-                          : "care-l-sort-amount-down"
-                      }
-                    />
-                  }
-                >
-                  <span>{ordering.desc}</span>
-                  <span className="text-gray-600 text-sm">
-                    {ordering.order}
-                  </span>
-                </DropdownItem>
-              );
-            })}
-          </DropdownMenu>
+          <SortDropdownMenu
+            options={PATIENT_SORT_OPTIONS}
+            selected={qParams.ordering}
+            onSelect={updateQuery}
+          />
           <div className="tooltip">
             {!isExportAllowed ? (
               <ButtonV2
@@ -808,7 +797,15 @@ export const PatientManager = () => {
       </div>
       <div className="flex flex-wrap col-span-3 mt-6">
         <FilterBadges
-          badges={({ badge, value, kasp, phoneNumber, dateRange, range }) => [
+          badges={({
+            badge,
+            value,
+            kasp,
+            phoneNumber,
+            dateRange,
+            range,
+            ordering,
+          }) => [
             phoneNumber("Primary number", "phone_number"),
             phoneNumber("Emergency number", "emergency_phone_number"),
             badge("Patient name", "name"),
@@ -825,7 +822,7 @@ export const PatientManager = () => {
             value("Facility", "facility", facilityBadgeName),
             badge("Facility Type", "facility_type"),
             value("District", "district", districtName),
-            badge("Ordering", "ordering"),
+            ordering(),
             badge("Category", "category"),
             badge("Disease Status", "disease_status"),
             value(
