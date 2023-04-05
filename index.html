@@ -43,13 +43,12 @@
       src="https://kit.fontawesome.com/d69454c2e7.js"
       crossorigin="anonymous"
     ></script>
-    <script>window.plausible = window.plausible || function() { (window.plausible.q = window.plausible.q || []).push(arguments) }</script>
     <script>
-      var url = window.location.href;
-      // Replace every all-numeric sequences between two slashes and uuids with "_ID_REDACTED_"
-      var redactedUrl = url.replace(/\/\d+\//g, "/_ID_REDACTED_/").replace(/[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}/gi, "_ID_REDACTED_");
-      // Send the pageview event to Plausible
-      plausible('pageview', { u: redactedUrl + window.location.search});
+      window.plausible =
+        window.plausible ||
+        function () {
+          (window.plausible.q = window.plausible.q || []).push(arguments);
+        };
     </script>
   </body>
 </html>
