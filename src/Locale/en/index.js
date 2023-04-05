@@ -9,6 +9,7 @@ import Shifting from "./Shifting.json";
 import Notifications from "./Notifications.json";
 import ExternalResult from "./ExternalResult.json";
 import CoverImageEdit from "./CoverImageEdit.json";
+import SortOptions from "./SortOptions.json";
 
 export default {
   ...Auth,
@@ -22,4 +23,5 @@ export default {
   ...Hub,
   ...Notifications,
   ...Shifting,
+  SortOptions,
 };
