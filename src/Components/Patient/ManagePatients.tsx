@@ -24,8 +24,7 @@ import {
   PATIENT_SORT_OPTIONS,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
-import { make as SlideOver } from "../Common/SlideOver.gen";
-import PatientFilterV2 from "./PatientFilterV2";
+import PatientFilter from "./PatientFilter";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Chip from "../../CAREUI/display/Chip";
@@ -43,6 +42,7 @@ import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 import CountBlock from "../../CAREUI/display/Count";
 import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import SortDropdownMenu from "../Common/SortDropdown";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -679,43 +679,7 @@ export const PatientManager = () => {
             <CareIcon className="care-l-plus text-lg" />
             <p className="lg:my-[2px]">Add Patient Details</p>
           </ButtonV2>
-          <ButtonV2
-            ghost
-            border
-            className="bg-white"
-            onClick={() => advancedFilter.setShow(true)}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="fill-current w-4 h-4 mr-2"
-            >
-              <line x1="8" y1="6" x2="21" y2="6"></line>
-              <line x1="8" y1="12" x2="21" y2="12">
-                {" "}
-              </line>
-              <line x1="8" y1="18" x2="21" y2="18">
-                {" "}
-              </line>
-              <line x1="3" y1="6" x2="3.01" y2="6">
-                {" "}
-              </line>
-              <line x1="3" y1="12" x2="3.01" y2="12">
-                {" "}
-              </line>
-              <line x1="3" y1="18" x2="3.01" y2="18">
-                {" "}
-              </line>
-            </svg>
-            <span className="lg:my-[2px]">Advanced Filters</span>
-          </ButtonV2>
+          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
           <SortDropdownMenu
             options={PATIENT_SORT_OPTIONS}
             selected={qParams.ordering}
@@ -894,11 +858,7 @@ export const PatientManager = () => {
         />
       </div>
       <div>
-        <SlideOver {...advancedFilter}>
-          <div className="bg-white min-h-screen p-4">
-            <PatientFilterV2 {...advancedFilter} />
-          </div>
-        </SlideOver>
+        <PatientFilter {...advancedFilter} />
         <NavTabs
           onChange={(tab) => updateQuery({ is_active: tab ? "False" : "True" })}
           options={[
