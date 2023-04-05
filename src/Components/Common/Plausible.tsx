@@ -6,8 +6,8 @@ import { useEffect } from "react";
 export default function Plausible() {
   const { site_url, analytics_server_url } = useConfig();
 
-  useEffect(() => triggerPageView(), []);
   useLocationChange(() => triggerPageView());
+  useEffect(() => triggerPageView(), []);
 
   return (
     <Script
@@ -21,13 +21,25 @@ export default function Plausible() {
 const triggerPageView = () => {
   const plausible = (window as any).plausible;
 
-  const url = window.location.href;
-  // Replace every all-numeric sequences between two slashes and uuids with "_ID_REDACTED_"
+  const url = new URL(window.location.href);
+
+  // Remove all empty query parameters and replace all non-empty ones with
+  // "[REDACTED]"
+  url.searchParams.forEach((value, key) => {
+    if (!value) {
+      url.searchParams.delete(key);
+    } else {
+      url.searchParams.set(key, "[REDACTED]");
+    }
+  });
+
+  // Replace all-numeric sequences between two slashes and uuids with "[ID_REDACTED]"
   const redactedUrl = url
-    .replace(/\/\d+\//g, "/_ID_REDACTED_/")
+    .toString()
+    .replace(/\/\d+/g, "/[ID_REDACTED]")
     .replace(
       /[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}/gi,
-      "_ID_REDACTED_"
+      "[ID_REDACTED]"
     );
 
   // Send the pageview event to Plausible
