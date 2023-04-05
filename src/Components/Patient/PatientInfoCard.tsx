@@ -159,23 +159,6 @@ export default function PatientInfoCard(props: {
               <span className="mx-2">•</span>
               <span>{patient.gender}</span>
             </p>
-            {/* <div className="lg:mt-2">
-              {patient.last_consultation?.last_daily_round
-                ?.ventilator_interface && (
-                <Chip
-                  color="purple"
-                  startIcon="lungs"
-                  text={
-                    RESPIRATORY_SUPPORT.find(
-                      (resp) =>
-                        resp.text ===
-                        patient.last_consultation?.last_daily_round
-                          ?.ventilator_interface
-                    )?.id || "UNKNOWN"
-                  }
-                />
-              )}
-            </div> */}
             <div className="text-sm flex flex-col sm:flex-row items-center gap-2 lg:mt-4">
               {[
                 ["Blood Group", patient.blood_group, patient.blood_group],
