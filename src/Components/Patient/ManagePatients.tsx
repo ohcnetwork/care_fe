@@ -19,7 +19,7 @@ import {
   ADMITTED_TO,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
-  PATIENT_FILTER_ORDER,
+  PATIENT_SORT_OPTIONS,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
 import { make as SlideOver } from "../Common/SlideOver.gen";
@@ -37,11 +37,11 @@ import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
 import CountBlock from "../../CAREUI/display/Count";
 import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
+import SortDropdownMenu from "../Common/SortDropdown";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -704,35 +704,11 @@ export const PatientManager = () => {
             </svg>
             <span className="lg:my-[2px]">Advanced Filters</span>
           </ButtonV2>
-          <DropdownMenu
-            title="Sort by"
-            variant="secondary"
-            className="border border-primary-500 bg-white"
-            icon={<CareIcon className="care-l-sort" />}
-          >
-            {PATIENT_FILTER_ORDER.map((ordering) => {
-              return (
-                <DropdownItem
-                  key={ordering.text}
-                  onClick={() => updateQuery({ ordering: ordering.text })}
-                  icon={
-                    <CareIcon
-                      className={
-                        ordering.order === "Ascending"
-                          ? "care-l-sort-amount-up"
-                          : "care-l-sort-amount-down"
-                      }
-                    />
-                  }
-                >
-                  <span>{ordering.desc}</span>
-                  <span className="text-gray-600 text-sm">
-                    {ordering.order}
-                  </span>
-                </DropdownItem>
-              );
-            })}
-          </DropdownMenu>
+          <SortDropdownMenu
+            options={PATIENT_SORT_OPTIONS}
+            selected={qParams.ordering}
+            onSelect={updateQuery}
+          />
           <div className="tooltip">
             {!isExportAllowed ? (
               <ButtonV2
@@ -845,7 +821,15 @@ export const PatientManager = () => {
       </div>
       <div className="flex flex-wrap col-span-3 mt-6">
         <FilterBadges
-          badges={({ badge, value, kasp, phoneNumber, dateRange, range }) => [
+          badges={({
+            badge,
+            value,
+            kasp,
+            phoneNumber,
+            dateRange,
+            range,
+            ordering,
+          }) => [
             phoneNumber("Primary number", "phone_number"),
             phoneNumber("Emergency number", "emergency_phone_number"),
             badge("Patient name", "name"),
@@ -862,7 +846,7 @@ export const PatientManager = () => {
             value("Facility", "facility", facilityBadgeName),
             badge("Facility Type", "facility_type"),
             value("District", "district", districtName),
-            badge("Ordering", "ordering"),
+            ordering(),
             badge("Category", "category"),
             badge("Disease Status", "disease_status"),
             value(
