@@ -15,12 +15,13 @@ import { precacheAndRoute } from "workbox-precaching";
 // import { createHandlerBoundToURL } from "workbox-precaching";
 import { registerRoute } from "workbox-routing";
 import { StaleWhileRevalidate } from "workbox-strategies";
-// import { NetworkFirst } from "workbox-strategies";
 
 declare const self: ServiceWorkerGlobalScope;
 
 // eslint-disable-next-line no-restricted-globals
-const _ignored = self.__WB_MANIFEST;
+const _ignored = self.__WB_MANIFEST.map((_) => {
+  return _;
+});
 
 clientsClaim();
 
