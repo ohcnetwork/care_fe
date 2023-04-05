@@ -19,7 +19,6 @@ import {
   ADMITTED_TO,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
-  PATIENT_FILTER_ORDER,
   RESPIRATORY_SUPPORT,
   PATIENT_SORT_OPTIONS,
   TELEMEDICINE_ACTIONS,
@@ -470,7 +469,7 @@ export const PatientManager = () => {
                 </div>
               )}
             </div>
-            <div className="pl-2 md:block flex flex-col gap-2 w-full">
+            <div className="pl-2 md:block flex flex-row gap-2 w-full">
               <div className="flex gap-2 justify-between w-full">
                 <div className="text-xl font-semibold capitalize">
                   <span>{patient.name}</span>
@@ -486,20 +485,8 @@ export const PatientManager = () => {
                     </span>
                   )}
                 </div>
-                {patient.last_consultation?.last_daily_round
-                  ?.ventilator_interface && (
-                  <div className="rounded-full p-2 self-center border border-black text-center bg-cyan-100 font-semibold text-sm">
-                    {
-                      RESPIRATORY_SUPPORT.find(
-                        (resp) =>
-                          resp.text ===
-                          patient.last_consultation?.last_daily_round
-                            ?.ventilator_interface
-                      )?.id
-                    }
-                  </div>
-                )}
               </div>
+
               {patient.facility_object && (
                 <div className="mb-2">
                   <div className="flex flex-wrap items-center">
@@ -606,6 +593,19 @@ export const PatientManager = () => {
                 </div>
               </div>
             </div>
+            {patient.last_consultation?.last_daily_round
+              ?.ventilator_interface && (
+              <div className="rounded-full p-2 self-center border border-black text-center bg-cyan-100 font-semibold text-sm max-w-fit mt-0 mb-auto">
+                {
+                  RESPIRATORY_SUPPORT.find(
+                    (resp) =>
+                      resp.text ===
+                      patient.last_consultation?.last_daily_round
+                        ?.ventilator_interface
+                  )?.id
+                }
+              </div>
+            )}
           </div>
         </Link>
       );
