@@ -434,8 +434,8 @@ export const PatientManager = () => {
               {category ? PatientCategoryDisplayText[category] : "UNKNOWN"}
             </span>
           </div>
-          <div className="flex gap-4 items-start">
-            <div className="w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
+          <div className="flex flex-col md:flex-row gap-4 items-start">
+            <div className="w-full md:w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
               {patient?.last_consultation &&
               patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
@@ -469,7 +469,7 @@ export const PatientManager = () => {
                 </div>
               )}
             </div>
-            <div className="pl-2 md:block flex flex-row gap-2 w-full">
+            <div className="pl-2 md:block flex flex-col md:flex-row gap-2 w-full">
               <div className="flex gap-2 justify-between w-full">
                 <div className="text-xl font-semibold capitalize">
                   <span>{patient.name}</span>
