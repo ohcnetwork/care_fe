@@ -149,6 +149,11 @@ let saveData = (id, consultationId, state, send, updateCB) => {
 
 let ventilatorInterfaceOptions: array<Options.t> = [
   {
+    label: "None",
+    value: "UNKNOWN",
+    name: "ventilator_interface",
+  },
+  {
     label: "Invasive ventilator (IV)",
     value: "INVASIVE",
     name: "ventilator_interface",
@@ -160,7 +165,7 @@ let ventilatorInterfaceOptions: array<Options.t> = [
   },
   {
     label: "Oxygen Support",
-    value: "UNKNOWN",
+    value: "OXYGEN_SUPPORT",
     name: "ventilator_interface",
   },
 ]
@@ -191,7 +196,8 @@ let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId,
   let editor = switch state.ventilator_interface {
   | INVASIVE => <CriticalCare__VentilatorParametersEditor__Invasive state send />
   | NON_INVASIVE => <CriticalCare__VentilatorParametersEditor__NonInvasive state send />
-  | UNKNOWN => <CriticalCare__VentilatorParametersEditor__None state send />
+  | UNKNOWN => <CriticalCare__VentilatorParametersEditor__None />
+  | OXYGEN_SUPPORT => <CriticalCare__VentilatorParametersEditor__OxygenSupport state send />
   }
 
   <div>

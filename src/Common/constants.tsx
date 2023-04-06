@@ -334,7 +334,8 @@ export const ADMITTED_TO = [
 export const RESPIRATORY_SUPPORT = [
   { id: "NIV", text: "NON_INVASIVE" },
   { id: "IV", text: "INVASIVE" },
-  { id: "O2", text: "UNKNOWN" },
+  { id: "O2", text: "OXYGEN_SUPPORT" },
+  { id: "NONE", text: "UNKNOWN" },
 ];
 
 export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";

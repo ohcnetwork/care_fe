@@ -88,6 +88,7 @@ export default function PatientFilter(props: any) {
     last_consultation_is_telemedicine:
       filter.last_consultation_is_telemedicine || null,
     is_antenatal: filter.is_antenatal || null,
+    ventilator_interface: filter.ventilator_interface || null,
   });
   const dispatch: any = useDispatch();
 
@@ -130,6 +131,7 @@ export default function PatientFilter(props: any) {
     last_vaccinated_date_after: "",
     last_consultation_is_telemedicine: null,
     is_antenatal: null,
+    ventilator_interface: null,
   };
 
   useEffect(() => {
@@ -175,10 +177,10 @@ export default function PatientFilter(props: any) {
   ];
 
   const RESPIRATORY_SUPPORT_FILTER = [
-    { id: "0", text: "None" },
-    { id: "1", text: "O2 Support" },
-    { id: "2", text: "NIV" },
-    { id: "3", text: "IV" },
+    { id: "UNKNOWN", text: "None" },
+    { id: "OXYGEN_SUPPORT", text: "O2 Support" },
+    { id: "NON_INVASIVE", text: "NIV" },
+    { id: "INVASIVE", text: "IV" },
   ];
 
   const TELEMEDICINE_FILTER = [
@@ -238,6 +240,7 @@ export default function PatientFilter(props: any) {
       last_vaccinated_date_after,
       last_consultation_is_telemedicine,
       is_antenatal,
+      ventilator_interface,
     } = filterState;
     const data = {
       district: district || "",
@@ -342,6 +345,7 @@ export default function PatientFilter(props: any) {
       last_consultation_is_telemedicine:
         last_consultation_is_telemedicine || "",
       is_antenatal: is_antenatal || "",
+      ventilator_interface: ventilator_interface || "",
     };
     onChange(data);
   };
@@ -524,11 +528,11 @@ export default function PatientFilter(props: any) {
           options={RESPIRATORY_SUPPORT_FILTER}
           optionLabel={(o) => o.text}
           optionValue={(o) => o.id}
-          value={filterState.last_consultation_is_telemedicine}
+          value={filterState.ventilator_interface}
           onChange={(v) =>
             setFilterState({
               ...filterState,
-              last_consultation_is_telemedicine: v,
+              ventilator_interface: v,
             })
           }
         />

@@ -594,18 +594,20 @@ export const PatientManager = () => {
               </div>
             </div>
             {patient.last_consultation?.last_daily_round
-              ?.ventilator_interface && (
-              <div className="rounded-full p-2 self-center border border-black text-center bg-cyan-100 font-semibold text-sm max-w-fit mt-0 mb-auto">
-                {
-                  RESPIRATORY_SUPPORT.find(
-                    (resp) =>
-                      resp.text ===
-                      patient.last_consultation?.last_daily_round
-                        ?.ventilator_interface
-                  )?.id
-                }
-              </div>
-            )}
+              ?.ventilator_interface &&
+              patient.last_consultation?.last_daily_round
+                ?.ventilator_interface !== "UNKNOWN" && (
+                <div className="rounded-full shrink-0 w-6 h-6 flex items-center justify-center border border-primary-600 text-primary-600 bg-primary-100 font-semibold text-xs mb-auto">
+                  {
+                    RESPIRATORY_SUPPORT.find(
+                      (resp) =>
+                        resp.text ===
+                        patient.last_consultation?.last_daily_round
+                          ?.ventilator_interface
+                    )?.id
+                  }
+                </div>
+              )}
           </div>
         </Link>
       );
