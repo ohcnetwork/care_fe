@@ -51,10 +51,10 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
-import PRNPrescriptionBuilder, {
-  PRNPrescriptionType,
-} from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import PrescriptionBuilder, {
+  PrescriptionType,
+} from "../Common/prescription-builder/PrescriptionBuilder";
+import PRNPrescriptionBuilder from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { formatDate } from "../../Utils/utils";
 import CreateClaimCard from "../HCX/CreateClaimCard";
 import { HCXClaimModel } from "../HCX/models";
@@ -113,7 +113,9 @@ export const ConsultationDetails = (props: any) => {
   const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
     []
   );
-  const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
+  const [dischargePrescription, setDischargePrescription] = useState<
+    PrescriptionType[]
+  >([]);
 
   const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
   const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
@@ -532,16 +534,16 @@ export const ConsultationDetails = (props: any) => {
               />
               <FieldLabel>Discharge Prescription</FieldLabel>
               <div className="my-2">
-                <PRNPrescriptionBuilder
-                  prescriptions={PRNAdvice}
-                  setPrescriptions={setPRNAdvice}
+                <PrescriptionBuilder
+                  prescriptions={dischargeAdvice}
+                  setPrescriptions={setDischargeAdvice}
                 />
               </div>
               <div>
                 <FieldLabel>Discharge PRN Prescription</FieldLabel>
                 <PRNPrescriptionBuilder
-                  prescriptions={dischargeAdvice}
-                  setPrescriptions={setDischargeAdvice}
+                  prescriptions={dischargePrescription}
+                  setPrescriptions={setDischargePrescription}
                 />
               </div>
             </div>
@@ -689,7 +691,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="border rounded-lg bg-white shadow h-full text-black w-full">
             <PatientInfoCard
               patient={patientData}
-              ip_no={consultationData.ip_no}
+              consultation={consultationData}
               fetchPatientData={fetchData}
             />
 

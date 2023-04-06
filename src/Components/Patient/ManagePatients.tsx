@@ -658,7 +658,7 @@ export const PatientManager = () => {
       />
       <div className="flex flex-col lg:flex-row justify-between items-center">
         <PageTitle title="Patients" hideBack={true} breadcrumbs={false} />
-        <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end">
+        <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end w-full lg:w-fit">
           {showDoctorConnect && (
             <ButtonV2
               onClick={() => {
