@@ -83,7 +83,8 @@ type FormDetails = {
   category: string;
   admission_date?: Date;
   discharge_date: null;
-  referred_to: string;
+  referred_to?: string;
+  referred_to_external?: string;
   icd11_diagnoses_object: ICD11DiagnosisModel[];
   icd11_provisional_diagnoses_object: ICD11DiagnosisModel[];
   verified_by: string;
@@ -132,6 +133,7 @@ const initForm: FormDetails = {
   admission_date: new Date(),
   discharge_date: null,
   referred_to: "",
+  referred_to_external: "",
   icd11_diagnoses_object: [],
   icd11_provisional_diagnoses_object: [],
   verified_by: "",
@@ -291,7 +293,11 @@ export const ConsultationForm = (props: any) => {
       setProcedures(
         !Array.isArray(res.data.procedure) ? [] : res.data.procedure
       );
-
+      if (res.data.suggestion === "R") {
+        if (res.data.referred_to_external)
+          setSelectedFacility({ id: -1, name: res.data.referred_to_external });
+        else setSelectedFacility(res.data.referred_to_object);
+      }
       if (!status.aborted) {
         if (res && res.data) {
           const formData = {
@@ -421,7 +427,11 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "referred_to":
-          if (state.form.suggestion === "R" && !state.form[field]) {
+          if (
+            state.form.suggestion === "R" &&
+            !state.form[field] &&
+            !state.form["referred_to_external"]
+          ) {
             errors[field] = "Please select the referred to facility";
             invalidForm = true;
           }
@@ -634,7 +644,13 @@ export const ConsultationForm = (props: any) => {
         patient: patientId,
         facility: facilityId,
         referred_to:
-          state.form.suggestion === "R" ? state.form.referred_to : undefined,
+          state.form.suggestion === "R" && !state.form.referred_to_external
+            ? state.form.referred_to
+            : undefined,
+        referred_to_external:
+          state.form.suggestion === "R" && !state.form.referred_to
+            ? state.form.referred_to_external
+            : undefined,
         consultation_notes: state.form.consultation_notes,
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
@@ -773,7 +789,13 @@ export const ConsultationForm = (props: any) => {
     setSelectedFacility(selectedFacility);
     const form: FormDetails = { ...state.form };
     if (selectedFacility && selectedFacility.id) {
-      form.referred_to = selectedFacility.id.toString() || "";
+      if (selectedFacility.id === -1) {
+        form.referred_to_external = selectedFacility.name || "";
+        delete form.referred_to;
+      } else {
+        form.referred_to = selectedFacility.id.toString() || "";
+        delete form.referred_to_external;
+      }
     }
     dispatch({ type: "set_form", form });
   };
@@ -1013,7 +1035,7 @@ export const ConsultationForm = (props: any) => {
                   {state.form.suggestion === "R" && (
                     <div
                       id="referred_to"
-                      className="col-span-6"
+                      className="col-span-6 mb-5"
                       ref={fieldRef["referred_to"]}
                     >
                       <FieldLabel>Referred To Facility</FieldLabel>
@@ -1022,6 +1044,7 @@ export const ConsultationForm = (props: any) => {
                         searchAll={true}
                         selected={selectedFacility}
                         setSelected={setFacility}
+                        freeText={true}
                         errors={state.errors.referred_to}
                       />
                     </div>

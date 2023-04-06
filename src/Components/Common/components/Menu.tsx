@@ -6,6 +6,7 @@ import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
 import { classNames } from "../../../Utils/utils";
 import { ButtonVariant } from "./ButtonV2";
 import { DropdownTransition } from "./HelperComponents";
+import React from "react";
 
 interface DropdownMenuProps {
   id?: string;
