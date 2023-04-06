@@ -73,7 +73,7 @@ function TabPanel(props: TabPanelProps) {
 const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   "Comfort Care": "COMFORT CARE",
   Stable: "STABLE",
-  "Slightly Abnormal": "ABNORMAL",
+  Abnormal: "ABNORMAL",
   Critical: "CRITICAL",
 };
 

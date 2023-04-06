@@ -348,7 +348,7 @@ export const PATIENT_CATEGORIES: {
 }[] = [
   { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
   { id: "Stable", text: "Stable", twClass: "patient-stable" },
-  { id: "Moderate", text: "Slightly Abnormal", twClass: "patient-abnormal" },
+  { id: "Moderate", text: "Abnormal", twClass: "patient-abnormal" },
   { id: "Critical", text: "Critical", twClass: "patient-critical" },
 ];
 

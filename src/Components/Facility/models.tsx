@@ -76,7 +76,7 @@ export interface OptionsType {
 export type PatientCategory =
   | "Comfort Care"
   | "Stable"
-  | "Slightly Abnormal"
+  | "Abnormal"
   | "Critical";
 
 export interface ConsultationModel {
