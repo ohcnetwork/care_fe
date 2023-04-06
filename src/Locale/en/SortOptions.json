@@ -1,6 +1,8 @@
 {
     "-created_date": "Latest created date first",
     "created_date": "Oldest created date first",
+    "-category_severity": "Highest Severity category first",
+    "category_severity": "Lowest Severity category first",
     "-modified_date": "Latest updated date first",
     "modified_date": "Oldest updated date first",
     "facility__name,last_consultation__current_bed__bed__name": "Bed No. 1-N",
