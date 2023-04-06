@@ -144,13 +144,15 @@ export default function PatientInfoCard(props: {
                 {patient.facility_object?.name}
               </Link>
 
-              <span className="md:col-span-2 capitalize pl-2">
-                <span className="badge badge-pill badge-primary">
-                  {consultation?.suggestion !== "A"
-                    ? `OP: ${op_no}`
-                    : `IP: ${ip_no}`}
+              {(consultation?.suggestion === "A" || op_no) && (
+                <span className="md:col-span-2 capitalize pl-2">
+                  <span className="badge badge-pill badge-primary">
+                    {consultation?.suggestion !== "A"
+                      ? `OP: ${op_no}`
+                      : `IP: ${ip_no}`}
+                  </span>
                 </span>
-              </span>
+              )}
             </div>
             {!patient.is_active && (
               <p className="bg-red-100 text-red-600 inline-block rounded-lg px-2 py-1 my-1 text-sm">

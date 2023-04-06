@@ -383,16 +383,6 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "op_no":
-          if (state.form.suggestion === "A") return;
-          if (!state.form[field]) {
-            errors[field] = "OP Number is required as person is not admitted";
-            invalidForm = true;
-          } else if (!state.form[field].replace(/\s/g, "").length) {
-            errors[field] = "OP can not be empty";
-            invalidForm = true;
-          }
-          return;
         case "other_symptoms":
           if (isOtherSymptomsSelected && !state.form[field]) {
             errors[field] = "Please enter the other symptom details";
@@ -1112,11 +1102,7 @@ export const ConsultationForm = (props: any) => {
                   )}
                   {state.form.suggestion !== "A" ? (
                     <div className="col-span-6 mb-6" ref={fieldRef["op_no"]}>
-                      <TextFormField
-                        {...field("op_no")}
-                        label="OP Number"
-                        required={state.form.suggestion !== "A"}
-                      />
+                      <TextFormField {...field("op_no")} label="OP Number" />
                     </div>
                   ) : (
                     <div className="col-span-6 mb-6" ref={fieldRef["ip_no"]}>
