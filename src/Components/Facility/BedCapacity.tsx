@@ -152,6 +152,10 @@ export const BedCapacity = (props: BedCapacityProps) => {
         errors[field] = "Occupied must be less than or equal to total capacity";
         invalidForm = true;
       }
+      if (field === "totalCapacity" && Number(state.form[field]) === 0) {
+        errors[field] = "Total capacity cannot be 0";
+        invalidForm = true;
+      }
     });
     if (invalidForm) {
       dispatch({ type: "set_error", errors });
@@ -252,7 +256,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
               value={state.form.totalCapacity}
               onChange={handleChange}
               error={state.errors.totalCapacity}
-              min={0}
+              min={1}
             />
             <TextFormField
               className="w-full"
