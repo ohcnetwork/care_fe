@@ -9,9 +9,26 @@ import { CircularProgress } from "@material-ui/core";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import useMergeState from "../../Common/hooks/useMergeState";
-import FilterButtons from "../Common/FilterButtons";
 import { navigate } from "raviger";
+import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import { FieldLabel } from "../Form/FormFields/FormField";
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
+
+const clearFilterState = {
+  orgin_facility: "",
+  orgin_facility_ref: "",
+  approving_facility: "",
+  approving_facility_ref: "",
+  assigned_facility: "",
+  assigned_facility_ref: "",
+  emergency: "",
+  created_date_before: "",
+  created_date_after: "",
+  modified_date_before: "",
+  modified_date_after: "",
+  ordering: "",
+  status: "",
+};
 
 export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter } = props;
@@ -148,152 +165,138 @@ export default function ListFilter(props: any) {
     setFilterState(filterData);
   };
   return (
-    <div>
-      <div className="pb-10">
-        <FilterButtons
-          onClose={closeFilter}
-          onApply={applyFilter}
-          onClear={() => {
-            navigate("/resource");
-            setFilterState(filterState);
-            closeFilter();
-          }}
-        />
-      </div>
-      <div className="font-light text-md mt-2">Filter By:</div>
-      <div className="flex flex-wrap gap-2">
-        {props.showResourceStatus && (
-          <div className="w-full flex-none">
-            <span className="text-sm font-semibold">Status</span>
-            <LegacySelectField
-              name="status"
-              variant="outlined"
-              margin="dense"
-              optionArray={true}
-              value={filterState.status}
-              options={["--", ...resourceStatusOptions]}
-              onChange={handleChange}
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-            />
-          </div>
-        )}
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Origin facility</span>
-          <div className="">
-            {isOriginLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <FacilitySelect
-                multiple={false}
-                name="orgin_facility"
-                selected={filterState.orgin_facility_ref}
-                setSelected={(obj) => setFacility(obj, "orgin_facility")}
-                className="resource-page-filter-dropdown"
-                errors={""}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">
-            Resource approving facility
-          </span>
-          <div className="">
-            {isResourceLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <FacilitySelect
-                multiple={false}
-                name="approving_facility"
-                selected={filterState.approving_facility_ref}
-                setSelected={(obj) => setFacility(obj, "approving_facility")}
-                className="resource-page-filter-dropdown"
-                errors={""}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Assigned facility</span>
-          <div className="">
-            {isAssignedLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <FacilitySelect
-                multiple={false}
-                name="assigned_facility"
-                selected={filterState.assigned_facility_ref}
-                setSelected={(obj) => setFacility(obj, "assigned_facility")}
-                className="resource-page-filter-dropdown"
-                errors={""}
-              />
-            )}
-          </div>
-        </div>
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Ordering</span>
+    <FiltersSlideover
+      advancedFilter={props}
+      onApply={applyFilter}
+      onClear={() => {
+        navigate("/resource");
+        setFilterState(clearFilterState);
+        closeFilter();
+      }}
+    >
+      {props.showResourceStatus && (
+        <div>
+          <FieldLabel>Status</FieldLabel>
           <LegacySelectField
-            name="ordering"
-            variant="outlined"
-            margin="dense"
-            optionKey="text"
-            optionValue="desc"
-            value={filterState.ordering}
-            options={RESOURCE_FILTER_ORDER}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Is emergency case</span>
-          <LegacySelectField
-            name="emergency"
+            name="status"
             variant="outlined"
             margin="dense"
             optionArray={true}
-            value={filterState.emergency}
-            options={["--", "yes", "no"]}
+            value={filterState.status}
+            options={["--", ...resourceStatusOptions]}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
-
-        <div className="w-full flex-none">
-          <DateRangePicker
-            startDate={getDate(filterState.created_date_after)}
-            endDate={getDate(filterState.created_date_before)}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "created_date_after",
-                "created_date_before",
-                e
-              )
-            }
-            endDateId={"created_date_before"}
-            startDateId={"created_date_after"}
-            label={"Created Date"}
-            size="small"
-          />
-          <DateRangePicker
-            startDate={getDate(filterState.modified_date_after)}
-            endDate={getDate(filterState.modified_date_before)}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "modified_date_after",
-                "modified_date_before",
-                e
-              )
-            }
-            endDateId={"modified_date_before"}
-            startDateId={"modified_date_after"}
-            label={"Modified Date"}
-            size="small"
-          />
+      )}
+      <div>
+        <FieldLabel>Origin facility</FieldLabel>
+        <div>
+          {isOriginLoading ? (
+            <CircularProgress size={20} />
+          ) : (
+            <FacilitySelect
+              multiple={false}
+              name="orgin_facility"
+              selected={filterState.orgin_facility_ref}
+              setSelected={(obj) => setFacility(obj, "orgin_facility")}
+              className="resource-page-filter-dropdown"
+              errors={""}
+            />
+          )}
         </div>
       </div>
-    </div>
+
+      <div>
+        <FieldLabel>Resource approving facility</FieldLabel>
+        <div className="">
+          {isResourceLoading ? (
+            <CircularProgress size={20} />
+          ) : (
+            <FacilitySelect
+              multiple={false}
+              name="approving_facility"
+              selected={filterState.approving_facility_ref}
+              setSelected={(obj) => setFacility(obj, "approving_facility")}
+              className="resource-page-filter-dropdown"
+              errors={""}
+            />
+          )}
+        </div>
+      </div>
+
+      <div>
+        <FieldLabel>Assigned facility</FieldLabel>
+        <div>
+          {isAssignedLoading ? (
+            <CircularProgress size={20} />
+          ) : (
+            <FacilitySelect
+              multiple={false}
+              name="assigned_facility"
+              selected={filterState.assigned_facility_ref}
+              setSelected={(obj) => setFacility(obj, "assigned_facility")}
+              className="resource-page-filter-dropdown"
+              errors={""}
+            />
+          )}
+        </div>
+      </div>
+      <div>
+        <FieldLabel>Ordering</FieldLabel>
+        <LegacySelectField
+          name="ordering"
+          variant="outlined"
+          margin="dense"
+          optionKey="text"
+          optionValue="desc"
+          value={filterState.ordering}
+          options={RESOURCE_FILTER_ORDER}
+          onChange={handleChange}
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
+      </div>
+
+      <div>
+        <FieldLabel>Is emergency case</FieldLabel>
+        <LegacySelectField
+          name="emergency"
+          variant="outlined"
+          margin="dense"
+          optionArray={true}
+          value={filterState.emergency}
+          options={["--", "yes", "no"]}
+          onChange={handleChange}
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
+      </div>
+
+      <DateRangePicker
+        startDate={getDate(filterState.created_date_after)}
+        endDate={getDate(filterState.created_date_before)}
+        onChange={(e) =>
+          handleDateRangeChange("created_date_after", "created_date_before", e)
+        }
+        endDateId={"created_date_before"}
+        startDateId={"created_date_after"}
+        label={"Created Date"}
+        size="small"
+      />
+      <DateRangePicker
+        startDate={getDate(filterState.modified_date_after)}
+        endDate={getDate(filterState.modified_date_before)}
+        onChange={(e) =>
+          handleDateRangeChange(
+            "modified_date_after",
+            "modified_date_before",
+            e
+          )
+        }
+        endDateId={"modified_date_before"}
+        startDateId={"modified_date_after"}
+        label={"Modified Date"}
+        size="small"
+      />
+    </FiltersSlideover>
   );
 }

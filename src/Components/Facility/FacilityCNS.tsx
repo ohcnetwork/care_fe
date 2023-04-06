@@ -9,14 +9,17 @@ import {
   listAssetBeds,
 } from "../../Redux/actions";
 import { classNames } from "../../Utils/utils";
-import { AssetData } from "../Assets/AssetTypes";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { AssetData, AssetLocationObject } from "../Assets/AssetTypes";
+import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import Loading from "../Common/Loading";
 import Pagination from "../Common/Pagination";
 import { PatientModel } from "../Patient/models";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
 import { FacilityModel } from "./models";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete";
+import { uniqBy } from "lodash";
+import DialogModal from "../Common/Dialog";
 
 interface Monitor {
   patient: PatientModel;
@@ -42,6 +45,8 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
       location.reload();
     }
   }, []);
+  const [location, setLocation] = useState<AssetLocationObject>();
+  const [showSelectLocation, setShowSelectLocation] = useState(true);
 
   useEffect(() => {
     const onFullscreenChange = () =>
@@ -127,15 +132,21 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
   if (!monitors) return <Loading />;
   return (
     <Page
-      title={`${facility?.name}: Central Nursing Station`}
+      title={`Central Nursing Station: ${facility?.name} - ${location?.name}`}
       backUrl={`/facility/${facilityId}`}
       noImplicitPadding
       breadcrumbs={false}
       options={
-        <div className="flex gap-2 items-center">
+        <div className="flex gap-4 items-center">
           <ButtonV2
             variant="secondary"
-            ghost
+            border
+            onClick={() => setShowSelectLocation(true)}
+          >
+            Change Location
+          </ButtonV2>
+          <ButtonV2
+            variant="secondary"
             border
             onClick={() => {
               if (isFullscreen) {
@@ -144,7 +155,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
                 document.documentElement.requestFullscreen();
               }
             }}
-            className="tooltip"
+            className="tooltip !h-11"
           >
             <CareIcon
               className={classNames(
@@ -159,7 +170,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
             </span>
           </ButtonV2>
           <Pagination
-            className="border-gray-400 border rounded-lg"
+            className=""
             cPage={currentPage}
             onChange={(page) => {
               setCurrentPage(page);
@@ -171,13 +182,63 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
         </div>
       }
     >
+      <DialogModal
+        title="Select Location"
+        show={showSelectLocation || !location}
+        onClose={() => setShowSelectLocation(false)}
+        className="w-full max-w-md"
+      >
+        {!monitors && <Loading />}
+        {monitors.length === 0 && (
+          <div className="text-center">
+            <h3 className="text-lg font-semibold">
+              No vitals monitors present
+            </h3>
+          </div>
+        )}
+        <div className="flex flex-col gap-2">
+          <AutocompleteFormField
+            className="mt-2"
+            name="location"
+            placeholder="Pick a location"
+            value={location}
+            onChange={({ value }) => setLocation(value)}
+            options={
+              monitors
+                ? uniqBy(
+                    monitors.map((m) => m.asset.location_object),
+                    "id"
+                  )
+                : []
+            }
+            isLoading={!monitors}
+            optionLabel={(location) => location.name}
+            optionDescription={(location) =>
+              location.description +
+              " (" +
+              monitors.filter((m) => m.asset.location_object.id === location.id)
+                .length +
+              " patients)"
+            }
+            optionValue={(location) => location}
+            disabled={!monitors}
+          />
+          <div className="flex justify-end">
+            <Submit
+              onClick={() => setShowSelectLocation(false)}
+              label="Confirm"
+            />
+          </div>
+        </div>
+      </DialogModal>
       {monitors.length === 0 && (
         <div className="flex w-full h-[80vh] items-center justify-center text-black text-center">
           No patients are currently monitored
         </div>
       )}
-      <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-2">
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-1">
         {monitors
+          ?.filter((m) => m.asset.location_object.id === location?.id)
           ?.slice(
             (currentPage - 1) * PER_PAGE_LIMIT,
             currentPage * PER_PAGE_LIMIT

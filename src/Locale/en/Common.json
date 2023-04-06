@@ -27,7 +27,7 @@
   "updated": "Updated",
   "assigned_to": "Assigned to",
   "cancel": "Cancel",
-  "clear_filters": "Clear Filters",
+  "clear": "Clear",
   "apply": "Apply",
   "filter_by": "Filter By",
   "ordering": "Ordering",
@@ -111,7 +111,10 @@
   "camera": "Camera",
   "submitting": "Submitting",
   "view_details": "View Details",
+  "type_to_search": "Type to search",
+  "show_all": "Show All",
   "select_skills": "Select and add some skills",
   "contact_your_admin_to_add_skills": "Contact your admin to add skills",
-  "add": "Add"
+  "add": "Add",
+  "sort_by": "Sort By"
 }

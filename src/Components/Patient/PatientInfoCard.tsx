@@ -9,6 +9,7 @@ import {
   CONSULTATION_SUGGESTION,
   DISCHARGE_REASONS,
   PATIENT_CATEGORIES,
+  RESPIRATORY_SUPPORT,
 } from "../../Common/constants";
 import moment from "moment";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -170,6 +171,17 @@ export default function PatientInfoCard(props: {
                   "Height",
                   getDimensionOrDash(patient.last_consultation?.height, "cm"),
                   true,
+                ],
+                [
+                  "Respiratory Support",
+                  RESPIRATORY_SUPPORT.find(
+                    (resp) =>
+                      resp.text ===
+                      patient.last_consultation?.last_daily_round
+                        ?.ventilator_interface
+                  )?.id || "UNKNOWN",
+                  patient.last_consultation?.last_daily_round
+                    ?.ventilator_interface,
                 ],
               ].map((stat, i) => {
                 return stat[2] ? (

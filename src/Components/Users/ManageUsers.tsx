@@ -21,7 +21,6 @@ import LinkFacilityDialog from "./LinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import UserFilter from "./UserFilter";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import UserDetails from "../Common/UserDetails";
 import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
@@ -35,6 +34,7 @@ import SkillsSlideOver from "./SkillsSlideOver";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import CountBlock from "../../CAREUI/display/Count";
 import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -203,7 +203,7 @@ export default function ManageUsers() {
           className=" w-full lg:w-1/2 xl:w-1/3 mt-6 md:px-4"
         >
           <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-visible relative">
-            <div className="h-full flex flex-col justify-between pb-20 sm:pb-16">
+            <div className="h-full flex flex-col justify-between pb-36 sm:pb-28 md:pb-24">
               <div className="px-6 py-4">
                 <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
                   {user.username && (
@@ -368,51 +368,31 @@ export default function ManageUsers() {
                       </UserDetails>
                     </div>
                   )}
-                  {user.username && (
-                    <div id="facilities" className="col-span-4">
-                      <div className="flex text-gray-800 absolute bottom-12 sm:bottom-9 left-6">
-                        <p className="flex items-center">Linked Facilities: </p>
-                        <ButtonV2
-                          ghost
-                          circle
-                          variant="secondary"
-                          className="tooltip flex items-center"
-                          onClick={() => {
-                            setExpandFacilityList(!expandFacilityList);
-                            setSelectedUser(user);
-                          }}
-                        >
-                          <CareIcon
-                            className={`${
-                              !user.facilities
-                                ? "care-l-eye"
-                                : expandFacilityList
-                                ? "care-l-eye-slash"
-                                : "care-l-eye"
-                            } text-xl`}
-                          />
-                          <span className="tooltip-text tooltip-bottom">
-                            {!user.facilities
-                              ? "View"
-                              : expandFacilityList
-                              ? "Hide"
-                              : "View"}{" "}
-                            Linked Facilities
-                          </span>
-                        </ButtonV2>
-                      </div>
-                    </div>
-                  )}
                 </div>
                 {user.username && (
-                  <div
-                    onClick={() => {
-                      setExpandSkillList(true);
-                      setSelectedUser(user.username);
-                    }}
-                    className="col-span-4 mt-2 align-baseline font-bold text-sm text-blue-500 hover:text-blue-800 absolute bottom-3"
-                  >
-                    Click here to show linked skills
+                  <div className="flex justify-between flex-col w-full md:flex-row gap-2 absolute bottom-0 sm:bottom-6 left-0 p-4">
+                    <ButtonV2
+                      id="facilities"
+                      className="flex items-center w-full md:w-1/2"
+                      onClick={() => {
+                        setExpandFacilityList(!expandFacilityList);
+                        setSelectedUser(user);
+                      }}
+                    >
+                      <CareIcon className="care-l-hospital text-lg" />
+                      <p>Linked Facilities</p>
+                    </ButtonV2>
+                    <ButtonV2
+                      id="skills"
+                      className="flex items-center w-full md:w-1/2"
+                      onClick={() => {
+                        setExpandSkillList(true);
+                        setSelectedUser(user.username);
+                      }}
+                    >
+                      <CareIcon className="care-l-award text-xl" />
+                      <p>Linked Skills</p>
+                    </ButtonV2>
                   </div>
                 )}
               </div>
@@ -483,52 +463,14 @@ export default function ManageUsers() {
               placeholder="Search by username"
             />
           </div>
-          <div>
-            <div className="flex flex-col items-center mb-2 gap-2">
-              <button
-                className="btn btn-primary-ghost w-full"
-                onClick={() => advancedFilter.setShow(true)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>Advanced Filters</span>
-              </button>
-              {userTypes.length && addUser}
-            </div>
+          <div className="flex flex-col gap-2">
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+            {userTypes.length && addUser}
           </div>
 
-          <SlideOver {...advancedFilter}>
-            <div className="bg-white min-h-screen p-4">
-              <UserFilter {...advancedFilter} />
-            </div>
-          </SlideOver>
+          <UserFilter {...advancedFilter} />
         </div>
       </div>
 
@@ -819,7 +761,7 @@ function UserFacilities(props: { user: any }) {
             <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
               <div className="w-full">
                 <img
-                  src={`${process.env.PUBLIC_URL}/images/404.svg`}
+                  src={`${import.meta.env.REACT_PUBLIC_URL}/images/404.svg`}
                   alt="No linked facilities"
                   className="w-80 mx-auto"
                 />

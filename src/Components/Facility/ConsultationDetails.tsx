@@ -51,9 +51,7 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import PrescriptionBuilder, {
-  PrescriptionType,
-} from "../Common/prescription-builder/PrescriptionBuilder";
+import { PrescriptionType } from "../Common/prescription-builder/PrescriptionBuilder";
 import PRNPrescriptionBuilder, {
   PRNPrescriptionType,
 } from "../Common/prescription-builder/PRNPrescriptionBuilder";
@@ -296,12 +294,6 @@ export const ConsultationDetails = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatch(getConsultation(consultationId));
-      setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      setPRNAdvice(
-        !Array.isArray(res.data.prn_prescription)
-          ? []
-          : res.data.prn_prescription
-      );
       setPreDischargeForm((form) => {
         return {
           ...form,
@@ -539,15 +531,15 @@ export const ConsultationDetails = (props: any) => {
                 onChange={handleDateChange}
               />
               <FieldLabel>Discharge Prescription</FieldLabel>
-              <div className="">
+              <div className="my-2">
                 <PRNPrescriptionBuilder
                   prescriptions={PRNAdvice}
                   setPrescriptions={setPRNAdvice}
                 />
               </div>
               <div>
-                <FieldLabel>Description Advice</FieldLabel>
-                <PrescriptionBuilder
+                <FieldLabel>Discharge PRN Prescription</FieldLabel>
+                <PRNPrescriptionBuilder
                   prescriptions={dischargeAdvice}
                   setPrescriptions={setDischargeAdvice}
                 />

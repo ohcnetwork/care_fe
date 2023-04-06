@@ -1,5 +1,5 @@
 #build-stage
-FROM node:lts-buster-slim as build-stage
+FROM node:18-buster-slim as build-stage
 
 WORKDIR /app
 

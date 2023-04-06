@@ -187,7 +187,11 @@ export const FacilityHome = (props: any) => {
           const res = capacityData.find((data) => {
             return data.room_type === x.id;
           });
-          if (res && res.current_capacity && res.total_capacity) {
+          if (
+            res &&
+            res.current_capacity !== undefined &&
+            res.total_capacity !== undefined
+          ) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
               setCapacityData((state) =>
                 state.filter((i) => i.id !== bedTypeId)
