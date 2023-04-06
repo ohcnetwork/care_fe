@@ -6,26 +6,25 @@ import {
   TableHead,
   TableRow,
   TableBody,
-  Theme,
   InputLabel,
   Typography,
   Box,
 } from "@material-ui/core";
-import { SelectField } from "../../Common/HelperInputFields";
+import { LegacySelectField } from "../../Common/HelperInputFields";
 import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
 import React from "react";
 import { useState } from "react";
-import { TextInputField } from "../../Common/HelperInputFields";
+import { LegacyTextInputField } from "../../Common/HelperInputFields";
 import _ from "lodash";
 
-const useStyle = makeStyles((theme: Theme) => ({
+const useStyle = makeStyles(() => ({
   tableCell: {
     paddingTop: 0,
     paddingBottom: 0,
   },
 }));
 
-const StyledTableRow = withStyles((theme: Theme) =>
+const StyledTableRow = withStyles(() =>
   createStyles({
     root: {
       "&:nth-of-type(odd)": {
@@ -46,7 +45,7 @@ const TestRow = ({ data, value, onChange }: any) => {
       <TableCell className={className.tableCell}>{data.name}</TableCell>
       <TableCell className={className.tableCell} align="right">
         {data.investigation_type === "Choice" ? (
-          <SelectField
+          <LegacySelectField
             name="preferred_vehicle_choice"
             variant="outlined"
             optionArray={true}
@@ -107,7 +106,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
       )}
       <br />
       <InputLabel>Search Test</InputLabel>
-      <TextInputField
+      <LegacyTextInputField
         value={searchFilter}
         placeholder="Search test"
         errors=""

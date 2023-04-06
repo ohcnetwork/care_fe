@@ -2,6 +2,7 @@ import { PatientCategory } from "../Components/Facility/models";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
 import { IConfig } from "./hooks/useConfig";
+import { SortOption } from "../Components/Common/SortDropdown";
 
 export const KeralaLogo = "images/kerala-logo.png";
 
@@ -164,27 +165,23 @@ export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
-export const PATIENT_FILTER_ORDER: (OptionsType & { order: string })[] = [
-  { id: 1, text: "created_date", desc: "Created Date", order: "Ascending" },
-  { id: 2, text: "-created_date", desc: "Created Date", order: "Descending" },
-  { id: 3, text: "modified_date", desc: "Modified Date", order: "Ascending" },
-  { id: 4, text: "-modified_date", desc: "Modified Date", order: "Descending" },
-  { id: 5, text: "review_time", desc: "Review Time", order: "Ascending" },
-  { id: 6, text: "-review_time", desc: "Review Time", order: "Descending" },
-  { id: 7, text: "name", desc: "Patient Name", order: "Ascending" },
-  { id: 8, text: "-name", desc: "Patient Name", order: "Descending" },
+export const PATIENT_SORT_OPTIONS: SortOption[] = [
+  { isAscending: false, value: "-created_date" },
+  { isAscending: true, value: "created_date" },
+  { isAscending: false, value: "-modified_date" },
+  { isAscending: true, value: "modified_date" },
   {
-    id: 7,
-    text: "facility__name,last_consultation__current_bed__bed__name",
-    desc: "Bed Number",
-    order: "Ascending",
+    isAscending: true,
+    value: "facility__name,last_consultation__current_bed__bed__name",
   },
   {
-    id: 8,
-    text: "facility__name,-last_consultation__current_bed__bed__name",
-    desc: "Bed Number",
-    order: "Descending",
+    isAscending: false,
+    value: "facility__name,-last_consultation__current_bed__bed__name",
   },
+  { isAscending: false, value: "-review_time" },
+  { isAscending: true, value: "review_time" },
+  { isAscending: true, value: "name" },
+  { isAscending: false, value: "-name" },
 ];
 
 export const getBedTypes = ({
@@ -298,9 +295,9 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
 ];
 
 export const GENDER_TYPES = [
-  { id: 1, text: "Male", icon: <i className="fa-solid fa-person" /> },
-  { id: 2, text: "Female", icon: <i className="fa-solid fa-person-dress" /> },
-  { id: 3, text: "Non-binary", icon: <i className="fa-solid fa-genderless" /> },
+  { id: 1, text: "Male", icon: "M" },
+  { id: 2, text: "Female", icon: "F" },
+  { id: 3, text: "Non-binary", icon: "NB" },
 ];
 
 export const SAMPLE_TEST_RESULT = [
@@ -332,6 +329,12 @@ export const ADMITTED_TO = [
   { id: "2", text: "ICU" },
   { id: "6", text: "Bed with oxygen support" },
   { id: "7", text: "Regular" },
+];
+
+export const RESPIRATORY_SUPPORT = [
+  { id: "NIV", text: "NON_INVASIVE" },
+  { id: "IV", text: "INVASIVE" },
+  { id: "O2", text: "UNKNOWN" },
 ];
 
 export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";

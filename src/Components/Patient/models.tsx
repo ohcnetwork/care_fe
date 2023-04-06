@@ -250,6 +250,8 @@ export interface SampleListModel {
 export interface DailyRoundsModel {
   ventilator_spo2?: number;
   spo2?: string;
+  rhythm?: string;
+  rhythm_detail?: string;
   bp?: {
     diastolic: number;
     mean: number;

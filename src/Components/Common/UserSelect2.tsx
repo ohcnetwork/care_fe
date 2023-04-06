@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getUserList } from "../../Redux/actions";
-import { AutoCompleteAsyncField } from "../Common/HelperInputFields";
+import { LegacyAutoCompleteAsyncField } from "../Common/HelperInputFields";
 import { UserModel } from "../Users/models";
 import { debounce } from "lodash";
 interface UserSelectProps {
@@ -74,7 +74,7 @@ export const UserSelect = (props: UserSelectProps) => {
   );
 
   return (
-    <AutoCompleteAsyncField
+    <LegacyAutoCompleteAsyncField
       name={name}
       multiple={multiple}
       variant="outlined"

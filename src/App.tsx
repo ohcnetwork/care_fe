@@ -24,7 +24,7 @@ const App: React.FC = () => {
     if (res.data && res.status < 400) {
       const config = res.data as IConfig;
 
-      if (config.sentry_dsn && process.env.NODE_ENV === "production") {
+      if (config?.sentry_dsn && import.meta.env.PROD) {
         Sentry.init({
           environment: config.sentry_environment,
           dsn: config.sentry_dsn,
@@ -73,7 +73,6 @@ const App: React.FC = () => {
   useEffect(() => {
     const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
     const favicon: any = document.querySelector("link[rel~='icon']");
-    console.log(favicon);
     if (darkThemeMq.matches) {
       favicon.href = "/favicon-light.ico";
     } else {

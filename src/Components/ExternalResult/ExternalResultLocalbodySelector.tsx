@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SelectField } from "../Common/HelperInputFields";
+import { LegacySelectField } from "../Common/HelperInputFields";
 import { useTranslation } from "react-i18next";
 import { FieldLabel } from "../Form/FormFields/FormField";
 
@@ -25,7 +25,7 @@ export const ExternalResultLocalbodySelector = (props: any) => {
           <FieldLabel id="local_body-label" required={true}>
             {t("local_body")}
           </FieldLabel>
-          <SelectField
+          <LegacySelectField
             name="local_body"
             variant="outlined"
             margin="dense"
@@ -42,7 +42,7 @@ export const ExternalResultLocalbodySelector = (props: any) => {
             {t("Ward")}
           </FieldLabel>
           {wards && (
-            <SelectField
+            <LegacySelectField
               name="ward"
               variant="outlined"
               margin="dense"

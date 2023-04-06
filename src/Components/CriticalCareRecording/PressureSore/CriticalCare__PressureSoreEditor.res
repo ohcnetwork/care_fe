@@ -271,6 +271,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
                   ),
                 )}
               </div>
+              {state.previewMode ? React.null :  <div>
               {switch selectedPart {
               | Some(p) =>
                 <i
@@ -281,6 +282,7 @@ let renderBody = (state, send, title, partPaths, substr) => {
                 />
               | None => React.null
               }}
+              </div>}
             </div>
           </div>
         }, partPaths)->React.array}

@@ -4,7 +4,6 @@ import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
@@ -334,11 +333,7 @@ export default function ResultList() {
         </table>
       </div>
       <Pagination totalCount={totalCount} />
-      <SlideOver {...advancedFilter}>
-        <div className="bg-white min-h-screen p-4">
-          <ListFilter {...advancedFilter} dataList={lsgWardData} />
-        </div>
-      </SlideOver>
+      <ListFilter {...advancedFilter} dataList={lsgWardData} />
     </div>
   );
 }
