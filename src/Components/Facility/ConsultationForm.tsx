@@ -1035,7 +1035,7 @@ export const ConsultationForm = (props: any) => {
                   {state.form.suggestion === "R" && (
                     <div
                       id="referred_to"
-                      className="col-span-6"
+                      className="col-span-6 mb-5"
                       ref={fieldRef["referred_to"]}
                     >
                       <FieldLabel>Referred To Facility</FieldLabel>
