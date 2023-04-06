@@ -174,6 +174,13 @@ export default function PatientFilter(props: any) {
     { id: "true", text: "Declared" },
   ];
 
+  const RESPIRATORY_SUPPORT_FILTER = [
+    { id: "0", text: "None" },
+    { id: "1", text: "O2 Support" },
+    { id: "2", text: "NIV" },
+    { id: "3", text: "IV" },
+  ];
+
   const TELEMEDICINE_FILTER = [
     { id: "true", text: "Yes" },
     { id: "false", text: "No" },
@@ -507,6 +514,22 @@ export default function PatientFilter(props: any) {
           value={filterState.is_declared_positive}
           onChange={(v) =>
             setFilterState({ ...filterState, is_declared_positive: v })
+          }
+        />
+      </div>
+      <div className="w-full flex-none">
+        <FieldLabel className="text-sm">Respiratory Support</FieldLabel>
+        <SelectMenuV2
+          placeholder="Show all"
+          options={RESPIRATORY_SUPPORT_FILTER}
+          optionLabel={(o) => o.text}
+          optionValue={(o) => o.id}
+          value={filterState.last_consultation_is_telemedicine}
+          onChange={(v) =>
+            setFilterState({
+              ...filterState,
+              last_consultation_is_telemedicine: v,
+            })
           }
         />
       </div>
