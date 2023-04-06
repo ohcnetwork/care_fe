@@ -168,6 +168,8 @@ export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
 export const PATIENT_SORT_OPTIONS: SortOption[] = [
   { isAscending: false, value: "-created_date" },
   { isAscending: true, value: "created_date" },
+  { isAscending: false, value: "-category_severity" },
+  { isAscending: true, value: "category_severity" },
   { isAscending: false, value: "-modified_date" },
   { isAscending: true, value: "modified_date" },
   {
