@@ -42,7 +42,6 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
   useEffect(() => {
     if (!searchParams.get("page")) {
       navigate(`/facility/${facilityId}/cns?page=1`);
-      location.reload();
     }
   }, []);
   const [location, setLocation] = useState<AssetLocationObject>();
