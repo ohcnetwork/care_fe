@@ -597,7 +597,7 @@ export const PatientManager = () => {
               ?.ventilator_interface &&
               patient.last_consultation?.last_daily_round
                 ?.ventilator_interface !== "UNKNOWN" && (
-                <div className="rounded-full shrink-0 w-6 h-6 flex items-center justify-center border border-primary-600 text-primary-600 bg-primary-100 font-semibold text-xs mb-auto">
+                <div className="rounded-full shrink-0 w-8 h-8 flex items-center justify-center border border-primary-600 text-primary-600 bg-primary-100 font-semibold text-xs mb-auto">
                   {
                     RESPIRATORY_SUPPORT.find(
                       (resp) =>
