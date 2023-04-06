@@ -94,6 +94,7 @@ type FormDetails = {
   prescribed_medication: string;
   consultation_notes: string;
   ip_no: string;
+  op_no: string;
   procedure: ProcedureType[];
   discharge_advice: PrescriptionType[];
   prn_prescription: PRNPrescriptionType[];
@@ -141,6 +142,7 @@ const initForm: FormDetails = {
   prescribed_medication: "",
   consultation_notes: "",
   ip_no: "",
+  op_no: "",
   procedure: [],
   discharge_advice: [],
   prn_prescription: [],
@@ -303,6 +305,7 @@ export const ConsultationForm = (props: any) => {
                   ?.id || "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
+            op_no: res.data.op_no ? res.data.op_no : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`,
@@ -619,6 +622,7 @@ export const ConsultationForm = (props: any) => {
         prescribed_medication: state.form.prescribed_medication,
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
+        op_no: state.form.op_no,
         icd11_diagnoses: state.form.icd11_diagnoses_object.map((o) => o.id),
         icd11_provisional_diagnoses:
           state.form.icd11_provisional_diagnoses_object.map((o) => o.id),
@@ -1096,14 +1100,19 @@ export const ConsultationForm = (props: any) => {
                       )}
                     </>
                   )}
-
-                  <div className="col-span-6" ref={fieldRef["ip_no"]}>
-                    <TextFormField
-                      {...field("ip_no")}
-                      label="IP Number"
-                      required={state.form.suggestion === "A"}
-                    />
-                  </div>
+                  {state.form.suggestion !== "A" ? (
+                    <div className="col-span-6 mb-6" ref={fieldRef["op_no"]}>
+                      <TextFormField {...field("op_no")} label="OP Number" />
+                    </div>
+                  ) : (
+                    <div className="col-span-6 mb-6" ref={fieldRef["ip_no"]}>
+                      <TextFormField
+                        {...field("ip_no")}
+                        label="IP Number"
+                        required={state.form.suggestion === "A"}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 gap-x-6">

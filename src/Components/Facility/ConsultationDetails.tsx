@@ -689,7 +689,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="border rounded-lg bg-white shadow h-full text-black w-full">
             <PatientInfoCard
               patient={patientData}
-              ip_no={consultationData.ip_no}
+              consultation={consultationData}
               fetchPatientData={fetchData}
             />
 
