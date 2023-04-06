@@ -11,7 +11,7 @@ export const AddSkillsPlaceholder = () => {
     <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
       <div className="w-full">
         <img
-          src={`${import.meta.env.VITE_PUBLIC_URL}/images/404.svg`}
+          src={`${import.meta.env.REACT_PUBLIC_URL}/images/404.svg`}
           alt="Error 404"
           className="w-80 mx-auto"
         />
