@@ -18,7 +18,7 @@ export type VaccinationDetails = {
 export const emptyValues = {
   vaccine: "",
   doses: 0,
-  date: "",
+  date: new Date().toJSON().slice(0, 10),
   precision: 0,
 };
 
@@ -124,7 +124,10 @@ export default function VaccinationBuilder(
                   />
                 </div>
                 <div>
-                  <div className="mb-1">Date</div>
+                  <div className="mb-1">
+                    Date
+                    <span className="font-bold text-danger-500">{" *"}</span>
+                  </div>
                   <input
                     type="date"
                     className="cui-input-base"

@@ -16,6 +16,7 @@ import {
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
   CONSULTATION_STATUS,
+  BLOOD_GROUPS,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -45,8 +46,12 @@ import InvestigationBuilder, {
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
-import { VaccinationDetails } from "../Common/prescription-builder/VaccinationBuilder";
-import { DiseaseDetails } from "../Common/prescription-builder/DiseaseBuilder";
+import VaccinationBuilder, {
+  VaccinationDetails,
+} from "../Common/prescription-builder/VaccinationBuilder";
+import DiseaseBuilder, {
+  DiseaseDetails,
+} from "../Common/prescription-builder/DiseaseBuilder";
 import { ICD11DiagnosisModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -115,7 +120,7 @@ type FormDetails = {
   death_confirmed_doctor: string;
   // Health Details
   family_details: string;
-  has_allergy: BooleanStrings;
+  has_allergy: false;
   allergies: string;
   blood_group: string;
   height: number;
@@ -183,7 +188,7 @@ const initForm: FormDetails = {
   death_datetime: "",
   death_confirmed_doctor: "",
   family_details: "",
-  has_allergy: "false",
+  has_allergy: false,
   allergies: "",
   blood_group: "",
   height: 0.0,
@@ -235,10 +240,10 @@ const consultationFormReducer = (state = initialState, action: Action) => {
 };
 
 type ConsultationFormSection =
-  | "Consultation Details"
-  | "Treatment Plan"
+  | "Medical History"
   | "Health Details"
-  | "Medical History";
+  | "Consultation Details"
+  | "Treatment Plan";
 
 export const ConsultationForm = (props: any) => {
   const { goBack } = useAppHistory();
@@ -265,15 +270,25 @@ export const ConsultationForm = (props: any) => {
   const [facilityName, setFacilityName] = useState("");
   const isUpdate = !!id;
 
-  const [currentSection, setCurrentSection] = useState<ConsultationFormSection>(
-    "Consultation Details"
-  );
-  const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
+  const [currentSection, setCurrentSection] =
+    useState<ConsultationFormSection>("Medical History");
+  const [consultationDetailsVisible, consultationDetailsRef] =
+    useVisibility(-300);
   const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
   const [healthDetailsVisible, healthDetailsRef] = useVisibility(-300);
-  const [medicalHistoryVisible, medicalHistoryRef] = useVisibility(-300);
+  const [medicalHistoryVisible, medicalHistoryRef] = useVisibility();
 
   const sections = {
+    "Medical History": {
+      iconClass: "care-l-book-medical",
+      visible: medicalHistoryVisible,
+      ref: medicalHistoryRef,
+    },
+    "Health Details": {
+      iconClass: "care-l-syringe",
+      visible: healthDetailsVisible,
+      ref: healthDetailsRef,
+    },
     "Consultation Details": {
       iconClass: "care-l-medkit",
       visible: consultationDetailsVisible,
@@ -284,25 +299,15 @@ export const ConsultationForm = (props: any) => {
       visible: treatmentPlanVisible,
       ref: treatmentPlanRef,
     },
-    "Health Details": {
-      iconClass: "fa-solid fa-syringe",
-      visible: healthDetailsVisible,
-      ref: healthDetailsRef,
-    },
-    "Medical History": {
-      iconClass: "fa-solid fa-book-medical",
-      visible: medicalHistoryVisible,
-      ref: medicalHistoryRef,
-    },
   };
 
   useEffect(() => {
     setCurrentSection((currentSection) => {
       let sectionNow = currentSection;
+      if (medicalHistoryVisible) sectionNow = "Medical History";
+      if (healthDetailsVisible) sectionNow = "Health Details";
       if (consultationDetailsVisible) sectionNow = "Consultation Details";
       if (treatmentPlanVisible) sectionNow = "Treatment Plan";
-      if (healthDetailsVisible) sectionNow = "Health Details";
-      if (medicalHistoryVisible) sectionNow = "Medical History";
       return sectionNow;
     });
   }, [
@@ -374,7 +379,7 @@ export const ConsultationForm = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
               ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
-                ?.id || "Comfort"
+                  ?.id || "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             op_no: res.data.op_no ? res.data.op_no : "",
@@ -390,11 +395,9 @@ export const ConsultationForm = (props: any) => {
             cause_of_death: res.data?.discharge_notes || "",
             death_datetime: res.data?.death_datetime || "",
             death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
-            family_details:
-              res.data.health_details_object?.family_details || "",
-            has_allergy:
-              `${res.data.health_details_object?.has_allergy}` || "false",
-            allergies: res.data.health_details_object?.allergies || "",
+            family_details: res.data?.health_details_object?.family_detail,
+            has_allergy: res?.data.health_details_object?.has_allergy,
+            allergies: res?.data.health_details_object?.allergies,
             blood_group: res.data.health_details_object?.blood_group
               ? res.data.health_details_object?.blood_group === "UNKNOWN"
                 ? "UNK"
@@ -407,6 +410,7 @@ export const ConsultationForm = (props: any) => {
             present_health: res.data.medical_history_object?.present_health,
           };
           dispatch({ type: "set_form", form: formData });
+          console.log(formData);
           setBed(formData.bed);
         } else {
           goBack();
@@ -648,7 +652,7 @@ export const ConsultationForm = (props: any) => {
           return;
 
         case "has_allergy":
-          if (state.form.has_allergy === "true") {
+          if (state.form.has_allergy) {
             if (state.form.allergies === "") {
               errors["allergies"] = "Please enter Patient's allergies";
               invalidForm = true;
@@ -658,35 +662,47 @@ export const ConsultationForm = (props: any) => {
 
         case "vaccination_history": {
           let invalid = false;
+          let errorMsg = "";
           for (const f of vaccination) {
-            if (
-              !f.vaccine?.replace(/\s/g, "").length ||
-              !f.date?.replace(/\s/g, "").length
-            ) {
+            if (!f.vaccine?.replace(/\s/g, "").length) {
+              errorMsg = "Vaccine field can not be empty";
+              invalid = true;
+              break;
+            }
+            if (!f.date?.replace(/\s/g, "").length) {
+              errorMsg = "Date field can not be empty";
               invalid = true;
               break;
             }
           }
           if (invalid) {
-            errors[field] = "Vaccination field can not be empty";
+            errors[field] = errorMsg;
             invalidForm = true;
           }
           return;
         }
         case "patient_diseases": {
           let invalid = false;
+          let errorMsg = "";
           for (const f of diseases) {
-            if (
-              !f.disease?.replace(/\s/g, "").length ||
-              !f.details?.replace(/\s/g, "").length ||
-              !f.date?.replace(/\s/g, "").length
-            ) {
+            if (!f.disease?.replace(/\s/g, "").length) {
+              errorMsg = "Disease field can not be empty";
+              invalid = true;
+              break;
+            }
+            if (!f.details?.replace(/\s/g, "").length) {
+              errorMsg = "Details field can not be empty";
+              invalid = true;
+              break;
+            }
+            if (!f.date?.replace(/\s/g, "").length) {
+              errorMsg = "Date field can not be empty";
               invalid = true;
               break;
             }
           }
           if (invalid) {
-            errors[field] = "Disease field can not be empty";
+            errors[field] = errorMsg;
             invalidForm = true;
           }
           return;
@@ -747,6 +763,7 @@ export const ConsultationForm = (props: any) => {
   ) => {
     e.preventDefault();
     const validated = validateForm();
+    console.log(validated, state, vaccination);
     if (validated) {
       setIsLoading(true);
       const data = {
@@ -802,8 +819,7 @@ export const ConsultationForm = (props: any) => {
         new_health_details: {
           family_details: state.form.family_details,
           has_allergy: state.form.has_allergy,
-          allergies:
-            state.form.has_allergy === "true" ? state.form.allergies : "",
+          allergies: state.form.has_allergy ? state.form.allergies : "",
           blood_group: state.form.blood_group
             ? state.form.blood_group
             : undefined,
@@ -893,6 +909,16 @@ export const ConsultationForm = (props: any) => {
         ...state.form,
         [name]: value,
         action: value === "false" ? "PENDING" : state.form.action,
+      },
+    });
+  };
+
+  const handleAllergyChange = ({ name, value }: FieldChangeEvent<boolean>) => {
+    dispatch({
+      type: "set_form",
+      form: {
+        ...state.form,
+        [name]: value,
       },
     });
   };
@@ -1000,8 +1026,9 @@ export const ConsultationForm = (props: any) => {
             const section = sections[sectionTitle as ConsultationFormSection];
             return (
               <button
-                className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${isCurrent ? "bg-white text-primary-500" : "bg-transparent"
-                  } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
+                className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
+                  isCurrent ? "bg-white text-primary-500" : "bg-transparent"
+                } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
                 onClick={() => {
                   section.ref.current?.scrollIntoView({
                     behavior: "smooth",
@@ -1023,6 +1050,137 @@ export const ConsultationForm = (props: any) => {
               className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
             >
               <div className="grid grid-cols-1 gap-x-12 items-start">
+                <div className="grid grid-cols-6 gap-x-6">
+                  {sectionTitle("Medical History")}
+                  <div
+                    className="col-span-6"
+                    ref={fieldRef["ongoing_medication"]}
+                  >
+                    <TextAreaFormField
+                      {...field("ongoing_medication")}
+                      label="Ongoing Medication"
+                    />
+                  </div>
+
+                  <div className="col-span-6" ref={fieldRef["present_health"]}>
+                    <TextAreaFormField
+                      {...field("present_health")}
+                      label="Present Health"
+                    />
+                  </div>
+
+                  <div
+                    id="patient_diseases"
+                    className="mt-4 col-span-6"
+                    ref={fieldRef["patient_diseases"]}
+                  >
+                    <FieldLabel>Medical History</FieldLabel>
+                    <DiseaseBuilder
+                      diseases={diseases}
+                      setDiseases={setDiseases}
+                    />
+                    <br />
+                    <LegacyErrorHelperText
+                      error={state.errors.patient_diseases}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-6 gap-x-6">
+                  {sectionTitle("Health Details")}
+                  <CheckBoxFormField
+                    className="col-span-6"
+                    {...field("has_allergy")}
+                    label="Is the patient allergic"
+                    onChange={handleAllergyChange}
+                  />
+
+                  {state.form.has_allergy && (
+                    <div className="col-span-6" ref={fieldRef["allergies"]}>
+                      <TextAreaFormField
+                        {...field("allergies")}
+                        label="Allergies"
+                      />
+                    </div>
+                  )}
+
+                  <div
+                    id="vaccination_history"
+                    className="mt-4 col-span-6"
+                    ref={fieldRef["vaccination_history"]}
+                  >
+                    <FieldLabel>Vaccination History</FieldLabel>
+                    <VaccinationBuilder
+                      vaccinations={vaccination}
+                      setVaccinations={setVaccination}
+                    />
+                    <br />
+                    <LegacyErrorHelperText
+                      error={state.errors.vaccination_history}
+                    />
+                  </div>
+
+                  <div className="col-span-6" ref={fieldRef["blood_group"]}>
+                    <SelectFormField
+                      className=""
+                      {...field("blood_group")}
+                      label="Blood Group"
+                      options={BLOOD_GROUPS}
+                      required
+                      optionLabel={(option) => option.text}
+                      optionValue={(option) => option.text}
+                    />
+                  </div>
+
+                  <div className="col-span-6">
+                    <div className="flex items-center justify-between">
+                      <FieldLabel>Body Surface Area</FieldLabel>
+                      <span className="mb-2 text-black font-medium text-sm">
+                        {Math.sqrt(
+                          (Number(state.form.weight) *
+                            Number(state.form.height)) /
+                            3600
+                        ).toFixed(2)}
+                        m<sup>2</sup>
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center sm:gap-3">
+                      <TextFormField
+                        className="w-full"
+                        {...field("weight")}
+                        type="number"
+                        placeholder="Weight"
+                        trailingPadding=" "
+                        trailing={
+                          <p className="text-sm text-gray-700 mr-8">
+                            Weight (kg)
+                          </p>
+                        }
+                        min={0}
+                      />
+                      <TextFormField
+                        className="w-full"
+                        {...field("height")}
+                        type="number"
+                        placeholder="Height"
+                        trailingPadding=" "
+                        trailing={
+                          <p className="text-sm text-gray-700 mr-8">
+                            Height (cm)
+                          </p>
+                        }
+                        min={0}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-span-6" ref={fieldRef["family_details"]}>
+                    <TextAreaFormField
+                      {...field("family_details")}
+                      label="Family Details"
+                    />
+                  </div>
+                </div>
                 <div className="grid grid-cols-6 gap-x-6">
                   {sectionTitle("Consultation Details")}
                   <div
@@ -1105,7 +1263,7 @@ export const ConsultationForm = (props: any) => {
                         {Math.sqrt(
                           (Number(state.form.weight) *
                             Number(state.form.height)) /
-                          3600
+                            3600
                         ).toFixed(2)}
                         m<sup>2</sup>
                       </span>

@@ -3,7 +3,6 @@ import { useDispatch } from "react-redux";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { listICD11Diagnosis } from "../../../Redux/actions";
 import AutoCompleteAsync from "../../Form/AutoCompleteAsync";
-
 interface DiseaseBuilderProps<T> {
   diseases: T[];
   setDiseases: React.Dispatch<React.SetStateAction<T[]>>;
@@ -19,7 +18,7 @@ export type DiseaseDetails = {
 export const emptyValues = {
   disease: "",
   details: "",
-  date: "",
+  date: new Date().toJSON().slice(0, 10),
   precision: 0,
 };
 
@@ -117,7 +116,10 @@ export default function DiseaseBuilder(
                 />
               </div>
               <div className="w-full">
-                <div className="mb-1">Date</div>
+                <div className="mb-1">
+                  Date
+                  <span className="font-bold text-danger-500">{" *"}</span>
+                </div>
                 <input
                   type="date"
                   className="cui-input-base"
@@ -146,7 +148,7 @@ export default function DiseaseBuilder(
         }}
         className="shadow-sm mt-4 bg-gray-200 w-full font-bold block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:bg-gray-300 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
       >
-        + Add Disease History
+        + Add Medical History
       </button>
     </div>
   );
