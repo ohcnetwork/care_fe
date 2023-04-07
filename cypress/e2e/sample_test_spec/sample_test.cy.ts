@@ -22,7 +22,7 @@ describe("Sample List", () => {
 
   it("Search by Patient Name", () => {
     cy.intercept(/\/api\/v1\/test_sample/).as("test_sample");
-    cy.get("[name='patient_name_search']").type("Test");
+    cy.get("[name='patient_name']").type("Test");
     cy.wait("@test_sample").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
     });
