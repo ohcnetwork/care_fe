@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import ToolTip from "../utils/Tooltip";
 import { classNames } from "../../../Utils/utils";
 
 export function PrescriptionDropdown(props: {
@@ -71,21 +70,15 @@ export function PrescriptionDropdown(props: {
               </button>
 
               {tips && tips[option] && (
-                <ToolTip
-                  text={
-                    <span className="text-sm font-semibold">
-                      {tips[option]}
-                    </span>
-                  }
-                  position="RIGHT"
+                <button
+                  onClick={(event) => event.preventDefault()}
+                  className="rounded px-4 tooltip"
                 >
-                  <button
-                    onClick={(event) => event.preventDefault()}
-                    className="rounded px-4"
-                  >
-                    <i className="fa-solid fa-circle-info"></i>
-                  </button>
-                </ToolTip>
+                  <span className="tooltip-text tooltip-right">
+                    {tips[option]}
+                  </span>
+                  <i className="fa-solid fa-circle-info"></i>
+                </button>
               )}
             </div>
           );
