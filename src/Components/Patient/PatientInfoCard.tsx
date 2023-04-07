@@ -4,11 +4,12 @@ import { PatientModel } from "./models";
 import DialogModal from "../Common/Dialog";
 import Beds from "../Facility/Consultations/Beds";
 import { useState } from "react";
-import { PatientCategory } from "../Facility/models";
+import { ConsultationModel, PatientCategory } from "../Facility/models";
 import {
   CONSULTATION_SUGGESTION,
   DISCHARGE_REASONS,
   PATIENT_CATEGORIES,
+  RESPIRATORY_SUPPORT,
 } from "../../Common/constants";
 import moment from "moment";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -18,14 +19,16 @@ import useConfig from "../../Common/hooks/useConfig";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
-  ip_no?: string | undefined;
+  consultation?: ConsultationModel;
   fetchPatientData?: (state: { aborted: boolean }) => void;
 }) {
   const [open, setOpen] = useState(false);
   const { enable_hcx } = useConfig();
 
   const patient = props.patient;
-  const ip_no = props.ip_no;
+  const consultation = props.consultation;
+  const ip_no = consultation?.ip_no;
+  const op_no = consultation?.op_no;
 
   const category: PatientCategory | undefined =
     patient?.last_consultation?.category;
@@ -140,10 +143,13 @@ export default function PatientInfoCard(props: {
                 ></i>
                 {patient.facility_object?.name}
               </Link>
-              {ip_no && (
+
+              {(consultation?.suggestion === "A" || op_no) && (
                 <span className="md:col-span-2 capitalize pl-2">
                   <span className="badge badge-pill badge-primary">
-                    {`IP: ${ip_no}`}
+                    {consultation?.suggestion !== "A"
+                      ? `OP: ${op_no}`
+                      : `IP: ${ip_no}`}
                   </span>
                 </span>
               )}
@@ -171,8 +177,19 @@ export default function PatientInfoCard(props: {
                   getDimensionOrDash(patient.last_consultation?.height, "cm"),
                   true,
                 ],
+                [
+                  "Respiratory Support",
+                  RESPIRATORY_SUPPORT.find(
+                    (resp) =>
+                      resp.text ===
+                      patient.last_consultation?.last_daily_round
+                        ?.ventilator_interface
+                  )?.id || "UNKNOWN",
+                  patient.last_consultation?.last_daily_round
+                    ?.ventilator_interface,
+                ],
               ].map((stat, i) => {
-                return stat[2] ? (
+                return stat[2] && stat[1] !== "NONE" ? (
                   <div
                     key={"patient_stat_" + i}
                     className="bg-gray-200 border-gray-500 border py-1 px-2 rounded-lg text-xs"

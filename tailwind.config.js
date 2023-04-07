@@ -2,6 +2,7 @@
 const colors = require("tailwindcss/colors");
 const defaultTheme = require("tailwindcss/defaultTheme");
 
+
 const gray = {
   100: "#FBFAFC",
   200: "#F7F5FA",
@@ -14,6 +15,7 @@ const gray = {
   900: "#453C52",
 };
 
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   important: true,
   theme: {
@@ -84,7 +86,7 @@ module.exports = {
   corePlugins: {
     aspectRatio: false,
   },
-  content: ["./src/**/*.{html,md,js,jsx,ts,tsx,res}"],
+  content: ["./src/**/*.{html,md,js,jsx,ts,tsx,res}", "./index.html"],
   safelist: [
     {
       pattern: /^(bg-[^/]+|text-[^/]+|border-.+)$/,

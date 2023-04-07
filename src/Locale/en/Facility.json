@@ -19,5 +19,6 @@
   "expected_burn_rate": "Expected Burn Rate",
   "type_b_cylinders": "B Type Cylinders",
   "type_c_cylinders": "C Type Cylinders",
-  "type_d_cylinders": "D Type Cylinders"
+  "type_d_cylinders": "D Type Cylinders",
+  "select_local_body": "Select Local Body"
 }

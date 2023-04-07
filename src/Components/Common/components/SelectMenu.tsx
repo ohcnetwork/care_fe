@@ -68,7 +68,7 @@ export default function SelectMenu<T>(props: Props<T>) {
               leaveTo="opacity-0"
             >
               <Listbox.Options
-                className={`origin-top-right absolute z-10 mt-2 w-auto lg:w-72 rounded-md shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none ${
+                className={`origin-top-right absolute z-10 w-auto lg:w-72 rounded-md shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none ${
                   props.position ? "md:right-0 md:left-auto" : "left-0"
                 }`}
               >
