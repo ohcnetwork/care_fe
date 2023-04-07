@@ -54,7 +54,9 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import PrescriptionBuilder, {
   PrescriptionType,
 } from "../Common/prescription-builder/PrescriptionBuilder";
-import PRNPrescriptionBuilder from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import PRNPrescriptionBuilder, {
+  PRNPrescriptionType,
+} from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { formatDate } from "../../Utils/utils";
 import CreateClaimCard from "../HCX/CreateClaimCard";
 import { HCXClaimModel } from "../HCX/models";
@@ -70,6 +72,8 @@ interface PreDischargeFormInterface {
   discharge_date: string;
   death_datetime: string | null;
   death_confirmed_doctor: string | null;
+  discharge_prescription: PrescriptionType[];
+  discharge_prn_prescription: PRNPrescriptionType[];
 }
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -107,14 +111,16 @@ export const ConsultationDetails = (props: any) => {
       discharge_date: "",
       death_datetime: null,
       death_confirmed_doctor: null,
+      discharge_prescription: [],
+      discharge_prn_prescription: [],
     });
   const [showAutomatedRounds, setShowAutomatedRounds] = useState(true);
 
-  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
-    []
-  );
   const [dischargePrescription, setDischargePrescription] = useState<
     PrescriptionType[]
+  >([]);
+  const [dischargePRNPrescription, setDischargePRNPrescription] = useState<
+    PRNPrescriptionType[]
   >([]);
 
   const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
@@ -253,6 +259,8 @@ export const ConsultationDetails = (props: any) => {
           discharge_date: moment(preDischargeForm.discharge_date).toISOString(
             true
           ),
+          discharge_prescription: dischargePrescription,
+          discharge_prn_prescription: dischargePRNPrescription,
         },
         { id: patientData.id }
       )
@@ -535,15 +543,15 @@ export const ConsultationDetails = (props: any) => {
               <FieldLabel>Discharge Prescription</FieldLabel>
               <div className="my-2">
                 <PrescriptionBuilder
-                  prescriptions={dischargeAdvice}
-                  setPrescriptions={setDischargeAdvice}
+                  prescriptions={dischargePrescription}
+                  setPrescriptions={setDischargePrescription}
                 />
               </div>
               <div>
                 <FieldLabel>Discharge PRN Prescription</FieldLabel>
                 <PRNPrescriptionBuilder
-                  prescriptions={dischargePrescription}
-                  setPrescriptions={setDischargePrescription}
+                  prescriptions={dischargePRNPrescription}
+                  setPrescriptions={setDischargePRNPrescription}
                 />
               </div>
             </div>
