@@ -864,6 +864,162 @@ export const ConsultationDetails = (props: any) => {
                 </section>
               )}
               <div className="grid lg:grid-cols-2 gap-4 mt-4">
+                {consultationData.discharge_date && (
+                  <div
+                    className={`bg-white overflow-hidden shadow rounded-lg gap-4 ${
+                      consultationData.discharge_reason === "REC" &&
+                      "lg:col-span-2"
+                    }`}
+                  >
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Discharge Information
+                      </h3>
+                      <div className="grid gap-4 mt-2">
+                        <div>
+                          Reason {" - "}
+                          <span className="font-semibold">
+                            {DISCHARGE_REASONS.find(
+                              (d) => d.id === consultationData.discharge_reason
+                            )?.text || "--"}
+                          </span>
+                        </div>
+                        {consultationData.discharge_reason === "REC" && (
+                          <div className="grid gap-4">
+                            <div>
+                              Date {" - "}
+                              <span className="font-semibold">
+                                {consultationData.discharge_date
+                                  ? formatDate(consultationData.discharge_date)
+                                  : "--:--"}
+                              </span>
+                            </div>
+                            <div>
+                              Advice {" - "}
+                              <span className="font-semibold">
+                                {consultationData.discharge_notes || "--"}
+                              </span>
+                            </div>
+                            <div className="mt-2">
+                              <div className="font-semibold uppercase text-sm">
+                                Prescription
+                              </div>
+                              <div className="my-2">
+                                <div className="overflow-scroll">
+                                  <ResponsiveMedicineTable
+                                    theads={[
+                                      "Medicine",
+                                      "Route",
+                                      "Frequency",
+                                      "Dosage",
+                                      "Days",
+                                      "Notes",
+                                    ]}
+                                    list={
+                                      consultationData.discharge_prescription
+                                    }
+                                    objectKeys={[
+                                      "medicine",
+                                      "route",
+                                      "dosage",
+                                      "dosage_new",
+                                      "days",
+                                      "notes",
+                                    ]}
+                                    fieldsToDisplay={[2, 3]}
+                                  />
+                                </div>
+                              </div>{" "}
+                            </div>
+                            <hr className="border border-gray-300 my-2"></hr>
+                            <div className="mt-2">
+                              <div className="font-semibold uppercase text-sm">
+                                PRN Prescription
+                              </div>
+                              <div className="overflow-scroll">
+                                <ResponsiveMedicineTable
+                                  theads={[
+                                    "Medicine",
+                                    "Route",
+                                    "Dosage",
+                                    "Indicator Event",
+                                    "Max. Dosage in 24 hrs",
+                                    "Min. time between 2 doses",
+                                  ]}
+                                  list={
+                                    consultationData.discharge_prn_prescription
+                                  }
+                                  objectKeys={[
+                                    "medicine",
+                                    "route",
+                                    "dosage",
+                                    "indicator",
+                                    "max_dosage",
+                                    "min_time",
+                                  ]}
+                                  fieldsToDisplay={[2, 4]}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {consultationData.discharge_reason === "EXP" && (
+                          <div className="grid gap-4">
+                            <div>
+                              Discharge Date {" - "}
+                              <span className="font-semibold">
+                                {consultationData.discharge_date
+                                  ? formatDate(consultationData.discharge_date)
+                                  : "--:--"}
+                              </span>
+                            </div>
+                            <div>
+                              Date of Death {" - "}
+                              <span className="font-semibold">
+                                {consultationData.death_datetime
+                                  ? formatDate(consultationData.death_datetime)
+                                  : "--:--"}
+                              </span>
+                            </div>
+                            <div>
+                              Cause of death {" - "}
+                              <span className="font-semibold">
+                                {consultationData.discharge_reason || "--"}
+                              </span>
+                            </div>
+                            <div>
+                              Confirmed By {" - "}
+                              <span className="font-semibold">
+                                {consultationData.death_confirmed_doctor ||
+                                  "--"}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        {["REF", "LAMA"].includes(
+                          consultationData.discharge_reason || ""
+                        ) && (
+                          <div className="grid gap-4">
+                            <div>
+                              Date {" - "}
+                              <span className="font-semibold">
+                                {consultationData.discharge_date
+                                  ? formatDate(consultationData.discharge_date)
+                                  : "--:--"}
+                              </span>
+                            </div>
+                            <div>
+                              Notes {" - "}
+                              <span className="font-semibold">
+                                {consultationData.discharge_notes || "--"}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {consultationData.symptoms_text && (
                   <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="px-4 py-5 sm:p-6">
