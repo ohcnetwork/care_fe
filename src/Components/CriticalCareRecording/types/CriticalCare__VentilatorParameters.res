@@ -2,6 +2,7 @@ type parentventilatorModeType = CMV | SIMV | UNKNOWN
 
 type ventilatorInterfaceType =
   | UNKNOWN
+  | OXYGEN_SUPPORT
   | INVASIVE
   | NON_INVASIVE
 
@@ -36,6 +37,7 @@ let encodeVentilatorInterfaceType = ventilatorInterfaceType => {
   switch ventilatorInterfaceType {
   | INVASIVE => "INVASIVE"
   | NON_INVASIVE => "NON_INVASIVE"
+  | OXYGEN_SUPPORT => "OXYGEN_SUPPORT"
   | UNKNOWN => "UNKNOWN"
   }
 }
@@ -77,6 +79,7 @@ let decodeVentilatorInterfaceType = ventilatorInterfaceType => {
   | "INVASIVE" => INVASIVE
   | "NON_INVASIVE" => NON_INVASIVE
   | "UNKNOWN" => UNKNOWN
+  | "OXYGEN_SUPPORT" => OXYGEN_SUPPORT
   | _ => UNKNOWN
   }
 }
@@ -111,6 +114,7 @@ let ventilatorInterfaceTypeToString = ventilatorInterfaceType => {
   | INVASIVE => "Invasive"
   | NON_INVASIVE => "Non Invasive"
   | UNKNOWN => "Unknown"
+  | OXYGEN_SUPPORT => "Oxygen Support"
   }
 }
 
@@ -139,7 +143,8 @@ let ventilatorOxygenModalityTypeToString = ventilatorOxygenModalityType => {
   }
 }
 
-export type t = {
+@genType
+type t = {
   ventilator_interface: ventilatorInterfaceType,
   ventilator_mode: ventilatorModeType,
   ventilator_oxygen_modality: ventilatorOxygenModalityType,

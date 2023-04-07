@@ -5,6 +5,8 @@ export interface IConfig {
   github_url: string;
   coronasafe_url: string;
   dpg_url: string;
+  site_url: string;
+  analytics_server_url: string;
   static_header_logo: string;
   static_light_logo: string;
   static_black_logo: string;
