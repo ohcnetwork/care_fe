@@ -10,6 +10,7 @@ import { HistoryAPIProvider } from "./CAREUI/misc/HistoryAPIProvider";
 import * as Sentry from "@sentry/browser";
 import { IConfig } from "./Common/hooks/useConfig";
 import { LocalStorageKeys } from "./Common/constants";
+import Plausible from "./Components/Common/Plausible";
 
 const Loading = loadable(() => import("./Components/Common/Loading"));
 
@@ -90,15 +91,12 @@ const App: React.FC = () => {
     return <Loading />;
   }
 
-  if (currentUser?.data) {
-    return (
-      <HistoryAPIProvider>
-        <AppRouter />
-      </HistoryAPIProvider>
-    );
-  } else {
-    return <SessionRouter />;
-  }
+  return (
+    <HistoryAPIProvider>
+      {currentUser?.data ? <AppRouter /> : <SessionRouter />}
+      <Plausible />
+    </HistoryAPIProvider>
+  );
 };
 
 export default App;
