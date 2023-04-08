@@ -189,7 +189,7 @@ export default function PatientInfoCard(props: {
                     ?.ventilator_interface,
                 ],
               ].map((stat, i) => {
-                return stat[2] ? (
+                return stat[2] && stat[1] !== "NONE" ? (
                   <div
                     key={"patient_stat_" + i}
                     className="bg-gray-200 border-gray-500 border py-1 px-2 rounded-lg text-xs"
