@@ -30,7 +30,7 @@ const FacilitiesSelectDialog = (props: Props) => {
         showAll={false}
         multiple={false}
       />
-      <div className="mt-4 flex justify-between">
+      <div className="mt-4 flex flex-col">
         <Cancel onClick={handleCancel} />
         <Submit
           onClick={handleOk}
