@@ -19,7 +19,6 @@ import {
   ADMITTED_TO,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
-  PATIENT_FILTER_ORDER,
   RESPIRATORY_SUPPORT,
   PATIENT_SORT_OPTIONS,
   TELEMEDICINE_ACTIONS,
@@ -74,7 +73,7 @@ function TabPanel(props: TabPanelProps) {
 const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   "Comfort Care": "COMFORT CARE",
   Stable: "STABLE",
-  "Slightly Abnormal": "ABNORMAL",
+  Abnormal: "ABNORMAL",
   Critical: "CRITICAL",
 };
 
@@ -435,8 +434,8 @@ export const PatientManager = () => {
               {category ? PatientCategoryDisplayText[category] : "UNKNOWN"}
             </span>
           </div>
-          <div className="flex gap-4 items-start">
-            <div className="w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
+          <div className="flex flex-col md:flex-row gap-4 items-start">
+            <div className="w-full md:w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
               {patient?.last_consultation &&
               patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
@@ -470,7 +469,7 @@ export const PatientManager = () => {
                 </div>
               )}
             </div>
-            <div className="pl-2 md:block flex flex-col gap-2 w-full">
+            <div className="pl-2 md:block flex flex-col md:flex-row gap-2 w-full">
               <div className="flex gap-2 justify-between w-full">
                 <div className="text-xl font-semibold capitalize">
                   <span>{patient.name}</span>
@@ -486,20 +485,8 @@ export const PatientManager = () => {
                     </span>
                   )}
                 </div>
-                {patient.last_consultation?.last_daily_round
-                  ?.ventilator_interface && (
-                  <div className="rounded-full p-2 self-center border border-black text-center bg-cyan-100 font-semibold text-sm">
-                    {
-                      RESPIRATORY_SUPPORT.find(
-                        (resp) =>
-                          resp.text ===
-                          patient.last_consultation?.last_daily_round
-                            ?.ventilator_interface
-                      )?.id
-                    }
-                  </div>
-                )}
               </div>
+
               {patient.facility_object && (
                 <div className="mb-2">
                   <div className="flex flex-wrap items-center">
@@ -606,6 +593,21 @@ export const PatientManager = () => {
                 </div>
               </div>
             </div>
+            {patient.last_consultation?.last_daily_round
+              ?.ventilator_interface &&
+              patient.last_consultation?.last_daily_round
+                ?.ventilator_interface !== "UNKNOWN" && (
+                <div className="rounded-full shrink-0 w-8 h-8 flex items-center justify-center border border-primary-600 text-primary-600 bg-primary-100 font-semibold text-xs mb-auto">
+                  {
+                    RESPIRATORY_SUPPORT.find(
+                      (resp) =>
+                        resp.text ===
+                        patient.last_consultation?.last_daily_round
+                          ?.ventilator_interface
+                    )?.id
+                  }
+                </div>
+              )}
           </div>
         </Link>
       );
@@ -621,7 +623,7 @@ export const PatientManager = () => {
   } else if (data && data.length) {
     managePatients = (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4">
           {patientList}
         </div>
         <Pagination totalCount={totalCount} />
@@ -658,7 +660,7 @@ export const PatientManager = () => {
       />
       <div className="flex flex-col lg:flex-row justify-between items-center">
         <PageTitle title="Patients" hideBack={true} breadcrumbs={false} />
-        <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end">
+        <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end w-full lg:w-fit">
           {showDoctorConnect && (
             <ButtonV2
               onClick={() => {

@@ -83,7 +83,8 @@ type FormDetails = {
   category: string;
   admission_date?: Date;
   discharge_date: null;
-  referred_to: string;
+  referred_to?: string;
+  referred_to_external?: string;
   icd11_diagnoses_object: ICD11DiagnosisModel[];
   icd11_provisional_diagnoses_object: ICD11DiagnosisModel[];
   verified_by: string;
@@ -94,6 +95,7 @@ type FormDetails = {
   prescribed_medication: string;
   consultation_notes: string;
   ip_no: string;
+  op_no: string;
   procedure: ProcedureType[];
   discharge_advice: PrescriptionType[];
   prn_prescription: PRNPrescriptionType[];
@@ -131,6 +133,7 @@ const initForm: FormDetails = {
   admission_date: new Date(),
   discharge_date: null,
   referred_to: "",
+  referred_to_external: "",
   icd11_diagnoses_object: [],
   icd11_provisional_diagnoses_object: [],
   verified_by: "",
@@ -141,6 +144,7 @@ const initForm: FormDetails = {
   prescribed_medication: "",
   consultation_notes: "",
   ip_no: "",
+  op_no: "",
   procedure: [],
   discharge_advice: [],
   prn_prescription: [],
@@ -289,7 +293,11 @@ export const ConsultationForm = (props: any) => {
       setProcedures(
         !Array.isArray(res.data.procedure) ? [] : res.data.procedure
       );
-
+      if (res.data.suggestion === "R") {
+        if (res.data.referred_to_external)
+          setSelectedFacility({ id: -1, name: res.data.referred_to_external });
+        else setSelectedFacility(res.data.referred_to_object);
+      }
       if (!status.aborted) {
         if (res && res.data) {
           const formData = {
@@ -303,6 +311,7 @@ export const ConsultationForm = (props: any) => {
                   ?.id || "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
+            op_no: res.data.op_no ? res.data.op_no : "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`,
@@ -418,7 +427,11 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "referred_to":
-          if (state.form.suggestion === "R" && !state.form[field]) {
+          if (
+            state.form.suggestion === "R" &&
+            !state.form[field] &&
+            !state.form["referred_to_external"]
+          ) {
             errors[field] = "Please select the referred to facility";
             invalidForm = true;
           }
@@ -619,6 +632,7 @@ export const ConsultationForm = (props: any) => {
         prescribed_medication: state.form.prescribed_medication,
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
+        op_no: state.form.op_no,
         icd11_diagnoses: state.form.icd11_diagnoses_object.map((o) => o.id),
         icd11_provisional_diagnoses:
           state.form.icd11_provisional_diagnoses_object.map((o) => o.id),
@@ -630,7 +644,13 @@ export const ConsultationForm = (props: any) => {
         patient: patientId,
         facility: facilityId,
         referred_to:
-          state.form.suggestion === "R" ? state.form.referred_to : undefined,
+          state.form.suggestion === "R" && !state.form.referred_to_external
+            ? state.form.referred_to
+            : undefined,
+        referred_to_external:
+          state.form.suggestion === "R" && !state.form.referred_to
+            ? state.form.referred_to_external
+            : undefined,
         consultation_notes: state.form.consultation_notes,
         is_telemedicine: state.form.is_telemedicine,
         action: state.form.action,
@@ -769,7 +789,13 @@ export const ConsultationForm = (props: any) => {
     setSelectedFacility(selectedFacility);
     const form: FormDetails = { ...state.form };
     if (selectedFacility && selectedFacility.id) {
-      form.referred_to = selectedFacility.id.toString() || "";
+      if (selectedFacility.id === -1) {
+        form.referred_to_external = selectedFacility.name || "";
+        delete form.referred_to;
+      } else {
+        form.referred_to = selectedFacility.id.toString() || "";
+        delete form.referred_to_external;
+      }
     }
     dispatch({ type: "set_form", form });
   };
@@ -1009,7 +1035,7 @@ export const ConsultationForm = (props: any) => {
                   {state.form.suggestion === "R" && (
                     <div
                       id="referred_to"
-                      className="col-span-6"
+                      className="col-span-6 mb-5"
                       ref={fieldRef["referred_to"]}
                     >
                       <FieldLabel>Referred To Facility</FieldLabel>
@@ -1018,6 +1044,7 @@ export const ConsultationForm = (props: any) => {
                         searchAll={true}
                         selected={selectedFacility}
                         setSelected={setFacility}
+                        freeText={true}
                         errors={state.errors.referred_to}
                       />
                     </div>
@@ -1096,14 +1123,19 @@ export const ConsultationForm = (props: any) => {
                       )}
                     </>
                   )}
-
-                  <div className="col-span-6" ref={fieldRef["ip_no"]}>
-                    <TextFormField
-                      {...field("ip_no")}
-                      label="IP Number"
-                      required={state.form.suggestion === "A"}
-                    />
-                  </div>
+                  {state.form.suggestion !== "A" ? (
+                    <div className="col-span-6 mb-6" ref={fieldRef["op_no"]}>
+                      <TextFormField {...field("op_no")} label="OP Number" />
+                    </div>
+                  ) : (
+                    <div className="col-span-6 mb-6" ref={fieldRef["ip_no"]}>
+                      <TextFormField
+                        {...field("ip_no")}
+                        label="IP Number"
+                        required={state.form.suggestion === "A"}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 gap-x-6">

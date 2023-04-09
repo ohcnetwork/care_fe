@@ -88,6 +88,7 @@ export default function PatientFilter(props: any) {
     last_consultation_is_telemedicine:
       filter.last_consultation_is_telemedicine || null,
     is_antenatal: filter.is_antenatal || null,
+    ventilator_interface: filter.ventilator_interface || null,
   });
   const dispatch: any = useDispatch();
 
@@ -130,6 +131,7 @@ export default function PatientFilter(props: any) {
     last_vaccinated_date_after: "",
     last_consultation_is_telemedicine: null,
     is_antenatal: null,
+    ventilator_interface: null,
   };
 
   useEffect(() => {
@@ -172,6 +174,13 @@ export default function PatientFilter(props: any) {
   const DECLARED_FILTER = [
     { id: "false", text: "Not Declared" },
     { id: "true", text: "Declared" },
+  ];
+
+  const RESPIRATORY_SUPPORT_FILTER = [
+    { id: "UNKNOWN", text: "None" },
+    { id: "OXYGEN_SUPPORT", text: "O2 Support" },
+    { id: "NON_INVASIVE", text: "NIV" },
+    { id: "INVASIVE", text: "IV" },
   ];
 
   const TELEMEDICINE_FILTER = [
@@ -231,6 +240,7 @@ export default function PatientFilter(props: any) {
       last_vaccinated_date_after,
       last_consultation_is_telemedicine,
       is_antenatal,
+      ventilator_interface,
     } = filterState;
     const data = {
       district: district || "",
@@ -335,6 +345,7 @@ export default function PatientFilter(props: any) {
       last_consultation_is_telemedicine:
         last_consultation_is_telemedicine || "",
       is_antenatal: is_antenatal || "",
+      ventilator_interface: ventilator_interface || "",
     };
     onChange(data);
   };
@@ -507,6 +518,22 @@ export default function PatientFilter(props: any) {
           value={filterState.is_declared_positive}
           onChange={(v) =>
             setFilterState({ ...filterState, is_declared_positive: v })
+          }
+        />
+      </div>
+      <div className="w-full flex-none">
+        <FieldLabel className="text-sm">Respiratory Support</FieldLabel>
+        <SelectMenuV2
+          placeholder="Show all"
+          options={RESPIRATORY_SUPPORT_FILTER}
+          optionLabel={(o) => o.text}
+          optionValue={(o) => o.id}
+          value={filterState.ventilator_interface}
+          onChange={(v) =>
+            setFilterState({
+              ...filterState,
+              ventilator_interface: v,
+            })
           }
         />
       </div>
