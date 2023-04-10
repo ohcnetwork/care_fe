@@ -237,7 +237,7 @@ export const ConsultationForm = (props: any) => {
   );
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
   const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
-  const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
+  const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-500);
 
   const sections = {
     "Consultation Details": {
@@ -258,12 +258,11 @@ export const ConsultationForm = (props: any) => {
   };
 
   useEffect(() => {
-    setCurrentSection((currentSection) => {
-      let sectionNow = currentSection;
-      if (consultationDetailsVisible) sectionNow = "Consultation Details";
-      if (diagnosisVisible) sectionNow = "Diagnosis";
-      if (treatmentPlanVisible) sectionNow = "Treatment Plan";
-      return sectionNow;
+    setCurrentSection((prev) => {
+      if (consultationDetailsVisible) return "Consultation Details";
+      if (diagnosisVisible) return "Diagnosis";
+      if (treatmentPlanVisible) return "Treatment Plan";
+      return prev;
     });
   }, [consultationDetailsVisible, diagnosisVisible, treatmentPlanVisible]);
 
