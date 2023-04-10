@@ -48,10 +48,7 @@ import ProcedureBuilder, {
 import { ICD11DiagnosisModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import {
-  FieldChangeEvent,
-  FieldChangeEventHandler,
-} from "../Form/FormFields/Utils";
+import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -727,21 +724,6 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleTelemedicineChange = ({
-    name,
-    value,
-  }: FieldChangeEvent<unknown>) => {
-    value = `${value}`;
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        [name]: value,
-        action: value === "false" ? "PENDING" : state.form.action,
-      },
-    });
-  };
-
   const handleDoctorSelect = (doctor: UserModel | null) => {
     if (doctor?.id) {
       dispatch({
@@ -1231,7 +1213,7 @@ export const ConsultationForm = (props: any) => {
                               className="flex-1"
                               required
                               label={kasp_string}
-                              onChange={handleTelemedicineChange}
+                              onChange={handleFormFieldChange}
                             />
                           )}
                           <div
@@ -1283,7 +1265,7 @@ export const ConsultationForm = (props: any) => {
                             className="col-span-6"
                             {...field("is_telemedicine")}
                             label="Is Telemedicine required for the patient?"
-                            onChange={handleTelemedicineChange}
+                            onChange={handleFormFieldChange}
                           />
 
                           {JSON.parse(state.form.is_telemedicine) && (
