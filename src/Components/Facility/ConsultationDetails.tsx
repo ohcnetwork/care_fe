@@ -663,6 +663,17 @@ export const ConsultationDetails = (props: any) => {
           <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
               <div className="w-full flex flex-col sm:flex-row px-2">
+                <ButtonV2
+                  onClick={() =>
+                    navigate(
+                      `/facility/${patientData.facility}/patient/${patientData.id}/shift/new`
+                    )
+                  }
+                  className="w-full btn m-1 btn-primary hover:text-white"
+                >
+                  <CareIcon className="care-l-ambulance w-5 h-5" />
+                  Shift Patient
+                </ButtonV2>
                 <button
                   onClick={() => setShowDoctors(true)}
                   className="w-full btn m-1 btn-primary hover:text-white"
