@@ -1256,6 +1256,29 @@ export const ConsultationForm = (props: any) => {
                             />
                           </div>
 
+                          <div className="flex flex-col md:flex-row gap-3 col-span-6">
+                            <div
+                              ref={fieldRef["review_interval"]}
+                              className="flex-1"
+                            >
+                              <SelectFormField
+                                {...selectField("review_interval")}
+                                label="Review After"
+                                options={REVIEW_AT_CHOICES}
+                              />
+                            </div>
+                            <div className="flex-1" ref={fieldRef["action"]}>
+                              <SelectFormField
+                                {...field("action")}
+                                label="Action"
+                                required
+                                options={TELEMEDICINE_ACTIONS}
+                                optionLabel={(option) => option.desc}
+                                optionValue={(option) => option.text}
+                              />
+                            </div>
+                          </div>
+
                           <CheckBoxFormField
                             className="col-span-6"
                             {...field("is_telemedicine")}
@@ -1264,40 +1287,17 @@ export const ConsultationForm = (props: any) => {
                           />
 
                           {JSON.parse(state.form.is_telemedicine) && (
-                            <div className="flex flex-col md:flex-row gap-3 col-span-6">
-                              <div
-                                ref={fieldRef["review_interval"]}
-                                className="flex-1"
-                              >
-                                <SelectFormField
-                                  {...selectField("review_interval")}
-                                  label="Review After"
-                                  options={REVIEW_AT_CHOICES}
-                                />
-                              </div>
-
-                              <div
-                                className="flex-[2]"
-                                ref={fieldRef["assigned_to"]}
-                              >
-                                <OnlineUsersSelect
-                                  userId={state.form.assigned_to}
-                                  selectedUser={state.form.assigned_to_object}
-                                  onSelect={handleDoctorSelect}
-                                  user_type="Doctor"
-                                  outline
-                                />
-                              </div>
-                              <div className="flex-1" ref={fieldRef["action"]}>
-                                <SelectFormField
-                                  {...field("action")}
-                                  label="Action"
-                                  required
-                                  options={TELEMEDICINE_ACTIONS}
-                                  optionLabel={(option) => option.desc}
-                                  optionValue={(option) => option.text}
-                                />
-                              </div>
+                            <div
+                              className="flex-[2] col-span-6"
+                              ref={fieldRef["assigned_to"]}
+                            >
+                              <OnlineUsersSelect
+                                userId={state.form.assigned_to}
+                                selectedUser={state.form.assigned_to_object}
+                                onSelect={handleDoctorSelect}
+                                user_type="Doctor"
+                                outline
+                              />
                             </div>
                           )}
                         </>
