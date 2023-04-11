@@ -416,6 +416,7 @@ export const PatientManager = () => {
       }
 
       const category: PatientCategory | undefined =
+        patient?.last_consultation?.last_daily_round?.patient_category ??
         patient?.last_consultation?.category;
       const categoryClass = category
         ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass

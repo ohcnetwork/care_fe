@@ -631,6 +631,7 @@ export const NURSING_CARE_FIELDS: Array<OptionsType> = [
   { id: 10, text: "chest_tube_care", desc: "Chest Tube Care" },
   { id: 11, text: "tracheostomy_care", desc: "Tracheostomy Care" },
   { id: 12, text: "stoma_care", desc: "Stoma Care" },
+  { id: 13, text: "catheter_care", desc: "Catheter Care" },
 ];
 
 export const EYE_OPEN_SCALE = [

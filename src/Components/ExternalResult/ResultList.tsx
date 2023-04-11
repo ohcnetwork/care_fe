@@ -262,11 +262,10 @@ export default function ResultList() {
         />
         <div className="mt-2">
           <SearchInput
-            label="Search by name"
-            name="patient_name_search"
+            name="name"
             onChange={(e) => updateQuery({ [e.name]: e.value })}
             value={qParams.name}
-            placeholder="Search patient"
+            placeholder="Search by name"
           />
           <div className="text-sm font-medium my-2">Search by number</div>
           <div className="w-full max-w-sm">

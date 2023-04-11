@@ -31,14 +31,14 @@ export default function PatientInfoCard(props: {
   const op_no = consultation?.op_no;
 
   const category: PatientCategory | undefined =
-    patient?.last_consultation?.category;
+    consultation?.last_daily_round?.patient_category ?? consultation?.category;
   const categoryClass = category
     ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass
     : "patient-unknown";
 
   const bedDialogTitle = !patient.is_active
     ? "Bed History"
-    : !patient.last_consultation?.current_bed
+    : !consultation?.current_bed
     ? "Assign Bed"
     : "Switch Bed";
 
@@ -50,12 +50,12 @@ export default function PatientInfoCard(props: {
         onClose={() => setOpen(false)}
         className="w-full max-w-2xl"
       >
-        {patient?.facility && patient?.id && patient?.last_consultation?.id ? (
+        {patient?.facility && patient?.id && consultation?.id ? (
           <Beds
             facilityId={patient?.facility}
             patientId={patient?.id}
             discharged={!patient.is_active}
-            consultationId={patient?.last_consultation?.id}
+            consultationId={consultation?.id}
             setState={setOpen}
             fetchPatientData={props.fetchPatientData}
             smallLoader
@@ -72,23 +72,23 @@ export default function PatientInfoCard(props: {
             <div
               className={`w-24 h-24 min-w-[5rem] bg-gray-200 ${categoryClass}-profile`}
             >
-              {patient?.last_consultation &&
-              patient?.last_consultation?.current_bed &&
-              patient?.last_consultation?.discharge_date === null ? (
+              {consultation &&
+              consultation?.current_bed &&
+              consultation?.discharge_date === null ? (
                 <div
                   className="flex flex-col items-center justify-center h-full"
                   title={`
-                ${patient?.last_consultation?.current_bed?.bed_object?.location_object?.name}\n${patient?.last_consultation?.current_bed?.bed_object.name}
+                ${consultation?.current_bed?.bed_object?.location_object?.name}\n${consultation?.current_bed?.bed_object.name}
               `}
                 >
                   <p className="overflow-hidden px-2 whitespace-nowrap w-full text-gray-900 text-sm text-center text-ellipsis ">
                     {
-                      patient?.last_consultation?.current_bed?.bed_object
-                        ?.location_object?.name
+                      consultation?.current_bed?.bed_object?.location_object
+                        ?.name
                     }
                   </p>
                   <p className="w-full text-base px-2 text-ellipsis overflow-hidden whitespace-nowrap font-bold text-center">
-                    {patient?.last_consultation?.current_bed?.bed_object.name}
+                    {consultation?.current_bed?.bed_object.name}
                   </p>
                 </div>
               ) : (
@@ -114,8 +114,8 @@ export default function PatientInfoCard(props: {
             </div>
             <div>
               {patient.review_time &&
-                !patient.last_consultation?.discharge_date &&
-                Number(patient.last_consultation?.review_interval) > 0 && (
+                !consultation?.discharge_date &&
+                Number(consultation?.review_interval) > 0 && (
                   <div
                     className={
                       "mb-2 inline-flex items-center px-3 py-1 rounded-lg text-xs leading-4 font-semibold p-1 w-full justify-center border-gray-500 border " +
@@ -175,12 +175,12 @@ export default function PatientInfoCard(props: {
                 ],
                 [
                   "Weight",
-                  getDimensionOrDash(patient.last_consultation?.weight, " kg"),
+                  getDimensionOrDash(consultation?.weight, " kg"),
                   true,
                 ],
                 [
                   "Height",
-                  getDimensionOrDash(patient.last_consultation?.height, "cm"),
+                  getDimensionOrDash(consultation?.height, "cm"),
                   true,
                 ],
                 [
@@ -188,11 +188,9 @@ export default function PatientInfoCard(props: {
                   RESPIRATORY_SUPPORT.find(
                     (resp) =>
                       resp.text ===
-                      patient.last_consultation?.last_daily_round
-                        ?.ventilator_interface
+                      consultation?.last_daily_round?.ventilator_interface
                   )?.id || "UNKNOWN",
-                  patient.last_consultation?.last_daily_round
-                    ?.ventilator_interface,
+                  consultation?.last_daily_round?.ventilator_interface,
                 ],
               ].map((stat, i) => {
                 return stat[2] && stat[1] !== "NONE" ? (
@@ -211,31 +209,22 @@ export default function PatientInfoCard(props: {
               <div>
                 {
                   CONSULTATION_SUGGESTION.find(
-                    (suggestion) =>
-                      suggestion.id === patient.last_consultation?.suggestion
+                    (suggestion) => suggestion.id === consultation?.suggestion
                   )?.text
                 }{" "}
                 on{" "}
-                {patient.last_consultation?.suggestion === "A"
-                  ? moment(patient.last_consultation?.admission_date).format(
-                      "DD/MM/YYYY"
-                    )
-                  : patient.last_consultation?.suggestion === "DD"
-                  ? moment(patient.last_consultation?.death_datetime).format(
-                      "DD/MM/YYYY"
-                    )
-                  : moment(patient.last_consultation?.created_date).format(
-                      "DD/MM/YYYY"
-                    )}
+                {consultation?.suggestion === "A"
+                  ? moment(consultation?.admission_date).format("DD/MM/YYYY")
+                  : consultation?.suggestion === "DD"
+                  ? moment(consultation?.death_datetime).format("DD/MM/YYYY")
+                  : moment(consultation?.created_date).format("DD/MM/YYYY")}
               </div>
               {patient.is_active === false &&
-                patient.last_consultation?.suggestion !== "OP" &&
-                patient.last_consultation?.suggestion !== "DD" && (
+                consultation?.suggestion !== "OP" &&
+                consultation?.suggestion !== "DD" && (
                   <div>
                     Discharged on{" "}
-                    {moment(patient.last_consultation?.discharge_date).format(
-                      "DD/MM/YYYY"
-                    )}
+                    {moment(consultation?.discharge_date).format("DD/MM/YYYY")}
                   </div>
                 )}
             </div>
@@ -249,14 +238,13 @@ export default function PatientInfoCard(props: {
                 Discharge Reason
               </div>
               <div className="mt-1 text-xl font-semibold leading-5 text-gray-900">
-                {!patient.last_consultation?.discharge_reason ? (
+                {!consultation?.discharge_reason ? (
                   <span className="text-gray-800">UNKNOWN</span>
-                ) : patient.last_consultation?.discharge_reason === "EXP" ? (
+                ) : consultation?.discharge_reason === "EXP" ? (
                   <span className="text-red-600">EXPIRED</span>
                 ) : (
                   DISCHARGE_REASONS.find(
-                    (reason) =>
-                      reason.id === patient.last_consultation?.discharge_reason
+                    (reason) => reason.id === consultation?.discharge_reason
                   )?.text
                 )}
               </div>
@@ -264,23 +252,20 @@ export default function PatientInfoCard(props: {
           )}
           {[
             [
-              `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/update`,
+              `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/update`,
               "Edit Consultation Details",
               "pen",
-              patient.is_active && patient.last_consultation?.id,
+              patient.is_active && consultation?.id,
             ],
             [
-              `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/daily-rounds`,
+              `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`,
               "Log Update",
               "plus",
-              patient.is_active && patient.last_consultation?.id,
+              patient.is_active && consultation?.id,
               [
-                !(patient.last_consultation?.facility !== patient.facility) &&
-                  !(
-                    patient.last_consultation?.discharge_date ||
-                    !patient.is_active
-                  ) &&
-                  moment(patient.last_consultation?.modified_date).isBefore(
+                !(consultation?.facility !== patient.facility) &&
+                  !(consultation?.discharge_date || !patient.is_active) &&
+                  moment(consultation?.modified_date).isBefore(
                     new Date().getTime() - 24 * 60 * 60 * 1000
                   ),
                 <div className="text-center">
@@ -296,20 +281,20 @@ export default function PatientInfoCard(props: {
               true,
             ],
             [
-              `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/treatment-summary`,
+              `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/treatment-summary`,
               "Treatment Summary",
               "file-medical",
-              patient.last_consultation?.id,
+              consultation?.id,
             ],
           ]
             .concat(
               enable_hcx
                 ? [
                     [
-                      `/facility/${patient.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}/claims`,
+                      `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
                       "Claims",
                       "copy-landscape",
-                      patient.last_consultation?.id,
+                      consultation?.id,
                     ],
                   ]
                 : []
@@ -317,21 +302,21 @@ export default function PatientInfoCard(props: {
             .map(
               (action: any, i) =>
                 action[3] && (
-                  <div className="relative">
+                  <div className="relative" key={i}>
                     <ButtonV2
                       key={i}
                       variant={action[4] && action[4][0] ? "danger" : "primary"}
                       href={
-                        patient.last_consultation?.admitted &&
-                        !patient.last_consultation?.current_bed &&
+                        consultation?.admitted &&
+                        !consultation?.current_bed &&
                         i === 1
                           ? undefined
                           : `${action[0]}`
                       }
                       onClick={() => {
                         if (
-                          patient.last_consultation?.admitted &&
-                          !patient.last_consultation?.current_bed &&
+                          consultation?.admitted &&
+                          !consultation?.current_bed &&
                           i === 1
                         ) {
                           Notification.Error({
