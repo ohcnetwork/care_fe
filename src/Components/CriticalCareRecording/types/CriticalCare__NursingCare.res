@@ -11,6 +11,7 @@ type procedure =
   | ChestTubeCare
   | TracheostomyCare
   | StomaCare
+  | CatheterCare
   | Other(string)
 
 type item = {
@@ -34,6 +35,7 @@ let decodeProcedure = procedure => {
   | "chest_tube_care" => ChestTubeCare
   | "tracheostomy_care" => TracheostomyCare
   | "stoma_care" => StomaCare
+  | "catheter_care" => CatheterCare
   | p => Other(p)
   }
 }
@@ -52,6 +54,7 @@ let encodeProcedure = item => {
   | ChestTubeCare => "chest_tube_care"
   | TracheostomyCare => "tracheostomy_care"
   | StomaCare => "stoma_care"
+  | CatheterCare => "catheter_care"
   | Other(p) => p
   }
 }
@@ -70,6 +73,7 @@ let procedureString = procedure => {
   | ChestTubeCare => "Chest Tube Care"
   | TracheostomyCare => "Tracheostomy Care"
   | StomaCare => "Stoma Care"
+  | CatheterCare => "Catheter Care"
   | Other(p) => p
   }
 }
