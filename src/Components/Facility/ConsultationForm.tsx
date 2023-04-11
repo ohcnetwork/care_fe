@@ -682,14 +682,14 @@ export const ConsultationForm = (props: any) => {
           msg: `Consultation ${id ? "updated" : "created"} successfully`,
         });
 
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
+        );
+
         if (data.suggestion === "R") {
           navigate(`/facility/${facilityId}/patient/${patientId}/shift/new`);
           return;
         }
-
-        navigate(
-          `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
-        );
       }
     }
   };
