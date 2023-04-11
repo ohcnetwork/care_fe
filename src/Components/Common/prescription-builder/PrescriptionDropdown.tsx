@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Tooltip } from "@material-ui/core";
 import { classNames } from "../../../Utils/utils";
 
 export function PrescriptionDropdown(props: {
@@ -71,24 +70,15 @@ export function PrescriptionDropdown(props: {
               </button>
 
               {tips && tips[option] && (
-                <Tooltip
-                  title={
-                    <span className="text-sm font-semibold">
-                      {tips[option]}
-                    </span>
-                  }
-                  placement="right-start"
-                  arrow
-                  onClick={(event) => event.stopPropagation()}
-                  enterTouchDelay={0}
+                <button
+                  onClick={(event) => event.preventDefault()}
+                  className="rounded px-4 tooltip"
                 >
-                  <button
-                    onClick={(event) => event.preventDefault()}
-                    className="rounded px-4"
-                  >
-                    <i className="fa-solid fa-circle-info"></i>
-                  </button>
-                </Tooltip>
+                  <span className="tooltip-text tooltip-right">
+                    {tips[option]}
+                  </span>
+                  <i className="fa-solid fa-circle-info"></i>
+                </button>
               )}
             </div>
           );
