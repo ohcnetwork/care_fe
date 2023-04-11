@@ -88,6 +88,9 @@ export interface ConsultationModel {
   created_date?: string;
   discharge_date?: string;
   discharge_reason?: string;
+  discharge_prescription: any;
+  discharge_prn_prescription: any;
+  discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;
   facility?: number;
