@@ -234,7 +234,7 @@ export const ConsultationForm = (props: any) => {
   );
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
   const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
-  const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-500);
+  const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
 
   const sections = {
     "Consultation Details": {
@@ -758,7 +758,10 @@ export const ConsultationForm = (props: any) => {
   const sectionId = (section: ConsultationFormSection) =>
     section.toLowerCase().replace(" ", "-");
 
-  const sectionTitle = (sectionTitle: ConsultationFormSection) => {
+  const sectionTitle = (
+    sectionTitle: ConsultationFormSection,
+    required = false
+  ) => {
     const section = sections[sectionTitle];
     return (
       <div
@@ -769,6 +772,7 @@ export const ConsultationForm = (props: any) => {
         <CareIcon className={`${section.iconClass} text-xl mr-3`} />
         <label className="font-bold text-lg text-gray-900">
           {sectionTitle}
+          {required && <span className="text-danger-500">{" *"}</span>}
         </label>
         <hr className="ml-6 flex-1 border-gray-400 border" />
       </div>
@@ -1109,7 +1113,7 @@ export const ConsultationForm = (props: any) => {
 
                 <div className="flex flex-col gap-4 pb-4">
                   <div className="flex flex-col">
-                    {sectionTitle("Diagnosis")}
+                    {sectionTitle("Diagnosis", true)}
                     <p className="text-gray-700 text-sm -mt-4 mb-4 space-x-1">
                       <span className="font-medium">
                         Either Provisional or Final Diagnosis is mandatory
