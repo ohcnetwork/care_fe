@@ -4,8 +4,6 @@ import moment from "moment";
 import { IConfig } from "./hooks/useConfig";
 import { SortOption } from "../Components/Common/SortDropdown";
 
-export const KeralaLogo = "images/kerala-logo.png";
-
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
 
