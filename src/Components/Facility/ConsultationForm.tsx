@@ -844,7 +844,7 @@ export const ConsultationForm = (props: any) => {
         }
       />
 
-      <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
+      <div className="mt-5 flex top-0 sm:mx-12 flex-grow-0">
         <div className="hidden xl:flex flex-col w-72 fixed h-full">
           {Object.keys(sections).map((sectionTitle) => {
             if (state.form.consultation_status === 1) {
@@ -872,7 +872,7 @@ export const ConsultationForm = (props: any) => {
           })}
         </div>
         <div className="w-full h-full flex overflow-auto xl:ml-72">
-          <div className="w-full max-w-3xl 2xl:max-w-4xl">
+          <div className="w-full max-w-4xl 2xl:max-w-4xl">
             <form
               onSubmit={handleSubmit}
               className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
