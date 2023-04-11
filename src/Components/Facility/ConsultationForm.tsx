@@ -204,7 +204,10 @@ const consultationFormReducer = (state = initialState, action: Action) => {
   }
 };
 
-type ConsultationFormSection = "Consultation Details" | "Treatment Plan";
+type ConsultationFormSection =
+  | "Consultation Details"
+  | "Diagnosis"
+  | "Treatment Plan";
 
 export const ConsultationForm = (props: any) => {
   const { goBack } = useAppHistory();
@@ -233,13 +236,19 @@ export const ConsultationForm = (props: any) => {
     "Consultation Details"
   );
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
-  const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
+  const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
+  const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-500);
 
   const sections = {
     "Consultation Details": {
       iconClass: "care-l-medkit",
       visible: consultationDetailsVisible,
       ref: consultationDetailsRef,
+    },
+    Diagnosis: {
+      iconClass: "care-l-stethoscope",
+      visible: diagnosisVisible,
+      ref: diagnosisRef,
     },
     "Treatment Plan": {
       iconClass: "care-l-clipboard-alt",
@@ -249,13 +258,13 @@ export const ConsultationForm = (props: any) => {
   };
 
   useEffect(() => {
-    setCurrentSection((currentSection) => {
-      let sectionNow = currentSection;
-      if (consultationDetailsVisible) sectionNow = "Consultation Details";
-      if (treatmentPlanVisible) sectionNow = "Treatment Plan";
-      return sectionNow;
+    setCurrentSection((prev) => {
+      if (consultationDetailsVisible) return "Consultation Details";
+      if (diagnosisVisible) return "Diagnosis";
+      if (treatmentPlanVisible) return "Treatment Plan";
+      return prev;
     });
-  }, [consultationDetailsVisible, treatmentPlanVisible]);
+  }, [consultationDetailsVisible, diagnosisVisible, treatmentPlanVisible]);
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -999,28 +1008,6 @@ export const ConsultationForm = (props: any) => {
 
                   <div
                     className="col-span-6"
-                    ref={fieldRef["icd11_provisional_diagnoses_object"]}
-                  >
-                    <DiagnosisSelectFormField
-                      {...field("icd11_provisional_diagnoses_object")}
-                      multiple
-                      label="Provisional Diagnosis (as per ICD-11 recommended by WHO)"
-                    />
-                  </div>
-
-                  <div
-                    className="col-span-6"
-                    ref={fieldRef["icd11_diagnoses_object"]}
-                  >
-                    <DiagnosisSelectFormField
-                      {...field("icd11_diagnoses_object")}
-                      multiple
-                      label="Diagnosis (as per ICD-11 recommended by WHO)"
-                    />
-                  </div>
-
-                  <div
-                    className="col-span-6"
                     ref={fieldRef["consultation_status"]}
                   >
                     <SelectFormField
@@ -1136,6 +1123,34 @@ export const ConsultationForm = (props: any) => {
                       />
                     </div>
                   )}
+                </div>
+
+                <div className="flex flex-col gap-4 pb-4">
+                  <div className="flex flex-col">
+                    {sectionTitle("Diagnosis")}
+                    <p className="text-gray-700 text-sm -mt-4 mb-4 space-x-1">
+                      <span className="font-medium">
+                        Either Provisional or Final Diagnosis is mandatory
+                      </span>
+                      <span>| Diagnoses as per ICD-11 recommended by WHO</span>
+                    </p>
+                  </div>
+
+                  <div ref={fieldRef["icd11_provisional_diagnoses_object"]}>
+                    <DiagnosisSelectFormField
+                      {...field("icd11_provisional_diagnoses_object")}
+                      multiple
+                      label="Provisional Diagnosis"
+                    />
+                  </div>
+
+                  <div ref={fieldRef["icd11_diagnoses_object"]}>
+                    <DiagnosisSelectFormField
+                      {...field("icd11_diagnoses_object")}
+                      multiple
+                      label="Final Diagnosis"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 gap-x-6">
