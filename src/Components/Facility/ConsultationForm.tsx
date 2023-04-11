@@ -48,10 +48,7 @@ import ProcedureBuilder, {
 import { ICD11DiagnosisModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import {
-  FieldChangeEvent,
-  FieldChangeEventHandler,
-} from "../Form/FormFields/Utils";
+import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -736,21 +733,6 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleTelemedicineChange = ({
-    name,
-    value,
-  }: FieldChangeEvent<unknown>) => {
-    value = `${value}`;
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        [name]: value,
-        action: value === "false" ? "PENDING" : state.form.action,
-      },
-    });
-  };
-
   const handleDoctorSelect = (doctor: UserModel | null) => {
     if (doctor?.id) {
       dispatch({
@@ -1246,7 +1228,7 @@ export const ConsultationForm = (props: any) => {
                               className="flex-1"
                               required
                               label={kasp_string}
-                              onChange={handleTelemedicineChange}
+                              onChange={handleFormFieldChange}
                             />
                           )}
                           <div
@@ -1271,48 +1253,48 @@ export const ConsultationForm = (props: any) => {
                             />
                           </div>
 
+                          <div className="flex flex-col md:flex-row gap-3 col-span-6">
+                            <div
+                              ref={fieldRef["review_interval"]}
+                              className="flex-1"
+                            >
+                              <SelectFormField
+                                {...selectField("review_interval")}
+                                label="Review After"
+                                options={REVIEW_AT_CHOICES}
+                              />
+                            </div>
+                            <div className="flex-1" ref={fieldRef["action"]}>
+                              <SelectFormField
+                                {...field("action")}
+                                label="Action"
+                                required
+                                options={TELEMEDICINE_ACTIONS}
+                                optionLabel={(option) => option.desc}
+                                optionValue={(option) => option.text}
+                              />
+                            </div>
+                          </div>
+
                           <CheckBoxFormField
                             className="col-span-6"
                             {...field("is_telemedicine")}
                             label="Is Telemedicine required for the patient?"
-                            onChange={handleTelemedicineChange}
+                            onChange={handleFormFieldChange}
                           />
 
                           {JSON.parse(state.form.is_telemedicine) && (
-                            <div className="flex flex-col md:flex-row gap-3 col-span-6">
-                              <div
-                                ref={fieldRef["review_interval"]}
-                                className="flex-1"
-                              >
-                                <SelectFormField
-                                  {...selectField("review_interval")}
-                                  label="Review After"
-                                  options={REVIEW_AT_CHOICES}
-                                />
-                              </div>
-
-                              <div
-                                className="flex-[2]"
-                                ref={fieldRef["assigned_to"]}
-                              >
-                                <OnlineUsersSelect
-                                  userId={state.form.assigned_to}
-                                  selectedUser={state.form.assigned_to_object}
-                                  onSelect={handleDoctorSelect}
-                                  user_type="Doctor"
-                                  outline
-                                />
-                              </div>
-                              <div className="flex-1" ref={fieldRef["action"]}>
-                                <SelectFormField
-                                  {...field("action")}
-                                  label="Action"
-                                  required
-                                  options={TELEMEDICINE_ACTIONS}
-                                  optionLabel={(option) => option.desc}
-                                  optionValue={(option) => option.text}
-                                />
-                              </div>
+                            <div
+                              className="flex-[2] col-span-6"
+                              ref={fieldRef["assigned_to"]}
+                            >
+                              <OnlineUsersSelect
+                                userId={state.form.assigned_to}
+                                selectedUser={state.form.assigned_to_object}
+                                onSelect={handleDoctorSelect}
+                                user_type="Doctor"
+                                outline
+                              />
                             </div>
                           )}
                         </>
