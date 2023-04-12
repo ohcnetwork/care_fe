@@ -136,6 +136,10 @@ export default function PatientFilter(props: any) {
   };
 
   useEffect(() => {
+    setFilterState(filter);
+  }, [filter]);
+
+  useEffect(() => {
     async function fetchData() {
       if (filter.facility) {
         const { data: facilityData } = await dispatch(
