@@ -19,9 +19,9 @@ describe("Edit Profile Testing", () => {
     cy.awaitUrl("/external_results");
   });
 
-  it("Search by Patient name", () => {
+  it("Search by Sample name", () => {
     cy.intercept(/\/api\/v1\/external_result/).as("external_result");
-    cy.get("[name='patient_name_search']").type("akhil");
+    cy.get("[name='name']").type("akhil");
     cy.wait("@external_result").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
     });

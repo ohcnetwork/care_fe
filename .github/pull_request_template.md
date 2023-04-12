@@ -1,3 +1,6 @@
+### WHAT
+copilot:summary
+
 ## Proposed Changes
 
 - Fixes #issue?
@@ -15,3 +18,6 @@
 - [ ] Prep screenshot or demo video for changelog entry, and attach it to issue.
 - [ ] Request for Peer Reviews
 - [ ] Completion of QA
+
+### HOW
+copilot:walkthrough
