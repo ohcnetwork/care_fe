@@ -204,7 +204,6 @@ const ShiftCard = ({ shift, filter }: any) => {
           {filter === "TRANSFER IN PROGRESS" && shift.assigned_facility && (
             <div className="mt-2">
               <ButtonV2
-                size="small"
                 variant="secondary"
                 border={true}
                 onClick={() => setModalFor(shift.external_id)}
