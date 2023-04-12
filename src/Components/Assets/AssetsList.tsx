@@ -131,6 +131,7 @@ const AssetsList = () => {
     },
     [dispatch, qParams.facility]
   );
+
   const fetchLocationName = useCallback(
     async (status: statusType) => {
       if (!qParams.location) return setLocationName("");

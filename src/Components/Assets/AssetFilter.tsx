@@ -45,6 +45,18 @@ function AssetFilter(props: any) {
     setLocationId(location?.id ? location?.id : "");
   }, [facility, location]);
 
+  useEffect(() => {
+    if (filter.asset_type === "") {
+      setAssetType(filter.asset_type);
+    }
+    if (filter.status === "") {
+      setAssetStatus(filter.status);
+    }
+    if (filter.asset_class === "") {
+      setAssetClass(filter.asset_class);
+    }
+  }, [filter]);
+
   const clearFilter = useCallback(() => {
     setLocation(initialLocation);
     setFacility({ name: "" });

@@ -84,6 +84,10 @@ export default function ListFilter(props: any) {
   const dispatch: any = useDispatch();
 
   useEffect(() => {
+    setFilterState(filter);
+  }, [filter]);
+
+  useEffect(() => {
     async function fetchData() {
       if (filter.orgin_facility) {
         setOriginLoading(true);

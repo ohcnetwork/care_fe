@@ -36,6 +36,10 @@ export default function UserFilter(props: any) {
   const [isFacilityLoading, setFacilityLoading] = useState(false);
   const dispatch: any = useDispatch();
 
+  useEffect(() => {
+    setFilterState(filter);
+  }, [filter]);
+
   const handleChange = (event: any) => {
     const { name, value } = event.target;
 

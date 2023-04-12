@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { navigate } from "raviger";
 import { LegacySelectField } from "../../Common/HelperInputFields";
 import { CircularProgress } from "@material-ui/core";
@@ -31,7 +31,9 @@ function FacilityFilter(props: any) {
   const dispatchAction: any = useDispatch();
 
   const [isStateLoading, setIsStateLoading] = useState(false);
-  const [isDistrictLoading, setIsDistrictLoading] = useState(false);
+  const [isDistrictLoading, setIsDistrictLoading] = useState(true);
+  const [isPreventChangeFilterStateOn, setIsPreventChangeFilterStateOn] =
+    useState(false);
   const [states, setStates] = useState(initialStates);
   const [districts, setDistricts] = useState(selectStates);
   const [filterState, setFilterState] = useMergeState({
@@ -59,6 +61,11 @@ function FacilityFilter(props: any) {
   useAbortableEffect((status: statusType) => {
     fetchStates(status);
   }, []);
+  useEffect(() => {
+    if (!isPreventChangeFilterStateOn) {
+      setFilterState(filter);
+    }
+  }, [filter]);
 
   const fetchDistricts = useCallback(
     async (status: any) => {
@@ -93,12 +100,16 @@ function FacilityFilter(props: any) {
       facility_type: filterState.facility_type || "",
       kasp_empanelled: filterState.kasp_empanelled || "",
     };
+    setIsPreventChangeFilterStateOn(false);
     onChange(data);
   };
 
   const handleChange = (event: any) => {
+    setIsPreventChangeFilterStateOn(true);
     const { name, value } = event.target;
+
     const filterData: any = { ...filterState };
+
     if (name === "state") {
       filterData["district"] = 0;
       filterData["local_body"] = 0;

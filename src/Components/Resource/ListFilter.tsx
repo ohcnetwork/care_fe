@@ -51,6 +51,9 @@ export default function ListFilter(props: any) {
     status: filter.status || null,
   });
   const dispatch: any = useDispatch();
+  useEffect(() => {
+    setFilterState(filter);
+  }, [filter]);
 
   useEffect(() => {
     async function fetchData() {

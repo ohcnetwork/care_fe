@@ -66,6 +66,9 @@ export default function UserFilter(props: any) {
     };
     onChange(data);
   };
+  useEffect(() => {
+    setFilterState(filter);
+  }, [filter]);
 
   useEffect(() => {
     async function fetchData() {

@@ -45,6 +45,10 @@ export default function ListFilter(props: any) {
   });
   const { t } = useTranslation();
 
+  useEffect(() => {
+    setFilterState(filter);
+  }, [filter]);
+
   const handleDateRangeChange = (
     startDateId: string,
     endDateId: string,
