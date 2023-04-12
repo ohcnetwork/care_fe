@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { DoctorModal } from "./models";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
-import { RoleButton } from "../Common/RoleButton";
+// import { RoleButton } from "../Common/RoleButton";
 import { useDispatch } from "react-redux";
 import { deleteDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
@@ -10,6 +10,7 @@ import { DoctorCapacity } from "./DoctorCapacity";
 import DialogModal from "../Common/Dialog";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 interface DoctorsCountProps extends DoctorModal {
   facilityId: string;
@@ -62,28 +63,28 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
             <h2 className="font-bold text-xl mt-2">{props.count}</h2>
           </div>
         </div>
-        <div className="bg-[#FBF9FB] py-2 px-3 flex justify-end gap-8 border-t border-[#D2D6DC]">
-          <RoleButton
-            className="tooltip p-2 font-medium"
-            handleClickCB={() => {
+        <div className="py-2 px-3 flex justify-end gap-8">
+          <ButtonV2
+            onClick={() => {
               setSelectedId(props.area || 0);
               setOpen(true);
             }}
-            disableFor="readOnly"
-            buttonType="html"
+            className="tooltip p-2"
+            variant="secondary"
+            ghost
           >
             <CareIcon className="care-l-edit-alt" />
             <span className="tooltip-text tooltip-bottom">Edit</span>
-          </RoleButton>
-          <RoleButton
-            className="tooltip p-2 font-medium text-[#C81E1E]"
-            handleClickCB={() => setOpenDeleteDialog(true)}
-            disableFor="readOnly"
-            buttonType="html"
+          </ButtonV2>
+          <ButtonV2
+            onClick={() => setOpenDeleteDialog(true)}
+            className="tooltip p-2"
+            variant="danger"
+            ghost
           >
             <CareIcon className="care-l-trash-alt" />
             <span className="tooltip-text tooltip-bottom">Delete</span>
-          </RoleButton>
+          </ButtonV2>
         </div>
         <ConfirmDialogV2
           show={openDeleteDialog}
