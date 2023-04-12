@@ -21,7 +21,3 @@ copilot:summary
 
 ### HOW
 copilot:walkthrough
-
-
-# All
-copilot:all
