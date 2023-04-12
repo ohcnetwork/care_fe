@@ -761,7 +761,7 @@ function UserFacilities(props: { user: any }) {
             <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
               <div className="w-full">
                 <img
-                  src={`${import.meta.env.REACT_PUBLIC_URL}/images/404.svg`}
+                  src="/images/404.svg"
                   alt="No linked facilities"
                   className="w-80 mx-auto"
                 />
