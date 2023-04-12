@@ -205,7 +205,8 @@ const ShiftCard = ({ shift, filter }: any) => {
             <div className="mt-2">
               <ButtonV2
                 variant="secondary"
-                border={true}
+                border
+                className="w-full"
                 onClick={() => setModalFor(shift.external_id)}
               >
                 {t("transfer_to_receiving_facility")}
