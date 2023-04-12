@@ -48,10 +48,7 @@ import ProcedureBuilder, {
 import { ICD11DiagnosisModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import {
-  FieldChangeEvent,
-  FieldChangeEventHandler,
-} from "../Form/FormFields/Utils";
+import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -204,7 +201,10 @@ const consultationFormReducer = (state = initialState, action: Action) => {
   }
 };
 
-type ConsultationFormSection = "Consultation Details" | "Treatment Plan";
+type ConsultationFormSection =
+  | "Consultation Details"
+  | "Diagnosis"
+  | "Treatment Plan";
 
 export const ConsultationForm = (props: any) => {
   const { goBack } = useAppHistory();
@@ -233,13 +233,19 @@ export const ConsultationForm = (props: any) => {
     "Consultation Details"
   );
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
-  const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
+  const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
+  const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-500);
 
   const sections = {
     "Consultation Details": {
       iconClass: "care-l-medkit",
       visible: consultationDetailsVisible,
       ref: consultationDetailsRef,
+    },
+    Diagnosis: {
+      iconClass: "care-l-stethoscope",
+      visible: diagnosisVisible,
+      ref: diagnosisRef,
     },
     "Treatment Plan": {
       iconClass: "care-l-clipboard-alt",
@@ -249,13 +255,13 @@ export const ConsultationForm = (props: any) => {
   };
 
   useEffect(() => {
-    setCurrentSection((currentSection) => {
-      let sectionNow = currentSection;
-      if (consultationDetailsVisible) sectionNow = "Consultation Details";
-      if (treatmentPlanVisible) sectionNow = "Treatment Plan";
-      return sectionNow;
+    setCurrentSection((prev) => {
+      if (consultationDetailsVisible) return "Consultation Details";
+      if (diagnosisVisible) return "Diagnosis";
+      if (treatmentPlanVisible) return "Treatment Plan";
+      return prev;
     });
-  }, [consultationDetailsVisible, treatmentPlanVisible]);
+  }, [consultationDetailsVisible, diagnosisVisible, treatmentPlanVisible]);
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -727,21 +733,6 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleTelemedicineChange = ({
-    name,
-    value,
-  }: FieldChangeEvent<unknown>) => {
-    value = `${value}`;
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        [name]: value,
-        action: value === "false" ? "PENDING" : state.form.action,
-      },
-    });
-  };
-
   const handleDoctorSelect = (doctor: UserModel | null) => {
     if (doctor?.id) {
       dispatch({
@@ -835,7 +826,7 @@ export const ConsultationForm = (props: any) => {
         }
       />
 
-      <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
+      <div className="mt-5 flex top-0 sm:mx-12 flex-grow-0">
         <div className="hidden xl:flex flex-col w-72 fixed h-full">
           {Object.keys(sections).map((sectionTitle) => {
             if (state.form.consultation_status === 1) {
@@ -863,7 +854,7 @@ export const ConsultationForm = (props: any) => {
           })}
         </div>
         <div className="w-full h-full flex overflow-auto xl:ml-72">
-          <div className="w-full max-w-3xl 2xl:max-w-4xl">
+          <div className="w-full max-w-4xl 2xl:max-w-4xl">
             <form
               onSubmit={handleSubmit}
               className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
@@ -999,28 +990,6 @@ export const ConsultationForm = (props: any) => {
 
                   <div
                     className="col-span-6"
-                    ref={fieldRef["icd11_provisional_diagnoses_object"]}
-                  >
-                    <DiagnosisSelectFormField
-                      {...field("icd11_provisional_diagnoses_object")}
-                      multiple
-                      label="Provisional Diagnosis (as per ICD-11 recommended by WHO)"
-                    />
-                  </div>
-
-                  <div
-                    className="col-span-6"
-                    ref={fieldRef["icd11_diagnoses_object"]}
-                  >
-                    <DiagnosisSelectFormField
-                      {...field("icd11_diagnoses_object")}
-                      multiple
-                      label="Diagnosis (as per ICD-11 recommended by WHO)"
-                    />
-                  </div>
-
-                  <div
-                    className="col-span-6"
                     ref={fieldRef["consultation_status"]}
                   >
                     <SelectFormField
@@ -1138,6 +1107,34 @@ export const ConsultationForm = (props: any) => {
                   )}
                 </div>
 
+                <div className="flex flex-col gap-4 pb-4">
+                  <div className="flex flex-col">
+                    {sectionTitle("Diagnosis")}
+                    <p className="text-gray-700 text-sm -mt-4 mb-4 space-x-1">
+                      <span className="font-medium">
+                        Either Provisional or Final Diagnosis is mandatory
+                      </span>
+                      <span>| Diagnoses as per ICD-11 recommended by WHO</span>
+                    </p>
+                  </div>
+
+                  <div ref={fieldRef["icd11_provisional_diagnoses_object"]}>
+                    <DiagnosisSelectFormField
+                      {...field("icd11_provisional_diagnoses_object")}
+                      multiple
+                      label="Provisional Diagnosis"
+                    />
+                  </div>
+
+                  <div ref={fieldRef["icd11_diagnoses_object"]}>
+                    <DiagnosisSelectFormField
+                      {...field("icd11_diagnoses_object")}
+                      multiple
+                      label="Final Diagnosis"
+                    />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 gap-4 gap-x-6">
                   {String(state.form.consultation_status) !== "1" && (
                     <>
@@ -1231,7 +1228,7 @@ export const ConsultationForm = (props: any) => {
                               className="flex-1"
                               required
                               label={kasp_string}
-                              onChange={handleTelemedicineChange}
+                              onChange={handleFormFieldChange}
                             />
                           )}
                           <div
@@ -1256,48 +1253,48 @@ export const ConsultationForm = (props: any) => {
                             />
                           </div>
 
+                          <div className="flex flex-col md:flex-row gap-3 col-span-6">
+                            <div
+                              ref={fieldRef["review_interval"]}
+                              className="flex-1"
+                            >
+                              <SelectFormField
+                                {...selectField("review_interval")}
+                                label="Review After"
+                                options={REVIEW_AT_CHOICES}
+                              />
+                            </div>
+                            <div className="flex-1" ref={fieldRef["action"]}>
+                              <SelectFormField
+                                {...field("action")}
+                                label="Action"
+                                required
+                                options={TELEMEDICINE_ACTIONS}
+                                optionLabel={(option) => option.desc}
+                                optionValue={(option) => option.text}
+                              />
+                            </div>
+                          </div>
+
                           <CheckBoxFormField
                             className="col-span-6"
                             {...field("is_telemedicine")}
                             label="Is Telemedicine required for the patient?"
-                            onChange={handleTelemedicineChange}
+                            onChange={handleFormFieldChange}
                           />
 
                           {JSON.parse(state.form.is_telemedicine) && (
-                            <div className="flex flex-col md:flex-row gap-3 col-span-6">
-                              <div
-                                ref={fieldRef["review_interval"]}
-                                className="flex-1"
-                              >
-                                <SelectFormField
-                                  {...selectField("review_interval")}
-                                  label="Review After"
-                                  options={REVIEW_AT_CHOICES}
-                                />
-                              </div>
-
-                              <div
-                                className="flex-[2]"
-                                ref={fieldRef["assigned_to"]}
-                              >
-                                <OnlineUsersSelect
-                                  userId={state.form.assigned_to}
-                                  selectedUser={state.form.assigned_to_object}
-                                  onSelect={handleDoctorSelect}
-                                  user_type="Doctor"
-                                  outline
-                                />
-                              </div>
-                              <div className="flex-1" ref={fieldRef["action"]}>
-                                <SelectFormField
-                                  {...field("action")}
-                                  label="Action"
-                                  required
-                                  options={TELEMEDICINE_ACTIONS}
-                                  optionLabel={(option) => option.desc}
-                                  optionValue={(option) => option.text}
-                                />
-                              </div>
+                            <div
+                              className="flex-[2] col-span-6"
+                              ref={fieldRef["assigned_to"]}
+                            >
+                              <OnlineUsersSelect
+                                userId={state.form.assigned_to}
+                                selectedUser={state.form.assigned_to_object}
+                                onSelect={handleDoctorSelect}
+                                user_type="Doctor"
+                                outline
+                              />
                             </div>
                           )}
                         </>

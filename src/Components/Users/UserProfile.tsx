@@ -15,13 +15,14 @@ import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { handleSignOut } from "../../Utils/utils";
+import { classNames, handleSignOut } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import moment from "moment";
 import { SkillModel, SkillObjectModel } from "../Users/models";
+import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -87,6 +88,10 @@ const editFormReducer = (state: State, action: Action) => {
 export default function UserProfile() {
   const [states, dispatch] = useReducer(editFormReducer, initialState);
   const reduxDispatch: any = useDispatch();
+  const [updateStatus, setUpdateStatus] = useState({
+    isChecking: false,
+    isUpdateAvailable: false,
+  });
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -326,6 +331,25 @@ export default function UserProfile() {
   if (isLoading) {
     return <Loading />;
   }
+
+  const checkUpdates = async () => {
+    setUpdateStatus({ ...updateStatus, isChecking: true });
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    if ((await checkForUpdate()) != null) {
+      setUpdateStatus({
+        isUpdateAvailable: true,
+        isChecking: false,
+      });
+    } else {
+      setUpdateStatus({
+        isUpdateAvailable: false,
+        isChecking: false,
+      });
+      Notification.Success({
+        msg: "No update available",
+      });
+    }
+  };
 
   const changePassword = (e: any) => {
     e.preventDefault();
@@ -681,6 +705,49 @@ export default function UserProfile() {
           </div>
           <div className="mt-5 md:mt-0 md:col-span-2">
             <LanguageSelector className="bg-white w-full" />
+          </div>
+        </div>
+        <div className="md:grid md:grid-cols-3 md:gap-6 mt-6 mb-8">
+          <div className="md:col-span-1">
+            <div className="px-4 sm:px-0">
+              <h3 className="text-lg font-medium leading-6 text-gray-900">
+                Software Update
+              </h3>
+              <p className="mt-1 text-sm leading-5 text-gray-600">
+                Check for an available update
+              </p>
+            </div>
+          </div>
+          {updateStatus.isUpdateAvailable && (
+            <UpdatableApp silentlyAutoUpdate={false}>
+              <ButtonV2 disabled={true}>
+                <div className="flex items-center gap-4">
+                  <CareIcon className="care-l-exclamation text-2xl" />
+                  Update available
+                </div>
+              </ButtonV2>
+            </UpdatableApp>
+          )}
+          <div className="mt-5 md:mt-0 md:col-span-2">
+            {!updateStatus.isUpdateAvailable && (
+              <ButtonV2
+                disabled={updateStatus.isChecking}
+                onClick={checkUpdates}
+              >
+                {" "}
+                <div className="flex items-center gap-4">
+                  <CareIcon
+                    className={classNames(
+                      "care-l-sync text-2xl",
+                      updateStatus.isChecking && "animate-spin"
+                    )}
+                  />
+                  {updateStatus.isChecking
+                    ? "Checking for update"
+                    : "Check for update"}
+                </div>
+              </ButtonV2>
+            )}
           </div>
         </div>
       </div>
