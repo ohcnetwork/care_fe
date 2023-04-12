@@ -10,9 +10,9 @@ import { getShiftDetails, updateShift, getUserList } from "../../Redux/actions";
 import { LegacySelectField } from "../Common/HelperInputFields";
 import {
   SHIFTING_CHOICES,
-  FACILITY_TYPES,
-  SHIFTING_VEHICLE_CHOICES,
-  BREATHLESSNESS_LEVEL,
+  // FACILITY_TYPES,
+  // SHIFTING_VEHICLE_CHOICES,
+  // BREATHLESSNESS_LEVEL,
 } from "../../Common/constants";
 import { UserSelect } from "../Common/UserSelect";
 import { CircularProgress } from "@material-ui/core";
@@ -79,12 +79,12 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     shifting_approving_facility_object: {
       errorText: t("shifting_approving_facility_can_not_be_empty"),
     },
-    assigned_facility_type: {
-      errorText: t("please_select_facility_type"),
-    },
-    preferred_vehicle_choice: {
-      errorText: t("please_select_preferred_vehicle_type"),
-    },
+    // assigned_facility_type: {
+    //   errorText: t("please_select_facility_type"),
+    // },
+    // preferred_vehicle_choice: {
+    //   errorText: t("please_select_preferred_vehicle_type"),
+    // },
     reason: {
       errorText: t("please_enter_a_reason_for_the_shift"),
     },
@@ -237,8 +237,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     [fetchData]
   );
 
-  const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map((obj) => obj.text);
-  const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
+  // const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map((obj) => obj.text);
+  // const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
 
   if (isLoading) {
     return <Loading />;
@@ -307,6 +307,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 </FieldLabel>
                 <FacilitySelect
                   multiple={false}
+                  freeText={true}
                   name="assigned_facility"
                   selected={state.form.assigned_facility_object}
                   setSelected={(obj) =>
@@ -392,7 +393,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 </RadioGroup>
                 <LegacyErrorHelperText error={state.errors.is_up_shift} />
               </div>
-              <div className="md:col-span-1">
+              {/* <div className="md:col-span-1">
                 <FieldLabel>{t("preferred_vehicle")}</FieldLabel>
                 <LegacySelectField
                   name="preferred_vehicle_choice"
@@ -432,7 +433,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   onChange={handleChange}
                   className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5"
                 />
-              </div>
+              </div> */}
               <div className="">
                 <TextAreaFormField
                   rows={5}

@@ -3,16 +3,15 @@ import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   LegacyErrorHelperText,
-  LegacySelectField,
+  // LegacySelectField,
 } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
-import {
-  FACILITY_TYPES,
-  SHIFTING_VEHICLE_CHOICES,
-  BREATHLESSNESS_LEVEL,
-} from "../../Common/constants";
+// import {
+//   FACILITY_TYPES,
+//   SHIFTING_VEHICLE_CHOICES,
+// } from "../../Common/constants";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import {
   Card,
@@ -70,15 +69,15 @@ const requiredFields: any = {
     errorText: "Reason for shifting in mandatory",
     invalidText: "Please enter reason for shifting",
   },
-  assigned_facility_type: {
-    errorText: "Please Select Facility Type",
-  },
-  preferred_vehicle_choice: {
-    errorText: "Please Preferred Vehicle Type",
-  },
-  breathlessness_level: {
-    errorText: "Severity of Breathlessness is required",
-  },
+  // assigned_facility_type: {
+  //   errorText: "Please Select Facility Type",
+  // },
+  // preferred_vehicle_choice: {
+  //   errorText: "Please Preferred Vehicle Type",
+  // },
+  // breathlessness_level: {
+  //   errorText: "Severity of Breathlessness is required",
+  // },
 };
 
 const initError = Object.assign(
@@ -239,8 +238,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
       }
     }
   };
-  const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map((obj) => obj.text);
-  const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
+  // const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map((obj) => obj.text);
+  // const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
 
   if (isLoading) {
     return <Loading />;
@@ -262,7 +261,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
                 <TextFormField
-                  label="Contact person at the facility"
+                  label="Contact person at the current facility"
                   required
                   name="refering_facility_contact_name"
                   value={state.form.refering_facility_contact_name}
@@ -302,7 +301,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
               <div>
                 <FieldLabel>
-                  What facility would you like to assign the patient to
+                  {t("what_facility_assign_the_patient_to")}
                 </FieldLabel>
                 <FacilitySelect
                   multiple={false}
@@ -311,6 +310,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                   setSelected={(value: any) =>
                     handleValueChange(value, "assigned_facility")
                   }
+                  freeText={true}
                   errors={state.errors.assigned_facility}
                 />
               </div>
@@ -377,7 +377,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                                     errors={state.errors.vehicle_preference}
                                 />
                             </div> */}
-              <div className="md:col-span-1">
+              {/* <div className="md:col-span-1">
                 <FieldLabel>
                   Preferred Vehicle <span className="text-red-500">*</span>
                 </FieldLabel>
@@ -392,8 +392,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
                   className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
                   errors={state.errors.preferred_vehicle_choice}
                 />
-              </div>
-              <div className="md:col-span-1">
+              </div> */}
+              {/* <div className="md:col-span-1">
                 <FieldLabel>
                   Preferred Facility Type{" "}
                   <span className="text-red-500">*</span>
@@ -409,8 +409,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
                   className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
                   errors={state.errors.assigned_facility_type}
                 />
-              </div>
-              <div className="md:col-span-1">
+              </div> */}
+              {/* <div className="md:col-span-1">
                 <FieldLabel>
                   Severity of Breathlessness{" "}
                   <span className="text-red-500">*</span>
@@ -426,7 +426,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
                   className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
                   errors={state.errors.breathlessness_level}
                 />
-              </div>
+              </div> */}
 
               <div className="md:col-span-2">
                 <TextAreaFormField
