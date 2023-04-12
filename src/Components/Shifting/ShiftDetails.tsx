@@ -565,7 +565,9 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("referred_to")}:{" "}
               </span>
-              {data.assigned_facility_object?.name || "--"}
+              {data.assigned_facility_external ||
+                data.assigned_facility_object?.name ||
+                "--"}
             </div>
           </div>
 
@@ -871,11 +873,12 @@ export default function ShiftDetails(props: { id: string }) {
 
                 {showFacilityCard(data.orgin_facility_object)}
               </div>
-              <div>
-                <h4 className="mt-8">{t("details_of_assigned_facility")}</h4>
-                {showFacilityCard(data.assigned_facility_object)}
-              </div>
-
+              {!data.assigned_facility_external && (
+                <div>
+                  <h4 className="mt-8">{t("details_of_assigned_facility")}</h4>
+                  {showFacilityCard(data.assigned_facility_object)}
+                </div>
+              )}
               <div>
                 <h4 className="mt-8">
                   {t("details_of_shifting_approving_facility")}

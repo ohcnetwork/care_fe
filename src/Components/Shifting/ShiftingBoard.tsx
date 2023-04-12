@@ -130,7 +130,7 @@ const ShiftCard = ({ shift, filter }: any) => {
 
                   <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
                     {shift.assigned_facility_external ||
-                      shift.assigned_facility_object ||
+                      shift.assigned_facility_object?.name ||
                       t("yet_to_be_decided")}
                   </dd>
                 </dt>
