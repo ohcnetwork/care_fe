@@ -84,6 +84,18 @@ export default function ListFilter(props: any) {
   const dispatch: any = useDispatch();
 
   useEffect(() => {
+    if (filterState.orgin_facility === "") {
+      setFilterState({ ...filter, orgin_facility_ref: null });
+    }
+    if (filterState.shifting_approving_facility === "") {
+      setFilterState({ ...filter, shifting_approving_facility_ref: null });
+    }
+    if (filterState.assigned_facility === "") {
+      setFilterState({ ...filter, assigned_facility_ref: null });
+    }
+    if (filterState.assigned_to === "") {
+      setFilterState({ ...filter, assigned_user_ref: null });
+    }
     setFilterState(filter);
   }, [filter]);
 

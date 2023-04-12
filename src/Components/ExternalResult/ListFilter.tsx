@@ -46,6 +46,32 @@ export default function ListFilter(props: any) {
   const { t } = useTranslation();
 
   useEffect(() => {
+    if (filter.local_bodies === "") {
+      setSelectedLsgs([]);
+    }
+    if (filter.local_bodies) {
+      const getLsgsFromFilterParam = filter.local_bodies.split(",").map(Number);
+      const countOfLsgs = getLsgsFromFilterParam.length;
+      if (countOfLsgs !== selectedLsgs?.length) {
+        const freshLsgs = selectedLsgs.filter((lsg) =>
+          getLsgsFromFilterParam.includes(lsg.id)
+        );
+        setSelectedLsgs(freshLsgs);
+      }
+    }
+    if (filter.wards === "") {
+      setWards([]);
+    }
+    if (filter.wards) {
+      const getWardsFromFilterParam = filter.wards.split(",").map(Number);
+      const countOfWards = getWardsFromFilterParam.length;
+      if (countOfWards !== wards?.length) {
+        const freshWards = wards.filter((ward) =>
+          getWardsFromFilterParam.includes(ward.id)
+        );
+        setWards(freshWards);
+      }
+    }
     setFilterState(filter);
   }, [filter]);
 

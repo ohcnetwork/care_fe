@@ -67,6 +67,9 @@ export default function UserFilter(props: any) {
     onChange(data);
   };
   useEffect(() => {
+    if (filter.district_id === "") {
+      setFilterState({ ...filter, district_ref: null });
+    }
     setFilterState(filter);
   }, [filter]);
 

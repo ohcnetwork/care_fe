@@ -37,6 +37,9 @@ export default function UserFilter(props: any) {
   const dispatch: any = useDispatch();
 
   useEffect(() => {
+    if (filter.facility === "") {
+      setFilterState({ ...filter, facility_ref: null });
+    }
     setFilterState(filter);
   }, [filter]);
 
