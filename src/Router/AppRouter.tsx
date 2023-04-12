@@ -70,6 +70,7 @@ import useConfig from "../Common/hooks/useConfig";
 import FacilityCNS from "../Components/Facility/FacilityCNS";
 import ConsultationClaims from "../Components/Facility/ConsultationClaims";
 import { handleSignOut } from "../Utils/utils";
+import SessionExpired from "../Components/ErrorPages/SessionExpired";
 
 export default function AppRouter() {
   const { static_black_logo, enable_hcx } = useConfig();
@@ -398,6 +399,7 @@ export default function AppRouter() {
           tab={tab}
         />
       ),
+    "/session-expired": () => <SessionExpired />,
     "/not-found": () => <Error404 />,
   };
 

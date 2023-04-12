@@ -1,9 +1,8 @@
-import loadable from "@loadable/component";
 import { Login, ResetPassword } from "../Components/Auth";
 import { useRoutes } from "raviger";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
 import InvalidReset from "../Components/ErrorPages/InvalidReset";
-import  TopBar from "../Components/Common/TopBar";
+import TopBar from "../Components/Common/TopBar";
 
 const routes = {
   "/": () => <Login />,
