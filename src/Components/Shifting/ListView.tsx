@@ -184,7 +184,8 @@ export default function ListView() {
                     <i className="fas fa-plane-arrival mr-2"></i>
 
                     <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {(shift.assigned_facility_object || {}).name ||
+                      {shift.assigned_facility_external ||
+                        shift.assigned_facility_object ||
                         t("yet_to_be_decided")}
                     </dd>
                   </dt>

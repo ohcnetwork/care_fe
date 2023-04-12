@@ -33,6 +33,7 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
+import { useTranslation } from "react-i18next";
 
 interface patientShiftProps {
   facilityId: number;
@@ -49,9 +50,9 @@ const initForm: any = {
   comments: "",
   refering_facility_contact_name: "",
   refering_facility_contact_number: "",
-  assigned_facility_type: "",
-  preferred_vehicle_choice: "",
-  breathlessness_level: "",
+  // assigned_facility_type: "",
+  // preferred_vehicle_choice: "",
+  // breathlessness_level: "",
 };
 
 const requiredFields: any = {
@@ -97,6 +98,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const { t } = useTranslation();
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -208,21 +210,28 @@ export const ShiftCreate = (props: patientShiftProps) => {
         shifting_approving_facility: (
           state.form.shifting_approving_facility || {}
         ).id,
-        assigned_facility: (state.form.assigned_facility || {}).id,
+        assigned_facility:
+          state.form?.assigned_facility?.id != -1
+            ? state.form?.assigned_facility?.id
+            : null,
+        assigned_facility_external:
+          state.form?.assigned_facility?.id === -1
+            ? state.form?.assigned_facility?.name
+            : null,
         patient: props.patientId,
         emergency: state.form.emergency === "true",
         is_up_shift: state.form.is_up_shift === "true",
         reason: state.form.reason,
         vehicle_preference: state.form.vehicle_preference,
         comments: state.form.comments,
-        assigned_facility_type: state.form.assigned_facility_type,
-        preferred_vehicle_choice: state.form.preferred_vehicle_choice,
+        // assigned_facility_type: state.form.assigned_facility_type,
+        // preferred_vehicle_choice: state.form.preferred_vehicle_choice,
+        // breathlessness_level: state.form.breathlessness_level,
         refering_facility_contact_name:
           state.form.refering_facility_contact_name,
         refering_facility_contact_number: parsePhoneNumberFromString(
           state.form.refering_facility_contact_number
         )?.format("E.164"),
-        breathlessness_level: state.form.breathlessness_level,
       };
 
       const res = await dispatchAction(createShift(data));

@@ -114,10 +114,10 @@ export default function ShiftDetails(props: { id: string }) {
       ":" +
       data?.patient_object?.address +
       "\n" +
-      t("facility_preference") +
-      ":" +
-      data?.assigned_facility_type +
-      "\n" +
+      // t("facility_preference") +
+      // ":" +
+      // data?.assigned_facility_type +
+      // "\n" +
       t("reason") +
       ":" +
       data?.reason;
@@ -698,7 +698,9 @@ export default function ShiftDetails(props: { id: string }) {
                 <span className="font-semibold leading-relaxed">
                   {t("assigned_facility")}:{" "}
                 </span>
-                {data.assigned_facility_object?.name || "--"}
+                {data.assigned_facility_external ||
+                  data.assigned_facility_object?.name ||
+                  "--"}
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
@@ -746,12 +748,12 @@ export default function ShiftDetails(props: { id: string }) {
                   {data.is_kasp ? t("yes") : t("no")}
                 </span>
               </div>
-              <div>
+              {/* <div>
                 <span className="font-semibold leading-relaxed">
                   {t("vehicle_preference")}:{" "}
                 </span>
                 {data.vehicle_preference || data.preferred_vehicle_choice}
-              </div>
+              </div> 
               <div>
                 <span className="font-semibold leading-relaxed">
                   {t("facility_preference")}:{" "}
@@ -763,7 +765,7 @@ export default function ShiftDetails(props: { id: string }) {
                   {t("severity_of_breathlessness")}:{" "}
                 </span>
                 {data.breathlessness_level || "--"}
-              </div>
+              </div> */}
 
               <div className="md:row-span-2 md:col-span-2">
                 <span className="font-semibold leading-relaxed">

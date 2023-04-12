@@ -49,8 +49,8 @@ const initForm: any = {
   reason: "",
   vehicle_preference: "",
   comments: "",
-  assigned_facility_type: "",
-  preferred_vehicle_choice: "",
+  // assigned_facility_type: "",
+  // preferred_vehicle_choice: "",
   assigned_to: "",
   initial_status: "",
 };
@@ -179,7 +179,14 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         orgin_facility: state.form.orgin_facility_object?.id,
         shifting_approving_facility:
           state.form?.shifting_approving_facility_object?.id,
-        assigned_facility: state.form?.assigned_facility_object?.id,
+        assigned_facility:
+          state.form?.assigned_facility_object?.id != -1
+            ? state.form?.assigned_facility_object?.id
+            : null,
+        assigned_facility_external:
+          state.form?.assigned_facility_object?.id === -1
+            ? state.form?.assigned_facility_object?.name
+            : null,
         patient: state.form.patient_object?.id,
         emergency: [true, "true"].includes(state.form.emergency),
         is_kasp: [true, "true"].includes(state.form.is_kasp),
@@ -187,10 +194,10 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         reason: state.form.reason,
         vehicle_preference: state.form.vehicle_preference,
         comments: state.form.comments,
-        assigned_facility_type: state.form.assigned_facility_type,
-        preferred_vehicle_choice: state.form.preferred_vehicle_choice,
         assigned_to: state.form.assigned_to,
-        breathlessness_level: state.form.breathlessness_level,
+        // assigned_facility_type: state.form.assigned_facility_type,
+        // preferred_vehicle_choice: state.form.preferred_vehicle_choice,
+        // breathlessness_level: state.form.breathlessness_level,
       };
 
       if (state.form.status !== state.form.initial_status) {
@@ -220,6 +227,11 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       if (!status.aborted) {
         if (res && res.data) {
           const d = res.data;
+          if (d.assigned_facility_external)
+            d["assigned_facility_object"] = {
+              id: -1,
+              name: res.data.assigned_facility_external,
+            };
           d["initial_status"] = res.data.status;
           d["status"] = qParams.status || res.data.status;
           dispatch({ type: "set_form", form: d });
