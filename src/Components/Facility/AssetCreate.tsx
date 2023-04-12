@@ -244,17 +244,17 @@ const AssetCreate = (props: AssetProps) => {
             invalidForm = true;
           }
           // eslint-disable-next-line no-case-declarations
+          const checkTollFree = support_phone.startsWith("1800");
           const supportPhoneSimple = support_phone
             .replace(/[^0-9]/g, "")
             .slice(2);
-          const checkTollFree = supportPhoneSimple.startsWith("1800");
-          if (supportPhoneSimple.length > 10 && !checkTollFree) {
+          if (supportPhoneSimple.length != 10 && !checkTollFree) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
-          } else if (supportPhoneSimple.length > 11 && checkTollFree) {
-            errors[field] = "Please enter valid phone number";
-            invalidForm = true;
-          } else if (supportPhoneSimple.length < 10) {
+          } else if (
+            (support_phone.length < 10 || support_phone.length > 11) &&
+            checkTollFree
+          ) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
           }
@@ -324,8 +324,9 @@ const AssetCreate = (props: AssetProps) => {
         vendor_name: vendor_name,
         support_name: support_name,
         support_email: support_email,
-        support_phone:
-          parsePhoneNumberFromString(support_phone)?.format("E.164"),
+        support_phone: support_phone.startsWith("1800")
+          ? support_phone
+          : parsePhoneNumberFromString(support_phone)?.format("E.164"),
         qr_code_id: qrCodeId !== "" ? qrCodeId : null,
         manufacturer: manufacturer,
         warranty_amc_end_of_validity: warranty_amc_end_of_validity

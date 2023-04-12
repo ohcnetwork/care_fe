@@ -589,7 +589,15 @@ export const LegacyPhoneNumberField = (props: any) => {
   const onChangeHandler = debounce(onChange, 500);
 
   useEffect(() => {
-    setMaxLength(() => (value?.slice(4, 8) === "1800" ? 16 : 15));
+    if (enableTollFree) {
+      if (value.startsWith("1800")) {
+        setMaxLength(11); // 1800 + 6/7 digit number
+      } else {
+        setMaxLength(12); // 10 digit number + 2 digit country code
+      }
+    } else {
+      setMaxLength(15); // plus sign +  2 digit country code + space + 10 digit number
+    }
   }, [value]);
 
   const handleChange = (
@@ -598,7 +606,9 @@ export const LegacyPhoneNumberField = (props: any) => {
     event: ChangeEvent<HTMLInputElement>,
     formattedValue: string
   ) => {
-    onChangeHandler(formattedValue);
+    if (enableTollFree && !formattedValue.startsWith("1800"))
+      onChangeHandler(`+${formattedValue}`);
+    else onChangeHandler(formattedValue);
   };
 
   return (
@@ -609,33 +619,71 @@ export const LegacyPhoneNumberField = (props: any) => {
           requiredError ? "border border-red-500 rounded" : ""
         } relative flex items-center`}
       >
-        <PhoneInput
-          inputClass="cui-input-base pl-14 pr-10 py-5 tracking-widest"
-          containerClass={className}
-          countryCodeEditable={countryCodeEditable}
-          value={value}
-          placeholder={placeholder}
-          onChange={handleChange}
-          country="in"
-          disabled={disabled}
-          autoFormat={!turnOffAutoFormat}
-          enableLongNumbers={enableTollFree}
-          inputProps={{
-            maxLength,
-            name,
-          }}
-          {...countryRestriction}
-        />
-        <ButtonV2
-          className="absolute right-[1px] top-[1px] inset-y-0 h-[40px]"
-          variant="secondary"
-          type="button"
-          ghost
-          disabled={disabled}
-          onClick={() => onChange("+91")}
-        >
-          <CareIcon className="care-l-multiply" />
-        </ButtonV2>
+        {enableTollFree ? (
+          <>
+            <PhoneInput
+              inputClass="cui-input-base pl-4 pr-10 py-5 tracking-widest"
+              containerClass={className}
+              value={value}
+              onChange={handleChange}
+              disableCountryGuess
+              disableCountryCode
+              disableInitialCountryGuess
+              disableSearchIcon
+              disableDropdown
+              placeholder="(1800)... / 91 ..."
+              alwaysDefaultMask
+              country={undefined}
+              enableLongNumbers={enableTollFree}
+              buttonClass="hidden"
+              inputProps={{
+                maxLength,
+                name,
+              }}
+            />
+            <ButtonV2
+              className="absolute right-[2px] mb-[2px] inset-y-0 h-[40px]"
+              variant="secondary"
+              type="button"
+              ghost
+              disabled={disabled}
+              onClick={() => onChange("")}
+            >
+              {" "}
+              <CareIcon className="care-l-multiply" />
+            </ButtonV2>
+          </>
+        ) : (
+          <>
+            <PhoneInput
+              inputClass="cui-input-base pl-14 pr-10 py-5 tracking-widest"
+              containerClass={className}
+              countryCodeEditable={countryCodeEditable}
+              value={value}
+              placeholder={placeholder}
+              onChange={handleChange}
+              country="in"
+              disabled={disabled}
+              autoFormat={!turnOffAutoFormat}
+              enableLongNumbers={enableTollFree}
+              inputProps={{
+                maxLength,
+                name,
+              }}
+              {...countryRestriction}
+            />
+            <ButtonV2
+              className="absolute right-[2px] mb-[2px] inset-y-0 h-[40px]"
+              variant="secondary"
+              type="button"
+              ghost
+              disabled={disabled}
+              onClick={() => onChange("+91")}
+            >
+              <CareIcon className="care-l-multiply" />
+            </ButtonV2>
+          </>
+        )}
       </div>
       {errors && <LegacyErrorHelperText error={errors} />}
     </>
