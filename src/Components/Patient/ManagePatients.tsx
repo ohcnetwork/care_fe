@@ -320,8 +320,11 @@ export const PatientManager = () => {
       category_name = PATIENT_CATEGORIES.find(
         (item: any) => qParams.category === item.id
       )?.text;
+
+      return String(category_name);
+    } else {
+      return "";
     }
-    return String(category_name);
   };
 
   const fetchDistrictName = useCallback(
