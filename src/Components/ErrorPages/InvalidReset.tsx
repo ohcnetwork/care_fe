@@ -12,7 +12,7 @@ export default function InvalidReset() {
     <div className="flex justify-center text-center items-center h-screen">
       <div className="text-center w-[500px]">
         <img
-          src={`${import.meta.env.REACT_PUBLIC_URL}/images/invalid_reset.svg`}
+          src="/images/invalid_reset.svg"
           alt={t("invalid_reset")}
           className="w-full"
         />
