@@ -293,7 +293,7 @@ export const ConsultationForm = (props: any) => {
       }
     }
     fetchPatientName();
-  }, [dispatchAction, patientId, state.form]);
+  }, [dispatchAction, patientId]);
 
   const hasSymptoms =
     !!state.form.symptoms.length && !state.form.symptoms.includes(1);
@@ -1282,6 +1282,7 @@ export const ConsultationForm = (props: any) => {
                                 {...selectField("review_interval")}
                                 label="Review After"
                                 options={REVIEW_AT_CHOICES}
+                                position="above"
                               />
                             </div>
                             <div className="flex-1" ref={fieldRef["action"]}>
