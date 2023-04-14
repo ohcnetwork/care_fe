@@ -210,7 +210,12 @@ export default function PatientInfoCard(props: {
                       )?.text
                     }{" "}
                     on{" "}
-                    {moment(consultation?.admission_date).format("DD/MM/YYYY")},
+                    {consultation?.suggestion === "A"
+                      ? moment(consultation?.admission_date).format(
+                          "DD/MM/YYYY"
+                        )
+                      : moment(consultation?.created_date).format("DD/MM/YYYY")}
+                    ,
                     {consultation?.discharge_reason === "EXP" ? (
                       <span>
                         {" "}
