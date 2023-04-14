@@ -1,18 +1,29 @@
 import * as Notification from "../../Utils/Notifications";
+import { useNavigate } from "raviger";
 import { useEffect } from "react";
 import { handleSignOut } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
 
 export default function SessionExpired() {
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+  const navigate = useNavigate();
   const { t } = useTranslation();
+
   useEffect(() => {
     Notification.closeAllNotifications();
   }, []);
+
+  if ("data" in currentUser) {
+    navigate("/");
+  }
+
   return (
     <div className="flex justify-center text-center items-center h-screen">
       <div className="text-center w-[500px]">
         <img
-          src={`${import.meta.env.REACT_PUBLIC_URL}/images/session_expired.svg`}
+          src="/images/session_expired.svg"
           alt={t("session_expired")}
           className="w-full"
         />

@@ -535,7 +535,10 @@ export const ConsultationDetails = (props: any) => {
                 label="Discharge Date"
                 name="discharge_date"
                 value={moment(preDischargeForm.discharge_date).toDate()}
-                min={moment(consultationData.admission_date).toDate()}
+                min={moment(
+                  consultationData.admission_date ||
+                    consultationData.created_date
+                ).toDate()}
                 disableFuture={true}
                 required
                 onChange={handleDateChange}
@@ -601,7 +604,10 @@ export const ConsultationDetails = (props: any) => {
                 label="Date of Discharge"
                 name="discharge_date"
                 value={moment(preDischargeForm.discharge_date).toDate()}
-                min={moment(consultationData.admission_date).toDate()}
+                min={moment(
+                  consultationData.admission_date ||
+                    consultationData.created_date
+                ).toDate()}
                 disableFuture={true}
                 required
                 onChange={handleDateChange}
@@ -663,6 +669,17 @@ export const ConsultationDetails = (props: any) => {
           <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
               <div className="w-full flex flex-col sm:flex-row px-2">
+                <ButtonV2
+                  onClick={() =>
+                    navigate(
+                      `/facility/${patientData.facility}/patient/${patientData.id}/shift/new`
+                    )
+                  }
+                  className="w-full btn m-1 btn-primary hover:text-white"
+                >
+                  <CareIcon className="care-l-ambulance w-5 h-5" />
+                  Shift Patient
+                </ButtonV2>
                 <button
                   onClick={() => setShowDoctors(true)}
                   className="w-full btn m-1 btn-primary hover:text-white"
@@ -895,7 +912,7 @@ export const ConsultationDetails = (props: any) => {
                         {consultationData.discharge_reason === "REC" && (
                           <div className="grid gap-4">
                             <div>
-                              Date {" - "}
+                              Discharge Date {" - "}
                               <span className="font-semibold">
                                 {consultationData.discharge_date
                                   ? formatDate(consultationData.discharge_date)
@@ -974,14 +991,6 @@ export const ConsultationDetails = (props: any) => {
                         {consultationData.discharge_reason === "EXP" && (
                           <div className="grid gap-4">
                             <div>
-                              Discharge Date {" - "}
-                              <span className="font-semibold">
-                                {consultationData.discharge_date
-                                  ? formatDate(consultationData.discharge_date)
-                                  : "--:--"}
-                              </span>
-                            </div>
-                            <div>
                               Date of Death {" - "}
                               <span className="font-semibold">
                                 {consultationData.death_datetime
@@ -1009,7 +1018,7 @@ export const ConsultationDetails = (props: any) => {
                         ) && (
                           <div className="grid gap-4">
                             <div>
-                              Date {" - "}
+                              Discharge Date {" - "}
                               <span className="font-semibold">
                                 {consultationData.discharge_date
                                   ? formatDate(consultationData.discharge_date)
