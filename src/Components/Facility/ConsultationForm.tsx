@@ -98,7 +98,7 @@ type FormDetails = {
   prn_prescription: PRNPrescriptionType[];
   investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
-  action: string;
+  action: string | null;
   assigned_to: string;
   assigned_to_object: UserModel | null;
   special_instruction: string;
@@ -147,7 +147,7 @@ const initForm: FormDetails = {
   prn_prescription: [],
   investigation: [],
   is_telemedicine: "false",
-  action: "PENDING",
+  action: null,
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
@@ -1272,7 +1272,7 @@ export const ConsultationForm = (props: any) => {
                               <SelectFormField
                                 {...field("action")}
                                 label="Action"
-                                required
+                                position="above"
                                 options={TELEMEDICINE_ACTIONS}
                                 optionLabel={(option) => option.desc}
                                 optionValue={(option) => option.text}
