@@ -98,7 +98,7 @@ type FormDetails = {
   prn_prescription: PRNPrescriptionType[];
   investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
-  action: string | null;
+  action?: string;
   assigned_to: string;
   assigned_to_object: UserModel | null;
   special_instruction: string;
@@ -147,7 +147,7 @@ const initForm: FormDetails = {
   prn_prescription: [],
   investigation: [],
   is_telemedicine: "false",
-  action: null,
+  action: undefined,
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
