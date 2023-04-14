@@ -10,11 +10,7 @@ export const AddSkillsPlaceholder = () => {
   return (
     <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
       <div className="w-full">
-        <img
-          src={`${import.meta.env.REACT_PUBLIC_URL}/images/404.svg`}
-          alt="Error 404"
-          className="w-80 mx-auto"
-        />
+        <img src="/images/404.svg" alt="Error 404" className="w-80 mx-auto" />
       </div>
       <p className="text-lg font-semibold text-center text-primary pt-4">
         {t("select_skills")}

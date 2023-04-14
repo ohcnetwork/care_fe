@@ -314,6 +314,19 @@ export const PatientManager = () => {
     qParams.is_antenatal,
   ]);
 
+  const getTheCategoryFromId = () => {
+    let category_name;
+    if (qParams.category) {
+      category_name = PATIENT_CATEGORIES.find(
+        (item: any) => qParams.category === item.id
+      )?.text;
+
+      return String(category_name);
+    } else {
+      return "";
+    }
+  };
+
   const fetchDistrictName = useCallback(
     async (status: statusType) => {
       const res =
@@ -817,51 +830,51 @@ export const PatientManager = () => {
             range,
             ordering,
           }) => [
-              phoneNumber("Primary number", "phone_number"),
-              phoneNumber("Emergency number", "emergency_phone_number"),
-              badge("Patient name", "name"),
-              badge("IP number", "ip_no"),
-              ...dateRange("Modified", "modified_date"),
-              ...dateRange("Created", "created_date"),
-              ...dateRange("Admitted", "last_consultation_admission_date"),
-              ...dateRange("Discharged", "last_consultation_discharge_date"),
-              // Admitted to type badges
-              badge("No. of vaccination doses", "number_of_doses"),
-              kasp(),
-              badge("COWIN ID", "covin_id"),
-              badge("Is Antenatal", "is_antenatal"),
-              value("Facility", "facility", facilityBadgeName),
-              badge("Facility Type", "facility_type"),
-              value("District", "district", districtName),
-              ordering(),
-              badge("Category", "category"),
-              badge("Disease Status", "disease_status"),
-              value(
-                "Gender",
-                "gender",
-                parseOptionId(GENDER_TYPES, qParams.gender) || ""
-              ),
-              {
-                name: "Admitted to",
-                value: ADMITTED_TO[qParams.last_consultation_admitted_to],
-                paramKey: "last_consultation_admitted_to",
-              },
-              ...range("Age", "age"),
-              badge("SRF ID", "srf_id"),
-              { name: "LSG Body", value: localbodyName, paramKey: "lsgBody" },
-              badge("Declared Status", "is_declared_positive"),
-              ...dateRange("Result", "date_of_result"),
-              ...dateRange("Declared positive", "date_declared_positive"),
-              ...dateRange(
-                "Symptoms onset",
-                "last_consultation_symptoms_onset_date"
-              ),
-              ...dateRange("Last vaccinated", "last_vaccinated_date"),
-              {
-                name: "Telemedicine",
-                paramKey: "last_consultation_is_telemedicine",
-              },
-            ]}
+            phoneNumber("Primary number", "phone_number"),
+            phoneNumber("Emergency number", "emergency_phone_number"),
+            badge("Patient name", "name"),
+            badge("IP number", "ip_no"),
+            ...dateRange("Modified", "modified_date"),
+            ...dateRange("Created", "created_date"),
+            ...dateRange("Admitted", "last_consultation_admission_date"),
+            ...dateRange("Discharged", "last_consultation_discharge_date"),
+            // Admitted to type badges
+            badge("No. of vaccination doses", "number_of_doses"),
+            kasp(),
+            badge("COWIN ID", "covin_id"),
+            badge("Is Antenatal", "is_antenatal"),
+            value("Facility", "facility", facilityBadgeName),
+            badge("Facility Type", "facility_type"),
+            value("District", "district", districtName),
+            ordering(),
+            value("Category", "category", getTheCategoryFromId()),
+            badge("Disease Status", "disease_status"),
+            value(
+              "Gender",
+              "gender",
+              parseOptionId(GENDER_TYPES, qParams.gender) || ""
+            ),
+            {
+              name: "Admitted to",
+              value: ADMITTED_TO[qParams.last_consultation_admitted_to],
+              paramKey: "last_consultation_admitted_to",
+            },
+            ...range("Age", "age"),
+            badge("SRF ID", "srf_id"),
+            { name: "LSG Body", value: localbodyName, paramKey: "lsgBody" },
+            badge("Declared Status", "is_declared_positive"),
+            ...dateRange("Result", "date_of_result"),
+            ...dateRange("Declared positive", "date_declared_positive"),
+            ...dateRange(
+              "Symptoms onset",
+              "last_consultation_symptoms_onset_date"
+            ),
+            ...dateRange("Last vaccinated", "last_vaccinated_date"),
+            {
+              name: "Telemedicine",
+              paramKey: "last_consultation_is_telemedicine",
+            },
+          ]}
           children={
             qParams.last_consultation_admitted_bed_type_list &&
             LastAdmittedToTypeBadges()
