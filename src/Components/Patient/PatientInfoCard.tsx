@@ -199,29 +199,44 @@ export default function PatientInfoCard(props: {
                 );
               })}
             </div>
-            <div className="flex gap-4 text-sm mt-3 px-3 py-1 font-medium bg-cyan-300">
-              <div>
-                {
-                  CONSULTATION_SUGGESTION.find(
-                    (suggestion) => suggestion.id === consultation?.suggestion
-                  )?.text
-                }{" "}
-                on{" "}
-                {consultation?.suggestion === "A"
-                  ? moment(consultation?.admission_date).format("DD/MM/YYYY")
-                  : consultation?.suggestion === "DD"
-                  ? moment(consultation?.death_datetime).format("DD/MM/YYYY")
-                  : moment(consultation?.created_date).format("DD/MM/YYYY")}
+            {patient.is_active === false && (
+              <div className="flex gap-4 text-sm mt-3 px-3 py-1 font-medium bg-cyan-300">
+                <div>
+                  <span>
+                    {
+                      CONSULTATION_SUGGESTION.find(
+                        (suggestion) =>
+                          suggestion.id === consultation?.suggestion
+                      )?.text
+                    }{" "}
+                    on{" "}
+                    {consultation?.suggestion === "A"
+                      ? moment(consultation?.admission_date).format(
+                          "DD/MM/YYYY"
+                        )
+                      : moment(consultation?.created_date).format("DD/MM/YYYY")}
+                    ,
+                    {consultation?.discharge_reason === "EXP" ? (
+                      <span>
+                        {" "}
+                        Expired on{" "}
+                        {moment(consultation?.death_datetime).format(
+                          "DD/MM/YYYY"
+                        )}
+                      </span>
+                    ) : (
+                      <span>
+                        {" "}
+                        Discharged on{" "}
+                        {moment(consultation?.discharge_date).format(
+                          "DD/MM/YYYY"
+                        )}
+                      </span>
+                    )}
+                  </span>
+                </div>
               </div>
-              {patient.is_active === false &&
-                consultation?.suggestion !== "OP" &&
-                consultation?.suggestion !== "DD" && (
-                  <div>
-                    Discharged on{" "}
-                    {moment(consultation?.discharge_date).format("DD/MM/YYYY")}
-                  </div>
-                )}
-            </div>
+            )}
           </div>
         </div>
 
