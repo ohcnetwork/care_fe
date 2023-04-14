@@ -114,7 +114,8 @@ type FormDetails = {
 
 type Action =
   | { type: "set_form"; form: FormDetails }
-  | { type: "set_error"; errors: FormDetails };
+  | { type: "set_error"; errors: FormDetails }
+  | { type: "set_form_field"; field: keyof FormDetails; value: any };
 
 const initForm: FormDetails = {
   symptoms: [],
@@ -189,13 +190,22 @@ const consultationFormReducer = (state = initialState, action: Action) => {
     case "set_form": {
       return {
         ...state,
-        form: action.form,
+        form: { ...state.form, ...action.form },
       };
     }
     case "set_error": {
       return {
         ...state,
         errors: action.errors,
+      };
+    }
+    case "set_form_field": {
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          [action.field]: action.value,
+        },
       };
     }
   }
@@ -271,12 +281,10 @@ export const ConsultationForm = (props: any) => {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
           dispatch({
-            type: "set_form",
-            form: {
-              ...state.form,
-              action: TELEMEDICINE_ACTIONS.find((a) => a.id === res.data.action)
-                ?.text,
-            },
+            type: "set_form_field",
+            field: "action",
+            value: TELEMEDICINE_ACTIONS.find((a) => a.id === res.data.action)
+              ?.text,
           });
         }
       } else {
@@ -285,7 +293,7 @@ export const ConsultationForm = (props: any) => {
       }
     }
     fetchPatientName();
-  }, [dispatchAction, patientId]);
+  }, [dispatchAction, patientId, state.form]);
 
   const hasSymptoms =
     !!state.form.symptoms.length && !state.form.symptoms.includes(1);
@@ -341,7 +349,7 @@ export const ConsultationForm = (props: any) => {
             death_datetime: res.data?.death_datetime || "",
             death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
           };
-          dispatch({ type: "set_form", form: { ...state.form, ...formData } });
+          dispatch({ type: "set_form", form: formData });
           setBed(formData.bed);
         } else {
           goBack();
