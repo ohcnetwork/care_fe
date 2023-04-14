@@ -270,6 +270,14 @@ export const ConsultationForm = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          dispatch({
+            type: "set_form",
+            form: {
+              ...state.form,
+              action: TELEMEDICINE_ACTIONS.find((a) => a.id === res.data.action)
+                ?.text,
+            },
+          });
         }
       } else {
         setPatientName("");
