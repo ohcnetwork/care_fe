@@ -5,7 +5,12 @@ import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications";
-import { getConsultation, getPatient, HCXActions } from "../../Redux/actions";
+import {
+  dischargeSummaryPreview,
+  getConsultation,
+  getPatient,
+  HCXActions,
+} from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { ConsultationModel, ICD11DiagnosisModel } from "./models";
 import { PatientModel } from "../Patient/models";
@@ -31,13 +36,9 @@ import { DialysisPlots } from "./Consultations/DialysisPlots";
 import DoctorVideoSlideover from "./DoctorVideoSlideover";
 import { Feed } from "./Consultations/Feed";
 import { validateEmailAddress } from "../../Common/validation";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
+import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { LegacyTextInputField } from "../Common/HelperInputFields";
-import { discharge, dischargePatient } from "../../Redux/actions";
+import { dischargeSummaryEmail, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
 import PatientInfoCard from "../Patient/PatientInfoCard";
@@ -90,10 +91,11 @@ export const ConsultationDetails = (props: any) => {
   const { currentUser } = state;
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
-    {}
+    {} as ConsultationModel
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
-  const [open, setOpen] = useState(false);
+  const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
+    useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
 
@@ -163,7 +165,7 @@ export const ConsultationDetails = (props: any) => {
   });
 
   const handleClickOpen = () => {
-    setOpen(true);
+    setOpenDischargeSummaryDialog(true);
   };
 
   const handleDischageClickOpen = () => {
@@ -171,14 +173,14 @@ export const ConsultationDetails = (props: any) => {
   };
 
   const handleClose = () => {
-    setOpen(false);
+    setOpenDischargeSummaryDialog(false);
   };
 
   const handleDischargeClose = () => {
     setOpenDischargeDialog(false);
   };
 
-  const handleDischargeSummarySubmit = () => {
+  const handleDischargeSummaryEmailSubmit = () => {
     if (!dischargeSummaryState.email) {
       const errorField = Object.assign({}, errors);
       errorField["dischargeSummaryForm"] = "email field can not be blank.";
@@ -189,9 +191,9 @@ export const ConsultationDetails = (props: any) => {
       setErrors(errorField);
     } else {
       dispatch(
-        discharge(
+        dischargeSummaryEmail(
           { email: dischargeSummaryState.email },
-          { external_id: patientData.id }
+          { external_id: consultationId }
         )
       ).then((response: any) => {
         if ((response || {}).status === 200) {
@@ -200,13 +202,26 @@ export const ConsultationDetails = (props: any) => {
           });
         }
       });
-      setOpen(false);
+      setOpenDischargeSummaryDialog(false);
     }
   };
 
-  const handleDischargeSummary = (e: any) => {
-    e.preventDefault();
-    setOpen(false);
+  const handleDownloadDischargeSummary = () => {
+    dispatch(dischargeSummaryPreview({ external_id: consultationId }))
+      .then((response: any) => {
+        console.log("rrr", response)
+        if (response.status === 200) {
+          window.open(response.data.read_signed_url, "_blank");
+        }
+        Notification.Error({
+          msg: "Discharge summary is not ready yet. Please try again after a few moments.",
+        });
+      })
+    setOpenDischargeSummaryDialog(false);
+  };
+
+  const handleDischargeSummaryClose = () => {
+    setOpenDischargeSummaryDialog(false);
   };
 
   const getPatientGender = (patientData: any) =>
@@ -262,7 +277,7 @@ export const ConsultationDetails = (props: any) => {
           discharge_prescription: dischargePrescription,
           discharge_prn_prescription: dischargePRNPrescription,
         },
-        { id: patientData.id }
+        { id: consultationId }
       )
     );
 
@@ -280,16 +295,14 @@ export const ConsultationDetails = (props: any) => {
     }
   };
 
-  const handleDischargeSummaryFormChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  const handleDischargeSummaryFormChange: FieldChangeEventHandler<string> = (
+    event
   ) => {
-    const { value } = e.target;
-
     const errorField = Object.assign({}, errors);
     errorField["dischargeSummaryForm"] = null;
     setErrors(errorField);
 
-    setDischargeSummaryForm({ email: value });
+    setDischargeSummaryForm({ email: event.value });
   };
 
   const dischargeSummaryFormSetUserEmail = () => {
@@ -427,56 +440,66 @@ export const ConsultationDetails = (props: any) => {
 
   return (
     <div>
-      <Dialog open={open} onClose={handleDischargeSummary}>
-        <DialogTitle id="form-dialog-title">
-          Download Discharge Summary
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Please enter your email id to receive the discharge summary.
-            Disclaimer: This is an automatically Generated email using your info
-            Captured in Care System.
-            <div
-              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-              role="alert"
-            >
-              <strong className="block sm:inline font-bold">
-                Please check your email id before continuing. We cannot deliver
-                the email if the email id is invalid
-              </strong>
-            </div>
-          </DialogContentText>
-          <div className="flex justify-end">
-            <a
-              href="#"
-              className="text-xs"
-              onClick={dischargeSummaryFormSetUserEmail}
-            >
-              Fill email input with my email.
-            </a>
+      <DialogModal
+        title={<p>Download discharge summary</p>}
+        show={openDischargeSummaryDialog}
+        onClose={handleDischargeSummaryClose}
+        className="md:max-w-3xl"
+      >
+        <div className="text-gray-800">
+          Please enter your email id to receive the discharge summary.
+          Disclaimer: This is an automatically Generated email using your info
+          Captured in Care System.
+          <div
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
+            Please check your email id before continuing. We cannot deliver the
+            email if the email id is invalid
           </div>
-          <LegacyTextInputField
-            type="email"
-            name="email"
-            label="email"
-            variant="outlined"
-            margin="dense"
-            autoComplete="off"
-            value={dischargeSummaryState.email}
-            InputLabelProps={{ shrink: !!dischargeSummaryState.email }}
-            onChange={handleDischargeSummaryFormChange}
-            errors={errors.dischargeSummaryForm}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleDischargeSummarySubmit} color="primary">
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
+        </div>
+        <div className="flex justify-end">
+          <a
+            href="#"
+            className="text-xs"
+            onClick={dischargeSummaryFormSetUserEmail}
+          >
+            Fill email input with my email.
+          </a>
+        </div>
+        <TextFormField
+          className="w-full"
+          name="email"
+          id="email"
+          onChange={handleDischargeSummaryFormChange}
+          type="email"
+          placeholder="Email"
+        />
+
+        <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
+          <Cancel onClick={handleClose} />
+
+          {isSendingDischargeApi ? (
+            <CircularProgress size={20} />
+          ) : (
+            <Submit
+              onClick={handleDownloadDischargeSummary}
+              label="Download"
+              autoFocus
+            />
+          )}
+
+          {isSendingDischargeApi ? (
+            <CircularProgress size={20} />
+          ) : (
+            <Submit
+              onClick={handleDischargeSummaryEmailSubmit}
+              label="Email"
+              className="bg-blue-500 hover:bg-blue-700"
+            />
+          )}
+        </div>
+      </DialogModal>
 
       <DialogModal
         title={
@@ -641,6 +664,7 @@ export const ConsultationDetails = (props: any) => {
           )}
         </div>
       </DialogModal>
+
       <div className="px-2 pb-2">
         <nav className="flex justify-between flex-wrap relative">
           <PageTitle

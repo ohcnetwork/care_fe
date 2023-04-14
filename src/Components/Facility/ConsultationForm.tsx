@@ -599,7 +599,7 @@ export const ConsultationForm = (props: any) => {
           death_datetime: death_datetime,
           death_confirmed_doctor: death_confirmed_doctor,
         },
-        { id: patientId }
+        { id: id }
       )
     );
 
