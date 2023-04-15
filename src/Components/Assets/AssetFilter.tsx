@@ -40,7 +40,6 @@ function AssetFilter(props: any) {
   const [qParams, _] = useQueryParams();
 
   useEffect(() => {
-    console.log(facility);
     setFacilityId(facility?.id ? facility?.id : "");
     setLocationId(location?.id ? location?.id : "");
   }, [facility, location]);
@@ -74,17 +73,9 @@ function AssetFilter(props: any) {
   const fetchFacility = useCallback(
     async (status: statusType) => {
       if (facilityId) {
-        const [facilityData]: any = await Promise.all([
-          dispatch(getAnyFacility(facilityId)),
-        ]);
+        const facilityData: any = await dispatch(getAnyFacility(facilityId));
         if (!status.aborted) {
-          if (!facilityData?.data)
-            Notification.Error({
-              msg: "Something went wrong..!",
-            });
-          else {
-            setFacility(facilityData.data);
-          }
+          setFacility(facilityData?.data);
         }
       }
     },
