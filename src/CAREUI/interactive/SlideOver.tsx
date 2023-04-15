@@ -90,7 +90,8 @@ export default function SlideOver({
                 className={classNames(
                   "bg-white md:rounded-xl flex flex-col",
                   directionClasses[slideFrom].proportions,
-                  dialogClass
+                  dialogClass,
+                  "p-6"
                 )}
               >
                 <div className="flex items-center p-2 gap-2 pt-4">
