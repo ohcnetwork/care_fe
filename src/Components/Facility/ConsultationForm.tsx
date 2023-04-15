@@ -98,7 +98,7 @@ type FormDetails = {
   prn_prescription: PRNPrescriptionType[];
   investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
-  action: string;
+  action?: string;
   assigned_to: string;
   assigned_to_object: UserModel | null;
   special_instruction: string;
@@ -114,7 +114,8 @@ type FormDetails = {
 
 type Action =
   | { type: "set_form"; form: FormDetails }
-  | { type: "set_error"; errors: FormDetails };
+  | { type: "set_error"; errors: FormDetails }
+  | { type: "set_form_field"; field: keyof FormDetails; value: any };
 
 const initForm: FormDetails = {
   symptoms: [],
@@ -147,7 +148,7 @@ const initForm: FormDetails = {
   prn_prescription: [],
   investigation: [],
   is_telemedicine: "false",
-  action: "PENDING",
+  action: undefined,
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
@@ -189,13 +190,22 @@ const consultationFormReducer = (state = initialState, action: Action) => {
     case "set_form": {
       return {
         ...state,
-        form: action.form,
+        form: { ...state.form, ...action.form },
       };
     }
     case "set_error": {
       return {
         ...state,
         errors: action.errors,
+      };
+    }
+    case "set_form_field": {
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          [action.field]: action.value,
+        },
       };
     }
   }
@@ -270,6 +280,14 @@ export const ConsultationForm = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          if (isUpdate) {
+            dispatch({
+              type: "set_form_field",
+              field: "action",
+              value: TELEMEDICINE_ACTIONS.find((a) => a.id === res.data.action)
+                ?.text,
+            });
+          }
         }
       } else {
         setPatientName("");
@@ -1266,13 +1284,14 @@ export const ConsultationForm = (props: any) => {
                                 {...selectField("review_interval")}
                                 label="Review After"
                                 options={REVIEW_AT_CHOICES}
+                                position="above"
                               />
                             </div>
                             <div className="flex-1" ref={fieldRef["action"]}>
                               <SelectFormField
                                 {...field("action")}
                                 label="Action"
-                                required
+                                position="above"
                                 options={TELEMEDICINE_ACTIONS}
                                 optionLabel={(option) => option.desc}
                                 optionValue={(option) => option.text}
