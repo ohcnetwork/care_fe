@@ -23,6 +23,7 @@ import {
   getConsultation,
   updateConsultation,
   getPatient,
+  getPrescriptions,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -33,7 +34,8 @@ import { UserModel } from "../Users/models";
 import { BedSelect } from "../Common/BedSelect";
 import { dischargePatient } from "../../Redux/actions";
 import Beds from "./Consultations/Beds";
-import PrescriptionBuilder, {
+import {
+  default as PrescriptionBuilderOld,
   PrescriptionType,
 } from "../Common/prescription-builder/PrescriptionBuilder";
 import PRNPrescriptionBuilder, {
@@ -64,6 +66,7 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useVisibility from "../../Utils/useVisibility";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -234,6 +237,7 @@ export const ConsultationForm = (props: any) => {
   );
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
   const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
+  const [prescriptions, setPrescriptions] = useState<PrescriptionType[]>([]);
 
   const sections = {
     "Consultation Details": {
@@ -276,6 +280,16 @@ export const ConsultationForm = (props: any) => {
   const hasSymptoms =
     !!state.form.symptoms.length && !state.form.symptoms.includes(1);
   const isOtherSymptomsSelected = state.form.symptoms.includes(9);
+
+  const fetchPrescriptions = useCallback(
+    async (_: statusType) => {
+      const res = await dispatchAction(getPrescriptions(id));
+      if (res.data.results) {
+        setPrescriptions(res.data.results);
+      }
+    },
+    [dispatchAction, id]
+  );
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -342,9 +356,10 @@ export const ConsultationForm = (props: any) => {
     (status: statusType) => {
       if (id) {
         fetchData(status);
+        fetchPrescriptions(status);
       }
     },
-    [dispatch, fetchData]
+    [dispatch, fetchData, fetchPrescriptions]
   );
 
   if (isLoading) return <Loading />;
@@ -1165,9 +1180,16 @@ export const ConsultationForm = (props: any) => {
                             ref={fieldRef["discharge_advice"]}
                           >
                             <FieldLabel>Prescription Medication</FieldLabel>
-                            <PrescriptionBuilder
+                            <PrescriptionBuilderOld
                               prescriptions={dischargeAdvice}
                               setPrescriptions={setDischargeAdvice}
+                            />
+                            <hr />
+                            <PrescriptionBuilder
+                              consultation={id}
+                              prescriptions={prescriptions as any}
+                              type="normal"
+                              fetchPrescriptions={fetchPrescriptions}
                             />
                             <LegacyErrorHelperText
                               error={state.errors.discharge_advice}

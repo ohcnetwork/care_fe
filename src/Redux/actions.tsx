@@ -546,6 +546,52 @@ export const setMinQuantity = (params: object, pathParams: object) => {
 export const getMinQuantity = (facilityId: object, params: object) => {
   return fireRequest("getMinQuantity", [facilityId, "min_quantity"], params);
 };
+//Medicine
+export const getPrescriptions = (consultation_id: string) => {
+  return fireRequest("getPrescriptions", [], {}, { consultation_id });
+};
+export const addPrescription = (consultation_id: string, params: object) => {
+  return fireRequest("addPrescription", [], params, { consultation_id });
+};
+export const updatePrescription = (consultation_id: string, params: object) => {
+  return fireRequest("updatePrescription", [], params, { consultation_id });
+};
+export const deletePrescription = (consultation_id: string, params: object) => {
+  return fireRequest("deletePrescription", [], params, { consultation_id });
+};
+
+export const getMedicineAdministration = (
+  consultation_id: string,
+  params: object
+) => {
+  return fireRequest("getMedicineAdministration", [], params, {
+    consultation_id,
+  });
+};
+export const addMedicineAdministration = (
+  consultation_id: string,
+  params: object
+) => {
+  return fireRequest("addMedicineAdministration", [], params, {
+    consultation_id,
+  });
+};
+export const updateMedicineAdministration = (
+  consultation_id: string,
+  params: object
+) => {
+  return fireRequest("updateMedicineAdministration", [], params, {
+    consultation_id,
+  });
+};
+export const deleteMedicineAdministration = (
+  consultation_id: string,
+  params: object
+) => {
+  return fireRequest("deleteMedicineAdministration", [], params, {
+    consultation_id,
+  });
+};
 
 export const getMinQuantityOfItem = (
   facilityId: object,
