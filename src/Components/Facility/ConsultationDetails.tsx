@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import { Button, CircularProgress } from "@material-ui/core";
+import CircularProgress from "../Common/components/CircularProgress";
 import moment from "moment";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -37,7 +37,6 @@ import DoctorVideoSlideover from "./DoctorVideoSlideover";
 import { Feed } from "./Consultations/Feed";
 import { validateEmailAddress } from "../../Common/validation";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
-import { LegacyTextInputField } from "../Common/HelperInputFields";
 import { dischargeSummaryEmail, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
@@ -99,12 +98,9 @@ export const ConsultationDetails = (props: any) => {
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
 
-  const initDischargeSummaryForm: { email: string } = {
-    email: "",
-  };
-  const [dischargeSummaryState, setDischargeSummaryForm] = useState(
-    initDischargeSummaryForm
-  );
+  const [dischargeSummaryState, setDischargeSummaryForm] = useState<{
+    email: string;
+  }>({ email: currentUser.data.email?.trim() || "" });
   const [errors, setErrors] = useState<any>({});
   const [preDischargeForm, setPreDischargeForm] =
     useState<PreDischargeFormInterface>({
@@ -190,6 +186,7 @@ export const ConsultationDetails = (props: any) => {
       errorField["dischargeSummaryForm"] = "Please Enter a Valid Email Address";
       setErrors(errorField);
     } else {
+      setIsSendingDischargeApi(true);
       dispatch(
         dischargeSummaryEmail(
           { email: dischargeSummaryState.email },
@@ -201,23 +198,27 @@ export const ConsultationDetails = (props: any) => {
             msg: "We will be sending an email shortly. Please check your inbox.",
           });
         }
+        setIsSendingDischargeApi(false);
       });
       setOpenDischargeSummaryDialog(false);
     }
   };
 
   const handleDownloadDischargeSummary = () => {
-    dispatch(dischargeSummaryPreview({ external_id: consultationId }))
-      .then((response: any) => {
-        console.log("rrr", response)
+    setIsSendingDischargeApi(true);
+    dispatch(dischargeSummaryPreview({ external_id: consultationId })).then(
+      (response: any) => {
         if (response.status === 200) {
           window.open(response.data.read_signed_url, "_blank");
+        } else {
+          Notification.Error({
+            msg: "Discharge summary is not ready yet. Please try again after a few moments.",
+          });
         }
-        Notification.Error({
-          msg: "Discharge summary is not ready yet. Please try again after a few moments.",
-        });
-      })
-    setOpenDischargeSummaryDialog(false);
+        setIsSendingDischargeApi(false);
+        setOpenDischargeSummaryDialog(false);
+      }
+    );
   };
 
   const handleDischargeSummaryClose = () => {
@@ -303,14 +304,6 @@ export const ConsultationDetails = (props: any) => {
     setErrors(errorField);
 
     setDischargeSummaryForm({ email: event.value });
-  };
-
-  const dischargeSummaryFormSetUserEmail = () => {
-    if (!currentUser.data.email.trim())
-      return Notification.Error({
-        msg: "Email not provided! Please update profile",
-      });
-    setDischargeSummaryForm({ email: currentUser.data.email });
   };
 
   const fetchData = useCallback(
@@ -444,28 +437,12 @@ export const ConsultationDetails = (props: any) => {
         title={<p>Download discharge summary</p>}
         show={openDischargeSummaryDialog}
         onClose={handleDischargeSummaryClose}
-        className="md:max-w-3xl"
+        className="md:max-w-2xl"
       >
-        <div className="text-gray-800">
+        <div className="my-2 text-gray-800">
           Please enter your email id to receive the discharge summary.
-          Disclaimer: This is an automatically Generated email using your info
-          Captured in Care System.
-          <div
-            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-            role="alert"
-          >
-            Please check your email id before continuing. We cannot deliver the
-            email if the email id is invalid
-          </div>
-        </div>
-        <div className="flex justify-end">
-          <a
-            href="#"
-            className="text-xs"
-            onClick={dischargeSummaryFormSetUserEmail}
-          >
-            Fill email input with my email.
-          </a>
+          Disclaimer: This is an automatically generated report using patient's
+          info captured in Care System.
         </div>
         <TextFormField
           className="w-full"
@@ -475,28 +452,31 @@ export const ConsultationDetails = (props: any) => {
           type="email"
           placeholder="Email"
         />
-
-        <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
-          <Cancel onClick={handleClose} />
-
+        <div
+          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+          role="alert"
+        >
+          Please check your email id before continuing. We cannot deliver the
+          email if the email id is invalid
+        </div>
+        <div className="flex flex-col md:flex-row gap-2 pt-4">
           {isSendingDischargeApi ? (
-            <CircularProgress size={20} />
+            <CircularProgress className="mr-auto w-full md:w-auto" />
           ) : (
             <Submit
               onClick={handleDownloadDischargeSummary}
               label="Download"
               autoFocus
+              className="mr-auto bg-blue-500 hover:bg-blue-700"
             />
           )}
 
+          <Cancel onClick={handleClose} />
+
           {isSendingDischargeApi ? (
-            <CircularProgress size={20} />
+            <CircularProgress />
           ) : (
-            <Submit
-              onClick={handleDischargeSummaryEmailSubmit}
-              label="Email"
-              className="bg-blue-500 hover:bg-blue-700"
-            />
+            <Submit onClick={handleDischargeSummaryEmailSubmit} label="Email" />
           )}
         </div>
       </DialogModal>
@@ -660,7 +640,7 @@ export const ConsultationDetails = (props: any) => {
         <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
           <Cancel onClick={handleDischargeClose} />
           {isSendingDischargeApi ? (
-            <CircularProgress size={20} />
+            <CircularProgress />
           ) : (
             <Submit
               onClick={() => handlePatientDischarge(false)}
