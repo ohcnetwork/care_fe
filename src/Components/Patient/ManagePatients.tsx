@@ -314,6 +314,19 @@ export const PatientManager = () => {
     qParams.is_antenatal,
   ]);
 
+  const getTheCategoryFromId = () => {
+    let category_name;
+    if (qParams.category) {
+      category_name = PATIENT_CATEGORIES.find(
+        (item: any) => qParams.category === item.id
+      )?.text;
+
+      return String(category_name);
+    } else {
+      return "";
+    }
+  };
+
   const fetchDistrictName = useCallback(
     async (status: statusType) => {
       const res =
@@ -826,7 +839,7 @@ export const PatientManager = () => {
             badge("Facility Type", "facility_type"),
             value("District", "district", districtName),
             ordering(),
-            badge("Category", "category"),
+            value("Category", "category", getTheCategoryFromId()),
             badge("Disease Status", "disease_status"),
             value(
               "Gender",

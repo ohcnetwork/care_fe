@@ -113,7 +113,7 @@ let ventilatorInterfaceTypeToString = ventilatorInterfaceType => {
   switch ventilatorInterfaceType {
   | INVASIVE => "Invasive"
   | NON_INVASIVE => "Non Invasive"
-  | UNKNOWN => "Unknown"
+  | UNKNOWN => "None"
   | OXYGEN_SUPPORT => "Oxygen Support"
   }
 }
