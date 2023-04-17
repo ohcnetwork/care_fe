@@ -6,7 +6,7 @@ import ToolTip from "../Common/utils/Tooltip";
 import { PrescriptionDropdown } from "../Common/prescription-builder/PrescriptionDropdown";
 import medicines_list from "../Common/prescription-builder/assets/medicines.json";
 import { UserModel } from "../Users/models";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import { useDispatch } from "react-redux";
 import {
   addPrescription,
@@ -16,6 +16,9 @@ import {
 import { statusType } from "../../Common/utils";
 import _ from "lodash";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import moment from "moment";
+import DialogModal from "../Common/Dialog";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 
 export const medicines = medicines_list;
 
@@ -60,7 +63,7 @@ type BasePrescriptionType = {
   prescribed_by: UserModel;
   discontinued: boolean;
   discontinued_reason: string;
-  discontinued_data: string;
+  discontinued_date: string;
   created_date: string;
   modified_date: string;
 };
@@ -107,7 +110,6 @@ export default function PrescriptionBuilder(props: {
   prescriptions: PrescriptionType[];
   type: "normal" | "prn";
   fetchPrescriptions: (status: statusType) => Promise<void>;
-  discharge?: boolean;
 }) {
   const { consultation, prescriptions, type, fetchPrescriptions } = props;
 
@@ -166,6 +168,7 @@ export function PrescriptionForm(props: {
   const [prescription, setPrescription] = useState(props.prescription);
   const dispatchAction: any = useDispatch();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [discontinueDialog, setDiscontinueDialog] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -229,9 +232,9 @@ export function PrescriptionForm(props: {
         onConfirm={handleDelete}
       />
       <div
-        className={
-          "border-2 border-gray-500 mb-2 border-dashed border-spacing-2 p-3 rounded-md text-sm text-gray-600"
-        }
+        className={`border-2 border-gray-500 mb-2 border-dashed border-spacing-2 p-3 rounded-md text-sm text-gray-600 ${
+          prescription.discontinued ? "bg-gray-200 opacity-80" : ""
+        }`}
       >
         <div className="flex flex-wrap md:flex-row md:gap-4 gap-2 items-center mb-2 justify-between">
           <div>
@@ -614,7 +617,109 @@ export function PrescriptionForm(props: {
             </div>
           </>
         )}
+        <div className="flex items-center justify-between gap-4">
+          <div className="text-xs mt-4 flex gap-4">
+            {prescription.external_id && (
+              <>
+                <div>
+                  Last updated:{" "}
+                  <b>{moment(prescription.modified_date).format("lll")}</b>
+                  <br />
+                  Created:{" "}
+                  <b>{moment(prescription.created_date).format("lll")}</b>
+                  <br />
+                  By: <b>{prescription.prescribed_by.username}</b>
+                </div>
+                {prescription.discontinued && (
+                  <div>
+                    {prescription.discontinued_date && (
+                      <>
+                        Discontinued on:{" "}
+                        <b>
+                          {moment(prescription.discontinued_date).format("lll")}
+                        </b>
+                      </>
+                    )}
+                    <br />
+                    Discontinue Reason:{" "}
+                    <b>{prescription.discontinued_reason}</b>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+          <div>
+            <div className="shrink-0 flex flex-col gap-2 text-xs items-center md:mt-3 cursor-pointer">
+              Discontinued
+              <input
+                type="checkbox"
+                className="inline-block rounded-md w-[18px] h-[18px]"
+                checked={prescription.discontinued}
+                onChange={(e) => {
+                  !prescription.discontinued
+                    ? setDiscontinueDialog(true)
+                    : setPrescription({
+                        ...prescription,
+                        discontinued: e.target.checked,
+                      });
+                }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
+      <DialogModal
+        title={
+          <div>
+            <p>Discontinue Medication?</p>
+          </div>
+        }
+        show={discontinueDialog}
+        onClose={() => {
+          setDiscontinueDialog(false);
+          setPrescription({
+            ...prescription,
+            discontinued: false,
+          });
+        }}
+        className="md:max-w-3xl"
+      >
+        <div className="mt-6 flex flex-col">
+          <TextAreaFormField
+            label="Reason to discontinue"
+            name="reason"
+            value={prescription.discontinued_reason}
+            onChange={(e) => {
+              setPrescription({
+                ...prescription,
+                discontinued_reason: e.value,
+              });
+            }}
+          />
+        </div>
+        <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
+          <Cancel
+            onClick={() => {
+              setDiscontinueDialog(false);
+              setPrescription({
+                ...prescription,
+                discontinued: false,
+              });
+            }}
+          />
+          <Submit
+            onClick={() => {
+              setPrescription({
+                ...prescription,
+                discontinued: true,
+              });
+              setDiscontinueDialog(false);
+            }}
+            label="Discontinue"
+            autoFocus
+          />
+        </div>
+      </DialogModal>
     </div>
   );
 }

@@ -348,27 +348,9 @@ const routes: Routes = {
     path: "/api/v1/consultation/{consultation_id}/prescriptions/{id}/",
     method: "DELETE",
   },
-  getMedicineAdministration: {
-    path: "/api/v1/consultation/{consultation_id}/medicine_administration/",
-  },
-  createMedicineAdministration: {
-    path: "/api/v1/consultation/{consultation_id}/medicine_administration/",
+  administerPrescription: {
+    path: "/api/v1/consultation/{consultation_id}/prescriptions/{id}/administer/",
     method: "POST",
-  },
-  getMedicineAdministrationDetail: {
-    path: "/api/v1/consultation/{consultation_id}/medicine_administration/{id}/",
-  },
-  updateMedicineAdministration: {
-    path: "/api/v1/consultation/{consultation_id}/medicine_administration/{id}/",
-    method: "PUT",
-  },
-  partialUpdateMedicineAdministration: {
-    path: "/api/v1/consultation/{consultation_id}/medicine_administration/{id}/",
-    method: "PATCH",
-  },
-  deleteMedicineAdministration: {
-    path: "/api/v1/consultation/{consultation_id}/medicine_administration/{id}/",
-    method: "DELETE",
   },
   createDailyRounds: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",

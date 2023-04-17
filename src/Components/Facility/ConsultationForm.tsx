@@ -62,6 +62,7 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import PrescriptionBuilder, {
   PrescriptionType,
 } from "../Medicine/PrescriptionBuilder";
+import MedicineAdministrationRecord from "../CriticalCareRecording/IOBalance/MedicineAdministrationRecord";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -826,6 +827,7 @@ export const ConsultationForm = (props: any) => {
               onSubmit={handleSubmit}
               className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
             >
+              <MedicineAdministrationRecord consultationId={id} />
               <div className="grid grid-cols-1 gap-x-12 items-start">
                 <div className="grid grid-cols-6 gap-x-6">
                   {sectionTitle("Consultation Details")}

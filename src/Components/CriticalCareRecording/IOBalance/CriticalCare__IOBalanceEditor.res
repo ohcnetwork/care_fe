@@ -94,7 +94,7 @@ let sumOfArray = items => {
 
 module MedicineAdministrationRecord = {
   @react.component @module("./MedicineAdministrationRecord")
-  external make: unit => React.element = "default"
+  external make: (~consultationId: string) => React.element = "default"
 }
 @react.component
 let make = (~ioBalance, ~updateCB, ~id, ~consultationId) => {
@@ -109,7 +109,7 @@ let make = (~ioBalance, ~updateCB, ~id, ~consultationId) => {
       <h3 className="underline underline-offset-2 mb-4">
         {str("Medicine Administration Record")}
       </h3>
-      <MedicineAdministrationRecord />
+      <MedicineAdministrationRecord consultationId={consultationId} />
     </div>
     <hr className="my-8 border-gray-400" />
     <h3 className="underline underline-offset-2 mb-4"> {str("I/O Balance")} </h3>
