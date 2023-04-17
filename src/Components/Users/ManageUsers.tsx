@@ -439,7 +439,7 @@ export default function ManageUsers() {
         setOpen={setExpandFacilityList}
         slideFrom="right"
         title="Facilities"
-        dialogClass="w-[350px]"
+        dialogClass="w-[350px] p-6"
         onCloseClick={() => {
           //fetchData({ aborted: false });
         }}
