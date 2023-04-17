@@ -492,8 +492,6 @@ export const DailyRounds = (props: any) => {
     dispatch({ type: "set_form", form });
   };
 
-  console.log("state", state, prevAction, prevReviewInterval);
-
   if (isLoading) {
     return <Loading />;
   }
