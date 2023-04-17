@@ -8,25 +8,46 @@ import medicines_list from "../Common/prescription-builder/assets/medicines.json
 import { UserModel } from "../Users/models";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { useDispatch } from "react-redux";
-import { addPrescription } from "../../Redux/actions";
+import {
+  addPrescription,
+  deletePrescription,
+  updatePrescription,
+} from "../../Redux/actions";
 import { statusType } from "../../Common/utils";
 import _ from "lodash";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 
 export const medicines = medicines_list;
 
-const frequency = ["Stat", "od", "hs", "bd", "tid", "qid", "q4h", "qod", "qwk"];
-const frequencyTips = {
-  Stat: "Immediately",
-  od: "once daily",
-  hs: "Night only",
-  bd: "Twice daily",
-  tid: "8th hourly",
-  qid: "6th hourly",
-  q4h: "4th hourly",
-  qod: "Alternate day",
-  qwk: "Once a week",
-};
-export const routes = ["Oral", "IV", "IM", "S/C"];
+const FREQUENCY = [
+  { name: "Imediately", value: "STAT" },
+  { name: "Once daily", value: "OD" },
+  { name: "Night only", value: "HS" },
+  { name: "Twice daily", value: "BD" },
+  { name: "8th hourly", value: "TID" },
+  { name: "6th hourly", value: "QID" },
+  { name: "4th hourly", value: "Q4H" },
+  { name: "Alternate day", value: "QOD" },
+  { name: "Once a week", value: "QWK" },
+];
+export const ROUTES = [
+  {
+    name: "Oral",
+    value: "ORAL",
+  },
+  {
+    name: "IV",
+    value: "IV",
+  },
+  {
+    name: "IM",
+    value: "IM",
+  },
+  {
+    name: "S/C",
+    value: "SC",
+  },
+];
 export const units = ["mg", "g", "ml", "drops", "ampule", "tsp"];
 
 type BasePrescriptionType = {
@@ -41,7 +62,7 @@ type BasePrescriptionType = {
   discontinued_reason: string;
   discontinued_data: string;
   created_date: string;
-  modified_data: string;
+  modified_date: string;
 };
 
 type NormalPrescription = {
@@ -86,6 +107,7 @@ export default function PrescriptionBuilder(props: {
   prescriptions: PrescriptionType[];
   type: "normal" | "prn";
   fetchPrescriptions: (status: statusType) => Promise<void>;
+  discharge?: boolean;
 }) {
   const { consultation, prescriptions, type, fetchPrescriptions } = props;
 
@@ -130,7 +152,7 @@ export default function PrescriptionBuilder(props: {
         }}
         className="shadow-sm mt-4 bg-gray-200 w-full font-bold block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:bg-gray-300 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
       >
-        + Add Medicine
+        + Add Prescription
       </button>
     </div>
   );
@@ -143,6 +165,8 @@ export function PrescriptionForm(props: {
 }) {
   const [prescription, setPrescription] = useState(props.prescription);
   const dispatchAction: any = useDispatch();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setPrescription(props.prescription);
@@ -150,27 +174,60 @@ export function PrescriptionForm(props: {
 
   const handleSubmit = () => {
     if (prescription.external_id) {
-      console.log("update");
+      handleSave();
     } else {
       handleCreate();
     }
   };
 
-  const handleDelete = () => {
-    console.log("delete");
+  const handleSave = async () => {
+    setLoading(true);
+    const res = await dispatchAction(
+      updatePrescription(
+        props.consultation,
+        prescription.external_id,
+        prescription
+      )
+    );
+    if (res && res.data && res.status !== 400) {
+      props.refreshPrescriptions({ aborted: false });
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async () => {
+    setLoading(true);
+    const res = await dispatchAction(
+      deletePrescription(props.consultation, prescription.external_id)
+    );
+    if (res && res.status !== 400) {
+      props.refreshPrescriptions({ aborted: false });
+    }
+    setLoading(false);
   };
 
   const handleCreate = async () => {
+    setLoading(true);
     const res = await dispatchAction(
       addPrescription(props.consultation, prescription)
     );
     if (res && res.data && res.status !== 400) {
       props.refreshPrescriptions({ aborted: false });
     }
+    setLoading(false);
   };
 
   return (
     <div>
+      <ConfirmDialogV2
+        title="Delete Prescription"
+        description="Are you sure you want to delete this prescription? You can set it as discontinued if the prescription is still valid."
+        action="Confirm"
+        variant="danger"
+        show={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+      />
       <div
         className={
           "border-2 border-gray-500 mb-2 border-dashed border-spacing-2 p-3 rounded-md text-sm text-gray-600"
@@ -189,7 +246,7 @@ export function PrescriptionForm(props: {
           </div>
           <div>
             {_.isEqual(props.prescription, prescription) || (
-              <ButtonV2 type="button" onClick={handleSubmit}>
+              <ButtonV2 type="button" onClick={handleSubmit} loading={loading}>
                 <CareIcon className="care-l-check w-4 h-4" />
                 {prescription.external_id ? "Save" : "Create"}
               </ButtonV2>
@@ -199,7 +256,8 @@ export function PrescriptionForm(props: {
                 <ButtonV2
                   type="button"
                   variant="danger"
-                  onClick={handleDelete}
+                  onClick={() => setShowDeleteDialog(true)}
+                  loading={loading}
                   className="ml-2"
                 >
                   <CareIcon className="care-l-trash-alt w-4 h-4" />
@@ -210,7 +268,192 @@ export function PrescriptionForm(props: {
           </div>
         </div>
         {prescription.is_prn ? (
-          <></>
+          <>
+            <div className="flex gap-2 flex-col md:flex-row items-center md:mb-4">
+              <div className="w-full">
+                <div className="mb-2">
+                  Medicine
+                  <span className="font-bold text-danger-500">{" *"}</span>
+                </div>
+                <AutoCompleteAsync
+                  placeholder="Medicine"
+                  selected={prescription.medicine}
+                  fetchData={(search) => {
+                    return Promise.resolve(
+                      medicines.filter((medicine: string) =>
+                        medicine.toLowerCase().includes(search.toLowerCase())
+                      )
+                    );
+                  }}
+                  optionLabel={(option) => option}
+                  onChange={(medicine) =>
+                    setPrescription({ ...prescription, medicine })
+                  }
+                  showNOptions={medicines.length}
+                  className="-mt-1"
+                />
+              </div>
+              <div className="flex gap-2">
+                <div className="w-[100px]">
+                  <div className="mb-1">Route</div>
+                  <SelectMenuV2
+                    placeholder="Route"
+                    options={ROUTES}
+                    value={prescription.route}
+                    onChange={(route) =>
+                      setPrescription({ ...prescription, route: route || "" })
+                    }
+                    optionLabel={(option) => option.name}
+                    optionValue={(option) => option.value}
+                    required={false}
+                    showChevronIcon={false}
+                    className="mt-[2px]"
+                  />
+                </div>
+                <div>
+                  <div className="w-full md:w-[160px] flex gap-2 shrink-0">
+                    <div>
+                      <div className="mb-1">Dosage</div>
+                      <div className="flex gap-1">
+                        <input
+                          type="number"
+                          className="cui-input-base py-0"
+                          value={prescription.dosage?.split(" ")[0]}
+                          placeholder="Dosage"
+                          min={0}
+                          onChange={(e) => {
+                            let value = parseFloat(e.target.value);
+                            if (value < 0) {
+                              value = 0;
+                            }
+                            setPrescription({
+                              ...prescription,
+                              dosage:
+                                value +
+                                " " +
+                                (prescription.dosage?.split(" ")[1] || "mg"),
+                            });
+                          }}
+                          required
+                        />
+                        <div className="w-[80px] shrink-0">
+                          <SelectMenuV2
+                            placeholder="Unit"
+                            options={units}
+                            value={prescription.dosage?.split(" ")[1] || "mg"}
+                            onChange={(unit) =>
+                              setPrescription({
+                                ...prescription,
+                                dosage: prescription.dosage
+                                  ? prescription.dosage.split(" ")[0] +
+                                    " " +
+                                    unit
+                                  : "0 mg",
+                              })
+                            }
+                            optionLabel={(option) => option}
+                            required={false}
+                            showChevronIcon={false}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 mt-2 flex-col md:flex-row">
+              <div className="w-full">
+                <div className="mb-1">
+                  Indicator
+                  <span className="font-bold text-danger-500">{" *"}</span>
+                </div>
+                <input
+                  type="text"
+                  className="cui-input-base"
+                  value={prescription.indicator}
+                  placeholder="Indicator"
+                  onChange={(e) => {
+                    setPrescription({
+                      ...prescription,
+                      indicator: e.target.value,
+                    });
+                  }}
+                />
+              </div>
+              <div className="w-full md:w-[170px] flex gap-2 shrink-0">
+                <div>
+                  <div className="mb-1">Max Dosage in 24 hrs.</div>
+
+                  <div className="flex gap-1">
+                    <input
+                      type="number"
+                      className="cui-input-base py-2"
+                      value={prescription.max_dosage?.split(" ")[0]}
+                      placeholder="Dosage"
+                      min={0}
+                      onChange={(e) => {
+                        let value = parseFloat(e.target.value);
+                        if (value < 0) {
+                          value = 0;
+                        }
+                        setPrescription({
+                          ...prescription,
+                          max_dosage:
+                            value +
+                            " " +
+                            (prescription.max_dosage?.split(" ")[1] || "mg"),
+                        });
+                      }}
+                      required
+                    />
+                    <div className="w-[80px] shrink-0">
+                      <SelectMenuV2
+                        placeholder="Unit"
+                        options={units}
+                        value={prescription.max_dosage?.split(" ")[1] || "mg"}
+                        onChange={(unit) =>
+                          setPrescription({
+                            ...prescription,
+                            max_dosage: prescription.max_dosage
+                              ? prescription.max_dosage.split(" ")[0] +
+                                " " +
+                                unit
+                              : "0 mg",
+                          })
+                        }
+                        optionLabel={(option) => option}
+                        required={false}
+                        showChevronIcon={false}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="w-[160px] shrink-0">
+                <div className="mb-1">Min. time btwn. 2 doses</div>
+                <div className="flex items-center">
+                  <SelectMenuV2
+                    placeholder="hours"
+                    options={[1, 2, 3, 6, 12, 24]}
+                    value={prescription.min_hours_between_doses || 0}
+                    onChange={(min_time) =>
+                      min_time &&
+                      (min_time > 0
+                        ? setPrescription({
+                            ...prescription,
+                            min_hours_between_doses: min_time,
+                          })
+                        : 0)
+                    }
+                    optionLabel={(option) => option}
+                    required={false}
+                  />
+                  <div className="ml-2">Hrs.</div>
+                </div>
+              </div>
+            </div>
+          </>
         ) : (
           <>
             <div className="flex gap-2 flex-col md:flex-row md:mb-4">
@@ -243,12 +486,13 @@ export function PrescriptionForm(props: {
                   <div className="mb-1">Route</div>
                   <SelectMenuV2
                     placeholder="Route"
-                    options={routes}
+                    options={ROUTES}
                     value={prescription.route}
                     onChange={(route) =>
                       setPrescription({ ...prescription, route: route || "" })
                     }
-                    optionLabel={(option) => option}
+                    optionLabel={(option) => option.name}
+                    optionValue={(option) => option.value}
                     required={false}
                     className="mt-[6px]"
                   />
@@ -259,28 +503,21 @@ export function PrescriptionForm(props: {
                   </div>
                   <SelectMenuV2
                     placeholder="Frequency"
-                    options={frequency}
-                    value={prescription.frequency.toLowerCase()}
+                    options={FREQUENCY}
+                    value={prescription.frequency}
                     onChange={(freq) =>
                       setPrescription({
                         ...prescription,
-                        frequency: freq?.toUpperCase() || "",
+                        frequency: freq || "",
                       })
                     }
-                    optionLabel={(option) => option}
+                    optionLabel={(option) => option.name}
+                    optionValue={(option) => option.value}
                     optionIcon={(option) => (
                       <ToolTip
                         className="-right-2 bottom-[calc(100%+1px)] max-w-[100px]"
                         position="CUSTOM"
-                        text={
-                          <span>
-                            {
-                              frequencyTips[
-                                option as keyof typeof frequencyTips
-                              ]
-                            }
-                          </span>
-                        }
+                        text={<span>{option.value}</span>}
                       >
                         <i className="fa-solid fa-circle-info"></i>
                       </ToolTip>

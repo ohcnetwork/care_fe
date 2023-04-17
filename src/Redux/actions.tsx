@@ -553,11 +553,26 @@ export const getPrescriptions = (consultation_id: string) => {
 export const addPrescription = (consultation_id: string, params: object) => {
   return fireRequest("addPrescription", [], params, { consultation_id });
 };
-export const updatePrescription = (consultation_id: string, params: object) => {
-  return fireRequest("updatePrescription", [], params, { consultation_id });
+export const updatePrescription = (
+  consultation_id: string,
+  prescription_id: string,
+  params: object
+) => {
+  return fireRequest("updatePrescription", [], params, {
+    consultation_id,
+    id: prescription_id,
+  });
 };
-export const deletePrescription = (consultation_id: string, params: object) => {
-  return fireRequest("deletePrescription", [], params, { consultation_id });
+export const deletePrescription = (
+  consultation_id: string,
+  prescription_id: string
+) => {
+  return fireRequest(
+    "deletePrescription",
+    [],
+    {},
+    { consultation_id, id: prescription_id }
+  );
 };
 
 export const getMedicineAdministration = (
