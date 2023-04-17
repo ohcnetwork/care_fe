@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { getUserList, getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
 
 export default function BadgesList(props: any) {
   const { qParams, FilterBadges } = props;
@@ -11,11 +12,6 @@ export default function BadgesList(props: any) {
   const [approvingFacilityName, setApprovingFacilityName] = useState("");
   const dispatch: any = useDispatch();
   const { t } = useTranslation();
-
-  const booleanFilterOptions = {
-    trueValue: t("yes"),
-    falseValue: t("no"),
-  };
 
   useEffect(() => {
     async function fetchData() {
@@ -63,27 +59,53 @@ export default function BadgesList(props: any) {
     }
     fetchData();
   }, [dispatch, qParams.assigned_facility]);
+  const getDescShiftingFilterOrder = (ordering: any) => {
+    let desc = "";
+    SHIFTING_FILTER_ORDER.map((item: any) => {
+      if (item.text === ordering) {
+        desc = item.desc;
+      }
+    });
+    return desc;
+  };
+  const filterInitialOption = (fieldValue: any) => {
+    if (fieldValue === "--") {
+      return "";
+    }
+
+    return fieldValue;
+  };
 
   return (
     <FilterBadges
-      badges={({
-        badge,
-        boolean,
-        phoneNumber,
-        dateRange,
-        kasp,
-        value,
-      }: any) => [
+      badges={({ badge, phoneNumber, dateRange, kasp, value }: any) => [
         badge(t("status"), "status"),
-        boolean(t("emergency"), "emergency", booleanFilterOptions),
+        value(
+          t("emergency"),
+          "emergency",
+          filterInitialOption(qParams.emergency)
+        ),
         kasp(),
-        boolean(t("up_shift"), "is_up_shift", booleanFilterOptions),
-        boolean(t("antenatal"), "is_antenatal", booleanFilterOptions),
+        value(
+          t("up_shift"),
+          "is_up_shift",
+          filterInitialOption(qParams.is_up_shift)
+        ),
+        value(
+          t("antenatal"),
+          "is_antenatal",
+          filterInitialOption(qParams.is_antenatal)
+        ),
         phoneNumber(t("phone_no"), "patient_phone_number"),
         badge(t("patient_name"), "patient_name"),
         ...dateRange(t("created"), "created_date"),
+        ...dateRange(t("modified"), "modified_date"),
         badge(t("disease_status"), "disease_status"),
-        badge(t("breathlessness_level"), "breathlessness_level"),
+        value(
+          t("breathlessness_level"),
+          "breathlessness_level",
+          filterInitialOption(qParams.breathlessness_level)
+        ),
         value(t("assigned_to"), "assigned_to", assignedUsername),
         value(
           t("assigned_facility"),
@@ -95,6 +117,11 @@ export default function BadgesList(props: any) {
           t("shifting_approval_facility"),
           "shifting_approving_facility",
           approvingFacilityName
+        ),
+        value(
+          t("ordering"),
+          "ordering",
+          getDescShiftingFilterOrder(qParams.ordering)
         ),
       ]}
     />

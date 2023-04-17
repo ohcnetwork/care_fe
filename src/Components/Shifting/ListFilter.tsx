@@ -13,6 +13,7 @@ import { getAnyFacility, getUserList } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { SHIFTING_CHOICES } from "../../Common/constants";
+import { areEqual } from "../../Common/validation";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import parsePhoneNumberFromString from "libphonenumber-js";
 import useMergeState from "../../Common/hooks/useMergeState";
@@ -32,20 +33,20 @@ const clearFilterState = {
   shifting_approving_facility_ref: "",
   assigned_facility: "",
   assigned_facility_ref: "",
-  emergency: "",
-  is_up_shift: "",
+  emergency: "--",
+  is_up_shift: "--",
   created_date_before: "",
   created_date_after: "",
   modified_date_before: "",
   modified_date_after: "",
   patient_phone_number: "",
   ordering: "",
-  is_kasp: "",
+  is_kasp: "--",
   status: "",
   assigned_user_ref: "",
   assigned_to: "",
   disease_status: "",
-  is_antenatal: "",
+  is_antenatal: "--",
   breathlessness_level: "",
 };
 
@@ -56,6 +57,8 @@ export default function ListFilter(props: any) {
   const [isShiftingLoading, setShiftingLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
   const [isAssignedUserLoading, setAssignedUserLoading] = useState(false);
+  const [isPreventChangeFilterStateOn, setIsPreventChangeFilterStateOn] =
+    useState(false);
   const { t } = useTranslation();
 
   const [filterState, setFilterState] = useMergeState({
@@ -84,19 +87,42 @@ export default function ListFilter(props: any) {
   const dispatch: any = useDispatch();
 
   useEffect(() => {
-    if (filterState.orgin_facility === "") {
+    if (filterState.orgin_facility === "" && !isPreventChangeFilterStateOn) {
       setFilterState({ ...filter, orgin_facility_ref: null });
     }
-    if (filterState.shifting_approving_facility === "") {
+    if (
+      filterState.shifting_approving_facility === "" &&
+      !isPreventChangeFilterStateOn
+    ) {
       setFilterState({ ...filter, shifting_approving_facility_ref: null });
     }
-    if (filterState.assigned_facility === "") {
+    if (filterState.assigned_facility === "" && !isPreventChangeFilterStateOn) {
       setFilterState({ ...filter, assigned_facility_ref: null });
     }
-    if (filterState.assigned_to === "") {
+    if (filterState.assigned_to === "" && !isPreventChangeFilterStateOn) {
       setFilterState({ ...filter, assigned_user_ref: null });
     }
     setFilterState(filter);
+  }, [filter]);
+
+  useEffect(() => {
+    const removedParamsFilter = filter;
+    delete removedParamsFilter?.page;
+    delete removedParamsFilter?.limit;
+    if (
+      areEqual(clearFilterState, {
+        ...filter,
+        orgin_facility_ref: "",
+        shifting_approving_facility_ref: "",
+        assigned_facility_ref: "",
+        assigned_user_ref: "",
+      })
+    ) {
+      const urlWithoutParams = window.location.pathname;
+      navigate(urlWithoutParams);
+
+      setFilterState(clearFilterState);
+    }
   }, [filter]);
 
   useEffect(() => {
@@ -169,14 +195,15 @@ export default function ListFilter(props: any) {
   }, [dispatch]);
 
   const setFacility = (selected: any, name: string) => {
+    setIsPreventChangeFilterStateOn(true);
     const filterData: any = { ...filterState };
     filterData[`${name}_ref`] = selected;
     filterData[name] = (selected || {}).id;
-
     setFilterState(filterData);
   };
 
   const setAssignedUser = (user: any) => {
+    setIsPreventChangeFilterStateOn(true);
     const filterData: any = { ...filterState };
     filterData.assigned_to = user ? user.id : "";
     filterData.assigned_user_ref = user;
@@ -258,6 +285,7 @@ export default function ListFilter(props: any) {
       breathlessness_level: breathlessness_level || "",
     };
     onChange(data);
+    setIsPreventChangeFilterStateOn(false);
   };
 
   const handleDateRangeChange = (

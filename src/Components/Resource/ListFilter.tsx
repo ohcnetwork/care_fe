@@ -7,6 +7,7 @@ import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import { RESOURCE_CHOICES } from "../../Common/constants";
+import { areEqual } from "../../Common/validation";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import useMergeState from "../../Common/hooks/useMergeState";
 import { navigate } from "raviger";
@@ -21,7 +22,7 @@ const clearFilterState = {
   approving_facility_ref: "",
   assigned_facility: "",
   assigned_facility_ref: "",
-  emergency: "",
+  emergency: "--",
   created_date_before: "",
   created_date_after: "",
   modified_date_before: "",
@@ -50,18 +51,42 @@ export default function ListFilter(props: any) {
     ordering: filter.ordering || null,
     status: filter.status || null,
   });
+  const [isPreventChangeFilterStateOn, setIsPreventChangeFilterStateOn] =
+    useState(false);
   const dispatch: any = useDispatch();
   useEffect(() => {
-    if (filterState.orgin_facility === "") {
+    if (filterState.orgin_facility === "" && !isPreventChangeFilterStateOn) {
       setFilterState({ ...filter, orgin_facility_ref: null });
     }
-    if (filterState.approving_facility === "") {
+    if (
+      filterState.approving_facility === "" &&
+      !isPreventChangeFilterStateOn
+    ) {
       setFilterState({ ...filter, approving_facility_ref: null });
     }
-    if (filterState.assigned_facility === "") {
+    if (filterState.assigned_facility === "" && !isPreventChangeFilterStateOn) {
       setFilterState({ ...filter, assigned_facility_ref: null });
     }
     setFilterState(filter);
+  }, [filter]);
+
+  useEffect(() => {
+    const removedParamsFilter = filter;
+    delete removedParamsFilter?.page;
+    delete removedParamsFilter?.limit;
+    if (
+      areEqual(clearFilterState, {
+        ...filter,
+        orgin_facility_ref: "",
+        approving_facility_ref: "",
+        assigned_facility_ref: "",
+      })
+    ) {
+      const urlWithoutParams = window.location.pathname;
+      navigate(urlWithoutParams);
+
+      setFilterState(clearFilterState);
+    }
   }, [filter]);
 
   useEffect(() => {
@@ -113,6 +138,7 @@ export default function ListFilter(props: any) {
   }, [dispatch]);
 
   const setFacility = (selected: any, name: string) => {
+    setIsPreventChangeFilterStateOn(true);
     setFilterState({
       ...filterState,
       [`${name}_ref`]: selected,
@@ -163,6 +189,7 @@ export default function ListFilter(props: any) {
       status: status || "",
     };
     onChange(data);
+    setIsPreventChangeFilterStateOn(false);
   };
 
   const handleDateRangeChange = (

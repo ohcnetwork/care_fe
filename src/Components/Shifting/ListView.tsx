@@ -259,6 +259,7 @@ export default function ListView() {
       </div>
     ));
   };
+  console.log(qParams, "hi");
 
   return (
     <Page
