@@ -100,7 +100,7 @@ const AutoCompleteAsync = (props: Props) => {
             </Combobox.Button>
           </div>
           <DropdownTransition>
-            <Combobox.Options className="cui-dropdown-base top-12 absolute z-10 mt-2 text-sm">
+            <Combobox.Options className="cui-dropdown-base top-12 absolute z-10 text-sm">
               {data?.length === 0 ? (
                 <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                   {query !== ""

@@ -13,9 +13,12 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   options: T[];
   optionLabel: OptionCallback<T, string>;
   optionValue?: OptionCallback<T, V>;
+  optionDescription?: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   onQuery?: (query: string) => void;
   dropdownIcon?: React.ReactNode | undefined;
+  isLoading?: boolean;
+  allowRawInput?: boolean;
 };
 
 const AutocompleteFormField = <T, V>(
@@ -36,7 +39,10 @@ const AutocompleteFormField = <T, V>(
         optionLabel={props.optionLabel}
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
+        optionDescription={props.optionDescription}
         onQuery={props.onQuery}
+        isLoading={props.isLoading}
+        allowRawInput={props.allowRawInput}
         requiredError={field.error ? props.required : false}
       />
     </FormField>
@@ -54,10 +60,12 @@ type AutocompleteProps<T, V = T> = {
   optionLabel: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
+  optionDescription?: OptionCallback<T, string>;
   className?: string;
   onQuery?: (query: string) => void;
   requiredError?: boolean;
   isLoading?: boolean;
+  allowRawInput?: boolean;
 } & (
   | {
       required?: false;
@@ -82,15 +90,41 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
     props.onQuery && props.onQuery(query);
   }, [query]);
 
-  const options = props.options.map((option) => {
+  const mappedOptions = props.options.map((option) => {
     const label = props.optionLabel(option);
+    const description =
+      props.optionDescription && props.optionDescription(option);
     return {
       label,
-      search: label.toLowerCase(),
+      description,
+      search:
+        label.toLowerCase() + (description ? description.toLowerCase() : ""),
       icon: props.optionIcon && props.optionIcon(option),
       value: props.optionValue ? props.optionValue(option) : option,
     };
   });
+
+  const getOptions = () => {
+    if (!query) return mappedOptions;
+
+    const knownOption = mappedOptions.find(
+      (o) => o.value == props.value || o.label == props.value
+    );
+
+    if (knownOption) return mappedOptions;
+    return [
+      {
+        label: query,
+        description: undefined,
+        search: query.toLowerCase(),
+        icon: <CareIcon className="care-l-plus" />,
+        value: query,
+      },
+      ...mappedOptions,
+    ];
+  };
+
+  const options = props.allowRawInput ? getOptions() : mappedOptions;
 
   const value = options.find((o) => props.value == o.value);
   const filteredOptions = options.filter((o) => o.search.includes(query));
@@ -130,6 +164,11 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
 
           <DropdownTransition>
             <Combobox.Options className="origin-top-right absolute z-10 mt-0.5 cui-dropdown-base">
+              {filteredOptions.length === 0 && (
+                <div className="p-2 text-sm text-gray-500">
+                  No options found
+                </div>
+              )}
               {filteredOptions.map((option, index) => (
                 <Combobox.Option
                   id={`${props.id}-option-${option.value}`}
@@ -137,9 +176,16 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   className={dropdownOptionClassNames}
                   value={option}
                 >
-                  <div className="flex justify-between">
-                    {option.label}
-                    {option.icon}
+                  <div className="flex flex-col">
+                    <div className="flex justify-between">
+                      {option.label}
+                      {option.icon}
+                    </div>
+                    {option.description && (
+                      <div className="text-sm text-gray-500">
+                        {option.description}
+                      </div>
+                    )}
                   </div>
                 </Combobox.Option>
               ))}

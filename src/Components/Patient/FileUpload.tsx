@@ -12,7 +12,7 @@ import {
   editUpload,
 } from "../../Redux/actions";
 import { FileUploadModel } from "./models";
-import { TextInputField } from "../Common/HelperInputFields";
+import { LegacyTextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
@@ -84,13 +84,14 @@ export const LinearProgressWithLabel = (props: any) => {
 
 interface FileUploadProps {
   type: string;
-  patientId: any;
-  facilityId: any;
-  consultationId: any;
+  patientId?: any;
+  facilityId?: any;
+  consultationId?: any;
   hideBack: boolean;
-  audio: boolean;
+  audio?: boolean;
   unspecified: boolean;
   sampleId?: number;
+  claimId?: string;
 }
 
 interface URLS {
@@ -131,6 +132,7 @@ export const FileUpload = (props: FileUploadProps) => {
     audio,
     unspecified,
     sampleId,
+    claimId,
   } = props;
   const id = patientId;
   const dispatch: any = useDispatch();
@@ -246,11 +248,13 @@ export const FileUpload = (props: FileUploadProps) => {
     PATIENT: "Upload Patient Files",
     CONSULTATION: "Upload Consultation Files",
     SAMPLE_MANAGEMENT: "Upload Sample Report",
+    CLAIM: "Upload Supporting Info",
   };
   const VIEW_HEADING: { [index: string]: string } = {
     PATIENT: "View Patient Files",
     CONSULTATION: "View Consultation Files",
     SAMPLE_MANAGEMENT: "View Sample Report",
+    CLAIM: "Supporting Info",
   };
 
   const handleClose = () => {
@@ -266,15 +270,14 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const getAssociatedId = () => {
     switch (type) {
-      case "PATIENT": {
+      case "PATIENT":
         return patientId;
-      }
-      case "CONSULTATION": {
+      case "CONSULTATION":
         return consultationId;
-      }
-      case "SAMPLE_MANAGEMENT": {
+      case "SAMPLE_MANAGEMENT":
         return sampleId;
-      }
+      case "CLAIM":
+        return claimId;
     }
   };
 
@@ -568,7 +571,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   </div>
                   <div className="flex flex-wrap items-center">
                     {item.id ? (
-                      Object.keys(url).length > 0 ? (
+                      Object.keys(url).length > 0 && (
                         <div className="flex flex-wrap">
                           <a
                             href={url[item.id]}
@@ -625,8 +628,6 @@ export const FileUpload = (props: FileUploadProps) => {
                             <></>
                           )}
                         </div>
-                      ) : (
-                        <CircularProgress />
                       )
                     ) : (
                       <div>File Not found</div>
@@ -1306,7 +1307,7 @@ export const FileUpload = (props: FileUploadProps) => {
               <InputLabel id="spo2-label">
                 Enter Audio File Name (optional)
               </InputLabel>
-              <TextInputField
+              <LegacyTextInputField
                 name="consultation_audio_file"
                 variant="outlined"
                 margin="dense"
@@ -1369,7 +1370,7 @@ export const FileUpload = (props: FileUploadProps) => {
               </div>
               <div>
                 <InputLabel id="spo2-label">Enter File Name*</InputLabel>
-                <TextInputField
+                <LegacyTextInputField
                   name="consultation_file"
                   variant="outlined"
                   margin="dense"

@@ -9,7 +9,8 @@ import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDate } from "../../../Utils/utils";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-
+import { PainDiagrams } from "./PainDiagrams";
+import PageTitle from "../../Common/PageTitle";
 interface PrimaryParametersPlotProps {
   facilityId: string;
   patientId: string;
@@ -31,7 +32,6 @@ export const PrimaryParametersPlot = ({
           {
             page: currentPage,
             fields: [
-              "pain",
               "bp",
               "pulse",
               "temperature",
@@ -139,13 +139,14 @@ export const PrimaryParametersPlot = ({
       rhythmValues[key] = lst;
     }
   });
+
   return (
     <div>
-      <div className="grid grid-row-1 md:grid-cols-2 gap-4">
-        <div className="md:w-full w-screen m-2 pt-4 px-4 bg-white border rounded-lg shadow">
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="md:w-full overflow-x-auto m-2 pt-4 px-4 bg-white border rounded-lg shadow">
           <StackedLinePlot title="BP" xData={dates} yData={BPData} />
         </div>
-        <div className="md:w-full w-screen pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
           <LinePlot
             title="Pulse"
             name="Pulse"
@@ -155,7 +156,7 @@ export const PrimaryParametersPlot = ({
             high={100}
           />
         </div>
-        <div className="md:w-full w-screen pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
           <LinePlot
             title="Temperature (F)"
             name="Temperature"
@@ -163,7 +164,7 @@ export const PrimaryParametersPlot = ({
             yData={yAxisData("temperature")}
           />
         </div>
-        <div className="md:w-full w-screen pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
           <LinePlot
             title="Resp"
             name="Resp"
@@ -171,10 +172,10 @@ export const PrimaryParametersPlot = ({
             yData={yAxisData("resp")}
           />
         </div>
-        <div className="md:w-full w-screen pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
           <StackedLinePlot title="Insulin" xData={dates} yData={InsulinData} />
         </div>
-        <div className="md:w-full w-screen pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
           <LinePlot
             title="SPO2 (%)"
             name="spo2"
@@ -184,7 +185,7 @@ export const PrimaryParametersPlot = ({
             high={100}
           />
         </div>
-        <div className="md:w-full w-screen pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
           <LinePlot
             title="Ventilator FIO2 (%)"
             name="fio2"
@@ -194,7 +195,7 @@ export const PrimaryParametersPlot = ({
             high={60}
           />
         </div>
-        <div className="md:w-full w-screen pt-4 m-2 px-4 bg-white border rounded-lg shadow h-80">
+        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow h-80">
           <h3 className="text-sm px-3 mb-2">Rhythm</h3>
           <div className="flow-root m-2 overflow-y-scroll h-64">
             <ul role="list" className="-mb-8">
@@ -256,7 +257,10 @@ export const PrimaryParametersPlot = ({
           </div>
         </div>
       </div>
-
+      <div>
+        <PageTitle title="Pain Scale" hideBack={true} breadcrumbs={false} />
+        <PainDiagrams consultationId={consultationId} />
+      </div>
       {totalCount > PAGINATION_LIMIT && (
         <div className="mt-4 flex w-full justify-center">
           <Pagination

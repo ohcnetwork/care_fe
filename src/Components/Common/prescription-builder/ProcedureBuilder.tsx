@@ -109,7 +109,8 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   {procedure.repetitive ? (
                     <div className="w-full">
                       <div className="mb-1">
-                        Frequency<span className="text-danger-500">{" *"}</span>
+                        Frequency
+                        <span className="text-danger-500">{" *"}</span>
                       </div>
                       <PrescriptionDropdown
                         onFocus={() => setActiveIdx(i)}

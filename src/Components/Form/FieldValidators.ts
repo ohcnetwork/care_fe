@@ -1,5 +1,5 @@
 export type FieldError = string | undefined;
-export type FieldValidator<T> = (value: T) => FieldError;
+export type FieldValidator<T> = (value: T, ...args: any) => FieldError;
 
 /**
  * Example usage:

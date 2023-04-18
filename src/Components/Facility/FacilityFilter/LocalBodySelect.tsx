@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import { getLocalbodyByDistrict } from "../../../Redux/actions";
-import { AutoCompleteAsyncField } from "../../Common/HelperInputFields";
+import { LegacyAutoCompleteAsyncField } from "../../Common/HelperInputFields";
 
 interface LocalBodySelectProps {
   name: string;
@@ -27,6 +28,7 @@ function LocalBodySelect(props: LocalBodySelectProps) {
     margin,
     district,
   } = props;
+  const { t } = useTranslation();
   const [loadBodyLoading, isLocalBodyLoading] = useState(false);
   const [selectedObject, setSelectedObject] = useState(null);
   const [hasSearchText, setHasSearchText] = useState(false);
@@ -81,7 +83,7 @@ function LocalBodySelect(props: LocalBodySelectProps) {
   }, [dispatchAction, district, selected]);
 
   return (
-    <AutoCompleteAsyncField
+    <LegacyAutoCompleteAsyncField
       name={name}
       multiple={multiple}
       variant="outlined"
@@ -91,11 +93,11 @@ function LocalBodySelect(props: LocalBodySelectProps) {
       onSearch={handleSearch}
       onChange={(e: any, selected: any) => handleValueChange(selected)}
       loading={loadBodyLoading}
-      placeholder="Enter local body name"
+      placeholder={t("select_local_body")}
       noOptionsText={
         hasSearchText
           ? "No local body found, please try again"
-          : "Start typing to begin search"
+          : t("type_to_search")
       }
       renderOption={(option: any) => <div>{option.name}</div>}
       getOptionSelected={(option: any, value: any) => option.id === value.id}

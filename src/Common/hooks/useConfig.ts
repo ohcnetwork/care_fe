@@ -5,6 +5,8 @@ export interface IConfig {
   github_url: string;
   coronasafe_url: string;
   dpg_url: string;
+  site_url: string;
+  analytics_server_url: string;
   static_header_logo: string;
   static_light_logo: string;
   static_black_logo: string;
@@ -49,6 +51,10 @@ export interface IConfig {
    * URL of the sample format for external result import.
    */
   sample_format_external_result_import: string;
+  /**
+   * Env to enable HCX features
+   */
+  enable_hcx: boolean;
 }
 
 const useConfig = () => {

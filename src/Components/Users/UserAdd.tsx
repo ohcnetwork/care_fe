@@ -29,13 +29,12 @@ import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 
-import { classNames, getExperienceSuffix } from "../../Utils/utils";
+import { classNames } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import MonthFormField from "../Form/FormFields/Month";
 import Checkbox from "../Common/components/CheckBox";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
@@ -513,7 +512,7 @@ export const UserAdd = (props: UserProps) => {
           }
           return;
         case "local_body":
-          if (!Number(state.form[field])) {
+          if (showLocalbody && !Number(state.form[field])) {
             errors[field] = "Please select the local body";
             invalidForm = true;
           }
@@ -583,9 +582,9 @@ export const UserAdd = (props: UserProps) => {
             : undefined,
         doctor_experience_commenced_on:
           state.form.user_type === "Doctor"
-            ? moment(state.form.doctor_experience_commenced_on).format(
-                "YYYY-MM-DD"
-              )
+            ? moment()
+                .subtract(state.form.doctor_experience_commenced_on, "years")
+                .format("YYYY-MM-DD")
             : undefined,
         doctor_medical_council_registration:
           state.form.user_type === "Doctor"
@@ -684,15 +683,13 @@ export const UserAdd = (props: UserProps) => {
                     placeholder="Qualification of the Doctor"
                   />
 
-                  <MonthFormField
+                  <TextFormField
                     {...field("doctor_experience_commenced_on")}
                     required
-                    label="Experience commenced on"
-                    suffix={(date) => (
-                      <span className="ml-2 text-sm whitespace-nowrap">
-                        {getExperienceSuffix(date)}
-                      </span>
-                    )}
+                    min={0}
+                    type="number"
+                    label="Years of experience"
+                    placeholder="Years of experience of the Doctor"
                   />
 
                   <TextFormField

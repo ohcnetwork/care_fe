@@ -10,7 +10,7 @@ interface Routes {
 
 const routes: Routes = {
   config: {
-    path: process.env.REACT_APP_CONFIG || "/config.json",
+    path: import.meta.env.REACT_APP_CONFIG || "/config.json",
     method: "GET",
     noAuth: true,
   },
@@ -801,6 +801,88 @@ const routes: Routes = {
   getAssetTransaction: {
     path: "/api/v1/asset_transaction/{id}",
     method: "GET",
+  },
+
+  // HCX Endpoints
+
+  listPMJYPackages: {
+    path: "/api/v1/hcx/pmjy_packages/",
+    method: "GET",
+  },
+
+  hcxListPayors: {
+    path: "/api/v1/hcx/payors/",
+    method: "GET",
+  },
+
+  hcxCheckEligibility: {
+    path: "/api/v1/hcx/check_eligibility/",
+    method: "POST",
+  },
+
+  listHCXPolicies: {
+    path: "/api/v1/hcx/policy/",
+    method: "GET",
+  },
+
+  createHCXPolicy: {
+    path: "/api/v1/hcx/policy/",
+    method: "POST",
+  },
+
+  getHCXPolicy: {
+    path: "/api/v1/hcx/policy/{external_id}/",
+    method: "GET",
+  },
+
+  updateHCXPolicy: {
+    path: "/api/v1/hcx/policy/{external_id}/",
+    method: "PUT",
+  },
+
+  partialUpdateHCXPolicy: {
+    path: "/api/v1/hcx/policy/{external_id}/",
+    method: "PATCH",
+  },
+
+  deleteHCXPolicy: {
+    path: "/api/v1/hcx/policy/{external_id}/",
+    method: "DELETE",
+  },
+
+  listHCXClaims: {
+    path: "/api/v1/hcx/claim/",
+    method: "GET",
+  },
+
+  createHCXClaim: {
+    path: "/api/v1/hcx/claim/",
+    method: "POST",
+  },
+
+  getHCXClaim: {
+    path: "/api/v1/hcx/claim/{external_id}/",
+    method: "GET",
+  },
+
+  updateHCXClaim: {
+    path: "/api/v1/hcx/claim/{external_id}/",
+    method: "PUT",
+  },
+
+  partialUpdateHCXClaim: {
+    path: "/api/v1/hcx/claim/{external_id}/",
+    method: "PATCH",
+  },
+
+  deleteHCXClaim: {
+    path: "/api/v1/hcx/claim/{external_id}/",
+    method: "DELETE",
+  },
+
+  hcxMakeClaim: {
+    path: "/api/v1/hcx/make_claim/",
+    method: "POST",
   },
 };
 

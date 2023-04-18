@@ -7,7 +7,7 @@ on:
 
 jobs:
   add-comment:
-    if: github.event.label.name == 'P1'
+    if: github.event.label.name == 'P1' && github.repository == 'coronasafe/care_fe'
     runs-on: ubuntu-latest
     permissions:
       issues: write

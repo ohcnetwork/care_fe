@@ -1,11 +1,11 @@
 import { navigate } from "raviger";
 import { Button, CircularProgress } from "@material-ui/core";
 import moment from "moment";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications";
-import { getConsultation, getPatient } from "../../Redux/actions";
+import { getConsultation, getPatient, HCXActions } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { ConsultationModel, ICD11DiagnosisModel } from "./models";
 import { PatientModel } from "../Patient/models";
@@ -28,7 +28,6 @@ import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { NutritionPlots } from "./Consultations/NutritionPlots";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
-import ViewInvestigations from "./Investigations/ViewInvestigations";
 import DoctorVideoSlideover from "./DoctorVideoSlideover";
 import { Feed } from "./Consultations/Feed";
 import { validateEmailAddress } from "../../Common/validation";
@@ -37,10 +36,9 @@ import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import { TextInputField } from "../Common/HelperInputFields";
+import { LegacyTextInputField } from "../Common/HelperInputFields";
 import { discharge, dischargePatient } from "../../Redux/actions";
 import ReadMore from "../Common/components/Readmore";
-import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
@@ -60,13 +58,22 @@ import PRNPrescriptionBuilder, {
   PRNPrescriptionType,
 } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { formatDate } from "../../Utils/utils";
+import CreateClaimCard from "../HCX/CreateClaimCard";
+import { HCXClaimModel } from "../HCX/models";
+import ClaimDetailCard from "../HCX/ClaimDetailCard";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import Chip from "../../CAREUI/display/Chip";
+import InvestigationTab from "./Investigations/investigationsTab";
+import useConfig from "../../Common/hooks/useConfig";
+
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
   discharge_date: string;
   death_datetime: string | null;
   death_confirmed_doctor: string | null;
+  discharge_prescription: PrescriptionType[];
+  discharge_prn_prescription: PRNPrescriptionType[];
 }
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -104,13 +111,56 @@ export const ConsultationDetails = (props: any) => {
       discharge_date: "",
       death_datetime: null,
       death_confirmed_doctor: null,
+      discharge_prescription: [],
+      discharge_prn_prescription: [],
     });
   const [showAutomatedRounds, setShowAutomatedRounds] = useState(true);
 
-  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
-    []
-  );
-  const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
+  const [dischargePrescription, setDischargePrescription] = useState<
+    PrescriptionType[]
+  >([]);
+  const [dischargePRNPrescription, setDischargePRNPrescription] = useState<
+    PRNPrescriptionType[]
+  >([]);
+
+  const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
+  const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
+  const { enable_hcx } = useConfig();
+
+  const fetchLatestClaim = useCallback(async () => {
+    const res = await dispatch(
+      HCXActions.claims.list({
+        ordering: "-modified_date",
+        use: "claim",
+        consultation: consultationId,
+      })
+    );
+
+    if (res.data?.results?.length) {
+      setLatestClaim(res.data.results[0]);
+      if (isCreateClaimLoading)
+        Notification.Success({ msg: "Fetched Claim Approval Results" });
+    } else {
+      setLatestClaim(undefined);
+      if (isCreateClaimLoading)
+        Notification.Success({ msg: "Error Fetched Claim Approval Results" });
+    }
+    setIsCreateClaimLoading(false);
+  }, [consultationId, dispatch]);
+
+  useEffect(() => {
+    fetchLatestClaim();
+  }, [fetchLatestClaim]);
+
+  useMessageListener((data) => {
+    if (
+      data.type === "MESSAGE" &&
+      (data.from === "claim/on_submit" || data.from === "preauth/on_submit") &&
+      data.message === "success"
+    ) {
+      fetchLatestClaim();
+    }
+  });
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -209,6 +259,8 @@ export const ConsultationDetails = (props: any) => {
           discharge_date: moment(preDischargeForm.discharge_date).toISOString(
             true
           ),
+          discharge_prescription: dischargePrescription,
+          discharge_prn_prescription: dischargePRNPrescription,
         },
         { id: patientData.id }
       )
@@ -252,18 +304,10 @@ export const ConsultationDetails = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatch(getConsultation(consultationId));
-      setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      setPRNAdvice(
-        !Array.isArray(res.data.prn_prescription)
-          ? []
-          : res.data.prn_prescription
-      );
       setPreDischargeForm((form) => {
         return {
           ...form,
-          discharge_date: res.data.admission_date
-            ? res.data.admission_date
-            : new Date().toISOString(),
+          discharge_date: new Date().toISOString(),
         };
       });
       if (!status.aborted) {
@@ -411,7 +455,7 @@ export const ConsultationDetails = (props: any) => {
               Fill email input with my email.
             </a>
           </div>
-          <TextInputField
+          <LegacyTextInputField
             type="email"
             name="email"
             label="email"
@@ -446,7 +490,7 @@ export const ConsultationDetails = (props: any) => {
         }
         show={openDischargeDialog}
         onClose={handleDischargeClose}
-        className="md:max-w-2xl"
+        className="md:max-w-3xl"
       >
         <div className="mt-6 flex flex-col">
           <SelectFormField
@@ -491,23 +535,26 @@ export const ConsultationDetails = (props: any) => {
                 label="Discharge Date"
                 name="discharge_date"
                 value={moment(preDischargeForm.discharge_date).toDate()}
-                min={moment(consultationData.admission_date).toDate()}
+                min={moment(
+                  consultationData.admission_date ||
+                    consultationData.created_date
+                ).toDate()}
                 disableFuture={true}
                 required
                 onChange={handleDateChange}
               />
               <FieldLabel>Discharge Prescription</FieldLabel>
-              <div className="">
-                <PRNPrescriptionBuilder
-                  prescriptions={PRNAdvice}
-                  setPrescriptions={setPRNAdvice}
+              <div className="my-2">
+                <PrescriptionBuilder
+                  prescriptions={dischargePrescription}
+                  setPrescriptions={setDischargePrescription}
                 />
               </div>
               <div>
-                <FieldLabel>Description Advice</FieldLabel>
-                <PrescriptionBuilder
-                  prescriptions={dischargeAdvice}
-                  setPrescriptions={setDischargeAdvice}
+                <FieldLabel>Discharge PRN Prescription</FieldLabel>
+                <PRNPrescriptionBuilder
+                  prescriptions={dischargePRNPrescription}
+                  setPrescriptions={setDischargePRNPrescription}
                 />
               </div>
             </div>
@@ -551,7 +598,41 @@ export const ConsultationDetails = (props: any) => {
               />
             </div>
           )}
+          {["REF", "LAMA"].includes(preDischargeForm.discharge_reason) && (
+            <div>
+              <DateFormField
+                label="Date of Discharge"
+                name="discharge_date"
+                value={moment(preDischargeForm.discharge_date).toDate()}
+                min={moment(
+                  consultationData.admission_date ||
+                    consultationData.created_date
+                ).toDate()}
+                disableFuture={true}
+                required
+                onChange={handleDateChange}
+              />
+            </div>
+          )}
         </div>
+
+        {enable_hcx && (
+          // TODO: if policy and approved pre-auth exists
+          <div className="my-5 shadow rounded p-5">
+            <h2 className="mb-2">Claim Insurance</h2>
+            {latestClaim ? (
+              <ClaimDetailCard claim={latestClaim} />
+            ) : (
+              <CreateClaimCard
+                consultationId={consultationId}
+                patientId={patientId}
+                use="claim"
+                isCreating={isCreateClaimLoading}
+                setIsCreating={setIsCreateClaimLoading}
+              />
+            )}
+          </div>
+        )}
 
         <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
           <Cancel onClick={handleDischargeClose} />
@@ -583,11 +664,22 @@ export const ConsultationDetails = (props: any) => {
               },
             }}
             breadcrumbs={true}
-            backUrl={"/patients"}
+            backUrl="/patients"
           />
           <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
             {patientData.is_active && (
               <div className="w-full flex flex-col sm:flex-row px-2">
+                <ButtonV2
+                  onClick={() =>
+                    navigate(
+                      `/facility/${patientData.facility}/patient/${patientData.id}/shift/new`
+                    )
+                  }
+                  className="w-full btn m-1 btn-primary hover:text-white"
+                >
+                  <CareIcon className="care-l-ambulance w-5 h-5" />
+                  Shift Patient
+                </ButtonV2>
                 <button
                   onClick={() => setShowDoctors(true)}
                   className="w-full btn m-1 btn-primary hover:text-white"
@@ -624,7 +716,7 @@ export const ConsultationDetails = (props: any) => {
           <div className="border rounded-lg bg-white shadow h-full text-black w-full">
             <PatientInfoCard
               patient={patientData}
-              ip_no={consultationData.ip_no}
+              consultation={consultationData}
               fetchPatientData={fetchData}
             />
 
@@ -764,7 +856,10 @@ export const ConsultationDetails = (props: any) => {
               <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
-                    if (!consultationData?.current_bed?.bed_object?.id)
+                    if (
+                      !consultationData?.current_bed?.bed_object?.id ||
+                      consultationData?.discharge_date !== null
+                    )
                       return null;
                   }
                   return (
@@ -794,6 +889,154 @@ export const ConsultationDetails = (props: any) => {
                 </section>
               )}
               <div className="grid lg:grid-cols-2 gap-4 mt-4">
+                {consultationData.discharge_date && (
+                  <div
+                    className={`bg-white overflow-hidden shadow rounded-lg gap-4 ${
+                      consultationData.discharge_reason === "REC" &&
+                      "lg:col-span-2"
+                    }`}
+                  >
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Discharge Information
+                      </h3>
+                      <div className="grid gap-4 mt-2">
+                        <div>
+                          Reason {" - "}
+                          <span className="font-semibold">
+                            {DISCHARGE_REASONS.find(
+                              (d) => d.id === consultationData.discharge_reason
+                            )?.text || "--"}
+                          </span>
+                        </div>
+                        {consultationData.discharge_reason === "REC" && (
+                          <div className="grid gap-4">
+                            <div>
+                              Discharge Date {" - "}
+                              <span className="font-semibold">
+                                {consultationData.discharge_date
+                                  ? formatDate(consultationData.discharge_date)
+                                  : "--:--"}
+                              </span>
+                            </div>
+                            <div>
+                              Advice {" - "}
+                              <span className="font-semibold">
+                                {consultationData.discharge_notes || "--"}
+                              </span>
+                            </div>
+                            <div className="mt-2">
+                              <div className="font-semibold uppercase text-sm">
+                                Prescription
+                              </div>
+                              <div className="my-2">
+                                <div className="overflow-scroll">
+                                  <ResponsiveMedicineTable
+                                    theads={[
+                                      "Medicine",
+                                      "Route",
+                                      "Frequency",
+                                      "Dosage",
+                                      "Days",
+                                      "Notes",
+                                    ]}
+                                    list={
+                                      consultationData.discharge_prescription
+                                    }
+                                    objectKeys={[
+                                      "medicine",
+                                      "route",
+                                      "dosage",
+                                      "dosage_new",
+                                      "days",
+                                      "notes",
+                                    ]}
+                                    fieldsToDisplay={[2, 3]}
+                                  />
+                                </div>
+                              </div>{" "}
+                            </div>
+                            <hr className="border border-gray-300 my-2"></hr>
+                            <div className="mt-2">
+                              <div className="font-semibold uppercase text-sm">
+                                PRN Prescription
+                              </div>
+                              <div className="overflow-scroll">
+                                <ResponsiveMedicineTable
+                                  theads={[
+                                    "Medicine",
+                                    "Route",
+                                    "Dosage",
+                                    "Indicator Event",
+                                    "Max. Dosage in 24 hrs",
+                                    "Min. time between 2 doses",
+                                  ]}
+                                  list={
+                                    consultationData.discharge_prn_prescription
+                                  }
+                                  objectKeys={[
+                                    "medicine",
+                                    "route",
+                                    "dosage",
+                                    "indicator",
+                                    "max_dosage",
+                                    "min_time",
+                                  ]}
+                                  fieldsToDisplay={[2, 4]}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        {consultationData.discharge_reason === "EXP" && (
+                          <div className="grid gap-4">
+                            <div>
+                              Date of Death {" - "}
+                              <span className="font-semibold">
+                                {consultationData.death_datetime
+                                  ? formatDate(consultationData.death_datetime)
+                                  : "--:--"}
+                              </span>
+                            </div>
+                            <div>
+                              Cause of death {" - "}
+                              <span className="font-semibold">
+                                {consultationData.discharge_reason || "--"}
+                              </span>
+                            </div>
+                            <div>
+                              Confirmed By {" - "}
+                              <span className="font-semibold">
+                                {consultationData.death_confirmed_doctor ||
+                                  "--"}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        {["REF", "LAMA"].includes(
+                          consultationData.discharge_reason || ""
+                        ) && (
+                          <div className="grid gap-4">
+                            <div>
+                              Discharge Date {" - "}
+                              <span className="font-semibold">
+                                {consultationData.discharge_date
+                                  ? formatDate(consultationData.discharge_date)
+                                  : "--:--"}
+                              </span>
+                            </div>
+                            <div>
+                              Notes {" - "}
+                              <span className="font-semibold">
+                                {consultationData.discharge_notes || "--"}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {consultationData.symptoms_text && (
                   <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="px-4 py-5 sm:p-6">
@@ -1406,12 +1649,12 @@ export const ConsultationDetails = (props: any) => {
                 </ButtonV2>
               </div>
             </div>
-            <ViewInvestigations
+            <InvestigationTab
               consultationId={consultationId}
               facilityId={facilityId}
               patientId={patientId}
+              patientData={patientData}
             />
-            <ViewInvestigationSuggestions consultationId={consultationId} />
           </div>
         )}
       </div>

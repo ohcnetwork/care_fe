@@ -4,7 +4,7 @@ import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { ErrorHelperText } from "../Common/HelperInputFields";
+import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { DoctorModal, OptionsType } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
@@ -180,7 +180,8 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
         }
       }
       handleUpdate();
-      if (e.target.id === "submit") handleClose();
+
+      if (e.nativeEvent.submitter.id === "save-and-exit") handleClose();
     }
   };
 
@@ -229,7 +230,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
                 }
                 disabled={!!id}
               />
-              <ErrorHelperText error={state.errors.area} />
+              <LegacyErrorHelperText error={state.errors.area} />
             </div>
             <div>
               <TextFormField
@@ -252,16 +253,9 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
                 <div className="flex flex-row w-full sm:w-auto flex-wrap gap-2 mt-2">
                   {!isLastOptionType &&
                     headerText === "Add Doctor Capacity" && (
-                      <Submit
-                        onClick={(e) => handleSubmit(e)}
-                        label="Save Doctor Capacity"
-                      />
+                      <Submit id="save-and-exit" label="Save Doctor Capacity" />
                     )}
-                  <Submit
-                    id="doctor-save"
-                    onClick={(e) => handleSubmit(e)}
-                    label={buttonText}
-                  />
+                  <Submit id="doctor-save" label={buttonText} />
                 </div>
               </div>
             </div>

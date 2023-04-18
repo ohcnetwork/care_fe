@@ -187,7 +187,11 @@ export const FacilityHome = (props: any) => {
           const res = capacityData.find((data) => {
             return data.room_type === x.id;
           });
-          if (res && res.current_capacity && res.total_capacity) {
+          if (
+            res &&
+            res.current_capacity !== undefined &&
+            res.total_capacity !== undefined
+          ) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
               setCapacityData((state) =>
                 state.filter((i) => i.id !== bedTypeId)
@@ -625,6 +629,16 @@ export const FacilityHome = (props: any) => {
                 ghost
                 border
                 className="w-full md:w-auto flex flex-row mt-2 justify-center"
+                onClick={() => navigate(`/facility/${facilityId}/cns`)}
+              >
+                <CareIcon className="care-l-monitor-heart-rate text-lg" />
+                <span>Central Nursing Station</span>
+              </ButtonV2>
+              <ButtonV2
+                variant="primary"
+                ghost
+                border
+                className="w-full md:w-auto flex flex-row mt-2 justify-center"
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
                 authorizeFor={NonReadOnlyUsers}
               >
@@ -638,7 +652,7 @@ export const FacilityHome = (props: any) => {
                 className="w-full md:w-auto flex flex-row mt-2 justify-center"
                 onClick={() => navigate(`/patients?facility=${facilityId}`)}
               >
-                <CareIcon className="care-l-user-injured" />
+                <CareIcon className="care-l-user-injured text-lg" />
                 <span>View Patients</span>
               </ButtonV2>
             </div>
