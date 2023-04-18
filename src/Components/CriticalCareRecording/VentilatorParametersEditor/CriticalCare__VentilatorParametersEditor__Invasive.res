@@ -94,16 +94,6 @@ let silderOptionArray = [
     "min": 90.0,
     "max": 100.0,
   },
-  {
-    "title": "EtCO2 (mm Hg)",
-    "start": "0",
-    "end": "200",
-    "interval": "20",
-    "step": 1.0,
-    "id": "etco2",
-    "min": 35.0,
-    "max": 45.0,
-  }
 ]
 
 @react.component
@@ -112,34 +102,6 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
   let (parentVentilatorMode, setParentVentilatorMode) = React.useState(() => defaultChecked)
 
   <div>
-    <div>
-      <div className="my-10">
-        <div className=" text-xl font-bold my-2"> {str("Bilateral Air Entry")} </div>
-        <div className="flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-4">
-          <Radio
-            key="bilateral-air-entry-yes"
-            id="bilateral-air-entry-yes"
-            label="Yes"
-            checked={switch state.bilateral_air_entry {
-              | Some(bae) => bae
-              | None => false
-            }}
-            onChange={_ => send(SetBilateralAirEntry(Some(true)))}
-          />
-          
-          <Radio
-            key="bilateral-air-entry-no"
-            id="bilateral-air-entry-no"
-            label="No"
-            checked={switch state.bilateral_air_entry {
-              | Some(bae) => !bae
-              | None => false
-            }}
-            onChange={_ => send(SetBilateralAirEntry(Some(false)))}
-          />
-        </div>
-      </div>
-    </div>
     <h4 className="mb-4"> {str("Ventilator Mode")} </h4>
     <div className="mb-4">
       <Radio
@@ -230,7 +192,6 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
           | "ventilator_tidal_volume" => state.ventilator_tidal_volume
           | "ventilator_fi02" => state.ventilator_fi02
           | "ventilator_spo2" => state.ventilator_spo2
-          | "etco2" => state.etco2
           | _ => None
           }
 
@@ -247,7 +208,6 @@ let make = (~state: VentilatorParameters.state, ~send: VentilatorParameters.acti
             | "ventilator_tidal_volume" => SetTidalVolume(s)
             | "ventilator_fi02" => SetFIO2(s)
             | "ventilator_spo2" => SetSPO2(s)
-            | "etco2" => SetETCO2(s)
             }
           <Slider
             key={`non-invasive-${option["id"]}`}

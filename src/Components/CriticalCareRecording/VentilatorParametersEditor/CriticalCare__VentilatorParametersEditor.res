@@ -7,6 +7,9 @@ external updateDailyRound: (string, string, Js.Json.t, _ => unit, _ => unit) => 
 
 open VentilatorParameters
 
+let string_of_int = data => Belt.Option.mapWithDefault(data, "", Js.Int.toString)
+let int_of_string = data => data->Belt.Int.fromString
+
 let reducer = (state: VentilatorParameters.state, action: VentilatorParameters.action) => {
   switch action {
   | SetBilateralAirEntry(bilateral_air_entry) => {
@@ -213,6 +216,46 @@ let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId,
 
   <div>
     <CriticalCare__PageTitle title="Respiratory Support" />
+     <div>
+      <div className="px-5 my-10">
+        <div className=" text-xl font-bold my-2"> {str("Bilateral Air Entry")} </div>
+        <div className="flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-4">
+          <Radio
+            key="bilateral-air-entry-yes"
+            id="bilateral-air-entry-yes"
+            label="Yes"
+            checked={switch state.bilateral_air_entry {
+              | Some(bae) => bae
+              | None => false
+            }}
+            onChange={_ => send(SetBilateralAirEntry(Some(true)))}
+          />
+          
+          <Radio
+            key="bilateral-air-entry-no"
+            id="bilateral-air-entry-no"
+            label="No"
+            checked={switch state.bilateral_air_entry {
+              | Some(bae) => !bae
+              | None => false
+            }}
+            onChange={_ => send(SetBilateralAirEntry(Some(false)))}
+          />
+        </div>
+      </div>
+      <Slider
+        title={"EtCO2 (mm Hg)"}
+        start={"0"}
+        end={"200"}
+        interval={"20"}
+        step={1.0}
+        value={string_of_int(state.etco2)}
+        setValue={s => send(SetETCO2(int_of_string(s)))}
+        getLabel={getStatus(35.0, "Low", 45.0, "High")}
+        hasError={ValidationUtils.isInputInRangeInt(0, 200, state.etco2)}
+      />
+    </div>
+
     <div className="py-6">
       <div className="mb-6">
         <h4> {str("Respiratory Support")} </h4>
