@@ -9,6 +9,14 @@ open VentilatorParameters
 
 let reducer = (state: VentilatorParameters.state, action: VentilatorParameters.action) => {
   switch action {
+  | SetBilateralAirEntry(bilateral_air_entry) => {
+      ...state,
+      bilateral_air_entry: bilateral_air_entry,
+    }
+  | SetETCO2(etco2) => {
+      ...state,
+      etco2: etco2,
+    }
   | SetVentilatorInterface(ventilator_interface) => {
       ...state,
       ventilator_interface: ventilator_interface,
@@ -124,7 +132,8 @@ let makePayload = (state: VentilatorParameters.state) => {
     payload,
   )
   DictUtils.setOptionalNumber("ventilator_spo2", state.ventilator_spo2, payload)
-
+  DictUtils.setOptionalBool("bilateral_air_entry", state.bilateral_air_entry, payload)
+  DictUtils.setOptionalNumber("etco2", state.etco2, payload)
   payload
 }
 
@@ -185,6 +194,8 @@ let initialState: VentilatorParameters.t => VentilatorParameters.state = ventila
     ventilator_oxygen_modality_flow_rate: ventilatorParameters.ventilator_oxygen_modality_flow_rate,
     ventilator_fi02: ventilatorParameters.ventilator_fi02,
     ventilator_spo2: ventilatorParameters.ventilator_spo2,
+    etco2: ventilatorParameters.etco2,
+    bilateral_air_entry: ventilatorParameters.bilateral_air_entry,
     saving: false,
   }
 }
