@@ -189,9 +189,13 @@ const PatientNotes = (props: PatientNotesProps) => {
                 )}
                 <div className="my-3">
                   <span className="text-xs text-gray-500 flex flex-col">
-                    {note.modified_date && (
-                      <div>Edited: {formatDate(note.modified_date)} </div>
-                    )}
+                    {note.modified_date &&
+                      moment(note.created_date).format("YYYY-MM-DD HH:mm:ss") !=
+                        moment(note.modified_date).format(
+                          "YYYY-MM-DD HH:mm:ss"
+                        ) && (
+                        <div>Edited: {formatDate(note.modified_date)} </div>
+                      )}
                     {note.created_date && (
                       <div>Sent: {formatDate(note.created_date) || "-"}</div>
                     )}
@@ -244,8 +248,7 @@ const PatientNotes = (props: PatientNotesProps) => {
                   ) : (
                     <>
                       {patientActive &&
-                        moment().diff(moment(note.created_date), "seconds") <=
-                          note.edit_window && (
+                        moment() <= moment(note.editable_until) && (
                           <ButtonV2
                             className="flex gap-2 ml-auto py-2 px-3 w-full md:w-fit"
                             onClick={() =>
