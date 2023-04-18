@@ -7,6 +7,7 @@ import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDate } from "../../../Utils/utils";
 
+/*
 interface ModalityType {
   id: number;
   type: string;
@@ -24,18 +25,17 @@ const modality: Array<ModalityType> = [
     normal_rate_high: 15,
   },
 ];
+*/
 
 export const VentilatorPlot = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
@@ -62,7 +62,6 @@ export const VentilatorPlot = (props: any) => {
           setResults(res.data.results);
           setTotalCount(res.data.count);
         }
-        setIsLoading(false);
       }
     },
     [consultationId, dispatch, currentPage]
@@ -75,7 +74,7 @@ export const VentilatorPlot = (props: any) => {
     [currentPage]
   );
 
-  const handlePagination = (page: number, limit: number) => {
+  const handlePagination = (page: number) => {
     setCurrentPage(page);
   };
 
@@ -178,6 +177,16 @@ export const VentilatorPlot = (props: any) => {
             yData={yAxisData("etco2")}
             low={35}
             high={45}
+          />
+        </div>
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <LinePlot
+            title="Bilateral Air Entry"
+            name="Bilateral Air Entry"
+            xData={dates}
+            yData={yAxisData("bilateral_air_entry")}
+            low={0}
+            high={1}
           />
         </div>
         <div className="pt-4 px-4 bg-white border rounded-lg shadow">

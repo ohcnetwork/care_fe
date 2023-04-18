@@ -90,7 +90,7 @@ export const ConsultationDetails = (props: any) => {
   const { currentUser } = state;
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
-    {}
+    {} as any
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [open, setOpen] = useState(false);
