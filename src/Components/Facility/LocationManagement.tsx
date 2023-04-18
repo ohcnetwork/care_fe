@@ -32,9 +32,7 @@ const LocationRow = (props: LocationRowProps) => {
     >
       <div className="px-4 lg:w-3/4">
         <div className="lg:flex items-baseline w-full">
-          <p className="text-xl capitalize break-words lg:w-1/4 lg:mr-4">
-            {name}
-          </p>
+          <p className="text-xl break-words lg:w-1/4 lg:mr-4">{name}</p>
           <p className="text-sm break-all lg:w-3/4">{description}</p>
         </div>
       </div>

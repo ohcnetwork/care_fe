@@ -31,7 +31,7 @@ const ConfirmDialogV2 = ({
       onClose={onClose}
       title={title}
       description={
-        <span className={`font-medium text-${variant || "secondary"}-500`}>
+        <span className={`font-medium text-${variant || "secondary"}-600`}>
           {description}
         </span>
       }

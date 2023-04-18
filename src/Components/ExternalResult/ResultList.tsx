@@ -226,32 +226,34 @@ export default function ResultList() {
         }
         handleCancel={() => setShowDialog(false)}
       />
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between">
         <PageTitle title="External Results" hideBack breadcrumbs={false} />
-        <ExportMenu
-          label="Import/Export"
-          exportItems={[
-            {
-              label: "Import Results",
-              action: () => navigate("/external_results/upload"),
-              options: {
-                icon: <CareIcon className="care-l-import" />,
+        <div className="w-full sm:w-auto">
+          <ExportMenu
+            label="Import/Export"
+            exportItems={[
+              {
+                label: "Import Results",
+                action: () => navigate("/external_results/upload"),
+                options: {
+                  icon: <CareIcon className="care-l-import" />,
+                },
               },
-            },
-            {
-              label: "Export Results",
-              action: () =>
-                externalResultList(
-                  { ...qParams, csv: true },
-                  "externalResultList"
-                ),
-              filePrefix: "external_results",
-              options: {
-                icon: <CareIcon className="care-l-export" />,
+              {
+                label: "Export Results",
+                action: () =>
+                  externalResultList(
+                    { ...qParams, csv: true },
+                    "externalResultList"
+                  ),
+                filePrefix: "external_results",
+                options: {
+                  icon: <CareIcon className="care-l-export" />,
+                },
               },
-            },
-          ]}
-        />
+            ]}
+          />
+        </div>
       </div>
       <div className="lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
         <CountBlock
@@ -262,11 +264,10 @@ export default function ResultList() {
         />
         <div className="mt-2">
           <SearchInput
-            label="Search by name"
-            name="patient_name_search"
+            name="name"
             onChange={(e) => updateQuery({ [e.name]: e.value })}
             value={qParams.name}
-            placeholder="Search patient"
+            placeholder="Search by name"
           />
           <div className="text-sm font-medium my-2">Search by number</div>
           <div className="w-full max-w-sm">
