@@ -4,7 +4,6 @@ import ListFilter from "./ListFilter";
 import ShiftingBoard from "./ShiftingBoard";
 import BadgesList from "./BadgesList";
 import { SHIFTING_CHOICES } from "../../Common/constants";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import { downloadShiftRequests } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import withScrolling from "react-dnd-scrolling";
@@ -53,7 +52,7 @@ export default function BoardView() {
         </div>
         <div className="w-full flex pt-2 lg:space-x-4 items-center flex-col lg:flex-row justify-between">
           <SearchInput
-            name="patient_name_search"
+            name="patient_name"
             value={qParams.patient_name}
             onChange={(e) => updateQuery({ [e.name]: e.value })}
             placeholder={t("search_patient")}
@@ -119,11 +118,7 @@ export default function BoardView() {
           )}
         </div>
       </ScrollingComponent>
-      <SlideOver {...advancedFilter}>
-        <div className="bg-white min-h-screen p-4">
-          <ListFilter {...advancedFilter} />
-        </div>
-      </SlideOver>
+      <ListFilter {...advancedFilter} />
     </div>
   );
 }

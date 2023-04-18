@@ -8,9 +8,7 @@ import {
   completeTransfer,
   downloadShiftRequests,
 } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
-import { Modal, Button } from "@material-ui/core";
 import { formatFilter } from "./Commons";
 import { formatDate } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
@@ -18,9 +16,11 @@ import useFilters from "../../Common/hooks/useFilters";
 import BadgesList from "./BadgesList";
 import { ExportButton } from "../Common/Export";
 import { useTranslation } from "react-i18next";
+import ButtonV2 from "../Common/components/ButtonV2";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ListView() {
   const dispatch: any = useDispatch();
@@ -108,7 +108,7 @@ export default function ListView() {
     }
 
     return data.map((shift: any) => (
-      <div key={`shift_${shift.id}`} className="w-full md:w-1/2 mt-6 md:px-7">
+      <div key={`shift_${shift.id}`} className="w-full mt-6">
         <div className="overflow-hidden shadow rounded-lg bg-white h-full">
           <div
             className={
@@ -224,67 +224,34 @@ export default function ListView() {
             </div>
 
             <div className="mt-2 flex">
-              <button
+              <ButtonV2
                 onClick={(_) => navigate(`/shifting/${shift.external_id}`)}
-                className="btn w-full btn-default bg-white mr-2"
+                variant="secondary"
+                border
+                className="w-full"
               >
                 <i className="fas fa-eye mr-2" /> {t("all_details")}
-              </button>
+              </ButtonV2>
             </div>
             {shift.status === "TRANSFER IN PROGRESS" &&
               shift.assigned_facility && (
                 <div className="mt-2">
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    fullWidth
+                  <ButtonV2
+                    className="w-full"
                     onClick={() => setModalFor(shift.external_id)}
                   >
                     {t("transfer_to_receiving_facility")}
-                  </Button>
-
-                  <Modal
-                    open={modalFor === shift.external_id}
-                    onClose={(_) =>
+                  </ButtonV2>
+                  <ConfirmDialogV2
+                    title={t("confirm_transfer_complete")}
+                    description={t("mark_transfer_complete_confirmation")}
+                    action="Confirm"
+                    show={modalFor === shift.external_id}
+                    onClose={() =>
                       setModalFor({ externalId: undefined, loading: false })
                     }
-                  >
-                    <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                      <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center">
-                        <div className="mb-4">
-                          <h1 className="text-2xl">
-                            {t("confirm_transfer_complete")}
-                          </h1>
-                        </div>
-                        <div className="mb-8">
-                          <p>{t("mark_transfer_complete_confirmation")}</p>
-                        </div>
-                        <div className="flex gap-2 justify-center">
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            fullWidth
-                            onClick={() => {
-                              setModalFor({
-                                externalId: undefined,
-                                loading: false,
-                              });
-                            }}
-                          >
-                            {t("cancel")}
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            fullWidth
-                            onClick={(_) => handleTransferComplete(shift)}
-                          >
-                            {t("confirm")}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </Modal>
+                    onConfirm={() => handleTransferComplete(shift)}
+                  />
                 </div>
               )}
           </div>
@@ -294,61 +261,61 @@ export default function ListView() {
   };
 
   return (
-    <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="md:flex md:items-center md:justify-between px-4">
-        <PageTitle
-          title={t("shifting")}
-          hideBack
-          componentRight={
-            <ExportButton
-              action={() =>
-                downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
-              }
-              filenamePrefix="shift_requests"
-            />
+    <Page
+      title={t("shifting")}
+      hideBack
+      componentRight={
+        <ExportButton
+          action={() =>
+            downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
           }
-          breadcrumbs={false}
+          filenamePrefix="shift_requests"
         />
-
-        <div className="md:px-4">
-          <SearchInput
-            name="patient_name"
-            value={qParams.patient_name}
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder={t("search_patient")}
-          />
-        </div>
-        <div className="w-32">
-          {/* dummy div to align space as per board view */}
-        </div>
-        <div className="flex md:flex-row flex-col justify-center items-center md:gap-6">
-          <div className="my-2 md:my-0">
-            <button
-              className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 md:w-40 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-              onClick={() =>
-                navigate("/shifting/board-view", { query: qParams })
-              }
-            >
-              <i
-                className="fa fa-list mr-1 transform rotate-90"
-                aria-hidden="true"
-              ></i>
-              {t("board_view")}
-            </button>
+      }
+      breadcrumbs={false}
+      options={
+        <>
+          <div className="md:px-4">
+            <SearchInput
+              name="patient_name"
+              value={qParams.patient_name}
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              placeholder={t("search_patient")}
+            />
           </div>
-          <div className="flex items-start gap-2">
-            <button
-              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-              onClick={() => advancedFilter.setShow(true)}
-            >
-              <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-              <span>{t("filters")}</span>
-            </button>
+          <div className="w-32">
+            {/* dummy div to align space as per board view */}
           </div>
-        </div>
-      </div>
+          <div className="flex md:flex-row flex-col justify-center items-center md:gap-6">
+            <div className="my-2 md:my-0">
+              <button
+                className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 md:w-40 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
+                onClick={() =>
+                  navigate("/shifting/board-view", { query: qParams })
+                }
+              >
+                <i
+                  className="fa fa-list mr-1 transform rotate-90"
+                  aria-hidden="true"
+                ></i>
+                {t("board_view")}
+              </button>
+            </div>
+            <div className="flex items-start gap-2">
+              <button
+                className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
+                onClick={() => advancedFilter.setShow(true)}
+              >
+                <i className="fa fa-filter mr-1" aria-hidden="true"></i>
+                <span>{t("filters")}</span>
+              </button>
+            </div>
+          </div>
+        </>
+      }
+    >
       <BadgesList {...{ qParams, FilterBadges }} />
-      <div className="px-1">
+      <div>
         {isLoading ? (
           <Loading />
         ) : (
@@ -363,7 +330,7 @@ export default function ListView() {
               </button>
             </div>
 
-            <div className="flex flex-wrap md:-mx-4 mb-5">
+            <div className="grid md:grid-cols-2 gap-x-6 mb-5">
               {showShiftingCardList(data)}
             </div>
             <div>
@@ -372,11 +339,7 @@ export default function ListView() {
           </div>
         )}
       </div>
-      <SlideOver {...advancedFilter}>
-        <div className="bg-white min-h-screen p-4">
-          <ListFilter showShiftingStatus={true} {...advancedFilter} />
-        </div>
-      </SlideOver>
-    </div>
+      <ListFilter showShiftingStatus={true} {...advancedFilter} />
+    </Page>
   );
 }

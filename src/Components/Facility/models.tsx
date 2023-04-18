@@ -76,7 +76,7 @@ export interface OptionsType {
 export type PatientCategory =
   | "Comfort Care"
   | "Stable"
-  | "Slightly Abnormal"
+  | "Abnormal"
   | "Critical";
 
 export interface ConsultationModel {
@@ -88,6 +88,9 @@ export interface ConsultationModel {
   created_date?: string;
   discharge_date?: string;
   discharge_reason?: string;
+  discharge_prescription: any;
+  discharge_prn_prescription: any;
+  discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;
   facility?: number;
@@ -100,6 +103,8 @@ export interface ConsultationModel {
   referred_to?: number | null;
   suggestion?: string;
   ip_no?: string;
+  op_no?: string;
+  consultation_status?: number;
   is_kasp?: boolean;
   kasp_enabled_date?: string;
   diagnosis?: string;

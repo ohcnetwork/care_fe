@@ -11,7 +11,7 @@ export type SlideOverProps = {
   children: React.ReactNode;
   slideFrom?: SlideFromEdges;
   dialogClass?: string;
-  title?: string;
+  title?: React.ReactNode;
   onlyChild?: boolean;
   onCloseClick?: () => void;
 };
@@ -103,8 +103,8 @@ export default function SlideOver({
                   >
                     <CareIcon className="care-l-arrow-left" />
                   </button>
-                  <div>
-                    <h1 className="text-xl font-black">{title}</h1>
+                  <div className="flex w-full">
+                    <h1 className="text-xl font-black w-full">{title}</h1>
                   </div>
                 </div>
                 <div className="overflow-auto flex-1 p-4">{children}</div>

@@ -2,8 +2,7 @@ import { PatientCategory } from "../Components/Facility/models";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
 import { IConfig } from "./hooks/useConfig";
-
-export const KeralaLogo = "images/kerala-logo.png";
+import { SortOption } from "../Components/Common/SortDropdown";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -164,27 +163,25 @@ export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
-export const PATIENT_FILTER_ORDER: (OptionsType & { order: string })[] = [
-  { id: 1, text: "created_date", desc: "Created Date", order: "Ascending" },
-  { id: 2, text: "-created_date", desc: "Created Date", order: "Descending" },
-  { id: 3, text: "modified_date", desc: "Modified Date", order: "Ascending" },
-  { id: 4, text: "-modified_date", desc: "Modified Date", order: "Descending" },
-  { id: 5, text: "review_time", desc: "Review Time", order: "Ascending" },
-  { id: 6, text: "-review_time", desc: "Review Time", order: "Descending" },
-  { id: 7, text: "name", desc: "Patient Name", order: "Ascending" },
-  { id: 8, text: "-name", desc: "Patient Name", order: "Descending" },
+export const PATIENT_SORT_OPTIONS: SortOption[] = [
+  { isAscending: false, value: "-created_date" },
+  { isAscending: true, value: "created_date" },
+  { isAscending: false, value: "-category_severity" },
+  { isAscending: true, value: "category_severity" },
+  { isAscending: false, value: "-modified_date" },
+  { isAscending: true, value: "modified_date" },
   {
-    id: 7,
-    text: "facility__name,last_consultation__current_bed__bed__name",
-    desc: "Bed Number",
-    order: "Ascending",
+    isAscending: true,
+    value: "facility__name,last_consultation__current_bed__bed__name",
   },
   {
-    id: 8,
-    text: "facility__name,-last_consultation__current_bed__bed__name",
-    desc: "Bed Number",
-    order: "Descending",
+    isAscending: false,
+    value: "facility__name,-last_consultation__current_bed__bed__name",
   },
+  { isAscending: false, value: "-review_time" },
+  { isAscending: true, value: "review_time" },
+  { isAscending: true, value: "name" },
+  { isAscending: false, value: "-name" },
 ];
 
 export const getBedTypes = ({
@@ -334,6 +331,13 @@ export const ADMITTED_TO = [
   { id: "7", text: "Regular" },
 ];
 
+export const RESPIRATORY_SUPPORT = [
+  { id: "NIV", text: "NON_INVASIVE" },
+  { id: "IV", text: "INVASIVE" },
+  { id: "O2", text: "OXYGEN_SUPPORT" },
+  { id: "NONE", text: "UNKNOWN" },
+];
+
 export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";
 
 export const PATIENT_CATEGORIES: {
@@ -343,7 +347,7 @@ export const PATIENT_CATEGORIES: {
 }[] = [
   { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
   { id: "Stable", text: "Stable", twClass: "patient-stable" },
-  { id: "Moderate", text: "Slightly Abnormal", twClass: "patient-abnormal" },
+  { id: "Moderate", text: "Abnormal", twClass: "patient-abnormal" },
   { id: "Critical", text: "Critical", twClass: "patient-critical" },
 ];
 
@@ -635,6 +639,7 @@ export const NURSING_CARE_FIELDS: Array<OptionsType> = [
   { id: 10, text: "chest_tube_care", desc: "Chest Tube Care" },
   { id: 11, text: "tracheostomy_care", desc: "Tracheostomy Care" },
   { id: 12, text: "stoma_care", desc: "Stoma Care" },
+  { id: 13, text: "catheter_care", desc: "Catheter Care" },
 ];
 
 export const EYE_OPEN_SCALE = [
