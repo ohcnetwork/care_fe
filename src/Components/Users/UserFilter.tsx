@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getDistrict } from "../../Redux/actions";
 import { navigate } from "raviger";
@@ -11,6 +11,7 @@ import { USER_TYPE_OPTIONS } from "../../Common/constants";
 import useMergeState from "../../Common/hooks/useMergeState";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import { areEqual } from "../../Common/validation";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";
@@ -29,6 +30,8 @@ export default function UserFilter(props: any) {
     district_id: filter.district_id || "",
     district_ref: null,
   });
+  const [isPreventChangeFilterStateOn, setIsPreventChangeFilterStateOn] =
+    useState(false);
 
   const clearFilterState = {
     first_name: "",
@@ -41,6 +44,7 @@ export default function UserFilter(props: any) {
   };
 
   const setDistrict = (selected: any) => {
+    setIsPreventChangeFilterStateOn(true);
     const filterData: any = { ...filterState };
     filterData["district_ref"] = selected;
     filterData["district_id"] = (selected || {}).id;
@@ -65,12 +69,34 @@ export default function UserFilter(props: any) {
       district_id: district_id || "",
     };
     onChange(data);
+    setIsPreventChangeFilterStateOn(false);
   };
   useEffect(() => {
-    if (filter.district_id === "") {
+    if (filter.district_id === "" && !isPreventChangeFilterStateOn) {
       setFilterState({ ...filter, district_ref: null });
     }
     setFilterState(filter);
+  }, [filter]);
+  useEffect(() => {
+    const removedParamsFilter = Object.fromEntries(
+      Object.entries(filter).filter(
+        ([key]) => key !== "page" && key !== "limit"
+      )
+    );
+    if (
+      areEqual(
+        { ...clearFilterState, username: "" },
+        {
+          ...removedParamsFilter,
+          district_ref: null,
+        }
+      )
+    ) {
+      const urlWithoutParams = window.location.pathname;
+      navigate(urlWithoutParams);
+
+      setFilterState(clearFilterState);
+    }
   }, [filter]);
 
   useEffect(() => {
@@ -124,7 +150,10 @@ export default function UserFilter(props: any) {
           optionLabel={(o) => o.role + ((o.readOnly && " (Read Only)") || "")}
           optionValue={(o) => o.id}
           value={filterState.user_type}
-          onChange={(v) => setFilterState({ ...filterState, user_type: v })}
+          onChange={(v) => {
+            setIsPreventChangeFilterStateOn(true);
+            setFilterState({ ...filterState, user_type: v });
+          }}
         />
       </div>
 

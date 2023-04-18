@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import {
@@ -18,6 +18,7 @@ import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import { areEqual } from "../../Common/validation";
 import TextFormField from "../Form/FormFields/TextFormField";
 import {
   FieldChangeEvent,
@@ -39,7 +40,8 @@ const getDate = (value: any) =>
 export default function PatientFilter(props: any) {
   const { kasp_enabled, kasp_string } = useConfig();
   const { filter, onChange, closeFilter } = props;
-
+  const [isPreventChangeFilterStateOn, setIsPreventChangeFilterStateOn] =
+    useState(false);
   const [filterState, setFilterState] = useMergeState({
     district: filter.district || "",
     facility: filter.facility || "",
@@ -109,34 +111,67 @@ export default function PatientFilter(props: any) {
     created_date_after: "",
     modified_date_before: "",
     modified_date_after: "",
-    category: null,
-    gender: null,
-    disease_status: null,
+    category: "",
+    gender: "",
+    disease_status: "",
     age_min: "",
     age_max: "",
-    date_of_result: null,
-    date_declared_positive: null,
+    date_of_result: "",
+    date_declared_positive: "",
     last_consultation_admission_date_before: "",
     last_consultation_admission_date_after: "",
     last_consultation_discharge_date_before: "",
     last_consultation_discharge_date_after: "",
-    last_consultation_admitted_to_list: [],
+    last_consultation_admitted_to_list: "",
+    last_consultation_admitted_bed_type_list: "",
     srf_id: "",
-    number_of_doses: null,
+    number_of_doses: "",
     covin_id: "",
-    is_kasp: null,
-    is_declared_positive: null,
+    is_kasp: "",
+    is_declared_positive: "",
     last_consultation_symptoms_onset_date_before: "",
     last_consultation_symptoms_onset_date_after: "",
     last_vaccinated_date_before: "",
     last_vaccinated_date_after: "",
-    last_consultation_is_telemedicine: null,
-    is_antenatal: null,
-    ventilator_interface: null,
+    last_consultation_is_telemedicine: "",
+    is_antenatal: "",
+    ventilator_interface: "",
   };
 
   useEffect(() => {
+    if (filterState.facility === "" && !isPreventChangeFilterStateOn) {
+      setFilterState({ ...filter, facility_ref: null });
+    }
+    if (filterState.lsgBody === "" && !isPreventChangeFilterStateOn) {
+      setFilterState({ ...filter, lsgBody_ref: null });
+    }
+    if (filterState.district === "" && !isPreventChangeFilterStateOn) {
+      setFilterState({ ...filter, district_ref: null });
+    }
     setFilterState(filter);
+  }, [filter]);
+
+  useEffect(() => {
+    const removedParamsFilter = Object.fromEntries(
+      Object.entries(filter).filter(
+        ([key]) => key !== "page" && key !== "limit"
+      )
+    );
+    if (
+      areEqual(clearFilterState, {
+        ...removedParamsFilter,
+        facility_ref: null,
+        lsgBody_ref: null,
+        district_ref: null,
+        date_declared_positive: "",
+        last_consultation_admitted_to_list: "",
+      })
+    ) {
+      const urlWithoutParams = window.location.pathname;
+      navigate(urlWithoutParams);
+
+      setFilterState(clearFilterState);
+    }
   }, [filter]);
 
   useEffect(() => {
@@ -194,6 +229,7 @@ export default function PatientFilter(props: any) {
   ];
 
   const setFacility = (selected: any, name: string) => {
+    setIsPreventChangeFilterStateOn(true);
     const filterData: any = { ...filterState };
     filterData[`${name}_ref`] = selected;
     filterData[name] = (selected || {}).id;
@@ -353,6 +389,7 @@ export default function PatientFilter(props: any) {
       ventilator_interface: ventilator_interface || "",
     };
     onChange(data);
+    setIsPreventChangeFilterStateOn(false);
   };
 
   const handleDateRangeChange = (event: FieldChangeEvent<DateRange>) => {

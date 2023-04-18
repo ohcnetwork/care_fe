@@ -13,6 +13,7 @@ import { useDispatch } from "react-redux";
 import { CircularProgress } from "@material-ui/core";
 import useMergeState from "../../Common/hooks/useMergeState";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import { areEqual } from "../../Common/validation";
 
 const clearFilterState = {
   status: "",
@@ -32,15 +33,34 @@ export default function UserFilter(props: any) {
     facility_ref: filter.facility_ref || null,
     sample_type: filter.sample_type || "",
   });
-
+  const [isPreventChangeFilterStateOn, setIsPreventChangeFilterStateOn] =
+    useState(false);
   const [isFacilityLoading, setFacilityLoading] = useState(false);
   const dispatch: any = useDispatch();
 
   useEffect(() => {
-    if (filter.facility === "") {
+    if (filter.facility === "" && !isPreventChangeFilterStateOn) {
       setFilterState({ ...filter, facility_ref: null });
     }
     setFilterState(filter);
+  }, [filter]);
+  useEffect(() => {
+    const removedParamsFilter = Object.fromEntries(
+      Object.entries(filter).filter(
+        ([key]) => key !== "page" && key !== "limit"
+      )
+    );
+    if (
+      areEqual(clearFilterState, {
+        ...removedParamsFilter,
+        facility_ref: null,
+      })
+    ) {
+      const urlWithoutParams = window.location.pathname;
+      navigate(urlWithoutParams);
+
+      setFilterState(clearFilterState);
+    }
   }, [filter]);
 
   const handleChange = (event: any) => {
@@ -61,6 +81,7 @@ export default function UserFilter(props: any) {
       sample_type: sample_type || "",
     };
     onChange(data);
+    setIsPreventChangeFilterStateOn(false);
   };
 
   useEffect(() => {
@@ -142,12 +163,13 @@ export default function UserFilter(props: any) {
               name="facility"
               selected={filterState.facility_ref}
               showAll={true}
-              setSelected={(obj) =>
+              setSelected={(obj) => {
+                setIsPreventChangeFilterStateOn(true);
                 setFilterState({
                   facility: (obj as FacilityModel)?.id,
                   facility_ref: obj,
-                })
-              }
+                });
+              }}
               className="shifting-page-filter-dropdown"
               errors={""}
             />

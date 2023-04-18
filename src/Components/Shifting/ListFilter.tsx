@@ -106,17 +106,22 @@ export default function ListFilter(props: any) {
   }, [filter]);
 
   useEffect(() => {
-    const removedParamsFilter = filter;
-    delete removedParamsFilter?.page;
-    delete removedParamsFilter?.limit;
+    const removedParamsFilter = Object.fromEntries(
+      Object.entries(filter).filter(
+        ([key]) => key !== "page" && key !== "limit"
+      )
+    );
     if (
-      areEqual(clearFilterState, {
-        ...filter,
-        orgin_facility_ref: "",
-        shifting_approving_facility_ref: "",
-        assigned_facility_ref: "",
-        assigned_user_ref: "",
-      })
+      areEqual(
+        { ...clearFilterState },
+        {
+          ...removedParamsFilter,
+          orgin_facility_ref: "",
+          shifting_approving_facility_ref: "",
+          assigned_facility_ref: "",
+          assigned_user_ref: "",
+        }
+      )
     ) {
       const urlWithoutParams = window.location.pathname;
       navigate(urlWithoutParams);

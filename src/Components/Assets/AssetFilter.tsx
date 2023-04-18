@@ -11,6 +11,7 @@ import { AssetClass, AssetLocationObject } from "./AssetTypes";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import { areEqual } from "../../Common/validation";
 
 const initialLocation = {
   id: "",
@@ -35,6 +36,7 @@ function AssetFilter(props: any) {
   const [asset_class, setAssetClass] = useState<string>(
     filter.asset_class || ""
   );
+
   const [facilityId, setFacilityId] = useState<number | "">(filter.facility);
   const [locationId, setLocationId] = useState<string | "">(filter.location);
   const [qParams, _] = useQueryParams();
@@ -45,6 +47,9 @@ function AssetFilter(props: any) {
   }, [facility, location]);
 
   useEffect(() => {
+    if (filter.facility === "") {
+      setFacility({ name: "" });
+    }
     if (filter.asset_type === "") {
       setAssetType(filter.asset_type);
     }
@@ -70,10 +75,37 @@ function AssetFilter(props: any) {
     else navigate("/assets");
   }, [qParams]);
 
+  useEffect(() => {
+    const removedParamsFilter = Object.fromEntries(
+      Object.entries(filter).filter(
+        ([key]) => key !== "page" && key !== "limit"
+      )
+    );
+    if (
+      areEqual(
+        {
+          facility: "",
+          asset_type: "",
+          status: "",
+          asset_class: "",
+          location: "",
+        },
+        {
+          ...removedParamsFilter,
+        }
+      )
+    ) {
+      const urlWithoutParams = window.location.pathname;
+      navigate(urlWithoutParams);
+      clearFilter();
+    }
+  }, [filter]);
+
   const fetchFacility = useCallback(
     async (status: statusType) => {
       if (facilityId) {
         const facilityData: any = await dispatch(getAnyFacility(facilityId));
+
         if (!status.aborted) {
           setFacility(facilityData?.data);
         }

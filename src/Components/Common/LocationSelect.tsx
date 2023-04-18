@@ -44,12 +44,16 @@ export const LocationSelect = (props: LocationSelectProps) => {
       search_text: query,
     };
     setLoading(true);
-    dispatchAction(
-      listFacilityAssetLocation(params, { facility_external_id: facilityId })
-    ).then(({ data }: any) => {
-      setLocations(data.results);
-      setLoading(false);
-    });
+    try {
+      dispatchAction(
+        listFacilityAssetLocation(params, { facility_external_id: facilityId })
+      ).then(({ data }: any) => {
+        setLocations(data?.results);
+        setLoading(false);
+      });
+    } catch (error) {
+      // Handle the error here
+    }
   }, [query, facilityId]);
 
   return props.multiple ? (
