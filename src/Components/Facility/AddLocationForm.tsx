@@ -29,7 +29,10 @@ export const AddLocationForm = (props: LocationFormProps) => {
   const [description, setDescription] = useState("");
   const [facilityName, setFacilityName] = useState("");
   const [locationName, setLocationName] = useState("");
-
+  const [errors, setErrors] = useState<any>({
+    name: "",
+    description: "",
+  });
   const headerText = !locationId ? "Add Location" : "Update Location";
   const buttonText = !locationId ? "Add Location" : "Update Location";
 
@@ -56,6 +59,10 @@ export const AddLocationForm = (props: LocationFormProps) => {
   }, [dispatchAction, facilityId, locationId]);
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
+    setErrors({
+      name: "",
+      description: "",
+    });
     e.preventDefault();
     setIsLoading(true);
     const data = {
@@ -69,17 +76,26 @@ export const AddLocationForm = (props: LocationFormProps) => {
         : createFacilityAssetLocation(data, facilityId)
     );
     setIsLoading(false);
-    if (res && (res.status === 201 || res.status === 200)) {
-      const notificationMessage = locationId
-        ? "Location updated successfully"
-        : "Location created successfully";
+    if (res) {
+      if (res.status === 201 || res.status === 200) {
+        const notificationMessage = locationId
+          ? "Location updated successfully"
+          : "Location created successfully";
 
-      navigate(`/facility/${facilityId}/location`, {
-        replace: true,
-      });
-      Notification.Success({
-        msg: notificationMessage,
-      });
+        navigate(`/facility/${facilityId}/location`, {
+          replace: true,
+        });
+        Notification.Success({
+          msg: notificationMessage,
+        });
+      } else if (res.status === 400) {
+        Object.keys(res.data).forEach((key) => {
+          setErrors((prevState: any) => ({
+            ...prevState,
+            [key]: res.data[key],
+          }));
+        });
+      }
     }
   };
 
@@ -115,7 +131,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
                     required
                     value={name}
                     onChange={(e) => setName(e.value)}
-                    error=""
+                    error={errors.name}
                   />
                 </div>
                 <div>
@@ -125,7 +141,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
                     label="Description"
                     value={description}
                     onChange={(e) => setDescription(e.value)}
-                    error=""
+                    error={errors.description}
                   />
                 </div>
               </div>
