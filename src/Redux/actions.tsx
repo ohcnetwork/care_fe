@@ -589,6 +589,18 @@ export const administerPrescription = (
     id: prescription_id,
   });
 };
+export const deleteAdministration = (
+  consultation_id: string,
+  prescription_id: string,
+  administration_id: string
+) => {
+  return fireRequest(
+    "deleteAdministration",
+    [],
+    {},
+    { consultation_id, prescription_id, administration_id }
+  );
+};
 export const getMinQuantityOfItem = (
   facilityId: object,
   externalId: object

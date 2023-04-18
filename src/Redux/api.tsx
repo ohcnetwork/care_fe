@@ -352,6 +352,10 @@ const routes: Routes = {
     path: "/api/v1/consultation/{consultation_id}/prescriptions/{id}/administer/",
     method: "POST",
   },
+  deleteAdministration: {
+    path: "/api/v1/consultation/{consultation_id}/prescriptions/{id}/delete_administered/?id={administration_id}",
+    method: "DELETE",
+  },
   createDailyRounds: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
     method: "POST",

@@ -19,19 +19,103 @@ import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 import moment from "moment";
 import DialogModal from "../Common/Dialog";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import { MedicineAdministrationRecord } from "../CriticalCareRecording/IOBalance/MedicineAdministrationRecord";
 
 export const medicines = medicines_list;
 
-const FREQUENCY = [
-  { name: "Imediately", value: "STAT" },
-  { name: "Once daily", value: "OD" },
-  { name: "Night only", value: "HS" },
-  { name: "Twice daily", value: "BD" },
-  { name: "8th hourly", value: "TID" },
-  { name: "6th hourly", value: "QID" },
-  { name: "4th hourly", value: "Q4H" },
-  { name: "Alternate day", value: "QOD" },
-  { name: "Once a week", value: "QWK" },
+export const PRESCRIPTION_FREQUENCY = [
+  {
+    name: "Imediately",
+    value: "STAT",
+    slots: 1,
+    completed: (administrations: MedicineAdministrationRecord[]) =>
+      administrations.filter((administration) => administration),
+  },
+  {
+    name: "Once daily",
+    value: "OD",
+    slots: 1,
+    completed: (administrations: MedicineAdministrationRecord[]) =>
+      administrations.filter((administration) =>
+        moment(administration.administered_date).isSame(moment(), "day")
+      ),
+  },
+  {
+    name: "Night only",
+    value: "HS",
+    slots: 1,
+    completed: (administrations: MedicineAdministrationRecord[]) =>
+      administrations.filter((administration) =>
+        moment(administration.administered_date).isSame(moment(), "day")
+      ),
+  },
+  {
+    name: "Twice daily",
+    value: "BD",
+    slots: 2,
+    completed: (administrations: MedicineAdministrationRecord[]) =>
+      administrations.filter((administration) =>
+        moment(administration.administered_date).isSame(moment(), "day")
+      ),
+  },
+  {
+    name: "8th hourly",
+    value: "TID",
+    slots: 3,
+    completed: (administrations: MedicineAdministrationRecord[]) =>
+      administrations.filter((administration) =>
+        moment(administration.administered_date).isSame(moment(), "day")
+      ),
+  },
+  {
+    name: "6th hourly",
+    value: "QID",
+    slots: 4,
+    completed: (administrations: MedicineAdministrationRecord[]) =>
+      administrations.filter((administration) =>
+        moment(administration.administered_date).isSame(moment(), "day")
+      ),
+  },
+  {
+    name: "4th hourly",
+    value: "Q4H",
+    slots: 6,
+    completed: (administrations: MedicineAdministrationRecord[]) =>
+      administrations.filter((administration) =>
+        moment(administration.administered_date).isSame(moment(), "day")
+      ),
+  },
+  {
+    name: "Alternate day",
+    value: "QOD",
+    slots: 1,
+    completed: (administrations: MedicineAdministrationRecord[]) => {
+      const lastAdministration = administrations[0];
+      if (!lastAdministration) {
+        return [];
+      }
+      if (
+        moment(lastAdministration.administered_date).isSame(moment(), "day") ||
+        moment(lastAdministration.administered_date).isSame(
+          moment().subtract(1, "day"),
+          "day"
+        )
+      ) {
+        return [lastAdministration];
+      } else {
+        return [] as MedicineAdministrationRecord[];
+      }
+    },
+  },
+  {
+    name: "Once a week",
+    value: "QWK",
+    slots: 1,
+    completed: (administrations: MedicineAdministrationRecord[]) =>
+      administrations.filter((administration) =>
+        moment(administration.administered_date).isSame(moment(), "week")
+      ),
+  },
 ];
 export const ROUTES = [
   {
@@ -66,6 +150,7 @@ type BasePrescriptionType = {
   discontinued_date: string;
   created_date: string;
   modified_date: string;
+  administrations: MedicineAdministrationRecord[];
 };
 
 type NormalPrescription = {
@@ -93,7 +178,7 @@ const baseEmptyValues = {
 };
 
 const normalEmptyValues = {
-  frequency: "od",
+  frequency: "STAT",
   days: 1,
   is_prn: false,
 };
@@ -103,6 +188,14 @@ const PRNEmptyValues = {
   max_dosage: "0 mg",
   min_hours_between_doses: 0,
   is_prn: true,
+};
+
+export const emptyPrescriptionValues = (prn = false) => {
+  const emptyValues = {
+    ...baseEmptyValues,
+    ...(!prn ? normalEmptyValues : PRNEmptyValues),
+  };
+  return emptyValues;
 };
 
 export default function PrescriptionBuilder(props: {
@@ -118,10 +211,7 @@ export default function PrescriptionBuilder(props: {
   );
   const [addPrescriptionForm, setAddPrescriptionForm] = useState(false);
 
-  const emptyValues = {
-    ...baseEmptyValues,
-    ...(type === "normal" ? normalEmptyValues : PRNEmptyValues),
-  };
+  const emptyValues = emptyPrescriptionValues(type === "prn");
 
   const refreshPrescriptions = (status: statusType) => {
     setAddPrescriptionForm(false);
@@ -164,6 +254,7 @@ export function PrescriptionForm(props: {
   prescription: PrescriptionType;
   consultation: string;
   refreshPrescriptions: (status: statusType) => void;
+  onAction?: () => void;
 }) {
   const [prescription, setPrescription] = useState(props.prescription);
   const dispatchAction: any = useDispatch();
@@ -194,6 +285,7 @@ export function PrescriptionForm(props: {
     );
     if (res && res.data && res.status !== 400) {
       props.refreshPrescriptions({ aborted: false });
+      props.onAction && props.onAction();
     }
     setLoading(false);
   };
@@ -205,6 +297,7 @@ export function PrescriptionForm(props: {
     );
     if (res && res.status !== 400) {
       props.refreshPrescriptions({ aborted: false });
+      props.onAction && props.onAction();
     }
     setLoading(false);
   };
@@ -216,6 +309,7 @@ export function PrescriptionForm(props: {
     );
     if (res && res.data && res.status !== 400) {
       props.refreshPrescriptions({ aborted: false });
+      props.onAction && props.onAction();
     }
     setLoading(false);
   };
@@ -506,7 +600,7 @@ export function PrescriptionForm(props: {
                   </div>
                   <SelectMenuV2
                     placeholder="Frequency"
-                    options={FREQUENCY}
+                    options={PRESCRIPTION_FREQUENCY}
                     value={prescription.frequency}
                     onChange={(freq) =>
                       setPrescription({
