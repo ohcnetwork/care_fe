@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
@@ -6,6 +6,7 @@ import { LinePlot } from "./components/LinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDate } from "../../../Utils/utils";
+import BinaryChronologicalChart from "./components/BinaryChronologicalChart";
 
 /*
 interface ModalityType {
@@ -50,6 +51,7 @@ export const VentilatorPlot = (props: any) => {
               "ventilator_fi02",
               "ventilator_spo2",
               "etco2",
+              "bilateral_air_entry",
               "ventilator_oxygen_modality_oxygen_rate",
               "ventilator_oxygen_modality_flow_rate",
             ],
@@ -59,6 +61,7 @@ export const VentilatorPlot = (props: any) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
+          console.log(res);
           setResults(res.data.results);
           setTotalCount(res.data.count);
         }
@@ -87,6 +90,19 @@ export const VentilatorPlot = (props: any) => {
       .map((p: any) => p[name])
       .reverse();
   };
+
+  const bilateral = Object.values(results)
+    .map((p: any, i) => {
+      return {
+        value: p.bilateral_air_entry,
+        timestamp: Object.keys(results)[i],
+      };
+    })
+    .filter((p) => p.value !== null);
+
+  useEffect(() => {
+    console.log(bilateral);
+  }, [bilateral]);
 
   return (
     <div>
@@ -180,13 +196,11 @@ export const VentilatorPlot = (props: any) => {
           />
         </div>
         <div className="pt-4 px-4 bg-white border rounded-lg shadow">
-          <LinePlot
+          <BinaryChronologicalChart
             title="Bilateral Air Entry"
-            name="Bilateral Air Entry"
-            xData={dates}
-            yData={yAxisData("bilateral_air_entry")}
-            low={0}
-            high={1}
+            data={bilateral}
+            trueName="Yes"
+            falseName="No"
           />
         </div>
         <div className="pt-4 px-4 bg-white border rounded-lg shadow">
