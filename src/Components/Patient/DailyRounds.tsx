@@ -110,7 +110,7 @@ export const DailyRounds = (props: any) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [prevReviewInterval, setPreviousReviewInterval] = useState(-1);
-  const [prevAction, setPreviousAction] = useState("");
+  const [prevAction, setPreviousAction] = useState("NONE");
   const [hasPreviousLog, setHasPreviousLog] = useState(false);
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
@@ -127,7 +127,7 @@ export const DailyRounds = (props: any) => {
           );
           setPreviousAction(
             TELEMEDICINE_ACTIONS.find((action) => action.id === res.data.action)
-              ?.text || ""
+              ?.text || "NONE"
           );
         }
       } else {

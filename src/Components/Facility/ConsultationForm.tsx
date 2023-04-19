@@ -148,7 +148,7 @@ const initForm: FormDetails = {
   prn_prescription: [],
   investigation: [],
   is_telemedicine: "false",
-  action: undefined,
+  action: "NONE",
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
