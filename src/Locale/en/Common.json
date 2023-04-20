@@ -24,6 +24,7 @@
   "no": "No",
   "status": "Status",
   "created": "Created",
+  "modified": "Modified",
   "updated": "Updated",
   "assigned_to": "Assigned to",
   "cancel": "Cancel",
