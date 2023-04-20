@@ -535,7 +535,10 @@ export const ConsultationDetails = (props: any) => {
                 label="Discharge Date"
                 name="discharge_date"
                 value={moment(preDischargeForm.discharge_date).toDate()}
-                min={moment(consultationData.admission_date).toDate()}
+                min={moment(
+                  consultationData.admission_date ||
+                    consultationData.created_date
+                ).toDate()}
                 disableFuture={true}
                 required
                 onChange={handleDateChange}
@@ -601,7 +604,10 @@ export const ConsultationDetails = (props: any) => {
                 label="Date of Discharge"
                 name="discharge_date"
                 value={moment(preDischargeForm.discharge_date).toDate()}
-                min={moment(consultationData.admission_date).toDate()}
+                min={moment(
+                  consultationData.admission_date ||
+                    consultationData.created_date
+                ).toDate()}
                 disableFuture={true}
                 required
                 onChange={handleDateChange}
@@ -913,7 +919,7 @@ export const ConsultationDetails = (props: any) => {
                         {consultationData.discharge_reason === "REC" && (
                           <div className="grid gap-4">
                             <div>
-                              Date {" - "}
+                              Discharge Date {" - "}
                               <span className="font-semibold">
                                 {consultationData.discharge_date
                                   ? formatDate(consultationData.discharge_date)
@@ -992,14 +998,6 @@ export const ConsultationDetails = (props: any) => {
                         {consultationData.discharge_reason === "EXP" && (
                           <div className="grid gap-4">
                             <div>
-                              Discharge Date {" - "}
-                              <span className="font-semibold">
-                                {consultationData.discharge_date
-                                  ? formatDate(consultationData.discharge_date)
-                                  : "--:--"}
-                              </span>
-                            </div>
-                            <div>
                               Date of Death {" - "}
                               <span className="font-semibold">
                                 {consultationData.death_datetime
@@ -1027,7 +1025,7 @@ export const ConsultationDetails = (props: any) => {
                         ) && (
                           <div className="grid gap-4">
                             <div>
-                              Date {" - "}
+                              Discharge Date {" - "}
                               <span className="font-semibold">
                                 {consultationData.discharge_date
                                   ? formatDate(consultationData.discharge_date)
