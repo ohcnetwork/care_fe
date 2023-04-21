@@ -21,6 +21,8 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useEffect, useReducer, useState } from "react";
 
 import { CircularProgress } from "@material-ui/core";
+import { ConsultationModel } from "../Facility/models.js";
+import DischargeModal from "../Facility/DischargeModal.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { LegacyErrorHelperText } from "../Common/HelperInputFields";
@@ -73,6 +75,10 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [assignedUser, SetAssignedUser] = useState(null);
   const [assignedUserLoading, setAssignedUserLoading] = useState(false);
+  const [consultationData, setConsultationData] = useState<ConsultationModel>(
+    {} as ConsultationModel
+  );
+  const [showDischargeModal, setShowDischargeModal] = useState(false);
   const { t } = useTranslation();
 
   const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text).filter(
@@ -210,7 +216,11 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           msg: t("shift_request_updated_successfully"),
         });
 
-        navigate(`/shifting/${props.id}`);
+        if (data.status === "PATIENT EXPIRED") {
+          setShowDischargeModal(true);
+        } else {
+          navigate(`/shifting/${props.id}`);
+        }
       } else {
         setIsLoading(false);
       }
@@ -224,6 +234,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       if (!status.aborted) {
         if (res && res.data) {
           const d = res.data;
+          setConsultationData(d.patient.last_consultation);
           d["initial_status"] = res.data.status;
           d["status"] = qParams.status || res.data.status;
           dispatch({ type: "set_form", form: d });
@@ -250,6 +261,12 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
   return (
     <div className="px-2 pb-2">
+      <DischargeModal
+        show={showDischargeModal}
+        onClose={() => setShowDischargeModal(false)}
+        consultationData={consultationData}
+        discharge_reason="EXP"
+      />
       <PageTitle
         title={t("update_shift_request")}
         backUrl={`/shifting/${props.id}`}
