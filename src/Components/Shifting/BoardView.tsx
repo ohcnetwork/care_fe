@@ -125,7 +125,7 @@ export default function BoardView() {
           )}
         </div>
       </ScrollingComponent>
-      <ListFilter {...advancedFilter} />
+      <ListFilter {...advancedFilter} key={window.location.search} />
     </div>
   );
 }

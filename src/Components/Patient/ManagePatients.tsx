@@ -882,7 +882,7 @@ export const PatientManager = () => {
         />
       </div>
       <div>
-        <PatientFilter {...advancedFilter} />
+        <PatientFilter {...advancedFilter} key={window.location.search} />
         <NavTabs
           onChange={(tab) => updateQuery({ is_active: tab ? "False" : "True" })}
           options={[

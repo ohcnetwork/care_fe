@@ -258,7 +258,7 @@ export const HospitalList = () => {
         </div>
       </div>
 
-      <FacilityFilter {...advancedFilter} />
+      <FacilityFilter {...advancedFilter} key={window.location.search} />
       <FilterBadges
         badges={({ badge, value, kasp }) => [
           badge("Facility/District Name", "search"),
