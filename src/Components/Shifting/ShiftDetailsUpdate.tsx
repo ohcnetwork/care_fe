@@ -1,44 +1,44 @@
-import { useReducer, useState, useCallback, useEffect } from "react";
-import loadable from "@loadable/component";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
-import { navigate, useQueryParams } from "raviger";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getShiftDetails, updateShift, getUserList } from "../../Redux/actions";
-import { LegacySelectField } from "../Common/HelperInputFields";
-import {
-  SHIFTING_CHOICES,
-  FACILITY_TYPES,
-  SHIFTING_VEHICLE_CHOICES,
-  BREATHLESSNESS_LEVEL,
-} from "../../Common/constants";
-import { UserSelect } from "../Common/UserSelect";
-import { CircularProgress } from "@material-ui/core";
-import { useTranslation } from "react-i18next";
 
 import {
+  BREATHLESSNESS_LEVEL,
+  FACILITY_TYPES,
+  SHIFTING_CHOICES,
+  SHIFTING_VEHICLE_CHOICES,
+} from "../../Common/constants";
+import {
+  Box,
   Card,
   CardContent,
+  FormControlLabel,
   Radio,
   RadioGroup,
-  Box,
-  FormControlLabel,
 } from "@material-ui/core";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useConfig from "../../Common/hooks/useConfig";
+import { getShiftDetails, getUserList, updateShift } from "../../Redux/actions";
+import { navigate, useQueryParams } from "raviger";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useCallback, useEffect, useReducer, useState } from "react";
+
+import { CircularProgress } from "@material-ui/core";
+import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import { LegacyErrorHelperText } from "../Common/HelperInputFields";
+import { LegacySelectField } from "../Common/HelperInputFields";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import { UserSelect } from "../Common/UserSelect";
+import loadable from "@loadable/component";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface patientShiftProps {
   id: string;
 }
-
-const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
 const initForm: any = {
   shifting_approving_facility_object: null,
@@ -67,13 +67,17 @@ const initialState = {
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
-  const { kasp_full_string } = useConfig();
+  const { kasp_full_string, wartime_shifting } = useConfig();
   const dispatchAction: any = useDispatch();
   const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
   const [assignedUser, SetAssignedUser] = useState(null);
   const [assignedUserLoading, setAssignedUserLoading] = useState(false);
   const { t } = useTranslation();
+
+  const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text).filter(
+    (choice) => wartime_shifting || choice !== "PENDING"
+  );
 
   const requiredFields: any = {
     shifting_approving_facility_object: {
