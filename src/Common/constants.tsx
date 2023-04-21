@@ -676,7 +676,7 @@ export const CONSULTATION_TABS: Array<OptionsType> = [
   { id: 6, text: "ABG", desc: "ABG" },
   { id: 7, text: "NURSING", desc: "Nursing" },
   { id: 8, text: "NEUROLOGICAL_MONITORING", desc: "Neurological Monitoring" },
-  { id: 9, text: "VENTILATOR", desc: "Ventilator" },
+  { id: 9, text: "VENTILATOR", desc: "Respiratory Support" },
   { id: 10, text: "NUTRITION", desc: "Nutrition" },
   { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
   { id: 12, text: "DIALYSIS", desc: "Dialysis" },

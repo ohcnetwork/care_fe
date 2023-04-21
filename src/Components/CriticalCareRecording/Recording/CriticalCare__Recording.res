@@ -11,7 +11,6 @@ type editor =
   | PressureSoreEditor
   | NursingCareEditor
   | MedicineEditor
-  | OthersEditor
 
 type state = {
   visibleEditor: option<editor>,
@@ -55,7 +54,6 @@ let editorNameToString = editor => {
   | PressureSoreEditor => "Pressure Sore"
   | NursingCareEditor => "Nursing Care"
   | MedicineEditor => "Medicine"
-  | OthersEditor => "Others"
   }
 }
 
@@ -221,13 +219,6 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
                 id
                 consultationId
               />
-            | OthersEditor =>
-              <CriticalCare__OthersEditor
-                others={CriticalCare__DailyRound.others(state.dailyRound)}
-                updateCB={updateDailyRound(send, OthersEditor)}
-                id
-                consultationId
-              />
             }}
           </div>
         </div>
@@ -249,7 +240,6 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
               PressureSoreEditor,
               NursingCareEditor,
               MedicineEditor,
-              OthersEditor,
             ])->React.array}
           </div>
           <Link
