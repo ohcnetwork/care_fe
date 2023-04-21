@@ -44,6 +44,7 @@ interface IProps {
   show: boolean;
   onClose: () => void;
   consultationData: ConsultationModel;
+  afterSubmit?: () => void;
   discharge_reason?: string;
   discharge_notes?: string;
   discharge_date?: string | null;
@@ -54,6 +55,10 @@ const DischargeModal = ({
   show,
   onClose,
   consultationData,
+  afterSubmit = () => {
+    onClose();
+    window.location.reload();
+  },
   discharge_reason = "",
   discharge_notes = "",
   discharge_date = new Date().toISOString(),
@@ -165,8 +170,8 @@ const DischargeModal = ({
       Notification.Success({
         msg: "Patient Discharged",
       });
-      onClose();
-      window.location.reload();
+
+      afterSubmit();
     }
   };
 

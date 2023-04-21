@@ -266,6 +266,11 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         onClose={() => setShowDischargeModal(false)}
         consultationData={consultationData}
         discharge_reason="EXP"
+        afterSubmit={() => {
+          navigate(
+            `/facility/${consultationData.facility}/patient/${consultationData.patient}/consultation/${consultationData.id}`
+          );
+        }}
       />
       <PageTitle
         title={t("update_shift_request")}
