@@ -1,32 +1,39 @@
 import React, { useState } from "react";
-import { navigate } from "raviger";
-import ListFilter from "./ListFilter";
-import ShiftingBoard from "./ShiftingBoard";
+
 import BadgesList from "./BadgesList";
-import { SHIFTING_CHOICES } from "../../Common/constants";
-import { downloadShiftRequests } from "../../Redux/actions";
-import loadable from "@loadable/component";
-import withScrolling from "react-dnd-scrolling";
-import { formatFilter } from "./Commons";
-import SearchInput from "../Form/SearchInput";
-import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
+import ListFilter from "./ListFilter";
+import { SHIFTING_CHOICES } from "../../Common/constants";
+import SearchInput from "../Form/SearchInput";
+import ShiftingBoard from "./ShiftingBoard";
+import { downloadShiftRequests } from "../../Redux/actions";
+import { formatFilter } from "./Commons";
+import loadable from "@loadable/component";
+import { navigate } from "raviger";
+import useConfig from "../../Common/hooks/useConfig";
+import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
+import withScrolling from "react-dnd-scrolling";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const ScrollingComponent = withScrolling("div");
-const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
-
-const COMPLETED = ["COMPLETED", "REJECTED", "DESTINATION REJECTED"];
-const ACTIVE = shiftStatusOptions.filter(
-  (option) => !COMPLETED.includes(option)
-);
 
 export default function BoardView() {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
     limit: -1,
   });
+  const { wartime_shifting } = useConfig();
+
+  const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text).filter(
+    (choice) => wartime_shifting || choice !== "PENDING"
+  );
+
+  const COMPLETED = ["COMPLETED", "REJECTED", "DESTINATION REJECTED"];
+  const ACTIVE = shiftStatusOptions.filter(
+    (option) => !COMPLETED.includes(option)
+  );
+
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   const [isLoading] = useState(false);
   const { t } = useTranslation();
