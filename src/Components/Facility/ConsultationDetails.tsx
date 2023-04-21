@@ -1,55 +1,57 @@
-import { navigate } from "raviger";
+import * as Notification from "../../Utils/Notifications";
+
 import { Button, CircularProgress } from "@material-ui/core";
-import moment from "moment";
+import {
+  CONSULTATION_TABS,
+  DISCHARGE_REASONS,
+  GENDER_TYPES,
+  OptionsType,
+  SYMPTOM_CHOICES,
+} from "../../Common/constants";
+import { ConsultationModel, ICD11DiagnosisModel } from "./models";
+import {
+  MultilineInputField,
+  SelectField,
+  TextInputField,
+} from "../Common/HelperInputFields";
+import { discharge, dischargePatient } from "../../Redux/actions";
+import { getConsultation, getPatient } from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import * as Notification from "../../Utils/Notifications";
-import { getConsultation, getPatient } from "../../Redux/actions";
-import loadable from "@loadable/component";
-import { ConsultationModel, ICD11DiagnosisModel } from "./models";
-import { PatientModel } from "../Patient/models";
-import {
-  SYMPTOM_CHOICES,
-  CONSULTATION_TABS,
-  OptionsType,
-  GENDER_TYPES,
-  DISCHARGE_REASONS,
-} from "../../Common/constants";
-import { FileUpload } from "../Patient/FileUpload";
-import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
-import { MedicineTables } from "./Consultations/MedicineTables";
+
 import { ABGPlots } from "./Consultations/ABGPlots";
 import { DailyRoundsList } from "./Consultations/DailyRoundsList";
-import { make as Link } from "../Common/components/Link.gen";
-import { NursingPlot } from "./Consultations/NursingPlot";
-import { NeurologicalTable } from "./Consultations/NeurologicalTables";
-import { VentilatorPlot } from "./Consultations/VentilatorPlot";
-import { NutritionPlots } from "./Consultations/NutritionPlots";
-import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
-import { DialysisPlots } from "./Consultations/DialysisPlots";
-import ViewInvestigations from "./Investigations/ViewInvestigations";
-import DoctorVideoSlideover from "./DoctorVideoSlideover";
-import { Feed } from "./Consultations/Feed";
-import { validateEmailAddress } from "../../Common/validation";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import { DialysisPlots } from "./Consultations/DialysisPlots";
+import DoctorVideoSlideover from "./DoctorVideoSlideover";
+import { Feed } from "./Consultations/Feed";
+import { FileUpload } from "../Patient/FileUpload";
 import InputLabel from "@material-ui/core/InputLabel";
-import {
-  TextInputField,
-  SelectField,
-  MultilineInputField,
-} from "../Common/HelperInputFields";
-import { discharge, dischargePatient } from "../../Redux/actions";
-import ReadMore from "../Common/components/Readmore";
-import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
-import { formatDate } from "../../Utils/utils";
-import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
+import { make as Link } from "../Common/components/Link.gen";
+import { MedicineTables } from "./Consultations/MedicineTables";
+import { NeurologicalTable } from "./Consultations/NeurologicalTables";
+import { NursingPlot } from "./Consultations/NursingPlot";
+import { NutritionPlots } from "./Consultations/NutritionPlots";
 import PatientInfoCard from "../Patient/PatientInfoCard";
+import { PatientModel } from "../Patient/models";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
+import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
+import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
+import ReadMore from "../Common/components/Readmore";
+import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
+import { VentilatorPlot } from "./Consultations/VentilatorPlot";
+import ViewInvestigationSuggestions from "./Investigations/InvestigationSuggestions";
+import ViewInvestigations from "./Investigations/ViewInvestigations";
+import { formatDate } from "../../Utils/utils";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { navigate } from "raviger";
+import { validateEmailAddress } from "../../Common/validation";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -520,6 +522,7 @@ export const ConsultationDetails = (props: any) => {
               patient={patientData}
               ip_no={consultationData.ip_no}
               fetchPatientData={fetchData}
+              consultationId={consultationId}
             />
 
             <div className="flex md:flex-row flex-col justify-between border-t px-4 pt-5">

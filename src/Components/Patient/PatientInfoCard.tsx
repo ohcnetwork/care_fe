@@ -1,15 +1,19 @@
-import { Link } from "raviger";
-import { getDimensionOrDash } from "../../Common/utils";
-import { PatientModel } from "./models";
-import { Modal } from "@material-ui/core";
+import * as Notification from "../../Utils/Notifications.js";
+
+import ABHAProfileModal from "../ABDM/ABHAProfileModal";
 import Beds from "../Facility/Consultations/Beds";
-import { useState } from "react";
-import { PatientCategoryTailwindClass } from "../../Common/constants";
-import { PatientCategory } from "../Facility/models";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Link } from "raviger";
 import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
-import ABHAProfileModal from "../ABDM/ABHAProfileModal";
+import { Modal } from "@material-ui/core";
+import { PatientCategory } from "../Facility/models";
+import { PatientCategoryTailwindClass } from "../../Common/constants";
+import { PatientModel } from "./models";
+import { getDimensionOrDash } from "../../Common/utils";
+import { linkCareContext } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
+import { useState } from "react";
 
 const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   "Comfort Care": "COMFORT CARE",
@@ -23,10 +27,14 @@ export default function PatientInfoCard(props: {
   patient: PatientModel;
   ip_no?: string | undefined;
   fetchPatientData?: (state: { aborted: boolean }) => void;
+  consultationId: string;
 }) {
   const [open, setOpen] = useState(false);
   const [showLinkABHANumber, setShowLinkABHANumber] = useState(false);
   const [showABHAProfile, setShowABHAProfile] = useState(false);
+  const [isLinkingCareContext, setIsLinkingCareContext] = useState(false);
+
+  const dispatch = useDispatch<any>();
 
   const patient = props.patient;
   const ip_no = props.ip_no;
@@ -237,6 +245,32 @@ export default function PatientInfoCard(props: {
             >
               <CareIcon className="care-l-user-square" />
               <p>Show ABHA Profile</p>
+            </ButtonV2>
+            <ButtonV2
+              className="hover:text-white flex gap-3 justify-start font-semibold mt-0"
+              onClick={async () => {
+                setIsLinkingCareContext(true);
+                const res = await dispatch(
+                  linkCareContext(props.consultationId)
+                );
+
+                console.log(res);
+
+                if (res.status === 200) {
+                  Notification.Success({
+                    msg: "Care Context sucessfully linked!",
+                  });
+                } else {
+                  Notification.Error({
+                    msg: "Error in linking Care Context!",
+                  });
+                }
+                setIsLinkingCareContext(false);
+              }}
+              loading={isLinkingCareContext}
+            >
+              <CareIcon className="care-l-link" />
+              <p>Link Care Context</p>
             </ButtonV2>
             <ABHAProfileModal
               abha={patient.abha_number_object}

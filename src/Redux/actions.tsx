@@ -1,5 +1,6 @@
-import { ICreateHealthIdRequest } from "../Components/ABDM/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
+
+import { ICreateHealthIdRequest } from "../Components/ABDM/models";
 
 // User
 export const postLogin = (params: object) => {
@@ -846,4 +847,8 @@ export const linkViaQR = (abha_details: any, patientId?: string) => {
     ...abha_details,
     facilityId: "8be5ab36-1b66-44ca-ae77-c719e084160d",
   });
+};
+
+export const linkCareContext = (consultationId: string) => {
+  return fireRequest("linkCareContext", [], { consultation: consultationId });
 };

@@ -820,6 +820,11 @@ const routes: Routes = {
     path: "/api/v1/abdm/healthid/link_via_qr/",
     method: "POST",
   },
+
+  linkCareContext: {
+    path: "/v1.0/patients/profile/add_care_context/",
+    method: "POST",
+  },
 };
 
 export default routes;
