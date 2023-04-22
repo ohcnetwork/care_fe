@@ -3,15 +3,17 @@ import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   LegacyErrorHelperText,
-  // LegacySelectField,
+  LegacySelectField,
 } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
-// import {
-//   FACILITY_TYPES,
-//   SHIFTING_VEHICLE_CHOICES,
-// } from "../../Common/constants";
+import {
+  FACILITY_TYPES,
+  SHIFTING_VEHICLE_CHOICES,
+  BREATHLESSNESS_LEVEL,
+  PATIENT_CATEGORIES,
+} from "../../Common/constants";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import {
   Card,
@@ -34,62 +36,13 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 import { useTranslation } from "react-i18next";
+import useConfig from "../../Common/hooks/useConfig";
+import PatientCategorySelect from "./PatientCategorySelect";
 
 interface patientShiftProps {
   facilityId: number;
   patientId: number;
 }
-
-const initForm: any = {
-  shifting_approving_facility: null,
-  assigned_facility: null,
-  emergency: "false",
-  is_up_shift: "true",
-  reason: "",
-  vehicle_preference: "",
-  comments: "",
-  refering_facility_contact_name: "",
-  refering_facility_contact_number: "",
-  // assigned_facility_type: "",
-  // preferred_vehicle_choice: "",
-  // breathlessness_level: "",
-};
-
-const requiredFields: any = {
-  shifting_approving_facility: {
-    errorText: "Name of the referring facility",
-  },
-  refering_facility_contact_name: {
-    errorText: "Name of contact of the referring facility",
-  },
-  refering_facility_contact_number: {
-    errorText: "Phone number of contact of the referring facility",
-    invalidText: "Please enter valid phone number",
-  },
-  reason: {
-    errorText: "Reason for shifting in mandatory",
-    invalidText: "Please enter reason for shifting",
-  },
-  // assigned_facility_type: {
-  //   errorText: "Please Select Facility Type",
-  // },
-  // preferred_vehicle_choice: {
-  //   errorText: "Please Preferred Vehicle Type",
-  // },
-  // breathlessness_level: {
-  //   errorText: "Severity of Breathlessness is required",
-  // },
-};
-
-const initError = Object.assign(
-  {},
-  ...Object.keys(initForm).map((k) => ({ [k]: "" }))
-);
-
-const initialState = {
-  form: { ...initForm },
-  errors: { ...initError },
-};
 
 export const ShiftCreate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
@@ -98,13 +51,86 @@ export const ShiftCreate = (props: patientShiftProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
+  const [patientCategory, setPatientCategory] = useState<any>();
   const { t } = useTranslation();
+  const { wartime_shifting } = useConfig();
+
+  const initForm: any = {
+    shifting_approving_facility: null,
+    assigned_facility: null,
+    emergency: "false",
+    is_up_shift: "true",
+    reason: "",
+    vehicle_preference: "",
+    comments: "",
+    refering_facility_contact_name: "",
+    refering_facility_contact_number: "",
+    assigned_facility_type: null,
+    preferred_vehicle_choice: null,
+    breathlessness_level: null,
+    patient_category: "",
+    ambulance_driver_name: "",
+    ambulance_phone_number: "",
+    ambulance_number: "",
+  };
+
+  let requiredFields: any = {
+    shifting_approving_facility: {
+      errorText: "Name of the referring facility",
+    },
+    refering_facility_contact_name: {
+      errorText: "Name of contact of the referring facility",
+    },
+    refering_facility_contact_number: {
+      errorText: "Phone number of contact of the referring facility",
+      invalidText: "Please enter valid phone number",
+    },
+    reason: {
+      errorText: "Reason for shifting in mandatory",
+      invalidText: "Please enter reason for shifting",
+    },
+    ambulance_number: {
+      errorText: "Ambulance Number is required",
+      invalidText: "Please enter valid Ambulance Number",
+    },
+  };
+
+  if (wartime_shifting) {
+    requiredFields = {
+      ...requiredFields,
+      assigned_facility_type: {
+        errorText: "Please Select Facility Type",
+      },
+      preferred_vehicle_choice: {
+        errorText: "Please Preferred Vehicle Type",
+      },
+      breathlessness_level: {
+        errorText: "Severity of Breathlessness is required",
+      },
+    };
+  }
+
+  const initError = Object.assign(
+    {},
+    ...Object.keys(initForm).map((k) => ({ [k]: "" }))
+  );
+
+  const initialState = {
+    form: { ...initForm },
+    errors: { ...initError },
+  };
 
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
         const res = await dispatchAction(getPatient({ id: patientId }));
         if (res.data) {
+          const patient_category =
+            res.data.last_consultation?.last_daily_round?.patient_category ??
+            res.data.last_consultation?.category;
+          setPatientCategory(
+            PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id
+          );
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
         }
@@ -224,14 +250,20 @@ export const ShiftCreate = (props: patientShiftProps) => {
         reason: state.form.reason,
         vehicle_preference: state.form.vehicle_preference,
         comments: state.form.comments,
-        // assigned_facility_type: state.form.assigned_facility_type,
-        // preferred_vehicle_choice: state.form.preferred_vehicle_choice,
-        // breathlessness_level: state.form.breathlessness_level,
+        assigned_facility_type: state.form.assigned_facility_type,
+        preferred_vehicle_choice: state.form.preferred_vehicle_choice,
         refering_facility_contact_name:
           state.form.refering_facility_contact_name,
         refering_facility_contact_number: parsePhoneNumberFromString(
           state.form.refering_facility_contact_number
         )?.format("E.164"),
+        breathlessness_level: state.form.breathlessness_level,
+        patient_category: patientCategory,
+        ambulance_driver_name: state.form.ambulance_driver_name,
+        ambulance_phone_number: parsePhoneNumberFromString(
+          state.form.ambulance_phone_number
+        )?.format("E.164"),
+        ambulance_number: state.form.ambulance_number,
       };
 
       const res = await dispatchAction(createShift(data));
@@ -247,8 +279,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
       }
     }
   };
-  // const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map((obj) => obj.text);
-  // const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
+  const vehicleOptions = SHIFTING_VEHICLE_CHOICES.map((obj) => obj.text);
+  const facilityOptions = FACILITY_TYPES.map((obj) => obj.text);
 
   if (isLoading) {
     return <Loading />;
@@ -291,24 +323,26 @@ export const ShiftCreate = (props: patientShiftProps) => {
                 />
               </div>
 
-              <div>
-                <FieldLabel>
-                  Name of shifting approving facility{" "}
-                  <span className="text-red-500">*</span>
-                </FieldLabel>
-                <FacilitySelect
-                  multiple={false}
-                  facilityType={1300}
-                  name="shifting_approving_facility"
-                  selected={state.form.shifting_approving_facility}
-                  setSelected={(value: any) =>
-                    handleValueChange(value, "shifting_approving_facility")
-                  }
-                  errors={state.errors.shifting_approving_facility}
-                />
-              </div>
+              {wartime_shifting && (
+                <div>
+                  <FieldLabel>
+                    Name of shifting approving facility{" "}
+                    <span className="text-red-500">*</span>
+                  </FieldLabel>
+                  <FacilitySelect
+                    multiple={false}
+                    facilityType={1300}
+                    name="shifting_approving_facility"
+                    selected={state.form.shifting_approving_facility}
+                    setSelected={(value: any) =>
+                      handleValueChange(value, "shifting_approving_facility")
+                    }
+                    errors={state.errors.shifting_approving_facility}
+                  />
+                </div>
+              )}
 
-              <div>
+              <div className={`md:col-span-${wartime_shifting ? "1" : "2"}`}>
                 <FieldLabel>
                   {t("what_facility_assign_the_patient_to")}
                 </FieldLabel>
@@ -374,68 +408,72 @@ export const ShiftCreate = (props: patientShiftProps) => {
                 <LegacyErrorHelperText error={state.errors.is_up_shift} />
               </div>
 
-              {/* <div>
-                                <InputLabel>Vehicle preference</InputLabel>
-                                <TextInputField
-                                    fullWidth
-                                    name="vehicle_preference"
-                                    variant="outlined"
-                                    margin="dense"
-                                    value={state.form.vehicle_preference}
-                                    onChange={handleChange}
-                                    errors={state.errors.vehicle_preference}
-                                />
-                            </div> */}
-              {/* <div className="md:col-span-1">
-                <FieldLabel>
-                  Preferred Vehicle <span className="text-red-500">*</span>
-                </FieldLabel>
-                <LegacySelectField
-                  name="preferred_vehicle_choice"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.preferred_vehicle_choice}
-                  options={["", ...vehicleOptions]}
-                  onChange={handleChange}
-                  className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
-                  errors={state.errors.preferred_vehicle_choice}
+              <div className="md:col-span-2">
+                <PatientCategorySelect
+                  required={false}
+                  name="patient_category"
+                  value={patientCategory}
+                  onChange={(value) => {
+                    setPatientCategory(value);
+                  }}
+                  label="Patient Category"
                 />
-              </div> */}
-              {/* <div className="md:col-span-1">
-                <FieldLabel>
-                  Preferred Facility Type{" "}
-                  <span className="text-red-500">*</span>
-                </FieldLabel>
-                <LegacySelectField
-                  name="assigned_facility_type"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.assigned_facility_type}
-                  options={["", ...facilityOptions]}
-                  onChange={handleChange}
-                  className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
-                  errors={state.errors.assigned_facility_type}
-                />
-              </div> */}
-              {/* <div className="md:col-span-1">
-                <FieldLabel>
-                  Severity of Breathlessness{" "}
-                  <span className="text-red-500">*</span>
-                </FieldLabel>
-                <LegacySelectField
-                  name="breathlessness_level"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.breathlessness_level}
-                  options={["", ...BREATHLESSNESS_LEVEL]}
-                  onChange={handleChange}
-                  className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
-                  errors={state.errors.breathlessness_level}
-                />
-              </div> */}
+              </div>
+
+              {wartime_shifting && (
+                <>
+                  <div className="md:col-span-1">
+                    <FieldLabel>
+                      Preferred Vehicle <span className="text-red-500">*</span>
+                    </FieldLabel>
+                    <LegacySelectField
+                      name="preferred_vehicle_choice"
+                      variant="outlined"
+                      margin="dense"
+                      optionArray={true}
+                      value={state.form.preferred_vehicle_choice}
+                      options={["", ...vehicleOptions]}
+                      onChange={handleChange}
+                      className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
+                      errors={state.errors.preferred_vehicle_choice}
+                    />
+                  </div>
+                  <div className="md:col-span-1">
+                    <FieldLabel>
+                      Preferred Facility Type{" "}
+                      <span className="text-red-500">*</span>
+                    </FieldLabel>
+                    <LegacySelectField
+                      name="assigned_facility_type"
+                      variant="outlined"
+                      margin="dense"
+                      optionArray={true}
+                      value={state.form.assigned_facility_type}
+                      options={["", ...facilityOptions]}
+                      onChange={handleChange}
+                      className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
+                      errors={state.errors.assigned_facility_type}
+                    />
+                  </div>
+                  <div className="md:col-span-1">
+                    <FieldLabel>
+                      Severity of Breathlessness{" "}
+                      <span className="text-red-500">*</span>
+                    </FieldLabel>
+                    <LegacySelectField
+                      name="breathlessness_level"
+                      variant="outlined"
+                      margin="dense"
+                      optionArray={true}
+                      value={state.form.breathlessness_level}
+                      options={["", ...BREATHLESSNESS_LEVEL]}
+                      onChange={handleChange}
+                      className="bg-white h-11 w-fit mt-2 shadow-sm md:leading-5"
+                      errors={state.errors.breathlessness_level}
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="md:col-span-2">
                 <TextAreaFormField
@@ -450,6 +488,39 @@ export const ShiftCreate = (props: patientShiftProps) => {
                 />
               </div>
 
+              <div className="md:col-span-2">
+                <TextFormField
+                  label="Name of ambulance driver"
+                  name="ambulance_driver_name"
+                  placeholder="Name of ambulance driver"
+                  value={state.form.ambulance_driver_name}
+                  onChange={handleTextFormFieldChange}
+                />
+              </div>
+
+              <div className="md:col-span-1">
+                <PhoneNumberFormField
+                  name="ambulance_phone_number"
+                  label="Ambulance Phone Number"
+                  value={state.form.ambulance_phone_number}
+                  onChange={(event) => {
+                    handleFormFieldChange(event);
+                  }}
+                  error={state.errors.ambulance_phone_number}
+                />
+              </div>
+
+              <div className="md:col-span-1">
+                <TextFormField
+                  label="Ambulance No."
+                  required
+                  name="ambulance_number"
+                  placeholder="Ambulance No."
+                  value={state.form.ambulance_number}
+                  onChange={handleTextFormFieldChange}
+                  error={state.errors.ambulance_number}
+                />
+              </div>
               <div className="md:col-span-2">
                 <TextAreaFormField
                   name="comments"

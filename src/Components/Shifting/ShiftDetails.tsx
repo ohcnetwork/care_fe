@@ -20,7 +20,8 @@ import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function ShiftDetails(props: { id: string }) {
-  const { static_header_logo, kasp_full_string } = useConfig();
+  const { static_header_logo, kasp_full_string, wartime_shifting } =
+    useConfig();
   const dispatch: any = useDispatch();
   const initialData: any = {};
   const [data, setData] = useState(initialData);
@@ -89,7 +90,7 @@ export default function ShiftDetails(props: { id: string }) {
   };
 
   const copyContent = (data: any) => {
-    const formattedText =
+    let formattedText =
       t("disease_status") +
       ": *" +
       data?.patient_object?.disease_status +
@@ -114,13 +115,13 @@ export default function ShiftDetails(props: { id: string }) {
       ":" +
       data?.patient_object?.address +
       "\n" +
-      // t("facility_preference") +
-      // ":" +
-      // data?.assigned_facility_type +
-      // "\n" +
       t("reason") +
       ":" +
       data?.reason;
+    if (wartime_shifting) {
+      formattedText +=
+        t("facility_preference") + ": " + data?.assigned_facility_type + "\n";
+    }
     return formattedText;
   };
 
@@ -743,6 +744,15 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
+                  {t("patient_category")}:{" "}
+                </span>
+                <span className="badge badge-pill badge-warning py-1 px-2">
+                  {" "}
+                  {data.patient_category}
+                </span>
+              </div>
+              <div>
+                <span className="font-semibold leading-relaxed">
                   {kasp_full_string}:{" "}
                 </span>
                 <span className="badge badge-pill badge-warning py-1 px-2">
@@ -750,24 +760,28 @@ export default function ShiftDetails(props: { id: string }) {
                   {data.is_kasp ? t("yes") : t("no")}
                 </span>
               </div>
-              {/* <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("vehicle_preference")}:{" "}
-                </span>
-                {data.vehicle_preference || data.preferred_vehicle_choice}
-              </div> 
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("facility_preference")}:{" "}
-                </span>
-                {data.assigned_facility_type || "--"}
-              </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("severity_of_breathlessness")}:{" "}
-                </span>
-                {data.breathlessness_level || "--"}
-              </div> */}
+              {wartime_shifting && (
+                <>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      {t("vehicle_preference")}:{" "}
+                    </span>
+                    {data.vehicle_preference || data.preferred_vehicle_choice}
+                  </div>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      {t("facility_preference")}:{" "}
+                    </span>
+                    {data.assigned_facility_type || "--"}
+                  </div>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      {t("severity_of_breathlessness")}:{" "}
+                    </span>
+                    {data.breathlessness_level || "--"}
+                  </div>{" "}
+                </>
+              )}
 
               <div className="md:row-span-2 md:col-span-2">
                 <span className="font-semibold leading-relaxed">
@@ -775,7 +789,34 @@ export default function ShiftDetails(props: { id: string }) {
                 </span>
                 <span className="ml-2">{data.reason || "--"}</span>
               </div>
-
+              <div className="md:row-span-2 md:col-span-2">
+                <span className="font-semibold leading-relaxed">
+                  {t("ambulance_driver_name")}:{" "}
+                </span>
+                <span className="ml-2">
+                  {data.ambulance_driver_name || "--"}
+                </span>
+              </div>
+              <div className="md:row-span-2 md:col-span-2">
+                <span className="font-semibold leading-relaxed">
+                  {t("ambulance_phone_number")}:{" "}
+                </span>
+                <span className="ml-2">
+                  {data.ambulance_phone_number ? (
+                    <a href={`tel:${data.ambulance_phone_number}`}>
+                      {data.ambulance_phone_number}
+                    </a>
+                  ) : (
+                    "--"
+                  )}
+                </span>
+              </div>
+              <div className="md:row-span-2 md:col-span-2">
+                <span className="font-semibold leading-relaxed">
+                  {t("ambulance_number")}:{" "}
+                </span>
+                <span className="ml-2">{data.ambulance_number || "--"}</span>
+              </div>
               <div className="md:row-span-2 md:col-span-2">
                 <span className="font-semibold leading-relaxed">
                   {t("comments")}:{" "}
