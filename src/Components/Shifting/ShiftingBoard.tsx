@@ -5,12 +5,11 @@ import {
   completeTransfer,
   downloadShiftRequests,
 } from "../../Redux/actions";
-import Button from "@material-ui/core/Button";
 import { navigate } from "raviger";
 import moment from "moment";
-import { Modal } from "@material-ui/core";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 import { CSVLink } from "react-csv";
-import CircularProgress from "@material-ui/core/CircularProgress";
+import CircularProgress from "../Common/components/CircularProgress";
 import { useDrag, useDrop } from "react-dnd";
 import { classNames, formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -205,60 +204,29 @@ const ShiftCard = ({ shift, filter }: any) => {
           </div>
           {filter === "TRANSFER IN PROGRESS" && shift.assigned_facility && (
             <div className="mt-2">
-              <Button
-                size="small"
-                variant="outlined"
-                fullWidth
+              <ButtonV2
+                variant="secondary"
+                border
+                className="w-full sm:whitespace-normal"
                 onClick={() => setModalFor(shift.external_id)}
               >
                 {t("transfer_to_receiving_facility")}
-              </Button>
+              </ButtonV2>
 
-              <Modal
-                open={modalFor === shift.external_id}
-                onClose={(_) =>
+              <ConfirmDialogV2
+                title={t("confirm_transfer_complete")}
+                description={t("mark_this_transfer_as_complete_question")}
+                show={modalFor === shift.external_id}
+                onClose={() =>
                   setModalFor({ externalId: undefined, loading: false })
                 }
+                action={t("confirm")}
+                onConfirm={() => handleTransferComplete(shift)}
               >
-                <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                  <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center">
-                    <div className="mb-4">
-                      <h1 className="text-2xl">
-                        {t("confirm_transfer_complete")}
-                      </h1>
-                    </div>
-                    <div className="mb-8">
-                      <p>{t("mark_this_transfer_as_complete_question")}</p>
-                      <p className="mt-2 text-yellow-600">
-                        {t("redirected_to_create_consultation")}
-                      </p>
-                    </div>
-                    <div className="flex gap-2 justify-center">
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        fullWidth
-                        onClick={() => {
-                          setModalFor({
-                            externalId: undefined,
-                            loading: false,
-                          });
-                        }}
-                      >
-                        {t("Cancel")}
-                      </Button>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        fullWidth
-                        onClick={(_) => handleTransferComplete(shift)}
-                      >
-                        {t("confirm")}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </Modal>
+                <p className="mt-2 text-sm text-yellow-600">
+                  {t("redirected_to_create_consultation")}
+                </p>
+              </ConfirmDialogV2>
             </div>
           )}
         </div>

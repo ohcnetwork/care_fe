@@ -98,7 +98,7 @@ type FormDetails = {
   prn_prescription: PRNPrescriptionType[];
   investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
-  action: string;
+  action?: string;
   assigned_to: string;
   assigned_to_object: UserModel | null;
   special_instruction: string;
@@ -114,7 +114,8 @@ type FormDetails = {
 
 type Action =
   | { type: "set_form"; form: FormDetails }
-  | { type: "set_error"; errors: FormDetails };
+  | { type: "set_error"; errors: FormDetails }
+  | { type: "set_form_field"; field: keyof FormDetails; value: any };
 
 const initForm: FormDetails = {
   symptoms: [],
@@ -147,7 +148,7 @@ const initForm: FormDetails = {
   prn_prescription: [],
   investigation: [],
   is_telemedicine: "false",
-  action: "PENDING",
+  action: undefined,
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
@@ -189,13 +190,22 @@ const consultationFormReducer = (state = initialState, action: Action) => {
     case "set_form": {
       return {
         ...state,
-        form: action.form,
+        form: { ...state.form, ...action.form },
       };
     }
     case "set_error": {
       return {
         ...state,
         errors: action.errors,
+      };
+    }
+    case "set_form_field": {
+      return {
+        ...state,
+        form: {
+          ...state.form,
+          [action.field]: action.value,
+        },
       };
     }
   }
@@ -234,7 +244,7 @@ export const ConsultationForm = (props: any) => {
   );
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
   const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
-  const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-500);
+  const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
 
   const sections = {
     "Consultation Details": {
@@ -270,6 +280,14 @@ export const ConsultationForm = (props: any) => {
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
+          if (isUpdate) {
+            dispatch({
+              type: "set_form_field",
+              field: "action",
+              value: TELEMEDICINE_ACTIONS.find((a) => a.id === res.data.action)
+                ?.text,
+            });
+          }
         }
       } else {
         setPatientName("");
@@ -758,7 +776,10 @@ export const ConsultationForm = (props: any) => {
   const sectionId = (section: ConsultationFormSection) =>
     section.toLowerCase().replace(" ", "-");
 
-  const sectionTitle = (sectionTitle: ConsultationFormSection) => {
+  const sectionTitle = (
+    sectionTitle: ConsultationFormSection,
+    required = false
+  ) => {
     const section = sections[sectionTitle];
     return (
       <div
@@ -769,6 +790,7 @@ export const ConsultationForm = (props: any) => {
         <CareIcon className={`${section.iconClass} text-xl mr-3`} />
         <label className="font-bold text-lg text-gray-900">
           {sectionTitle}
+          {required && <span className="text-danger-500">{" *"}</span>}
         </label>
         <hr className="ml-6 flex-1 border-gray-400 border" />
       </div>
@@ -1109,7 +1131,7 @@ export const ConsultationForm = (props: any) => {
 
                 <div className="flex flex-col gap-4 pb-4">
                   <div className="flex flex-col">
-                    {sectionTitle("Diagnosis")}
+                    {sectionTitle("Diagnosis", true)}
                     <p className="text-gray-700 text-sm -mt-4 mb-4 space-x-1">
                       <span className="font-medium">
                         Either Provisional or Final Diagnosis is mandatory
@@ -1262,13 +1284,14 @@ export const ConsultationForm = (props: any) => {
                                 {...selectField("review_interval")}
                                 label="Review After"
                                 options={REVIEW_AT_CHOICES}
+                                position="above"
                               />
                             </div>
                             <div className="flex-1" ref={fieldRef["action"]}>
                               <SelectFormField
                                 {...field("action")}
                                 label="Action"
-                                required
+                                position="above"
                                 options={TELEMEDICINE_ACTIONS}
                                 optionLabel={(option) => option.desc}
                                 optionValue={(option) => option.text}

@@ -340,7 +340,11 @@ export default function ListView() {
           </div>
         )}
       </div>
-      <ListFilter showShiftingStatus={true} {...advancedFilter} />
+      <ListFilter
+        showShiftingStatus={true}
+        {...advancedFilter}
+        key={window.location.search}
+      />
     </Page>
   );
 }

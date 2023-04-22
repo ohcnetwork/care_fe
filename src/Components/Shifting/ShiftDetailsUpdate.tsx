@@ -1,44 +1,46 @@
-import { useReducer, useState, useCallback, useEffect } from "react";
-import loadable from "@loadable/component";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
-import { navigate, useQueryParams } from "raviger";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getShiftDetails, updateShift, getUserList } from "../../Redux/actions";
-import { LegacySelectField } from "../Common/HelperInputFields";
+
 import {
   SHIFTING_CHOICES,
   // FACILITY_TYPES,
   // SHIFTING_VEHICLE_CHOICES,
   // BREATHLESSNESS_LEVEL,
 } from "../../Common/constants";
-import { UserSelect } from "../Common/UserSelect";
-import { CircularProgress } from "@material-ui/core";
-import { useTranslation } from "react-i18next";
-
 import {
+  Box,
   Card,
   CardContent,
+  FormControlLabel,
   Radio,
   RadioGroup,
-  Box,
-  FormControlLabel,
 } from "@material-ui/core";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useConfig from "../../Common/hooks/useConfig";
+import { getShiftDetails, getUserList, updateShift } from "../../Redux/actions";
+import { navigate, useQueryParams } from "raviger";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useCallback, useEffect, useReducer, useState } from "react";
+
+import { CircularProgress } from "@material-ui/core";
+import { ConsultationModel } from "../Facility/models.js";
+import DischargeModal from "../Facility/DischargeModal.js";
+import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import { LegacyErrorHelperText } from "../Common/HelperInputFields";
+import { LegacySelectField } from "../Common/HelperInputFields";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import { UserSelect } from "../Common/UserSelect";
+import loadable from "@loadable/component";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface patientShiftProps {
   id: string;
 }
-
-const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
 
 const initForm: any = {
   shifting_approving_facility_object: null,
@@ -67,13 +69,21 @@ const initialState = {
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
-  const { kasp_full_string } = useConfig();
+  const { kasp_full_string, wartime_shifting } = useConfig();
   const dispatchAction: any = useDispatch();
   const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
   const [assignedUser, SetAssignedUser] = useState(null);
   const [assignedUserLoading, setAssignedUserLoading] = useState(false);
+  const [consultationData, setConsultationData] = useState<ConsultationModel>(
+    {} as ConsultationModel
+  );
+  const [showDischargeModal, setShowDischargeModal] = useState(false);
   const { t } = useTranslation();
+
+  const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text).filter(
+    (choice) => wartime_shifting || choice !== "PENDING"
+  );
 
   const requiredFields: any = {
     shifting_approving_facility_object: {
@@ -213,7 +223,11 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           msg: t("shift_request_updated_successfully"),
         });
 
-        navigate(`/shifting/${props.id}`);
+        if (data.status === "PATIENT EXPIRED") {
+          setShowDischargeModal(true);
+        } else {
+          navigate(`/shifting/${props.id}`);
+        }
       } else {
         setIsLoading(false);
       }
@@ -227,6 +241,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       if (!status.aborted) {
         if (res && res.data) {
           const d = res.data;
+          setConsultationData(d.patient.last_consultation);
           if (d.assigned_facility_external)
             d["assigned_facility_object"] = {
               id: -1,
@@ -258,6 +273,17 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
   return (
     <div className="px-2 pb-2">
+      <DischargeModal
+        show={showDischargeModal}
+        onClose={() => setShowDischargeModal(false)}
+        consultationData={consultationData}
+        discharge_reason="EXP"
+        afterSubmit={() => {
+          navigate(
+            `/facility/${consultationData.facility}/patient/${consultationData.patient}/consultation/${consultationData.id}`
+          );
+        }}
+      />
       <PageTitle
         title={t("update_shift_request")}
         backUrl={`/shifting/${props.id}`}
