@@ -10,7 +10,7 @@ import {
 } from "../../Redux/actions";
 import { classNames } from "../../Utils/utils";
 import { AssetData, AssetLocationObject } from "../Assets/AssetTypes";
-import ButtonV2, { Submit } from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import Loading from "../Common/Loading";
 import Pagination from "../Common/Pagination";
@@ -36,6 +36,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
   const [monitors, setMonitors] = useState<Monitor[]>();
   const [facility, setFacility] = useState<FacilityModel>();
   const [currentPage, setCurrentPage] = useState(1);
+  const [defaultShowAllLocation, setDefaultShowAllLocation] = useState(true);
   const searchParams = new URLSearchParams(window.location.search);
 
   // this wil set ?page=1 param in url if it is not present
@@ -45,7 +46,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
     }
   }, []);
   const [location, setLocation] = useState<AssetLocationObject>();
-  const [showSelectLocation, setShowSelectLocation] = useState(true);
+  const [showSelectLocation, setShowSelectLocation] = useState(false);
 
   useEffect(() => {
     const onFullscreenChange = () =>
@@ -131,43 +132,62 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
   if (!monitors) return <Loading />;
   return (
     <Page
-      title={`Central Nursing Station: ${facility?.name} - ${location?.name}`}
+      title={`Central Nursing Station: ${
+        defaultShowAllLocation
+          ? "All Locations"
+          : `${facility?.name} - ${location?.name}`
+      }`}
       backUrl={`/facility/${facilityId}`}
       noImplicitPadding
       breadcrumbs={false}
       options={
         <div className="flex gap-4 items-center">
-          <ButtonV2
-            variant="secondary"
-            border
-            onClick={() => setShowSelectLocation(true)}
-          >
-            Change Location
-          </ButtonV2>
-          <ButtonV2
-            variant="secondary"
-            border
-            onClick={() => {
-              if (isFullscreen) {
-                document.exitFullscreen();
-              } else {
-                document.documentElement.requestFullscreen();
-              }
-            }}
-            className="tooltip !h-11"
-          >
-            <CareIcon
-              className={classNames(
-                isFullscreen
-                  ? "care-l-compress-arrows"
-                  : "care-l-expand-arrows-alt",
-                "text-lg"
-              )}
-            />
-            <span className="tooltip-text tooltip-bottom -translate-x-1/2">
-              {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-            </span>
-          </ButtonV2>
+          {monitors?.length > 0 ? (
+            <>
+              <ButtonV2
+                variant="secondary"
+                border
+                onClick={() => setShowSelectLocation(true)}
+              >
+                Change Location
+              </ButtonV2>
+              <ButtonV2
+                variant="secondary"
+                border
+                onClick={() => {
+                  if (isFullscreen) {
+                    document.exitFullscreen();
+                  } else {
+                    document.documentElement.requestFullscreen();
+                  }
+                }}
+                className="tooltip !h-11"
+              >
+                <CareIcon
+                  className={classNames(
+                    isFullscreen
+                      ? "care-l-compress-arrows"
+                      : "care-l-expand-arrows-alt",
+                    "text-lg"
+                  )}
+                />
+                <span className="tooltip-text tooltip-bottom -translate-x-1/2">
+                  {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                </span>
+              </ButtonV2>
+            </>
+          ) : (
+            <>
+              <ButtonV2
+                variant="secondary"
+                border
+                onClick={() => history.go(-2)}
+              >
+                Go Back
+              </ButtonV2>
+            </>
+          )}
+
           <Pagination
             className=""
             cPage={currentPage}
@@ -175,7 +195,13 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
               setCurrentPage(page);
               navigate(`/facility/${facilityId}/cns?page=${page}`);
             }}
-            data={{ totalCount: monitors.length }}
+            data={{
+              totalCount: defaultShowAllLocation
+                ? monitors.length
+                : monitors.filter(
+                    (m) => m.asset.location_object.id === location?.id
+                  ).length,
+            }}
             defaultPerPage={PER_PAGE_LIMIT}
           />
         </div>
@@ -183,18 +209,11 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
     >
       <DialogModal
         title="Select Location"
-        show={showSelectLocation || !location}
+        show={showSelectLocation}
         onClose={() => setShowSelectLocation(false)}
         className="w-full max-w-md"
       >
         {!monitors && <Loading />}
-        {monitors.length === 0 && (
-          <div className="text-center">
-            <h3 className="text-lg font-semibold">
-              No vitals monitors present
-            </h3>
-          </div>
-        )}
         <div className="flex flex-col gap-2">
           <AutocompleteFormField
             className="mt-2"
@@ -222,10 +241,28 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
             optionValue={(location) => location}
             disabled={!monitors}
           />
-          <div className="flex justify-end">
+          <div className="md:flex justify-end">
+            <ButtonV2
+              variant="primary"
+              className="w-full mr-2 my-2"
+              onClick={() => {
+                setDefaultShowAllLocation(true);
+                setShowSelectLocation(false);
+              }}
+            >
+              Show All Locations
+            </ButtonV2>
             <Submit
-              onClick={() => setShowSelectLocation(false)}
+              onClick={() => {
+                setDefaultShowAllLocation(false);
+                setShowSelectLocation(false);
+              }}
+              className="mr-2 my-2"
               label="Confirm"
+            />
+            <Cancel
+              onClick={() => setShowSelectLocation(false)}
+              className="mr-2 my-2"
             />
           </div>
         </div>
@@ -237,7 +274,11 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
       )}
       <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-1">
         {monitors
-          ?.filter((m) => m.asset.location_object.id === location?.id)
+          ?.filter((m) =>
+            defaultShowAllLocation
+              ? true
+              : m.asset.location_object.id === location?.id
+          )
           ?.slice(
             (currentPage - 1) * PER_PAGE_LIMIT,
             currentPage * PER_PAGE_LIMIT
