@@ -302,25 +302,27 @@ export default function ListFilter(props: any) {
         </div>
       </div>
 
-      <div>
-        <FieldLabel>{t("shifting_approving_facility")}</FieldLabel>
-        <div className="">
-          {isShiftingLoading ? (
-            <CircularProgress size={20} />
-          ) : (
-            <FacilitySelect
-              multiple={false}
-              name="shifting_approving_facility"
-              selected={filterState.shifting_approving_facility_ref}
-              setSelected={(obj) =>
-                setFacility(obj, "shifting_approving_facility")
-              }
-              className="shifting-page-filter-dropdown"
-              errors={""}
-            />
-          )}
+      {wartime_shifting && (
+        <div>
+          <FieldLabel>{t("shifting_approving_facility")}</FieldLabel>
+          <div className="">
+            {isShiftingLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <FacilitySelect
+                multiple={false}
+                name="shifting_approving_facility"
+                selected={filterState.shifting_approving_facility_ref}
+                setSelected={(obj) =>
+                  setFacility(obj, "shifting_approving_facility")
+                }
+                className="shifting-page-filter-dropdown"
+                errors={""}
+              />
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <div>
         <FieldLabel>{t("assigned_facility")}</FieldLabel>

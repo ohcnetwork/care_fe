@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { classNames, formatDate } from "../../Utils/utils";
 import {
-  listShiftRequests,
   completeTransfer,
   downloadShiftRequests,
+  listShiftRequests,
 } from "../../Redux/actions";
-import { navigate } from "raviger";
-import moment from "moment";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
-import { CSVLink } from "react-csv";
-import CircularProgress from "../Common/components/CircularProgress";
 import { useDrag, useDrop } from "react-dnd";
-import { classNames, formatDate } from "../../Utils/utils";
+
 import ButtonV2 from "../Common/components/ButtonV2";
+import { CSVLink } from "react-csv";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import CircularProgress from "../Common/components/CircularProgress";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import moment from "moment";
+import { navigate } from "raviger";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 
 const limit = 14;
@@ -39,6 +41,7 @@ const reduceLoading = (action: string, current: any) => {
 
 const ShiftCard = ({ shift, filter }: any) => {
   const dispatch: any = useDispatch();
+  const { wartime_shifting } = useConfig();
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
@@ -109,17 +112,19 @@ const ShiftCard = ({ shift, filter }: any) => {
                   </dd>
                 </dt>
               </div>
-              <div className="sm:col-span-1">
-                <dt
-                  title={t("shifting_approving_facility")}
-                  className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                >
-                  <i className="fas fa-user-check mr-2"></i>
-                  <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
-                    {(shift.shifting_approving_facility_object || {}).name}
-                  </dd>
-                </dt>
-              </div>
+              {wartime_shifting && (
+                <div className="sm:col-span-1">
+                  <dt
+                    title={t("shifting_approving_facility")}
+                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                  >
+                    <i className="fas fa-user-check mr-2"></i>
+                    <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
+                      {(shift.shifting_approving_facility_object || {}).name}
+                    </dd>
+                  </dt>
+                </div>
+              )}
               <div className="sm:col-span-1">
                 <dt
                   title={t("assigned_facility")}

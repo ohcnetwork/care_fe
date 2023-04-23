@@ -1,11 +1,11 @@
 import * as Notification from "../../Utils/Notifications.js";
 
 import {
-  SHIFTING_CHOICES,
-  FACILITY_TYPES,
-  SHIFTING_VEHICLE_CHOICES,
   BREATHLESSNESS_LEVEL,
+  FACILITY_TYPES,
   PATIENT_CATEGORIES,
+  SHIFTING_CHOICES,
+  SHIFTING_VEHICLE_CHOICES,
 } from "../../Common/constants";
 import {
   Box,
@@ -28,17 +28,17 @@ import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { LegacySelectField } from "../Common/HelperInputFields";
+import PatientCategorySelect from "../Patient/PatientCategorySelect";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
 import { UserSelect } from "../Common/UserSelect";
 import loadable from "@loadable/component";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import PatientCategorySelect from "../Patient/PatientCategorySelect";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -95,10 +95,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   );
 
   let requiredFields: any = {
-    shifting_approving_facility_object: {
-      errorText: t("shifting_approving_facility_can_not_be_empty"),
-    },
-
     reason: {
       errorText: t("please_enter_a_reason_for_the_shift"),
     },
@@ -112,6 +108,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   if (wartime_shifting) {
     requiredFields = {
       ...requiredFields,
+      shifting_approving_facility_object: {
+        errorText: t("shifting_approving_facility_can_not_be_empty"),
+      },
       assigned_facility_type: {
         errorText: t("please_select_facility_type"),
       },

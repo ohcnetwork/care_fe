@@ -1,29 +1,32 @@
-import { useState, useEffect } from "react";
-import loadable from "@loadable/component";
-import { navigate } from "raviger";
-import { useDispatch } from "react-redux";
-import moment from "moment";
 import {
-  listShiftRequests,
   completeTransfer,
   downloadShiftRequests,
+  listShiftRequests,
 } from "../../Redux/actions";
-import ListFilter from "./ListFilter";
-import { formatFilter } from "./Commons";
-import { formatDate } from "../../Utils/utils";
-import SearchInput from "../Form/SearchInput";
-import useFilters from "../../Common/hooks/useFilters";
+import { useEffect, useState } from "react";
+
 import BadgesList from "./BadgesList";
-import { ExportButton } from "../Common/Export";
-import { useTranslation } from "react-i18next";
 import ButtonV2 from "../Common/components/ButtonV2";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import { ExportButton } from "../Common/Export";
+import ListFilter from "./ListFilter";
 import Page from "../Common/components/Page";
+import SearchInput from "../Form/SearchInput";
+import { formatDate } from "../../Utils/utils";
+import { formatFilter } from "./Commons";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { navigate } from "raviger";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import useFilters from "../../Common/hooks/useFilters";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function ListView() {
   const dispatch: any = useDispatch();
+  const { wartime_shifting } = useConfig();
   const {
     qParams,
     updateQuery,
@@ -165,17 +168,19 @@ export default function ListView() {
                     </dd>
                   </dt>
                 </div>
-                <div className="sm:col-span-1">
-                  <dt
-                    title={t("shifting_approving_facility")}
-                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                  >
-                    <i className="fas fa-user-check mr-2"></i>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {(shift.shifting_approving_facility_object || {}).name}
-                    </dd>
-                  </dt>
-                </div>
+                {wartime_shifting && (
+                  <div className="sm:col-span-1">
+                    <dt
+                      title={t("shifting_approving_facility")}
+                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                    >
+                      <i className="fas fa-user-check mr-2"></i>
+                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                        {(shift.shifting_approving_facility_object || {}).name}
+                      </dd>
+                    </dt>
+                  </div>
+                )}
                 <div className="sm:col-span-1">
                   <dt
                     title={t("assigned_facility")}

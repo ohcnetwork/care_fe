@@ -1,21 +1,23 @@
-import React, { useState, useCallback } from "react";
-import loadable from "@loadable/component";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getShiftDetails, deleteShiftRecord } from "../../Redux/actions";
-import { navigate, Link } from "raviger";
-import QRCode from "qrcode.react";
-import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications.js";
-import { CopyToClipboard } from "react-copy-to-clipboard";
-import CommentSection from "./CommentsSection";
-import { formatDate } from "../../Utils/utils";
-import useConfig from "../../Common/hooks/useConfig";
-import { useTranslation } from "react-i18next";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
+
+import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
+import { Link, navigate } from "raviger";
+import React, { useCallback, useState } from "react";
+import { deleteShiftRecord, getShiftDetails } from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+
 import ButtonV2 from "../Common/components/ButtonV2";
+import CommentSection from "./CommentsSection";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "../Common/components/Page";
+import QRCode from "qrcode.react";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
+import { formatDate } from "../../Utils/utils";
+import loadable from "@loadable/component";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -691,12 +693,14 @@ export default function ShiftDetails(props: { id: string }) {
                 </span>
                 {data.orgin_facility_object?.name || "--"}
               </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("shifting_approving_facility")}:{" "}
-                </span>
-                {data.shifting_approving_facility_object?.name || "--"}
-              </div>
+              {wartime_shifting && (
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    {t("shifting_approving_facility")}:{" "}
+                  </span>
+                  {data.shifting_approving_facility_object?.name || "--"}
+                </div>
+              )}
               <div>
                 <span className="font-semibold leading-relaxed">
                   {t("assigned_facility")}:{" "}
@@ -920,12 +924,14 @@ export default function ShiftDetails(props: { id: string }) {
                   {showFacilityCard(data.assigned_facility_object)}
                 </div>
               )}
-              <div>
-                <h4 className="mt-8">
-                  {t("details_of_shifting_approving_facility")}
-                </h4>
-                {showFacilityCard(data.shifting_approving_facility_object)}
-              </div>
+              {wartime_shifting && (
+                <div>
+                  <h4 className="mt-8">
+                    {t("details_of_shifting_approving_facility")}
+                  </h4>
+                  {showFacilityCard(data.shifting_approving_facility_object)}
+                </div>
+              )}
             </div>
           </div>
         </Page>
