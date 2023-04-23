@@ -1,43 +1,45 @@
-import { useReducer, useState, useEffect } from "react";
-import loadable from "@loadable/component";
-import { FacilitySelect } from "../Common/FacilitySelect";
+import * as Notification from "../../Utils/Notifications.js";
+
+import {
+  BREATHLESSNESS_LEVEL,
+  FACILITY_TYPES,
+  PATIENT_CATEGORIES,
+  SHIFTING_VEHICLE_CHOICES,
+} from "../../Common/constants";
+import {
+  Box,
+  Card,
+  CardContent,
+  FormControlLabel,
+  Radio,
+  RadioGroup,
+} from "@material-ui/core";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import {
   LegacyErrorHelperText,
   LegacySelectField,
 } from "../Common/HelperInputFields";
-import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
-import { navigate } from "raviger";
-import {
-  FACILITY_TYPES,
-  SHIFTING_VEHICLE_CHOICES,
-  BREATHLESSNESS_LEVEL,
-  PATIENT_CATEGORIES,
-} from "../../Common/constants";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import {
-  Card,
-  CardContent,
-  Radio,
-  RadioGroup,
-  Box,
-  FormControlLabel,
-} from "@material-ui/core";
-import { phonePreg } from "../../Common/validation";
-
 import { createShift, getPatient } from "../../Redux/actions";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { useEffect, useReducer, useState } from "react";
+
+import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import PatientCategorySelect from "./PatientCategorySelect";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import loadable from "@loadable/component";
+import { navigate } from "raviger";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { phonePreg } from "../../Common/validation";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
+
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
-import { useTranslation } from "react-i18next";
-import useConfig from "../../Common/hooks/useConfig";
-import PatientCategorySelect from "./PatientCategorySelect";
 
 interface patientShiftProps {
   facilityId: number;
@@ -75,9 +77,6 @@ export const ShiftCreate = (props: patientShiftProps) => {
   };
 
   let requiredFields: any = {
-    shifting_approving_facility: {
-      errorText: "Name of the referring facility",
-    },
     refering_facility_contact_name: {
       errorText: "Name of contact of the referring facility",
     },
@@ -98,6 +97,9 @@ export const ShiftCreate = (props: patientShiftProps) => {
   if (wartime_shifting) {
     requiredFields = {
       ...requiredFields,
+      shifting_approving_facility: {
+        errorText: "Name of the referring facility",
+      },
       assigned_facility_type: {
         errorText: "Please Select Facility Type",
       },
