@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
-import { getUserList, getAnyFacility } from "../../Redux/actions";
+import { getAnyFacility, getUserList } from "../../Redux/actions";
+import { useEffect, useState } from "react";
+
+import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 
@@ -63,6 +65,15 @@ export default function BadgesList(props: any) {
     }
     fetchData();
   }, [dispatch, qParams.assigned_facility]);
+  const getDescShiftingFilterOrder = (ordering: any) => {
+    let desc = "";
+    SHIFTING_FILTER_ORDER.map((item: any) => {
+      if (item.text === ordering) {
+        desc = item.desc;
+      }
+    });
+    return desc;
+  };
 
   return (
     <FilterBadges
@@ -82,6 +93,7 @@ export default function BadgesList(props: any) {
         phoneNumber(t("phone_no"), "patient_phone_number"),
         badge(t("patient_name"), "patient_name"),
         ...dateRange(t("created"), "created_date"),
+        ...dateRange(t("modified"), "modified_date"),
         badge(t("disease_status"), "disease_status"),
         badge(t("breathlessness_level"), "breathlessness_level"),
         value(t("assigned_to"), "assigned_to", assignedUsername),
@@ -95,6 +107,11 @@ export default function BadgesList(props: any) {
           t("shifting_approval_facility"),
           "shifting_approving_facility",
           approvingFacilityName
+        ),
+        value(
+          t("ordering"),
+          "ordering",
+          getDescShiftingFilterOrder(qParams.ordering)
         ),
       ]}
     />

@@ -248,7 +248,11 @@ export default function ListView() {
           </div>
         )}
       </div>
-      <ListFilter {...advancedFilter} showResourceStatus={true} />
+      <ListFilter
+        {...advancedFilter}
+        showResourceStatus={true}
+        key={window.location.search}
+      />
     </div>
   );
 }
