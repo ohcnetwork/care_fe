@@ -474,8 +474,8 @@ export const ICMR_CATEGORY = [
 ];
 
 export const TELEMEDICINE_ACTIONS = [
-  { id: 0, text: "NONE", desc: "None" },
-  { id: 10, text: "PENDING", desc: "Pending" },
+  { id: 10, text: "NO_ACTION", desc: "No Action" },
+  { id: 20, text: "PENDING", desc: "Pending" },
   { id: 30, text: "SPECIALIST_REQUIRED", desc: "Specialist Required" },
   { id: 40, text: "PLAN_FOR_HOME_CARE", desc: "Plan for Home Care" },
   { id: 50, text: "FOLLOW_UP_NOT_REQUIRED", desc: "Follow Up Not Required" },
