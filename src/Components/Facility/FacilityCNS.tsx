@@ -280,6 +280,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
               )
               .map(({ patient, socketUrl }) => (
                 <MonitorCard
+                  key={patient.id}
                   facilityId={facilityId}
                   patient={patient}
                   socketUrl={socketUrl}
@@ -293,6 +294,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
               )
               .map(({ patient, socketUrl }) => (
                 <MonitorCard
+                  key={patient.id}
                   facilityId={facilityId}
                   patient={patient}
                   socketUrl={socketUrl}
