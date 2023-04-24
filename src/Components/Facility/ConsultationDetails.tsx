@@ -1,70 +1,72 @@
-import { navigate } from "raviger";
+import * as Notification from "../../Utils/Notifications";
+
 import { Button, CircularProgress } from "@material-ui/core";
-import moment from "moment";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import {
+  CONSULTATION_TABS,
+  DISCHARGE_REASONS,
+  GENDER_TYPES,
+  OptionsType,
+  SYMPTOM_CHOICES,
+} from "../../Common/constants";
+import { ConsultationModel, ICD11DiagnosisModel } from "./models";
+import { HCXActions, getConsultation, getPatient } from "../../Redux/actions";
+import PRNPrescriptionBuilder, {
+  PRNPrescriptionType,
+} from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import PrescriptionBuilder, {
+  PrescriptionType,
+} from "../Common/prescription-builder/PrescriptionBuilder";
+import { discharge, dischargePatient } from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import * as Notification from "../../Utils/Notifications";
-import { getConsultation, getPatient, HCXActions } from "../../Redux/actions";
-import loadable from "@loadable/component";
-import { ConsultationModel, ICD11DiagnosisModel } from "./models";
-import { PatientModel } from "../Patient/models";
-import {
-  SYMPTOM_CHOICES,
-  CONSULTATION_TABS,
-  OptionsType,
-  GENDER_TYPES,
-  DISCHARGE_REASONS,
-} from "../../Common/constants";
-import { FileUpload } from "../Patient/FileUpload";
-import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
-import { MedicineTables } from "./Consultations/MedicineTables";
+
 import { ABGPlots } from "./Consultations/ABGPlots";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import Chip from "../../CAREUI/display/Chip";
+import ClaimDetailCard from "../HCX/ClaimDetailCard";
+import CreateClaimCard from "../HCX/CreateClaimCard";
 import { DailyRoundsList } from "./Consultations/DailyRoundsList";
-import { make as Link } from "../Common/components/Link.gen";
-import { NursingPlot } from "./Consultations/NursingPlot";
-import { NeurologicalTable } from "./Consultations/NeurologicalTables";
-import { VentilatorPlot } from "./Consultations/VentilatorPlot";
-import { NutritionPlots } from "./Consultations/NutritionPlots";
-import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
-import { DialysisPlots } from "./Consultations/DialysisPlots";
-import DoctorVideoSlideover from "./DoctorVideoSlideover";
-import { Feed } from "./Consultations/Feed";
-import { validateEmailAddress } from "../../Common/validation";
+import DateFormField from "../Form/FormFields/DateFormField";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogModal from "../Common/Dialog";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import { DialysisPlots } from "./Consultations/DialysisPlots";
+import DoctorVideoSlideover from "./DoctorVideoSlideover";
+import { Feed } from "./Consultations/Feed";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import { FileUpload } from "../Patient/FileUpload";
+import { HCXClaimModel } from "../HCX/models";
+import InvestigationTab from "./Investigations/investigationsTab";
 import { LegacyTextInputField } from "../Common/HelperInputFields";
-import { discharge, dischargePatient } from "../../Redux/actions";
+import { make as Link } from "../Common/components/Link.gen";
+import { MedicineTables } from "./Consultations/MedicineTables";
+import { NeurologicalTable } from "./Consultations/NeurologicalTables";
+import { NursingPlot } from "./Consultations/NursingPlot";
+import { NutritionPlots } from "./Consultations/NutritionPlots";
+import PatientInfoCard from "../Patient/PatientInfoCard";
+import { PatientModel } from "../Patient/models";
+import PatientVitalsCard from "../Patient/PatientVitalsCard";
+import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
+import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 import ReadMore from "../Common/components/Readmore";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
-import PatientInfoCard from "../Patient/PatientInfoCard";
-import PatientVitalsCard from "../Patient/PatientVitalsCard";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import DialogModal from "../Common/Dialog";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import DateFormField from "../Form/FormFields/DateFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import PrescriptionBuilder, {
-  PrescriptionType,
-} from "../Common/prescription-builder/PrescriptionBuilder";
-import PRNPrescriptionBuilder, {
-  PRNPrescriptionType,
-} from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { formatDate } from "../../Utils/utils";
-import CreateClaimCard from "../HCX/CreateClaimCard";
-import { HCXClaimModel } from "../HCX/models";
-import ClaimDetailCard from "../HCX/ClaimDetailCard";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
-import Chip from "../../CAREUI/display/Chip";
-import InvestigationTab from "./Investigations/investigationsTab";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import { validateEmailAddress } from "../../Common/validation";
 
 interface PreDischargeFormInterface {
   discharge_reason: string;
@@ -90,7 +92,7 @@ export const ConsultationDetails = (props: any) => {
   const { currentUser } = state;
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
-    {}
+    {} as ConsultationModel
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [open, setOpen] = useState(false);
@@ -667,7 +669,7 @@ export const ConsultationDetails = (props: any) => {
             backUrl="/patients"
           />
           <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
-            {patientData.is_active && (
+            {!consultationData.discharge_date && (
               <div className="w-full flex flex-col sm:flex-row px-2">
                 <ButtonV2
                   onClick={() =>
@@ -805,10 +807,7 @@ export const ConsultationDetails = (props: any) => {
                 <button
                   className="btn btn-primary"
                   onClick={handleDischageClickOpen}
-                  disabled={
-                    !patientData.is_active ||
-                    patientData.last_consultation?.facility !== facilityId
-                  }
+                  disabled={!!consultationData.discharge_date}
                 >
                   <i className="fas fa-hospital-user"></i>
                   &nbsp; Discharge from CARE
