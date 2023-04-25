@@ -4,7 +4,8 @@ import {
   BREATHLESSNESS_LEVEL,
   FACILITY_TYPES,
   PATIENT_CATEGORIES,
-  SHIFTING_CHOICES,
+  SHIFTING_CHOICES_PEACETIME,
+  SHIFTING_CHOICES_WARTIME,
   SHIFTING_VEHICLE_CHOICES,
 } from "../../Common/constants";
 import {
@@ -25,6 +26,7 @@ import { CircularProgress } from "@material-ui/core";
 import { ConsultationModel } from "../Facility/models.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
+import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { LegacySelectField } from "../Common/HelperInputFields";
@@ -90,9 +92,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     errors: { ...initError },
   };
 
-  const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text).filter(
-    (choice) => wartime_shifting || choice !== "PENDING"
-  );
+  const shiftStatusOptions = (
+    wartime_shifting ? SHIFTING_CHOICES_WARTIME : SHIFTING_CHOICES_PEACETIME
+  ).map((option) => option.text);
 
   let requiredFields: any = {
     reason: {

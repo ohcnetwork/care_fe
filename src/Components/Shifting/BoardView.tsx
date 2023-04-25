@@ -1,9 +1,12 @@
 import React, { useState } from "react";
+import {
+  SHIFTING_CHOICES_PEACETIME,
+  SHIFTING_CHOICES_WARTIME,
+} from "../../Common/constants";
 
 import BadgesList from "./BadgesList";
 import { ExportButton } from "../Common/Export";
 import ListFilter from "./ListFilter";
-import { SHIFTING_CHOICES } from "../../Common/constants";
 import SearchInput from "../Form/SearchInput";
 import ShiftingBoard from "./ShiftingBoard";
 import { downloadShiftRequests } from "../../Redux/actions";
@@ -25,11 +28,13 @@ export default function BoardView() {
   });
   const { wartime_shifting } = useConfig();
 
-  const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text).filter(
-    (choice) => wartime_shifting || choice !== "PENDING"
-  );
+  const shiftStatusOptions = (
+    wartime_shifting ? SHIFTING_CHOICES_WARTIME : SHIFTING_CHOICES_PEACETIME
+  ).map((option) => option.text);
 
-  const COMPLETED = ["COMPLETED", "REJECTED", "DESTINATION REJECTED"];
+  const COMPLETED = wartime_shifting
+    ? ["COMPLETED", "REJECTED", "DESTINATION REJECTED", "PATIENT EXPIRED"]
+    : ["CANCELLED", "PATIENT EXPIRED"];
   const ACTIVE = shiftStatusOptions.filter(
     (option) => !COMPLETED.includes(option)
   );

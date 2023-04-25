@@ -233,7 +233,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
       setIsLoading(true);
 
       const data = {
-        status: "PENDING",
+        status: wartime_shifting ? "PENDING" : "APPROVED",
         orgin_facility: props.facilityId,
         shifting_approving_facility: (
           state.form.shifting_approving_facility || {}
