@@ -50,7 +50,7 @@ interface patientShiftProps {
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
-  const { kasp_full_string, wartime_shifting } = useConfig();
+  const { kasp_full_string, kasp_enabled, wartime_shifting } = useConfig();
   const dispatchAction: any = useDispatch();
   const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
@@ -426,7 +426,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 <LegacyErrorHelperText error={state.errors.emergency} />
               </div>
 
-              {wartime_shifting && (
+              {kasp_enabled && (
                 <div>
                   <FieldLabel>
                     {t("is")} {kasp_full_string}?
