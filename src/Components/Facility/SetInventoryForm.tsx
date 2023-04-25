@@ -5,10 +5,13 @@ import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getItems, setMinQuantity, getAnyFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { SelectField, TextInputField } from "../Common/HelperInputFields";
+import {
+  LegacySelectField,
+  LegacyTextInputField,
+} from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -40,6 +43,7 @@ const inventoryFormReducer = (state = initialState, action: any) => {
 };
 
 export const SetInventoryForm = (props: any) => {
+  const { goBack } = useAppHistory();
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
@@ -143,6 +147,7 @@ export const SetInventoryForm = (props: any) => {
             style: "pointer-events-none",
           },
         }}
+        backUrl={`/facility/${facilityId}/inventory/min_quantity/list`}
       />
       <div className="mt-4">
         <Card>
@@ -153,7 +158,7 @@ export const SetInventoryForm = (props: any) => {
                   <InputLabel id="inventory_name_label">
                     Inventory Name
                   </InputLabel>
-                  <SelectField
+                  <LegacySelectField
                     name="id"
                     variant="outlined"
                     margin="dense"
@@ -169,7 +174,7 @@ export const SetInventoryForm = (props: any) => {
 
                 <div>
                   <InputLabel id="inventory_name_label">Unit</InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="id"
                     variant="outlined"
                     margin="dense"
@@ -181,7 +186,7 @@ export const SetInventoryForm = (props: any) => {
 
                 <div className="md:col-span-2">
                   <InputLabel id="quantity">Item Min Quantity</InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     fullWidth
                     name="quantity"
                     variant="outlined"

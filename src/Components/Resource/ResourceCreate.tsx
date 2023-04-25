@@ -2,10 +2,10 @@ import { useReducer, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
-  TextInputField,
-  MultilineInputField,
-  ErrorHelperText,
-  SelectField,
+  LegacyTextInputField,
+  LegacyMultilineInputField,
+  LegacyErrorHelperText,
+  LegacySelectField,
 } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
@@ -27,10 +27,10 @@ import {
 import { phonePreg } from "../../Common/validation";
 
 import { createResource, getAnyFacility } from "../../Redux/actions";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -89,6 +89,7 @@ const initialState = {
 };
 
 export default function ResourceCreate(props: resourceProps) {
+  const { goBack } = useAppHistory();
   const { facilityId } = props;
 
   const dispatchAction: any = useDispatch();
@@ -229,6 +230,7 @@ export default function ResourceCreate(props: resourceProps) {
           [facilityId]: { name: facilityName },
           resource: { style: "pointer-events-none" },
         }}
+        backUrl={`/facility/${facilityId}`}
       />
       <div className="mt-4">
         <Card>
@@ -236,7 +238,7 @@ export default function ResourceCreate(props: resourceProps) {
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
                 <InputLabel>Name of Contact Person at Facility*</InputLabel>
-                <TextInputField
+                <LegacyTextInputField
                   fullWidth
                   name="refering_facility_contact_name"
                   variant="outlined"
@@ -275,7 +277,7 @@ export default function ResourceCreate(props: resourceProps) {
 
               <div>
                 <InputLabel>Category</InputLabel>
-                <SelectField
+                <LegacySelectField
                   name="category"
                   variant="outlined"
                   fullWidth
@@ -290,7 +292,7 @@ export default function ResourceCreate(props: resourceProps) {
 
               <div>
                 <InputLabel>Subcategory</InputLabel>
-                <SelectField
+                <LegacySelectField
                   name="sub_category"
                   variant="outlined"
                   margin="dense"
@@ -304,7 +306,7 @@ export default function ResourceCreate(props: resourceProps) {
 
               <div className="md:col-span-1">
                 <InputLabel>Request Title*</InputLabel>
-                <TextInputField
+                <LegacyTextInputField
                   rows={5}
                   name="title"
                   variant="outlined"
@@ -320,7 +322,7 @@ export default function ResourceCreate(props: resourceProps) {
               <div className="md:col-span-1">
                 <div className="w-full">
                   <InputLabel>Required Quantity</InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="requested_quantity"
                     variant="outlined"
                     margin="dense"
@@ -334,7 +336,7 @@ export default function ResourceCreate(props: resourceProps) {
 
               <div className="md:col-span-2">
                 <InputLabel>Description of request*</InputLabel>
-                <MultilineInputField
+                <LegacyMultilineInputField
                   rows={5}
                   name="reason"
                   variant="outlined"
@@ -369,7 +371,7 @@ export default function ResourceCreate(props: resourceProps) {
                     />
                   </Box>
                 </RadioGroup>
-                <ErrorHelperText error={state.errors.emergency} />
+                <LegacyErrorHelperText error={state.errors.emergency} />
               </div>
 
               <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">

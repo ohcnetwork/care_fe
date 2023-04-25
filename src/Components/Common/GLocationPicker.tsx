@@ -2,10 +2,9 @@ import React from "react";
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { deepEqual } from "../../Common/utils";
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
-import PersonPinIcon from "@material-ui/icons/PersonPin";
-import { GMAPS_API_KEY } from "../../Common/env";
 import Spinner from "./Spinner";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import useConfig from "../../Common/hooks/useConfig";
 
 const render = (status: Status) => {
   if (status === "LOADING") {
@@ -32,6 +31,7 @@ const GLocationPicker = ({
   handleOnClose,
   handleOnSelectCurrentLocation,
 }: GLocationPickerProps) => {
+  const { gmaps_api_key } = useConfig();
   const [location, setLocation] = React.useState<google.maps.LatLng | null>(
     null
   );
@@ -66,7 +66,7 @@ const GLocationPicker = ({
 
   return (
     <div className="flex w-80 h-80 sm:w-96 sm:h-96">
-      <Wrapper libraries={["places"]} apiKey={GMAPS_API_KEY} render={render}>
+      <Wrapper libraries={["places"]} apiKey={gmaps_api_key} render={render}>
         <Map
           center={center}
           onClick={onClick}
@@ -197,7 +197,7 @@ const Map: React.FC<MapProps> = ({
           id="pac-input"
           ref={searchRef}
           type="text"
-          className="rounded m-[10px] p-2 w-[60%] border-0"
+          className="m-[10px] py-2.5 w-[60%] cui-input-base peer"
           placeholder="Start typing to search"
         />
         {handleOnClose && (
@@ -207,7 +207,7 @@ const Map: React.FC<MapProps> = ({
             ref={mapCloseRef}
             onClick={handleOnClose}
           >
-            <CareIcon className="care-l-times-circle text-lg" />
+            <CareIcon className="care-l-times-circle text-2xl text-gray-800" />
           </div>
         )}
         {handleOnSelectCurrentLocation && (
@@ -221,7 +221,7 @@ const Map: React.FC<MapProps> = ({
               )
             }
           >
-            <PersonPinIcon />
+            <CareIcon className="care-l-user-location text-2xl text-gray-800" />
           </div>
         )}
       </>

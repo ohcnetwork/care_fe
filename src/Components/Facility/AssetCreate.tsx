@@ -7,30 +7,30 @@ import {
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import CropFreeIcon from "@material-ui/icons/CropFree";
 import PageTitle from "../Common/PageTitle";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
 import {
-  ActionTextInputField,
-  ErrorHelperText,
+  LegacyActionTextInputField,
+  LegacyErrorHelperText,
 } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
-import { LocationOnOutlined } from "@material-ui/icons";
 import { navigate } from "raviger";
 import QrReader from "react-qr-reader";
 import { parseQueryParams } from "../../Utils/primitives";
 import moment from "moment";
 import SwitchV2 from "../Common/components/Switch";
 import useVisibility from "../../Utils/useVisibility";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { LocationSelect } from "../Common/LocationSelect";
+import { FieldLabel } from "../Form/FormFields/FormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -96,6 +96,7 @@ type AssetFormSection =
   | "Service Details";
 
 const AssetCreate = (props: AssetProps) => {
+  const { goBack } = useAppHistory();
   const { facilityId, assetId } = props;
 
   let assetTypeInitial: AssetType;
@@ -393,11 +394,12 @@ const AssetCreate = (props: AssetProps) => {
             assets: { style: "text-gray-200 pointer-events-none" },
             [assetId || "????"]: { name },
           }}
+          backUrl={`/facility/${facilityId}`}
         />
         <section className="text-center">
           <h1 className="text-6xl flex items-center flex-col py-10">
             <div className="p-5 rounded-full flex items-center justify-center bg-gray-200 w-40 h-40">
-              <LocationOnOutlined fontSize="inherit" color="primary" />
+              <CareIcon className="care-l-map-marker text-green-600" />
             </div>
           </h1>
           <p className="text-gray-600">
@@ -468,6 +470,11 @@ const AssetCreate = (props: AssetProps) => {
           assets: { style: "text-gray-200 pointer-events-none" },
           [assetId || "????"]: { name },
         }}
+        backUrl={
+          assetId
+            ? `/facility/${facilityId}/assets/${assetId}`
+            : `/facility/${facilityId}`
+        }
       />
       <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
         <div className="hidden xl:flex flex-col w-72 fixed h-full mt-4">
@@ -503,7 +510,6 @@ const AssetCreate = (props: AssetProps) => {
                 <div className="grid grid-cols-6 gap-x-6">
                   {/* General Details Section */}
                   {sectionTitle("General Details")}
-
                   {/* Asset Name */}
                   <div className="col-span-6" ref={fieldRef["name"]}>
                     <TextFormField
@@ -515,23 +521,23 @@ const AssetCreate = (props: AssetProps) => {
                       error={state.errors.name}
                     />
                   </div>
-
+                  <FieldLabel className="text-sm w-max" required>
+                    Asset Location
+                  </FieldLabel>
                   {/* Location */}
                   <div ref={fieldRef["location"]} className="col-span-6">
-                    <AutocompleteFormField
-                      name="location"
-                      label="Location"
-                      required
-                      placeholder="Select the location of the asset"
-                      options={locations}
-                      optionLabel={({ name }) => name}
-                      optionValue={({ id }) => id}
-                      value={location}
-                      onChange={({ value }) => setLocation(value)}
-                      error={state.errors.location}
+                    <LocationSelect
+                      name="Facilities"
+                      setSelected={(selectedId) =>
+                        setLocation((selectedId as string) || "")
+                      }
+                      selected={location}
+                      errors=""
+                      showAll={false}
+                      multiple={false}
+                      facilityId={facilityId as unknown as number}
                     />
                   </div>
-
                   <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
                     {/* Asset Type */}
                     <div ref={fieldRef["asset_type"]} className="flex-1">
@@ -582,7 +588,6 @@ const AssetCreate = (props: AssetProps) => {
                       />
                     </div>
                   </div>
-
                   {/* Description */}
                   <div className="col-span-6">
                     <TextAreaFormField
@@ -594,7 +599,6 @@ const AssetCreate = (props: AssetProps) => {
                       error={state.errors.description}
                     />
                   </div>
-
                   {/* Divider */}
                   <div className="col-span-6">
                     <hr
@@ -606,7 +610,6 @@ const AssetCreate = (props: AssetProps) => {
                       }
                     />
                   </div>
-
                   {/* Working Status */}
                   <div ref={fieldRef["is_working"]} className="col-span-6">
                     <SwitchV2
@@ -632,7 +635,6 @@ const AssetCreate = (props: AssetProps) => {
                       error={state.errors.is_working}
                     />
                   </div>
-
                   {/* Not Working Reason */}
                   <div
                     className={
@@ -658,9 +660,10 @@ const AssetCreate = (props: AssetProps) => {
                         setNotWorkingReason(e.target.value)
                       }
                     />
-                    <ErrorHelperText error={state.errors.not_working_reason} />
+                    <LegacyErrorHelperText
+                      error={state.errors.not_working_reason}
+                    />
                   </div>
-
                   {/* Divider */}
                   <div className="col-span-6">
                     <hr
@@ -672,11 +675,10 @@ const AssetCreate = (props: AssetProps) => {
                       }
                     />
                   </div>
-
                   {/* Asset QR ID */}
                   <div className="col-span-6">
                     <label htmlFor="asset-qr-id">Asset QR ID</label>
-                    <ActionTextInputField
+                    <LegacyActionTextInputField
                       id="qr_code_id"
                       fullWidth
                       name="qr_code_id"
@@ -685,11 +687,13 @@ const AssetCreate = (props: AssetProps) => {
                       margin="dense"
                       value={qrCodeId}
                       onChange={(e) => setQrCodeId(e.target.value)}
-                      actionIcon={<CropFreeIcon className="cursor-pointer" />}
+                      actionIcon={
+                        <CareIcon className="care-l-focus cursor-pointer text-lg" />
+                      }
                       action={() => setIsScannerActive(true)}
                       errors={state.errors.qr_code_id}
                     />
-                    <ErrorHelperText error={state.errors.qr_id} />
+                    <LegacyErrorHelperText error={state.errors.qr_id} />
                   </div>
                 </div>
                 <div className="grid grid-cols-6 gap-x-6">
@@ -720,24 +724,24 @@ const AssetCreate = (props: AssetProps) => {
                     <TextFormField
                       name="WarrantyAMCExpiry"
                       value={warranty_amc_end_of_validity}
-                      onChange={(date) => {
-                        if (
-                          moment(date.value).format("YYYY-MM-DD") <
-                          new Date().toLocaleDateString("en-ca")
-                        ) {
+                      onChange={(event) => {
+                        const value = moment(event.value);
+                        const date = new Date(value.toDate().toDateString());
+                        const today = new Date(new Date().toDateString());
+                        if (date < today) {
                           Notification.Error({
                             msg: "Warranty / AMC Expiry date can't be in past",
                           });
                         } else {
                           setWarrantyAmcEndOfValidity(
-                            moment(date.value).format("YYYY-MM-DD")
+                            value.format("YYYY-MM-DD")
                           );
                         }
                       }}
                       type="date"
                       min={moment().format("YYYY-MM-DD")}
                     />
-                    <ErrorHelperText
+                    <LegacyErrorHelperText
                       error={state.errors.warranty_amc_end_of_validity}
                     />
                   </div>
@@ -853,7 +857,9 @@ const AssetCreate = (props: AssetProps) => {
                       type="date"
                       max={moment(new Date()).format("YYYY-MM-DD")}
                     />
-                    <ErrorHelperText error={state.errors.last_serviced_on} />
+                    <LegacyErrorHelperText
+                      error={state.errors.last_serviced_on}
+                    />
                   </div>
 
                   {/* Notes */}
@@ -872,7 +878,7 @@ const AssetCreate = (props: AssetProps) => {
                         setNotes(e.target.value)
                       }
                     />
-                    <ErrorHelperText error={state.errors.notes} />
+                    <LegacyErrorHelperText error={state.errors.notes} />
                   </div>
                 </div>
 

@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { PrescriptionDropdown } from "./PrescriptionDropdown";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 export type ProcedureType = {
   procedure?: string;
@@ -25,7 +27,7 @@ export interface Props<T> {
 
 export default function ProcedureBuilder(props: Props<ProcedureType>) {
   const { procedures, setProcedures } = props;
-
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const setItem = (object: ProcedureType, i: number) => {
     setProcedures(
       procedures.map((procedure, index) => (index === i ? object : procedure))
@@ -38,19 +40,40 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
         return (
           <div
             key={i}
-            className="border-b border-b-gray-500 border-dashed py-2 text-xs text-gray-600"
+            className={`border-2 ${
+              activeIdx === i ? "border-primary-500" : "border-gray-500"
+            } mb-2 border-dashed border-spacing-2 p-3 rounded-md text-sm text-gray-600`}
           >
-            <div className="flex gap-2 flex-col">
-              <div className="flex flex-col gap-2 md:flex-row w-full shrink-0 justify-between">
+            <div className="flex gap-2 flex-col md:flex-row">
+              <div className="flex flex-col gap-2 flex-1 w-full">
+                <div className="flex flex-wrap md:flex-row md:gap-4 gap-2 items-center">
+                  <h4 className="text-base font-medium text-gray-700">
+                    Procedure No. {i + 1}
+                  </h4>
+                  <button
+                    type="button"
+                    className="h-full flex justify-center items-center gap-2 text-gray-100 rounded-md text-sm transition hover:bg-red-600 px-3 py-1 bg-red-500"
+                    onClick={() =>
+                      setProcedures(
+                        procedures.filter((procedure, index) => i != index)
+                      )
+                    }
+                  >
+                    Delete Procedure
+                    <CareIcon className="care-l-trash-alt w-4 h-4" />
+                  </button>
+                </div>
                 <div className="w-full">
                   Procedure
                   <span className="text-danger-500">{" *"}</span>
                   <input
                     type="text"
-                    className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                    className="mt-1 w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
                     placeholder="Procedure"
                     maxLength={100}
                     value={procedure.procedure || ""}
+                    onFocus={() => setActiveIdx(i)}
+                    onBlur={() => setActiveIdx(null)}
                     onChange={(e) => {
                       setItem(
                         {
@@ -62,13 +85,15 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     }}
                   />
                 </div>
-                <div className="flex gap-2 flex-col md:flex-row">
-                  <div className="shrink-0">
-                    Repetitive
+                <div className="flex gap-2 md:gap-4 flex-col md:flex-row">
+                  <div className="shrink-0 flex gap-2 items-center md:mt-3 cursor-pointer">
+                    Is the procedure repetitive?
                     <br />
                     <input
                       type="checkbox"
-                      className="mt-2 inline-block"
+                      onFocus={() => setActiveIdx(i)}
+                      onBlur={() => setActiveIdx(null)}
+                      className="inline-block rounded-md w-[18px] h-[18px]"
                       checked={procedure?.repetitive || false}
                       onChange={(e) => {
                         setItem(
@@ -83,9 +108,13 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                   </div>
                   {procedure.repetitive ? (
                     <div className="w-full">
-                      Frequency
-                      <span className="text-danger-500">{" *"}</span>
+                      <div className="mb-1">
+                        Frequency
+                        <span className="text-danger-500">{" *"}</span>
+                      </div>
                       <PrescriptionDropdown
+                        onFocus={() => setActiveIdx(i)}
+                        onBlur={() => setActiveIdx(null)}
                         placeholder="Frequency"
                         options={FREQUENCY}
                         value={procedure.frequency || ""}
@@ -102,12 +131,15 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     </div>
                   ) : (
                     <div className="w-full">
-                      Time
-                      <span className="text-danger-500">{" *"}</span>
+                      <div className="mb-1">
+                        Time<span className="text-danger-500">{" *"}</span>
+                      </div>
                       <input
                         type="datetime-local"
                         className="w-[calc(100%-5px)] focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
                         value={procedure.time || ""}
+                        onFocus={() => setActiveIdx(i)}
+                        onBlur={() => setActiveIdx(null)}
                         onChange={(e) => {
                           setItem(
                             {
@@ -121,15 +153,16 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     </div>
                   )}
                 </div>
-              </div>
-              <div className="flex flex-col md:flex-row items-center">
+
                 <div className="w-full">
-                  Notes
+                  <div className="mb-1">Notes</div>
                   <input
                     type="text"
                     className="w-full focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
                     placeholder="Notes"
                     value={procedure.notes || ""}
+                    onFocus={() => setActiveIdx(i)}
+                    onBlur={() => setActiveIdx(null)}
                     onChange={(e) => {
                       setItem(
                         {
@@ -141,17 +174,6 @@ export default function ProcedureBuilder(props: Props<ProcedureType>) {
                     }}
                   />
                 </div>
-                <button
-                  type="button"
-                  className="text-gray-400 text-base transition hover:text-red-500 mt-3 ml-2"
-                  onClick={() =>
-                    setProcedures(
-                      procedures.filter((procedure, index) => i != index)
-                    )
-                  }
-                >
-                  <i className="fas fa-trash" />
-                </button>
               </div>
             </div>
           </div>

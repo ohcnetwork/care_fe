@@ -2,7 +2,6 @@ import { useDispatch } from "react-redux";
 import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
-import PageTitle from "../Common/PageTitle";
 import {
   getAnyFacility,
   listAssets,
@@ -13,15 +12,11 @@ import { getAsset } from "../../Redux/actions";
 import { useState, useCallback, useEffect } from "react";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import { make as SlideOver } from "../Common/SlideOver.gen";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import AssetFilter from "./AssetFilter";
-import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
-import AssetImportModal from "./AssetImportModal";
 import { FacilityModel } from "../Facility/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
@@ -29,6 +24,10 @@ import AuthorizeFor from "../../Utils/AuthorizeFor";
 import ButtonV2 from "../Common/components/ButtonV2";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import ExportMenu from "../Common/Export";
+import CountBlock from "../../CAREUI/display/Count";
+import AssetImportModal from "./AssetImportModal";
+import Page from "../Common/components/Page";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -73,7 +72,7 @@ const AssetsList = () => {
         location: qParams.location,
         status: qParams.status,
       };
-      const { data }: any = await dispatch(listAssets(params));
+      const { data } = await dispatch(listAssets(params));
       if (!status.aborted) {
         setIsLoading(false);
         if (!data)
@@ -83,11 +82,17 @@ const AssetsList = () => {
         else {
           setAssets(data.results);
           setTotalCount(data.count);
+          if (qParams.facility) {
+            const fetchFacility = await dispatch(
+              getAnyFacility(qParams.facility)
+            );
+            setSelectedFacility(fetchFacility.data as FacilityModel);
+          }
         }
       }
     },
     [
-      dispatch,
+      resultsPerPage,
       qParams.page,
       qParams.search,
       qParams.facility,
@@ -95,6 +100,7 @@ const AssetsList = () => {
       qParams.asset_class,
       qParams.location,
       qParams.status,
+      dispatch,
     ]
   );
 
@@ -156,9 +162,7 @@ const AssetsList = () => {
       // QR Maybe searchParams "asset" or "assetQR"
       const assetId = params.asset || params.assetQR;
       if (assetId) {
-        const { data }: any = await dispatch(
-          listAssets({ qr_code_id: assetId })
-        );
+        const { data } = await dispatch(listAssets({ qr_code_id: assetId }));
         return data.results[0].id;
       }
     } catch (err) {
@@ -166,11 +170,13 @@ const AssetsList = () => {
     }
   };
 
-  const checkValidAssetId = async (assetId: any) => {
-    const assetData: any = await dispatch(getAsset(assetId));
+  const checkValidAssetId = async (assetId: string) => {
+    const assetData = await dispatch(getAsset(assetId));
     try {
       if (assetData.data) {
-        navigate(`/assets/${assetId}`);
+        navigate(
+          `/facility/${assetData.data.location_object.facility.id}/assets/${assetId}`
+        );
       }
     } catch (err) {
       console.log(err);
@@ -196,13 +202,13 @@ const AssetsList = () => {
         </button>
         <QrReader
           delay={300}
-          onScan={async (value: any) => {
+          onScan={async (value: string | null) => {
             if (value) {
               const assetId = await getAssetIdFromQR(value);
               checkValidAssetId(assetId ?? value);
             }
           }}
-          onError={(e: any) =>
+          onError={(e) =>
             Notification.Error({
               msg: e.message,
             })
@@ -230,21 +236,28 @@ const AssetsList = () => {
             <div className="md:flex">
               <p className="text-xl flex font-medium capitalize break-words">
                 <span className="mr-2 text-primary-500">
-                  <i
-                    className={`fas fa-${
+                  <CareIcon
+                    className={`care-l-${
                       (
                         (asset.asset_class &&
                           assetClassProps[asset.asset_class]) ||
                         assetClassProps.NONE
                       ).icon
-                    }`}
+                    } text-2xl`}
                   />
                 </span>
                 <p className="truncate w-48">{asset.name}</p>
               </p>
             </div>
             <p className="font-normal text-sm">
-              {asset?.location_object?.name}
+              <span className="text-sm font-medium">
+                <CareIcon className="care-l-location-point mr-1 text-primary-500" />
+                {asset?.location_object?.name}
+              </span>
+              <span className="text-sm font-medium ml-2">
+                <CareIcon className="care-l-hospital mr-1 text-primary-500" />
+                {asset?.location_object?.facility?.name}
+              </span>
             </p>
 
             <div className="flex flex-wrap gap-2 mt-2">
@@ -253,11 +266,6 @@ const AssetsList = () => {
               ) : (
                 <Chip color="red" startIcon="cog" text="Not Working" />
               )}
-              <Chip
-                color="blue"
-                startIcon="location-arrow"
-                text={asset.status}
-              />
             </div>
           </div>
         ))}
@@ -272,85 +280,67 @@ const AssetsList = () => {
   }
 
   return (
-    <div className="px-6">
-      <div className="flex justify-between items-center">
-        <PageTitle title="Assets" breadcrumbs={false} hideBack />
-        {authorizedForImportExport && (
-          <div className="tooltip">
-            {!facility && (
-              <span className="tooltip-text tooltip-bottom -translate-x-2/3 flex flex-col items-center">
-                <p>Select a facility from the Facilities</p>
-                <p>page and click 'View Assets' from the</p>
-                <p>Manage Facility dropdown</p>
-              </span>
-            )}
-            {/* TODO: ask for facility select dialog instead of disabling */}
-            <ExportMenu
-              disabled={!facility || importAssetModalOpen}
-              label={importAssetModalOpen ? "Importing..." : "Import/Export"}
-              exportItems={[
-                {
-                  label: "Import Assets",
-                  // action: () => setImportAssetModalOpen(true),
-                  options: {
-                    icon: <CareIcon className="care-l-import" />,
-                    onClick: () => setImportAssetModalOpen(true),
+    <Page
+      title="Assets"
+      breadcrumbs={false}
+      hideBack
+      options={
+        <>
+          {authorizedForImportExport && (
+            <div className="tooltip">
+              <ExportMenu
+                label={importAssetModalOpen ? "Importing..." : "Import/Export"}
+                exportItems={[
+                  {
+                    label: "Import Assets",
+                    options: {
+                      icon: <CareIcon className="care-l-import" />,
+                      onClick: () => setImportAssetModalOpen(true),
+                    },
                   },
-                },
-                {
-                  label: "Export Assets",
-                  action: () =>
-                    authorizedForImportExport &&
-                    listAssets({
-                      ...qParams,
-                      json: true,
-                      limit: totalCount,
-                    }),
-                  type: "json",
-                  filePrefix: `assets_${facility?.name}`,
-                  options: {
-                    icon: <CareIcon className="care-l-export" />,
-                    disabled: totalCount === 0 || !authorizedForImportExport,
+                  {
+                    label: "Export Assets",
+                    action: () =>
+                      authorizedForImportExport &&
+                      listAssets({
+                        ...qParams,
+                        json: true,
+                        limit: totalCount,
+                      }),
+                    type: "json",
+                    filePrefix: `assets_${facility?.name}`,
+                    options: {
+                      icon: <CareIcon className="care-l-export" />,
+                      disabled: totalCount === 0 || !authorizedForImportExport,
+                    },
                   },
-                },
-              ]}
-            />
-          </div>
-        )}
-      </div>
-      <div className="lg:flex mt-5 space-y-2">
-        <div className="bg-white overflow-hidden shadow rounded-lg flex-1 md:mr-2">
-          <div className="px-4 py-5 sm:p-6">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Assets
-              </dt>
-              {/* Show spinner until count is fetched from server */}
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
-                </dd>
-              ) : (
-                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
-          </div>
-        </div>
+                ]}
+              />
+            </div>
+          )}
+        </>
+      }
+    >
+      <div className="lg:flex mt-5 space-y-2 gap-3">
+        <CountBlock
+          text="Total Assets"
+          count={totalCount}
+          loading={isLoading}
+          icon={"monitor-heart-rate"}
+        />
         <div className="flex-1">
           <SearchInput
             name="search"
             value={qParams.search}
             onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder="Search assets"
+            placeholder="Search by name/serial no./QR code ID"
           />
         </div>
         <div className="flex flex-col lg:ml-2 justify-start items-start gap-2">
           <div className="flex flex-col md:flex-row gap-2 w-full lg:w-auto">
             <div className="w-full">
               <AdvancedFilterButton
-                setShowFilters={() => advancedFilter.setShow(true)}
+                onClick={() => advancedFilter.setShow(true)}
               />
             </div>
             <ButtonV2
@@ -363,7 +353,13 @@ const AssetsList = () => {
           <div className="flex flex-col md:flex-row w-full">
             <ButtonV2
               className="w-full inline-flex items-center justify-center"
-              onClick={() => setShowFacilityDialog(true)}
+              onClick={() => {
+                if (qParams.facility) {
+                  navigate(`/facility/${qParams.facility}/assets/new`);
+                } else {
+                  setShowFacilityDialog(true);
+                }
+              }}
             >
               <CareIcon className="care-l-plus-circle text-lg" />
               <span>Create Asset</span>
@@ -371,13 +367,7 @@ const AssetsList = () => {
           </div>
         </div>
       </div>
-      <div>
-        <SlideOver {...advancedFilter}>
-          <div className="bg-white min-h-screen p-4">
-            <AssetFilter {...advancedFilter} />
-          </div>
-        </SlideOver>
-      </div>
+      <AssetFilter {...advancedFilter} />
       {isLoading ? (
         <Loading />
       ) : (
@@ -385,7 +375,7 @@ const AssetsList = () => {
           <FilterBadges
             badges={({ badge, value }) => [
               value("Facility", ["facility", "location"], facility?.name || ""),
-              badge("Name", "search"),
+              badge("Name/Serial No./QR ID", "search"),
               value("Asset Type", "asset_type", asset_type || ""),
               value("Asset Class", "asset_class", asset_class || ""),
               badge("Status", "status"),
@@ -400,10 +390,35 @@ const AssetsList = () => {
           </div>
         </>
       )}
+      {typeof facility === "undefined" && (
+        <FacilitiesSelectDialogue
+          show={importAssetModalOpen}
+          setSelected={(e) => setFacility(e)}
+          selectedFacility={
+            facility ?? {
+              name: "",
+            }
+          }
+          handleOk={() => {
+            return undefined;
+          }}
+          handleCancel={() => {
+            return setImportAssetModalOpen(false);
+          }}
+        />
+      )}
       {facility && (
         <AssetImportModal
           open={importAssetModalOpen}
-          onClose={() => setImportAssetModalOpen(false)}
+          onClose={() => {
+            setImportAssetModalOpen(false);
+            setFacility((f) => {
+              if (!qParams.facility) {
+                return undefined;
+              }
+              return f;
+            });
+          }}
           facility={facility}
         />
       )}
@@ -417,7 +432,7 @@ const AssetsList = () => {
           setSelectedFacility({ name: "" });
         }}
       />
-    </div>
+    </Page>
   );
 };
 

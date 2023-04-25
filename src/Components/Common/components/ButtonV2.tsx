@@ -95,7 +95,7 @@ const ButtonV2 = ({
 }: ButtonProps) => {
   const className = classNames(
     props.className,
-    "font-medium h-min inline-flex items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
+    "font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
     `button-size-${size}`,
     `justify-${align}`,
     `button-shape-${circle ? "circle" : "square"}`,
@@ -150,8 +150,6 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
     <ButtonV2
       id="submit"
       type="submit"
-      className="w-full md:w-auto"
-      // Voluntarily setting children this way, so that it's overridable when using.
       children={
         <>
           <CareIcon className="care-l-check-circle text-lg" />
@@ -159,6 +157,7 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
         </>
       }
       {...props}
+      className={classNames("w-full md:w-auto", props.className)}
     />
   );
 };
@@ -170,8 +169,7 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
       id="cancel"
       type="button"
       variant="secondary"
-      className="w-full md:w-auto"
-      // Voluntarily setting children this way, so that it's overridable when using.
+      border
       children={
         <>
           <CareIcon className="care-l-times-circle text-lg" />
@@ -179,6 +177,7 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
         </>
       }
       {...props}
+      className={classNames("w-full md:w-auto", props.className)}
     />
   );
 };

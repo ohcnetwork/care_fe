@@ -149,18 +149,23 @@ let saveData = (id, consultationId, state, send, updateCB) => {
 
 let ventilatorInterfaceOptions: array<Options.t> = [
   {
-    label: "Invasive (IV)",
+    label: "None",
+    value: "UNKNOWN",
+    name: "ventilator_interface",
+  },
+  {
+    label: "Invasive ventilator (IV)",
     value: "INVASIVE",
     name: "ventilator_interface",
   },
   {
-    label: "Non-Invasive (NIV)",
+    label: "Non-Invasive ventilator (NIV)",
     value: "NON_INVASIVE",
     name: "ventilator_interface",
   },
   {
-    label: "None",
-    value: "UNKNOWN",
+    label: "Oxygen Support",
+    value: "OXYGEN_SUPPORT",
     name: "ventilator_interface",
   },
 ]
@@ -191,14 +196,15 @@ let make = (~ventilatorParameters: VentilatorParameters.t, ~id, ~consultationId,
   let editor = switch state.ventilator_interface {
   | INVASIVE => <CriticalCare__VentilatorParametersEditor__Invasive state send />
   | NON_INVASIVE => <CriticalCare__VentilatorParametersEditor__NonInvasive state send />
-  | UNKNOWN => <CriticalCare__VentilatorParametersEditor__None state send />
+  | UNKNOWN => <CriticalCare__VentilatorParametersEditor__None />
+  | OXYGEN_SUPPORT => <CriticalCare__VentilatorParametersEditor__OxygenSupport state send />
   }
 
   <div>
-    <CriticalCare__PageTitle title="Ventilator Parameters" />
+    <CriticalCare__PageTitle title="Respiratory Support" />
     <div className="py-6">
       <div className="mb-6">
-        <h4> {str("Ventilation Interface")} </h4>
+        <h4> {str("Respiratory Support")} </h4>
         <div>
           <div className="flex items-center py-4 mb-4">
             <CriticalCare__RadioButton

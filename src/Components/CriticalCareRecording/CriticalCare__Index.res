@@ -110,7 +110,7 @@ let make = (
     <div>
       <div
         className="bg-white px-2 md:px-6 py-5 border-b border-gray-200 sm:px-6 max-w-5xl mx-auto border mt-4 shadow rounded-lg">
-        <h1 className="text-5xl"> {str("Consultation Update")} </h1>
+        <h1 className="text-4xl sm:text-5xl"> {str("Consultation Update")} </h1>
         <div>
           <CriticalCare__PageTitle title="General" />
           <DailyRound__General others title renderOptionalDescription />
@@ -176,11 +176,17 @@ let make = (
         <div className="grow border-t border-gray-400 mt-4" />
         <div>
           <CriticalCare__PageTitle title="Pressure Sore" />
-          <DailyRound__PressureSore pressureSoreParameter />
+          <CriticalCare__PressureSoreEditor
+            pressureSoreParameter={pressureSoreParameter}
+            previewMode={true}
+            updateCB={_ => ()}
+            id={id}
+            consultationId={consultationId}
+          />
         </div>
         <div className="grow border-t border-gray-400 mt-4" />
         <div>
-          <CriticalCare__PageTitle title="Ventilator Parameters" />
+          <CriticalCare__PageTitle title="Respiratory Support" />
           <DailyRound__VentilatorParameters
             ventilatorParameters
             renderOptionalInt

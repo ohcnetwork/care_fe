@@ -35,28 +35,23 @@ import {
   getWardByLocalBody,
   externalResult,
   getAnyFacility,
+  HCXActions,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import AlertDialog from "../Common/AlertDialog";
 import {
-  CheckboxField,
-  DateInputField,
-  ErrorHelperText,
-  SelectField,
-  TextInputField,
+  LegacyCheckboxField,
+  LegacyDateInputField,
+  LegacyErrorHelperText,
+  LegacySelectField,
+  LegacyTextInputField,
 } from "../Common/HelperInputFields";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import { DupPatientModel } from "../Facility/models";
 import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import { validatePincode } from "../../Common/validation";
-import { InfoOutlined } from "@material-ui/icons";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import {
-  getPincodeDetails,
-  goBack,
-  includesIgnoreCase,
-} from "../../Utils/utils";
+import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -67,9 +62,20 @@ import { debounce } from "lodash";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import useConfig from "../../Common/hooks/useConfig";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
+import { HCXPolicyModel } from "../HCX/models";
+import HCXPolicyValidator from "../HCX/validators";
+import { FieldError } from "../Form/FieldValidators";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import DialogModal from "../Common/Dialog";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -89,13 +95,7 @@ const medicalHistoryChoices = MEDICAL_HISTORY_CHOICES.reduce(
   ],
   []
 );
-const genderTypes = [
-  {
-    id: 0,
-    text: "Select",
-  },
-  ...GENDER_TYPES,
-];
+const genderTypes = GENDER_TYPES;
 const diseaseStatus = [...DISEASE_STATUS];
 const bloodGroups = [...BLOOD_GROUPS];
 const testType = [...TEST_TYPE];
@@ -162,12 +162,6 @@ const initialState = {
   errors: { ...initError },
 };
 
-const initialStates = [{ id: 0, name: "Choose State" }];
-const selectStates = [{ id: 0, name: "Please select your state" }];
-const initialLocalbodies = [{ id: 0, name: "Choose Localbody", number: 0 }];
-const initialWard = [{ id: 0, name: "Choose Ward", number: 0 }];
-const selectDistrict = [{ id: 0, name: "Please select your district" }];
-
 const patientFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
     case "set_form": {
@@ -187,12 +181,17 @@ const patientFormReducer = (state = initialState, action: any) => {
   }
 };
 
-const scrollTo = (id: any) => {
+const scrollTo = (id: string | boolean) => {
   const element = document.querySelector(`#${id}-div`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
+const getDate = (value: any) =>
+  value && moment(value).isValid() && moment(value).toDate();
+
 export const PatientRegister = (props: PatientRegisterProps) => {
+  const { goBack } = useAppHistory();
+  const { gov_data_api_key, enable_hcx } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
@@ -208,10 +207,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
-  const [states, setStates] = useState(initialStates);
-  const [districts, setDistricts] = useState(selectStates);
-  const [localBody, setLocalBody] = useState(selectDistrict);
-  const [ward, setWard] = useState(initialLocalbodies);
+  const [states, setStates] = useState<any[]>([]);
+  const [districts, setDistricts] = useState<any[]>([]);
+  const [localBody, setLocalBody] = useState<any[]>([]);
+  const [ward, setWard] = useState<any[]>([]);
   const [statusDialog, setStatusDialog] = useState<{
     show?: boolean;
     transfer?: boolean;
@@ -222,6 +221,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [patientName, setPatientName] = useState("");
   const [{ extId }, setQuery] = useQueryParams();
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
+  const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>(
+    []
+  );
+  const [insuranceDetailsError, setInsuranceDetailsError] =
+    useState<FieldError>();
 
   useEffect(() => {
     if (extId) {
@@ -239,7 +243,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsDistrictLoading(true);
         const districtList = await dispatchAction(getDistrictByState({ id }));
         if (districtList) {
-          setDistricts([...districtList.data]);
+          setDistricts(districtList.data);
         }
         setIsDistrictLoading(false);
         return districtList ? [...districtList.data] : [];
@@ -256,13 +260,23 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           getLocalbodyByDistrict({ id })
         );
         setIsLocalbodyLoading(false);
-        setLocalBody([...initialLocalbodies, ...localBodyList.data]);
+        setLocalBody(localBodyList.data);
       } else {
-        setLocalBody(selectDistrict);
+        setLocalBody([]);
       }
     },
     [dispatchAction]
   );
+
+  const field = (name: string) => {
+    return {
+      id: name,
+      name,
+      onChange: handleChange,
+      value: state.form[name],
+      error: state.errors[name],
+    };
+  };
 
   const fetchWards = useCallback(
     async (id: string) => {
@@ -270,9 +284,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         setIsWardLoading(true);
         const wardList = await dispatchAction(getWardByLocalBody({ id }));
         setIsWardLoading(false);
-        setWard([...initialWard, ...wardList.data.results]);
+        setWard(wardList.data.results);
       } else {
-        setWard(initialLocalbodies);
+        setWard([]);
       }
     },
     [dispatchAction]
@@ -377,7 +391,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 : res.data.blood_group
               : "",
             local_body: res.data.local_body ? res.data.local_body : "",
-            ward: res.data.ward_object ? res.data.ward_object.id : initialWard,
+            ward: res.data.ward_object ? res.data.ward_object.id : undefined,
             village: res.data.village ? res.data.village : "",
             medical_history: [],
             is_antenatal: String(!!res.data.is_antenatal),
@@ -453,12 +467,30 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     [dispatchAction, fetchDistricts, fetchLocalBody, fetchWards, id]
   );
 
+  useEffect(() => {
+    const fetchPatientInsuranceDetails = async () => {
+      if (!id) {
+        setInsuranceDetails([]);
+        return;
+      }
+
+      const res = await dispatchAction(
+        HCXActions.policies.list({ patient: id })
+      );
+      if (res && res.data) {
+        setInsuranceDetails(res.data.results);
+      }
+    };
+
+    fetchPatientInsuranceDetails();
+  }, [dispatchAction, id]);
+
   const fetchStates = useCallback(
     async (status: statusType) => {
       setIsStateLoading(true);
       const statesRes = await dispatchAction(getStates());
       if (!status.aborted && statesRes.data.results) {
-        setStates([...initialStates, ...statesRes.data.results]);
+        setStates(statesRes.data.results);
       }
       setIsStateLoading(false);
     },
@@ -493,6 +525,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     let invalidForm = false;
     let error_div = "";
 
+    const insuranceDetailsError = insuranceDetails
+      .map((policy) => HCXPolicyValidator(policy, enable_hcx))
+      .find((error) => !!error);
+    setInsuranceDetailsError(insuranceDetailsError);
+
+    if (insuranceDetailsError) {
+      invalidForm = true;
+      error_div = "insurance_details";
+    }
+
     Object.keys(state.form).forEach((field) => {
       let phoneNumber, emergency_phone_number;
       switch (field) {
@@ -516,7 +558,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
         case "date_of_birth":
           if (!state.form[field]) {
-            errors[field] = "Please enter date in DD/MM/YYYY format";
+            errors[field] = "Please enter date in YYYY/MM/DD format";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -527,16 +569,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             !Number(state.form[field])
           ) {
             errors[field] = "Please select local body";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
-          return;
-        case "ward":
-          if (
-            state.form.nationality === "India" &&
-            !Number(state.form[field])
-          ) {
-            errors[field] = "Please select ward";
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -651,6 +683,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             }
           }
           return;
+
+        case "date_of_result":
+          if (state.form[field] < state.form.date_of_test) {
+            errors[field] =
+              "Date should not be before the date of sample collection";
+            if (!error_div) error_div = field;
+            invalidForm = true;
+          }
+          return;
         case "disease_status":
           if (state.form[field] === "POSITIVE") {
             if (!state.form.date_of_test) {
@@ -667,7 +708,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
         case "medical_history":
           if (!state.form[field].length) {
-            errors[field] = "Please fill the medical history";
+            errors[field] = (
+              <span className="text-red-500">
+                Please fill the medical history
+              </span>
+            );
             if (!error_div) error_div = field;
             invalidForm = true;
           }
@@ -682,14 +727,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   };
 
   const handlePincodeChange = async (e: any) => {
-    handleChange(e);
+    handleFormFieldChange(e);
 
-    if (!validatePincode(e.target.value)) return;
+    if (!validatePincode(e.value)) return;
 
-    const pincodeDetails = await getPincodeDetails(e.target.value);
+    const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
     if (!pincodeDetails) return;
 
-    const matchedState = states.find((state) => {
+    const matchedState = states?.find((state) => {
       return includesIgnoreCase(state.name, pincodeDetails.statename);
     });
     if (!matchedState) return;
@@ -708,7 +753,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ...state.form,
         state: matchedState.id,
         district: matchedDistrict.id,
-        pincode: e.target.value,
+        pincode: e.value,
       },
     });
 
@@ -853,8 +898,39 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ? updatePatient(data, { id })
           : createPatient({ ...data, facility: facilityId })
       );
-      setIsLoading(false);
       if (res && res.data && res.status != 400) {
+        await Promise.all(
+          insuranceDetails.map(async (obj) => {
+            const policy = {
+              ...obj,
+              patient: res.data.id,
+              insurer_id: obj.insurer_id || undefined,
+              insurer_name: obj.insurer_name || undefined,
+            };
+            const policyRes = await (policy.id
+              ? dispatchAction(
+                  HCXActions.policies.update(
+                    policy.id,
+                    policy as HCXPolicyModel
+                  )
+                )
+              : dispatchAction(
+                  HCXActions.policies.create(policy as HCXPolicyModel)
+                ));
+
+            if (enable_hcx) {
+              const eligibilityCheckRes = await dispatchAction(
+                HCXActions.checkEligibility(policyRes.data.id)
+              );
+              if (eligibilityCheckRes.status === 200) {
+                Notification.Success({ msg: "Checking Policy Eligibility..." });
+              } else {
+                Notification.Error({ msg: "Something Went Wrong..." });
+              }
+            }
+          })
+        );
+
         dispatch({ type: "set_form", form: initForm });
         if (!id) {
           setAlertMessage({
@@ -872,6 +948,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           goBack();
         }
       }
+      setIsLoading(false);
     }
   };
 
@@ -903,11 +980,23 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleDateChange = (date: any, field: string) => {
+  const handleDateChange = (date: MaterialUiPickersDate, field: string) => {
     if (moment(date).isValid()) {
       const form = { ...state.form };
       form[field] = date;
       dispatch({ type: "set_form", form });
+    }
+  };
+
+  const handleDOBChange = (e: FieldChangeEvent<Date>) => {
+    if (moment(e.value).isValid()) {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          [e.name]: moment(e.value).format("YYYY-MM-DD"),
+        },
+      });
     }
   };
 
@@ -964,7 +1053,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     return (
       <div key={textField}>
         <div>
-          <CheckboxField
+          <LegacyCheckboxField
             checked={state.form.medical_history.includes(id)}
             onChange={(e) => handleMedicalCheckboxChange(e, id)}
             name={checkboxField}
@@ -1002,12 +1091,19 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         />
       )}
       {statusDialog.transfer && (
-        <TransferPatientDialog
-          patientList={statusDialog.patientList}
-          handleOk={() => handleDialogClose("close")}
-          handleCancel={() => handleDialogClose("back")}
-          facilityId={facilityId}
-        />
+        <DialogModal
+          show={statusDialog.transfer}
+          onClose={() => handleDialogClose("back")}
+          title="Patient Transfer Form"
+          className="max-w-md md:min-w-[600px]"
+        >
+          <TransferPatientDialog
+            patientList={statusDialog.patientList}
+            handleOk={() => handleDialogClose("close")}
+            handleCancel={() => handleDialogClose("back")}
+            facilityId={facilityId}
+          />
+        </DialogModal>
       )}
       <PageTitle
         title={headerText}
@@ -1016,6 +1112,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           if (showImport) {
             setShowImport(false);
             return false;
+          } else {
+            id
+              ? navigate(`/facility/${facilityId}/patient/${id}`)
+              : navigate(`/facility/${facilityId}`);
           }
         }}
         crumbsReplacements={{
@@ -1026,8 +1126,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <div className="mt-4">
         <div className="bg-purple-100 text-purple-800 p-4 font-semibold text-xs my-8 rounded mx-4">
           <div className="text-lg font-bold flex items-center mb-1">
-            <InfoOutlined className="mr-2" /> Please enter the correct date of
-            birth for the patient
+            <CareIcon className=" care-l-info-circle text-2xl font-bold mr-1" />{" "}
+            Please enter the correct date of birth for the patient
           </div>
           <p className="text-sm text-black font-normal">
             Each patient in the system is uniquely identifiable by the number
@@ -1050,7 +1150,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <FieldLabel htmlFor="care-external-results-id" required>
                     Enter Care External Results Id
                   </FieldLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     id="care-external-results-id"
                     name="care-external-results-id"
                     variant="outlined"
@@ -1091,7 +1191,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   Import From External Results
                 </ButtonV2>
                 <form onSubmit={(e) => handleSubmit(e)}>
-                  <Card elevation={0} className="mb-8 rounded">
+                  <Card elevation={0} className="mb-8 rounded overflow-visible">
                     <CardContent>
                       <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
                         Personal Details
@@ -1127,57 +1227,37 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           <FieldLabel htmlFor="name" id="name-label" required>
                             Name
                           </FieldLabel>
-                          <TextInputField
+                          <TextFormField
                             id="name"
                             name="name"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
-                            autoComplete="no"
                             value={state.form.name}
-                            onChange={handleChange}
-                            errors={state.errors.name}
+                            onChange={handleFormFieldChange}
+                            error={state.errors.name}
                           />
                         </div>
                         <div data-testid="date-of-birth" id="date_of_birth-div">
-                          <FieldLabel
-                            htmlFor="date_of_birth"
-                            id="date_of_birth-label"
+                          <DateFormField
+                            name="date_of_birth"
+                            label="Date of Birth"
                             required
-                          >
-                            Date of birth
-                          </FieldLabel>
-                          <DateInputField
-                            fullWidth={true}
-                            id="date_of_birth"
-                            value={state.form.date_of_birth}
-                            onChange={(date) =>
-                              handleDateChange(date, "date_of_birth")
-                            }
-                            errors={state.errors.date_of_birth}
-                            inputVariant="outlined"
-                            margin="dense"
-                            openTo="year"
-                            disableFuture={true}
+                            value={getDate(state.form.date_of_birth)}
+                            onChange={handleDOBChange}
+                            error={state.errors.date_of_birth}
+                            position="LEFT"
+                            disableFuture
                           />
                         </div>
                         <div data-testid="Gender" id="gender-div">
-                          <FieldLabel
-                            htmlFor="gender"
-                            id="gender-label"
-                            required
-                          >
-                            Gender
-                          </FieldLabel>
-                          <SelectField
-                            labelId="gender"
+                          <SelectFormField
                             name="gender"
-                            variant="outlined"
-                            margin="dense"
+                            required
+                            label="Gender"
+                            optionLabel={(o: any) => o.text}
                             value={state.form.gender}
                             options={genderTypes}
-                            onChange={handleChange}
-                            errors={state.errors.gender}
+                            onChange={handleFormFieldChange}
+                            error={state.errors.gender}
+                            optionValue={(o: any) => o.id}
                           />
                         </div>
 
@@ -1258,7 +1338,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             error={state.errors.permanent_address}
                           />
 
-                          <CheckboxField
+                          <LegacyCheckboxField
                             checked={sameAddress}
                             onChange={() => setSameAddress(!sameAddress)}
                             label="Same as Current Address"
@@ -1274,15 +1354,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           >
                             Pincode
                           </FieldLabel>
-                          <TextInputField
+                          <TextFormField
                             id="pincode"
                             name="pincode"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
                             value={state.form.pincode}
                             onChange={handlePincodeChange}
-                            errors={state.errors.pincode}
+                            error={state.errors.pincode}
                           />
                           {showAutoFilledPincode && (
                             <div>
@@ -1297,7 +1374,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           <FieldLabel htmlFor="village" id="name-label">
                             Village
                           </FieldLabel>
-                          <TextInputField
+                          <LegacyTextInputField
                             id="village"
                             name="village"
                             variant="outlined"
@@ -1315,7 +1392,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           >
                             Nationality
                           </FieldLabel>
-                          <SelectField
+                          <LegacySelectField
                             labelId="nationality"
                             name="nationality"
                             variant="outlined"
@@ -1330,81 +1407,80 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         {state.form.nationality === "India" ? (
                           <>
                             <div data-testid="state" id="state-div">
-                              <FieldLabel
-                                htmlFor="state"
-                                id="state-label"
-                                required
-                              >
-                                State
-                              </FieldLabel>
                               {isStateLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
-                                <SelectField
-                                  labelId="state"
+                                <SelectFormField
+                                  {...field("state")}
                                   name="state"
-                                  variant="outlined"
-                                  margin="dense"
+                                  label="State"
+                                  required
+                                  placeholder="Choose State"
                                   value={state.form.state}
                                   options={states}
-                                  optionValue="name"
-                                  onChange={(e) => [
-                                    handleChange(e),
-                                    fetchDistricts(e.target.value),
+                                  optionLabel={(o: any) => o.name}
+                                  optionValue={(o: any) => o.id}
+                                  onChange={(e: any) => [
+                                    handleFormFieldChange(e),
+                                    fetchDistricts(e.value),
                                   ]}
-                                  errors={state.errors.state}
+                                  error={state.errors.state}
                                 />
                               )}
                             </div>
 
                             <div data-testid="district" id="district-div">
-                              <FieldLabel id="district-label" required>
-                                District
-                              </FieldLabel>
                               {isDistrictLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
-                                <SelectField
-                                  labelId="district"
+                                <SelectFormField
+                                  {...field("district")}
                                   name="district"
-                                  variant="outlined"
-                                  margin="dense"
+                                  label="District"
+                                  required
+                                  placeholder={
+                                    state.form.state
+                                      ? "Choose District"
+                                      : "Select State First"
+                                  }
+                                  disabled={!state.form.state}
                                   value={state.form.district}
                                   options={districts}
-                                  optionValue="name"
-                                  onChange={(e) => [
-                                    handleChange(e),
-                                    fetchLocalBody(String(e.target.value)),
+                                  optionLabel={(o: any) => o.name}
+                                  optionValue={(o: any) => o.id}
+                                  onChange={(e: any) => [
+                                    handleFormFieldChange(e),
+                                    fetchLocalBody(String(e.value)),
                                   ]}
-                                  errors={state.errors.district}
+                                  error={state.errors.district}
                                 />
                               )}
                             </div>
 
                             <div data-testid="localbody" id="local_body-div">
-                              <FieldLabel
-                                htmlFor="local_body"
-                                id="local_body-label"
-                                required
-                              >
-                                Localbody
-                              </FieldLabel>
                               {isLocalbodyLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
-                                <SelectField
-                                  labelId="local_body"
+                                <SelectFormField
+                                  {...field("local_body")}
                                   name="local_body"
-                                  variant="outlined"
-                                  margin="dense"
+                                  label="Localbody"
+                                  required
+                                  placeholder={
+                                    state.form.district
+                                      ? "Choose Localbody"
+                                      : "Select District First"
+                                  }
+                                  disabled={!state.form.district}
                                   value={state.form.local_body}
                                   options={localBody}
-                                  optionValue="name"
-                                  onChange={(e) => [
-                                    handleChange(e),
-                                    fetchWards(String(e.target.value)),
+                                  optionLabel={(o: any) => o.name}
+                                  optionValue={(o: any) => o.id}
+                                  onChange={(e: any) => [
+                                    handleFormFieldChange(e),
+                                    fetchWards(String(e.value)),
                                   ]}
-                                  errors={state.errors.local_body}
+                                  error={state.errors.local_body}
                                 />
                               )}
                             </div>
@@ -1412,21 +1488,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               data-testid="ward-respective-lsgi"
                               id="ward-div"
                             >
-                              <FieldLabel
-                                htmlFor="ward"
-                                id="ward-label"
-                                required
-                              >
-                                Ward/Division of respective LSGI
-                              </FieldLabel>
                               {isWardLoading ? (
                                 <CircularProgress size={20} />
                               ) : (
-                                <SelectField
-                                  labelId="ward"
+                                <SelectFormField
+                                  label="Ward"
                                   name="ward"
-                                  variant="outlined"
-                                  margin="dense"
                                   options={ward
                                     .sort((a, b) => a.number - b.number)
                                     .map((e) => {
@@ -1436,9 +1503,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       };
                                     })}
                                   value={state.form.ward}
-                                  optionValue="name"
-                                  onChange={handleChange}
-                                  errors={state.errors.ward}
+                                  placeholder={
+                                    state.form.local_body
+                                      ? "Choose Ward"
+                                      : "Select Localbody First"
+                                  }
+                                  disabled={!state.form.local_body}
+                                  optionLabel={(o: any) => o.name}
+                                  optionValue={(o: any) => o.id}
+                                  onChange={handleFormFieldChange}
+                                  error={state.errors.ward}
                                 />
                               )}
                             </div>
@@ -1452,7 +1526,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Passport Number
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="passport_no"
                               name="passport_no"
                               variant="outlined"
@@ -1469,7 +1543,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   <Card elevation={0} className="mb-8 rounded">
                     <AccordionV2
                       className="mt-2 lg:mt-0 md:mt-0 bg-white shadow-sm rounded-lg p-3 relative"
-                      expandIcon={<ExpandMoreIcon />}
+                      expandIcon={
+                        <CareIcon className="care-l-angle-down text-2xl font-bold" />
+                      }
                       title={
                         <h1 className="font-bold text-purple-500 text-left text-xl">
                           COVID Details
@@ -1519,7 +1595,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   >
                                     COWIN ID
                                   </FieldLabel>
-                                  <TextInputField
+                                  <LegacyTextInputField
                                     id="covin_id"
                                     name="covin_id"
                                     variant="outlined"
@@ -1563,7 +1639,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       />
                                     </div>
                                   </RadioGroup>
-                                  <ErrorHelperText
+                                  <LegacyErrorHelperText
                                     error={state.errors.number_of_doses}
                                   />
                                 </div>
@@ -1575,7 +1651,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   >
                                     Vaccine Name
                                   </FieldLabel>
-                                  <SelectField
+                                  <LegacySelectField
                                     labelId="vaccine_name"
                                     name="vaccine_name"
                                     variant="outlined"
@@ -1595,7 +1671,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   >
                                     Last Date of Vaccination
                                   </FieldLabel>
-                                  <DateInputField
+                                  <LegacyDateInputField
                                     id="last_vaccinated_date"
                                     fullWidth={true}
                                     value={state.form.last_vaccinated_date}
@@ -1686,7 +1762,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 >
                                   Estimate date of contact
                                 </FieldLabel>
-                                <DateInputField
+                                <LegacyDateInputField
                                   fullWidth={true}
                                   id="estimated_contact_date"
                                   value={state.form.estimated_contact_date}
@@ -1711,7 +1787,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 >
                                   Name / Cluster of Contact
                                 </FieldLabel>
-                                <TextInputField
+                                <LegacyTextInputField
                                   id="cluster_name"
                                   name="cluster_name"
                                   variant="outlined"
@@ -1736,7 +1812,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               COVID Disease Status
                             </FieldLabel>
-                            <SelectField
+                            <LegacySelectField
                               labelId="disease_status"
                               name="disease_status"
                               variant="outlined"
@@ -1756,7 +1832,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               COVID Test Type
                             </FieldLabel>
-                            <SelectField
+                            <LegacySelectField
                               labelId="test_type"
                               name="test_type"
                               variant="outlined"
@@ -1772,7 +1848,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             <FieldLabel id="srf_id-label" htmlFor="srf_id">
                               SRF Id for COVID Test
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="srf_id"
                               name="srf_id"
                               variant="outlined"
@@ -1822,7 +1898,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 <FieldLabel id="date_declared_positive-label">
                                   Date Patient is Declared Positive for COVID
                                 </FieldLabel>
-                                <DateInputField
+                                <LegacyDateInputField
                                   fullWidth={true}
                                   value={state.form.date_declared_positive}
                                   onChange={(date) =>
@@ -1843,7 +1919,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             <FieldLabel id="test_id-label" htmlFor="test_id">
                               COVID Positive ID issued by ICMR
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="test_id"
                               name="test_id"
                               variant="outlined"
@@ -1862,7 +1938,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Date of Sample given for COVID Test
                             </FieldLabel>
-                            <DateInputField
+                            <LegacyDateInputField
                               fullWidth={true}
                               id="date_of_test"
                               value={state.form.date_of_test}
@@ -1882,14 +1958,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Date of Result for COVID Test
                             </FieldLabel>
-                            <DateInputField
+                            <LegacyDateInputField
                               fullWidth={true}
                               id="date_of_result"
                               value={state.form.date_of_result}
                               onChange={(date) =>
                                 handleDateChange(date, "date_of_result")
                               }
-                              min={state.form.date_of_test}
                               errors={state.errors.date_of_result}
                               inputVariant="outlined"
                               margin="dense"
@@ -1904,7 +1979,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Number Of Primary Contacts for COVID
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="number_of_primary_contacts"
                               name="number_of_primary_contacts"
                               variant="outlined"
@@ -1922,7 +1997,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             >
                               Number Of Secondary Contacts for COVID
                             </FieldLabel>
-                            <TextInputField
+                            <LegacyTextInputField
                               id="number_of_secondary_contacts"
                               name="number_of_secondary_contacts"
                               variant="outlined"
@@ -1937,7 +2012,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </div>
                     </AccordionV2>
                   </Card>
-                  <Card elevation={0} className="mb-8 rounded">
+                  <Card elevation={0} className="mb-8 rounded overflow-visible">
                     <CardContent>
                       <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
                         Medical History
@@ -1987,7 +2062,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               return renderMedicalHistory(i.id, i.text);
                             })}
                           </div>
-                          <ErrorHelperText
+                          <LegacyErrorHelperText
                             error={state.errors.medical_history}
                           />
                         </div>
@@ -2008,29 +2083,56 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         </div>
 
                         <div data-testid="blood-group" id="blood_group-div">
-                          <FieldLabel
-                            id="blood_group-label"
-                            htmlFor="blood_group"
-                            required
-                          >
-                            Blood Group
-                          </FieldLabel>
-                          <SelectField
-                            labelId="blood_group"
+                          <SelectFormField
+                            position="above"
+                            label="Blood Group"
                             name="blood_group"
-                            variant="outlined"
-                            margin="dense"
-                            showEmpty={true}
-                            optionArray={true}
+                            required
                             value={state.form.blood_group}
                             options={bloodGroups}
-                            onChange={handleChange}
-                            errors={state.errors.blood_group}
+                            optionLabel={(o: any) => o}
+                            onChange={handleFormFieldChange}
+                            error={state.errors.blood_group}
                           />
                         </div>
                       </div>
                     </CardContent>
                   </Card>
+                  <div className="bg-white rounded flex flex-col gap-4 w-full p-4">
+                    <div className="flex w-full items-center justify-between">
+                      <h1 className="font-bold text-purple-500 text-left text-xl">
+                        Insurance Details
+                      </h1>
+                      <ButtonV2
+                        type="button"
+                        variant="alert"
+                        border
+                        ghost={insuranceDetails.length !== 0}
+                        onClick={() =>
+                          setInsuranceDetails([
+                            ...insuranceDetails,
+                            {
+                              id: "",
+                              subscriber_id: "",
+                              policy_id: "",
+                              insurer_id: "",
+                              insurer_name: "",
+                            },
+                          ])
+                        }
+                      >
+                        <CareIcon className="care-l-plus text-lg" />
+                        <span>Add Insurance Details</span>
+                      </ButtonV2>
+                    </div>
+                    <InsuranceDetailsBuilder
+                      name="insurance_details"
+                      value={insuranceDetails}
+                      onChange={({ value }) => setInsuranceDetails(value)}
+                      error={insuranceDetailsError}
+                      gridView
+                    />
+                  </div>
                   <div className="flex items-center my-4 mx-4">
                     <button
                       className="btn btn-large btn-primary mr-4"

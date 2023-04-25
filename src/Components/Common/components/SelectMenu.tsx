@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
-import { Check, KeyboardArrowDown } from "@material-ui/icons";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 type Props<T> = {
   options: {
@@ -47,12 +47,12 @@ export default function SelectMenu<T>(props: Props<T>) {
               <div className="relative z-0 flex w-full">
                 <div className="relative flex-1 flex items-center py-2 pl-3 pr-4 border border-transparent rounded-l focus:outline-none focus:z-10">
                   {selected.value && (
-                    <Check className="h-5 w-5" aria-hidden="true" />
+                    <CareIcon className="h-5 w-5 care-l-check" />
                   )}
                   <p className="ml-2.5 text-sm font-medium">{selected.title}</p>
                 </div>
                 <div className="items-center p-2 rounded-r text-sm font-medium focus:outline-none focus:z-10">
-                  <KeyboardArrowDown className="h-5 w-5" aria-hidden="true" />
+                  <CareIcon className="h-5 w-5 care-l-angle-down" />
                 </div>
               </div>
             </Listbox.Button>
@@ -68,7 +68,7 @@ export default function SelectMenu<T>(props: Props<T>) {
               leaveTo="opacity-0"
             >
               <Listbox.Options
-                className={`origin-top-right absolute z-10 mt-2 w-auto lg:w-72 rounded-md shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none ${
+                className={`origin-top-right absolute z-10 w-auto lg:w-72 rounded-md shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none ${
                   props.position ? "md:right-0 md:left-auto" : "left-0"
                 }`}
               >
@@ -98,7 +98,7 @@ export default function SelectMenu<T>(props: Props<T>) {
                                 active ? "text-white" : "text-primary-500"
                               }`}
                             >
-                              <Check className="h-5 w-5" aria-hidden="true" />
+                              <CareIcon className="h-5 w-5 care-l-check text-xl" />
                             </span>
                           ) : null}
                         </div>

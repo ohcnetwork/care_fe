@@ -7,6 +7,10 @@ import { getConfig, getCurrentUser } from "./Redux/actions";
 import { useAbortableEffect, statusType } from "./Common/utils";
 import axios from "axios";
 import { HistoryAPIProvider } from "./CAREUI/misc/HistoryAPIProvider";
+import * as Sentry from "@sentry/browser";
+import { IConfig } from "./Common/hooks/useConfig";
+import { LocalStorageKeys } from "./Common/constants";
+import Plausible from "./Components/Common/Plausible";
 
 const Loading = loadable(() => import("./Components/Common/Loading"));
 
@@ -19,15 +23,24 @@ const App: React.FC = () => {
   useAbortableEffect(async () => {
     const res = await dispatch(getConfig());
     if (res.data && res.status < 400) {
-      localStorage.setItem("config", JSON.stringify(res.data));
+      const config = res.data as IConfig;
+
+      if (config?.sentry_dsn && import.meta.env.PROD) {
+        Sentry.init({
+          environment: config.sentry_environment,
+          dsn: config.sentry_dsn,
+        });
+      }
+
+      localStorage.setItem("config", JSON.stringify(config));
     }
   }, [dispatch]);
 
   const updateRefreshToken = () => {
-    const refresh = localStorage.getItem("care_refresh_token");
-    const access = localStorage.getItem("care_access_token");
+    const refresh = localStorage.getItem(LocalStorageKeys.refreshToken);
+    const access = localStorage.getItem(LocalStorageKeys.accessToken);
     if (!access && refresh) {
-      localStorage.removeItem("care_refresh_token");
+      localStorage.removeItem(LocalStorageKeys.refreshToken);
       document.location.reload();
       return;
     }
@@ -39,8 +52,8 @@ const App: React.FC = () => {
         refresh,
       })
       .then((resp) => {
-        localStorage.setItem("care_access_token", resp.data.access);
-        localStorage.setItem("care_refresh_token", resp.data.refresh);
+        localStorage.setItem(LocalStorageKeys.accessToken, resp.data.access);
+        localStorage.setItem(LocalStorageKeys.refreshToken, resp.data.refresh);
       });
   };
   useEffect(() => {
@@ -58,6 +71,16 @@ const App: React.FC = () => {
     [dispatch]
   );
 
+  useEffect(() => {
+    const darkThemeMq = window.matchMedia("(prefers-color-scheme: dark)");
+    const favicon: any = document.querySelector("link[rel~='icon']");
+    if (darkThemeMq.matches) {
+      favicon.href = "/favicon-light.ico";
+    } else {
+      favicon.href = "/favicon-dark.ico";
+    }
+  }, []);
+
   if (
     !currentUser ||
     currentUser.isFetching ||
@@ -68,15 +91,12 @@ const App: React.FC = () => {
     return <Loading />;
   }
 
-  if (currentUser?.data) {
-    return (
-      <HistoryAPIProvider>
-        <AppRouter />
-      </HistoryAPIProvider>
-    );
-  } else {
-    return <SessionRouter />;
-  }
+  return (
+    <HistoryAPIProvider>
+      {currentUser?.data ? <AppRouter /> : <SessionRouter />}
+      <Plausible />
+    </HistoryAPIProvider>
+  );
 };
 
 export default App;

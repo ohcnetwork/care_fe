@@ -8,6 +8,8 @@ export function PrescriptionMultiDropdown(props: {
   placeholder?: string;
   type?: "string" | "number";
   min?: number;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }) {
   const { options, selectedValues, setSelectedValues } = props;
   const [open, setOpen] = useState(false);
@@ -62,6 +64,8 @@ export function PrescriptionMultiDropdown(props: {
         onClick={() => setOpen(!open)}
         value={value}
         onChange={(e) => setValue(e.target.value)}
+        onFocus={props.onFocus}
+        onBlur={props.onBlur}
       />
       <div
         ref={dropRef}
@@ -78,9 +82,10 @@ export function PrescriptionMultiDropdown(props: {
                 type="button"
                 key={i}
                 className={classNames(
-                  "w-full block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900",
-                  selectedValues.includes(option) &&
-                    "bg-primary-100 hover:bg-primary-200"
+                  "w-full block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:text-gray-900 focus:outline-none focus:text-gray-900",
+                  selectedValues.includes(option)
+                    ? "bg-primary-100 hover:bg-primary-200"
+                    : "hover:bg-gray-100 focus:bg-gray-100"
                 )}
                 onClick={() => {
                   setSelectedValues(

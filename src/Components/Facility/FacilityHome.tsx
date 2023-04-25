@@ -8,9 +8,9 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogContentText from "@material-ui/core/DialogContentText";
 import {
-  BED_TYPES,
   DOCTOR_SPECIALIZATION,
   FACILITY_FEATURE_TYPES,
+  getBedTypes,
   USER_TYPES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -30,7 +30,6 @@ import {
   FacilityModel,
   PatientStatsModel,
 } from "./models";
-import moment from "moment";
 import CoverImageEditModal from "./CoverImageEditModal";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import Table from "../Common/components/Table";
@@ -42,6 +41,10 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { BedCapacity } from "./BedCapacity";
 import { DoctorCapacity } from "./DoctorCapacity";
 import DialogModal from "../Common/Dialog";
+import useConfig from "../../Common/hooks/useConfig";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
+import { useTranslation } from "react-i18next";
+import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -56,6 +59,7 @@ export const getFacilityFeatureIcon = (featureId: number) => {
 };
 
 export const FacilityHome = (props: any) => {
+  const { t } = useTranslation();
   const { facilityId } = props;
   const dispatch: any = useDispatch();
   const [facilityData, setFacilityData] = useState<FacilityModel>({});
@@ -65,11 +69,13 @@ export const FacilityHome = (props: any) => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [editCoverImage, setEditCoverImage] = useState(false);
   const [imageKey, setImageKey] = useState(Date.now());
+  const [totalDoctors, setTotalDoctors] = useState(0);
   const [patientStatsData, setPatientStatsData] = useState<
     Array<PatientStatsModel>
   >([]);
   const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
   const [doctorCapacityModalOpen, setDoctorCapacityModalOpen] = useState(false);
+  const config = useConfig();
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -94,6 +100,14 @@ export const FacilityHome = (props: any) => {
             }
             if (doctorRes && doctorRes.data) {
               setDoctorData(doctorRes.data.results);
+              // calculating total doctors count
+              let totalCount = 0;
+              doctorRes.data.results.map((doctor: DoctorModal) => {
+                if (doctor.count) {
+                  totalCount += doctor.count;
+                }
+              });
+              setTotalDoctors(totalCount);
             }
             if (
               triageRes &&
@@ -162,19 +176,22 @@ export const FacilityHome = (props: any) => {
     capacityList = (
       <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-7 w-full">
         <BedTypeCard
-          label={"Total Beds"}
-          bedCapacityId={0}
+          label="Total Beds"
           used={totalOccupiedBedCount}
           total={totalBedCount}
           handleUpdate={() => {
             return;
           }}
         />
-        {BED_TYPES.map((x) => {
+        {getBedTypes(config).map((x) => {
           const res = capacityData.find((data) => {
             return data.room_type === x.id;
           });
-          if (res && res.current_capacity && res.total_capacity) {
+          if (
+            res &&
+            res.current_capacity !== undefined &&
+            res.total_capacity !== undefined
+          ) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
               setCapacityData((state) =>
                 state.filter((i) => i.id !== bedTypeId)
@@ -217,6 +234,23 @@ export const FacilityHome = (props: any) => {
   } else {
     doctorList = (
       <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-6">
+        {/* Total Doctors Count Card */}
+        <div className="w-full">
+          <div className="shadow-sm rounded-sm h-full border border-primary-500 bg-primary-100 flex flex-col">
+            <div className="flex justify-start items-center gap-3 px-4 py-6 flex-1">
+              <div className="rounded-full p-4 bg-primary-500">
+                <DoctorIcon className="fill-current text-white w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-medium text-sm text-[#808080]">
+                  Total Doctors
+                </div>
+                <h2 className="font-bold text-xl mt-2">{totalDoctors}</h2>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {doctorData.map((data: DoctorModal) => {
           const removeCurrentDoctorData = (doctorId: number | undefined) => {
             setDoctorData((state) =>
@@ -234,6 +268,14 @@ export const FacilityHome = (props: any) => {
                 );
                 if (doctorRes && doctorRes.data) {
                   setDoctorData(doctorRes.data.results);
+                  // update total doctors count
+                  let totalCount = 0;
+                  doctorRes.data.results.map((doctor: DoctorModal) => {
+                    if (doctor.count) {
+                      totalCount += doctor.count;
+                    }
+                  });
+                  setTotalDoctors(totalCount);
                 }
               }}
               {...data}
@@ -301,6 +343,7 @@ export const FacilityHome = (props: any) => {
         title={facilityData.name || "Facility"}
         crumbsReplacements={{ [facilityId]: { name: facilityData.name } }}
         focusOnLoad={true}
+        backUrl="/facility"
       />
       <Dialog
         maxWidth={"md"}
@@ -406,11 +449,13 @@ export const FacilityHome = (props: any) => {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold">{facilityData.name}</h1>
-                  <p className="mt-1 text-sm text-gray-700">
-                    Last updated:{" "}
-                    {facilityData?.modified_date &&
-                      moment(facilityData?.modified_date).fromNow()}
-                  </p>
+                  {facilityData?.modified_date && (
+                    <RecordMeta
+                      className="mt-1 text-sm text-gray-700"
+                      prefix={t("updated")}
+                      time={facilityData?.modified_date}
+                    />
+                  )}
                 </div>
               </div>
               <div className="flex items-center flex-1">
@@ -584,6 +629,16 @@ export const FacilityHome = (props: any) => {
                 ghost
                 border
                 className="w-full md:w-auto flex flex-row mt-2 justify-center"
+                onClick={() => navigate(`/facility/${facilityId}/cns`)}
+              >
+                <CareIcon className="care-l-monitor-heart-rate text-lg" />
+                <span>Central Nursing Station</span>
+              </ButtonV2>
+              <ButtonV2
+                variant="primary"
+                ghost
+                border
+                className="w-full md:w-auto flex flex-row mt-2 justify-center"
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
                 authorizeFor={NonReadOnlyUsers}
               >
@@ -597,7 +652,7 @@ export const FacilityHome = (props: any) => {
                 className="w-full md:w-auto flex flex-row mt-2 justify-center"
                 onClick={() => navigate(`/patients?facility=${facilityId}`)}
               >
-                <CareIcon className="care-l-user-injured" />
+                <CareIcon className="care-l-user-injured text-lg" />
                 <span>View Patients</span>
               </ButtonV2>
             </div>
@@ -736,6 +791,14 @@ export const FacilityHome = (props: any) => {
               const doctorRes = await dispatch(listDoctor({}, { facilityId }));
               if (doctorRes && doctorRes.data) {
                 setDoctorData(doctorRes.data.results);
+                // update total doctors count
+                setTotalDoctors(
+                  doctorRes.data.results.reduce(
+                    (acc: number, doctor: DoctorModal) =>
+                      acc + (doctor.count || 0),
+                    0
+                  )
+                );
               }
             }}
           />

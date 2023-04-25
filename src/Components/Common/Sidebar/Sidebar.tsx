@@ -7,12 +7,11 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import useConfig from "../../../Common/hooks/useConfig";
 import SlideOver from "../../../CAREUI/interactive/SlideOver";
 import { classNames } from "../../../Utils/utils";
+import { Link } from "raviger";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 
-const LOGO = process.env.REACT_APP_LIGHT_LOGO;
-const LOGO_COLLAPSE =
-  process.env.REACT_APP_LIGHT_COLLAPSE_LOGO || "/images/logo_collapsed.svg";
+const LOGO_COLLAPSE = "/images/logo_collapsed.svg";
 
 type StatelessSidebarProps =
   | {
@@ -50,12 +49,14 @@ const StatelessSidebar = ({
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
+  const { static_light_logo } = useConfig();
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
   const { dashboard_url } = useConfig();
 
   const indicatorRef = useRef<HTMLDivElement>(null);
   const [lastIndicatorPosition, setLastIndicatorPosition] = useState(0);
+  const [isOverflowVisible, setOverflowVisisble] = useState(false);
 
   useEffect(() => {
     if (!indicatorRef.current) return;
@@ -69,23 +70,26 @@ const StatelessSidebar = ({
       const bottomItemOffset = 2;
 
       const indexDifference = index - lastIndicatorPosition;
-      // e.style.display = "block";
+      e.style.display = "block";
 
-      // if (indexDifference > 0) {
-      //   console.log("indexDifference > 0");
-      //   e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
-      //   e.style.bottom = "auto";
-      // } else {
-      //   console.log("indexDifference < 0");
-      //   e.style.bottom =
-      //     itemHeight * (NavItems.length + bottomItemOffset) -
-      //     lastIndicatorPosition * itemHeight -
-      //     28 +
-      //     "px";
-      //   e.style.top = "auto";
-      // }
+      if (indexDifference > 0) {
+        e.style.top = lastIndicatorPosition * itemHeight + 16 + "px";
+        e.style.bottom = "auto";
+      } else {
+        e.style.bottom =
+          itemHeight * (NavItems.length + bottomItemOffset) -
+          lastIndicatorPosition * itemHeight -
+          28 +
+          "px";
+        e.style.top = "auto";
+      }
 
-      // e.style.height = `${Math.abs(indexDifference) * itemHeight + 12}px`;
+      const variableHeight = Math.min(
+        Math.abs(indexDifference) * itemHeight,
+        70
+      );
+
+      e.style.height = `${variableHeight}px`;
       setTimeout(() => {
         if (!e) return;
         if (indexDifference > 0) {
@@ -102,25 +106,33 @@ const StatelessSidebar = ({
         e.style.height = "0.75rem";
         setLastIndicatorPosition(index);
       }, 300);
+    } else {
+      indicatorRef.current.style.display = "none";
     }
-    // else {
-    //   indicatorRef.current.style.display = "none";
-    // }
   }, [activeLink]);
+  const handleOverflow = (value: boolean) => {
+    setOverflowVisisble(value);
+  };
 
   return (
     <nav
       className={`h-screen group flex flex-col bg-primary-800 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
-      } transition-all duration-300 ease-in-out overflow-y-auto overflow-x-hidden`}
+      } transition-all duration-300 ease-in-out ${
+        isOverflowVisible && shrinked
+          ? " overflow-visible "
+          : " overflow-y-auto overflow-x-hidden "
+      }`}
     >
       <div className="h-3" /> {/* flexible spacing */}
-      <img
-        className={`${
-          shrinked ? "mx-auto" : "ml-5"
-        } h-5 md:h-8 self-start transition mb-2 md:mb-5`}
-        src={shrinked ? LOGO_COLLAPSE : LOGO}
-      />
+      <Link href="/">
+        <img
+          className={`${
+            shrinked ? "mx-auto" : "ml-5"
+          } h-5 md:h-8 self-start transition mb-2 md:mb-5`}
+          src={shrinked ? LOGO_COLLAPSE : static_light_logo}
+        />
+      </Link>
       <div className="h-3" /> {/* flexible spacing */}
       <div className="flex flex-col relative h-full mb-4 md:mb-0">
         <div className="flex flex-col relative flex-1 md:flex-none">
@@ -128,7 +140,7 @@ const StatelessSidebar = ({
             ref={indicatorRef}
             // className="absolute left-2 w-1 hidden md:block bg-primary-400 rounded z-10 transition-all"
             className={classNames(
-              "block absolute left-2 w-1 bg-primary-400 rounded z-10 transition-all duration-200 ease-in-out",
+              "block absolute left-2 w-1 bg-primary-400 rounded z-10 transition-all",
               activeLink ? "opacity-0 md:opacity-100" : "opacity-0"
             )}
           />
@@ -140,12 +152,14 @@ const StatelessSidebar = ({
                 icon={<CareIcon className={`${i.icon} h-5`} />}
                 selected={i.to === activeLink}
                 do={() => onItemClick && onItemClick(false)}
+                handleOverflow={handleOverflow}
               />
             );
           })}
 
           <NotificationItem
             shrinked={shrinked}
+            handleOverflow={handleOverflow}
             onClickCB={() => onItemClick && onItemClick(false)}
           />
           <Item
@@ -153,6 +167,7 @@ const StatelessSidebar = ({
             to={dashboard_url}
             icon={<CareIcon className="care-l-dashboard text-lg" />}
             external
+            handleOverflow={handleOverflow}
           />
         </div>
         <div className="hidden md:block md:flex-1" />

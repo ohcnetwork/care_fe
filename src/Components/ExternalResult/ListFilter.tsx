@@ -1,14 +1,27 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  AutoCompleteAsyncField,
-  TextInputField,
+  LegacyAutoCompleteAsyncField,
+  LegacyTextInputField,
 } from "../Common/HelperInputFields";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import { getAllLocalBodyByDistrict } from "../../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "raviger";
 import moment from "moment";
 import useMergeState from "../../Common/hooks/useMergeState";
+import { navigate } from "raviger";
+import { useTranslation } from "react-i18next";
+import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import { FieldLabel } from "../Form/FormFields/FormField";
+
+const clearFilterState = {
+  created_date_before: "",
+  created_date_after: "",
+  result_date_before: "",
+  result_date_after: "",
+  sample_collection_date_before: "",
+  sample_collection_date_after: "",
+  srf_id: "",
+};
 
 export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter, dataList } = props;
@@ -30,6 +43,7 @@ export default function ListFilter(props: any) {
     sample_collection_date_after: filter.sample_collection_date_after || null,
     srf_id: filter.srf_id || null,
   });
+  const { t } = useTranslation();
 
   const handleDateRangeChange = (
     startDateId: string,
@@ -173,126 +187,103 @@ export default function ListFilter(props: any) {
     setFilterState(filterData);
   };
 
-  const clearFilters = () => {
-    dataList([], []);
-    closeFilter();
-  };
-
   return (
-    <div>
-      <div className="flex justify-between">
-        <button className="btn btn-default" onClick={closeFilter}>
-          <i className="fas fa-times mr-2" />
-          Cancel
-        </button>
-        <Link
-          href="/external_results"
-          className="btn btn-default hover:text-gray-900"
-          onClick={clearFilters}
-        >
-          <i className="fas fa-times mr-2" />
-          Clear Filters
-        </Link>
-        <button className="btn btn-primary" onClick={applyFilter}>
-          <i className="fas fa-check mr-2" />
-          Apply
-        </button>
-      </div>
-      <div className="font-light text-md mt-2">Filter By:</div>
-      <div className="flex flex-wrap gap-2">
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Lsg</span>
-          <AutoCompleteAsyncField
-            multiple={true}
-            name="local_bodies"
-            options={lsgList}
-            label="Local Body"
-            variant="outlined"
-            placeholder="Select Local Body"
-            loading={loading}
-            freeSolo={false}
-            value={selectedLsgs}
-            renderOption={(option: any) => <div>{option.name}</div>}
-            getOptionSelected={(option: any, value: any) =>
-              option.id === value.id
-            }
-            getOptionLabel={(option: any) => option.name}
-            onChange={(e: object, value: any) => handleLsgChange(value)}
-          />
-        </div>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Ward</span>
-          <AutoCompleteAsyncField
-            multiple={true}
-            name="wards"
-            options={filterWards()}
-            label="Ward"
-            variant="outlined"
-            placeholder="Select wards"
-            loading={loading}
-            freeSolo={false}
-            value={wards}
-            renderOption={(option: any) => <div>{option.name}</div>}
-            getOptionSelected={(option: any, value: any) =>
-              option.id === value.id
-            }
-            getOptionLabel={(option: any) => option.name}
-            onChange={(e: object, value: any) => handleWardChange(value)}
-          />
-        </div>
-      </div>
-      <div className="w-full flex-none">
-        <DateRangePicker
-          startDate={getDate(filterState.created_date_after)}
-          endDate={getDate(filterState.created_date_before)}
-          onChange={(e) =>
-            handleDateRangeChange(
-              "created_date_after",
-              "created_date_before",
-              e
-            )
+    <FiltersSlideover
+      advancedFilter={props}
+      onApply={applyFilter}
+      onClear={() => {
+        navigate("/external_results");
+        setFilterState(clearFilterState);
+        closeFilter();
+      }}
+    >
+      <div>
+        <FieldLabel>{t("lsg")}</FieldLabel>
+        <LegacyAutoCompleteAsyncField
+          className="-my-3"
+          multiple
+          name="local_bodies"
+          options={lsgList}
+          label={t("Local Body")}
+          variant="outlined"
+          placeholder={t("select_local_body")}
+          loading={loading}
+          freeSolo={false}
+          value={selectedLsgs}
+          renderOption={(option: any) => <div>{option.name}</div>}
+          getOptionSelected={(option: any, value: any) =>
+            option.id === value.id
           }
-          endDateId={"created_date_before"}
-          startDateId={"created_date_after"}
-          label={"Created Date"}
-          size="small"
+          getOptionLabel={(option: any) => option.name}
+          onChange={(e: object, value: any) => handleLsgChange(value)}
         />
       </div>
-      <div className="w-full flex-none">
-        <DateRangePicker
-          startDate={getDate(filterState.result_date_after)}
-          endDate={getDate(filterState.result_date_before)}
-          onChange={(e) =>
-            handleDateRangeChange("result_date_after", "result_date_before", e)
+
+      <div>
+        <FieldLabel>{t("Ward")}</FieldLabel>
+        <LegacyAutoCompleteAsyncField
+          className="-my-3"
+          multiple={true}
+          name="wards"
+          options={filterWards()}
+          label={t("Ward")}
+          variant="outlined"
+          placeholder={t("select_wards")}
+          loading={loading}
+          freeSolo={false}
+          value={wards}
+          renderOption={(option: any) => <div>{option.name}</div>}
+          getOptionSelected={(option: any, value: any) =>
+            option.id === value.id
           }
-          endDateId={"result_date_before"}
-          startDateId={"result_date_after"}
-          label={"Result Date"}
-          size="small"
+          getOptionLabel={(option: any) => option.name}
+          onChange={(e: object, value: any) => handleWardChange(value)}
         />
       </div>
+
+      <DateRangePicker
+        startDate={getDate(filterState.created_date_after)}
+        endDate={getDate(filterState.created_date_before)}
+        onChange={(e) =>
+          handleDateRangeChange("created_date_after", "created_date_before", e)
+        }
+        endDateId={"created_date_before"}
+        startDateId={"created_date_after"}
+        label={t("created_date")}
+        size="small"
+      />
+
+      <DateRangePicker
+        startDate={getDate(filterState.result_date_after)}
+        endDate={getDate(filterState.result_date_before)}
+        onChange={(e) =>
+          handleDateRangeChange("result_date_after", "result_date_before", e)
+        }
+        endDateId={"result_date_before"}
+        startDateId={"result_date_after"}
+        label={t("result_date")}
+        size="small"
+      />
+
+      <DateRangePicker
+        startDate={getDate(filterState.sample_collection_date_after)}
+        endDate={getDate(filterState.sample_collection_date_before)}
+        onChange={(e) =>
+          handleDateRangeChange(
+            "sample_collection_date_after",
+            "sample_collection_date_before",
+            e
+          )
+        }
+        endDateId={"sample_collection_date_before"}
+        startDateId={"sample_collection_date_after"}
+        label={t("sample_collection_date")}
+        size="small"
+      />
+
       <div className="w-full flex-none">
-        <DateRangePicker
-          startDate={getDate(filterState.sample_collection_date_after)}
-          endDate={getDate(filterState.sample_collection_date_before)}
-          onChange={(e) =>
-            handleDateRangeChange(
-              "sample_collection_date_after",
-              "sample_collection_date_before",
-              e
-            )
-          }
-          endDateId={"sample_collection_date_before"}
-          startDateId={"sample_collection_date_after"}
-          label={"Sample Collection Date"}
-          size="small"
-        />
-      </div>
-      <div className="w-full flex-none">
-        <span className="text-sm font-semibold">SRF ID</span>
-        <TextInputField
+        <FieldLabel>{t("srf_id")}</FieldLabel>
+        <LegacyTextInputField
           id="srf_id"
           name="srf_id"
           variant="outlined"
@@ -300,10 +291,10 @@ export default function ListFilter(props: any) {
           errors=""
           value={filterState.srf_id}
           onChange={handleChange}
-          label="Srf id"
+          label={t("srf_id")}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9 mr-1"
         />
       </div>
-    </div>
+    </FiltersSlideover>
   );
 }

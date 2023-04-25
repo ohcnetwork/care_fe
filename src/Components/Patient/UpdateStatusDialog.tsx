@@ -4,7 +4,6 @@ import {
   DialogContent,
   DialogTitle,
 } from "@material-ui/core";
-import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
 import React, { useEffect, useState, useReducer } from "react";
 import axios from "axios";
 import {
@@ -12,13 +11,17 @@ import {
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
 } from "../../Common/constants";
-import { CheckboxField, SelectField } from "../Common/HelperInputFields";
+import {
+  LegacyCheckboxField,
+  LegacySelectField,
+} from "../Common/HelperInputFields";
 import { SampleTestModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
 import { createUpload } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
   sample: SampleTestModel;
@@ -195,7 +198,7 @@ const UpdateStatusDialog = (props: Props) => {
           <div className="md:col-span-2">{currentStatus?.desc}</div>
           <div className="font-semibold leading-relaxed">New Status :</div>
           <div className="md:col-span-2">
-            <SelectField
+            <LegacySelectField
               name="status"
               variant="standard"
               optionValue="desc"
@@ -210,7 +213,7 @@ const UpdateStatusDialog = (props: Props) => {
                 Result :
               </div>
               <div className="md:col-span-2">
-                <SelectField
+                <LegacySelectField
                   name="result"
                   variant="standard"
                   value={state.form.result}
@@ -241,14 +244,14 @@ const UpdateStatusDialog = (props: Props) => {
                   onClick={handleUpload}
                   disabled={uploadDone}
                 >
-                  <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
+                  <CareIcon className="care-l-cloud-upload text-2xl font-bold" />
                   <span>Upload</span>
                 </Submit>
               </div>
             </>
           )}
           <div className="md:col-span-3">
-            <CheckboxField
+            <LegacyCheckboxField
               checked={state.form.confirm}
               onChange={(e: any) =>
                 handleChange(e.target.name, e.target.checked)

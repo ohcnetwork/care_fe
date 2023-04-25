@@ -15,6 +15,7 @@ import { useDrag, useDrop } from "react-dnd";
 import { classNames, formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useTranslation } from "react-i18next";
 
 const limit = 14;
 
@@ -25,9 +26,6 @@ interface boardProps {
 }
 
 const now = moment().format("DD-MM-YYYY:hh:mm:ss");
-
-const renderBoardTitle = (board: string) =>
-  board === "APPROVED" ? "AWAITING DESTINATION APPROVAL" : board;
 
 const reduceLoading = (action: string, current: any) => {
   switch (action) {
@@ -51,6 +49,7 @@ const ShiftCard = ({ shift, filter }: any) => {
     item: shift,
     collect: (monitor) => ({ isDragging: !!monitor.isDragging() }),
   }));
+  const { t } = useTranslation();
 
   const handleTransferComplete = (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
@@ -83,7 +82,7 @@ const ShiftCard = ({ shift, filter }: any) => {
               <div>
                 {shift.emergency && (
                   <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
-                    Emergency
+                    {t("emergency")}
                   </span>
                 )}
               </div>
@@ -91,7 +90,7 @@ const ShiftCard = ({ shift, filter }: any) => {
             <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
               <div className="sm:col-span-1">
                 <dt
-                  title="Phone Number"
+                  title={t("phone_number")}
                   className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                 >
                   <i className="fas fa-mobile mr-2" />
@@ -102,7 +101,7 @@ const ShiftCard = ({ shift, filter }: any) => {
               </div>
               <div className="sm:col-span-1">
                 <dt
-                  title=" Origin facility"
+                  title={t("origin_facility")}
                   className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                 >
                   <i className="fas fa-plane-departure mr-2"></i>
@@ -113,7 +112,7 @@ const ShiftCard = ({ shift, filter }: any) => {
               </div>
               <div className="sm:col-span-1">
                 <dt
-                  title="Shifting approving facility"
+                  title={t("shifting_approving_facility")}
                   className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                 >
                   <i className="fas fa-user-check mr-2"></i>
@@ -124,21 +123,21 @@ const ShiftCard = ({ shift, filter }: any) => {
               </div>
               <div className="sm:col-span-1">
                 <dt
-                  title=" Assigned facility"
+                  title={t("assigned_facility")}
                   className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                 >
                   <i className="fas fa-plane-arrival mr-2"></i>
 
                   <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
                     {(shift.assigned_facility_object || {}).name ||
-                      "Yet to be decided"}
+                      t("yet_to_be_decided")}
                   </dd>
                 </dt>
               </div>
 
               <div className="sm:col-span-1">
                 <dt
-                  title="  Last Modified"
+                  title={t("last_modified")}
                   className={
                     "text-sm leading-5 font-medium flex items-center " +
                     (moment().subtract(2, "hours").isBefore(shift.modified_date)
@@ -155,7 +154,7 @@ const ShiftCard = ({ shift, filter }: any) => {
 
               <div className="sm:col-span-1">
                 <dt
-                  title="Patient Address"
+                  title={t("patient_address")}
                   className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                 >
                   <i className="fas fa-home mr-2"></i>
@@ -168,7 +167,7 @@ const ShiftCard = ({ shift, filter }: any) => {
               {shift.assigned_to_object && (
                 <div className="sm:col-span-1">
                   <dt
-                    title="Assigned to"
+                    title={t("assigned_to")}
                     className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                   >
                     <i className="fas fa-user mr-2"></i>
@@ -183,7 +182,7 @@ const ShiftCard = ({ shift, filter }: any) => {
 
               <div className="sm:col-span-1">
                 <dt
-                  title="Patient State"
+                  title={t("patient_state")}
                   className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                 >
                   <i className="fas fa-thumbtack mr-2"></i>
@@ -200,7 +199,7 @@ const ShiftCard = ({ shift, filter }: any) => {
               onClick={(_) => navigate(`/shifting/${shift.external_id}`)}
               className="btn w-full btn-default bg-white mr-2"
             >
-              <i className="fas fa-eye mr-2" /> All Details
+              <i className="fas fa-eye mr-2" /> {t("all_details")}
             </button>
           </div>
           {filter === "TRANSFER IN PROGRESS" && shift.assigned_facility && (
@@ -211,7 +210,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                 fullWidth
                 onClick={() => setModalFor(shift.external_id)}
               >
-                TRANSFER TO RECEIVING FACILITY
+                {t("transfer_to_receiving_facility")}
               </Button>
 
               <Modal
@@ -223,18 +222,14 @@ const ShiftCard = ({ shift, filter }: any) => {
                 <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
                   <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center">
                     <div className="mb-4">
-                      <h1 className="text-2xl">Confirm Transfer Complete!</h1>
+                      <h1 className="text-2xl">
+                        {t("confirm_transfer_complete")}
+                      </h1>
                     </div>
                     <div className="mb-8">
-                      <p>
-                        Are you sure you want to mark this transfer as complete?
-                        The Origin facility will no longer have access to this
-                        patient
-                      </p>
+                      <p>{t("mark_this_transfer_as_complete_question")}</p>
                       <p className="mt-2 text-yellow-600">
-                        Note: You will be redirected to create consultation
-                        form. Please complete the form to finish the transfer
-                        process
+                        {t("redirected_to_create_consultation")}
                       </p>
                     </div>
                     <div className="flex gap-2 justify-center">
@@ -249,7 +244,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                           });
                         }}
                       >
-                        Cancel
+                        {t("Cancel")}
                       </Button>
                       <Button
                         size="small"
@@ -257,7 +252,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                         fullWidth
                         onClick={(_) => handleTransferComplete(shift)}
                       >
-                        Confirm
+                        {t("confirm")}
                       </Button>
                     </div>
                   </div>
@@ -364,6 +359,7 @@ export default function ShiftingBoard({
       setIsLoading((loading) => reduceLoading("COMPLETE", loading));
     });
   };
+  const { t } = useTranslation();
 
   const patientFilter = (filter: string) => {
     return data
@@ -372,6 +368,10 @@ export default function ShiftingBoard({
         <ShiftCard key={`shift_${shift.id}`} shift={shift} filter={filter} />
       ));
   };
+
+  const renderBoardTitle = (board: string) =>
+    board === "APPROVED" ? t("awaiting_destination_approval") : board;
+
   return (
     <div
       ref={drop}
@@ -396,7 +396,7 @@ export default function ShiftingBoard({
               >
                 <CareIcon className="care-l-import text-lg font-bold" />
                 <span className="tooltip-text tooltip-bottom -translate-x-16">
-                  Download
+                  {t("download")}
                 </span>
               </ButtonV2>
             )}
@@ -424,13 +424,13 @@ export default function ShiftingBoard({
         ) : data?.length > 0 ? (
           patientFilter(board)
         ) : (
-          <p className="mx-auto p-4">No patients to show.</p>
+          <p className="mx-auto p-4">{t("no_patients_to_show")}</p>
         )}
         {!isLoading.board &&
           data?.length < (totalCount || 0) &&
           (isLoading.more ? (
             <div className="mx-auto my-4 p-2 px-4 bg-gray-100 rounded-md hover:bg-white">
-              Loading
+              {t("loading")}
             </div>
           ) : (
             <button

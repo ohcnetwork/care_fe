@@ -12,17 +12,17 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  CheckboxField,
-  SelectField,
-  TextInputField,
+  LegacyCheckboxField,
+  LegacySelectField,
+  LegacyTextInputField,
 } from "../Common/HelperInputFields";
 import { SampleTestModel, FacilityNameModel } from "./models";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -78,6 +78,7 @@ const sampleTestFormReducer = (state = initialState, action: any) => {
 };
 
 export const SampleTest = (props: any) => {
+  const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId } = props;
   const [state, dispatch] = useReducer(sampleTestFormReducer, initialState);
@@ -267,6 +268,7 @@ export const SampleTest = (props: any) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={`/facility/${facilityId}/patient/${patientId}`}
       />
       <div className="mt-4">
         <Card>
@@ -276,7 +278,7 @@ export const SampleTest = (props: any) => {
                 <div className="space-y-4">
                   <div>
                     <FieldLabel>Sample Test Type*</FieldLabel>
-                    <SelectField
+                    <LegacySelectField
                       name="sample_type"
                       variant="outlined"
                       margin="dense"
@@ -304,7 +306,7 @@ export const SampleTest = (props: any) => {
                 <div className="row-span-3 space-y-4">
                   <div>
                     <FieldLabel>ICMR Category (for COVID Test)</FieldLabel>
-                    <SelectField
+                    <LegacySelectField
                       name="icmr_category"
                       variant="outlined"
                       margin="dense"
@@ -347,7 +349,7 @@ export const SampleTest = (props: any) => {
                 <div className="space-y-4">
                   <div>
                     <FieldLabel required>Label</FieldLabel>
-                    <TextInputField
+                    <LegacyTextInputField
                       name="icmr_label"
                       variant="outlined"
                       margin="dense"
@@ -358,7 +360,7 @@ export const SampleTest = (props: any) => {
                   </div>
                   <div className="mt-4 w-full">
                     <FieldLabel>Testing Facility Name</FieldLabel>
-                    <SelectField
+                    <LegacySelectField
                       name="testing_facility"
                       variant="outlined"
                       margin="dense"
@@ -373,7 +375,7 @@ export const SampleTest = (props: any) => {
                     />
                   </div>
                   <div className="flex items-center">
-                    <CheckboxField
+                    <LegacyCheckboxField
                       checked={state.form.isFastTrack}
                       onChange={handleCheckboxFieldChange}
                       name="isFastTrack"
@@ -399,7 +401,7 @@ export const SampleTest = (props: any) => {
               <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
                   <FieldLabel>Doctor's Name</FieldLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="doctor_name"
                     variant="outlined"
                     margin="dense"
@@ -409,7 +411,7 @@ export const SampleTest = (props: any) => {
                   />
                 </div>
                 <div className="flex items-center">
-                  <CheckboxField
+                  <LegacyCheckboxField
                     checked={state.form.is_atypical_presentation}
                     onChange={handleCheckboxFieldChange}
                     name="is_atypical_presentation"
@@ -462,7 +464,7 @@ export const SampleTest = (props: any) => {
               </div>
               <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div className="flex items-center">
-                  <CheckboxField
+                  <LegacyCheckboxField
                     checked={state.form.has_sari}
                     onChange={handleCheckboxFieldChange}
                     name="has_sari"
@@ -470,7 +472,7 @@ export const SampleTest = (props: any) => {
                   />
                 </div>
                 <div className="flex items-center">
-                  <CheckboxField
+                  <LegacyCheckboxField
                     checked={state.form.has_ari}
                     onChange={handleCheckboxFieldChange}
                     name="has_ari"
@@ -478,7 +480,7 @@ export const SampleTest = (props: any) => {
                   />
                 </div>
                 <div className="flex items-center">
-                  <CheckboxField
+                  <LegacyCheckboxField
                     checked={state.form.is_unusual_course}
                     onChange={handleCheckboxFieldChange}
                     name="is_unusual_course"

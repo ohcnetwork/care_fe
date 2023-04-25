@@ -67,7 +67,7 @@ export interface PatientModel {
   estimated_contact_date?: string;
   past_travel?: boolean;
   ongoing_medication?: string;
-  countries_travelled?: Array<string> | string;
+  countries_travelled?: Array<string>;
   transit_details?: string;
   number_of_primary_contacts?: number;
   number_of_secondary_contacts?: number;
@@ -197,7 +197,7 @@ export interface SampleReportModel {
   };
   exposure_history?: {
     has_travel_to_foreign_last_14_days?: boolean;
-    places_of_travel?: string;
+    places_of_travel?: Array<string>;
     travel_start_date?: string;
     travel_end_date?: string;
     contact_with_confirmed_case?: boolean;
@@ -250,6 +250,8 @@ export interface SampleListModel {
 export interface DailyRoundsModel {
   ventilator_spo2?: number;
   spo2?: string;
+  rhythm?: string;
+  rhythm_detail?: string;
   bp?: {
     diastolic: number;
     mean: number;
@@ -274,7 +276,7 @@ export interface DailyRoundsModel {
   created_date?: string;
   modified_date?: string;
   taken_at?: string;
-  rounds_type?: string;
+  rounds_type?: "NORMAL" | "VENTILATOR" | "ICU" | "AUTOMATED";
   last_updated_by_telemedicine?: boolean;
   created_by_telemedicine?: boolean;
   created_by?: {

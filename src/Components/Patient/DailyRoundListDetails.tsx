@@ -78,7 +78,10 @@ export const DailyRoundListDetails = (props: any) => {
 
   return (
     <div className="px-2">
-      <PageTitle title={`Consultation Update #${id}`} />
+      <PageTitle
+        title={`Consultation Update #${id}`}
+        backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
+      />
       <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="max-w-md">
@@ -87,12 +90,6 @@ export const DailyRoundListDetails = (props: any) => {
                 Patient Category:{" "}
               </span>
               {dailyRoundListDetailsData.patient_category || "-"}
-            </div>
-            <div className="capitalize mt-4">
-              <span className="font-semibold leading-relaxed">
-                Current Health:{" "}
-              </span>
-              {dailyRoundListDetailsData.current_health || "-"}
             </div>
           </div>
 
@@ -122,15 +119,13 @@ export const DailyRoundListDetails = (props: any) => {
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Taken at: </span>
-            {dailyRoundListDetailsData.temperature_measured_at
-              ? moment(
-                  dailyRoundListDetailsData.temperature_measured_at
-                ).format("lll")
+            {dailyRoundListDetailsData.taken_at
+              ? moment(dailyRoundListDetailsData.taken_at).format("lll")
               : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">SpO2: </span>
-            {dailyRoundListDetailsData.spo2 || "-"}
+            {dailyRoundListDetailsData.ventilator_spo2 || "-"}
           </div>
           <div className="md:col-span-2 capitalize">
             <span className="font-semibold leading-relaxed">
@@ -163,49 +158,44 @@ export const DailyRoundListDetails = (props: any) => {
             {dailyRoundListDetailsData.other_details || "-"}
           </div>
           <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">Medication: </span>
-            {dailyRoundListDetailsData?.medication_given && (
-              <div className="mt-4">
-                <div className="flex flex-col">
-                  <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                    <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
-                      <table className="min-w-full">
-                        <thead>
-                          <tr>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                              Medicine
-                            </th>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                              Dosage
-                            </th>
-                            <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                              Days
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {dailyRoundListDetailsData?.medication_given?.map(
-                            (med) => (
-                              <tr className="bg-white">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 font-medium text-gray-900">
-                                  {med.medicine}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
-                                  {med.dosage}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500">
-                                  {med.dosage}
-                                </td>
-                              </tr>
-                            )
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
+            <span className="font-semibold leading-relaxed">Pulse(bpm): </span>
+            {dailyRoundListDetailsData.pulse || "-"}
+          </div>
+          <div className="md:col-span-2 ">
+            <span className="font-semibold leading-relaxed">BP</span>
+            <div className="flex flex-row space-x-20">
+              <div className="flex">
+                <span className="font-semibold leading-relaxed">
+                  Systolic:{" "}
+                </span>
+                {dailyRoundListDetailsData.bp?.systolic || "-"}
               </div>
-            )}
+              <div className="flex">
+                {" "}
+                <span className="font-semibold leading-relaxed">
+                  Diastolic:
+                </span>
+                {dailyRoundListDetailsData.bp?.diastolic || "-"}
+              </div>
+            </div>
+          </div>
+
+          <div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">
+              Respiratory Rate (bpm):
+            </span>
+
+            {dailyRoundListDetailsData.resp || "-"}
+          </div>
+          <div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">Rhythm: </span>
+            {dailyRoundListDetailsData.rhythm || "-"}
+          </div>
+          <div className="md:col-span-2">
+            <span className="font-semibold leading-relaxed">
+              Rhythm Description:{" "}
+            </span>
+            {dailyRoundListDetailsData.rhythm_detail || "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">

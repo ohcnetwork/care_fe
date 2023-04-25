@@ -88,7 +88,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
           <Card className="w-full flex flex-col">
             <form onSubmit={handleSubmit}>
               <h2 className="text-lg font-bold mb-2">Connection</h2>
-              <div>
+              <div className="flex flex-col">
                 <TextFormField
                   name="middlewareHostname"
                   label="Middleware Hostname"
@@ -103,11 +103,11 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                   required
                   error={ipadrdress_error}
                 />
+                <Submit className="w-full">
+                  <CareIcon className="care-l-save" />
+                  <span>Save Configuration</span>
+                </Submit>
               </div>
-              <Submit className="w-full">
-                <CareIcon className="care-l-save" />
-                <span>Save Configuration</span>
-              </Submit>
             </form>
           </Card>
           <Card className="">

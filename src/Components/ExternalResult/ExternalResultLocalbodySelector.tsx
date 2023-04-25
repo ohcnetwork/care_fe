@@ -1,23 +1,11 @@
-import React, { useCallback, useReducer, useState } from "react";
-import {
-  MultilineInputField,
-  PhoneNumberField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
-
-import {
-  Button,
-  Card,
-  CardContent,
-  CircularProgress,
-  InputLabel,
-  IconButton,
-} from "@material-ui/core";
+import { useState } from "react";
+import { LegacySelectField } from "../Common/HelperInputFields";
+import { useTranslation } from "react-i18next";
+import { FieldLabel } from "../Form/FormFields/FormField";
 
 export const ExternalResultLocalbodySelector = (props: any) => {
   const [localBody, setLocalBody] = useState(0);
-
+  const { t } = useTranslation();
   const selectedLocalBody = props.lsgs?.find(
     (item: any) => item.id == localBody
   );
@@ -30,12 +18,14 @@ export const ExternalResultLocalbodySelector = (props: any) => {
           id="listbox-label"
           className="block text-sm leading-5 font-medium text-gray-700"
         >
-          Assigned to
+          {t("assigned_to")}
         </label>
 
         <div className="md:col-span-2">
-          <InputLabel id="local_body-label">Localbody*</InputLabel>
-          <SelectField
+          <FieldLabel id="local_body-label" required={true}>
+            {t("local_body")}
+          </FieldLabel>
+          <LegacySelectField
             name="local_body"
             variant="outlined"
             margin="dense"
@@ -48,9 +38,11 @@ export const ExternalResultLocalbodySelector = (props: any) => {
           />
         </div>
         <div className="md:col-span-2">
-          <InputLabel id="ward-label">Ward*</InputLabel>
+          <FieldLabel id="ward-label" required={true}>
+            {t("Ward")}
+          </FieldLabel>
           {wards && (
-            <SelectField
+            <LegacySelectField
               name="ward"
               variant="outlined"
               margin="dense"

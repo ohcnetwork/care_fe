@@ -1,9 +1,8 @@
-import React from "react";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   show: boolean;
@@ -15,10 +14,11 @@ interface Props {
 
 const FacilitiesSelectDialog = (props: Props) => {
   const { show, handleOk, handleCancel, selectedFacility, setSelected } = props;
+  const { t } = useTranslation();
 
   return (
     <DialogModal
-      title={<FieldLabel className="text-lg">Search for Facility</FieldLabel>}
+      title={t("search_for_facility")}
       show={show}
       onClose={handleCancel}
     >
@@ -30,12 +30,12 @@ const FacilitiesSelectDialog = (props: Props) => {
         showAll={false}
         multiple={false}
       />
-      <div className="mt-4 flex justify-between">
+      <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:justify-end">
         <Cancel onClick={handleCancel} />
         <Submit
           onClick={handleOk}
           disabled={!selectedFacility.id}
-          label="Select"
+          label={t("select")}
         />
       </div>
     </DialogModal>

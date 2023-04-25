@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
-import { KASP_STRING } from "../constants";
+import useConfig from "./useConfig";
 
 export type FilterState = Record<string, unknown>;
 export type FilterParamKeys = string | string[];
@@ -18,6 +18,8 @@ interface FilterBadgeProps {
  * of pagination and filters.
  */
 export default function useFilters({ limit = 14 }: { limit?: number }) {
+  const { t } = useTranslation();
+  const { kasp_string } = useConfig();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
   const [qParams, setQueryParams] = useQueryParams();
@@ -64,6 +66,13 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     badge(name: string, paramKey: FilterParamKeys) {
       return { name, paramKey };
     },
+    ordering(name = "Sort by", paramKey = "ordering") {
+      return {
+        name,
+        paramKey,
+        value: qParams[paramKey] && t("SortOptions." + qParams[paramKey]),
+      };
+    },
     value(name: string, paramKey: FilterParamKeys, value: string) {
       return { name, value, paramKey };
     },
@@ -106,16 +115,18 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
       return { name, value, paramKey };
     },
     kasp(nameSuffix = "", paramKey = "is_kasp") {
-      const name = nameSuffix ? KASP_STRING + " " + nameSuffix : KASP_STRING;
-      const [trueLabel, falseLabel] = [KASP_STRING, "Non " + KASP_STRING];
+      const name = nameSuffix ? kasp_string + " " + nameSuffix : kasp_string;
+      const [trueLabel, falseLabel] = [kasp_string, "Non " + kasp_string];
       return badgeUtils.boolean(name, paramKey, { trueLabel, falseLabel });
     },
   };
 
   const FilterBadges = ({
     badges,
+    children,
   }: {
     badges: (utils: typeof badgeUtils) => FilterBadgeProps[];
+    children?: React.ReactNode;
   }) => {
     const compiledBadges = badges(badgeUtils);
     const { t } = useTranslation();
@@ -124,6 +135,7 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
+        {children}
       </div>
     );
   };

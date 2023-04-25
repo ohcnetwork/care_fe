@@ -11,6 +11,7 @@ on:
 
 jobs:
   cypress-run:
+    if: github.repository == 'coronasafe/care_fe'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 📥
@@ -40,14 +41,14 @@ jobs:
         run: npm install --legacy-peer-deps
 
       - name: Compile rescript files ⚙️
-        run: "npm run re:build"
+        run: "npm run build:res"
 
       - name: Cypress run 🥬
         uses: cypress-io/github-action@v4
         with:
           env: SKIP_PREFLIGHT_CHECK=true
           install: false
-          start: "npm run start:react"
+          start: "npm run dev:react"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: electron

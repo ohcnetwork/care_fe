@@ -1,5 +1,5 @@
 #build-stage
-FROM node:lts-buster-slim as build-stage
+FROM node:18-buster-slim as build-stage
 
 WORKDIR /app
 
@@ -16,9 +16,6 @@ RUN npm run build
 
 #production-stage
 FROM nginx:stable-alpine as production-stage
-
-COPY start.sh /docker-entrypoint.d/start.sh
-RUN chmod +x /docker-entrypoint.d/start.sh
 
 COPY --from=build-stage /app/build /usr/share/nginx/html
 

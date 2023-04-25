@@ -1,6 +1,3 @@
-import { CircularProgress } from "@material-ui/core";
-import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
@@ -26,6 +23,9 @@ import { formatDate } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
+import CountBlock from "../../CAREUI/display/Count";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -147,6 +147,23 @@ export default function SampleViewAdmin() {
     });
   };
 
+  const parseExportData = (data: string) =>
+    data
+      .trim()
+      .split("\n")
+      .map((row: string) =>
+        row
+          .trim()
+          .split(",")
+          .map((field: string) =>
+            new Date(field).toString() === "Invalid Date"
+              ? field
+              : formatDate(field, "DD/MM/YYYY hh:mm A")
+          )
+          .join(",")
+      )
+      .join("\n");
+
   let sampleList: any[] = [];
   if (sample && sample.length) {
     sampleList = sample.map((item) => {
@@ -215,7 +232,7 @@ export default function SampleViewAdmin() {
                       Contact:{" "}
                     </span>
                     Confirmed carrier
-                    <WarningRoundedIcon className="text-red-500"></WarningRoundedIcon>
+                    <CareIcon className="care-l-exclamation-triangle text-red-500 text-xl font-bold" />
                   </div>
                 )}
                 {item.patient_has_suspected_contact &&
@@ -225,7 +242,7 @@ export default function SampleViewAdmin() {
                         Contact:{" "}
                       </span>
                       Suspected carrier
-                      <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
+                      <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-yellow-500" />
                     </div>
                   )}
                 {item.has_sari && (
@@ -234,14 +251,14 @@ export default function SampleViewAdmin() {
                       SARI:{" "}
                     </span>
                     Severe Acute Respiratory illness
-                    <WarningRoundedIcon className="text-orange-500"></WarningRoundedIcon>
+                    <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-orange-500" />
                   </div>
                 )}
                 {item.has_ari && !item.has_sari && (
                   <div>
                     <span className="font-semibold leading-relaxed">ARI: </span>
                     Acute Respiratory illness
-                    <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
+                    <CareIcon className=" care-l-exclamation-triangle text-xl font-bold text-yellow-500" />
                   </div>
                 )}
               </div>
@@ -289,7 +306,11 @@ export default function SampleViewAdmin() {
   }
 
   if (isLoading || !sample) {
-    manageSamples = <Loading />;
+    manageSamples = (
+      <div className="flex justify-center w-full">
+        <Loading />
+      </div>
+    );
   } else if (sample && sample.length) {
     manageSamples = (
       <>
@@ -324,39 +345,31 @@ export default function SampleViewAdmin() {
         componentRight={
           <ExportButton
             action={() => downloadSampleTests({ ...qParams })}
+            parse={parseExportData}
             filenamePrefix="samples"
           />
         }
       />
       <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
         <div className="flex flex-col lg:flex-row gap-6 justify-between">
-          <div className="bg-white overflow-hidden shadow rounded-lg px-4 py-5 sm:p-6 w-full">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Samples Taken
-              </dt>
-              {/* Show spinner until count is fetched from server */}
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
-                </dd>
-              ) : (
-                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
+          <div className="w-full">
+            <CountBlock
+              text="Total Samples Taken"
+              count={totalCount}
+              loading={isLoading}
+              icon={"thermometer"}
+            />
           </div>
 
-          <div className="w-full flex flex-col gap-3 p-2">
+          <div className="w-full flex flex-col gap-3">
             <SearchInput
-              name="patient_name_search"
+              name="patient_name"
               value={qParams.patient_name}
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder="Search patient"
             />
             <SearchInput
-              name="district_name_search"
+              name="district_name"
               value={qParams.district_name}
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder="Search by district"
@@ -364,50 +377,8 @@ export default function SampleViewAdmin() {
             />
           </div>
 
-          <div>
-            <div className="flex items-start mt-2 mb-2 ">
-              <button
-                className="btn btn-primary-ghost md:mt-7 w-full"
-                onClick={() => advancedFilter.setShow(true)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>Advanced Filters</span>
-              </button>
-            </div>
-            <SlideOver {...advancedFilter}>
-              <div className="bg-white min-h-screen p-4">
-                <SampleFilter {...advancedFilter} />
-              </div>
-            </SlideOver>
-          </div>
+          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
+          <SampleFilter {...advancedFilter} />
         </div>
         <FilterBadges
           badges={({ badge, value }) => [

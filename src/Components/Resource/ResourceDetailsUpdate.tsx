@@ -3,9 +3,9 @@ import loadable from "@loadable/component";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
 import {
-  TextInputField,
-  MultilineInputField,
-  ErrorHelperText,
+  LegacyTextInputField,
+  LegacyMultilineInputField,
+  LegacyErrorHelperText,
 } from "../Common/HelperInputFields";
 
 import * as Notification from "../../Utils/Notifications.js";
@@ -17,7 +17,7 @@ import {
   updateResource,
   getUserList,
 } from "../../Redux/actions";
-import { SelectField } from "../Common/HelperInputFields";
+import { LegacySelectField } from "../Common/HelperInputFields";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import { UserSelect } from "../Common/UserSelect";
 import { CircularProgress } from "@material-ui/core";
@@ -30,8 +30,8 @@ import {
   Box,
   FormControlLabel,
 } from "@material-ui/core";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -73,6 +73,7 @@ const initialState = {
 };
 
 export const ResourceDetailsUpdate = (props: resourceProps) => {
+  const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
@@ -226,6 +227,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       <PageTitle
         title={"Update Resource Request"}
         crumbsReplacements={{ [props.id]: { name: requestTitle } }}
+        backUrl={`/resource/${props.id}`}
       />
       <div className="mt-4">
         <Card>
@@ -233,7 +235,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="md:col-span-1">
                 <InputLabel>Status</InputLabel>
-                <SelectField
+                <LegacySelectField
                   name="status"
                   variant="outlined"
                   margin="dense"
@@ -292,7 +294,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               </div>
               <div>
                 <InputLabel>Required Quantity</InputLabel>
-                <TextInputField
+                <LegacyTextInputField
                   name="requested_quantity"
                   variant="outlined"
                   margin="dense"
@@ -304,7 +306,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               </div>
               <div>
                 <InputLabel>Approved Quantity</InputLabel>
-                <TextInputField
+                <LegacyTextInputField
                   name="assigned_quantity"
                   variant="outlined"
                   margin="dense"
@@ -318,7 +320,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
               <div className="md:col-span-2">
                 <InputLabel>Request Title*</InputLabel>
-                <TextInputField
+                <LegacyTextInputField
                   rows={5}
                   name="title"
                   variant="outlined"
@@ -333,7 +335,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
               <div className="md:col-span-2">
                 <InputLabel>Description of request*</InputLabel>
-                <MultilineInputField
+                <LegacyMultilineInputField
                   rows={5}
                   name="reason"
                   variant="outlined"
@@ -368,7 +370,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                     />
                   </Box>
                 </RadioGroup>
-                <ErrorHelperText error={state.errors.emergency} />
+                <LegacyErrorHelperText error={state.errors.emergency} />
               </div>
 
               <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">

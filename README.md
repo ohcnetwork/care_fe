@@ -40,7 +40,7 @@ npm install --legacy-peer-deps
 #### 🏃 Run the app in development mode
 
 ```sh
-npm run start
+npm run dev
 ```
 
 Once the development server has started, open [localhost:4000](http://localhost:4000) in your browser. The page will be automatically reloaded when you make edits and save. You will also see any lint errors in the console.
@@ -54,9 +54,13 @@ Authenticate to staging API with any of the following credentials
   password: Coronasafe@123
   role: District Admin
 
-- username: devstaff
+- username: dev-staff
   password: Coronasafe@123
   role: Staff
+
+- username: dev-doctor
+  password: Coronasafe@123
+  role: Doctor
 ```
 
 #### 🏷️ Make use labels to update the PR/issue status
@@ -97,7 +101,7 @@ Builds the app for production to the `build` folder. It correctly bundles React 
 #### Start a production `http-server`
 
 ```sh
-npm run start:Dev
+npm run preview
 ```
 
 Starts a production http-server in local to run the project with Service worker.

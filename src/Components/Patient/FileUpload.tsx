@@ -1,6 +1,5 @@
 import axios from "axios";
-import { Button, CircularProgress, InputLabel } from "@material-ui/core";
-import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
+import { CircularProgress, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
 import React, { useCallback, useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,7 +12,7 @@ import {
   editUpload,
 } from "../../Redux/actions";
 import { FileUploadModel } from "./models";
-import { TextInputField } from "../Common/HelperInputFields";
+import { LegacyTextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
@@ -31,6 +30,7 @@ import DialogModal from "../Common/Dialog";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -84,13 +84,14 @@ export const LinearProgressWithLabel = (props: any) => {
 
 interface FileUploadProps {
   type: string;
-  patientId: any;
-  facilityId: any;
-  consultationId: any;
+  patientId?: any;
+  facilityId?: any;
+  consultationId?: any;
   hideBack: boolean;
-  audio: boolean;
+  audio?: boolean;
   unspecified: boolean;
   sampleId?: number;
+  claimId?: string;
 }
 
 interface URLS {
@@ -119,6 +120,8 @@ interface StateInterface {
 export const FileUpload = (props: FileUploadProps) => {
   const { t } = useTranslation();
   const [audioBlob, setAudioBlob] = useState<Blob>();
+  const [audioBlobExists, setAudioBlobExists] = useState(false);
+  const [resetRecording, setResetRecording] = useState(false);
   const [file, setFile] = useState<File | null>();
   const {
     facilityId,
@@ -129,6 +132,7 @@ export const FileUpload = (props: FileUploadProps) => {
     audio,
     unspecified,
     sampleId,
+    claimId,
   } = props;
   const id = patientId;
   const dispatch: any = useDispatch();
@@ -141,11 +145,11 @@ export const FileUpload = (props: FileUploadProps) => {
   const [reload, setReload] = useState<boolean>(false);
   const [uploadPercent, setUploadPercent] = useState(0);
   const [uploadFileName, setUploadFileName] = useState<string>("");
-  const [uploadFileNameError, setUploadFileNameError] = useState<string>("");
+  const [uploadFileError, setUploadFileError] = useState<string>("");
   const [url, seturl] = useState<URLS>({});
   const [fileUrl, setFileUrl] = useState("");
   const [audioName, setAudioName] = useState<string>("");
-  const [audioNameError, setAudioNameError] = useState<string>("");
+  const [audioFileError, setAudioFileError] = useState<string>("");
   const [contentType, setcontentType] = useState<string>("");
   const [downloadURL, setDownloadURL] = useState<string>();
   const initialState = {
@@ -244,11 +248,13 @@ export const FileUpload = (props: FileUploadProps) => {
     PATIENT: "Upload Patient Files",
     CONSULTATION: "Upload Consultation Files",
     SAMPLE_MANAGEMENT: "Upload Sample Report",
+    CLAIM: "Upload Supporting Info",
   };
   const VIEW_HEADING: { [index: string]: string } = {
     PATIENT: "View Patient Files",
     CONSULTATION: "View Consultation Files",
     SAMPLE_MANAGEMENT: "View Sample Report",
+    CLAIM: "Supporting Info",
   };
 
   const handleClose = () => {
@@ -264,15 +270,14 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const getAssociatedId = () => {
     switch (type) {
-      case "PATIENT": {
+      case "PATIENT":
         return patientId;
-      }
-      case "CONSULTATION": {
+      case "CONSULTATION":
         return consultationId;
-      }
-      case "SAMPLE_MANAGEMENT": {
+      case "SAMPLE_MANAGEMENT":
         return sampleId;
-      }
+      case "CLAIM":
+        return claimId;
     }
   };
 
@@ -533,14 +538,16 @@ export const FileUpload = (props: FileUploadProps) => {
                         </span>{" "}
                         {item.uploaded_by ? item.uploaded_by.username : null}
                       </div>
-                      <div>
-                        <span className="font-semibold leading-relaxed">
-                          Created On :
-                        </span>{" "}
-                        {item.created_date
-                          ? formatDate(item.created_date)
-                          : "-"}
-                      </div>
+                      {item.created_date && (
+                        <RecordMeta
+                          prefix={
+                            <span className="font-semibold leading-relaxed">
+                              {t("created")}:
+                            </span>
+                          }
+                          time={item.created_date}
+                        />
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -564,12 +571,12 @@ export const FileUpload = (props: FileUploadProps) => {
                   </div>
                   <div className="flex flex-wrap items-center">
                     {item.id ? (
-                      Object.keys(url).length > 0 ? (
+                      Object.keys(url).length > 0 && (
                         <div className="flex flex-wrap">
                           <a
                             href={url[item.id]}
                             download={item.name}
-                            className="Button outline-offset-1 button-size-default button-shape-square button-primary-default m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500"
+                            className="Button gap-2 outline-offset-1 button-size-default button-shape-square button-primary-default m-1 sm:w-auto w-full hover:text-white focus:bg-primary-500 flex justify-center"
                           >
                             <CareIcon className="care-l-arrow-circle-down text-lg" />{" "}
                             DOWNLOAD
@@ -621,8 +628,6 @@ export const FileUpload = (props: FileUploadProps) => {
                             <></>
                           )}
                         </div>
-                      ) : (
-                        <CircularProgress />
                       )
                     ) : (
                       <div>File Not found</div>
@@ -652,14 +657,16 @@ export const FileUpload = (props: FileUploadProps) => {
                         </span>{" "}
                         {item.uploaded_by ? item.uploaded_by.username : null}
                       </div>
-                      <div>
-                        <span className="font-semibold leading-relaxed">
-                          Created On :
-                        </span>{" "}
-                        {item.created_date
-                          ? formatDate(item.created_date)
-                          : "-"}
-                      </div>
+                      {item.created_date && (
+                        <RecordMeta
+                          prefix={
+                            <span className="font-semibold leading-relaxed">
+                              {t("created")}:
+                            </span>
+                          }
+                          time={item.created_date}
+                        />
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-wrap items-center">
@@ -778,12 +785,16 @@ export const FileUpload = (props: FileUploadProps) => {
                       </span>{" "}
                       {item.uploaded_by ? item.uploaded_by.username : null}
                     </div>
-                    <div>
-                      <span className="font-semibold leading-relaxed">
-                        Created On :
-                      </span>{" "}
-                      {item.created_date ? formatDate(item.created_date) : "-"}
-                    </div>
+                    {item.created_date && (
+                      <RecordMeta
+                        prefix={
+                          <span className="font-semibold leading-relaxed">
+                            {t("created")}:
+                          </span>
+                        }
+                        time={item.created_date}
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center">
@@ -833,6 +844,7 @@ export const FileUpload = (props: FileUploadProps) => {
     setUploadFileName(
       fileName.substring(0, fileName.lastIndexOf(".")) || fileName
     );
+
     const ext: string = fileName.split(".")[1];
     setcontentType(header_content_type[ext]);
 
@@ -880,7 +892,7 @@ export const FileUpload = (props: FileUploadProps) => {
           Notification.Success({
             msg: "File Uploaded Successfully",
           });
-          setUploadFileNameError("");
+          setUploadFileError("");
           resolve(response);
         })
         .catch((e) => {
@@ -896,12 +908,16 @@ export const FileUpload = (props: FileUploadProps) => {
   const validateFileUpload = () => {
     const filenameLength = uploadFileName.trim().length;
     const f = file;
-    if (f === undefined) {
-      setUploadFileNameError("Please choose a file to upload");
+    if (f === undefined || f === null) {
+      setUploadFileError("Please choose a file to upload");
       return false;
     }
     if (filenameLength === 0) {
-      setUploadFileNameError("Please give a name !!");
+      setUploadFileError("Please give a name !!");
+      return false;
+    }
+    if (f.size > 10e7) {
+      setUploadFileError("Maximum size of files is 100 MB");
       return false;
     }
     return true;
@@ -948,13 +964,21 @@ export const FileUpload = (props: FileUploadProps) => {
     setAudioBlob(createdBlob);
   };
 
+  const confirmAudioBlobExists = () => {
+    setAudioBlobExists(true);
+  };
+
+  const deleteAudioBlob = () => {
+    setAudioBlobExists(false);
+    setResetRecording(true);
+  };
+
   const uploadAudiofile = (response: any) => {
     const url = response.data.signed_url;
     const internal_name = response.data.internal_name;
     const f = audioBlob;
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`, { type: "audio/mpeg" });
-
     const config = {
       onUploadProgress: (progressEvent: any) => {
         const percentCompleted = Math.round(
@@ -982,7 +1006,12 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const validateAudioUpload = () => {
     const f = audioBlob;
-    if (f === undefined) {
+    if (f === undefined || f === null) {
+      setAudioFileError("Please upload a file");
+      return false;
+    }
+    if (f.size > 10e7) {
+      setAudioFileError("File size must not exceed 100 MB");
       return false;
     }
     return true;
@@ -990,7 +1019,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const handleAudioUpload = async () => {
     if (!validateAudioUpload()) return;
-    setAudioNameError("");
+    setAudioFileError("");
     const category = "AUDIO";
     const name = "audio.mp3";
     const filename =
@@ -1010,6 +1039,7 @@ export const FileUpload = (props: FileUploadProps) => {
         setAudioUploadStarted(false);
       });
     setAudioName("");
+    setAudioBlobExists(false);
   };
 
   // For creating the Download File URL
@@ -1158,7 +1188,14 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
           <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
             <Cancel onClick={() => setModalOpenForEdit(false)} />
-            <Submit disabled={btnloader} label="Proceed" />
+            <Submit
+              disabled={
+                btnloader ||
+                modalDetails?.name === editFileName ||
+                editFileName.length === 0
+              }
+              label="Proceed"
+            />
           </div>
         </form>
       </DialogModal>
@@ -1254,6 +1291,11 @@ export const FileUpload = (props: FileUploadProps) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={
+          type === "CONSULTATION"
+            ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+            : `/facility/${facilityId}/patient/${patientId}`
+        }
       />
       <div className="mt-4">
         <div className="md:grid grid-cols-2 gap-4">
@@ -1265,7 +1307,7 @@ export const FileUpload = (props: FileUploadProps) => {
               <InputLabel id="spo2-label">
                 Enter Audio File Name (optional)
               </InputLabel>
-              <TextInputField
+              <LegacyTextInputField
                 name="consultation_audio_file"
                 variant="outlined"
                 margin="dense"
@@ -1276,30 +1318,48 @@ export const FileUpload = (props: FileUploadProps) => {
                 onChange={(e: any) => {
                   setAudioName(e.target.value);
                 }}
-                errors={audioNameError}
+                errors={audioFileError}
               />
+              <div className="text-xs">
+                Please allow browser permission before you start speaking
+              </div>
               {audiouploadStarted ? (
                 <LinearProgressWithLabel value={uploadPercent} />
               ) : (
-                <>
-                  <VoiceRecorder createAudioBlob={createAudioBlob} />
-                  {audioBlob && (
-                    <Button
-                      color="primary"
-                      variant="contained"
-                      type="submit"
-                      style={{ marginLeft: "auto" }}
-                      startIcon={
-                        <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                      }
-                      onClick={() => {
-                        handleAudioUpload();
-                      }}
-                    >
-                      Save Recording
-                    </Button>
+                <div className="flex flex-col lg:flex-row justify-between w-full">
+                  {audioBlobExists && (
+                    <div className="flex items-center w-full md:w-auto">
+                      <ButtonV2
+                        variant="danger"
+                        className="w-full"
+                        onClick={() => {
+                          deleteAudioBlob();
+                        }}
+                      >
+                        <CareIcon className="care-l-trash h-4" /> Delete
+                      </ButtonV2>
+                    </div>
                   )}
-                </>
+                  <VoiceRecorder
+                    createAudioBlob={createAudioBlob}
+                    confirmAudioBlobExists={confirmAudioBlobExists}
+                    reset={resetRecording}
+                    setResetRecording={setResetRecording}
+                  />
+                  {audioBlobExists && (
+                    <div className="flex items-center w-full md:w-auto">
+                      <ButtonV2
+                        onClick={() => {
+                          handleAudioUpload();
+                        }}
+                        className="w-full"
+                      >
+                        <CareIcon className={"care-l-cloud-upload text-xl"} />
+                        Save
+                      </ButtonV2>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           ) : null}
@@ -1309,8 +1369,8 @@ export const FileUpload = (props: FileUploadProps) => {
                 <h4>Upload New File</h4>
               </div>
               <div>
-                <InputLabel id="spo2-label">Enter File Name</InputLabel>
-                <TextInputField
+                <InputLabel id="spo2-label">Enter File Name*</InputLabel>
+                <LegacyTextInputField
                   name="consultation_file"
                   variant="outlined"
                   margin="dense"
@@ -1321,7 +1381,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   onChange={(e: any) => {
                     setUploadFileName(e.target.value);
                   }}
-                  errors={uploadFileNameError}
+                  errors={uploadFileError}
                 />
               </div>
               <div className="mt-4">

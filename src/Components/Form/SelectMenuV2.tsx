@@ -22,6 +22,9 @@ type SelectMenuProps<T, V = T> = {
   showIconWhenSelected?: boolean;
   showChevronIcon?: boolean;
   className?: string;
+  requiredError?: boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
 } & (
   | {
       required?: false;
@@ -84,7 +87,13 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
               {props.placeholder}
             </Listbox.Label>
             <div className="relative">
-              <Listbox.Button className="w-full flex rounded cui-input-base">
+              <Listbox.Button
+                className={`${
+                  props?.requiredError ? "border-red-500" : ""
+                } w-full flex rounded cui-input-base`}
+                onFocus={props.onFocus}
+                onBlur={props.onBlur}
+              >
                 <div className="relative z-0 flex items-center w-full">
                   <div className="relative flex-1 flex items-center focus:z-10">
                     {props.showIconWhenSelected && value?.icon && (

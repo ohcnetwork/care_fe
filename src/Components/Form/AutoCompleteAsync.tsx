@@ -17,7 +17,10 @@ interface Props {
   debounceTime?: number;
   className?: string;
   placeholder?: string;
+  disabled?: boolean;
   error?: string;
+  onBlur?: () => void;
+  onFocus?: () => void;
 }
 
 const AutoCompleteAsync = (props: Props) => {
@@ -33,6 +36,7 @@ const AutoCompleteAsync = (props: Props) => {
     debounceTime = 300,
     className = "",
     placeholder,
+    disabled = false,
     error,
   } = props;
   const [data, setData] = useState([]);
@@ -61,6 +65,7 @@ const AutoCompleteAsync = (props: Props) => {
     <div className={className}>
       <Combobox
         value={selected}
+        disabled={disabled}
         onChange={onChange}
         by={compareBy}
         multiple={multiple as any}
@@ -81,6 +86,8 @@ const AutoCompleteAsync = (props: Props) => {
                   : ""
               }
               onChange={({ target }) => setQuery(target.value)}
+              onFocus={props.onFocus}
+              onBlur={props.onBlur}
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
               <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-secondary-900">
@@ -93,7 +100,7 @@ const AutoCompleteAsync = (props: Props) => {
             </Combobox.Button>
           </div>
           <DropdownTransition>
-            <Combobox.Options className="cui-dropdown-base top-12 absolute z-10 mt-2 text-sm">
+            <Combobox.Options className="cui-dropdown-base top-12 absolute z-10 text-sm">
               {data?.length === 0 ? (
                 <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
                   {query !== ""

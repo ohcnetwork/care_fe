@@ -1,6 +1,6 @@
 import moment from "moment";
 import { navigate } from "raviger";
-import { GOV_DATA_API_KEY } from "../Common/env";
+import { LocalStorageKeys } from "../Common/constants";
 
 interface ApacheParams {
   age: number;
@@ -67,25 +67,11 @@ export const calculateApache2Score = (apacheParams: ApacheParams): number => {
   return totalScore;
 };
 
-/**
- * Deprecated. Use `goBack` from the `useAppHistory` hook instead.
- */
-export const goBack = (deltaOrUrl?: string | number | false | void) => {
-  if (typeof deltaOrUrl === "number") {
-    window.history.go(-deltaOrUrl);
-    return;
-  }
-
-  if (typeof deltaOrUrl === "string") {
-    navigate(deltaOrUrl);
-    return;
-  }
-
-  window.history.back();
-};
-
-export const formatDate = (date: string | Date) => {
-  return moment(date).format("hh:mm A; DD/MM/YYYY");
+export const formatDate = (
+  date: string | Date,
+  format = "hh:mm A; DD/MM/YYYY"
+) => {
+  return moment(date).format(format);
 };
 
 export const relativeDate = (date: string | Date) => {
@@ -96,11 +82,9 @@ export const relativeDate = (date: string | Date) => {
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export const handleSignOut = (forceReload: boolean) => {
-  localStorage.removeItem("care_access_token");
-  localStorage.removeItem("care_refresh_token");
-  localStorage.removeItem("shift-filters");
-  localStorage.removeItem("external-filters");
-  localStorage.removeItem("lsg-ward-data");
+  Object.values(LocalStorageKeys).forEach((key) =>
+    localStorage.removeItem(key)
+  );
   navigate("/");
   if (forceReload) window.location.reload();
 };
@@ -193,9 +177,9 @@ export const parseCsvFile = async (
   return parsed;
 };
 
-export const getPincodeDetails = async (pincode: string) => {
+export const getPincodeDetails = async (pincode: string, apiKey: string) => {
   const response = await fetch(
-    `https://api.data.gov.in/resource/5c2f62fe-5afa-4119-a499-fec9d604d5bd?api-key=${GOV_DATA_API_KEY}&format=json&filters[pincode]=${pincode}&limit=1`
+    `https://api.data.gov.in/resource/5c2f62fe-5afa-4119-a499-fec9d604d5bd?api-key=${apiKey}&format=json&filters[pincode]=${pincode}&limit=1`
   );
   const data = await response.json();
   return data.records[0];
@@ -209,3 +193,29 @@ export const includesIgnoreCase = (str1: string, str2: string) => {
     lowerCaseStr2.includes(lowerCaseStr1)
   );
 };
+
+export const getExperienceSuffix = (date?: Date) => {
+  if (!date) return "0 Years";
+
+  const today = new Date();
+
+  let m = (today.getFullYear() - date.getFullYear()) * 12;
+  m -= date.getMonth();
+  m += today.getMonth();
+
+  let str = "";
+
+  const years = Math.floor(m / 12);
+  const months = m % 12;
+
+  if (years) str += `${years} years `;
+  if (months) str += `${months} months`;
+
+  return str;
+};
+
+export const formatCurrency = (price: number) =>
+  price.toLocaleString("en-IN", {
+    style: "currency",
+    currency: "INR",
+  });

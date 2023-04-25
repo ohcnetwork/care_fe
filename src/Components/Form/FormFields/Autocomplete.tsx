@@ -3,10 +3,7 @@ import { Combobox } from "@headlessui/react";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
-import {
-  FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
-} from "./Utils";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
 
 type OptionCallback<T, R> = (option: T) => R;
@@ -16,32 +13,37 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   options: T[];
   optionLabel: OptionCallback<T, string>;
   optionValue?: OptionCallback<T, V>;
+  optionDescription?: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   onQuery?: (query: string) => void;
   dropdownIcon?: React.ReactNode | undefined;
+  isLoading?: boolean;
+  allowRawInput?: boolean;
 };
 
 const AutocompleteFormField = <T, V>(
   props: AutocompleteFormFieldProps<T, V>
 ) => {
-  const { name } = props;
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-
+  const field = useFormFieldPropsResolver(props);
   return (
-    <FormField props={props}>
+    <FormField field={field}>
       <Autocomplete
-        id={props.id}
+        id={field.id}
+        disabled={field.disabled}
+        required={field.required}
+        className={field.className}
+        value={field.value}
+        onChange={(value: any) => field.handleChange(value)}
         options={props.options}
-        disabled={props.disabled}
-        value={props.value}
         placeholder={props.placeholder}
         optionLabel={props.optionLabel}
         optionIcon={props.optionIcon}
         optionValue={props.optionValue}
-        className={props.className}
-        required={props.required}
+        optionDescription={props.optionDescription}
         onQuery={props.onQuery}
-        onChange={(value: any) => handleChange({ name, value })}
+        isLoading={props.isLoading}
+        allowRawInput={props.allowRawInput}
+        requiredError={field.error ? props.required : false}
       />
     </FormField>
   );
@@ -58,9 +60,12 @@ type AutocompleteProps<T, V = T> = {
   optionLabel: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
+  optionDescription?: OptionCallback<T, string>;
   className?: string;
   onQuery?: (query: string) => void;
+  requiredError?: boolean;
   isLoading?: boolean;
+  allowRawInput?: boolean;
 } & (
   | {
       required?: false;
@@ -85,21 +90,54 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
     props.onQuery && props.onQuery(query);
   }, [query]);
 
-  const options = props.options.map((option) => {
+  const mappedOptions = props.options.map((option) => {
     const label = props.optionLabel(option);
+    const description =
+      props.optionDescription && props.optionDescription(option);
     return {
       label,
-      search: label.toLowerCase(),
+      description,
+      search:
+        label.toLowerCase() + (description ? description.toLowerCase() : ""),
       icon: props.optionIcon && props.optionIcon(option),
       value: props.optionValue ? props.optionValue(option) : option,
     };
   });
 
+  const getOptions = () => {
+    if (!query) return mappedOptions;
+
+    const knownOption = mappedOptions.find(
+      (o) => o.value == props.value || o.label == props.value
+    );
+
+    if (knownOption) return mappedOptions;
+    return [
+      {
+        label: query,
+        description: undefined,
+        search: query.toLowerCase(),
+        icon: <CareIcon className="care-l-plus" />,
+        value: query,
+      },
+      ...mappedOptions,
+    ];
+  };
+
+  const options = props.allowRawInput ? getOptions() : mappedOptions;
+
   const value = options.find((o) => props.value == o.value);
   const filteredOptions = options.filter((o) => o.search.includes(query));
 
   return (
-    <div className={props.className} id={props.id}>
+    <div
+      className={
+        props.requiredError
+          ? "border rounded border-red-500 " + props.className
+          : props.className
+      }
+      id={props.id}
+    >
       <Combobox
         disabled={props.disabled}
         value={value}
@@ -126,6 +164,11 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
 
           <DropdownTransition>
             <Combobox.Options className="origin-top-right absolute z-10 mt-0.5 cui-dropdown-base">
+              {filteredOptions.length === 0 && (
+                <div className="p-2 text-sm text-gray-500">
+                  No options found
+                </div>
+              )}
               {filteredOptions.map((option, index) => (
                 <Combobox.Option
                   id={`${props.id}-option-${option.value}`}
@@ -133,9 +176,16 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   className={dropdownOptionClassNames}
                   value={option}
                 >
-                  <div className="flex justify-between">
-                    {option.label}
-                    {option.icon}
+                  <div className="flex flex-col">
+                    <div className="flex justify-between">
+                      {option.label}
+                      {option.icon}
+                    </div>
+                    {option.description && (
+                      <div className="text-sm text-gray-500">
+                        {option.description}
+                      </div>
+                    )}
                   </div>
                 </Combobox.Option>
               ))}

@@ -12,12 +12,13 @@ import {
   getTriageInfo,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { TextInputField } from "../Common/HelperInputFields";
+import { LegacyTextInputField } from "../Common/HelperInputFields";
 import { PatientStatsModel } from "./models";
-import { goBack } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
-import DateInputV2 from "../Common/DateInputV2";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import DateFormField from "../Form/FormFields/DateFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -60,6 +61,7 @@ const triageFormReducer = (state = initialState, action: any) => {
 };
 
 export const TriageForm = (props: triageFormProps) => {
+  const { goBack } = useAppHistory();
   const dispatchTriageData: any = useDispatch();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
@@ -161,12 +163,6 @@ export const TriageForm = (props: triageFormProps) => {
           if (!state.form[field]) {
             errors[field] = "Field is required";
             invalidForm = true;
-          } else if (
-            moment(state.form.entry_date).format("YYYY-MM-DD") >
-            new Date().toLocaleDateString("en-ca")
-          ) {
-            errors[field] = "Date cannot be in future";
-            invalidForm = true;
           }
           return;
         default:
@@ -239,35 +235,22 @@ export const TriageForm = (props: triageFormProps) => {
     }
   };
 
+  const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [event.name]: event.value },
+    });
+  };
+
   const handleChange = (e: any) => {
     const form = { ...state.form };
     form[e.target.name] = e.target.value;
     dispatch({ type: "set_form", form });
   };
 
-  const handleDateChange = (date: any, key: string) => {
-    if (moment(date).isValid()) {
-      // ensuring that the date is not in future
-      if (
-        moment(date).format("YYYY-MM-DD") >
-        new Date().toLocaleDateString("en-ca")
-      ) {
-        Notification.Error({ msg: "Date can't be in future" });
-        return;
-      }
-      const form = { ...state.form };
-      form[key] = date;
-      dispatch({ type: "set_form", form });
-    }
-  };
-
   if (isLoading) {
     return <Loading />;
   }
-
-  const borderColor = state.errors["entry_date"]
-    ? "border-red-500"
-    : "border-gray-200";
 
   return (
     <div className="px-2">
@@ -279,6 +262,7 @@ export const TriageForm = (props: triageFormProps) => {
             name: moment(state.form.entry_date).format("YYYY-MM-DD"),
           },
         }}
+        backUrl={`/facility/${facilityId}`}
       />
 
       <Modal
@@ -328,30 +312,24 @@ export const TriageForm = (props: triageFormProps) => {
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
               <div className="max-w-[250px] pb-4">
-                <InputLabel>Entry Date</InputLabel>
-                <div className="flex-auto">
-                  <DateInputV2
-                    className={`bg-gray-50 ${borderColor}`}
-                    value={state.form.entry_date}
-                    max={new Date()}
-                    onChange={(date) => handleDateChange(date, "entry_date")}
-                    position="RIGHT"
-                    placeholder="Entry Date"
-                  />
-                </div>
-                {state.errors.entry_date &&
-                  state.errors.entry_date.length > 0 && (
-                    <div className="text-sm text-red-500">
-                      {state.errors.entry_date}
-                    </div>
-                  )}
+                <DateFormField
+                  required
+                  name="entry_date"
+                  label="Entry Date"
+                  value={state.form.entry_date}
+                  disableFuture
+                  onChange={handleFormFieldChange}
+                  position="LEFT"
+                  placeholder="Entry Date"
+                  error={state.errors.entry_date}
+                />
               </div>
               <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div>
                   <InputLabel id="num-patients-visited-label">
                     Patients Visited in Triage
                   </InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="num_patients_visited"
                     variant="outlined"
                     margin="dense"
@@ -368,7 +346,7 @@ export const TriageForm = (props: triageFormProps) => {
                   <InputLabel id="num-patients-home-quarantine-label">
                     Patients in Home Quarantine
                   </InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="num_patients_home_quarantine"
                     variant="outlined"
                     margin="dense"
@@ -385,7 +363,7 @@ export const TriageForm = (props: triageFormProps) => {
                   <InputLabel id="num-patients-isolation-label">
                     Suspected Isolated
                   </InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="num_patients_isolation"
                     variant="outlined"
                     margin="dense"
@@ -402,7 +380,7 @@ export const TriageForm = (props: triageFormProps) => {
                   <InputLabel id="num-patient-referred-label">
                     Patients Referred
                   </InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="num_patient_referred"
                     variant="outlined"
                     margin="dense"
@@ -419,7 +397,7 @@ export const TriageForm = (props: triageFormProps) => {
                   <InputLabel id="num-patient-referred-label">
                     Confirmed Positive
                   </InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="num_patient_confirmed_positive"
                     variant="outlined"
                     margin="dense"

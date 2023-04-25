@@ -6,7 +6,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import SwipeableViews from "react-swipeable-views";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import { CircularProgress, Tooltip } from "@material-ui/core";
+import { Tooltip } from "@material-ui/core";
 
 import {
   getAllPatient,
@@ -19,11 +19,11 @@ import {
   ADMITTED_TO,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
-  PATIENT_FILTER_ORDER,
+  RESPIRATORY_SUPPORT,
+  PATIENT_SORT_OPTIONS,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
-import { make as SlideOver } from "../Common/SlideOver.gen";
-import PatientFilterV2 from "./PatientFilterV2";
+import PatientFilter from "./PatientFilter";
 import { parseOptionId } from "../../Common/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Chip from "../../CAREUI/display/Chip";
@@ -36,7 +36,13 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { ExportMenu } from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
+import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
+import CountBlock from "../../CAREUI/display/Count";
+import { useTranslation } from "react-i18next";
+import * as Notification from "../../Utils/Notifications.js";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import SortDropdownMenu from "../Common/SortDropdown";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -67,14 +73,14 @@ function TabPanel(props: TabPanelProps) {
 const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   "Comfort Care": "COMFORT CARE",
   Stable: "STABLE",
-  "Slightly Abnormal": "ABNORMAL",
+  Abnormal: "ABNORMAL",
   Critical: "CRITICAL",
 };
 
 export const PatientManager = () => {
+  const { t } = useTranslation();
   const dispatch: any = useDispatch();
-
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<any[]>();
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const {
@@ -91,7 +97,8 @@ export const PatientManager = () => {
     name: "",
   });
   const [showDialog, setShowDialog] = useState(false);
-
+  const [showDoctors, setShowDoctors] = useState(false);
+  const [showDoctorConnect, setShowDoctorConnect] = useState(false);
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadge] = useState("");
@@ -101,7 +108,8 @@ export const PatientManager = () => {
   const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
     useState("");
 
-  useEffect(() => {
+  const setPhoneNum = (phone_number: string) => {
+    setPhoneNumber(phone_number);
     if (phone_number.length === 15) {
       setPhoneNumberError("");
       updateQuery({ phone_number });
@@ -115,9 +123,10 @@ export const PatientManager = () => {
     }
 
     setPhoneNumberError("Enter a valid number");
-  }, [phone_number]);
+  };
 
-  useEffect(() => {
+  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
+    setEmergencyPhoneNumber(emergency_phone_number);
     if (emergency_phone_number.length === 15) {
       setEmergencyPhoneNumberError("");
       updateQuery({ emergency_phone_number });
@@ -131,7 +140,7 @@ export const PatientManager = () => {
     }
 
     setEmergencyPhoneNumberError("Enter a valid number");
-  }, [emergency_phone_number]);
+  };
 
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
@@ -159,7 +168,7 @@ export const PatientManager = () => {
     created_date_after: qParams.created_date_after || undefined,
     modified_date_before: qParams.modified_date_before || undefined,
     modified_date_after: qParams.modified_date_after || undefined,
-    ordering: qParams.ordering || undefined,
+    ordering: qParams.ordering || "-modified_date",
     category: qParams.category || undefined,
     gender: qParams.gender || undefined,
     age_min: qParams.age_min || undefined,
@@ -196,6 +205,12 @@ export const PatientManager = () => {
       qParams.last_consultation_is_telemedicine || undefined,
     is_antenatal: qParams.is_antenatal || undefined,
   };
+
+  useEffect(() => {
+    if (params.facility) {
+      setShowDoctorConnect(true);
+    }
+  }, [qParams.facility]);
 
   const date_range_fields = [
     [params.created_date_before, params.created_date_after],
@@ -241,20 +256,20 @@ export const PatientManager = () => {
   };
 
   useEffect(() => {
-    if (params.page === 1) return;
-
     setIsLoading(true);
-    dispatch(getAllPatient(params, "listPatients"))
-      .then((res: any) => {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-        }
+    if (!params.phone_number) {
+      setPhoneNumber("+91");
+    }
+    if (!params.emergency_phone_number) {
+      setEmergencyPhoneNumber("+91");
+    }
+    dispatch(getAllPatient(params, "listPatients")).then((res: any) => {
+      if (res && res.data) {
+        setData(res.data.results);
+        setTotalCount(res.data.count);
         setIsLoading(false);
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
+      }
+    });
   }, [
     dispatch,
     qParams.last_consultation_admission_date_before,
@@ -298,6 +313,19 @@ export const PatientManager = () => {
     qParams.last_consultation_is_telemedicine,
     qParams.is_antenatal,
   ]);
+
+  const getTheCategoryFromId = () => {
+    let category_name;
+    if (qParams.category) {
+      category_name = PATIENT_CATEGORIES.find(
+        (item: any) => qParams.category === item.id
+      )?.text;
+
+      return String(category_name);
+    } else {
+      return "";
+    }
+  };
 
   const fetchDistrictName = useCallback(
     async (status: statusType) => {
@@ -355,7 +383,6 @@ export const PatientManager = () => {
     },
     [fetchFacilityBadgeName]
   );
-
   const LastAdmittedToTypeBadges = () => {
     const badge = (key: string, value: any, id: string) => {
       return (
@@ -364,13 +391,13 @@ export const PatientManager = () => {
             name={key}
             value={value}
             onRemove={() => {
-              const lcat = qParams.last_consultation_admitted_to_list
+              const lcat = qParams.last_consultation_admitted_bed_type_list
                 .split(",")
                 .filter((x: string) => x != id)
                 .join(",");
               updateQuery({
                 ...qParams,
-                last_consultation_admitted_to_list: lcat,
+                last_consultation_admitted_bed_type_list: lcat,
               });
             }}
           />
@@ -402,6 +429,7 @@ export const PatientManager = () => {
       }
 
       const category: PatientCategory | undefined =
+        patient?.last_consultation?.last_daily_round?.patient_category ??
         patient?.last_consultation?.category;
       const categoryClass = category
         ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass
@@ -420,10 +448,11 @@ export const PatientManager = () => {
               {category ? PatientCategoryDisplayText[category] : "UNKNOWN"}
             </span>
           </div>
-          <div className="flex gap-4 items-start">
-            <div className="w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
+          <div className="flex flex-col md:flex-row gap-4 items-start">
+            <div className="w-full md:w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
               {patient?.last_consultation &&
-              patient?.last_consultation?.current_bed ? (
+              patient?.last_consultation?.current_bed &&
+              patient?.last_consultation?.discharge_date === null ? (
                 <div className="flex flex-col items-center justify-center h-full">
                   <Tooltip
                     title={
@@ -454,114 +483,120 @@ export const PatientManager = () => {
                 </div>
               )}
             </div>
-            <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
-              <div>
-                <div className="md:flex justify-between w-full">
-                  <div className="text-xl font-semibold capitalize">
-                    <span>{patient.name}</span>
-                    <span className="text-gray-800">{" - " + patient.age}</span>
-                    {patient.action && patient.action != 10 && (
-                      <span className="font-semibold ml-2 text-gray-700">
-                        -{" "}
-                        {
-                          TELEMEDICINE_ACTIONS.find(
-                            (i) => i.id === patient.action
-                          )?.desc
-                        }
-                      </span>
-                    )}
+            <div className="pl-2 md:block flex flex-col md:flex-row gap-2 w-full">
+              <div className="flex gap-2 justify-between w-full">
+                <div className="text-xl font-semibold capitalize">
+                  <span>{patient.name}</span>
+                  <span className="text-gray-800">{" - " + patient.age}</span>
+                  {patient.action && patient.action != 10 && (
+                    <span className="font-semibold ml-2 text-gray-700">
+                      -{" "}
+                      {
+                        TELEMEDICINE_ACTIONS.find(
+                          (i) => i.id === patient.action
+                        )?.desc
+                      }
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {patient.facility_object && (
+                <div className="mb-2">
+                  <div className="flex flex-wrap items-center">
+                    <p className="text-sm font-medium text-gray-700 mr-2">
+                      {patient.facility_object.name}
+                    </p>
+                    <RecordMeta
+                      className="text-sm text-gray-900"
+                      prefix={
+                        <span className="text-gray-600">{t("updated")}</span>
+                      }
+                      time={patient.modified_date}
+                    />
                   </div>
                 </div>
-                {patient.facility_object && (
-                  <div className="mb-2">
-                    <div className="flex flex-wrap items-center">
-                      <p className="text-sm font-medium text-gray-700 mr-2">
-                        {" "}
-                        {patient.facility_object.name}
-                      </p>
-                      <p className="text-sm">
-                        <span className="text-gray-600">last updated</span>{" "}
-                        <span className="font-medium text-gray-900">
-                          {" "}
-                          {moment(patient.modified_date).fromNow()}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                )}
-                <div className="flex w-full">
-                  <div className="flex flex-wrap gap-2 flex-row justify-start">
-                    {patient.review_time &&
-                      !patient.last_consultation?.discharge_date &&
-                      Number(patient.last_consultation?.review_interval) > 0 &&
-                      moment().isAfter(patient.review_time) && (
-                        <Chip
-                          size="small"
-                          color="red"
-                          startIcon="clock"
-                          text="Review Missed"
-                        />
-                      )}
-                    {patient.allow_transfer ? (
-                      <Chip
-                        size="small"
-                        color="yellow"
-                        startIcon="unlock"
-                        text="Transfer Allowed"
-                      />
-                    ) : (
-                      <Chip
-                        size="small"
-                        color="primary"
-                        startIcon="lock"
-                        text="Transfer Blocked"
-                      />
-                    )}
-                    {patient.disease_status === "POSITIVE" && (
+              )}
+              <div className="flex w-full">
+                <div className="flex flex-wrap gap-2 flex-row justify-start">
+                  {patient.review_time &&
+                    !patient.last_consultation?.discharge_date &&
+                    Number(patient.last_consultation?.review_interval) > 0 &&
+                    moment().isAfter(patient.review_time) && (
                       <Chip
                         size="small"
                         color="red"
-                        startIcon="radiation"
-                        text="Positive"
+                        startIcon="clock"
+                        text="Review Missed"
                       />
                     )}
-                    {patient.gender === 2 &&
-                      patient.is_antenatal &&
-                      patient.is_active && (
-                        <Chip
-                          size="small"
-                          color="blue"
-                          startIcon="baby-carriage"
-                          text="Antenatal"
-                        />
-                      )}
-                    {patient.is_medical_worker && patient.is_active && (
+                  {patient.disease_status === "POSITIVE" && (
+                    <Chip
+                      size="small"
+                      color="red"
+                      startIcon="radiation"
+                      text="Positive"
+                    />
+                  )}
+                  {patient.gender === 2 &&
+                    patient.is_antenatal &&
+                    patient.is_active && (
                       <Chip
                         size="small"
                         color="blue"
-                        startIcon="user-md"
-                        text="Medical Worker"
+                        startIcon="baby-carriage"
+                        text="Antenatal"
                       />
                     )}
-                    {patient.disease_status === "EXPIRED" && (
+                  {patient.is_medical_worker && patient.is_active && (
+                    <Chip
+                      size="small"
+                      color="blue"
+                      startIcon="user-md"
+                      text="Medical Worker"
+                    />
+                  )}
+                  {patient.disease_status === "EXPIRED" && (
+                    <Chip
+                      size="small"
+                      color="yellow"
+                      startIcon="exclamation-triangle"
+                      text="Patient Expired"
+                    />
+                  )}
+                  {(!patient.last_consultation ||
+                    patient.last_consultation?.facility !== patient.facility ||
+                    (patient.last_consultation?.discharge_date &&
+                      patient.is_active)) && (
+                    <span className="relative inline-flex">
                       <Chip
                         size="small"
-                        color="yellow"
-                        startIcon="exclamation-triangle"
-                        text="Patient Expired"
+                        color="red"
+                        startIcon="notes-medical"
+                        text="No Consultation Filed"
                       />
-                    )}
-                    {(!patient.last_consultation ||
-                      patient.last_consultation?.facility !==
-                        patient.facility ||
-                      (patient.last_consultation?.discharge_date &&
-                        patient.is_active)) && (
+                      <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
+                        <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                      </span>
+                    </span>
+                  )}
+                  {!(
+                    patient.last_consultation?.facility !== patient.facility
+                  ) &&
+                    !(
+                      patient.last_consultation?.discharge_date ||
+                      !patient.is_active
+                    ) &&
+                    moment(patient.last_consultation?.modified_date).isBefore(
+                      new Date().getTime() - 24 * 60 * 60 * 1000
+                    ) && (
                       <span className="relative inline-flex">
                         <Chip
                           size="small"
                           color="red"
-                          startIcon="notes-medical"
-                          text="No Consultation Filed"
+                          startIcon="circle-exclamation"
+                          text="No update in 24 hours"
                         />
                         <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
                           <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
@@ -569,33 +604,24 @@ export const PatientManager = () => {
                         </span>
                       </span>
                     )}
-                    {!(
-                      patient.last_consultation?.facility !== patient.facility
-                    ) &&
-                      !(
-                        patient.last_consultation?.discharge_date ||
-                        !patient.is_active
-                      ) &&
-                      moment(patient.last_consultation?.modified_date).isBefore(
-                        new Date().getTime() - 24 * 60 * 60 * 1000
-                      ) && (
-                        <span className="relative inline-flex">
-                          <Chip
-                            size="small"
-                            color="red"
-                            startIcon="circle-exclamation"
-                            text="No update in 24 hours"
-                          />
-                          <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
-                            <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
-                          </span>
-                        </span>
-                      )}
-                  </div>
                 </div>
               </div>
             </div>
+            {patient.last_consultation?.last_daily_round
+              ?.ventilator_interface &&
+              patient.last_consultation?.last_daily_round
+                ?.ventilator_interface !== "UNKNOWN" && (
+                <div className="rounded-full shrink-0 w-8 h-8 flex items-center justify-center border border-primary-600 text-primary-600 bg-primary-100 font-semibold text-xs mb-auto">
+                  {
+                    RESPIRATORY_SUPPORT.find(
+                      (resp) =>
+                        resp.text ===
+                        patient.last_consultation?.last_daily_round
+                          ?.ventilator_interface
+                    )?.id
+                  }
+                </div>
+              )}
           </div>
         </Link>
       );
@@ -611,7 +637,7 @@ export const PatientManager = () => {
   } else if (data && data.length) {
     managePatients = (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4">
           {patientList}
         </div>
         <Pagination totalCount={totalCount} />
@@ -630,7 +656,7 @@ export const PatientManager = () => {
       name,
       value: qParams[name] || defaultValue,
       onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
-      className: "grow lg:max-w-sm w-full mb-2",
+      className: "grow w-full mb-2",
     };
   };
 
@@ -648,7 +674,17 @@ export const PatientManager = () => {
       />
       <div className="flex flex-col lg:flex-row justify-between items-center">
         <PageTitle title="Patients" hideBack={true} breadcrumbs={false} />
-        <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end">
+        <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end w-full lg:w-fit">
+          {showDoctorConnect && (
+            <ButtonV2
+              onClick={() => {
+                setShowDoctors(true);
+              }}
+            >
+              <CareIcon className="care-l-phone text-lg" />
+              <p className="lg:my-[2px]">Doctor Connect</p>
+            </ButtonV2>
+          )}
           <ButtonV2
             onClick={() => {
               qParams.facility
@@ -657,89 +693,49 @@ export const PatientManager = () => {
             }}
           >
             <CareIcon className="care-l-plus text-lg" />
-            <p>Add Patient Details</p>
+            <p className="lg:my-[2px]">Add Patient Details</p>
           </ButtonV2>
-          <ButtonV2
-            ghost
-            border
-            className="bg-white"
-            onClick={() => advancedFilter.setShow(true)}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="fill-current w-4 h-4 mr-2"
-            >
-              <line x1="8" y1="6" x2="21" y2="6"></line>
-              <line x1="8" y1="12" x2="21" y2="12">
-                {" "}
-              </line>
-              <line x1="8" y1="18" x2="21" y2="18">
-                {" "}
-              </line>
-              <line x1="3" y1="6" x2="3.01" y2="6">
-                {" "}
-              </line>
-              <line x1="3" y1="12" x2="3.01" y2="12">
-                {" "}
-              </line>
-              <line x1="3" y1="18" x2="3.01" y2="18">
-                {" "}
-              </line>
-            </svg>
-            <span>Advanced Filters</span>
-          </ButtonV2>
-          <DropdownMenu
-            title="Sort by"
-            variant="secondary"
-            className="border border-primary-500 bg-white"
-            icon={<CareIcon className="care-l-sort" />}
-          >
-            {PATIENT_FILTER_ORDER.map((ordering) => {
-              return (
-                <DropdownItem
-                  key={ordering.text}
-                  onClick={() => updateQuery({ ordering: ordering.text })}
-                  icon={
-                    <CareIcon
-                      className={
-                        ordering.order === "Ascending"
-                          ? "care-l-sort-amount-up"
-                          : "care-l-sort-amount-down"
-                      }
-                    />
-                  }
-                >
-                  <span>{ordering.desc}</span>
-                  <span className="text-gray-600 text-sm">
-                    {ordering.order}
-                  </span>
-                </DropdownItem>
-              );
-            })}
-          </DropdownMenu>
+          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
+          <SortDropdownMenu
+            options={PATIENT_SORT_OPTIONS}
+            selected={qParams.ordering}
+            onSelect={updateQuery}
+          />
           <div className="tooltip">
-            <ExportMenu
-              disabled={!isExportAllowed}
-              exportItems={[
-                {
-                  label:
-                    tabValue === 0 ? "Live patients" : "Discharged patients",
-                  action: exportPatients(true),
-                },
-                {
-                  label: "All patients",
-                  action: exportPatients(false),
-                },
-              ]}
-            />
+            {!isExportAllowed ? (
+              <ButtonV2
+                onClick={() => {
+                  advancedFilter.setShow(true);
+                  setTimeout(() => {
+                    const element = document.getElementById("bed-type-select");
+                    if (element) element.scrollIntoView({ behavior: "smooth" });
+                    Notification.Warn({
+                      msg: "Please select a seven day period.",
+                    });
+                  }, 500);
+                }}
+                className="lg:w-fit w-full mr-5"
+              >
+                <CareIcon className="care-l-import" />
+                <span className="lg:my-[3px]">Export</span>
+              </ButtonV2>
+            ) : (
+              <ExportMenu
+                disabled={!isExportAllowed}
+                exportItems={[
+                  {
+                    label:
+                      tabValue === 0 ? "Live patients" : "Discharged patients",
+                    action: exportPatients(true),
+                  },
+                  {
+                    label: "All patients",
+                    action: exportPatients(false),
+                  },
+                ]}
+              />
+            )}
+
             {!isExportAllowed && (
               <span className="tooltip-text tooltip-bottom -translate-x-1/2">
                 Select a seven day period
@@ -748,71 +744,84 @@ export const PatientManager = () => {
           </div>
         </div>
       </div>
-      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-12px]">
-        <div>
-          <div className="flex flex-col mt-2 h-full">
-            <div className="bg-white overflow-hidden shadow rounded-lg mb-2 h-full">
-              <div className="px-4 py-24 sm:p-[35px]">
+      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-4 my-4 px-2 md:px-0 mb-[-12px]">
+        <div className="flex flex-col xl:flex-row mt-2 h-full gap-3">
+          <div className="flex-1">
+            <CountBlock
+              text="Total Patients"
+              count={totalCount}
+              loading={isLoading}
+              icon={"user-injured"}
+              containerClass="pb-8"
+            />
+          </div>
+          {/*<div className="bg-white overflow-hidden shadow rounded-lg flex-1">
+              <div className="p-4">
                 <dl>
-                  <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                    Total Patients
+                  <div className="flex items-center justify-center rounded-lg text-xl w-10 h-10 bg-yellow-100">
+                    <CareIcon className="care-l-accessible-icon-alt text-yellow-600" />
+                  </div>
+                  <dt className="text-sm font-semibold text-gray-800 truncate mt-2">
+                    Discharged Patients
                   </dt>
-                  {/* Show spinner until count is fetched from server */}
                   {isLoading ? (
-                    <dd className="mt-4 text-5xl leading-9">
+                    <dd className=" text-5xl leading-9">
                       <CircularProgress className="text-primary-500" />
                     </dd>
                   ) : (
-                    <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
+                    <dd className="text-4xl leading-9 font-bold">
                       {totalCount}
                     </dd>
                   )}
                 </dl>
               </div>
-            </div>
-          </div>
+            </div>*/}
         </div>
-        <div className="w-full col-span-2">
+        <div className="w-full col-span-3">
           <div className="col-span-2 mt-2">
-            <div>
-              <div>
-                <div className="md:flex md:gap-4 mt-1">
-                  <SearchInput
-                    label="Search by Patient"
-                    placeholder="Enter patient name"
-                    {...queryField("name")}
-                  />
-                  <SearchInput
-                    label="Search by IP Number"
-                    placeholder="Enter IP Number"
-                    secondary
-                    {...queryField("ip_no")}
-                  />
-                </div>
-              </div>
+            <div className="md:flex md:gap-4 mt-1">
+              <SearchInput
+                label="Search by Patient"
+                placeholder="Enter patient name"
+                {...queryField("name")}
+              />
+              <SearchInput
+                label="Search by IP Number"
+                placeholder="Enter IP Number"
+                secondary
+                {...queryField("ip_no")}
+              />
             </div>
             <div className="md:flex md:gap-4">
               <PhoneNumberFormField
                 label="Search by Primary Number"
                 {...queryField("phone_number", "+91")}
                 value={phone_number}
-                onChange={(e) => setPhoneNumber(e.value)}
+                onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
               />
               <PhoneNumberFormField
                 label="Search by Emergency Number"
                 {...queryField("emergency_phone_number", "+91")}
                 value={emergency_phone_number}
-                onChange={(e) => setEmergencyPhoneNumber(e.value)}
+                onChange={(e) => setEmergencyPhoneNum(e.value)}
                 error={emergencyPhoneNumberError}
               />
             </div>
           </div>
         </div>
       </div>
-      <div className="flex flex-wrap w-full col-span-3 mt-6">
+      <div className="flex flex-wrap col-span-3 mt-6">
         <FilterBadges
-          badges={({ badge, value, kasp, phoneNumber, dateRange, range }) => [
+          badges={({
+            badge,
+            value,
+            kasp,
+            phoneNumber,
+            dateRange,
+            range,
+            ordering,
+          }) => [
             phoneNumber("Primary number", "phone_number"),
             phoneNumber("Emergency number", "emergency_phone_number"),
             badge("Patient name", "name"),
@@ -829,8 +838,8 @@ export const PatientManager = () => {
             value("Facility", "facility", facilityBadgeName),
             badge("Facility Type", "facility_type"),
             value("District", "district", districtName),
-            badge("Ordering", "ordering"),
-            badge("Category", "category"),
+            ordering(),
+            value("Category", "category", getTheCategoryFromId()),
             badge("Disease Status", "disease_status"),
             value(
               "Gender",
@@ -858,16 +867,14 @@ export const PatientManager = () => {
               paramKey: "last_consultation_is_telemedicine",
             },
           ]}
+          children={
+            qParams.last_consultation_admitted_bed_type_list &&
+            LastAdmittedToTypeBadges()
+          }
         />
-        {qParams.last_consultation_admitted_bed_type_list &&
-          LastAdmittedToTypeBadges()}
       </div>
       <div>
-        <SlideOver {...advancedFilter}>
-          <div className="bg-white min-h-screen p-4">
-            <PatientFilterV2 {...advancedFilter} />
-          </div>
-        </SlideOver>
+        <PatientFilter {...advancedFilter} />
         <NavTabs
           onChange={(tab) => updateQuery({ is_active: tab ? "False" : "True" })}
           options={[
@@ -884,6 +891,11 @@ export const PatientManager = () => {
             <div className="mb-4">{managePatients}</div>
           </TabPanel>
         </SwipeableViews>
+        <DoctorVideoSlideover
+          facilityId={params.facility}
+          show={showDoctors}
+          setShow={setShowDoctors}
+        />
       </div>
     </div>
   );

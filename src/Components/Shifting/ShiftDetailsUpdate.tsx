@@ -1,37 +1,36 @@
 import { useReducer, useState, useCallback, useEffect } from "react";
 import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  MultilineInputField,
-  ErrorHelperText,
-} from "../Common/HelperInputFields";
+import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftDetails, updateShift, getUserList } from "../../Redux/actions";
-import { SelectField } from "../Common/HelperInputFields";
+import { LegacySelectField } from "../Common/HelperInputFields";
 import {
   SHIFTING_CHOICES,
   FACILITY_TYPES,
   SHIFTING_VEHICLE_CHOICES,
   BREATHLESSNESS_LEVEL,
-  KASP_FULL_STRING,
 } from "../../Common/constants";
 import { UserSelect } from "../Common/UserSelect";
 import { CircularProgress } from "@material-ui/core";
+import { useTranslation } from "react-i18next";
 
 import {
   Card,
   CardContent,
-  InputLabel,
   Radio,
   RadioGroup,
   Box,
   FormControlLabel,
 } from "@material-ui/core";
-import { goBack } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useConfig from "../../Common/hooks/useConfig";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -56,21 +55,6 @@ const initForm: any = {
   initial_status: "",
 };
 
-const requiredFields: any = {
-  shifting_approving_facility_object: {
-    errorText: "Shifting approving facility can not be empty.",
-  },
-  assigned_facility_type: {
-    errorText: "Please select Facility Type",
-  },
-  preferred_vehicle_choice: {
-    errorText: "Please select Preferred Vehicle Type",
-  },
-  reason: {
-    errorText: "Please enter a reason for the shift.",
-  },
-};
-
 const initError = Object.assign(
   {},
   ...Object.keys(initForm).map((k) => ({ [k]: "" }))
@@ -82,11 +66,29 @@ const initialState = {
 };
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
+  const { goBack } = useAppHistory();
+  const { kasp_full_string } = useConfig();
   const dispatchAction: any = useDispatch();
   const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
   const [assignedUser, SetAssignedUser] = useState(null);
   const [assignedUserLoading, setAssignedUserLoading] = useState(false);
+  const { t } = useTranslation();
+
+  const requiredFields: any = {
+    shifting_approving_facility_object: {
+      errorText: t("shifting_approving_facility_can_not_be_empty"),
+    },
+    assigned_facility_type: {
+      errorText: t("please_select_facility_type"),
+    },
+    preferred_vehicle_choice: {
+      errorText: t("please_select_preferred_vehicle_type"),
+    },
+    reason: {
+      errorText: t("please_enter_a_reason_for_the_shift"),
+    },
+  };
 
   const shiftFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
@@ -147,6 +149,12 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     form[name] = value;
     dispatch({ type: "set_form", form });
   };
+  const handleTextAreaChange = (e: any) => {
+    const form = { ...state.form };
+    const { name, value } = e;
+    form[name] = value;
+    dispatch({ type: "set_form", form });
+  };
 
   const handleOnSelect = (user: any) => {
     const form = { ...state.form };
@@ -195,7 +203,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       if (res && res.status == 200 && res.data) {
         dispatch({ type: "set_form", form: res.data });
         Notification.Success({
-          msg: "Shift request updated successfully",
+          msg: t("shift_request_updated_successfully"),
         });
 
         navigate(`/shifting/${props.id}`);
@@ -238,14 +246,17 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
   return (
     <div className="px-2 pb-2">
-      <PageTitle title={"Update Shift Request"} />
+      <PageTitle
+        title={t("update_shift_request")}
+        backUrl={`/shifting/${props.id}`}
+      />
       <div className="mt-4">
         <Card>
           <CardContent>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="md:col-span-1">
-                <InputLabel>Status</InputLabel>
-                <SelectField
+                <FieldLabel>{t("status")}</FieldLabel>
+                <LegacySelectField
                   name="status"
                   variant="outlined"
                   margin="dense"
@@ -253,11 +264,11 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.status}
                   options={shiftStatusOptions}
                   onChange={handleChange}
-                  className="bg-white h-14 w-full mt-2 shadow-sm md:text-sm md:leading-5"
+                  className="bg-white h-14 w-full shadow-sm md:text-sm md:leading-5 mt-2"
                 />
               </div>
               <div className="flex-none">
-                <InputLabel>Assigned To</InputLabel>
+                <FieldLabel>{t("assigned_to")}</FieldLabel>
                 <div>
                   {assignedUserLoading ? (
                     <CircularProgress size={20} />
@@ -275,7 +286,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 </div>
               </div>
               <div>
-                <InputLabel>Name of shifting approving facility*</InputLabel>
+                <FieldLabel>
+                  {t("name_of_shifting_approving_facility")}
+                </FieldLabel>
                 <FacilitySelect
                   multiple={false}
                   name="shifting_approving_facility"
@@ -289,9 +302,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>
-                  What facility would you like to assign the patient to
-                </InputLabel>
+                <FieldLabel>
+                  {t("what_facility_assign_the_patient_to")}
+                </FieldLabel>
                 <FacilitySelect
                   multiple={false}
                   name="assigned_facility"
@@ -304,7 +317,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               </div>
 
               <div>
-                <InputLabel>Is this an emergency?</InputLabel>
+                <FieldLabel>{t("is_this_an_emergency")}</FieldLabel>
                 <RadioGroup
                   aria-label="emergency"
                   name="emergency"
@@ -316,20 +329,22 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                     <FormControlLabel
                       value={true}
                       control={<Radio />}
-                      label="Yes"
+                      label={t("yes")}
                     />
                     <FormControlLabel
                       value={false}
                       control={<Radio />}
-                      label="No"
+                      label={t("no")}
                     />
                   </Box>
                 </RadioGroup>
-                <ErrorHelperText error={state.errors.emergency} />
+                <LegacyErrorHelperText error={state.errors.emergency} />
               </div>
 
               <div>
-                <InputLabel>Is {KASP_FULL_STRING}?</InputLabel>
+                <FieldLabel>
+                  {t("is")} {kasp_full_string}?
+                </FieldLabel>
                 <RadioGroup
                   aria-label="is_kasp"
                   name="is_kasp"
@@ -341,22 +356,22 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                     <FormControlLabel
                       value={true}
                       control={<Radio />}
-                      label="Yes"
+                      label={t("yes")}
                     />
                     <FormControlLabel
                       value={false}
                       control={<Radio />}
-                      label="No"
+                      label={t("no")}
                     />
                   </Box>
                 </RadioGroup>
-                <ErrorHelperText error={state.errors.is_kasp} />
+                <LegacyErrorHelperText error={state.errors.is_kasp} />
               </div>
 
               <div>
-                <InputLabel>Is this an upshift?</InputLabel>
+                <FieldLabel>{t("is_this_an_upshift")}</FieldLabel>
                 <RadioGroup
-                  aria-label="is it upshift"
+                  aria-label={t("is_it_upshift")}
                   name="is_up_shift"
                   value={[true, "true"].includes(state.form.is_up_shift)}
                   onChange={handleChange}
@@ -366,20 +381,20 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                     <FormControlLabel
                       value={true}
                       control={<Radio />}
-                      label="Yes"
+                      label={t("yes")}
                     />
                     <FormControlLabel
                       value={false}
                       control={<Radio />}
-                      label="No"
+                      label={t("no")}
                     />
                   </Box>
                 </RadioGroup>
-                <ErrorHelperText error={state.errors.is_up_shift} />
+                <LegacyErrorHelperText error={state.errors.is_up_shift} />
               </div>
               <div className="md:col-span-1">
-                <InputLabel>Preferred Vehicle*</InputLabel>
-                <SelectField
+                <FieldLabel>{t("preferred_vehicle")}</FieldLabel>
+                <LegacySelectField
                   name="preferred_vehicle_choice"
                   variant="outlined"
                   margin="dense"
@@ -392,8 +407,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 />
               </div>
               <div className="md:col-span-1">
-                <InputLabel>Preferred Facility Type*</InputLabel>
-                <SelectField
+                <FieldLabel>{t("preferred_facility_type")}*</FieldLabel>
+                <LegacySelectField
                   name="assigned_facility_type"
                   variant="outlined"
                   margin="dense"
@@ -406,8 +421,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 />
               </div>
               <div className="md:col-span-1">
-                <InputLabel>Severity of Breathlessness*</InputLabel>
-                <SelectField
+                <FieldLabel>{t("severity_of_breathlessness")}*</FieldLabel>
+                <LegacySelectField
                   name="breathlessness_level"
                   variant="outlined"
                   margin="dense"
@@ -419,32 +434,27 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 />
               </div>
               <div className="">
-                <InputLabel>Reason for shift*</InputLabel>
-                <MultilineInputField
+                <TextAreaFormField
                   rows={5}
                   name="reason"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Type your reason here"
+                  label={t("reason_for_shift")}
+                  required
+                  placeholder={t("type_your_reason_here") + "*"}
                   value={state.form.reason}
-                  onChange={handleChange}
-                  errors={state.errors.reason}
+                  onChange={handleTextAreaChange}
+                  error={state.errors.reason}
                 />
               </div>
 
               <div className="">
-                <InputLabel>Any other comments</InputLabel>
-                <MultilineInputField
+                <TextAreaFormField
                   rows={5}
                   name="comments"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="type any extra comments here"
+                  label={t("any_other_comments")}
+                  placeholder={t("type_any_extra_comments_here")}
                   value={state.form.comments}
-                  onChange={handleChange}
-                  errors={state.errors.comments}
+                  onChange={handleTextAreaChange}
+                  error={state.errors.comments}
                 />
               </div>
 

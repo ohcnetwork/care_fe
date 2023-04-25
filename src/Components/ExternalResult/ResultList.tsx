@@ -1,11 +1,9 @@
 import loadable from "@loadable/component";
 import { Button } from "@material-ui/core";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
@@ -15,6 +13,7 @@ import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ExportMenu from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import CountBlock from "../../CAREUI/display/Count";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -227,59 +226,48 @@ export default function ResultList() {
         }
         handleCancel={() => setShowDialog(false)}
       />
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between">
         <PageTitle title="External Results" hideBack breadcrumbs={false} />
-        <ExportMenu
-          label="Import/Export"
-          exportItems={[
-            {
-              label: "Import Results",
-              action: () => navigate("/external_results/upload"),
-              options: {
-                icon: <CareIcon className="care-l-import" />,
+        <div className="w-full sm:w-auto">
+          <ExportMenu
+            label="Import/Export"
+            exportItems={[
+              {
+                label: "Import Results",
+                action: () => navigate("/external_results/upload"),
+                options: {
+                  icon: <CareIcon className="care-l-import" />,
+                },
               },
-            },
-            {
-              label: "Export Results",
-              action: () =>
-                externalResultList(
-                  { ...qParams, csv: true },
-                  "externalResultList"
-                ),
-              filePrefix: "external_results",
-              options: {
-                icon: <CareIcon className="care-l-export" />,
+              {
+                label: "Export Results",
+                action: () =>
+                  externalResultList(
+                    { ...qParams, csv: true },
+                    "externalResultList"
+                  ),
+                filePrefix: "external_results",
+                options: {
+                  icon: <CareIcon className="care-l-export" />,
+                },
               },
-            },
-          ]}
-        />
-      </div>
-      <div className="mt-5 lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
-        <div className="bg-white overflow-hidden shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Results
-              </dt>
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
-                </dd>
-              ) : (
-                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
-          </div>
+            ]}
+          />
         </div>
+      </div>
+      <div className="lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
+        <CountBlock
+          text="Total Results"
+          count={totalCount}
+          loading={isLoading}
+          icon={"clipboard-notes"}
+        />
         <div className="mt-2">
           <SearchInput
-            label="Search by name"
-            name="patient_name_search"
+            name="name"
             onChange={(e) => updateQuery({ [e.name]: e.value })}
             value={qParams.name}
-            placeholder="Search patient"
+            placeholder="Search by name"
           />
           <div className="text-sm font-medium my-2">Search by number</div>
           <div className="w-full max-w-sm">
@@ -346,11 +334,7 @@ export default function ResultList() {
         </table>
       </div>
       <Pagination totalCount={totalCount} />
-      <SlideOver {...advancedFilter}>
-        <div className="bg-white min-h-screen p-4">
-          <ListFilter {...advancedFilter} dataList={lsgWardData} />
-        </div>
-      </SlideOver>
+      <ListFilter {...advancedFilter} dataList={lsgWardData} />
     </div>
   );
 }

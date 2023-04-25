@@ -14,7 +14,8 @@
     "plugin:react-hooks/recommended",
     "plugin:prettier/recommended",
     "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "plugin:i18next/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -24,7 +25,10 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": [
+    "@typescript-eslint", 
+    "i18next"
+  ],
   "rules": {
     "quotes": ["error", "double"],
     "no-unused-vars": "off",
@@ -36,7 +40,20 @@
         "caughtErrorsIgnorePattern": "^_"
       }
     ],
-    "react/react-in-jsx-scope": "off"
+    "react/react-in-jsx-scope": "off",
+    "i18next/no-literal-string": [
+      "warn",
+      {
+        "mode": "jsx-only",
+        "jsx-attributes": {
+          "include": ["label", "placeholder", "error", "title"],
+          "exclude": [".*"]
+        },
+        "callees": {
+          "exclude": [".*"]
+        }
+      }
+    ]
   },
   "ignorePatterns": [
     "dist",

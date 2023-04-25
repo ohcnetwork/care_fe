@@ -24,6 +24,7 @@ import {
 import SlideOver from "../../CAREUI/interactive/SlideOver";
 import ButtonV2 from "../Common/components/ButtonV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import { useTranslation } from "react-i18next";
 
 const RESULT_LIMIT = 14;
 
@@ -41,6 +42,7 @@ const NotificationTile = ({
   const dispatch: any = useDispatch();
   const [result, setResult] = useState(notification);
   const [isMarkingAsRead, setIsMarkingAsRead] = useState(false);
+  const { t } = useTranslation();
 
   const handleMarkAsRead = async () => {
     setIsMarkingAsRead(true);
@@ -124,7 +126,7 @@ const NotificationTile = ({
                   : "care-l-envelope-check"
               }
             />
-            <span className="text-xs">Mark as Read</span>
+            <span className="text-xs">{t("mark_as_read")}</span>
           </ButtonV2>
           <ButtonV2
             border
@@ -132,7 +134,7 @@ const NotificationTile = ({
             className="font-semibold px-2 py-1 bg-white hover:bg-secondary-300 flex-shrink-0"
           >
             <CareIcon className="care-l-envelope-open" />
-            <span className="text-xs">Open</span>
+            <span className="text-xs">{t("open")}</span>
           </ButtonV2>
         </div>
       </div>
@@ -143,11 +145,13 @@ const NotificationTile = ({
 interface NotificationsListProps {
   shrinked: boolean;
   onClickCB?: () => void;
+  handleOverflow: any;
 }
 
 export default function NotificationsList({
   shrinked,
   onClickCB,
+  handleOverflow,
 }: NotificationsListProps) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -164,6 +168,7 @@ export default function NotificationsList({
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -188,7 +193,6 @@ export default function NotificationsList({
         setIsSubscribed("SubscribedOnAnotherDevice");
       }
     } catch (error) {
-      console.error(`Service worker error...Details: ${error}`);
       Sentry.captureException(error);
     }
   };
@@ -208,21 +212,21 @@ export default function NotificationsList({
       return (
         <>
           <CareIcon className="care-l-bell" />
-          <span className="text-xs">Subscribe</span>
+          <span className="text-xs">{t("subscribe")}</span>
         </>
       );
     } else if (status === "SubscribedOnAnotherDevice") {
       return (
         <>
           <CareIcon className="care-l-bell" />
-          <span className="text-xs">Subscribe on this device</span>
+          <span className="text-xs">{t("subscribe_on_this_device")}</span>
         </>
       );
     } else {
       return (
         <>
           <CareIcon className="care-l-bell-slash" />
-          <span className="text-xs">Unsubscribe</span>
+          <span className="text-xs">{t("unsubscribe")}</span>
         </>
       );
     }
@@ -254,16 +258,15 @@ export default function NotificationsList({
               })
               .catch(function (_e) {
                 Error({
-                  msg: "Unsubscribe failed.",
+                  msg: t("unsubscribe_failed"),
                 });
               });
           })
           .catch(function (_e) {
-            Error({ msg: "Subscription Error" });
+            Error({ msg: t("subscription_error") });
           });
       })
       .catch(function (_e) {
-        console.error(`Service worker error...Details: ${_e}`);
         Sentry.captureException(_e);
       });
   };
@@ -302,8 +305,6 @@ export default function NotificationsList({
 
     if (res.status >= 200 && res.status <= 300) {
       setIsSubscribed("SubscribedOnThisDevice");
-    } else {
-      console.log("Error saving web push info.");
     }
     setIsSubscribing(false);
   }
@@ -376,7 +377,7 @@ export default function NotificationsList({
               border
               onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
             >
-              {isLoading ? "Loading..." : "Load More"}
+              {isLoading ? t("loading") : t("load_more")}
             </ButtonV2>
           </div>
         )}
@@ -384,8 +385,10 @@ export default function NotificationsList({
     );
   } else if (data && data.length === 0) {
     manageResults = (
-      <div className="px-4 pt-3 lg:px-8">
-        <h5> No Results Found </h5>
+      <div className="px-4 pt-3 lg:px-8 flex justify-center">
+        <h5 className="text-gray-600 text-xl font-bold">
+          {t("no_results_found")}
+        </h5>
       </div>
     );
   }
@@ -395,16 +398,17 @@ export default function NotificationsList({
   return (
     <>
       <Item
-        text="Notifications"
+        text={t("Notifications")}
         do={() => setOpen(!open)}
         icon={<CareIcon className="care-l-bell h-5" />}
         badgeCount={unreadCount}
+        handleOverflow={handleOverflow}
       />
       <SlideOver
         open={open}
         setOpen={setOpen}
         slideFrom="right"
-        title="Notifications"
+        title={t("Notifications")}
         dialogClass="md:w-[400px]"
         onCloseClick={onClickCB}
       >
@@ -421,7 +425,7 @@ export default function NotificationsList({
               }}
             >
               <CareIcon className="care-l-sync" />
-              <span className="text-xs">Reload</span>
+              <span className="text-xs">{t("reload")}</span>
             </ButtonV2>
             <ButtonV2
               onClick={handleSubscribeClick}
@@ -445,13 +449,13 @@ export default function NotificationsList({
                     : "care-l-envelope-check"
                 }
               />
-              <span className="text-xs">Mark all as Read</span>
+              <span className="text-xs">{t("mark_all_as_read")}</span>
             </ButtonV2>
           </div>
 
           <SelectMenuV2
             className="mb-2"
-            placeholder="Filter by category"
+            placeholder={t("filter_by_category")}
             options={NOTIFICATION_EVENTS}
             value={eventFilter}
             optionLabel={(o) => o.text}
