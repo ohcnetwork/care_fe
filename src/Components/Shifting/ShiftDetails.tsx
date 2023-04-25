@@ -1,26 +1,29 @@
-import React, { useState, useCallback } from "react";
-import loadable from "@loadable/component";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getShiftDetails, deleteShiftRecord } from "../../Redux/actions";
-import { navigate, Link } from "raviger";
-import QRCode from "qrcode.react";
-import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
 import * as Notification from "../../Utils/Notifications.js";
-import { CopyToClipboard } from "react-copy-to-clipboard";
-import CommentSection from "./CommentsSection";
-import { formatDate } from "../../Utils/utils";
-import useConfig from "../../Common/hooks/useConfig";
-import { useTranslation } from "react-i18next";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
+
+import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
+import { Link, navigate } from "raviger";
+import React, { useCallback, useState } from "react";
+import { deleteShiftRecord, getShiftDetails } from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+
 import ButtonV2 from "../Common/components/ButtonV2";
+import CommentSection from "./CommentsSection";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "../Common/components/Page";
+import QRCode from "qrcode.react";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
+import { formatDate } from "../../Utils/utils";
+import loadable from "@loadable/component";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function ShiftDetails(props: { id: string }) {
-  const { static_header_logo, kasp_full_string } = useConfig();
+  const { static_header_logo, kasp_full_string, wartime_shifting } =
+    useConfig();
   const dispatch: any = useDispatch();
   const initialData: any = {};
   const [data, setData] = useState(initialData);
@@ -89,7 +92,7 @@ export default function ShiftDetails(props: { id: string }) {
   };
 
   const copyContent = (data: any) => {
-    const formattedText =
+    let formattedText =
       t("disease_status") +
       ": *" +
       data?.patient_object?.disease_status +
@@ -114,13 +117,13 @@ export default function ShiftDetails(props: { id: string }) {
       ":" +
       data?.patient_object?.address +
       "\n" +
-      t("facility_preference") +
-      ":" +
-      data?.assigned_facility_type +
-      "\n" +
       t("reason") +
       ":" +
       data?.reason;
+    if (wartime_shifting) {
+      formattedText +=
+        t("facility_preference") + ": " + data?.assigned_facility_type + "\n";
+    }
     return formattedText;
   };
 
@@ -565,7 +568,9 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("referred_to")}:{" "}
               </span>
-              {data.assigned_facility_object?.name || "--"}
+              {data.assigned_facility_external ||
+                data.assigned_facility_object?.name ||
+                "--"}
             </div>
           </div>
 
@@ -688,17 +693,21 @@ export default function ShiftDetails(props: { id: string }) {
                 </span>
                 {data.orgin_facility_object?.name || "--"}
               </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("shifting_approving_facility")}:{" "}
-                </span>
-                {data.shifting_approving_facility_object?.name || "--"}
-              </div>
+              {wartime_shifting && (
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    {t("shifting_approving_facility")}:{" "}
+                  </span>
+                  {data.shifting_approving_facility_object?.name || "--"}
+                </div>
+              )}
               <div>
                 <span className="font-semibold leading-relaxed">
                   {t("assigned_facility")}:{" "}
                 </span>
-                {data.assigned_facility_object?.name || "--"}
+                {data.assigned_facility_external ||
+                  data.assigned_facility_object?.name ||
+                  "--"}
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
@@ -739,6 +748,15 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
+                  {t("patient_category")}:{" "}
+                </span>
+                <span className="badge badge-pill badge-warning py-1 px-2">
+                  {" "}
+                  {data.patient_category}
+                </span>
+              </div>
+              <div>
+                <span className="font-semibold leading-relaxed">
                   {kasp_full_string}:{" "}
                 </span>
                 <span className="badge badge-pill badge-warning py-1 px-2">
@@ -746,24 +764,28 @@ export default function ShiftDetails(props: { id: string }) {
                   {data.is_kasp ? t("yes") : t("no")}
                 </span>
               </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("vehicle_preference")}:{" "}
-                </span>
-                {data.vehicle_preference || data.preferred_vehicle_choice}
-              </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("facility_preference")}:{" "}
-                </span>
-                {data.assigned_facility_type || "--"}
-              </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {t("severity_of_breathlessness")}:{" "}
-                </span>
-                {data.breathlessness_level || "--"}
-              </div>
+              {wartime_shifting && (
+                <>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      {t("vehicle_preference")}:{" "}
+                    </span>
+                    {data.vehicle_preference || data.preferred_vehicle_choice}
+                  </div>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      {t("facility_preference")}:{" "}
+                    </span>
+                    {data.assigned_facility_type || "--"}
+                  </div>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      {t("severity_of_breathlessness")}:{" "}
+                    </span>
+                    {data.breathlessness_level || "--"}
+                  </div>{" "}
+                </>
+              )}
 
               <div className="md:row-span-2 md:col-span-2">
                 <span className="font-semibold leading-relaxed">
@@ -771,7 +793,34 @@ export default function ShiftDetails(props: { id: string }) {
                 </span>
                 <span className="ml-2">{data.reason || "--"}</span>
               </div>
-
+              <div className="md:row-span-2 md:col-span-2">
+                <span className="font-semibold leading-relaxed">
+                  {t("ambulance_driver_name")}:{" "}
+                </span>
+                <span className="ml-2">
+                  {data.ambulance_driver_name || "--"}
+                </span>
+              </div>
+              <div className="md:row-span-2 md:col-span-2">
+                <span className="font-semibold leading-relaxed">
+                  {t("ambulance_phone_number")}:{" "}
+                </span>
+                <span className="ml-2">
+                  {data.ambulance_phone_number ? (
+                    <a href={`tel:${data.ambulance_phone_number}`}>
+                      {data.ambulance_phone_number}
+                    </a>
+                  ) : (
+                    "--"
+                  )}
+                </span>
+              </div>
+              <div className="md:row-span-2 md:col-span-2">
+                <span className="font-semibold leading-relaxed">
+                  {t("ambulance_number")}:{" "}
+                </span>
+                <span className="ml-2">{data.ambulance_number || "--"}</span>
+              </div>
               <div className="md:row-span-2 md:col-span-2">
                 <span className="font-semibold leading-relaxed">
                   {t("comments")}:{" "}
@@ -869,17 +918,20 @@ export default function ShiftDetails(props: { id: string }) {
 
                 {showFacilityCard(data.orgin_facility_object)}
               </div>
-              <div>
-                <h4 className="mt-8">{t("details_of_assigned_facility")}</h4>
-                {showFacilityCard(data.assigned_facility_object)}
-              </div>
-
-              <div>
-                <h4 className="mt-8">
-                  {t("details_of_shifting_approving_facility")}
-                </h4>
-                {showFacilityCard(data.shifting_approving_facility_object)}
-              </div>
+              {!data.assigned_facility_external && (
+                <div>
+                  <h4 className="mt-8">{t("details_of_assigned_facility")}</h4>
+                  {showFacilityCard(data.assigned_facility_object)}
+                </div>
+              )}
+              {wartime_shifting && (
+                <div>
+                  <h4 className="mt-8">
+                    {t("details_of_shifting_approving_facility")}
+                  </h4>
+                  {showFacilityCard(data.shifting_approving_facility_object)}
+                </div>
+              )}
             </div>
           </div>
         </Page>

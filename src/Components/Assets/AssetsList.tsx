@@ -48,6 +48,7 @@ const AssetsList = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [facility, setFacility] = useState<FacilityModel>();
   const [asset_type, setAssetType] = useState<string>();
+  const [facilityName, setFacilityName] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
@@ -118,6 +119,14 @@ const AssetsList = () => {
     },
     [dispatch, fetchData]
   );
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (!qParams.facility) return setFacilityName("");
+      const res = await dispatch(getAnyFacility(qParams.facility, "facility"));
+      setFacilityName(res?.data?.name);
+    }
+    fetchFacilityName();
+  }, [dispatch, qParams.facility]);
 
   const fetchFacility = useCallback(
     async (status: statusType) => {
@@ -367,14 +376,14 @@ const AssetsList = () => {
           </div>
         </div>
       </div>
-      <AssetFilter {...advancedFilter} />
+      <AssetFilter {...advancedFilter} key={window.location.search} />
       {isLoading ? (
         <Loading />
       ) : (
         <>
           <FilterBadges
             badges={({ badge, value }) => [
-              value("Facility", ["facility", "location"], facility?.name || ""),
+              value("Facility", "facility", facilityName || ""),
               badge("Name/Serial No./QR ID", "search"),
               value("Asset Type", "asset_type", asset_type || ""),
               value("Asset Class", "asset_class", asset_class || ""),
