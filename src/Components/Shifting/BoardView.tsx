@@ -73,7 +73,7 @@ export default function BoardView() {
             <button
               className={
                 "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
-                (boardFilter === ACTIVE
+                (boardFilter[0] === ACTIVE[0]
                   ? " bg-white text-gray-800"
                   : " bg-gray-200 text-sm text-gray-500")
               }
@@ -84,7 +84,7 @@ export default function BoardView() {
             <button
               className={
                 "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
-                (boardFilter === COMPLETED
+                (boardFilter[0] === COMPLETED[0]
                   ? " bg-white text-gray-800"
                   : " bg-gray-200 text-sm text-gray-500")
               }
