@@ -1,21 +1,25 @@
-import React, { useEffect, useState } from "react";
+import * as Notification from "../../Utils/Notifications.js";
+
 import { classNames, formatDate } from "../../Utils/utils";
 import {
   completeTransfer,
   downloadShiftRequests,
   listShiftRequests,
 } from "../../Redux/actions";
+import { useDispatch, useSelector } from "react-redux";
 import { useDrag, useDrop } from "react-dnd";
+import { useEffect, useState } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import { CSVLink } from "react-csv";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CircularProgress from "../Common/components/CircularProgress";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import { checkAuthority } from "../../Common/utils";
 import moment from "moment";
 import { navigate } from "raviger";
+import { transferPatient } from "../../Redux/actions";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 
 const limit = 14;
@@ -41,6 +45,8 @@ const reduceLoading = (action: string, current: any) => {
 
 const ShiftCard = ({ shift, filter }: any) => {
   const dispatch: any = useDispatch();
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
   const { wartime_shifting } = useConfig();
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
@@ -51,6 +57,7 @@ const ShiftCard = ({ shift, filter }: any) => {
     item: shift,
     collect: (monitor) => ({ isDragging: !!monitor.isDragging() }),
   }));
+  const [isPatientTransfering, setIsPatientTransfering] = useState(false);
   const { t } = useTranslation();
 
   const handleTransferComplete = (shift: any) => {
@@ -61,6 +68,9 @@ const ShiftCard = ({ shift, filter }: any) => {
       );
     });
   };
+
+  console.log(shift);
+
   return (
     <div ref={drag} className="w-full mt-2">
       <div
@@ -198,6 +208,49 @@ const ShiftCard = ({ shift, filter }: any) => {
               </div>
             </dl>
           </div>
+
+          {shift?.status === "COMPLETED" &&
+            shift?.assigned_facility &&
+            (checkAuthority(currentUser?.data?.user_type, "DistrictAdmin") ||
+              currentUser?.data?.home_facility ===
+                shift?.assigned_facility) && (
+              <div className="mt-2 flex">
+                <ButtonV2
+                  loading={isPatientTransfering}
+                  disabled={
+                    shift?.origin_facility !==
+                      shift?.patient_object?.facility &&
+                    shift?.assigned_facility === shift?.patient_object?.facility
+                  }
+                  onClick={async () => {
+                    setIsPatientTransfering(true);
+                    const data = {
+                      date_of_birth: moment(
+                        shift?.patient_object?.date_of_birth
+                      ).format("YYYY-MM-DD"),
+                      facility: shift?.assigned_facility,
+                    };
+                    const res = await dispatch(
+                      transferPatient(data, { id: shift?.patient })
+                    );
+                    setIsPatientTransfering(false);
+                    if (res && res.data && res.status === 200) {
+                      Notification.Success({
+                        msg: "Patient admitted successfully",
+                      });
+                    } else {
+                      Notification.Error({
+                        msg: "Patient admission failed",
+                      });
+                    }
+                  }}
+                  className="w-full mr-2"
+                >
+                  <CareIcon className="care-l-user-injured text-lg" />
+                  <span>{t("admit_patient")}</span>
+                </ButtonV2>
+              </div>
+            )}
 
           <div className="mt-2 flex">
             <button

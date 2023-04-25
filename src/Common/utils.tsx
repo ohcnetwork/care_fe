@@ -1,6 +1,7 @@
+import { OptionsType, USER_TYPES, UserRole } from "./constants";
+
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from "react";
-import { OptionsType } from "./constants";
 
 export interface statusType {
   aborted?: boolean;
@@ -68,4 +69,10 @@ export const deepEqual = (x: any, y: any): boolean => {
   }
 
   return false;
+};
+
+export const checkAuthority = (type: UserRole, cutoff: UserRole) => {
+  const userAuthority = USER_TYPES.indexOf(type);
+  const cutoffAuthority = USER_TYPES.indexOf(cutoff);
+  return userAuthority >= cutoffAuthority;
 };
