@@ -3,17 +3,20 @@ import { Link } from "raviger";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { PatientModel } from "../Patient/models";
 import PatientVitalsCard from "../Patient/PatientVitalsCard";
+import { AssetLocationObject } from "../Assets/AssetTypes";
 
 interface MonitorCardProps {
   facilityId: string;
   patient: PatientModel;
   socketUrl: string;
+  location: AssetLocationObject;
 }
 
 export const MonitorCard = ({
   facilityId,
   patient,
   socketUrl,
+  location,
 }: MonitorCardProps) => {
   return (
     <div key={patient.id} className="group p-2 rounded-lg bg-black">
@@ -31,6 +34,10 @@ export const MonitorCard = ({
         <span className="flex-1 flex items-center justify-end gap-2 text-end">
           <CareIcon className="care-l-bed text-lg" />
           {patient.last_consultation?.current_bed?.bed_object?.name}
+        </span>
+        <span className="flex-2 flex items-center justify-end gap-2 text-end">
+          <CareIcon className="care-l-location-point text-lg" />
+          {location.name}
         </span>
       </div>
       <PatientVitalsCard socketUrl={socketUrl} shrinked />

@@ -148,6 +148,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
                 border
                 onClick={() => setShowSelectLocation(true)}
               >
+                <CareIcon className="care-l-location-point text-lg" />
                 Change Location
               </ButtonV2>
               <ButtonV2
@@ -278,9 +279,10 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
                 (currentPage - 1) * PER_PAGE_LIMIT,
                 currentPage * PER_PAGE_LIMIT
               )
-              .map(({ patient, socketUrl }) => (
+              .map(({ patient, socketUrl, asset }) => (
                 <MonitorCard
                   key={patient.id}
+                  location={asset.location_object}
                   facilityId={facilityId}
                   patient={patient}
                   socketUrl={socketUrl}
@@ -292,9 +294,10 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
                 (currentPage - 1) * PER_PAGE_LIMIT,
                 currentPage * PER_PAGE_LIMIT
               )
-              .map(({ patient, socketUrl }) => (
+              .map(({ patient, socketUrl, asset }) => (
                 <MonitorCard
                   key={patient.id}
+                  location={asset.location_object}
                   facilityId={facilityId}
                   patient={patient}
                   socketUrl={socketUrl}
