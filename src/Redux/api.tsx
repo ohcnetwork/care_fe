@@ -822,7 +822,7 @@ const routes: Routes = {
   },
 
   linkCareContext: {
-    path: "/v1.0/patients/profile/add_care_context/",
+    path: "/api/v1/abdm/healthid/add_care_context/",
     method: "POST",
   },
 };

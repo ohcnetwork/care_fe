@@ -256,7 +256,7 @@ export default function PatientInfoCard(props: {
 
                 console.log(res);
 
-                if (res.status === 200) {
+                if (res.status === 202) {
                   Notification.Success({
                     msg: "Care Context sucessfully linked!",
                   });
