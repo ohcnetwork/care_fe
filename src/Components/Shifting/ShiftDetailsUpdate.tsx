@@ -32,6 +32,7 @@ import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { LegacySelectField } from "../Common/HelperInputFields";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { UserSelect } from "../Common/UserSelect";
@@ -92,9 +93,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     errors: { ...initError },
   };
 
-  const shiftStatusOptions = (
-    wartime_shifting ? SHIFTING_CHOICES_WARTIME : SHIFTING_CHOICES_PEACETIME
-  ).map((option) => option.text);
+  const shiftStatusOptions = wartime_shifting
+    ? SHIFTING_CHOICES_WARTIME
+    : SHIFTING_CHOICES_PEACETIME;
 
   let requiredFields: any = {
     reason: {
@@ -181,6 +182,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     form[name] = value;
     dispatch({ type: "set_form", form });
   };
+
   const handleTextAreaChange = (e: any) => {
     const form = { ...state.form };
     const { name, value } = e;
@@ -338,16 +340,16 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           <CardContent>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="md:col-span-1">
-                <FieldLabel>{t("status")}</FieldLabel>
-                <LegacySelectField
+                <SelectFormField
                   name="status"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.status}
+                  label="Status"
+                  required
                   options={shiftStatusOptions}
-                  onChange={handleChange}
-                  className="bg-white h-14 w-full shadow-sm md:text-sm md:leading-5 mt-2"
+                  value={state.form.status}
+                  optionLabel={(option) => option.label || option.text}
+                  optionValue={(option) => option.text}
+                  optionSelectedLabel={(option) => option.label || option.text}
+                  onChange={handleFormFieldChange}
                 />
               </div>
               <div className="flex-none">
