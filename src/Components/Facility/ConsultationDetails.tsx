@@ -355,7 +355,7 @@ export const ConsultationDetails = (props: any) => {
             backUrl="/patients"
           />
           <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
-            {patientData.is_active && (
+            {!consultationData.discharge_date && (
               <div className="w-full flex flex-col sm:flex-row px-2">
                 <ButtonV2
                   onClick={() =>
@@ -493,10 +493,7 @@ export const ConsultationDetails = (props: any) => {
                 <button
                   className="btn btn-primary"
                   onClick={handleDischageClickOpen}
-                  disabled={
-                    !patientData.is_active ||
-                    patientData.last_consultation?.facility !== facilityId
-                  }
+                  disabled={!!consultationData.discharge_date}
                 >
                   <i className="fas fa-hospital-user"></i>
                   &nbsp; Discharge from CARE
