@@ -10,7 +10,10 @@ import {
   updateFacilityBed,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { LegacySelectField } from "../Common/HelperInputFields";
+import {
+  LegacySelectField,
+  LegacyCheckboxField,
+} from "../Common/HelperInputFields";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -36,14 +39,17 @@ export const AddBedForm = (props: BedFormProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [locationName, setLocationName] = useState("");
   const [bedName, setBedName] = useState("");
+  const [multipleBeds, setMultipleBeds] = useState(false);
+  const [numberOfBeds, setNumberOfBeds] = useState(1); //default = 1
   const [errors, setErrors] = useState({
     name: "",
     description: "",
     bedType: "",
+    numberOfBeds: "",
   });
 
   const headerText = !bedId ? "Add Bed" : "Update Bed";
-  const buttonText = !bedId ? "Add Bed" : "Update Bed";
+  const buttonText = !bedId ? "Add Bed(s)" : "Update Bed";
 
   useEffect(() => {
     async function fetchFacilityLocationAndBed() {
@@ -66,6 +72,7 @@ export const AddBedForm = (props: BedFormProps) => {
         setBedName(res?.data?.name || "");
         setDescription(res?.data?.description || "");
         setBedType(res?.data?.bed_type || "");
+        setNumberOfBeds(res?.data?.number_of_beds || "");
       }
       setIsLoading(false);
     }
@@ -76,6 +83,7 @@ export const AddBedForm = (props: BedFormProps) => {
     name: string;
     description: string;
     bed_type: string;
+    number_of_beds: number;
   }) => {
     let isValid = true;
     if (!data.name) {
@@ -85,6 +93,16 @@ export const AddBedForm = (props: BedFormProps) => {
     if (!data.bed_type) {
       isValid = false;
       setErrors((prev) => ({ ...prev, bedType: "Please select a bed type" }));
+    }
+    if (!multipleBeds) {
+      setNumberOfBeds(1);
+    }
+    if (data.number_of_beds < 1) {
+      isValid = false;
+      setErrors((prev) => ({
+        ...prev,
+        numberOfBeds: "Please enter a number larger than 0.",
+      }));
     }
 
     return isValid;
@@ -102,6 +120,7 @@ export const AddBedForm = (props: BedFormProps) => {
       name,
       description,
       bed_type: bedType,
+      number_of_beds: numberOfBeds,
     };
 
     if (!validateInputs(data)) return;
@@ -117,7 +136,7 @@ export const AddBedForm = (props: BedFormProps) => {
     if (res && (res.status === 201 || res.status === 200)) {
       const notificationMessage = bedId
         ? "Bed updated successfully"
-        : "Bed created successfully";
+        : "Bed(s) created successfully";
 
       navigate(`/facility/${facilityId}/location/${locationId}/beds`, {
         replace: true,
@@ -205,7 +224,29 @@ export const AddBedForm = (props: BedFormProps) => {
                     errors={errors.bedType}
                   />
                 </div>
-
+                {!bedId && (
+                  <div>
+                    <div>
+                      <LegacyCheckboxField
+                        label="Do you want to make multiple beds?"
+                        checked={multipleBeds}
+                        onClick={() => setMultipleBeds(!multipleBeds)}
+                      />
+                    </div>
+                    <div className="mt-2">
+                      <TextFormField
+                        name="number_of_beds"
+                        disabled={!multipleBeds}
+                        label="Number of beds"
+                        type="number"
+                        value={numberOfBeds.toString()}
+                        min={1}
+                        max={25}
+                        onChange={(e) => setNumberOfBeds(Number(e.value))}
+                      />
+                    </div>
+                  </div>
+                )}
                 <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
                   <Cancel onClick={handleCancel} />
                   <Submit onClick={handleSubmit} label={buttonText} />

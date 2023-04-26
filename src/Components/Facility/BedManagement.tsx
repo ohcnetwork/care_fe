@@ -262,7 +262,7 @@ export const BedManagement = (props: BedManagementProps) => {
             }
           >
             <i className="fas fa-plus mr-2"></i>
-            Add New Bed
+            Add New Bed(s)
           </button>
         </div>
         {bed}
