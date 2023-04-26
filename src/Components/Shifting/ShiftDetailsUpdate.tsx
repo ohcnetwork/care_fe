@@ -25,6 +25,7 @@ import { CircularProgress } from "@material-ui/core";
 import { ConsultationModel } from "../Facility/models.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
+import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { LegacySelectField } from "../Common/HelperInputFields";
@@ -210,10 +211,15 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (discharged = false) => {
     const validForm = validateForm();
 
     if (validForm) {
+      if (!discharged && state.form.status === "PATIENT EXPIRED") {
+        setShowDischargeModal(true);
+        return;
+      }
+
       setIsLoading(true);
 
       const data: any = {
@@ -260,11 +266,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           msg: t("shift_request_updated_successfully"),
         });
 
-        if (data.status === "PATIENT EXPIRED") {
-          setShowDischargeModal(true);
-        } else {
-          navigate(`/shifting/${props.id}`);
-        }
+        navigate(`/shifting/${props.id}`);
       } else {
         setIsLoading(false);
       }
@@ -319,9 +321,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         consultationData={consultationData}
         discharge_reason="EXP"
         afterSubmit={() => {
-          navigate(
-            `/facility/${consultationData.facility}/patient/${consultationData.patient}/consultation/${consultationData.id}`
-          );
+          handleSubmit(true);
         }}
       />
       <PageTitle
@@ -598,7 +598,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
               <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
                 <Cancel onClick={() => goBack()} />
-                <Submit onClick={handleSubmit} />
+                <Submit onClick={() => handleSubmit()} />
               </div>
             </div>
           </CardContent>
