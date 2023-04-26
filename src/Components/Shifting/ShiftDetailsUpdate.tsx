@@ -36,14 +36,13 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { UserSelect } from "../Common/UserSelect";
+import { classNames } from "../../Utils/utils.js";
 import loadable from "@loadable/component";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
-import { classNames } from "../../Utils/utils.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -345,7 +344,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   optionLabel={(option) => option.label || option.text}
                   optionValue={(option) => option.text}
                   optionSelectedLabel={(option) => option.label || option.text}
-                  onChange={handleChange}
+                  onChange={handleFormFieldChange}
                   className={classNames(
                     "bg-white",
                     wartime_shifting ? " h-14 " : " h-12 ",
