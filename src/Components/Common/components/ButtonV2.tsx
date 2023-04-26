@@ -1,9 +1,9 @@
-import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
 import AuthorizedChild from "../../../CAREUI/misc/AuthorizedChild";
 import { AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { Link } from "raviger";
 import { classNames } from "../../../Utils/utils";
+import { useTranslation } from "react-i18next";
 
 export type ButtonSize = "small" | "default" | "large";
 export type ButtonShape = "square" | "circle";
@@ -75,6 +75,14 @@ export type ButtonProps = RawButtonProps &
      * Whether the button should be having a Id.
      */
     id?: string | undefined;
+    /**
+     * Tooltip showed when hovered over.
+     */
+    tooltip?: string;
+    /**
+     * Class for tooltip
+     */
+    tooltipClassName?: string;
   };
 
 const ButtonV2 = ({
@@ -91,6 +99,8 @@ const ButtonV2 = ({
   children,
   href,
   target,
+  tooltip,
+  tooltipClassName,
   ...props
 }: ButtonProps) => {
   const className = classNames(
@@ -132,7 +142,16 @@ const ButtonV2 = ({
   }
 
   return (
-    <button {...props} disabled={disabled || loading} className={className}>
+    <button
+      {...props}
+      disabled={disabled || loading}
+      className={classNames(className, tooltip && "tooltip")}
+    >
+      {tooltip && (
+        <span className={classNames("tooltip-text", tooltipClassName)}>
+          {tooltip}
+        </span>
+      )}
       {children}
     </button>
   );

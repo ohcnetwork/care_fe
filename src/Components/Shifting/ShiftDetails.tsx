@@ -1,6 +1,11 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
+import {
+  GENDER_TYPES,
+  SHIFTING_CHOICES_PEACETIME,
+  SHIFTING_CHOICES_WARTIME,
+  TEST_TYPE_CHOICES,
+} from "../../Common/constants";
 import { Link, navigate } from "raviger";
 import React, { useCallback, useState } from "react";
 import { deleteShiftRecord, getShiftDetails } from "../../Redux/actions";
@@ -37,6 +42,10 @@ export default function ShiftDetails(props: { id: string }) {
   const [openDeleteShiftDialog, setOpenDeleteShiftDialog] =
     React.useState(false);
   const { t } = useTranslation();
+
+  const shiftStatusOptions = wartime_shifting
+    ? SHIFTING_CHOICES_WARTIME
+    : SHIFTING_CHOICES_PEACETIME;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -552,6 +561,15 @@ export default function ShiftDetails(props: { id: string }) {
           options={
             <div className="flex gap-2">
               <ButtonV2
+                tooltip={
+                  ["COMPLETED", "CANCELLED"].includes(data.status)
+                    ? `A shifting request, once ${data.status.toLowerCase()} cannot be updated`
+                    : ""
+                }
+                tooltipClassName="tooltip-top -translate-x-28 -translate-y-1 text-xs"
+                disabled={
+                  data.status === "COMPLETED" || data.status === "CANCELLED"
+                }
                 onClick={() => navigate(`/shifting/${data.external_id}/update`)}
               >
                 {t("update_status_details")}
@@ -591,7 +609,9 @@ export default function ShiftDetails(props: { id: string }) {
               <div>
                 <span className="font-semibold leading-relaxed">Status: </span>
                 <span className="badge badge-pill badge-primary py-1 px-2">
-                  {data.status}
+                  {shiftStatusOptions.find(
+                    (option) => data.status === option.text
+                  )?.label || data.status}
                 </span>
               </div>
               <div>

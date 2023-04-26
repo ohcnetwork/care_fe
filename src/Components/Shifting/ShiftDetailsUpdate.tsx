@@ -4,7 +4,8 @@ import {
   BREATHLESSNESS_LEVEL,
   FACILITY_TYPES,
   PATIENT_CATEGORIES,
-  SHIFTING_CHOICES,
+  SHIFTING_CHOICES_PEACETIME,
+  SHIFTING_CHOICES_WARTIME,
   SHIFTING_VEHICLE_CHOICES,
 } from "../../Common/constants";
 import {
@@ -31,17 +32,17 @@ import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { LegacySelectField } from "../Common/HelperInputFields";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { UserSelect } from "../Common/UserSelect";
+import { classNames } from "../../Utils/utils.js";
 import loadable from "@loadable/component";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
-import { classNames } from "../../Utils/utils.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -93,9 +94,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     errors: { ...initError },
   };
 
-  const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text).filter(
-    (choice) => wartime_shifting || choice !== "PENDING"
-  );
+  const shiftStatusOptions = wartime_shifting
+    ? SHIFTING_CHOICES_WARTIME
+    : SHIFTING_CHOICES_PEACETIME;
 
   let requiredFields: any = {
     reason: {
@@ -177,6 +178,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     form[name] = value;
     dispatch({ type: "set_form", form });
   };
+
   const handleTextAreaChange = (e: any) => {
     const form = { ...state.form };
     const { name, value } = e;
@@ -191,7 +193,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleFormFieldChange = (event: any) => {
+  const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
     dispatch({
       type: "set_form",
       form: { ...state.form, [event.name]: event.value },
@@ -333,15 +335,16 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           <CardContent>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="md:col-span-1">
-                <FieldLabel>{t("status")}</FieldLabel>
-                <LegacySelectField
+                <SelectFormField
                   name="status"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.status}
+                  label="Status"
+                  required
                   options={shiftStatusOptions}
-                  onChange={handleChange}
+                  value={state.form.status}
+                  optionLabel={(option) => option.label || option.text}
+                  optionValue={(option) => option.text}
+                  optionSelectedLabel={(option) => option.label || option.text}
+                  onChange={handleFormFieldChange}
                   className={classNames(
                     "bg-white",
                     wartime_shifting ? " h-14 " : " h-12 ",

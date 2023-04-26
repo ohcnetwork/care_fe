@@ -5,6 +5,10 @@ import {
 } from "../../Common/constants";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
 import React, { useEffect, useState } from "react";
+import {
+  SHIFTING_CHOICES_PEACETIME,
+  SHIFTING_CHOICES_WARTIME,
+} from "../../Common/constants";
 import { getAnyFacility, getUserList } from "../../Redux/actions";
 
 import { CircularProgress } from "@material-ui/core";
@@ -14,7 +18,6 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { LegacySelectField } from "../Common/HelperInputFields";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { SHIFTING_CHOICES } from "../../Common/constants";
 import { UserSelect } from "../Common/UserSelect2";
 import moment from "moment";
 import { navigate } from "raviger";
@@ -57,9 +60,9 @@ export default function ListFilter(props: any) {
   const [isAssignedUserLoading, setAssignedUserLoading] = useState(false);
   const { t } = useTranslation();
 
-  const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text).filter(
-    (choice) => wartime_shifting || choice !== "PENDING"
-  );
+  const shiftStatusOptions = (
+    wartime_shifting ? SHIFTING_CHOICES_WARTIME : SHIFTING_CHOICES_PEACETIME
+  ).map((option) => option.text);
 
   const [filterState, setFilterState] = useMergeState({
     orgin_facility: filter.orgin_facility || "",

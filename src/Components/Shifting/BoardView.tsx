@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import {
+  SHIFTING_CHOICES_PEACETIME,
+  SHIFTING_CHOICES_WARTIME,
+} from "../../Common/constants";
 
 import BadgesList from "./BadgesList";
 import { ExportButton } from "../Common/Export";
 import ListFilter from "./ListFilter";
-import { SHIFTING_CHOICES } from "../../Common/constants";
 import SearchInput from "../Form/SearchInput";
 import ShiftingBoard from "./ShiftingBoard";
 import { downloadShiftRequests } from "../../Redux/actions";
@@ -12,6 +14,7 @@ import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import useFilters from "../../Common/hooks/useFilters";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import withScrolling from "react-dnd-scrolling";
 
@@ -25,16 +28,28 @@ export default function BoardView() {
   });
   const { wartime_shifting } = useConfig();
 
-  const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text).filter(
-    (choice) => wartime_shifting || choice !== "PENDING"
+  const shiftStatusOptions = wartime_shifting
+    ? SHIFTING_CHOICES_WARTIME
+    : SHIFTING_CHOICES_PEACETIME;
+
+  const COMPLETED = wartime_shifting
+    ? [
+        "COMPLETED",
+        "REJECTED",
+        "CANCELLED",
+        "DESTINATION REJECTED",
+        "PATIENT EXPIRED",
+      ]
+    : ["CANCELLED", "PATIENT EXPIRED"];
+
+  const completedBoards = shiftStatusOptions.filter((option) =>
+    COMPLETED.includes(option.text)
+  );
+  const activeBoards = shiftStatusOptions.filter(
+    (option) => !COMPLETED.includes(option.text)
   );
 
-  const COMPLETED = ["COMPLETED", "REJECTED", "DESTINATION REJECTED"];
-  const ACTIVE = shiftStatusOptions.filter(
-    (option) => !COMPLETED.includes(option)
-  );
-
-  const [boardFilter, setBoardFilter] = useState(ACTIVE);
+  const [boardFilter, setBoardFilter] = useState(activeBoards);
   const [isLoading] = useState(false);
   const { t } = useTranslation();
 
@@ -68,22 +83,22 @@ export default function BoardView() {
             <button
               className={
                 "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
-                (boardFilter === ACTIVE
+                (boardFilter[0].text === activeBoards[0].text
                   ? " bg-white text-gray-800"
                   : " bg-gray-200 text-sm text-gray-500")
               }
-              onClick={() => setBoardFilter(ACTIVE)}
+              onClick={() => setBoardFilter(activeBoards)}
             >
               <span>{t("active")}</span>
             </button>
             <button
               className={
                 "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
-                (boardFilter === COMPLETED
+                (boardFilter[0].text === completedBoards[0].text
                   ? " bg-white text-gray-800"
                   : " bg-gray-200 text-sm text-gray-500")
               }
-              onClick={() => setBoardFilter(COMPLETED)}
+              onClick={() => setBoardFilter(completedBoards)}
             >
               <span>{t("completed")}</span>
             </button>
@@ -116,9 +131,10 @@ export default function BoardView() {
           ) : (
             boardFilter.map((board) => (
               <ShiftingBoard
-                key={board}
+                key={board.text}
                 filterProp={qParams}
-                board={board}
+                board={board.text}
+                title={board.label}
                 formatFilter={formatFilter}
               />
             ))
