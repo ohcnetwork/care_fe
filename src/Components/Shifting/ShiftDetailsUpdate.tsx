@@ -98,11 +98,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     reason: {
       errorText: t("please_enter_a_reason_for_the_shift"),
     },
-
-    ambulance_number: {
-      errorText: "Ambulance Number is required",
-      invalidText: "Please enter valid Ambulance Number",
-    },
   };
 
   if (wartime_shifting) {
@@ -193,7 +188,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
+  const handleFormFieldChange = (event: any) => {
     dispatch({
       type: "set_form",
       form: { ...state.form, [event.name]: event.value },
@@ -570,7 +565,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               <div className="md:col-span-1">
                 <TextFormField
                   label="Ambulance No."
-                  required
                   name="ambulance_number"
                   placeholder="Ambulance No."
                   value={state.form.ambulance_number}
