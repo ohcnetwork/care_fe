@@ -177,28 +177,12 @@ export default function ShiftDetails(props: { id: string }) {
               {patientData?.disease_status}
             </span>
           </div>
-
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("srf_id")}:{" "}
-            </span>
-            {(patientData?.srf_id && patientData?.srf_id) || "-"}
-          </div>
           <div>
             <span className="font-semibold leading-relaxed">
               {t("test_type")}:{" "}
             </span>
             {(patientData?.test_type && testType) || "-"}
           </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("date_of_test")}:{" "}
-            </span>
-            {(patientData?.date_of_test &&
-              formatDate(patientData?.date_of_test)) ||
-              "-"}
-          </div>
-
           <div>
             <span className="font-semibold leading-relaxed">
               {t("facility")}:{" "}
@@ -290,71 +274,6 @@ export default function ShiftDetails(props: { id: string }) {
             </span>
             {patientData?.address || "-"}
           </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("contact_with_confirmed_carrier")}:{" "}
-            </span>
-            {patientData?.contact_with_confirmed_carrier ? (
-              <span className="badge badge-pill badge-warning">{t("yes")}</span>
-            ) : (
-              <span className="badge badge-pill badge-secondary">
-                {t("no")}
-              </span>
-            )}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("contact_with_suspected_carrier")}:{" "}
-            </span>
-            {patientData?.contact_with_suspected_carrier ? (
-              <span className="badge badge-pill badge-warning">{t("yes")}</span>
-            ) : (
-              <span className="badge badge-pill badge-secondary">
-                {t("no")}
-              </span>
-            )}
-          </div>
-          {patientData?.estimated_contact_date && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("estimated_contact_date")}:{" "}
-              </span>
-              {formatDate(patientData?.estimated_contact_date)}
-            </div>
-          )}
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              {t("has_sari_severe_acute_respiratory_illness")}{" "}
-            </span>
-            {patientData?.has_SARI ? (
-              <span className="badge badge-pill badge-warning">{t("yes")}</span>
-            ) : (
-              <span className="badge badge-pill badge-secondary">
-                {t("no")}
-              </span>
-            )}
-          </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              {t("travel_within_last_28_days")}{" "}
-            </span>
-            {patientData?.past_travel ? (
-              <span className="badge badge-pill badge-warning">{t("yes")}</span>
-            ) : (
-              <span className="badge badge-pill badge-secondary">
-                {t("no")}
-              </span>
-            )}
-          </div>
-          {patientData?.countries_travelled &&
-            !!patientData?.countries_travelled.length && (
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  {t("countries_travelled")}:{" "}
-                </span>
-                {patientData?.countries_travelled.join(", ")}
-              </div>
-            )}
           {patientData?.ongoing_medication && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
@@ -369,22 +288,6 @@ export default function ShiftDetails(props: { id: string }) {
                 {t("allergies")}:{" "}
               </span>
               {patientData?.allergies}
-            </div>
-          )}
-          {!!patientData?.number_of_aged_dependents && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("number_of_aged_dependents_above_60")}:{" "}
-              </span>
-              {patientData?.number_of_aged_dependents}
-            </div>
-          )}
-          {!!patientData?.number_of_chronic_diseased_dependents && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("number_of_chronic_diseased_dependents")}:{" "}
-              </span>
-              {patientData?.number_of_chronic_diseased_dependents}
             </div>
           )}
         </div>
@@ -741,7 +644,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  {t("contact_person_number")}:{" "}
+                  {t("phone_number_at_current_facility")}:{" "}
                 </span>
                 {data.refering_facility_contact_number ? (
                   <a href={`tel:${data.refering_facility_contact_number}`}>
@@ -792,6 +695,15 @@ export default function ShiftDetails(props: { id: string }) {
               )}
               {wartime_shifting && (
                 <>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      {kasp_full_string}:{" "}
+                    </span>
+                    <span className="badge badge-pill badge-warning py-1 px-2">
+                      {" "}
+                      {data.is_kasp ? t("yes") : t("no")}
+                    </span>
+                  </div>
                   <div>
                     <span className="font-semibold leading-relaxed">
                       {t("vehicle_preference")}:{" "}
