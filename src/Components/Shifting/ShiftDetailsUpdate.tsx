@@ -320,7 +320,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         consultationData={consultationData}
         discharge_reason="EXP"
         afterSubmit={() => {
-          console.log("discharged");
           handleSubmit(true);
         }}
       />
