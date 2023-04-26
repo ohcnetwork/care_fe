@@ -645,6 +645,15 @@ export default function ShiftDetails(props: { id: string }) {
           options={
             <div className="flex gap-2">
               <ButtonV2
+                tooltip={
+                  ["COMPLETED", "CANCELLED"].includes(data.status)
+                    ? `A shifting request, once ${data.status.toLowerCase()} cannot be updated`
+                    : ""
+                }
+                tooltipClassName="tooltip-top -translate-x-28 -translate-y-1 text-xs"
+                disabled={
+                  data.status === "COMPLETED" || data.status === "CANCELLED"
+                }
                 onClick={() => navigate(`/shifting/${data.external_id}/update`)}
               >
                 {t("update_status_details")}
