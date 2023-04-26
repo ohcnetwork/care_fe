@@ -40,6 +40,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
+import { classNames } from "../../Utils/utils.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -346,9 +347,11 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   value={state.form.status}
                   options={shiftStatusOptions}
                   onChange={handleChange}
-                  className={`bg-white ${
-                    wartime_shifting ? " h-14 " : " h-12 "
-                  } w-full shadow-sm md:text-sm md:leading-5 mt-2`}
+                  className={classNames(
+                    "bg-white",
+                    wartime_shifting ? " h-14 " : " h-12 ",
+                    "w-full shadow-sm md:text-sm md:leading-5 mt-2"
+                  )}
                 />
               </div>
               {wartime_shifting && (
@@ -397,7 +400,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   multiple={false}
                   freeText={true}
                   name="assigned_facility"
-                  className={`${!wartime_shifting && " mt-6 "}`}
+                  className={classNames(!wartime_shifting && " mt-6 ")}
                   selected={state.form.assigned_facility_object}
                   setSelected={(obj) =>
                     setFacility(obj, "assigned_facility_object")
