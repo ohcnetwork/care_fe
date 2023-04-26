@@ -42,7 +42,6 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -193,7 +192,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleFormFieldChange = (event: any) => {
+  const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
     dispatch({
       type: "set_form",
       form: { ...state.form, [event.name]: event.value },
