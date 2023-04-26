@@ -265,14 +265,6 @@ export default function ShiftDetails(props: { id: string }) {
             </span>
             {patientData?.address || "-"}
           </div>
-          {patientData?.estimated_contact_date && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("estimated_contact_date")}:{" "}
-              </span>
-              {formatDate(patientData?.estimated_contact_date)}
-            </div>
-          )}
           {patientData?.ongoing_medication && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
@@ -287,22 +279,6 @@ export default function ShiftDetails(props: { id: string }) {
                 {t("allergies")}:{" "}
               </span>
               {patientData?.allergies}
-            </div>
-          )}
-          {!!patientData?.number_of_aged_dependents && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("number_of_aged_dependents_above_60")}:{" "}
-              </span>
-              {patientData?.number_of_aged_dependents}
-            </div>
-          )}
-          {!!patientData?.number_of_chronic_diseased_dependents && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("number_of_chronic_diseased_dependents")}:{" "}
-              </span>
-              {patientData?.number_of_chronic_diseased_dependents}
             </div>
           )}
         </div>
