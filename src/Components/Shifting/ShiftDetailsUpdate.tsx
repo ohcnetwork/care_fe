@@ -4,7 +4,8 @@ import {
   BREATHLESSNESS_LEVEL,
   FACILITY_TYPES,
   PATIENT_CATEGORIES,
-  SHIFTING_CHOICES,
+  SHIFTING_CHOICES_PEACETIME,
+  SHIFTING_CHOICES_WARTIME,
   SHIFTING_VEHICLE_CHOICES,
 } from "../../Common/constants";
 import {
@@ -25,14 +26,17 @@ import { CircularProgress } from "@material-ui/core";
 import { ConsultationModel } from "../Facility/models.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
+import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { LegacySelectField } from "../Common/HelperInputFields";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { UserSelect } from "../Common/UserSelect";
+import { classNames } from "../../Utils/utils.js";
 import loadable from "@loadable/component";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -49,7 +53,7 @@ interface patientShiftProps {
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
-  const { kasp_full_string, wartime_shifting } = useConfig();
+  const { kasp_full_string, kasp_enabled, wartime_shifting } = useConfig();
   const dispatchAction: any = useDispatch();
   const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
@@ -90,18 +94,13 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     errors: { ...initError },
   };
 
-  const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text).filter(
-    (choice) => wartime_shifting || choice !== "PENDING"
-  );
+  const shiftStatusOptions = wartime_shifting
+    ? SHIFTING_CHOICES_WARTIME
+    : SHIFTING_CHOICES_PEACETIME;
 
   let requiredFields: any = {
     reason: {
       errorText: t("please_enter_a_reason_for_the_shift"),
-    },
-
-    ambulance_number: {
-      errorText: "Ambulance Number is required",
-      invalidText: "Please enter valid Ambulance Number",
     },
   };
 
@@ -179,6 +178,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     form[name] = value;
     dispatch({ type: "set_form", form });
   };
+
   const handleTextAreaChange = (e: any) => {
     const form = { ...state.form };
     const { name, value } = e;
@@ -213,10 +213,15 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (discharged = false) => {
     const validForm = validateForm();
 
     if (validForm) {
+      if (!discharged && state.form.status === "PATIENT EXPIRED") {
+        setShowDischargeModal(true);
+        return;
+      }
+
       setIsLoading(true);
 
       const data: any = {
@@ -263,11 +268,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           msg: t("shift_request_updated_successfully"),
         });
 
-        if (data.status === "PATIENT EXPIRED") {
-          setShowDischargeModal(true);
-        } else {
-          navigate(`/shifting/${props.id}`);
-        }
+        navigate(`/shifting/${props.id}`);
       } else {
         setIsLoading(false);
       }
@@ -322,9 +323,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         consultationData={consultationData}
         discharge_reason="EXP"
         afterSubmit={() => {
-          navigate(
-            `/facility/${consultationData.facility}/patient/${consultationData.patient}/consultation/${consultationData.id}`
-          );
+          handleSubmit(true);
         }}
       />
       <PageTitle
@@ -336,36 +335,43 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           <CardContent>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <div className="md:col-span-1">
-                <FieldLabel>{t("status")}</FieldLabel>
-                <LegacySelectField
+                <SelectFormField
                   name="status"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.status}
+                  label="Status"
+                  required
                   options={shiftStatusOptions}
-                  onChange={handleChange}
-                  className="bg-white h-14 w-full shadow-sm md:text-sm md:leading-5 mt-2"
+                  value={state.form.status}
+                  optionLabel={(option) => option.label || option.text}
+                  optionValue={(option) => option.text}
+                  optionSelectedLabel={(option) => option.label || option.text}
+                  onChange={handleFormFieldChange}
+                  className={classNames(
+                    "bg-white",
+                    wartime_shifting ? " h-14 " : " h-12 ",
+                    "w-full shadow-sm md:text-sm md:leading-5 mt-2"
+                  )}
                 />
               </div>
-              <div className="flex-none">
-                <FieldLabel>{t("assigned_to")}</FieldLabel>
-                <div>
-                  {assignedUserLoading ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                    <UserSelect
-                      multiple={false}
-                      selected={assignedUser}
-                      setSelected={handleOnSelect}
-                      errors={""}
-                      facilityId={
-                        state.form?.shifting_approving_facility_object?.id
-                      }
-                    />
-                  )}
+              {wartime_shifting && (
+                <div className="flex-none">
+                  <FieldLabel>{t("assigned_to")}</FieldLabel>
+                  <div>
+                    {assignedUserLoading ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      <UserSelect
+                        multiple={false}
+                        selected={assignedUser}
+                        setSelected={handleOnSelect}
+                        errors={""}
+                        facilityId={
+                          state.form?.shifting_approving_facility_object?.id
+                        }
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
               {wartime_shifting && (
                 <div>
                   <FieldLabel>
@@ -392,6 +398,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                   multiple={false}
                   freeText={true}
                   name="assigned_facility"
+                  className={classNames(!wartime_shifting && " mt-6 ")}
                   selected={state.form.assigned_facility_object}
                   setSelected={(obj) =>
                     setFacility(obj, "assigned_facility_object")
@@ -425,32 +432,34 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 <LegacyErrorHelperText error={state.errors.emergency} />
               </div>
 
-              <div>
-                <FieldLabel>
-                  {t("is")} {kasp_full_string}?
-                </FieldLabel>
-                <RadioGroup
-                  aria-label="is_kasp"
-                  name="is_kasp"
-                  value={[true, "true"].includes(state.form.is_kasp)}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label={t("yes")}
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label={t("no")}
-                    />
-                  </Box>
-                </RadioGroup>
-                <LegacyErrorHelperText error={state.errors.is_kasp} />
-              </div>
+              {kasp_enabled && (
+                <div>
+                  <FieldLabel>
+                    {t("is")} {kasp_full_string}?
+                  </FieldLabel>
+                  <RadioGroup
+                    aria-label="is_kasp"
+                    name="is_kasp"
+                    value={[true, "true"].includes(state.form.is_kasp)}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box>
+                      <FormControlLabel
+                        value={true}
+                        control={<Radio />}
+                        label={t("yes")}
+                      />
+                      <FormControlLabel
+                        value={false}
+                        control={<Radio />}
+                        label={t("no")}
+                      />
+                    </Box>
+                  </RadioGroup>
+                  <LegacyErrorHelperText error={state.errors.is_kasp} />
+                </div>
+              )}
 
               <div>
                 <FieldLabel>{t("is_this_an_upshift")}</FieldLabel>
@@ -570,7 +579,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               <div className="md:col-span-1">
                 <TextFormField
                   label="Ambulance No."
-                  required
                   name="ambulance_number"
                   placeholder="Ambulance No."
                   value={state.form.ambulance_number}
@@ -593,7 +601,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
 
               <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
                 <Cancel onClick={() => goBack()} />
-                <Submit onClick={handleSubmit} />
+                <Submit onClick={() => handleSubmit()} />
               </div>
             </div>
           </CardContent>
