@@ -42,6 +42,7 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -52,7 +53,7 @@ interface patientShiftProps {
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
-  const { kasp_full_string, wartime_shifting } = useConfig();
+  const { kasp_full_string, kasp_enabled, wartime_shifting } = useConfig();
   const dispatchAction: any = useDispatch();
   const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
@@ -100,11 +101,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   let requiredFields: any = {
     reason: {
       errorText: t("please_enter_a_reason_for_the_shift"),
-    },
-
-    ambulance_number: {
-      errorText: "Ambulance Number is required",
-      invalidText: "Please enter valid Ambulance Number",
     },
   };
 
@@ -197,7 +193,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
+  const handleFormFieldChange = (event: any) => {
     dispatch({
       type: "set_form",
       form: { ...state.form, [event.name]: event.value },
@@ -429,32 +425,34 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 <LegacyErrorHelperText error={state.errors.emergency} />
               </div>
 
-              <div>
-                <FieldLabel>
-                  {t("is")} {kasp_full_string}?
-                </FieldLabel>
-                <RadioGroup
-                  aria-label="is_kasp"
-                  name="is_kasp"
-                  value={[true, "true"].includes(state.form.is_kasp)}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label={t("yes")}
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label={t("no")}
-                    />
-                  </Box>
-                </RadioGroup>
-                <LegacyErrorHelperText error={state.errors.is_kasp} />
-              </div>
+              {kasp_enabled && (
+                <div>
+                  <FieldLabel>
+                    {t("is")} {kasp_full_string}?
+                  </FieldLabel>
+                  <RadioGroup
+                    aria-label="is_kasp"
+                    name="is_kasp"
+                    value={[true, "true"].includes(state.form.is_kasp)}
+                    onChange={handleChange}
+                    style={{ padding: "0px 5px" }}
+                  >
+                    <Box>
+                      <FormControlLabel
+                        value={true}
+                        control={<Radio />}
+                        label={t("yes")}
+                      />
+                      <FormControlLabel
+                        value={false}
+                        control={<Radio />}
+                        label={t("no")}
+                      />
+                    </Box>
+                  </RadioGroup>
+                  <LegacyErrorHelperText error={state.errors.is_kasp} />
+                </div>
+              )}
 
               <div>
                 <FieldLabel>{t("is_this_an_upshift")}</FieldLabel>
@@ -574,7 +572,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               <div className="md:col-span-1">
                 <TextFormField
                   label="Ambulance No."
-                  required
                   name="ambulance_number"
                   placeholder="Ambulance No."
                   value={state.form.ambulance_number}

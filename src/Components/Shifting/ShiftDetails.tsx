@@ -27,8 +27,12 @@ import { useTranslation } from "react-i18next";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function ShiftDetails(props: { id: string }) {
-  const { static_header_logo, kasp_full_string, wartime_shifting } =
-    useConfig();
+  const {
+    static_header_logo,
+    kasp_full_string,
+    wartime_shifting,
+    kasp_enabled,
+  } = useConfig();
   const dispatch: any = useDispatch();
   const initialData: any = {};
   const [data, setData] = useState(initialData);
@@ -775,15 +779,17 @@ export default function ShiftDetails(props: { id: string }) {
                   {data.patient_category}
                 </span>
               </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {kasp_full_string}:{" "}
-                </span>
-                <span className="badge badge-pill badge-warning py-1 px-2">
-                  {" "}
-                  {data.is_kasp ? t("yes") : t("no")}
-                </span>
-              </div>
+              {kasp_enabled && (
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    {kasp_full_string}:{" "}
+                  </span>
+                  <span className="badge badge-pill badge-warning py-1 px-2">
+                    {" "}
+                    {data.is_kasp ? t("yes") : t("no")}
+                  </span>
+                </div>
+              )}
               {wartime_shifting && (
                 <>
                   <div>
