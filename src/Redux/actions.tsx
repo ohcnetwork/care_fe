@@ -829,6 +829,11 @@ export const listAssetTransaction = (params: object) =>
 export const getAssetTransaction = (id: string) =>
   fireRequest("getAssetTransaction", [], {}, { id });
 
+export const listAssetService = (params: object) =>
+  fireRequest("listAssetService", [], params);
+export const getAssetService = (params: object) =>
+  fireRequest("getAssetService", [], params);
+
 export const listPMJYPackages = (query?: string) =>
   fireRequest("listPMJYPackages", [], { query });
 

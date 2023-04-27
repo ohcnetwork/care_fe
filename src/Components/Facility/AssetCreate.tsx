@@ -204,8 +204,9 @@ const AssetCreate = (props: AssetProps) => {
       setManufacturer(asset.manufacturer);
       asset.warranty_amc_end_of_validity &&
         setWarrantyAmcEndOfValidity(asset.warranty_amc_end_of_validity);
-      asset.last_serviced_on && setLastServicedOn(asset.last_serviced_on);
-      setNotes(asset.notes);
+      asset.last_service.serviced_on &&
+        setLastServicedOn(asset.last_service.serviced_on);
+      asset.last_service.note && setNotes(asset.last_service.note);
     }
   }, [asset]);
 
@@ -334,7 +335,7 @@ const AssetCreate = (props: AssetProps) => {
         last_serviced_on: last_serviced_on
           ? moment(last_serviced_on).format("YYYY-MM-DD")
           : last_serviced_on,
-        notes: notes,
+        note: notes,
       };
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));

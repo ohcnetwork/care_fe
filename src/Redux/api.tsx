@@ -799,6 +799,17 @@ const routes: Routes = {
     method: "GET",
   },
 
+  // Asset service endpoints
+
+  listAssetService: {
+    path: "/api/v1/asset_service/",
+    method: "GET",
+  },
+  getAssetService: {
+    path: "/api/v1/asset_service/{id}",
+    method: "GET",
+  },
+
   // HCX Endpoints
 
   listPMJYPackages: {

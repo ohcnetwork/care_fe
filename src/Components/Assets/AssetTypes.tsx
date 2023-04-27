@@ -39,6 +39,14 @@ export const assetClassProps = {
   },
 };
 
+export interface AssetService {
+  id: string;
+  created_date: string;
+  modified_date: string;
+  serviced_on: string;
+  note: string;
+}
+
 export interface AssetData {
   id: string;
   name: string;
@@ -60,7 +68,7 @@ export interface AssetData {
   qr_code_id: string;
   manufacturer: string;
   warranty_amc_end_of_validity: string;
-  last_serviced_on: string;
+  last_service: AssetService;
   notes: string;
   meta?: {
     [key: string]: any;
@@ -90,6 +98,18 @@ export interface AssetTransaction {
     email: string;
     user_type: string;
   };
+  created_date: string;
+  modified_date: string;
+}
+
+export interface AssetService {
+  id: string;
+  asset: {
+    id: string;
+    name: string;
+  };
+  serviced_on: string;
+  note: string;
   created_date: string;
   modified_date: string;
 }

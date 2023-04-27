@@ -1,12 +1,18 @@
 import { useState, useCallback, useEffect, ReactElement } from "react";
 
 import loadable from "@loadable/component";
-import { assetClassProps, AssetData, AssetTransaction } from "./AssetTypes";
+import {
+  assetClassProps,
+  AssetData,
+  AssetService,
+  AssetTransaction,
+} from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useDispatch, useSelector } from "react-redux";
 import {
   deleteAsset,
   getAsset,
+  listAssetService,
   listAssetTransaction,
 } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
@@ -49,6 +55,10 @@ const AssetManage = (props: AssetManageProps) => {
   const [transactionDetails, setTransactionDetails] = useState<
     ReactElement | ReactElement[]
   >();
+  const [services, setServices] = useState<AssetService[]>([]);
+  const [servicesDetails, setServiceDetails] = useState<
+    ReactElement | ReactElement[]
+  >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch<any>();
   const limit = 14;
@@ -69,19 +79,30 @@ const AssetManage = (props: AssetManageProps) => {
             ? { qr_code_id: assetData.qr_code_id }
             : { external_id: assetId };
 
-          const transactionsData = await dispatch(
-            listAssetTransaction({
-              ...transactionFilter,
-              limit,
-              offset,
-            })
-          );
+          const [transactionsData, servicesData] = await Promise.all([
+            dispatch(
+              listAssetTransaction({
+                ...transactionFilter,
+                limit,
+                offset,
+              })
+            ),
+            dispatch(listAssetService({ external_id: assetId })),
+          ]);
+
           if (transactionsData && transactionsData.data) {
             setTransactions(transactionsData.data.results);
             setTotalCount(transactionsData.data.count);
           } else {
             Notification.Error({
               msg: "Error fetching transactions",
+            });
+          }
+          if (servicesData && servicesData.data) {
+            setServices(servicesData.data.results);
+          } else {
+            Notification.Error({
+              msg: "Error fetching service logs",
             });
           }
         } else {
@@ -170,9 +191,48 @@ const AssetManage = (props: AssetManageProps) => {
     }
   };
 
+  const populateServiceTableRows = (txns: AssetService[]) => {
+    if (txns.length > 0) {
+      setServiceDetails(
+        services.map((service: AssetService) => (
+          <tr key={`service_id_${service.id}`}>
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+              <span className="text-gray-900 font-medium">
+                {moment(service.serviced_on).format("DD MMM YYYY")}
+              </span>
+            </td>
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+              <span className="text-gray-900 font-medium">{service.note}</span>
+            </td>
+            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
+              <span className="text-gray-900 font-medium">
+                {formatDate(service.modified_date)}
+              </span>
+            </td>
+          </tr>
+        ))
+      );
+    } else {
+      setServiceDetails(
+        <tr>
+          <td
+            className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500 text-center"
+            colSpan={4}
+          >
+            <h5>No Service Logs Found</h5>
+          </td>
+        </tr>
+      );
+    }
+  };
+
   useEffect(() => {
     populateTableRows(transactions);
   }, [transactions]);
+
+  useEffect(() => {
+    populateServiceTableRows(services);
+  }, [services]);
 
   if (isLoading) return <Loading />;
   if (isPrintMode) return <PrintPreview />;
@@ -362,13 +422,15 @@ const AssetManage = (props: AssetManageProps) => {
                     label: "Last serviced on",
                     icon: "wrench",
                     content:
-                      asset?.last_serviced_on &&
-                      moment(asset?.last_serviced_on).format("DD MMM YYYY"),
+                      asset?.last_service.serviced_on &&
+                      moment(asset?.last_service.serviced_on).format(
+                        "DD MMM YYYY"
+                      ),
                   },
                   {
                     label: "Notes",
                     icon: "notes",
-                    content: asset?.notes,
+                    content: asset?.last_service.note,
                   },
                 ].map(detailBlock)}
               </div>
@@ -389,6 +451,27 @@ const AssetManage = (props: AssetManageProps) => {
             <AssetWarrantyCard asset={asset} />
           </div>
         )}
+      </div>
+      <div className="text-xl font-semibold mt-8 mb-4">Service History</div>
+      <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Serviced on
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Note
+              </th>
+              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+                Edited
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {servicesDetails}
+          </tbody>
+        </table>
       </div>
       <div className="text-xl font-semibold mt-8 mb-4">Transaction History</div>
       <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
