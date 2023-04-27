@@ -24,7 +24,6 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { UserSelect } from "../Common/UserSelect";
-import { classNames } from "../../Utils/utils.js";
 import loadable from "@loadable/component";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -315,10 +314,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             optionValue={(option) => option.text}
             optionSelectedLabel={(option) => option.text}
             onChange={handleFormFieldChange}
-            className={classNames(
-              wartime_shifting ? "h-14" : "h-12",
-              "bg-white w-full md:leading-5 mt-2 md:col-span-1"
-            )}
+            className="bg-white w-full md:leading-5 mt-2 md:col-span-1"
           />
 
           {wartime_shifting && (
@@ -364,7 +360,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               multiple={false}
               freeText
               name="assigned_facility"
-              className={classNames(!wartime_shifting && " mt-4 ")}
+              className="mt-4"
               selected={state.form.assigned_facility_object}
               setSelected={(obj) =>
                 setFacility(obj, "assigned_facility_object")
