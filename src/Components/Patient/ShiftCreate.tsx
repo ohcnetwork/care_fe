@@ -78,19 +78,15 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
   let requiredFields: any = {
     refering_facility_contact_name: {
-      errorText: "Name of contact of the referring facility",
+      errorText: "Name of contact of the current facility",
     },
     refering_facility_contact_number: {
-      errorText: "Phone number of contact of the referring facility",
+      errorText: "Phone number of contact of the current facility",
       invalidText: "Please enter valid phone number",
     },
     reason: {
       errorText: "Reason for shifting in mandatory",
       invalidText: "Please enter reason for shifting",
-    },
-    ambulance_number: {
-      errorText: "Ambulance Number is required",
-      invalidText: "Please enter valid Ambulance Number",
     },
   };
 
@@ -233,7 +229,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
       setIsLoading(true);
 
       const data = {
-        status: "PENDING",
+        status: wartime_shifting ? "PENDING" : "APPROVED",
         orgin_facility: props.facilityId,
         shifting_approving_facility: (
           state.form.shifting_approving_facility || {}
@@ -515,7 +511,6 @@ export const ShiftCreate = (props: patientShiftProps) => {
               <div className="md:col-span-1">
                 <TextFormField
                   label="Ambulance No."
-                  required
                   name="ambulance_number"
                   placeholder="Ambulance No."
                   value={state.form.ambulance_number}
