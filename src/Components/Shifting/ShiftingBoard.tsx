@@ -22,6 +22,7 @@ const limit = 14;
 
 interface boardProps {
   board: string;
+  title?: string;
   filterProp: any;
   formatFilter: any;
 }
@@ -211,7 +212,6 @@ const ShiftCard = ({ shift, filter }: any) => {
             <div className="mt-2">
               <ButtonV2
                 variant="secondary"
-                border
                 className="w-full sm:whitespace-normal"
                 onClick={() => setModalFor(shift.external_id)}
               >
@@ -242,6 +242,7 @@ const ShiftCard = ({ shift, filter }: any) => {
 
 export default function ShiftingBoard({
   board,
+  title,
   filterProp,
   formatFilter,
 }: boardProps) {
@@ -343,9 +344,6 @@ export default function ShiftingBoard({
       ));
   };
 
-  const renderBoardTitle = (board: string) =>
-    board === "APPROVED" ? t("awaiting_destination_approval") : board;
-
   return (
     <div
       ref={drop}
@@ -357,7 +355,7 @@ export default function ShiftingBoard({
       <div className="sticky top-0 pt-2 bg-gray-200 rounded z-10">
         <div className="flex justify-between p-4 mx-2 rounded bg-white shadow items-center">
           <h3 className="text-xs flex items-center h-8">
-            {renderBoardTitle(board)}{" "}
+            {title || board}{" "}
             {downloadLoading ? (
               <CircularProgress className="w-6 h-6 ml-2 text-black" />
             ) : (
