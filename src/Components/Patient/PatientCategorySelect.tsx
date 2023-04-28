@@ -3,7 +3,7 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { FormFieldBaseProps } from "../Form/FormFields/Utils";
 
 /**
- * A `FormField` component to select patient category and is always a mandatory
+ * A `FormField` component to select patient category and is by default a mandatory
  * field.
  */
 export default function PatientCategorySelect(
@@ -12,7 +12,7 @@ export default function PatientCategorySelect(
   return (
     <SelectFormField
       {...props}
-      required
+      required={props.required ?? true}
       options={PATIENT_CATEGORIES}
       optionValue={(option) => option.id}
       optionLabel={(option) => option.text}

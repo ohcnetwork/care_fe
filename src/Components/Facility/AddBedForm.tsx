@@ -10,7 +10,7 @@ import {
   updateFacilityBed,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { SelectField } from "../Common/HelperInputFields";
+import { LegacySelectField } from "../Common/HelperInputFields";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -183,7 +183,7 @@ export const AddBedForm = (props: BedFormProps) => {
                   <FieldLabel required id="bedType">
                     Bed Type
                   </FieldLabel>
-                  <SelectField
+                  <LegacySelectField
                     id="bed-type"
                     fullWidth
                     name="bed_type"

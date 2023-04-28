@@ -13,7 +13,7 @@ interface UpdatableAppProps {
   silentlyAutoUpdate?: boolean;
 }
 
-const checkForUpdate = async () => {
+export const checkForUpdate = async () => {
   const appVersion = localStorage.getItem(APP_VERSION_KEY);
 
   const res = await fetch(META_URL, {

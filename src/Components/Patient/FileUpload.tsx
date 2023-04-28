@@ -12,7 +12,7 @@ import {
   editUpload,
 } from "../../Redux/actions";
 import { FileUploadModel } from "./models";
-import { TextInputField } from "../Common/HelperInputFields";
+import { LegacyTextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
@@ -606,7 +606,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   </div>
                   <div className="flex flex-wrap items-center">
                     {item.id ? (
-                      Object.keys(url).length > 0 ? (
+                      Object.keys(url).length > 0 && (
                         <div className="flex flex-wrap">
                           <a
                             href={url[item.id]}
@@ -663,8 +663,6 @@ export const FileUpload = (props: FileUploadProps) => {
                             <></>
                           )}
                         </div>
-                      ) : (
-                        <CircularProgress />
                       )
                     ) : (
                       <div>File Not found</div>
@@ -1497,7 +1495,7 @@ export const FileUpload = (props: FileUploadProps) => {
               <InputLabel id="spo2-label">
                 Enter Audio File Name (optional)
               </InputLabel>
-              <TextInputField
+              <LegacyTextInputField
                 name="consultation_audio_file"
                 variant="outlined"
                 margin="dense"
@@ -1560,7 +1558,7 @@ export const FileUpload = (props: FileUploadProps) => {
               </div>
               <div>
                 <InputLabel id="spo2-label">Enter File Name*</InputLabel>
-                <TextInputField
+                <LegacyTextInputField
                   name="consultation_file"
                   variant="outlined"
                   margin="dense"

@@ -1,37 +1,68 @@
-import React, { useEffect, useState } from "react";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { UserSelect } from "../Common/UserSelect2";
-import { navigate } from "raviger";
-import { SelectField } from "../Common/HelperInputFields";
 import {
-  SHIFTING_FILTER_ORDER,
-  DISEASE_STATUS,
   BREATHLESSNESS_LEVEL,
+  DISEASE_STATUS,
+  SHIFTING_FILTER_ORDER,
 } from "../../Common/constants";
-import moment from "moment";
-import { getAnyFacility, getUserList } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
-import { CircularProgress } from "@material-ui/core";
-import { SHIFTING_CHOICES } from "../../Common/constants";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
-import parsePhoneNumberFromString from "libphonenumber-js";
-import useMergeState from "../../Common/hooks/useMergeState";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import useConfig from "../../Common/hooks/useConfig";
-import { useTranslation } from "react-i18next";
-import FilterButtons from "../Common/FilterButtons";
+import React, { useEffect, useState } from "react";
+import {
+  SHIFTING_CHOICES_PEACETIME,
+  SHIFTING_CHOICES_WARTIME,
+} from "../../Common/constants";
+import { getAnyFacility, getUserList } from "../../Redux/actions";
 
-const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
+import { CircularProgress } from "@material-ui/core";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import { LegacySelectField } from "../Common/HelperInputFields";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { UserSelect } from "../Common/UserSelect2";
+import moment from "moment";
+import { navigate } from "raviger";
+import parsePhoneNumberFromString from "libphonenumber-js";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import useMergeState from "../../Common/hooks/useMergeState";
+import { useTranslation } from "react-i18next";
+
+const clearFilterState = {
+  orgin_facility: "",
+  orgin_facility_ref: "",
+  shifting_approving_facility: "",
+  shifting_approving_facility_ref: "",
+  assigned_facility: "",
+  assigned_facility_ref: "",
+  emergency: "",
+  is_up_shift: "",
+  created_date_before: "",
+  created_date_after: "",
+  modified_date_before: "",
+  modified_date_after: "",
+  patient_phone_number: "",
+  ordering: "",
+  is_kasp: "",
+  status: "",
+  assigned_user_ref: "",
+  assigned_to: "",
+  disease_status: "",
+  is_antenatal: "",
+  breathlessness_level: "",
+};
 
 export default function ListFilter(props: any) {
-  const { kasp_enabled, kasp_string } = useConfig();
+  const { kasp_enabled, kasp_string, wartime_shifting } = useConfig();
   const { filter, onChange, closeFilter } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isShiftingLoading, setShiftingLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
   const [isAssignedUserLoading, setAssignedUserLoading] = useState(false);
   const { t } = useTranslation();
+
+  const shiftStatusOptions = (
+    wartime_shifting ? SHIFTING_CHOICES_WARTIME : SHIFTING_CHOICES_PEACETIME
+  ).map((option) => option.text);
 
   const [filterState, setFilterState] = useMergeState({
     orgin_facility: filter.orgin_facility || "",
@@ -232,57 +263,51 @@ export default function ListFilter(props: any) {
   };
 
   return (
-    <div>
-      <div className="pb-10">
-        <FilterButtons
-          onClose={closeFilter}
-          onApply={applyFilter}
-          onClear={() => {
-            navigate("/shifting");
-            setFilterState(filterState);
-            closeFilter();
-          }}
-        />
-      </div>
-      <div className="font-light text-md mt-2">{t("filter_by") + ":"}</div>
-      <div className="flex flex-wrap gap-2">
-        {props.showShiftingStatus && (
-          <div className="w-full flex-none">
-            <span className="text-sm font-semibold">{t("status")}</span>
-            <SelectField
-              name="status"
-              variant="outlined"
-              margin="dense"
-              optionArray={true}
-              value={filterState.status}
-              options={["--", ...shiftStatusOptions]}
-              onChange={handleChange}
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-            />
-          </div>
-        )}
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">{t("origin_facility")}</span>
-          <div className="">
-            {isOriginLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <FacilitySelect
-                multiple={false}
-                name="orgin_facility"
-                selected={filterState.orgin_facility_ref}
-                setSelected={(obj) => setFacility(obj, "orgin_facility")}
-                className="shifting-page-filter-dropdown"
-                errors={""}
-              />
-            )}
-          </div>
+    <FiltersSlideover
+      advancedFilter={props}
+      onApply={applyFilter}
+      onClear={() => {
+        navigate("/shifting");
+        setFilterState(clearFilterState);
+        closeFilter();
+      }}
+    >
+      {props.showShiftingStatus && (
+        <div>
+          <FieldLabel>{t("status")}</FieldLabel>
+          <LegacySelectField
+            name="status"
+            variant="outlined"
+            margin="dense"
+            optionArray={true}
+            value={filterState.status}
+            options={["--", ...shiftStatusOptions]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
         </div>
+      )}
+      <div>
+        <FieldLabel>{t("origin_facility")}</FieldLabel>
+        <div className="">
+          {isOriginLoading ? (
+            <CircularProgress size={20} />
+          ) : (
+            <FacilitySelect
+              multiple={false}
+              name="orgin_facility"
+              selected={filterState.orgin_facility_ref}
+              setSelected={(obj) => setFacility(obj, "orgin_facility")}
+              className="shifting-page-filter-dropdown"
+              errors={""}
+            />
+          )}
+        </div>
+      </div>
 
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">
-            {t("shifting_approving_facility")}
-          </span>
+      {wartime_shifting && (
+        <div>
+          <FieldLabel>{t("shifting_approving_facility")}</FieldLabel>
           <div className="">
             {isShiftingLoading ? (
               <CircularProgress size={20} />
@@ -300,194 +325,177 @@ export default function ListFilter(props: any) {
             )}
           </div>
         </div>
+      )}
 
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">
-            {t("assigned_facility")}
-          </span>
-          <div className="">
-            {isAssignedLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <FacilitySelect
-                multiple={false}
-                name="assigned_facility"
-                selected={filterState.assigned_facility_ref}
-                setSelected={(obj) => setFacility(obj, "assigned_facility")}
-                className="shifting-page-filter-dropdown"
-                errors={""}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">{t("assigned_to")}</span>
-          <div className="">
-            {isAssignedUserLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <UserSelect
-                name="assigned_to"
-                multiple={false}
-                selected={filterState.assigned_user_ref}
-                setSelected={(obj) => setAssignedUser(obj)}
-                className="shifting-page-filter-dropdown"
-                errors={""}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">{t("ordering")}</span>
-          <SelectField
-            name="ordering"
-            variant="outlined"
-            margin="dense"
-            optionKey="text"
-            optionValue="desc"
-            value={filterState.ordering}
-            options={SHIFTING_FILTER_ORDER}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">
-            {t("is_emergency_case")}
-          </span>
-          <SelectField
-            name="emergency"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
-            value={filterState.emergency}
-            options={["--", "yes", "no"]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-
-        {kasp_enabled && (
-          <div className="w-full flex-none">
-            <span className="text-sm font-semibold">{`${t(
-              "is"
-            )} ${kasp_string}`}</span>
-            <SelectField
-              name="is_kasp"
-              variant="outlined"
-              margin="dense"
-              optionArray={true}
-              value={filterState.is_kasp}
-              options={["--", "yes", "no"]}
-              onChange={handleChange}
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+      <div>
+        <FieldLabel>{t("assigned_facility")}</FieldLabel>
+        <div className="">
+          {isAssignedLoading ? (
+            <CircularProgress size={20} />
+          ) : (
+            <FacilitySelect
+              multiple={false}
+              name="assigned_facility"
+              selected={filterState.assigned_facility_ref}
+              setSelected={(obj) => setFacility(obj, "assigned_facility")}
+              className="shifting-page-filter-dropdown"
+              errors={""}
             />
-          </div>
-        )}
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">{t("is_upshift_case")}</span>
-          <SelectField
-            name="is_up_shift"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
-            value={filterState.is_up_shift}
-            options={["--", "yes", "no"]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">{t("disease_status")}</span>
-          <SelectField
-            name="disease_status"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
-            value={filterState.disease_status}
-            options={["--", ...DISEASE_STATUS]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">{t("is_antenatal")}</span>
-          <SelectField
-            name="is_antenatal"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
-            value={filterState.is_antenatal}
-            options={["--", "yes", "no"]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">
-            {t("breathlessness_level")}
-          </span>
-          <SelectField
-            name="breathlessness_level"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
-            value={filterState.breathlessness_level}
-            options={["--", ...BREATHLESSNESS_LEVEL]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-
-        <div className="w-full flex-none">
-          <PhoneNumberFormField
-            label={t("patient_phone_number")}
-            name="patient_phone_number"
-            value={filterState.patient_phone_number}
-            onChange={handleFormFieldChange}
-          />
-        </div>
-
-        <div className="w-full flex-none">
-          <DateRangePicker
-            startDate={getDate(filterState.created_date_after)}
-            endDate={getDate(filterState.created_date_before)}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "created_date_after",
-                "created_date_before",
-                e
-              )
-            }
-            endDateId={"created_date_before"}
-            startDateId={"created_date_after"}
-            label={t("created_date")}
-            size="small"
-          />
-          <DateRangePicker
-            startDate={getDate(filterState.modified_date_after)}
-            endDate={getDate(filterState.modified_date_before)}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "modified_date_after",
-                "modified_date_before",
-                e
-              )
-            }
-            endDateId={"modified_date_before"}
-            startDateId={"modified_date_after"}
-            label={t("modified_date")}
-            size="small"
-          />
+          )}
         </div>
       </div>
-    </div>
+
+      <div>
+        <FieldLabel>{t("assigned_to")}</FieldLabel>
+        {isAssignedUserLoading ? (
+          <CircularProgress size={20} />
+        ) : (
+          <UserSelect
+            name="assigned_to"
+            multiple={false}
+            selected={filterState.assigned_user_ref}
+            setSelected={(obj) => setAssignedUser(obj)}
+            className="shifting-page-filter-dropdown"
+            errors={""}
+          />
+        )}
+      </div>
+
+      <div className="-mt-6">
+        <FieldLabel>{t("ordering")}</FieldLabel>
+        <LegacySelectField
+          name="ordering"
+          variant="outlined"
+          margin="dense"
+          optionKey="text"
+          optionValue="desc"
+          value={filterState.ordering}
+          options={SHIFTING_FILTER_ORDER}
+          onChange={handleChange}
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
+      </div>
+
+      <div>
+        <FieldLabel>{t("is_emergency_case")}</FieldLabel>
+        <LegacySelectField
+          name="emergency"
+          variant="outlined"
+          margin="dense"
+          optionArray={true}
+          value={filterState.emergency}
+          options={["--", "yes", "no"]}
+          onChange={handleChange}
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
+      </div>
+
+      {kasp_enabled && (
+        <div>
+          <FieldLabel>{`${t("is")} ${kasp_string}`}</FieldLabel>
+          <LegacySelectField
+            name="is_kasp"
+            variant="outlined"
+            margin="dense"
+            optionArray={true}
+            value={filterState.is_kasp}
+            options={["--", "yes", "no"]}
+            onChange={handleChange}
+            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          />
+        </div>
+      )}
+
+      <div>
+        <FieldLabel>{t("is_upshift_case")}</FieldLabel>
+        <LegacySelectField
+          name="is_up_shift"
+          variant="outlined"
+          margin="dense"
+          optionArray={true}
+          value={filterState.is_up_shift}
+          options={["--", "yes", "no"]}
+          onChange={handleChange}
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
+      </div>
+
+      <div>
+        <FieldLabel>{t("disease_status")}</FieldLabel>
+        <LegacySelectField
+          name="disease_status"
+          variant="outlined"
+          margin="dense"
+          optionArray={true}
+          value={filterState.disease_status}
+          options={["--", ...DISEASE_STATUS]}
+          onChange={handleChange}
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
+      </div>
+
+      <div>
+        <FieldLabel>{t("is_antenatal")}</FieldLabel>
+        <LegacySelectField
+          name="is_antenatal"
+          variant="outlined"
+          margin="dense"
+          optionArray={true}
+          value={filterState.is_antenatal}
+          options={["--", "yes", "no"]}
+          onChange={handleChange}
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
+      </div>
+
+      <div>
+        <FieldLabel>{t("breathlessness_level")}</FieldLabel>
+        <LegacySelectField
+          name="breathlessness_level"
+          variant="outlined"
+          margin="dense"
+          optionArray={true}
+          value={filterState.breathlessness_level}
+          options={["--", ...BREATHLESSNESS_LEVEL]}
+          onChange={handleChange}
+          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        />
+      </div>
+
+      <PhoneNumberFormField
+        label={t("patient_phone_number")}
+        name="patient_phone_number"
+        value={filterState.patient_phone_number}
+        onChange={handleFormFieldChange}
+        errorClassName="hidden"
+      />
+
+      <DateRangePicker
+        startDate={getDate(filterState.created_date_after)}
+        endDate={getDate(filterState.created_date_before)}
+        onChange={(e) =>
+          handleDateRangeChange("created_date_after", "created_date_before", e)
+        }
+        endDateId={"created_date_before"}
+        startDateId={"created_date_after"}
+        label={t("created_date")}
+        size="small"
+      />
+      <DateRangePicker
+        startDate={getDate(filterState.modified_date_after)}
+        endDate={getDate(filterState.modified_date_before)}
+        onChange={(e) =>
+          handleDateRangeChange(
+            "modified_date_after",
+            "modified_date_before",
+            e
+          )
+        }
+        endDateId={"modified_date_before"}
+        startDateId={"modified_date_after"}
+        label={t("modified_date")}
+        size="small"
+      />
+    </FiltersSlideover>
   );
 }

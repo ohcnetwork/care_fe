@@ -15,7 +15,6 @@ import {
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { FacilityModel } from "./models";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacilityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
 import SearchInput from "../Form/SearchInput";
@@ -24,6 +23,7 @@ import { FacilityCard } from "./FacilityCard";
 import ExportMenu from "../Common/Export";
 import CountBlock from "../../CAREUI/display/Count";
 import Page from "../Common/components/Page";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -247,61 +247,18 @@ export const HospitalList = () => {
           loading={isLoading}
           icon={"hospital"}
         />
-        <div className="flex my-4 gap-2 flex-col md:flex-row justify-between flex-grow">
+        <div className="flex my-4 gap-2 flex-col sm:flex-row justify-between flex-grow">
           <SearchInput
             name="search"
             value={qParams.search}
             onChange={(e) => updateQuery({ [e.name]: e.value })}
             placeholder={t("facility_search_placeholder")}
           />
-
-          <div className="flex items-start mb-2 w-full md:w-auto">
-            <button
-              className="btn btn-primary-ghost w-full md:w-auto"
-              onClick={() => advancedFilter.setShow(true)}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="fill-current w-4 h-4 mr-2"
-              >
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12">
-                  {" "}
-                </line>
-                <line x1="8" y1="18" x2="21" y2="18">
-                  {" "}
-                </line>
-                <line x1="3" y1="6" x2="3.01" y2="6">
-                  {" "}
-                </line>
-                <line x1="3" y1="12" x2="3.01" y2="12">
-                  {" "}
-                </line>
-                <line x1="3" y1="18" x2="3.01" y2="18">
-                  {" "}
-                </line>
-              </svg>
-              <span>{t("advanced_filters")}</span>
-            </button>
-          </div>
+          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
         </div>
       </div>
 
-      <div>
-        <SlideOver {...advancedFilter}>
-          <div className="bg-white min-h-screen p-4">
-            <FacilityFilter {...advancedFilter} />
-          </div>
-        </SlideOver>
-      </div>
+      <FacilityFilter {...advancedFilter} key={window.location.search} />
       <FilterBadges
         badges={({ badge, value, kasp }) => [
           badge("Facility/District Name", "search"),
