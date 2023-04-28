@@ -411,8 +411,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
                   required={false}
                   name="patient_category"
                   value={patientCategory}
-                  onChange={(value) => {
-                    setPatientCategory(value);
+                  onChange={(e) => {
+                    setPatientCategory(e.value);
                   }}
                   label="Patient Category"
                 />
