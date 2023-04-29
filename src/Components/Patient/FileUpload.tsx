@@ -1147,7 +1147,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 {downloadURL && downloadURL.length > 0 && (
                   <a
                     href={downloadURL}
-                    download={file_state.name}
+                    download={`${file_state.name}.${file_state.extension}`}
                     className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
                   >
                     <i className="fas fa-download mr-2" />
