@@ -679,7 +679,9 @@ export default function ShiftDetails(props: { id: string }) {
                 </span>
                 <span className="badge badge-pill badge-warning py-1 px-2">
                   {" "}
-                  {data.patient_category}
+                  {data.patient_object.last_consultation?.last_daily_round
+                    ?.patient_category ??
+                    data.patient_object.last_consultation?.category}
                 </span>
               </div>
               {kasp_enabled && (
