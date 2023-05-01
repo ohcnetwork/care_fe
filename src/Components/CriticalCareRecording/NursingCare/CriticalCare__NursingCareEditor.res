@@ -145,6 +145,7 @@ let make = (~nursingCare, ~updateCB, ~id, ~consultationId) => {
         ChestTubeCare,
         TracheostomyCare,
         StomaCare,
+        CatheterCare,
       ])->React.array} </div>
     <button
       disabled={state.saving || !state.dirty}

@@ -3,7 +3,6 @@ import { navigate } from "raviger";
 import ListFilter from "./ListFilter";
 import ResourceBoard from "./ResourceBoard";
 import { RESOURCE_CHOICES } from "../../Common/constants";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import { downloadResourceRequests } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import withScrolling from "react-dnd-scrolling";
@@ -113,11 +112,7 @@ export default function BoardView() {
           )}
         </div>
       </ScrollingComponent>
-      <SlideOver {...advancedFilter}>
-        <div className="bg-white min-h-screen p-4">
-          <ListFilter {...advancedFilter} />
-        </div>
-      </SlideOver>
+      <ListFilter {...advancedFilter} key={window.location.search} />
     </div>
   );
 }

@@ -183,7 +183,7 @@ export const Login = (props: { forgot?: boolean }) => {
       <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-between md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
         <div></div>
         <div className="mt-4 md:mt-12 rounded-lg py-4 flex flex-col items-start">
-          <div className="hidden md:flex gap-6 mb-4">
+          <div className="hidden md:flex items-center gap-6 mb-4">
             {state_logo && (
               <>
                 <img
@@ -274,11 +274,26 @@ export const Login = (props: { forgot?: boolean }) => {
                 : "visible opacity-100 -translate-x-0")
             }
           >
-            <img
-              src={static_black_logo}
-              className="h-8 w-auto mb-4 md:hidden brightness-0 contrast-[0%]"
-              alt="care logo"
-            />{" "}
+            <div className="flex items-center gap-1">
+              {state_logo && (
+                <>
+                  <img
+                    src={state_logo}
+                    className={classNames(
+                      "rounded-lg p-3 h-24 md:hidden",
+                      state_logo_white && "invert brightness-0"
+                    )}
+                    alt="state logo"
+                  />
+                  <div className="mx-4 w-[1px] md:hidden bg-gray-600 h-8 rounded-full" />
+                </>
+              )}
+              <img
+                src={static_black_logo}
+                className="h-8 w-auto md:hidden brightness-0 contrast-[0%]"
+                alt="care logo"
+              />
+            </div>{" "}
             <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">
               {t("auth_login_title")}
             </div>

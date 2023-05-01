@@ -7,7 +7,6 @@ import {
   listResourceRequests,
   downloadResourceRequests,
 } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
 import { formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
@@ -249,11 +248,11 @@ export default function ListView() {
           </div>
         )}
       </div>
-      <SlideOver {...advancedFilter}>
-        <div className="bg-white min-h-screen p-4">
-          <ListFilter {...advancedFilter} showResourceStatus={true} />
-        </div>
-      </SlideOver>
+      <ListFilter
+        {...advancedFilter}
+        showResourceStatus={true}
+        key={window.location.search}
+      />
     </div>
   );
 }

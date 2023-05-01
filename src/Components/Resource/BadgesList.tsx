@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
+import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
 
 export default function BadgesList(props: any) {
   const { appliedFilters, FilterBadges } = props;
@@ -43,10 +44,24 @@ export default function BadgesList(props: any) {
     fetchData();
   }, [dispatch, appliedFilters.assigned_facility]);
 
+  const getDescShiftingFilterOrder = (ordering: any) => {
+    let desc = "";
+    SHIFTING_FILTER_ORDER.map((item: any) => {
+      if (item.text === ordering) {
+        desc = item.desc;
+      }
+    });
+    return desc;
+  };
+
   return (
     <FilterBadges
       badges={({ badge, value, boolean, dateRange }: any) => [
-        badge("Ordering", "ordering"),
+        value(
+          "Ordering",
+          "ordering",
+          getDescShiftingFilterOrder(appliedFilters.ordering)
+        ),
         badge("Status", "status"),
         boolean("Emergency", "emergency", {
           trueValue: "yes",

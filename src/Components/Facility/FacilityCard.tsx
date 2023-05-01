@@ -80,14 +80,14 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
             </Link>
 
             <div className="flex flex-col justify-between w-full h-fit md:h-full">
-              <div className="w-full flex">
-                <div className="px-4 py-4">
-                  <div className="flow-root">
-                    {facility.kasp_empanelled && (
-                      <div className="float-right mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
-                        {kasp_string}
-                      </div>
-                    )}
+              <div className="px-4 py-4 w-full">
+                <div className="flow-root">
+                  {facility.kasp_empanelled && (
+                    <div className="float-right mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
+                      {kasp_string}
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
                     <Link
                       href={`/facility/${facility.id}`}
                       className="float-left font-bold text-xl capitalize text-inherit hover:text-inherit"
@@ -104,8 +104,15 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     ) : (
                       <></>
                     )}
+                    <ButtonV2
+                      href={`/facility/${facility.id}/cns`}
+                      border
+                      ghost
+                    >
+                      <CareIcon className="care-l-monitor-heart-rate text-lg" />
+                      <span>CNS</span>
+                    </ButtonV2>
                   </div>
-
                   <div className="flex gap-1 flex-wrap mt-2">
                     <Chip
                       text={facility.facility_type}

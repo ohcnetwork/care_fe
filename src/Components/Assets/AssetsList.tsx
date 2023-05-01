@@ -12,9 +12,7 @@ import { getAsset } from "../../Redux/actions";
 import { useState, useCallback, useEffect } from "react";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import AssetFilter from "./AssetFilter";
-import AdvancedFilterButton from "../Common/AdvancedFilterButton";
 import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
 import SearchInput from "../Form/SearchInput";
@@ -29,6 +27,7 @@ import ExportMenu from "../Common/Export";
 import CountBlock from "../../CAREUI/display/Count";
 import AssetImportModal from "./AssetImportModal";
 import Page from "../Common/components/Page";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -49,6 +48,7 @@ const AssetsList = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [facility, setFacility] = useState<FacilityModel>();
   const [asset_type, setAssetType] = useState<string>();
+  const [facilityName, setFacilityName] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
@@ -119,6 +119,14 @@ const AssetsList = () => {
     },
     [dispatch, fetchData]
   );
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (!qParams.facility) return setFacilityName("");
+      const res = await dispatch(getAnyFacility(qParams.facility, "facility"));
+      setFacilityName(res?.data?.name);
+    }
+    fetchFacilityName();
+  }, [dispatch, qParams.facility]);
 
   const fetchFacility = useCallback(
     async (status: statusType) => {
@@ -251,7 +259,14 @@ const AssetsList = () => {
               </p>
             </div>
             <p className="font-normal text-sm">
-              {asset?.location_object?.name}
+              <span className="text-sm font-medium">
+                <CareIcon className="care-l-location-point mr-1 text-primary-500" />
+                {asset?.location_object?.name}
+              </span>
+              <span className="text-sm font-medium ml-2">
+                <CareIcon className="care-l-hospital mr-1 text-primary-500" />
+                {asset?.location_object?.facility?.name}
+              </span>
             </p>
 
             <div className="flex flex-wrap gap-2 mt-2">
@@ -260,11 +275,6 @@ const AssetsList = () => {
               ) : (
                 <Chip color="red" startIcon="cog" text="Not Working" />
               )}
-              <Chip
-                color="blue"
-                startIcon="location-arrow"
-                text={asset.status}
-              />
             </div>
           </div>
         ))}
@@ -339,7 +349,7 @@ const AssetsList = () => {
           <div className="flex flex-col md:flex-row gap-2 w-full lg:w-auto">
             <div className="w-full">
               <AdvancedFilterButton
-                setShowFilters={() => advancedFilter.setShow(true)}
+                onClick={() => advancedFilter.setShow(true)}
               />
             </div>
             <ButtonV2
@@ -366,20 +376,14 @@ const AssetsList = () => {
           </div>
         </div>
       </div>
-      <div>
-        <SlideOver {...advancedFilter}>
-          <div className="bg-white min-h-screen p-4">
-            <AssetFilter {...advancedFilter} />
-          </div>
-        </SlideOver>
-      </div>
+      <AssetFilter {...advancedFilter} key={window.location.search} />
       {isLoading ? (
         <Loading />
       ) : (
         <>
           <FilterBadges
             badges={({ badge, value }) => [
-              value("Facility", ["facility", "location"], facility?.name || ""),
+              value("Facility", "facility", facilityName || ""),
               badge("Name/Serial No./QR ID", "search"),
               value("Asset Type", "asset_type", asset_type || ""),
               value("Asset Class", "asset_class", asset_class || ""),

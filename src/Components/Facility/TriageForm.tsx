@@ -12,7 +12,7 @@ import {
   getTriageInfo,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { TextInputField } from "../Common/HelperInputFields";
+import { LegacyTextInputField } from "../Common/HelperInputFields";
 import { PatientStatsModel } from "./models";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -329,7 +329,7 @@ export const TriageForm = (props: triageFormProps) => {
                   <InputLabel id="num-patients-visited-label">
                     Patients Visited in Triage
                   </InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="num_patients_visited"
                     variant="outlined"
                     margin="dense"
@@ -346,7 +346,7 @@ export const TriageForm = (props: triageFormProps) => {
                   <InputLabel id="num-patients-home-quarantine-label">
                     Patients in Home Quarantine
                   </InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="num_patients_home_quarantine"
                     variant="outlined"
                     margin="dense"
@@ -363,7 +363,7 @@ export const TriageForm = (props: triageFormProps) => {
                   <InputLabel id="num-patients-isolation-label">
                     Suspected Isolated
                   </InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="num_patients_isolation"
                     variant="outlined"
                     margin="dense"
@@ -380,7 +380,7 @@ export const TriageForm = (props: triageFormProps) => {
                   <InputLabel id="num-patient-referred-label">
                     Patients Referred
                   </InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="num_patient_referred"
                     variant="outlined"
                     margin="dense"
@@ -397,7 +397,7 @@ export const TriageForm = (props: triageFormProps) => {
                   <InputLabel id="num-patient-referred-label">
                     Confirmed Positive
                   </InputLabel>
-                  <TextInputField
+                  <LegacyTextInputField
                     name="num_patient_confirmed_positive"
                     variant="outlined"
                     margin="dense"
