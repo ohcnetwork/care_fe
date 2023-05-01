@@ -87,7 +87,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       {kasp_string}
                     </div>
                   )}
-                  <div className="flex items-center justify-between">
+                  <div className="flex">
                     <Link
                       href={`/facility/${facility.id}`}
                       className="float-left font-bold text-xl capitalize text-inherit hover:text-inherit"
@@ -105,6 +105,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       <></>
                     )}
                     <ButtonV2
+                      className="mr-0 ml-auto"
                       href={`/facility/${facility.id}/cns`}
                       border
                       ghost
