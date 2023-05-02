@@ -137,7 +137,7 @@ export const FACILITY_TYPES: Array<OptionsType> = [
 ];
 
 export const SHIFTING_CHOICES_WARTIME: Array<OptionsType> = [
-  { id: 10, text: "PENDING" },
+  { id: 10, text: "PENDING", label: "SHIFTING APPROVAL PENDING" },
   { id: 15, text: "ON HOLD" },
   { id: 20, text: "APPROVED" },
   { id: 30, text: "REJECTED" },
