@@ -1,6 +1,6 @@
+import { AssignedToObjectModel } from "../Patient/models";
 import { PRNPrescriptionType } from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
-import { AssignedToObjectModel } from "../Patient/models";
 
 export interface LocalBodyModel {
   name: string;
@@ -125,10 +125,10 @@ export interface ConsultationModel {
   medical_history_object?: MedicalHistoyModel;
   facility?: number;
   facility_name?: string;
-  id?: number;
+  id: string;
   modified_date?: string;
   other_symptoms?: string;
-  patient?: number;
+  patient: string;
   prescribed_medication?: string;
   referred_to?: number | null;
   suggestion?: string;

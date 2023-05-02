@@ -1,8 +1,7 @@
-import { Link, navigate } from "raviger";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { GENDER_TYPES } from "../../Common/constants";
 import {
   getAllPatient,
   getPermittedFacility,
@@ -10,16 +9,16 @@ import {
 } from "../../Redux/actions";
 import { classNames } from "../../Utils/utils";
 import { AssetData, AssetLocationObject } from "../Assets/AssetTypes";
-import ButtonV2, { Submit } from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import Loading from "../Common/Loading";
 import Pagination from "../Common/Pagination";
 import { PatientModel } from "../Patient/models";
-import PatientVitalsCard from "../Patient/PatientVitalsCard";
 import { FacilityModel } from "./models";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { uniqBy } from "lodash";
 import DialogModal from "../Common/Dialog";
+import { MonitorCard } from "./MonitorCard";
 
 interface Monitor {
   patient: PatientModel;
@@ -36,6 +35,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
   const [monitors, setMonitors] = useState<Monitor[]>();
   const [facility, setFacility] = useState<FacilityModel>();
   const [currentPage, setCurrentPage] = useState(1);
+  const [defaultShowAllLocation, setDefaultShowAllLocation] = useState(true);
   const searchParams = new URLSearchParams(window.location.search);
 
   // this wil set ?page=1 param in url if it is not present
@@ -45,7 +45,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
     }
   }, []);
   const [location, setLocation] = useState<AssetLocationObject>();
-  const [showSelectLocation, setShowSelectLocation] = useState(true);
+  const [showSelectLocation, setShowSelectLocation] = useState(false);
 
   useEffect(() => {
     const onFullscreenChange = () =>
@@ -131,43 +131,63 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
   if (!monitors) return <Loading />;
   return (
     <Page
-      title={`Central Nursing Station: ${facility?.name} - ${location?.name}`}
+      title={`Central Nursing Station: ${
+        defaultShowAllLocation
+          ? "All Locations"
+          : `${facility?.name} - ${location?.name}`
+      }`}
       backUrl={`/facility/${facilityId}`}
       noImplicitPadding
       breadcrumbs={false}
       options={
         <div className="flex gap-4 items-center">
-          <ButtonV2
-            variant="secondary"
-            border
-            onClick={() => setShowSelectLocation(true)}
-          >
-            Change Location
-          </ButtonV2>
-          <ButtonV2
-            variant="secondary"
-            border
-            onClick={() => {
-              if (isFullscreen) {
-                document.exitFullscreen();
-              } else {
-                document.documentElement.requestFullscreen();
-              }
-            }}
-            className="tooltip !h-11"
-          >
-            <CareIcon
-              className={classNames(
-                isFullscreen
-                  ? "care-l-compress-arrows"
-                  : "care-l-expand-arrows-alt",
-                "text-lg"
-              )}
-            />
-            <span className="tooltip-text tooltip-bottom -translate-x-1/2">
-              {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-            </span>
-          </ButtonV2>
+          {monitors?.length > 0 ? (
+            <>
+              <ButtonV2
+                variant="secondary"
+                border
+                onClick={() => setShowSelectLocation(true)}
+              >
+                <CareIcon className="care-l-location-point text-lg" />
+                Change Location
+              </ButtonV2>
+              <ButtonV2
+                variant="secondary"
+                border
+                onClick={() => {
+                  if (isFullscreen) {
+                    document.exitFullscreen();
+                  } else {
+                    document.documentElement.requestFullscreen();
+                  }
+                }}
+                className="tooltip !h-11"
+              >
+                <CareIcon
+                  className={classNames(
+                    isFullscreen
+                      ? "care-l-compress-arrows"
+                      : "care-l-expand-arrows-alt",
+                    "text-lg"
+                  )}
+                />
+                <span className="tooltip-text tooltip-bottom -translate-x-1/2">
+                  {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                </span>
+              </ButtonV2>
+            </>
+          ) : (
+            <>
+              <ButtonV2
+                variant="secondary"
+                border
+                onClick={() => history.go(-2)}
+              >
+                Go Back
+              </ButtonV2>
+            </>
+          )}
+
           <Pagination
             className=""
             cPage={currentPage}
@@ -175,7 +195,13 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
               setCurrentPage(page);
               navigate(`/facility/${facilityId}/cns?page=${page}`);
             }}
-            data={{ totalCount: monitors.length }}
+            data={{
+              totalCount: defaultShowAllLocation
+                ? monitors.length
+                : monitors.filter(
+                    (m) => m.asset.location_object.id === location?.id
+                  ).length,
+            }}
             defaultPerPage={PER_PAGE_LIMIT}
           />
         </div>
@@ -183,18 +209,11 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
     >
       <DialogModal
         title="Select Location"
-        show={showSelectLocation || !location}
+        show={showSelectLocation}
         onClose={() => setShowSelectLocation(false)}
         className="w-full max-w-md"
       >
         {!monitors && <Loading />}
-        {monitors.length === 0 && (
-          <div className="text-center">
-            <h3 className="text-lg font-semibold">
-              No vitals monitors present
-            </h3>
-          </div>
-        )}
         <div className="flex flex-col gap-2">
           <AutocompleteFormField
             className="mt-2"
@@ -222,10 +241,28 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
             optionValue={(location) => location}
             disabled={!monitors}
           />
-          <div className="flex justify-end">
+          <div className="md:flex justify-end">
+            <ButtonV2
+              variant="primary"
+              className="w-full mr-2 my-2"
+              onClick={() => {
+                setDefaultShowAllLocation(true);
+                setShowSelectLocation(false);
+              }}
+            >
+              Show All Locations
+            </ButtonV2>
             <Submit
-              onClick={() => setShowSelectLocation(false)}
+              onClick={() => {
+                setDefaultShowAllLocation(false);
+                setShowSelectLocation(false);
+              }}
+              className="mr-2 my-2"
               label="Confirm"
+            />
+            <Cancel
+              onClick={() => setShowSelectLocation(false)}
+              className="mr-2 my-2"
             />
           </div>
         </div>
@@ -236,33 +273,36 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
         </div>
       )}
       <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-1">
-        {monitors
-          ?.filter((m) => m.asset.location_object.id === location?.id)
-          ?.slice(
-            (currentPage - 1) * PER_PAGE_LIMIT,
-            currentPage * PER_PAGE_LIMIT
-          )
-          .map(({ patient, socketUrl }) => (
-            <div key={patient.id} className="group p-2 rounded-lg bg-black">
-              <div className="flex flex-wrap gap-4 text-white w-full tracking-wider p-2">
-                <Link
-                  href={`/facility/${facilityId}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
-                  className="font-bold uppercase text-white"
-                >
-                  {patient.name}
-                </Link>
-                <span>
-                  {patient.age}y |{" "}
-                  {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
-                </span>
-                <span className="flex-1 flex items-center justify-end gap-2 text-end">
-                  <CareIcon className="care-l-bed text-lg" />
-                  {patient.last_consultation?.current_bed?.bed_object?.name}
-                </span>
-              </div>
-              <PatientVitalsCard socketUrl={socketUrl} shrinked />
-            </div>
-          ))}
+        {defaultShowAllLocation
+          ? monitors
+              ?.slice(
+                (currentPage - 1) * PER_PAGE_LIMIT,
+                currentPage * PER_PAGE_LIMIT
+              )
+              .map(({ patient, socketUrl, asset }) => (
+                <MonitorCard
+                  key={patient.id}
+                  location={asset.location_object}
+                  facilityId={facilityId}
+                  patient={patient}
+                  socketUrl={socketUrl}
+                />
+              ))
+          : monitors
+              ?.filter((m) => m.asset.location_object.id === location?.id)
+              ?.slice(
+                (currentPage - 1) * PER_PAGE_LIMIT,
+                currentPage * PER_PAGE_LIMIT
+              )
+              .map(({ patient, socketUrl, asset }) => (
+                <MonitorCard
+                  key={patient.id}
+                  location={asset.location_object}
+                  facilityId={facilityId}
+                  patient={patient}
+                  socketUrl={socketUrl}
+                />
+              ))}
       </div>
     </Page>
   );
