@@ -20,12 +20,16 @@
   "care": "CARE",
   "something_went_wrong": "Something went wrong..!",
   "stop": "Stop",
+  "record": "Record",
+  "recording": "Recording",
   "yes": "Yes",
   "no": "No",
   "status": "Status",
   "created": "Created",
   "modified": "Modified",
   "updated": "Updated",
+  "update": "Update",
+  "configure": "Configure",
   "assigned_to": "Assigned to",
   "cancel": "Cancel",
   "clear": "Clear",
@@ -104,6 +108,7 @@
   "recommended_aspect_ratio_for": "Recommended aspect ratio for",
   "drag_drop_image_to_upload": "Drag & drop image to upload",
   "upload_an_image": "Upload an image",
+  "upload": "Upload",
   "uploading": "Uploading",
   "switch": "Switch",
   "capture": "Capture",
@@ -121,5 +126,6 @@
   "RESPIRATORY_SUPPORT_UNKNOWN": "None",
   "RESPIRATORY_SUPPORT_OXYGEN_SUPPORT": "O2 Support",
   "RESPIRATORY_SUPPORT_NON_INVASIVE": "NIV",
-  "RESPIRATORY_SUPPORT_INVASIVE": "IV"
+  "RESPIRATORY_SUPPORT_INVASIVE": "IV",
+  "choose_file": "Choose File"
 }

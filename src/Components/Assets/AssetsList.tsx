@@ -20,7 +20,7 @@ import useFilters from "../../Common/hooks/useFilters";
 import { FacilityModel } from "../Facility/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
-import AuthorizeFor from "../../Utils/AuthorizeFor";
+import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ButtonV2 from "../Common/components/ButtonV2";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import ExportMenu from "../Common/Export";
@@ -28,10 +28,12 @@ import CountBlock from "../../CAREUI/display/Count";
 import AssetImportModal from "./AssetImportModal";
 import Page from "../Common/components/Page";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
 const AssetsList = () => {
+  const { t } = useTranslation();
   const {
     qParams,
     updateQuery,
@@ -361,6 +363,7 @@ const AssetsList = () => {
           </div>
           <div className="flex flex-col md:flex-row w-full">
             <ButtonV2
+              authorizeFor={NonReadOnlyUsers}
               className="w-full inline-flex items-center justify-center"
               onClick={() => {
                 if (qParams.facility) {
@@ -371,7 +374,7 @@ const AssetsList = () => {
               }}
             >
               <CareIcon className="care-l-plus-circle text-lg" />
-              <span>Create Asset</span>
+              <span>{t("create_asset")}</span>
             </ButtonV2>
           </div>
         </div>

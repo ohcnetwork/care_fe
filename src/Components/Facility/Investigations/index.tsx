@@ -12,6 +12,7 @@ import {
 import * as Notification from "../../../Utils/Notifications.js";
 import { navigate, useQueryParams } from "raviger";
 import loadable from "@loadable/component";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../../Common/Loading"));
 const PageTitle = loadable(() => import("../../Common/PageTitle"));
@@ -74,6 +75,7 @@ const Investigation = (props: {
   patientId: string;
   facilityId: string;
 }) => {
+  const { t } = useTranslation();
   const { patientId, facilityId } = props;
   const [{ investigations: queryInvestigationsRaw = undefined }] =
     useQueryParams();
@@ -282,7 +284,7 @@ const Investigation = (props: {
   return (
     <div className="max-w-7xl mx-auto px-4">
       <PageTitle
-        title={"Log Lab Result"}
+        title={t("log_lab_results")}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
