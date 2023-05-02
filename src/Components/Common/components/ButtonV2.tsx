@@ -111,47 +111,51 @@ const ButtonV2 = ({
     `button-shape-${circle ? "circle" : "square"}`,
     ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
     border && `button-${variant}-border`,
-    shadow && "shadow enabled:hover:shadow-lg"
+    shadow && "shadow enabled:hover:shadow-lg",
+    tooltip && "tooltip"
   );
 
-  if (authorizeFor) {
-    <AuthorizedChild authorizeFor={authorizeFor}>
-      {({ isAuthorized }) => (
-        <button
-          {...props}
-          disabled={disabled || !isAuthorized || loading}
-          className={className}
-        >
-          {children}
-        </button>
-      )}
-    </AuthorizedChild>;
+  if (tooltip) {
+    children = (
+      <>
+        {tooltip && (
+          <span className={classNames("tooltip-text", tooltipClassName)}>
+            {tooltip}
+          </span>
+        )}
+        {children}
+      </>
+    );
   }
 
   if (href && !(disabled || loading)) {
     return (
-      <Link
-        {...(props as any)}
-        href={href}
-        target={target}
-        className={className}
-      >
-        {children}
+      <Link href={href} target={target}>
+        <button {...props} disabled={disabled || loading} className={className}>
+          {children}
+        </button>
       </Link>
     );
   }
 
+  if (authorizeFor) {
+    return (
+      <AuthorizedChild authorizeFor={authorizeFor}>
+        {({ isAuthorized }) => (
+          <button
+            {...props}
+            disabled={disabled || !isAuthorized || loading}
+            className={className}
+          >
+            {children}
+          </button>
+        )}
+      </AuthorizedChild>
+    );
+  }
+
   return (
-    <button
-      {...props}
-      disabled={disabled || loading}
-      className={classNames(className, tooltip && "tooltip")}
-    >
-      {tooltip && (
-        <span className={classNames("tooltip-text", tooltipClassName)}>
-          {tooltip}
-        </span>
-      )}
+    <button {...props} disabled={disabled || loading} className={className}>
       {children}
     </button>
   );

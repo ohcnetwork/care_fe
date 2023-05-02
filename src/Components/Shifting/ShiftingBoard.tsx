@@ -15,7 +15,7 @@ import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 import moment from "moment";
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 
 const limit = 14;
@@ -52,6 +52,10 @@ const ShiftCard = ({ shift, filter }: any) => {
     item: shift,
     collect: (monitor) => ({ isDragging: !!monitor.isDragging() }),
   }));
+  const rootState: any = useSelector((rootState) => rootState);
+  const { currentUser } = rootState;
+  const userHomeFacilityId = currentUser.data.home_facility;
+  const userType = currentUser.data.user_type;
   const { t } = useTranslation();
 
   const handleTransferComplete = (shift: any) => {
@@ -208,11 +212,18 @@ const ShiftCard = ({ shift, filter }: any) => {
               <i className="fas fa-eye mr-2" /> {t("all_details")}
             </button>
           </div>
-          {filter === "TRANSFER IN PROGRESS" && shift.assigned_facility && (
+          {filter === "COMPLETED" && shift.assigned_facility && (
             <div className="mt-2">
               <ButtonV2
                 variant="secondary"
                 className="w-full sm:whitespace-normal"
+                disabled={
+                  !shift.patient_object.allow_transfer ||
+                  !(
+                    ["DistrictAdmin", "StateAdmin"].includes(userType) ||
+                    userHomeFacilityId === shift.assigned_facility
+                  )
+                }
                 onClick={() => setModalFor(shift.external_id)}
               >
                 {t("transfer_to_receiving_facility")}
