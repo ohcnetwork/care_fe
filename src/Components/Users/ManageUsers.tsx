@@ -439,7 +439,7 @@ export default function ManageUsers() {
         setOpen={setExpandFacilityList}
         slideFrom="right"
         title="Facilities"
-        dialogClass="w-[350px]"
+        dialogClass="md:w-[400px]"
         onCloseClick={() => {
           //fetchData({ aborted: false });
         }}
@@ -470,7 +470,7 @@ export default function ManageUsers() {
             {userTypes.length && addUser}
           </div>
 
-          <UserFilter {...advancedFilter} />
+          <UserFilter {...advancedFilter} key={window.location.search} />
         </div>
       </div>
 
@@ -761,7 +761,7 @@ function UserFacilities(props: { user: any }) {
             <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
               <div className="w-full">
                 <img
-                  src={`${import.meta.env.REACT_PUBLIC_URL}/images/404.svg`}
+                  src="/images/404.svg"
                   alt="No linked facilities"
                   className="w-80 mx-auto"
                 />

@@ -6,7 +6,6 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getResourceDetails, deleteResourceRecord } from "../../Redux/actions";
 import { navigate } from "raviger";
 import Button from "@material-ui/core/Button";
-import { KeralaLogo } from "../../Common/constants";
 import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
@@ -102,12 +101,6 @@ export default function ResourceDetails(props: { id: string }) {
   const ApprovalLetter = (data: any) => {
     return (
       <div id="section-to-print" className="print bg-white">
-        <div className="flex justify-center">
-          <img
-            src={`${import.meta.env.REACT_PUBLIC_URL}/${KeralaLogo}`}
-            alt="kerala-logo"
-          />
-        </div>
         <div className="mx-20 p-4">
           <div className="font-bold text-xl text-center mt-6">
             APPROVAL LETTER
@@ -338,7 +331,7 @@ export default function ResourceDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  Contact person at the facility:{" "}
+                  Contact person at the current facility:{" "}
                 </span>
                 {data.refering_facility_contact_name || "--"}
               </div>
