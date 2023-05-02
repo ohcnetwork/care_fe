@@ -346,12 +346,13 @@ const AssetManage = (props: AssetManageProps) => {
               )}
               {checkAuthority(user_type, "DistrictAdmin") && (
                 <ButtonV2
+                  authorizeFor={NonReadOnlyUsers}
                   onClick={() => setShowDeleteDialog(true)}
-                  variant={"danger"}
+                  variant="danger"
                   className="inline-flex"
                 >
                   <CareIcon className="care-l-trash h-4" />
-                  <span className="md:hidden">Delete</span>
+                  <span className="md:hidden">{t("delete")}</span>
                 </ButtonV2>
               )}
             </div>
