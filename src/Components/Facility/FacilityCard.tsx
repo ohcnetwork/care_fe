@@ -87,31 +87,20 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       {kasp_string}
                     </div>
                   )}
-                  <div className="flex">
+                  <div className="flex items-center justify-between">
                     <Link
                       href={`/facility/${facility.id}`}
                       className="float-left font-bold text-xl capitalize text-inherit hover:text-inherit"
                     >
                       {facility.name}
                     </Link>
-                    {userType !== "Staff" ? (
-                      <div
-                        className="h-[38px]"
-                        onClick={(_) => setNotifyModalFor(facility.id)}
-                      >
-                        <CareIcon className="care-l-megaphone text-lg text-black hover:text-primary-500 ml-2 hover:cursor-pointer" />
-                      </div>
-                    ) : (
-                      <></>
-                    )}
                     <ButtonV2
-                      className="mr-0 ml-auto"
                       href={`/facility/${facility.id}/cns`}
                       border
                       ghost
                     >
                       <CareIcon className="care-l-monitor-heart-rate text-lg" />
-                      <span>CNS</span>
+                      <span>View CNS</span>
                     </ButtonV2>
                   </div>
                   <div className="flex gap-1 flex-wrap mt-2">
@@ -167,9 +156,25 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
               <div className="bg-gray-50 border-t px-2 md:px-3 py-1 flex-none">
                 <div className="flex py-2 justify-between">
                   <div className="flex justify-between w-full flex-wrap gap-2">
-                    <div className="w-fit">
+                    <div className="flex gap-2">
+                      {userType !== "Staff" ? (
+                        <ButtonV2
+                          id="facility-notify"
+                          ghost
+                          border
+                          className="h-[38px]"
+                          onClick={(_) => setNotifyModalFor(facility.id)}
+                        >
+                          <CareIcon className="care-l-megaphone text-lg" />
+                          <span className="md:block hidden">
+                            Notify Facility
+                          </span>
+                        </ButtonV2>
+                      ) : (
+                        <></>
+                      )}
                       <div
-                        className={`flex items-center justify-center rounded-lg text-xl h-[38px] w-fit px-2 ml-auto ${
+                        className={`flex items-center justify-center rounded-md text-xl h-[38px] w-fit px-2 ml-auto ${
                           facility.patient_count / facility.bed_count > 0.85
                             ? "bg-red-500"
                             : "bg-primary-100"
@@ -190,8 +195,8 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                               : "gray-700"
                           } my-1`}
                         >
-                          {" "}
-                          {facility.patient_count} / {facility.bed_count}{" "}
+                          Bed Occupancy: {facility.patient_count} /{" "}
+                          {facility.bed_count}{" "}
                         </dt>{" "}
                       </div>
                       <DialogModal
@@ -228,7 +233,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         </form>
                       </DialogModal>
                     </div>
-                    <div className="flex gap-2 ">
+                    <div className="flex gap-2">
                       <ButtonV2
                         href={`/facility/${facility.id}`}
                         id="facility-details"
@@ -238,7 +243,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       >
                         <CareIcon className="care-l-hospital text-lg" />
                         <span className="hidden md:inline">
-                          {t("Facility")}
+                          {t("view_faciliy")}
                         </span>
                       </ButtonV2>
                       <ButtonV2
@@ -248,7 +253,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         ghost
                       >
                         <CareIcon className="care-l-user-injured text-lg" />
-                        {t("Patients")}
+                        {t("view_patients")}
                       </ButtonV2>
                     </div>
                   </div>

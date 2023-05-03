@@ -127,5 +127,8 @@
   "RESPIRATORY_SUPPORT_OXYGEN_SUPPORT": "O2 Support",
   "RESPIRATORY_SUPPORT_NON_INVASIVE": "NIV",
   "RESPIRATORY_SUPPORT_INVASIVE": "IV",
-  "choose_file": "Choose File"
+  "choose_file": "Choose File",
+  "view_faciliy": "View Facility",
+  "view_patients": "View Patients"
+
 }
