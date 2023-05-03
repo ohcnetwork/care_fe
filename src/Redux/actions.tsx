@@ -428,9 +428,15 @@ export const transferPatient = (params: object, pathParam: object) => {
 export const getPatientNotes = (
   patientId: string,
   limit: number,
-  offset: number
+  offset: number,
+  consultation?: string
 ) => {
-  return fireRequest("getPatientNotes", [], { limit, offset }, { patientId });
+  return fireRequest(
+    "getPatientNotes",
+    [],
+    { limit, offset, consultation },
+    { patientId }
+  );
 };
 export const addPatientNote = (patientId: string, params: object) => {
   return fireRequest("addPatientNote", [], params, { patientId });

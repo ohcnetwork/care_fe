@@ -132,7 +132,26 @@ export default function AppRouter() {
     "/facility/:facilityId/patient/:patientId/notes": ({
       facilityId,
       patientId,
-    }: any) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
+    }: {
+      facilityId: string;
+      patientId: string;
+    }) => <PatientNotes patientId={patientId} facilityId={facilityId} />,
+    "/facility/:facilityId/patient/:patientId/consultation/:consultationId/notes":
+      ({
+        facilityId,
+        patientId,
+        consultationId,
+      }: {
+        facilityId: string;
+        patientId: string;
+        consultationId: string;
+      }) => (
+        <PatientNotes
+          patientId={patientId}
+          facilityId={facilityId}
+          consultationId={consultationId}
+        />
+      ),
     "/facility/:facilityId/patient/:patientId/files": ({
       facilityId,
       patientId,

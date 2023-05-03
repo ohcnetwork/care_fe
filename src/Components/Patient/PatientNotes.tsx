@@ -1,30 +1,32 @@
-import React, { useCallback, useState, useEffect } from "react";
+import { navigate } from "raviger";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  getPatientNotes,
   addPatientNote,
   getPatient,
+  getPatientNotes,
 } from "../../Redux/actions";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import * as Notification from "../../Utils/Notifications.js";
+import { formatDate } from "../../Utils/utils";
+import Loading from "../Common/Loading";
 import PageTitle from "../Common/PageTitle";
 import Pagination from "../Common/Pagination";
-import { navigate } from "raviger";
-import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
-import Loading from "../Common/Loading";
-import { formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import { ConsultationModel } from "../Facility/models";
 
 interface PatientNotesProps {
-  patientId: any;
-  facilityId: any;
+  patientId: string;
+  facilityId: string;
+  consultationId?: string;
 }
 
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
 const PatientNotes = (props: PatientNotesProps) => {
-  const { patientId, facilityId } = props;
+  const { patientId, facilityId, consultationId } = props;
 
   const dispatch: any = useDispatch();
   const initialData: any = { notes: [], cPage: 1, count: 1 };
@@ -34,12 +36,20 @@ const PatientNotes = (props: PatientNotesProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [patientActive, setPatientActive] = useState(true);
+  const [consultationData, setConsultationData] = useState<ConsultationModel>(
+    {} as ConsultationModel
+  );
 
   const fetchData = useCallback(
     async (page = 1, status: statusType = { aborted: false }) => {
       setIsLoading(true);
       const res = await dispatch(
-        getPatientNotes(props.patientId, pageSize, (page - 1) * pageSize)
+        getPatientNotes(
+          props.patientId,
+          pageSize,
+          (page - 1) * pageSize,
+          consultationId
+        )
       );
       if (!status.aborted) {
         if (res && res.data) {
@@ -64,20 +74,20 @@ const PatientNotes = (props: PatientNotesProps) => {
   );
 
   useEffect(() => {
-    async function fetchPatientName() {
+    (async () => {
       if (patientId) {
         const res = await dispatch(getPatient({ id: patientId }));
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
           setPatientActive(res.data.is_active);
+          setConsultationData(res.data.last_consultation);
         }
       } else {
         setPatientName("");
         setFacilityName("");
       }
-    }
-    fetchPatientName();
+    })();
   }, [dispatch, patientId]);
 
   function handlePagination(page: number) {
@@ -87,6 +97,7 @@ const PatientNotes = (props: PatientNotesProps) => {
   const onAddNote = () => {
     const payload = {
       note: noteField,
+      consultation: consultationId ? consultationData : "",
     };
     if (!/\S+/.test(noteField)) {
       Notification.Error({
@@ -110,24 +121,31 @@ const PatientNotes = (props: PatientNotesProps) => {
       <PageTitle
         title="Patient Notes"
         className="mb-5"
-        crumbsReplacements={{
+        crumbsReplacements={ {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
-        }}
-        backUrl={`/facility/${facilityId}/patient/${patientId}`}
+          [consultationId || ""]: {
+            name: `Admitted on ${formatDate(
+              consultationData.admission_date
+                ? consultationData.admission_date
+                : "00:00"
+            )}`,
+          },
+        } }
+        backUrl={ `/facility/${facilityId}/patient/${patientId}` }
       />
       <h3 className="pl-10 text-lg">Add new notes</h3>
       <textarea
-        rows={3}
+        rows={ 3 }
         placeholder="Type your Note"
         className="mx-10 my-4 rounded-lg border border-gray-500 p-4 focus:border-primary-500 focus:outline-none focus:ring-primary-500"
-        onChange={(e) => setNoteField(e.target.value)}
+        onChange={ (e) => setNoteField(e.target.value) }
       />
       <div className="flex w-full justify-end pr-10">
         <ButtonV2
-          authorizeFor={NonReadOnlyUsers}
-          onClick={onAddNote}
-          disabled={!patientActive}
+          authorizeFor={ NonReadOnlyUsers }
+          onClick={ onAddNote }
+          disabled={ !patientActive }
         >
           Post Your Note
         </ButtonV2>
@@ -135,18 +153,18 @@ const PatientNotes = (props: PatientNotesProps) => {
       <div className="px-10 py-5">
         <h3 className="text-lg">Added Notes</h3>
         <div className="w-full">
-          {state.notes.length ? (
+          { state.notes.length ? (
             state.notes.map((note: any) => (
               <div
-                key={note.id}
+                key={ note.id }
                 className="mt-4 flex w-full flex-col rounded-lg border border-gray-300 bg-white p-4 text-gray-800"
               >
                 <span className="whitespace-pre-wrap break-words">
-                  {note.note}
+                  { note.note }
                 </span>
                 <div className="mt-3">
                   <span className="text-xs text-gray-500">
-                    {formatDate(note.created_date) || "-"}
+                    { formatDate(note.created_date) || "-" }
                   </span>
                 </div>
 
@@ -156,20 +174,20 @@ const PatientNotes = (props: PatientNotesProps) => {
                       <i className="fas fa-user" />
                     </div>
                     <span className="text-sm text-gray-700">
-                      {note.created_by_object?.first_name || "Unknown"}{" "}
-                      {note.created_by_object?.last_name}
+                      { note.created_by_object?.first_name || "Unknown" }{ " " }
+                      { note.created_by_object?.last_name }
                     </span>
                   </div>
 
                   <div
                     className="inline-flex w-full cursor-pointer items-center justify-center rounded-md border bg-gray-100 py-1 pl-2 pr-3 md:w-auto"
-                    onClick={() => navigate(`/facility/${note.facility?.id}`)}
+                    onClick={ () => navigate(`/facility/${note.facility?.id}`) }
                   >
                     <div className="flex h-8 w-8 items-center justify-center rounded-full">
                       <i className="fas fa-hospital" />
                     </div>
                     <span className="text-sm text-gray-700">
-                      {note.facility?.name || "Unknown"}
+                      { note.facility?.name || "Unknown" }
                     </span>
                   </div>
                 </div>
@@ -179,17 +197,17 @@ const PatientNotes = (props: PatientNotesProps) => {
             <div className="mt-2 flex items-center justify-center text-2xl font-bold text-gray-500">
               No Notes Found
             </div>
-          )}
-          {state.count > pageSize && (
+          ) }
+          { state.count > pageSize && (
             <div className="mt-4 flex w-full justify-center">
               <Pagination
-                data={{ totalCount: state.count }}
-                onChange={handlePagination}
-                defaultPerPage={pageSize}
-                cPage={state.cPage}
+                data={ { totalCount: state.count } }
+                onChange={ handlePagination }
+                defaultPerPage={ pageSize }
+                cPage={ state.cPage }
               />
             </div>
-          )}
+          ) }
         </div>
       </div>
     </div>
