@@ -1,29 +1,31 @@
-import React, { useEffect, useState } from "react";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { UserSelect } from "../Common/UserSelect2";
-import { navigate } from "raviger";
-import { LegacySelectField } from "../Common/HelperInputFields";
 import {
-  SHIFTING_FILTER_ORDER,
-  DISEASE_STATUS,
   BREATHLESSNESS_LEVEL,
+  DISEASE_STATUS,
+  SHIFTING_FILTER_ORDER,
 } from "../../Common/constants";
-import moment from "moment";
-import { getAnyFacility, getUserList } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
-import { CircularProgress } from "@material-ui/core";
-import { SHIFTING_CHOICES } from "../../Common/constants";
 import { DateRangePicker, getDate } from "../Common/DateRangePicker";
-import parsePhoneNumberFromString from "libphonenumber-js";
-import useMergeState from "../../Common/hooks/useMergeState";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import useConfig from "../../Common/hooks/useConfig";
-import { useTranslation } from "react-i18next";
-import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import React, { useEffect, useState } from "react";
+import {
+  SHIFTING_CHOICES_PEACETIME,
+  SHIFTING_CHOICES_WARTIME,
+} from "../../Common/constants";
+import { getAnyFacility, getUserList } from "../../Redux/actions";
 
-const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
+import { CircularProgress } from "@material-ui/core";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import { LegacySelectField } from "../Common/HelperInputFields";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { UserSelect } from "../Common/UserSelect2";
+import moment from "moment";
+import { navigate } from "raviger";
+import parsePhoneNumberFromString from "libphonenumber-js";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import useMergeState from "../../Common/hooks/useMergeState";
+import { useTranslation } from "react-i18next";
 
 const clearFilterState = {
   orgin_facility: "",
@@ -50,13 +52,17 @@ const clearFilterState = {
 };
 
 export default function ListFilter(props: any) {
-  const { kasp_enabled, kasp_string } = useConfig();
+  const { kasp_enabled, kasp_string, wartime_shifting } = useConfig();
   const { filter, onChange, closeFilter } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isShiftingLoading, setShiftingLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
   const [isAssignedUserLoading, setAssignedUserLoading] = useState(false);
   const { t } = useTranslation();
+
+  const shiftStatusOptions = (
+    wartime_shifting ? SHIFTING_CHOICES_WARTIME : SHIFTING_CHOICES_PEACETIME
+  ).map((option) => option.text);
 
   const [filterState, setFilterState] = useMergeState({
     orgin_facility: filter.orgin_facility || "",
@@ -299,25 +305,27 @@ export default function ListFilter(props: any) {
         </div>
       </div>
 
-      <div>
-        <FieldLabel>{t("shifting_approving_facility")}</FieldLabel>
-        <div className="">
-          {isShiftingLoading ? (
-            <CircularProgress size={20} />
-          ) : (
-            <FacilitySelect
-              multiple={false}
-              name="shifting_approving_facility"
-              selected={filterState.shifting_approving_facility_ref}
-              setSelected={(obj) =>
-                setFacility(obj, "shifting_approving_facility")
-              }
-              className="shifting-page-filter-dropdown"
-              errors={""}
-            />
-          )}
+      {wartime_shifting && (
+        <div>
+          <FieldLabel>{t("shifting_approving_facility")}</FieldLabel>
+          <div className="">
+            {isShiftingLoading ? (
+              <CircularProgress size={20} />
+            ) : (
+              <FacilitySelect
+                multiple={false}
+                name="shifting_approving_facility"
+                selected={filterState.shifting_approving_facility_ref}
+                setSelected={(obj) =>
+                  setFacility(obj, "shifting_approving_facility")
+                }
+                className="shifting-page-filter-dropdown"
+                errors={""}
+              />
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       <div>
         <FieldLabel>{t("assigned_facility")}</FieldLabel>

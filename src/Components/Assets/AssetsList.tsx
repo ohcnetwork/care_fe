@@ -20,7 +20,7 @@ import useFilters from "../../Common/hooks/useFilters";
 import { FacilityModel } from "../Facility/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
-import AuthorizeFor from "../../Utils/AuthorizeFor";
+import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ButtonV2 from "../Common/components/ButtonV2";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import ExportMenu from "../Common/Export";
@@ -28,10 +28,12 @@ import CountBlock from "../../CAREUI/display/Count";
 import AssetImportModal from "./AssetImportModal";
 import Page from "../Common/components/Page";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
 const AssetsList = () => {
+  const { t } = useTranslation();
   const {
     qParams,
     updateQuery,
@@ -48,6 +50,7 @@ const AssetsList = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [facility, setFacility] = useState<FacilityModel>();
   const [asset_type, setAssetType] = useState<string>();
+  const [facilityName, setFacilityName] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
@@ -118,6 +121,14 @@ const AssetsList = () => {
     },
     [dispatch, fetchData]
   );
+  useEffect(() => {
+    async function fetchFacilityName() {
+      if (!qParams.facility) return setFacilityName("");
+      const res = await dispatch(getAnyFacility(qParams.facility, "facility"));
+      setFacilityName(res?.data?.name);
+    }
+    fetchFacilityName();
+  }, [dispatch, qParams.facility]);
 
   const fetchFacility = useCallback(
     async (status: statusType) => {
@@ -352,6 +363,7 @@ const AssetsList = () => {
           </div>
           <div className="flex flex-col md:flex-row w-full">
             <ButtonV2
+              authorizeFor={NonReadOnlyUsers}
               className="w-full inline-flex items-center justify-center"
               onClick={() => {
                 if (qParams.facility) {
@@ -362,19 +374,19 @@ const AssetsList = () => {
               }}
             >
               <CareIcon className="care-l-plus-circle text-lg" />
-              <span>Create Asset</span>
+              <span>{t("create_asset")}</span>
             </ButtonV2>
           </div>
         </div>
       </div>
-      <AssetFilter {...advancedFilter} />
+      <AssetFilter {...advancedFilter} key={window.location.search} />
       {isLoading ? (
         <Loading />
       ) : (
         <>
           <FilterBadges
             badges={({ badge, value }) => [
-              value("Facility", ["facility", "location"], facility?.name || ""),
+              value("Facility", "facility", facilityName || ""),
               badge("Name/Serial No./QR ID", "search"),
               value("Asset Type", "asset_type", asset_type || ""),
               value("Asset Class", "asset_class", asset_class || ""),

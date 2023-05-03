@@ -1,26 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { classNames, formatDate } from "../../Utils/utils";
 import {
-  listShiftRequests,
   completeTransfer,
   downloadShiftRequests,
+  listShiftRequests,
 } from "../../Redux/actions";
-import Button from "@material-ui/core/Button";
-import { navigate } from "raviger";
-import moment from "moment";
-import { Modal } from "@material-ui/core";
-import { CSVLink } from "react-csv";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import { useDrag, useDrop } from "react-dnd";
-import { classNames, formatDate } from "../../Utils/utils";
+
 import ButtonV2 from "../Common/components/ButtonV2";
+import { CSVLink } from "react-csv";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import CircularProgress from "../Common/components/CircularProgress";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import moment from "moment";
+import { navigate } from "raviger";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 
 const limit = 14;
 
 interface boardProps {
   board: string;
+  title?: string;
   filterProp: any;
   formatFilter: any;
 }
@@ -40,6 +42,7 @@ const reduceLoading = (action: string, current: any) => {
 
 const ShiftCard = ({ shift, filter }: any) => {
   const dispatch: any = useDispatch();
+  const { wartime_shifting } = useConfig();
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
@@ -49,6 +52,10 @@ const ShiftCard = ({ shift, filter }: any) => {
     item: shift,
     collect: (monitor) => ({ isDragging: !!monitor.isDragging() }),
   }));
+  const rootState: any = useSelector((rootState) => rootState);
+  const { currentUser } = rootState;
+  const userHomeFacilityId = currentUser.data.home_facility;
+  const userType = currentUser.data.user_type;
   const { t } = useTranslation();
 
   const handleTransferComplete = (shift: any) => {
@@ -110,17 +117,19 @@ const ShiftCard = ({ shift, filter }: any) => {
                   </dd>
                 </dt>
               </div>
-              <div className="sm:col-span-1">
-                <dt
-                  title={t("shifting_approving_facility")}
-                  className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                >
-                  <i className="fas fa-user-check mr-2"></i>
-                  <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
-                    {(shift.shifting_approving_facility_object || {}).name}
-                  </dd>
-                </dt>
-              </div>
+              {wartime_shifting && (
+                <div className="sm:col-span-1">
+                  <dt
+                    title={t("shifting_approving_facility")}
+                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                  >
+                    <i className="fas fa-user-check mr-2"></i>
+                    <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
+                      {(shift.shifting_approving_facility_object || {}).name}
+                    </dd>
+                  </dt>
+                </div>
+              )}
               <div className="sm:col-span-1">
                 <dt
                   title={t("assigned_facility")}
@@ -129,7 +138,8 @@ const ShiftCard = ({ shift, filter }: any) => {
                   <i className="fas fa-plane-arrival mr-2"></i>
 
                   <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
-                    {(shift.assigned_facility_object || {}).name ||
+                    {shift.assigned_facility_external ||
+                      shift.assigned_facility_object?.name ||
                       t("yet_to_be_decided")}
                   </dd>
                 </dt>
@@ -202,62 +212,37 @@ const ShiftCard = ({ shift, filter }: any) => {
               <i className="fas fa-eye mr-2" /> {t("all_details")}
             </button>
           </div>
-          {filter === "TRANSFER IN PROGRESS" && shift.assigned_facility && (
+          {filter === "COMPLETED" && shift.assigned_facility && (
             <div className="mt-2">
-              <Button
-                size="small"
-                variant="outlined"
-                fullWidth
+              <ButtonV2
+                variant="secondary"
+                className="w-full sm:whitespace-normal"
+                disabled={
+                  !shift.patient_object.allow_transfer ||
+                  !(
+                    ["DistrictAdmin", "StateAdmin"].includes(userType) ||
+                    userHomeFacilityId === shift.assigned_facility
+                  )
+                }
                 onClick={() => setModalFor(shift.external_id)}
               >
                 {t("transfer_to_receiving_facility")}
-              </Button>
+              </ButtonV2>
 
-              <Modal
-                open={modalFor === shift.external_id}
-                onClose={(_) =>
+              <ConfirmDialogV2
+                title={t("confirm_transfer_complete")}
+                description={t("mark_this_transfer_as_complete_question")}
+                show={modalFor === shift.external_id}
+                onClose={() =>
                   setModalFor({ externalId: undefined, loading: false })
                 }
+                action={t("confirm")}
+                onConfirm={() => handleTransferComplete(shift)}
               >
-                <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                  <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center">
-                    <div className="mb-4">
-                      <h1 className="text-2xl">
-                        {t("confirm_transfer_complete")}
-                      </h1>
-                    </div>
-                    <div className="mb-8">
-                      <p>{t("mark_this_transfer_as_complete_question")}</p>
-                      <p className="mt-2 text-yellow-600">
-                        {t("redirected_to_create_consultation")}
-                      </p>
-                    </div>
-                    <div className="flex gap-2 justify-center">
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        fullWidth
-                        onClick={() => {
-                          setModalFor({
-                            externalId: undefined,
-                            loading: false,
-                          });
-                        }}
-                      >
-                        {t("Cancel")}
-                      </Button>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        fullWidth
-                        onClick={(_) => handleTransferComplete(shift)}
-                      >
-                        {t("confirm")}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </Modal>
+                <p className="mt-2 text-sm text-yellow-600">
+                  {t("redirected_to_create_consultation")}
+                </p>
+              </ConfirmDialogV2>
             </div>
           )}
         </div>
@@ -268,6 +253,7 @@ const ShiftCard = ({ shift, filter }: any) => {
 
 export default function ShiftingBoard({
   board,
+  title,
   filterProp,
   formatFilter,
 }: boardProps) {
@@ -369,9 +355,6 @@ export default function ShiftingBoard({
       ));
   };
 
-  const renderBoardTitle = (board: string) =>
-    board === "APPROVED" ? t("awaiting_destination_approval") : board;
-
   return (
     <div
       ref={drop}
@@ -383,7 +366,7 @@ export default function ShiftingBoard({
       <div className="sticky top-0 pt-2 bg-gray-200 rounded z-10">
         <div className="flex justify-between p-4 mx-2 rounded bg-white shadow items-center">
           <h3 className="text-xs flex items-center h-8">
-            {renderBoardTitle(board)}{" "}
+            {title || board}{" "}
             {downloadLoading ? (
               <CircularProgress className="w-6 h-6 ml-2 text-black" />
             ) : (

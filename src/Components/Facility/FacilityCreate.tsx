@@ -595,7 +595,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           const res = capacityData.find((data) => {
             return data.room_type === x.id;
           });
-          if (res && res.current_capacity && res.total_capacity) {
+          if (res) {
             const removeCurrentBedType = (bedTypeId: number | undefined) => {
               setCapacityData((state) =>
                 state.filter((i) => i.id !== bedTypeId)
@@ -609,8 +609,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                 key={`bed_${res.id}`}
                 room_type={res.room_type}
                 label={x.text}
-                used={res.current_capacity}
-                total={res.total_capacity}
+                used={res.current_capacity || 0}
+                total={res.total_capacity || 0}
                 lastUpdated={res.modified_date}
                 removeBedType={removeCurrentBedType}
                 handleUpdate={async () => {

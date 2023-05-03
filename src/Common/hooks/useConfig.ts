@@ -55,6 +55,10 @@ export interface IConfig {
    * Env to enable HCX features
    */
   enable_hcx: boolean;
+  /**
+   * Env to toggle peacetime and wartime shifting
+   */
+  wartime_shifting: boolean;
 }
 
 const useConfig = () => {

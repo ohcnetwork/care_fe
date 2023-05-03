@@ -331,7 +331,7 @@ export default function ResourceDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  Contact person at the facility:{" "}
+                  Contact person at the current facility:{" "}
                 </span>
                 {data.refering_facility_contact_name || "--"}
               </div>

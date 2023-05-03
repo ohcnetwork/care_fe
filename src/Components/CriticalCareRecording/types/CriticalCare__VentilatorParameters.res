@@ -113,7 +113,7 @@ let ventilatorInterfaceTypeToString = ventilatorInterfaceType => {
   switch ventilatorInterfaceType {
   | INVASIVE => "Invasive"
   | NON_INVASIVE => "Non Invasive"
-  | UNKNOWN => "Unknown"
+  | UNKNOWN => "None"
   | OXYGEN_SUPPORT => "Oxygen Support"
   }
 }
@@ -158,6 +158,8 @@ type t = {
   ventilator_oxygen_modality_flow_rate: option<int>,
   ventilator_fi02: option<int>,
   ventilator_spo2: option<int>,
+  bilateral_air_entry: option<bool>,
+  etco2: option<int>,
 }
 
 let ventilatorInterface = t => t.ventilator_interface
@@ -202,6 +204,8 @@ type state = {
   ventilator_oxygen_modality_flow_rate: option<int>,
   ventilator_fi02: option<int>,
   ventilator_spo2: option<int>,
+  bilateral_air_entry: option<bool>,
+  etco2: option<int>,
   saving: bool,
 }
 
@@ -219,6 +223,8 @@ type action =
   | SetOxygenModalityFlowRate(option<int>)
   | SetFIO2(option<int>)
   | SetSPO2(option<int>)
+  | SetBilateralAirEntry(option<bool>)
+  | SetETCO2(option<int>)
   | SetSaving
   | ClearSaving
 
@@ -236,6 +242,8 @@ let make = (
   ~ventilator_oxygen_modality_flow_rate,
   ~ventilator_fi02,
   ~ventilator_spo2,
+  ~bilateral_air_entry,
+  ~etco2,
 ) => {
   ventilator_interface: ventilator_interface,
   ventilator_mode: ventilator_mode,
@@ -250,6 +258,8 @@ let make = (
   ventilator_oxygen_modality_flow_rate: ventilator_oxygen_modality_flow_rate,
   ventilator_fi02: ventilator_fi02,
   ventilator_spo2: ventilator_spo2,
+  bilateral_air_entry: bilateral_air_entry,
+  etco2: etco2,
 }
 
 let makeFromJs = dailyRound => {
@@ -269,6 +279,8 @@ let makeFromJs = dailyRound => {
     ~ventilator_oxygen_modality_flow_rate=dailyRound["ventilator_oxygen_modality_flow_rate"]->Js.Nullable.toOption,
     ~ventilator_fi02=dailyRound["ventilator_fi02"]->Js.Nullable.toOption,
     ~ventilator_spo2=dailyRound["ventilator_spo2"]->Js.Nullable.toOption,
+    ~bilateral_air_entry=dailyRound["bilateral_air_entry"]->Js.Nullable.toOption,
+    ~etco2=dailyRound["etco2"]->Js.Nullable.toOption,
   )
 }
 
