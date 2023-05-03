@@ -23,6 +23,7 @@ import {
   getConsultation,
   updateConsultation,
   getPatient,
+  PrescriptionActions,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -33,12 +34,6 @@ import { UserModel } from "../Users/models";
 import { BedSelect } from "../Common/BedSelect";
 import { dischargePatient } from "../../Redux/actions";
 import Beds from "./Consultations/Beds";
-import PrescriptionBuilder, {
-  PrescriptionType,
-} from "../Common/prescription-builder/PrescriptionBuilder";
-import PRNPrescriptionBuilder, {
-  PRNPrescriptionType,
-} from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
@@ -61,6 +56,9 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useVisibility from "../../Utils/useVisibility";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import PrescriptionBuilder, {
+  PrescriptionType,
+} from "../Medicine/PrescriptionBuilder";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -94,8 +92,6 @@ type FormDetails = {
   ip_no: string;
   op_no: string;
   procedure: ProcedureType[];
-  discharge_advice: PrescriptionType[];
-  prn_prescription: PRNPrescriptionType[];
   investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
   action?: string;
@@ -144,8 +140,6 @@ const initForm: FormDetails = {
   ip_no: "",
   op_no: "",
   procedure: [],
-  discharge_advice: [],
-  prn_prescription: [],
   investigation: [],
   is_telemedicine: "false",
   action: undefined,
@@ -223,10 +217,7 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
-    []
-  );
-  const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
+  const [prescriptions, setPrescriptions] = useState<PrescriptionType[]>([]);
   const [InvestigationAdvice, setInvestigationAdvice] = useState<
     InvestigationType[]
   >([]);
@@ -301,16 +292,22 @@ export const ConsultationForm = (props: any) => {
     !!state.form.symptoms.length && !state.form.symptoms.includes(1);
   const isOtherSymptomsSelected = state.form.symptoms.includes(9);
 
+  const fetchPrescriptions = useCallback(
+    async (_: statusType) => {
+      const res = await dispatchAction(
+        PrescriptionActions({ consultation_external_id: id }).list()
+      );
+      if (res.data.results) {
+        setPrescriptions(res.data.results);
+      }
+    },
+    [dispatchAction, id]
+  );
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
-      setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      setPRNAdvice(
-        !Array.isArray(res.data.prn_prescription)
-          ? []
-          : res.data.prn_prescription
-      );
       setInvestigationAdvice(
         !Array.isArray(res.data.investigation) ? [] : res.data.investigation
       );
@@ -366,9 +363,10 @@ export const ConsultationForm = (props: any) => {
     (status: statusType) => {
       if (id) {
         fetchData(status);
+        fetchPrescriptions(status);
       }
     },
-    [dispatch, fetchData]
+    [dispatch, fetchData, fetchPrescriptions]
   );
 
   if (isLoading) return <Loading />;
@@ -489,27 +487,6 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "discharge_advice": {
-          let invalid = false;
-          let errorMsg = "";
-          for (const f of dischargeAdvice) {
-            if (!f.medicine?.replace(/\s/g, "").length) {
-              invalid = true;
-              errorMsg = "Prescription Medicine field can not be empty";
-              break;
-            }
-            if (!f.dosage?.replace(/\s/g, "").length) {
-              invalid = true;
-              errorMsg = "Prescription Frequency field can not be empty";
-              break;
-            }
-          }
-          if (invalid) {
-            errors[field] = errorMsg;
-            invalidForm = true;
-          }
-          return;
-        }
         case "procedure": {
           for (const p of procedures) {
             if (!p.procedure?.replace(/\s/g, "").length) {
@@ -524,21 +501,6 @@ export const ConsultationForm = (props: any) => {
             }
             if (p.repetitive && !p.frequency?.replace(/\s/g, "").length) {
               errors[field] = "Frequency field can not be empty";
-              invalidForm = true;
-              break;
-            }
-          }
-          return;
-        }
-        case "prn_prescription": {
-          for (const f of PRNAdvice) {
-            if (!f.medicine?.replace(/\s/g, "").length) {
-              errors[field] = "Medicine field can not be empty";
-              invalidForm = true;
-              break;
-            }
-            if (!f.indicator?.replace(/\s/g, "").length) {
-              errors[field] = "Indicator field can not be empty";
               invalidForm = true;
               break;
             }
@@ -661,8 +623,6 @@ export const ConsultationForm = (props: any) => {
         icd11_provisional_diagnoses:
           state.form.icd11_provisional_diagnoses_object.map((o) => o.id),
         verified_by: state.form.verified_by,
-        discharge_advice: dischargeAdvice,
-        prn_prescription: PRNAdvice,
         investigation: InvestigationAdvice,
         procedure: procedures,
         patient: patientId,
@@ -1178,32 +1138,25 @@ export const ConsultationForm = (props: any) => {
                           </div>
 
                           <div
-                            id="discharge_advice"
+                            id="prescription_medication"
                             className="col-span-6"
-                            ref={fieldRef["discharge_advice"]}
                           >
                             <FieldLabel>Prescription Medication</FieldLabel>
                             <PrescriptionBuilder
-                              prescriptions={dischargeAdvice}
-                              setPrescriptions={setDischargeAdvice}
-                            />
-                            <LegacyErrorHelperText
-                              error={state.errors.discharge_advice}
+                              consultation={id}
+                              prescriptions={prescriptions}
+                              type="normal"
+                              fetchPrescriptions={fetchPrescriptions}
                             />
                           </div>
 
-                          <div
-                            id="prn_prescription"
-                            className="col-span-6"
-                            ref={fieldRef["prn_prescription"]}
-                          >
+                          <div id="prn_prescription" className="col-span-6">
                             <FieldLabel>PRN Prescription</FieldLabel>
-                            <PRNPrescriptionBuilder
-                              prescriptions={PRNAdvice}
-                              setPrescriptions={setPRNAdvice}
-                            />
-                            <LegacyErrorHelperText
-                              error={state.errors.prn_prescription}
+                            <PrescriptionBuilder
+                              consultation={id}
+                              prescriptions={prescriptions}
+                              type="prn"
+                              fetchPrescriptions={fetchPrescriptions}
                             />
                           </div>
 
