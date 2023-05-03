@@ -1,33 +1,55 @@
-import React, { useState } from "react";
-import { navigate } from "raviger";
-import ListFilter from "./ListFilter";
-import ShiftingBoard from "./ShiftingBoard";
+import {
+  SHIFTING_CHOICES_PEACETIME,
+  SHIFTING_CHOICES_WARTIME,
+} from "../../Common/constants";
+
 import BadgesList from "./BadgesList";
-import { SHIFTING_CHOICES } from "../../Common/constants";
-import { downloadShiftRequests } from "../../Redux/actions";
-import loadable from "@loadable/component";
-import withScrolling from "react-dnd-scrolling";
-import { formatFilter } from "./Commons";
-import SearchInput from "../Form/SearchInput";
-import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
+import ListFilter from "./ListFilter";
+import SearchInput from "../Form/SearchInput";
+import ShiftingBoard from "./ShiftingBoard";
+import { downloadShiftRequests } from "../../Redux/actions";
+import { formatFilter } from "./Commons";
+import loadable from "@loadable/component";
+import { navigate } from "raviger";
+import useConfig from "../../Common/hooks/useConfig";
+import useFilters from "../../Common/hooks/useFilters";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import withScrolling from "react-dnd-scrolling";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const ScrollingComponent = withScrolling("div");
-const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text);
-
-const COMPLETED = ["COMPLETED", "REJECTED", "DESTINATION REJECTED"];
-const ACTIVE = shiftStatusOptions.filter(
-  (option) => !COMPLETED.includes(option)
-);
 
 export default function BoardView() {
   const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
     limit: -1,
   });
-  const [boardFilter, setBoardFilter] = useState(ACTIVE);
+  const { wartime_shifting } = useConfig();
+
+  const shiftStatusOptions = wartime_shifting
+    ? SHIFTING_CHOICES_WARTIME
+    : SHIFTING_CHOICES_PEACETIME;
+
+  const COMPLETED = wartime_shifting
+    ? [
+        "COMPLETED",
+        "REJECTED",
+        "CANCELLED",
+        "DESTINATION REJECTED",
+        "PATIENT EXPIRED",
+      ]
+    : ["CANCELLED", "PATIENT EXPIRED"];
+
+  const completedBoards = shiftStatusOptions.filter((option) =>
+    COMPLETED.includes(option.text)
+  );
+  const activeBoards = shiftStatusOptions.filter(
+    (option) => !COMPLETED.includes(option.text)
+  );
+
+  const [boardFilter, setBoardFilter] = useState(activeBoards);
   const [isLoading] = useState(false);
   const { t } = useTranslation();
 
@@ -61,22 +83,22 @@ export default function BoardView() {
             <button
               className={
                 "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
-                (boardFilter === ACTIVE
+                (boardFilter[0].text === activeBoards[0].text
                   ? " bg-white text-gray-800"
                   : " bg-gray-200 text-sm text-gray-500")
               }
-              onClick={() => setBoardFilter(ACTIVE)}
+              onClick={() => setBoardFilter(activeBoards)}
             >
               <span>{t("active")}</span>
             </button>
             <button
               className={
                 "flex leading-none border-2 border-gray-200 rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-blue-400 focus:text-blue-400 rounded-r-full px-4 py-2" +
-                (boardFilter === COMPLETED
+                (boardFilter[0].text === completedBoards[0].text
                   ? " bg-white text-gray-800"
                   : " bg-gray-200 text-sm text-gray-500")
               }
-              onClick={() => setBoardFilter(COMPLETED)}
+              onClick={() => setBoardFilter(completedBoards)}
             >
               <span>{t("completed")}</span>
             </button>
@@ -109,16 +131,17 @@ export default function BoardView() {
           ) : (
             boardFilter.map((board) => (
               <ShiftingBoard
-                key={board}
+                key={board.text}
                 filterProp={qParams}
-                board={board}
+                board={board.text}
+                title={board.label}
                 formatFilter={formatFilter}
               />
             ))
           )}
         </div>
       </ScrollingComponent>
-      <ListFilter {...advancedFilter} />
+      <ListFilter {...advancedFilter} key={window.location.search} />
     </div>
   );
 }

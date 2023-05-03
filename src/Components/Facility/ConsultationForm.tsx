@@ -693,6 +693,7 @@ export const ConsultationForm = (props: any) => {
       setIsLoading(false);
       if (res && res.data && res.status !== 400) {
         dispatch({ type: "set_form", form: initForm });
+
         if (data.suggestion === "DD") {
           await declareThePatientDead(
             state.form.cause_of_death,
@@ -700,20 +701,18 @@ export const ConsultationForm = (props: any) => {
             state.form.death_confirmed_doctor
           );
         }
-        if (id) {
-          Notification.Success({
-            msg: "Consultation updated successfully",
-          });
-          navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
-          );
-        } else {
-          Notification.Success({
-            msg: "Consultation created successfully",
-          });
-          navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
-          );
+
+        Notification.Success({
+          msg: `Consultation ${id ? "updated" : "created"} successfully`,
+        });
+
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
+        );
+
+        if (data.suggestion === "R") {
+          navigate(`/facility/${facilityId}/patient/${patientId}/shift/new`);
+          return;
         }
       }
     }
@@ -876,7 +875,7 @@ export const ConsultationForm = (props: any) => {
           })}
         </div>
         <div className="w-full h-full flex overflow-auto xl:ml-72">
-          <div className="w-full max-w-4xl 2xl:max-w-4xl">
+          <div className="w-full max-w-4xl">
             <form
               onSubmit={handleSubmit}
               className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"

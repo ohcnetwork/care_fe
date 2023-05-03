@@ -204,6 +204,7 @@ export const PatientManager = () => {
     last_consultation_is_telemedicine:
       qParams.last_consultation_is_telemedicine || undefined,
     is_antenatal: qParams.is_antenatal || undefined,
+    ventilator_interface: qParams.ventilator_interface || undefined,
   };
 
   useEffect(() => {
@@ -312,6 +313,7 @@ export const PatientManager = () => {
     qParams.last_vaccinated_date_after,
     qParams.last_consultation_is_telemedicine,
     qParams.is_antenatal,
+    qParams.ventilator_interface,
   ]);
 
   const getTheCategoryFromId = () => {
@@ -842,6 +844,12 @@ export const PatientManager = () => {
             value("Category", "category", getTheCategoryFromId()),
             badge("Disease Status", "disease_status"),
             value(
+              "Respiratory Support",
+              "ventilator_interface",
+              qParams.ventilator_interface &&
+                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`)
+            ),
+            value(
               "Gender",
               "gender",
               parseOptionId(GENDER_TYPES, qParams.gender) || ""
@@ -874,7 +882,7 @@ export const PatientManager = () => {
         />
       </div>
       <div>
-        <PatientFilter {...advancedFilter} />
+        <PatientFilter {...advancedFilter} key={window.location.search} />
         <NavTabs
           onChange={(tab) => updateQuery({ is_active: tab ? "False" : "True" })}
           options={[

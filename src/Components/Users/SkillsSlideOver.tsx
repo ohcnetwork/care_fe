@@ -55,6 +55,10 @@ export default ({ show, setShow, username }: IProps) => {
         Notification.Error({
           msg: "Error while adding skill",
         });
+      } else {
+        Notification.Success({
+          msg: "Skill added successfully",
+        });
       }
       setSelectedSkill(null);
       setIsLoading(false);
