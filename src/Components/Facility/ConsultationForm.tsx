@@ -662,6 +662,18 @@ export const ConsultationForm = (props: any) => {
           );
         }
 
+        if (!id && prescriptions.length > 0) {
+          const { create: createPrescription } = PrescriptionActions({
+            consultation_external_id: res.data.id,
+          });
+
+          await Promise.all(
+            prescriptions.map((prescription) =>
+              dispatchAction(createPrescription(prescription))
+            )
+          );
+        }
+
         Notification.Success({
           msg: `Consultation ${id ? "updated" : "created"} successfully`,
         });
@@ -1146,7 +1158,8 @@ export const ConsultationForm = (props: any) => {
                               consultation={id}
                               prescriptions={prescriptions}
                               type="normal"
-                              fetchPrescriptions={fetchPrescriptions}
+                              fetchPrescriptions={id && fetchPrescriptions}
+                              onChange={setPrescriptions}
                             />
                           </div>
 
@@ -1156,7 +1169,8 @@ export const ConsultationForm = (props: any) => {
                               consultation={id}
                               prescriptions={prescriptions}
                               type="prn"
-                              fetchPrescriptions={fetchPrescriptions}
+                              fetchPrescriptions={id && fetchPrescriptions}
+                              onChange={setPrescriptions}
                             />
                           </div>
 

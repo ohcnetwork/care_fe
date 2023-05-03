@@ -193,14 +193,21 @@ export const emptyPrescriptionValues = (prn = false) => {
   return emptyValues;
 };
 
-export default function PrescriptionBuilder(props: {
-  consultation: string;
+interface PrescriptionBuilderProps {
+  consultation?: string;
   prescriptions: PrescriptionType[];
   type: "normal" | "prn";
-  fetchPrescriptions: (status: statusType) => Promise<void>;
-}) {
-  const { consultation, prescriptions, type, fetchPrescriptions } = props;
+  fetchPrescriptions?: (status: statusType) => Promise<void>;
+  onChange?: (prescriptions: PrescriptionType[]) => void;
+}
 
+export default function PrescriptionBuilder({
+  consultation,
+  prescriptions,
+  type,
+  fetchPrescriptions,
+  onChange,
+}: PrescriptionBuilderProps) {
   const pres = prescriptions.filter(
     (prescription) => prescription.is_prn === (type === "prn")
   );
@@ -210,7 +217,7 @@ export default function PrescriptionBuilder(props: {
 
   const refreshPrescriptions = (status: statusType) => {
     setAddPrescriptionForm(false);
-    fetchPrescriptions(status);
+    fetchPrescriptions?.(status);
   };
 
   return (
@@ -221,15 +228,19 @@ export default function PrescriptionBuilder(props: {
           key={i}
           consultation={consultation}
           refreshPrescriptions={refreshPrescriptions}
+          onSave={(prescription) => {
+            const newPrescriptions = [...pres];
+            newPrescriptions[i] = prescription;
+            onChange?.(newPrescriptions);
+          }}
         />
       ))}
       {addPrescriptionForm && (
         <PrescriptionForm
-          prescription={{
-            ...(emptyValues as any),
-          }}
+          prescription={{ ...(emptyValues as any) }}
           consultation={consultation}
           refreshPrescriptions={refreshPrescriptions}
+          onSave={(prescription) => onChange?.([...pres, prescription])}
         />
       )}
       <button
@@ -247,9 +258,10 @@ export default function PrescriptionBuilder(props: {
 
 export function PrescriptionForm(props: {
   prescription: PrescriptionType;
-  consultation: string;
-  refreshPrescriptions: (status: statusType) => void;
+  consultation?: string;
+  refreshPrescriptions?: (status: statusType) => void;
   onAction?: () => void;
+  onSave?: (prescriptions: PrescriptionType) => void;
 }) {
   const [prescription, setPrescription] = useState(props.prescription);
   const dispatchAction: any = useDispatch();
@@ -270,16 +282,25 @@ export function PrescriptionForm(props: {
   };
 
   const { create, update } = useMemo(() => {
+    if (!props.consultation) {
+      return { create: undefined, update: undefined };
+    }
+
     return PrescriptionActions({
       consultation_external_id: props.consultation,
     });
-  }, [props.consultation]);
+  }, [props.consultation, props.onSave]);
 
   const handleSave = async () => {
+    if (!update) {
+      props.onSave?.(prescription);
+      return;
+    }
+
     setLoading(true);
     const res = await dispatchAction(update(prescription.id, prescription));
     if (res && res.data && res.status !== 400) {
-      props.refreshPrescriptions({ aborted: false });
+      props.refreshPrescriptions?.({ aborted: false });
       props.onAction && props.onAction();
     }
     setLoading(false);
@@ -298,10 +319,15 @@ export function PrescriptionForm(props: {
   //   };
 
   const handleCreate = async () => {
+    if (!create) {
+      props.onSave?.(prescription);
+      return;
+    }
+
     setLoading(true);
     const res = await dispatchAction(create(prescription));
     if (res && res.data && res.status !== 400) {
-      props.refreshPrescriptions({ aborted: false });
+      props.refreshPrescriptions?.({ aborted: false });
       props.onAction && props.onAction();
     }
     setLoading(false);
