@@ -1,4 +1,6 @@
+import { MedicineAdministrationRecord } from "../Components/CriticalCareRecording/IOBalance/MedicineAdministrationRecord";
 import { HCXClaimModel, HCXPolicyModel } from "../Components/HCX/models";
+import { PrescriptionType } from "../Components/Medicine/PrescriptionBuilder";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
 export const getConfig = () => {
@@ -831,6 +833,56 @@ export const getAssetTransaction = (id: string) =>
 
 export const listPMJYPackages = (query?: string) =>
   fireRequest("listPMJYPackages", [], { query });
+
+// Prescription Actions
+
+export const PrescriptionActions = (pathParams: {
+  consultation_external_id: string;
+  daily_rounds_external_id?: string;
+}) => {
+  const action = (action: string) =>
+    `${action}${
+      pathParams.daily_rounds_external_id ? "DailyRounds" : "Consultation"
+    }Prescription`;
+
+  return {
+    list() {
+      return fireRequest(action("list"), [], {}, pathParams);
+    },
+
+    create(obj: PrescriptionType) {
+      return fireRequest(action("create"), [], obj, pathParams);
+    },
+
+    read(external_id: string) {
+      const ctx = { ...pathParams, external_id };
+      return fireRequest(action("get"), [], {}, ctx);
+    },
+
+    update(external_id: string, obj: PrescriptionType) {
+      const ctx = { ...pathParams, external_id };
+      return fireRequest(action("update"), [], obj, ctx);
+    },
+
+    partialUpdate(external_id: string, obj: Partial<PrescriptionType>) {
+      const ctx = { ...pathParams, external_id };
+      return fireRequest(action("partialUpdate"), [], obj, ctx);
+    },
+
+    administer(
+      external_id: string,
+      obj: Partial<MedicineAdministrationRecord>
+    ) {
+      const ctx = { ...pathParams, external_id };
+      return fireRequest(action("administer"), [], obj, ctx);
+    },
+
+    listAdministrations(external_id: string) {
+      const ctx = { ...pathParams, external_id };
+      return fireRequest(`${action("list")}Administration`, [], {}, ctx);
+    },
+  };
+};
 
 // HCX Actions
 
