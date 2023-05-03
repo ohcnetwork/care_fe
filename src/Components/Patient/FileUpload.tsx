@@ -31,6 +31,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -1389,24 +1390,24 @@ export const FileUpload = (props: FileUploadProps) => {
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
                   <div className="flex flex-col gap-2 md:flex-row justify-between md:items-center items-stretch">
-                    <label className="flex items-center btn btn-primary">
-                      <i className="fas fa-file-arrow-down mr-2" /> Choose file
+                    <ButtonV2 authorizeFor={NonReadOnlyUsers}>
+                      <CareIcon className="care-l-file-upload-alt text-lg" />
+                      {t("choose_file")}
                       <input
                         title="changeFile"
                         onChange={onFileChange}
                         type="file"
                         hidden
                       />
-                    </label>
-                    <button
-                      className="btn btn-primary"
+                    </ButtonV2>
+                    <ButtonV2
+                      authorizeFor={NonReadOnlyUsers}
                       disabled={!file || !uploadFileName || !isActive}
-                      onClick={() => {
-                        handleUpload({ status });
-                      }}
+                      onClick={() => handleUpload({ status })}
                     >
-                      <i className="fas fa-cloud-arrow-up mr-2" /> Upload
-                    </button>
+                      <CareIcon className="care-l-cloud-upload text-lg" />
+                      {t("upload")}
+                    </ButtonV2>
                   </div>
                 )}
                 {file && (
