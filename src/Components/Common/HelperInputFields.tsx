@@ -26,7 +26,6 @@ import {
   MuiPickersUtilsProvider,
 } from "@material-ui/pickers";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
-import { debounce } from "lodash";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import PhoneInput, { ICountryData } from "react-phone-input-2";
 import "react-phone-input-2/lib/high-res.css";
@@ -577,26 +576,52 @@ export const LegacyPhoneNumberField = (props: any) => {
     value,
     turnOffAutoFormat,
     disabled,
-    enableTollFree,
     countryCodeEditable = false,
     className,
     name,
     requiredError = false,
   } = props;
   const [maxLength, setMaxLength] = useState(15);
-
+  const [enableTollFree, setEnableTollFree] = useState(
+    value.startsWith("1800")
+  );
   const countryRestriction = onlyIndia ? { onlyCountries: ["in"] } : {};
-  const onChangeHandler = debounce(onChange, 500);
+  const [randId, setRandId] = useState<string>("");
+
+  useEffect(() => {
+    if (value.startsWith("1800")) {
+      setEnableTollFree(true);
+    } else {
+      setEnableTollFree(false);
+    }
+  }, [value]);
+
+  useEffect(() => {
+    setRandId(
+      Math.random()
+        .toString(36)
+        .replace(/[^a-z]+/g, "a")
+    );
+  }, []);
+
+  const setFocus = () => {
+    setTimeout(() => {
+      const input = document.querySelector(`div#${randId} > div.visible input`);
+      if (input instanceof HTMLElement) {
+        input.focus();
+      }
+    }, 10);
+  };
 
   useEffect(() => {
     if (enableTollFree) {
       if (value.startsWith("1800")) {
-        setMaxLength(11); // 1800 + 6/7 digit number
+        setMaxLength(11);
       } else {
-        setMaxLength(12); // 10 digit number + 2 digit country code
+        setMaxLength(15);
       }
     } else {
-      setMaxLength(15); // plus sign +  2 digit country code + space + 10 digit number
+      setMaxLength(15);
     }
   }, [value]);
 
@@ -606,84 +631,115 @@ export const LegacyPhoneNumberField = (props: any) => {
     event: ChangeEvent<HTMLInputElement>,
     formattedValue: string
   ) => {
-    if (enableTollFree && !formattedValue.startsWith("1800"))
-      onChangeHandler(`+${formattedValue}`);
-    else onChangeHandler(formattedValue);
+    let phone = value;
+    if (phone.startsWith("91")) {
+      phone = phone.replace("91", "");
+    }
+    if (phone.startsWith("1800")) {
+      setEnableTollFree(true);
+      setFocus();
+      onChange(`${phone}`);
+    } else {
+      if (!value.startsWith("91") && !value.startsWith("1800")) {
+        onChange(`+91${formattedValue}`);
+      } else {
+        if (!formattedValue.startsWith("1800")) onChange(`+${formattedValue}`);
+        else onChange(formattedValue);
+      }
+      if (!value.startsWith("1800")) {
+        setEnableTollFree(false);
+        setFocus();
+      }
+    }
+    setFocus();
   };
 
   return (
     <>
       {label && <InputLabel>{label}</InputLabel>}
       <div
+        id={randId}
         className={`${
-          requiredError ? "border border-red-500 rounded" : ""
-        } relative flex items-center`}
+          requiredError && "border border-red-500 rounded"
+        } relative flex flex-col`}
       >
-        {enableTollFree ? (
-          <>
-            <PhoneInput
-              inputClass="cui-input-base pl-4 pr-10 py-5 tracking-widest"
-              containerClass={className}
-              value={value}
-              onChange={handleChange}
-              disableCountryGuess
-              disableCountryCode
-              disableInitialCountryGuess
-              disableSearchIcon
-              disableDropdown
-              placeholder="(1800)... / 91 ..."
-              alwaysDefaultMask
-              country={undefined}
-              enableLongNumbers={enableTollFree}
-              buttonClass="hidden"
-              inputProps={{
-                maxLength,
-                name,
-              }}
-            />
-            <ButtonV2
-              className="absolute right-[2px] mb-[2px] inset-y-0 h-[40px]"
-              variant="secondary"
-              type="button"
-              ghost
-              disabled={disabled}
-              onClick={() => onChange("")}
-            >
-              {" "}
-              <CareIcon className="care-l-multiply" />
-            </ButtonV2>
-          </>
-        ) : (
-          <>
-            <PhoneInput
-              inputClass="cui-input-base pl-14 pr-10 py-5 tracking-widest"
-              containerClass={className}
-              countryCodeEditable={countryCodeEditable}
-              value={value}
-              placeholder={placeholder}
-              onChange={handleChange}
-              country="in"
-              disabled={disabled}
-              autoFormat={!turnOffAutoFormat}
-              enableLongNumbers={enableTollFree}
-              inputProps={{
-                maxLength,
-                name,
-              }}
-              {...countryRestriction}
-            />
-            <ButtonV2
-              className="absolute right-[2px] mb-[2px] inset-y-0 h-[40px]"
-              variant="secondary"
-              type="button"
-              ghost
-              disabled={disabled}
-              onClick={() => onChange("+91")}
-            >
-              <CareIcon className="care-l-multiply" />
-            </ButtonV2>
-          </>
-        )}
+        <div
+          className={`flex flex-row ${enableTollFree ? "visible" : "hidden"}`}
+        >
+          <div className="h-full w-[67px] items-center flex justify-center rounded-md border-gray-500 border py-2">
+            <CareIcon className="care-l-phone w-5 h-5" />
+          </div>
+          <PhoneInput
+            inputClass="cui-input-base pl-4 pr-10 py-5 tracking-widest"
+            containerClass={className}
+            value={value}
+            onChange={handleChange}
+            disableCountryGuess
+            disableCountryCode
+            disableInitialCountryGuess
+            disableSearchIcon
+            disableDropdown
+            placeholder="(1800)... / 91 ..."
+            alwaysDefaultMask
+            country={undefined}
+            enableLongNumbers={true}
+            buttonClass="hidden"
+            inputProps={{
+              name,
+              maxLength,
+            }}
+          />
+          <ButtonV2
+            className="mt-[2px]"
+            variant="secondary"
+            type="button"
+            ghost
+            disabled={disabled}
+            onClick={() => {
+              onChange("+91");
+              setEnableTollFree(false);
+              setFocus();
+            }}
+          >
+            {" "}
+            <CareIcon className="care-l-multiply" />
+          </ButtonV2>
+        </div>
+        <div
+          className={`flex flex-row ${enableTollFree ? "hidden" : "visible"}`}
+        >
+          <PhoneInput
+            inputClass="cui-input-base pl-14 pr-10 py-5 tracking-widest"
+            containerClass={className}
+            countryCodeEditable={countryCodeEditable}
+            value={value}
+            placeholder={placeholder}
+            onChange={handleChange}
+            country="in"
+            disabled={disabled}
+            autoFormat={!turnOffAutoFormat}
+            enableLongNumbers={true}
+            inputProps={{
+              name,
+              maxLength,
+            }}
+            {...countryRestriction}
+          />
+          <ButtonV2
+            className="mt-[2px]"
+            variant="secondary"
+            type="button"
+            ghost
+            disabled={disabled}
+            onClick={() => {
+              onChange("+91");
+              setEnableTollFree(false);
+              setFocus();
+            }}
+          >
+            <CareIcon className="care-l-multiply" />
+          </ButtonV2>
+        </div>
       </div>
       {errors && <LegacyErrorHelperText error={errors} />}
     </>

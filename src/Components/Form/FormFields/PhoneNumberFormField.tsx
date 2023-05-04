@@ -23,7 +23,6 @@ const PhoneNumberFormField = (props: Props) => {
         placeholder={props.placeholder}
         onlyIndia={props.onlyIndia}
         turnOffAutoFormat={props.noAutoFormat}
-        enableTollFree={props.tollFree}
         countryCodeEditable={!!props.countryCodeEditable}
         className="my-0"
         requiredError={field.error ? props.required : false}
