@@ -2,6 +2,7 @@
     "no_consultation_updates": "No consultation updates",
     "consultation_updates": "Consultation updates",
     "update_log": "Update Log",
+    "log_lab_results": "Log Lab Results",
     "no_log_update_delta": "No changes since previous log update",
     "virtual_nursing_assistant": "Virtual Nursing Assistant"
 }

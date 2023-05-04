@@ -1,9 +1,9 @@
-import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
 import AuthorizedChild from "../../../CAREUI/misc/AuthorizedChild";
 import { AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { Link } from "raviger";
 import { classNames } from "../../../Utils/utils";
+import { useTranslation } from "react-i18next";
 
 export type ButtonSize = "small" | "default" | "large";
 export type ButtonShape = "square" | "circle";
@@ -75,6 +75,14 @@ export type ButtonProps = RawButtonProps &
      * Whether the button should be having a Id.
      */
     id?: string | undefined;
+    /**
+     * Tooltip showed when hovered over.
+     */
+    tooltip?: string;
+    /**
+     * Class for tooltip
+     */
+    tooltipClassName?: string;
   };
 
 const ButtonV2 = ({
@@ -91,6 +99,8 @@ const ButtonV2 = ({
   children,
   href,
   target,
+  tooltip,
+  tooltipClassName,
   ...props
 }: ButtonProps) => {
   const className = classNames(
@@ -101,33 +111,46 @@ const ButtonV2 = ({
     `button-shape-${circle ? "circle" : "square"}`,
     ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
     border && `button-${variant}-border`,
-    shadow && "shadow enabled:hover:shadow-lg"
+    shadow && "shadow enabled:hover:shadow-lg",
+    tooltip && "tooltip"
   );
 
-  if (authorizeFor) {
-    <AuthorizedChild authorizeFor={authorizeFor}>
-      {({ isAuthorized }) => (
-        <button
-          {...props}
-          disabled={disabled || !isAuthorized || loading}
-          className={className}
-        >
-          {children}
-        </button>
-      )}
-    </AuthorizedChild>;
+  if (tooltip) {
+    children = (
+      <>
+        {tooltip && (
+          <span className={classNames("tooltip-text", tooltipClassName)}>
+            {tooltip}
+          </span>
+        )}
+        {children}
+      </>
+    );
   }
 
   if (href && !(disabled || loading)) {
     return (
-      <Link
-        {...(props as any)}
-        href={href}
-        target={target}
-        className={className}
-      >
-        {children}
+      <Link href={href} target={target}>
+        <button {...props} disabled={disabled || loading} className={className}>
+          {children}
+        </button>
       </Link>
+    );
+  }
+
+  if (authorizeFor) {
+    return (
+      <AuthorizedChild authorizeFor={authorizeFor}>
+        {({ isAuthorized }) => (
+          <button
+            {...props}
+            disabled={disabled || !isAuthorized || loading}
+            className={className}
+          >
+            {children}
+          </button>
+        )}
+      </AuthorizedChild>
     );
   }
 
