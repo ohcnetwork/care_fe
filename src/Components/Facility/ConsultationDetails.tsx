@@ -689,7 +689,7 @@ export const ConsultationDetails = (props: any) => {
                             <div>
                               Cause of death {" - "}
                               <span className="font-semibold">
-                                {consultationData.discharge_reason || "--"}
+                                {consultationData.discharge_notes || "--"}
                               </span>
                             </div>
                             <div>
