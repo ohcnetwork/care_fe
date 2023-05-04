@@ -638,13 +638,12 @@ export const LegacyPhoneNumberField = (props: any) => {
     if (phone.startsWith("1800")) {
       setEnableTollFree(true);
       setFocus();
-      onChange(`${phone}`);
+      onChange(phone);
     } else {
       if (!value.startsWith("91") && !value.startsWith("1800")) {
-        onChange(`+91${formattedValue}`);
+        onChange(`91${formattedValue}`);
       } else {
-        if (!formattedValue.startsWith("1800")) onChange(`+${formattedValue}`);
-        else onChange(formattedValue);
+        onChange(formattedValue);
       }
       if (!value.startsWith("1800")) {
         setEnableTollFree(false);

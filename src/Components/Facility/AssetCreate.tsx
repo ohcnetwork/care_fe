@@ -772,7 +772,6 @@ const AssetCreate = (props: AssetProps) => {
                       name="support_phone"
                       label="Customer support number"
                       required
-                      tollFree
                       value={support_phone}
                       onChange={(e) => setSupportPhone(e.value)}
                       error={state.errors.support_phone}

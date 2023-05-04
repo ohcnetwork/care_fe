@@ -6,7 +6,6 @@ type Props = FormFieldBaseProps<string> & {
   placeholder?: string;
   autoComplete?: string;
   noAutoFormat?: boolean;
-  tollFree?: boolean;
   onlyIndia?: boolean;
   countryCodeEditable?: boolean;
 };
