@@ -634,6 +634,8 @@ export const PatientHome = (props: any) => {
                     </div>
                     <div className="mt-1 text-sm leading-5 font-medium">
                       {formatDate(patientData.date_of_return)}
+                    </div>
+                  </div>
                 )}
                 {patientData.countries_travelled &&
                   !!patientData.countries_travelled.length && (
