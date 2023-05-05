@@ -1,6 +1,8 @@
-import { MedicineAdministrationRecord } from "../Components/CriticalCareRecording/IOBalance/MedicineAdministrationRecord";
 import { HCXClaimModel, HCXPolicyModel } from "../Components/HCX/models";
-import { PrescriptionType } from "../Components/Medicine/PrescriptionBuilder";
+import {
+  MedicineAdministrationRecord,
+  Prescription,
+} from "../Components/Medicine/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
 export const getConfig = () => {
@@ -841,10 +843,10 @@ export const PrescriptionActions = (consultation_external_id: string) => {
   return {
     list: () => fireRequest("listPrescriptions", [], {}, pathParams),
 
-    create: (obj: PrescriptionType) =>
+    create: (obj: Prescription) =>
       fireRequest("createPrescription", [], obj, pathParams),
 
-    upsert: (prescriptions: PrescriptionType[]) =>
+    upsert: (prescriptions: Prescription[]) =>
       fireRequest("upsertPrescriptions", [], { prescriptions }, pathParams),
 
     listAdministrations: (query: object) =>
@@ -862,7 +864,7 @@ export const PrescriptionActions = (consultation_external_id: string) => {
         get: () => fireRequest("getPrescription", [], {}, pathParams),
 
         /** Administer a prescription */
-        administer: (obj: Partial<MedicineAdministrationRecord>) =>
+        administer: (obj: MedicineAdministrationRecord) =>
           fireRequest("administerPrescription", [], obj, pathParams),
 
         /** Discontinue a prescription */
