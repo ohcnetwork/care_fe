@@ -50,6 +50,7 @@ const AssetsList = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [facility, setFacility] = useState<FacilityModel>();
   const [asset_type, setAssetType] = useState<string>();
+  const [status, setStatus] = useState<string>();
   const [facilityName, setFacilityName] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
@@ -110,6 +111,10 @@ const AssetsList = () => {
   useEffect(() => {
     setAssetType(qParams.asset_type);
   }, [qParams.asset_type]);
+
+  useEffect(() => {
+    setStatus(qParams.status);
+  }, [qParams.status]);
 
   useEffect(() => {
     setAssetClass(qParams.asset_class);
@@ -390,7 +395,7 @@ const AssetsList = () => {
               badge("Name/Serial No./QR ID", "search"),
               value("Asset Type", "asset_type", asset_type || ""),
               value("Asset Class", "asset_class", asset_class || ""),
-              badge("Status", "status"),
+              value("Status", "status", status?.replace(/_/g, " ") || ""),
               value("Location", "location", locationName || ""),
             ]}
           />

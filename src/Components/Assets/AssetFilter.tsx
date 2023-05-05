@@ -169,7 +169,7 @@ function AssetFilter(props: any) {
         label="Asset Status"
         errorClassName="hidden"
         options={["ACTIVE", "TRANSFER_IN_PROGRESS"]}
-        optionLabel={(o) => o}
+        optionLabel={(o) => o.replace(/_/g, " ")}
         optionValue={(o) => o}
         value={asset_status}
         onChange={({ value }) => setAssetStatus(value)}
