@@ -221,7 +221,7 @@ export default function ResourceCreate(props: resourceProps) {
   return (
     <div className="px-2 pb-2">
       <PageTitle
-        title={t("create_title")}
+        title={t("create_resource_request")}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           resource: { style: "pointer-events-none" },
