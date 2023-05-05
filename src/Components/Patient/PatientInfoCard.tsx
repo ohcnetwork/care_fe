@@ -136,14 +136,14 @@ export default function PatientInfoCard(props: {
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-1 lg:mb-2">
               <Link
-                href={`/facility/${patient.facility_object?.id}`}
+                href={`/facility/${consultation?.facility}`}
                 className="font-semibold text-black hover:text-primary-600"
               >
                 <i
                   className="text-primary-400 fas fa-hospital mr-1"
                   aria-hidden="true"
                 ></i>
-                {patient.facility_object?.name}
+                {consultation?.facility_name}
               </Link>
 
               {(consultation?.suggestion === "A" || op_no) && (

@@ -50,12 +50,15 @@ import loadable from "@loadable/component";
 import moment from "moment";
 import { navigate } from "raviger";
 import { validateEmailAddress } from "../../Common/validation";
+import { useTranslation } from "react-i18next";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 
 export const ConsultationDetails = (props: any) => {
+  const { t } = useTranslation();
   const { facilityId, patientId, consultationId } = props;
   const tab = props.tab.toUpperCase();
   const dispatch: any = useDispatch();
@@ -569,7 +572,7 @@ export const ConsultationDetails = (props: any) => {
                 <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
                   <PatientVitalsCard
                     patient={patientData}
-                    facilityId={facilityId}
+                    facilityId={patientData.facility}
                   />
                 </section>
               )}
@@ -600,7 +603,10 @@ export const ConsultationDetails = (props: any) => {
                               Discharge Date {" - "}
                               <span className="font-semibold">
                                 {consultationData.discharge_date
-                                  ? formatDate(consultationData.discharge_date)
+                                  ? formatDate(
+                                      consultationData.discharge_date,
+                                      "DD/MM/YYYY"
+                                    )
                                   : "--:--"}
                               </span>
                             </div>
@@ -686,7 +692,7 @@ export const ConsultationDetails = (props: any) => {
                             <div>
                               Cause of death {" - "}
                               <span className="font-semibold">
-                                {consultationData.discharge_reason || "--"}
+                                {consultationData.discharge_notes || "--"}
                               </span>
                             </div>
                             <div>
@@ -706,7 +712,10 @@ export const ConsultationDetails = (props: any) => {
                               Discharge Date {" - "}
                               <span className="font-semibold">
                                 {consultationData.discharge_date
-                                  ? formatDate(consultationData.discharge_date)
+                                  ? formatDate(
+                                      consultationData.discharge_date,
+                                      "DD/MM/YYYY"
+                                    )
                                   : "--:--"}
                               </span>
                             </div>
@@ -1322,6 +1331,7 @@ export const ConsultationDetails = (props: any) => {
               />
               <div className="pt-6">
                 <ButtonV2
+                  authorizeFor={NonReadOnlyUsers}
                   disabled={!patientData.is_active}
                   onClick={() =>
                     navigate(
@@ -1330,7 +1340,7 @@ export const ConsultationDetails = (props: any) => {
                   }
                 >
                   <CareIcon className="care-l-plus" />
-                  <span>Log Lab Result</span>
+                  <span>{t("log_lab_results")}</span>
                 </ButtonV2>
               </div>
             </div>

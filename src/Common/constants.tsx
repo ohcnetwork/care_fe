@@ -137,7 +137,7 @@ export const FACILITY_TYPES: Array<OptionsType> = [
 ];
 
 export const SHIFTING_CHOICES_WARTIME: Array<OptionsType> = [
-  { id: 10, text: "PENDING" },
+  { id: 10, text: "PENDING", label: "SHIFTING APPROVAL PENDING" },
   { id: 15, text: "ON HOLD" },
   { id: 20, text: "APPROVED" },
   { id: 30, text: "REJECTED" },
@@ -488,7 +488,8 @@ export const ICMR_CATEGORY = [
 ];
 
 export const TELEMEDICINE_ACTIONS = [
-  { id: 10, text: "PENDING", desc: "Pending" },
+  { id: 10, text: "NO_ACTION", desc: "No Action" },
+  { id: 20, text: "PENDING", desc: "Pending" },
   { id: 30, text: "SPECIALIST_REQUIRED", desc: "Specialist Required" },
   { id: 40, text: "PLAN_FOR_HOME_CARE", desc: "Plan for Home Care" },
   { id: 50, text: "FOLLOW_UP_NOT_REQUIRED", desc: "Follow Up Not Required" },

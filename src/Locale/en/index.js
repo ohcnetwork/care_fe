@@ -1,4 +1,5 @@
 import Auth from "./Auth.json";
+import Asset from "./Asset.json";
 import Common from "./Common.json";
 import Consultation from "./Consultation.json";
 import Entities from "./Entities.json";
@@ -13,6 +14,7 @@ import SortOptions from "./SortOptions.json";
 
 export default {
   ...Auth,
+  ...Asset,
   ...Common,
   ...Consultation,
   ...CoverImageEdit,
