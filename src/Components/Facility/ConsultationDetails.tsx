@@ -617,7 +617,10 @@ export const ConsultationDetails = (props: any) => {
                               Discharge Date {" - "}
                               <span className="font-semibold">
                                 {consultationData.discharge_date
-                                  ? formatDate(consultationData.discharge_date)
+                                  ? formatDate(
+                                      consultationData.discharge_date,
+                                      "DD/MM/YYYY"
+                                    )
                                   : "--:--"}
                               </span>
                             </div>
@@ -703,7 +706,7 @@ export const ConsultationDetails = (props: any) => {
                             <div>
                               Cause of death {" - "}
                               <span className="font-semibold">
-                                {consultationData.discharge_reason || "--"}
+                                {consultationData.discharge_notes || "--"}
                               </span>
                             </div>
                             <div>
@@ -723,7 +726,10 @@ export const ConsultationDetails = (props: any) => {
                               Discharge Date {" - "}
                               <span className="font-semibold">
                                 {consultationData.discharge_date
-                                  ? formatDate(consultationData.discharge_date)
+                                  ? formatDate(
+                                      consultationData.discharge_date,
+                                      "DD/MM/YYYY"
+                                    )
                                   : "--:--"}
                               </span>
                             </div>

@@ -142,7 +142,7 @@ const initForm: FormDetails = {
   procedure: [],
   investigation: [],
   is_telemedicine: "false",
-  action: undefined,
+  action: "NO_ACTION",
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
