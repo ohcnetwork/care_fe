@@ -834,52 +834,41 @@ export const getAssetTransaction = (id: string) =>
 export const listPMJYPackages = (query?: string) =>
   fireRequest("listPMJYPackages", [], { query });
 
-// Prescription Actions
-
-export const PrescriptionActions = (pathParams: {
-  consultation_external_id: string;
-  daily_rounds_external_id?: string;
-}) => {
-  const action = (action: string) =>
-    `${action}${
-      pathParams.daily_rounds_external_id ? "DailyRounds" : "Consultation"
-    }Prescription`;
+/** Prescription related actions */
+export const PrescriptionActions = (consultation_external_id: string) => {
+  const pathParams = { consultation_external_id };
 
   return {
-    list() {
-      return fireRequest(action("list"), [], {}, pathParams);
-    },
+    list: () => fireRequest("listPrescriptions", [], {}, pathParams),
 
-    create(obj: PrescriptionType) {
-      return fireRequest(action("create"), [], obj, pathParams);
-    },
+    create: (obj: PrescriptionType) =>
+      fireRequest("createPrescription", [], obj, pathParams),
 
-    read(external_id: string) {
-      const ctx = { ...pathParams, external_id };
-      return fireRequest(action("get"), [], {}, ctx);
-    },
+    upsert: (prescriptions: PrescriptionType[]) =>
+      fireRequest("upsertPrescriptions", [], { prescriptions }, pathParams),
 
-    update(external_id: string, obj: PrescriptionType) {
-      const ctx = { ...pathParams, external_id };
-      return fireRequest(action("update"), [], obj, ctx);
-    },
+    listAdministrations: (query: object) =>
+      fireRequest("listAdministrations", [], query, pathParams),
 
-    partialUpdate(external_id: string, obj: Partial<PrescriptionType>) {
-      const ctx = { ...pathParams, external_id };
-      return fireRequest(action("partialUpdate"), [], obj, ctx);
-    },
+    getAdministration: (external_id: string) =>
+      fireRequest("getAdministration", [], {}, { ...pathParams, external_id }),
 
-    administer(
-      external_id: string,
-      obj: Partial<MedicineAdministrationRecord>
-    ) {
-      const ctx = { ...pathParams, external_id };
-      return fireRequest(action("administer"), [], obj, ctx);
-    },
+    /** Returns actions specific to a prescription */
+    prescription(external_id: string) {
+      const pathParams = { consultation_external_id, external_id };
 
-    listAdministrations(external_id: string) {
-      const ctx = { ...pathParams, external_id };
-      return fireRequest(`${action("list")}Administration`, [], {}, ctx);
+      return {
+        /** Read a specific prescription of a consultation */
+        get: () => fireRequest("getPrescription", [], {}, pathParams),
+
+        /** Administer a prescription */
+        administer: (obj: Partial<MedicineAdministrationRecord>) =>
+          fireRequest("administerPrescription", [], obj, pathParams),
+
+        /** Discontinue a prescription */
+        discontinue: () =>
+          fireRequest("discontinuePrescription", [], {}, pathParams),
+      };
     },
   };
 };

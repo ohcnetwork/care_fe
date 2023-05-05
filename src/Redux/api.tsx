@@ -801,74 +801,44 @@ const routes: Routes = {
 
   // Prescription endpoints
 
-  listConsultationPrescription: {
+  listPrescriptions: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
     method: "GET",
   },
 
-  createConsultationPrescription: {
+  createPrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
     method: "POST",
   },
 
-  getConsultationPrescription: {
+  upsertPrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/upsert/",
+    method: "POST",
+  },
+
+  listAdministrations: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/",
+    method: "GET",
+  },
+
+  getAdministration: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/{external_id}/",
+    method: "GET",
+  },
+
+  getPrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/",
     method: "GET",
   },
 
-  updateConsultationPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/",
-    method: "PUT",
-  },
-
-  partialUpdateConsultationPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/",
-    method: "PATCH",
-  },
-
-  administerConsultationPrescription: {
+  administerPrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/administer/",
     method: "POST",
   },
 
-  listConsultationPrescriptionAdministration: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/get_administrations/",
-    method: "GET",
-  },
-
-  listDailyRoundPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/daily_rounds/{daily_rounds_external_id}/prescriptions/",
-    method: "GET",
-  },
-
-  createDailyRoundPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/daily_rounds/{daily_rounds_external_id}/prescriptions/",
+  discontinuePrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
     method: "POST",
-  },
-
-  getDailyRoundPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/daily_rounds/{daily_rounds_external_id}/prescriptions/{external_id}/",
-    method: "GET",
-  },
-
-  updateDailyRoundPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/daily_rounds/{daily_rounds_external_id}/prescriptions/{external_id}/",
-    method: "PUT",
-  },
-
-  partialUpdateDailyRoundPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/daily_rounds/{daily_rounds_external_id}/prescriptions/{external_id}/",
-    method: "PATCH",
-  },
-
-  administerDailyRoundPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/daily_rounds/{daily_rounds_external_id}/prescriptions/{external_id}/administer/",
-    method: "POST",
-  },
-
-  listDailyRoundPrescriptionAdministration: {
-    path: "/api/v1/consultation/{consultation_external_id}/daily_rounds/{daily_rounds_external_id}/prescriptions/{external_id}/get_administrations/",
-    method: "GET",
   },
 
   // HCX Endpoints
