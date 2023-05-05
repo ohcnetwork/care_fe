@@ -1582,7 +1582,7 @@ export const FileUpload = (props: FileUploadProps) => {
                     <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
                       {({ isAuthorized }) =>
                         isAuthorized ? (
-                          <label className="font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square">
+                          <label className="font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square button-primary-default">
                             <CareIcon className="care-l-file-upload-alt text-lg" />
                             {t("choose_file")}
                             <input
