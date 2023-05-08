@@ -34,6 +34,7 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import Webcam from "react-webcam";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -1578,26 +1579,28 @@ export const FileUpload = (props: FileUploadProps) => {
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
                   <div className="flex flex-col md:flex-row gap-2 items-center justify-start md:justify-end">
-                    <ButtonV2 authorizeFor={NonReadOnlyUsers}>
-                      <CareIcon className="care-l-file-upload-alt text-lg" />
-                      {t("choose_file")}
-                      <input
-                        title="changeFile"
-                        onChange={onFileChange}
-                        type="file"
-                        hidden
-                      />
+                    <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
+                      {({ isAuthorized }) =>
+                        isAuthorized ? (
+                          <label className="font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square button-primary-default">
+                            <CareIcon className="care-l-file-upload-alt text-lg" />
+                            {t("choose_file")}
+                            <input
+                              title="changeFile"
+                              onChange={onFileChange}
+                              type="file"
+                              hidden
+                            />
+                          </label>
+                        ) : (
+                          <></>
+                        )
+                      }
+                    </AuthorizedChild>
+                    <ButtonV2 onClick={() => setModalOpenForCamera(true)}>
+                      <CareIcon className="care-l-camera text-lg mr-2" />
+                      Open Camera
                     </ButtonV2>
-                    <ButtonV2
-                        onClick={() => {
-                          setModalOpenForCamera(true);
-                        }}
-                        className="btn btn-primary"
-                      >
-                        {/* <i className="fas fa-cloud-arrow-up mr-2"></i> */}
-                        <CareIcon className="care-l-camera text-lg mr-2" />
-                        Open Camera
-                      </ButtonV2>
                     <ButtonV2
                       authorizeFor={NonReadOnlyUsers}
                       disabled={!file || !uploadFileName || !isActive}
