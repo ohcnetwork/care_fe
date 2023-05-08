@@ -572,7 +572,7 @@ export const ConsultationDetails = (props: any) => {
                 <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
                   <PatientVitalsCard
                     patient={patientData}
-                    facilityId={facilityId}
+                    facilityId={patientData.facility}
                   />
                 </section>
               )}
@@ -603,7 +603,10 @@ export const ConsultationDetails = (props: any) => {
                               Discharge Date {" - "}
                               <span className="font-semibold">
                                 {consultationData.discharge_date
-                                  ? formatDate(consultationData.discharge_date)
+                                  ? formatDate(
+                                      consultationData.discharge_date,
+                                      "DD/MM/YYYY"
+                                    )
                                   : "--:--"}
                               </span>
                             </div>
@@ -709,7 +712,10 @@ export const ConsultationDetails = (props: any) => {
                               Discharge Date {" - "}
                               <span className="font-semibold">
                                 {consultationData.discharge_date
-                                  ? formatDate(consultationData.discharge_date)
+                                  ? formatDate(
+                                      consultationData.discharge_date,
+                                      "DD/MM/YYYY"
+                                    )
                                   : "--:--"}
                               </span>
                             </div>
