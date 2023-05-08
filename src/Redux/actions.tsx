@@ -841,7 +841,8 @@ export const PrescriptionActions = (consultation_external_id: string) => {
   const pathParams = { consultation_external_id };
 
   return {
-    list: () => fireRequest("listPrescriptions", [], {}, pathParams),
+    list: (query?: Partial<Prescription>) =>
+      fireRequest("listPrescriptions", [], query, pathParams),
 
     create: (obj: Prescription) =>
       fireRequest("createPrescription", [], obj, pathParams),
@@ -865,11 +866,23 @@ export const PrescriptionActions = (consultation_external_id: string) => {
 
         /** Administer a prescription */
         administer: (obj: MedicineAdministrationRecord) =>
-          fireRequest("administerPrescription", [], obj, pathParams),
+          fireRequest(
+            "administerPrescription",
+            [],
+            obj,
+            pathParams,
+            `administer-medicine-${external_id}`
+          ),
 
         /** Discontinue a prescription */
         discontinue: () =>
-          fireRequest("discontinuePrescription", [], {}, pathParams),
+          fireRequest(
+            "discontinuePrescription",
+            [],
+            {},
+            pathParams,
+            `discontinue-medicine-${external_id}`
+          ),
       };
     },
   };

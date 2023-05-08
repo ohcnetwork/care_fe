@@ -811,7 +811,7 @@ const routes: Routes = {
     method: "POST",
   },
 
-  upsertPrescription: {
+  upsertPrescriptions: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/upsert/",
     method: "POST",
   },
