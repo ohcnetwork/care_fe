@@ -71,7 +71,10 @@ export default function PrescriptionsTable({
         <DiscontinuePrescription
           prescription={showDiscontinueFor}
           actions={prescription(showDiscontinueFor.id!)}
-          onClose={() => setShowDiscontinueFor(undefined)}
+          onClose={() => {
+            setShowDiscontinueFor(undefined);
+            onChange?.();
+          }}
           key={showDiscontinueFor.id}
         />
       )}
