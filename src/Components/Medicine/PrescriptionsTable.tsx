@@ -18,11 +18,13 @@ import {
 interface Props {
   is_prn?: boolean;
   consultation_id: string;
+  onChange?: () => void;
 }
 
 export default function PrescriptionsTable({
   is_prn = false,
   consultation_id,
+  onChange,
 }: Props) {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>();
   const [showBulkAdminister, setShowBulkAdminister] = useState(false);
@@ -58,7 +60,10 @@ export default function PrescriptionsTable({
           <MedicineAdministration
             prescriptions={prescriptions}
             action={prescription}
-            onDone={() => setShowBulkAdminister(false)}
+            onDone={() => {
+              setShowBulkAdminister(false);
+              onChange?.();
+            }}
           />
         </SlideOver>
       )}
@@ -115,8 +120,8 @@ export default function PrescriptionsTable({
                       "Route",
                       "Dosage",
                       "Indicator Event",
-                      "Max. Dosage in 24 hrs",
-                      "Min. time between 2 doses",
+                      "Max. dosage in 24 hrs",
+                      "Min. hours b/w doses",
                       "Last Administered",
                     ]
                   : [
@@ -165,7 +170,7 @@ export default function PrescriptionsTable({
                       "dosage",
                       "days",
                       "notes",
-                      "last_administered",
+                      "last_administered__pretty",
                     ]
               }
               fieldsToDisplay={[2, 3]}
@@ -181,7 +186,7 @@ export default function PrescriptionsTable({
 
                 return (
                   <div className="flex gap-1">
-                    <ButtonV2
+                    {/* <ButtonV2
                       type="button"
                       size="small"
                       variant="secondary"
@@ -190,7 +195,7 @@ export default function PrescriptionsTable({
                     >
                       <CareIcon className="care-l-syringe text-base" />
                       Administer
-                    </ButtonV2>
+                    </ButtonV2> */}
                     <ButtonV2
                       type="button"
                       size="small"

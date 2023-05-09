@@ -60,6 +60,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 
 export const ConsultationDetails = (props: any) => {
+  const [medicinesKey, setMedicinesKey] = useState(0);
   const { t } = useTranslation();
   const { facilityId, patientId, consultationId } = props;
   const tab = props.tab.toUpperCase();
@@ -1090,13 +1091,25 @@ export const ConsultationDetails = (props: any) => {
         {tab === "MEDICINES" && (
           <div>
             <div className="mt-4">
-              <PrescriptionsTable consultation_id={consultationId} />
+              <PrescriptionsTable
+                key={medicinesKey}
+                consultation_id={consultationId}
+                onChange={() => setMedicinesKey((k) => k + 1)}
+              />
             </div>
             <div className="mt-8">
-              <PrescriptionsTable consultation_id={consultationId} is_prn />
+              <PrescriptionsTable
+                key={medicinesKey}
+                consultation_id={consultationId}
+                is_prn
+                onChange={() => setMedicinesKey((k) => k + 1)}
+              />
             </div>
             <div className="mt-8">
-              <MedicineAdministrationsTable consultation_id={consultationId} />
+              <MedicineAdministrationsTable
+                key={medicinesKey}
+                consultation_id={consultationId}
+              />
             </div>
             {consultationData.procedure && (
               <div className="mt-4">

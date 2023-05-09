@@ -53,21 +53,20 @@ export default function MedicineAdministrationsTable({
             <ResponsiveMedicineTable
               theads={["Medicine", "Notes", "Administered On"]}
               list={
-                items?.map(({ notes, ...obj }) => ({
+                items?.map((obj) => ({
+                  ...obj,
                   medicine: obj.prescription?.medicine,
-                  notes,
-                  administered_on: (
+                  created_date__pretty: (
                     <span className="flex gap-1">
-                      <RecordMeta time={obj.administered_date} /> by{" "}
+                      <RecordMeta time={obj.created_date} /> by{" "}
                       {obj.administered_by?.first_name}{" "}
-                      {obj.administered_by?.last_name}(
-                      {obj.administered_by?.username})
+                      {obj.administered_by?.last_name}
                     </span>
                   ),
                   ...obj,
                 })) || []
               }
-              objectKeys={["medicine", "notes", "administered_on"]}
+              objectKeys={["medicine", "notes", "created_date__pretty"]}
               fieldsToDisplay={[2, 3]}
             />
             {items?.length === 0 && (

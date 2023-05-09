@@ -8,6 +8,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useDispatch } from "react-redux";
 import { Error } from "../../Utils/Notifications";
+import { formatDate } from "../../Utils/utils";
 
 interface Props {
   prescriptions: Prescription[];
@@ -93,7 +94,16 @@ export default function MedicineAdministration(props: Props) {
                   return newShouldAdminister;
                 })
               }
+              errorClassName="hidden"
             />
+            <div className="text-gray-600 font-semibold leading-relaxed text-sm">
+              <CareIcon className="care-l-history-alt pr-1" /> Last administered
+              <span className="pl-1">
+                {obj.last_administered_on
+                  ? formatDate(obj.last_administered_on)
+                  : "never"}
+              </span>
+            </div>
             <TextAreaFormField
               label="Administration Notes"
               disabled={!shouldAdminister[index]}

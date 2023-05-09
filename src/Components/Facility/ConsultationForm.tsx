@@ -649,14 +649,16 @@ export const ConsultationForm = (props: any) => {
         });
 
         navigate(
-          id
-            ? `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
-            : `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}/prescriptions`
+          `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
         );
 
         if (data.suggestion === "R") {
           navigate(`/facility/${facilityId}/patient/${patientId}/shift/new`);
           return;
+        } else if (id) {
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}/prescriptions`
+          );
         }
       }
     }
