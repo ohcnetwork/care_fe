@@ -1,30 +1,33 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import * as Notification from "../../Utils/Notifications.js";
+import * as Notify from "../../Utils/Notifications";
+
+import Dropdown, { DropdownItem } from "../Common/components/Menu";
 import {
+  confirmWithAadhaarOtp,
+  confirmWithMobileOtp,
   createHealthId,
   generateAadhaarOtp,
   generateMobileOtp,
+  initiateAbdmAuthentication,
+  linkViaQR,
   resentAadhaarOtp,
+  searchByHealthId,
   verifyAadhaarOtp,
   verifyMobileOtp,
-  searchByHealthId,
-  initiateAbdmAuthentication,
-  confirmWithMobileOtp,
-  confirmWithAadhaarOtp,
-  linkViaQR,
 } from "../../Redux/actions";
-import * as Notify from "../../Utils/Notifications";
-import { classNames } from "../../Utils/utils";
+import { useEffect, useState } from "react";
+
 import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
+import OtpFormField from "../Form/FormFields/OtpFormField";
 import QRScanner from "../Common/QRScanner";
 import TextFormField from "../Form/FormFields/TextFormField";
-import * as Notification from "../../Utils/Notifications.js";
-import Dropdown, { DropdownItem } from "../Common/components/Menu";
-import OtpFormField from "../Form/FormFields/OtpFormField";
+import { classNames } from "../../Utils/utils";
+import { useDispatch } from "react-redux";
 
 interface Props {
+  facilityId: string;
   patientId?: string;
   patientMobile?: string | undefined;
   setAbha?: (abha: any) => void;
@@ -40,6 +43,7 @@ type Step =
 
 export default function LinkABHANumberModal({
   patientId,
+  facilityId,
   patientMobile,
   setAbha,
   ...props
@@ -68,6 +72,7 @@ export default function LinkABHANumberModal({
             onSignup={() => {
               setCurrentStep("AadhaarVerification");
             }}
+            facilityId={facilityId}
             patientId={patientId}
             setAbha={setAbha}
             closeModal={props.onClose}
@@ -113,6 +118,7 @@ export default function LinkABHANumberModal({
 interface ScanABHAQRSectionProps {
   onSignup: () => void;
   patientId?: string;
+  facilityId: string;
   setAbha?: (abha: any) => void;
   closeModal?: () => void;
 }
@@ -120,6 +126,7 @@ interface ScanABHAQRSectionProps {
 const ScanABHAQRSection = ({
   onSignup,
   patientId,
+  facilityId,
   setAbha,
   closeModal,
 }: ScanABHAQRSectionProps) => {
@@ -148,7 +155,9 @@ const ScanABHAQRSection = ({
             const abha = JSON.parse(value);
             console.log("scan", patientId, abha);
             if (patientId) {
-              const res = await dispatch(linkViaQR(abha, patientId));
+              const res = await dispatch(
+                linkViaQR(abha, facilityId, patientId)
+              );
 
               if (res.status === 200 || res.status === 202) {
                 Notification.Success({ msg: "Request sent successfully" });

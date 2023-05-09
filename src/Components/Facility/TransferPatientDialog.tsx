@@ -1,3 +1,5 @@
+import * as Notification from "../../Utils/Notifications.js";
+
 import {
   Button,
   Dialog,
@@ -6,22 +8,22 @@ import {
   DialogTitle,
   InputLabel,
 } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import { navigate } from "raviger";
-import moment from "moment";
-import React, { useReducer, useState } from "react";
-import { useDispatch } from "react-redux";
-import { transferPatient } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
 import { DateInputField, SelectField } from "../Common/HelperInputFields";
+import React, { useReducer, useState } from "react";
+
+import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { DupPatientModel } from "./models";
 import { OptionsType } from "../../Common/constants";
+import moment from "moment";
+import { navigate } from "raviger";
+import { transferPatient } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
 
 interface Props {
   patientList: Array<DupPatientModel>;
   handleOk: () => void;
   handleCancel: () => void;
-  facilityId: number;
+  facilityId: string;
 }
 
 const initForm: any = {

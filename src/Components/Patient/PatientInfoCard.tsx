@@ -290,6 +290,7 @@ export default function PatientInfoCard(props: {
             <LinkABHANumberModal
               show={showLinkABHANumber}
               onClose={() => setShowLinkABHANumber(false)}
+              facilityId={patient.facility as string}
               patientId={patient.id as any}
             />
           </>

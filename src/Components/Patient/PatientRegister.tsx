@@ -1,3 +1,13 @@
+import * as Notification from "../../Utils/Notifications.js";
+
+import {
+  BLOOD_GROUPS,
+  DISEASE_STATUS,
+  GENDER_TYPES,
+  MEDICAL_HISTORY_CHOICES,
+  TEST_TYPE,
+  VACCINES,
+} from "../../Common/constants";
 import {
   Box,
   Card,
@@ -8,37 +18,6 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-
-import { navigate, useQueryParams } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import moment from "moment";
-import loadable from "@loadable/component";
-import { useCallback, useReducer, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import {
-  BLOOD_GROUPS,
-  DISEASE_STATUS,
-  GENDER_TYPES,
-  MEDICAL_HISTORY_CHOICES,
-  TEST_TYPE,
-  VACCINES,
-} from "../../Common/constants";
-import countryList from "../../Common/static/countries.json";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  createPatient,
-  getDistrictByState,
-  getLocalbodyByDistrict,
-  getPatient,
-  getStates,
-  searchPatient,
-  updatePatient,
-  getWardByLocalBody,
-  externalResult,
-  getAnyFacility,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import AlertDialog from "../Common/AlertDialog";
 import {
   CheckboxField,
   DateInputField,
@@ -47,26 +26,48 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
+import {
+  createPatient,
+  externalResult,
+  getAnyFacility,
+  getDistrictByState,
+  getLocalbodyByDistrict,
+  getPatient,
+  getStates,
+  getWardByLocalBody,
+  searchPatient,
+  updatePatient,
+} from "../../Redux/actions";
+import { navigate, useQueryParams } from "raviger";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useCallback, useEffect, useReducer, useState } from "react";
+
+import AccordionV2 from "../Common/components/AccordionV2";
+import AlertDialog from "../Common/AlertDialog";
+import CollapseV2 from "../Common/components/CollapseV2";
 import { DupPatientModel } from "../Facility/models";
+import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { InfoOutlined } from "@material-ui/icons";
+import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
 import { PatientModel } from "./models";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
-import { validatePincode } from "../../Common/validation";
-import { InfoOutlined } from "@material-ui/icons";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import countryList from "../../Common/static/countries.json";
+import { debounce } from "lodash";
 import { goBack } from "../../Utils/utils";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { useDispatch } from "react-redux";
+import { validatePincode } from "../../Common/validation";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-import AccordionV2 from "../Common/components/AccordionV2";
-import CollapseV2 from "../Common/components/CollapseV2";
-import { debounce } from "lodash";
-import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
-  facilityId: number;
+  facilityId: string;
 }
 
 interface medicalHistoryModel {
@@ -958,6 +959,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     <div className="px-2 pb-2">
       {showLinkAbhaNumberModal && (
         <LinkABHANumberModal
+          facilityId={facilityId}
           show={showLinkAbhaNumberModal}
           onClose={() => setShowLinkAbhaNumberModal(false)}
           setAbha={({
