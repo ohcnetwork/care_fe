@@ -11,6 +11,8 @@ export default function ResponsiveMedicineTable(props: {
   list: Array<any>;
   objectKeys: Array<string>;
   fieldsToDisplay: Array<number>;
+  actions?: (item: any) => JSX.Element;
+  actionLabel?: string;
 }) {
   const [windowSize, setWindowSize] = useState(getWindowSize());
   useEffect(() => {
@@ -37,6 +39,11 @@ export default function ResponsiveMedicineTable(props: {
                   </th>
                 );
               })}
+              {props.actions && (
+                <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
+                  {props.actionLabel || ""}
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -56,6 +63,9 @@ export default function ResponsiveMedicineTable(props: {
                       </td>
                     );
                 })}
+                {props.actions && (
+                  <td className="px-6">{props.actions(med)}</td>
+                )}
               </tr>
             ))}
           </tbody>
