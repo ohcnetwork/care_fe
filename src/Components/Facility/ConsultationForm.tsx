@@ -23,7 +23,6 @@ import {
   getConsultation,
   updateConsultation,
   getPatient,
-  PrescriptionActions,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -56,9 +55,6 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useVisibility from "../../Utils/useVisibility";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import PrescriptionBuilder, {
-  PrescriptionType,
-} from "../Medicine/PrescriptionBuilder";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -217,7 +213,6 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [prescriptions, setPrescriptions] = useState<PrescriptionType[]>([]);
   const [InvestigationAdvice, setInvestigationAdvice] = useState<
     InvestigationType[]
   >([]);
@@ -292,18 +287,6 @@ export const ConsultationForm = (props: any) => {
     !!state.form.symptoms.length && !state.form.symptoms.includes(1);
   const isOtherSymptomsSelected = state.form.symptoms.includes(9);
 
-  const fetchPrescriptions = useCallback(
-    async (_: statusType) => {
-      const res = await dispatchAction(
-        PrescriptionActions({ consultation_external_id: id }).list()
-      );
-      if (res.data.results) {
-        setPrescriptions(res.data.results);
-      }
-    },
-    [dispatchAction, id]
-  );
-
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -363,10 +346,9 @@ export const ConsultationForm = (props: any) => {
     (status: statusType) => {
       if (id) {
         fetchData(status);
-        fetchPrescriptions(status);
       }
     },
-    [dispatch, fetchData, fetchPrescriptions]
+    [fetchData, id]
   );
 
   if (isLoading) return <Loading />;
@@ -662,24 +644,14 @@ export const ConsultationForm = (props: any) => {
           );
         }
 
-        if (!id && prescriptions.length > 0) {
-          const { create: createPrescription } = PrescriptionActions({
-            consultation_external_id: res.data.id,
-          });
-
-          await Promise.all(
-            prescriptions.map((prescription) =>
-              dispatchAction(createPrescription(prescription))
-            )
-          );
-        }
-
         Notification.Success({
           msg: `Consultation ${id ? "updated" : "created"} successfully`,
         });
 
         navigate(
-          `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
+          id
+            ? `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
+            : `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}/prescriptions`
         );
 
         if (data.suggestion === "R") {
@@ -1148,32 +1120,6 @@ export const ConsultationForm = (props: any) => {
                               error={state.errors.investigation}
                             />
                           </div>
-
-                          <div
-                            id="prescription_medication"
-                            className="col-span-6"
-                          >
-                            <FieldLabel>Prescription Medication</FieldLabel>
-                            <PrescriptionBuilder
-                              consultation={id}
-                              prescriptions={prescriptions}
-                              type="normal"
-                              fetchPrescriptions={id && fetchPrescriptions}
-                              onChange={setPrescriptions}
-                            />
-                          </div>
-
-                          <div id="prn_prescription" className="col-span-6">
-                            <FieldLabel>PRN Prescription</FieldLabel>
-                            <PrescriptionBuilder
-                              consultation={id}
-                              prescriptions={prescriptions}
-                              type="prn"
-                              fetchPrescriptions={id && fetchPrescriptions}
-                              onChange={setPrescriptions}
-                            />
-                          </div>
-
                           <div
                             id="procedure"
                             className="col-span-6"
