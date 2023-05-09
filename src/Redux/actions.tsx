@@ -841,14 +841,18 @@ export const PrescriptionActions = (consultation_external_id: string) => {
   const pathParams = { consultation_external_id };
 
   return {
-    list: (query?: Partial<Prescription>) =>
-      fireRequest("listPrescriptions", [], query, pathParams),
+    list: (query?: Partial<Prescription>) => {
+      let altKey;
+      if (query?.is_prn !== undefined) {
+        altKey = query?.is_prn
+          ? "listPRNPrescriptions"
+          : "listNormalPrescriptions";
+      }
+      return fireRequest("listPrescriptions", [], query, pathParams, altKey);
+    },
 
     create: (obj: Prescription) =>
       fireRequest("createPrescription", [], obj, pathParams),
-
-    upsert: (prescriptions: Prescription[]) =>
-      fireRequest("upsertPrescriptions", [], { prescriptions }, pathParams),
 
     listAdministrations: (query: object) =>
       fireRequest("listAdministrations", [], query, pathParams),
