@@ -879,11 +879,11 @@ export const PrescriptionActions = (consultation_external_id: string) => {
           ),
 
         /** Discontinue a prescription */
-        discontinue: () =>
+        discontinue: (discontinued_reason: string | undefined) =>
           fireRequest(
             "discontinuePrescription",
             [],
-            {},
+            { discontinued_reason },
             pathParams,
             `discontinue-medicine-${external_id}`
           ),
