@@ -2,6 +2,7 @@ import DialogModal from "./Dialog";
 import ButtonV2, { ButtonVariant, Cancel } from "./components/ButtonV2";
 
 type ConfirmDialogV2Props = {
+  className?: string;
   title: React.ReactNode;
   description?: React.ReactNode;
   disabled?: boolean;
@@ -25,6 +26,7 @@ const ConfirmDialogV2 = ({
   onConfirm,
   cancelLabel,
   children,
+  className,
 }: ConfirmDialogV2Props) => {
   return (
     <DialogModal
@@ -36,6 +38,7 @@ const ConfirmDialogV2 = ({
         </span>
       }
       show={show}
+      className={className}
     >
       {children}
       <div className="mt-6 flex justify-end gap-2 w-full flex-col md:flex-row">

@@ -8,11 +8,7 @@ import {
   SYMPTOM_CHOICES,
 } from "../../Common/constants";
 import { ConsultationModel, ICD11DiagnosisModel } from "./models";
-import {
-  PrescriptionActions,
-  getConsultation,
-  getPatient,
-} from "../../Redux/actions";
+import { getConsultation, getPatient } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -56,7 +52,7 @@ import { navigate } from "raviger";
 import { validateEmailAddress } from "../../Common/validation";
 import { useTranslation } from "react-i18next";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import { PrescriptionType } from "../Medicine/PrescriptionBuilder";
+import PrescriptionsTable from "../Medicine/PrescriptionsTable";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -87,21 +83,6 @@ export const ConsultationDetails = (props: any) => {
   );
   const [errors, setErrors] = useState<any>({});
   const [showAutomatedRounds, setShowAutomatedRounds] = useState(true);
-
-  const [prescriptions, setPrescriptions] = useState<PrescriptionType[]>();
-
-  const fetchPrescriptions = useCallback(
-    async (_: statusType) => {
-      const res = await dispatch(
-        PrescriptionActions({ consultation_external_id: consultationId }).list()
-      );
-
-      if (res.data.results) {
-        setPrescriptions(res.data.results);
-      }
-    },
-    [dispatch, consultationId]
-  );
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -240,7 +221,6 @@ export const ConsultationDetails = (props: any) => {
 
   useAbortableEffect((status: statusType) => {
     fetchData(status);
-    fetchPrescriptions(status);
   }, []);
 
   if (isLoading) {
@@ -1109,98 +1089,10 @@ export const ConsultationDetails = (props: any) => {
         {tab === "MEDICINES" && (
           <div>
             <div className="mt-4">
-              <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900 mb-2">
-                <span className="mr-3">Prescription</span>
-                <div className="text-xs text-gray-600 mt-2 ">
-                  <i className="fas fa-history text-sm pr-2"></i>
-                  {prescriptions?.filter((p) => !p.is_prn)?.[
-                    prescriptions.filter((p) => !p.is_prn).length - 1
-                  ].modified_date &&
-                    formatDate(
-                      prescriptions?.[
-                        prescriptions.filter((p) => !p.is_prn).length - 1
-                      ].modified_date
-                    )}
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                  <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
-                    <ResponsiveMedicineTable
-                      theads={[
-                        "Medicine",
-                        "Route",
-                        "Frequency",
-                        "Dosage",
-                        "Days",
-                        "Notes",
-                      ]}
-                      list={prescriptions?.filter((p) => !p.is_prn) || []}
-                      objectKeys={[
-                        "medicine",
-                        "route",
-                        "frequency",
-                        "dosage",
-                        "days",
-                        "notes",
-                      ]}
-                      fieldsToDisplay={[2, 3]}
-                    />
-                    {prescriptions?.filter((p) => !p.is_prn).length === 0 && (
-                      <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
-                        No data found
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <PrescriptionsTable consultation_id={consultationId} />
             </div>
-            <div className="mt-4">
-              <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900 mb-2">
-                <span className="mr-3">PRN Prescription</span>
-                <div className="text-xs text-gray-600 mt-2">
-                  <i className="fas fa-history text-sm pr-2"></i>
-                  {prescriptions?.filter((p) => p.is_prn)?.[
-                    prescriptions.filter((p) => p.is_prn).length - 1
-                  ].modified_date &&
-                    formatDate(
-                      prescriptions?.[
-                        prescriptions.filter((p) => p.is_prn).length - 1
-                      ].modified_date
-                    )}
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                  <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
-                    <ResponsiveMedicineTable
-                      theads={[
-                        "Medicine",
-                        "Route",
-                        "Dosage",
-                        "Indicator Event",
-                        "Max. Dosage in 24 hrs",
-                        "Min. time between 2 doses",
-                      ]}
-                      list={prescriptions?.filter((p) => p.is_prn) || []}
-                      objectKeys={[
-                        "medicine",
-                        "route",
-                        "dosage",
-                        "indicator",
-                        "max_dosage",
-                        "min_hours_between_doses",
-                      ]}
-                      fieldsToDisplay={[2, 4]}
-                    />
-                    {prescriptions?.filter((p) => p.is_prn).length === 0 && (
-                      <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
-                        No data found
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+            <div className="mt-8">
+              <PrescriptionsTable consultation_id={consultationId} is_prn />
             </div>
             {consultationData.procedure && (
               <div className="mt-4">

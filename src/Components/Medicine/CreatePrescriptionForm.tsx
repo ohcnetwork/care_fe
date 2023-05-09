@@ -12,7 +12,7 @@ import { useState } from "react";
 
 const prescriptionFormContext = createFormContext<Prescription>();
 
-export default function PrescriptionForm(props: {
+export default function CreatePrescriptionForm(props: {
   prescription: Prescription;
   create: ReturnType<typeof PrescriptionActions>["create"];
   onDone: () => void;

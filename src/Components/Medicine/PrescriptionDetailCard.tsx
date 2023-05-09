@@ -6,21 +6,19 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import {
   PRESCRIPTION_FREQUENCIES,
   PRESCRIPTION_ROUTES,
-} from "./PrescriptionForm";
+} from "./CreatePrescriptionForm";
+import { PrescriptionActions } from "../../Redux/actions";
 
 export default function PrescriptionDetailCard({
   prescription,
   ...props
 }: {
-  index: number;
   prescription: Prescription;
   readonly?: boolean;
   children?: React.ReactNode;
+  actions: ReturnType<ReturnType<typeof PrescriptionActions>["prescription"]>;
+  onDiscontinueClick?: () => void;
 }) {
-  const isNew = !prescription.id;
-
-  const displayId = prescription.id?.slice(-5) || props.index;
-
   return (
     <div
       className={classNames(
@@ -28,54 +26,52 @@ export default function PrescriptionDetailCard({
         prescription.discontinued && "bg-gray-200 opacity-80"
       )}
     >
-      <div className="flex-1 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div className="flex gap-4 items-center">
-            <h3 className="text-lg font-semibold text-gray-700">
-              {prescription.is_prn ? "PRN Prescription" : "Prescription"} #
-              {displayId}
-            </h3>
-            {isNew && (
-              <span className="bg-blue-500 text-white font-semibold text-xs px-2 py-1 rounded-full">
-                NEW
-              </span>
-            )}
-            {prescription.discontinued && (
-              <span className="bg-gray-700 text-white font-semibold text-xs px-2 py-1 rounded-full">
-                DISCONTINUED
-              </span>
+      <div className="flex-1 flex flex-col gap-2">
+        <div>
+          <div className="flex items-center justify-between">
+            <div className="flex gap-4 items-center">
+              <h3 className="text-lg font-semibold text-gray-700">
+                {prescription.is_prn ? "PRN Prescription" : "Prescription"} #
+                {prescription.id?.slice(-5)}
+              </h3>
+              {prescription.discontinued && (
+                <span className="bg-gray-700 text-white font-semibold text-xs px-2 py-1 rounded-full">
+                  DISCONTINUED
+                </span>
+              )}
+            </div>
+
+            {!props.readonly && (
+              <div className="flex gap-2 items-center">
+                <ButtonV2
+                  disabled={prescription.discontinued}
+                  type="button"
+                  size="small"
+                  variant="secondary"
+                  ghost
+                  border
+                >
+                  <CareIcon className="care-l-syringe text-base" />
+                  Administer
+                </ButtonV2>
+                <ButtonV2
+                  disabled={prescription.discontinued}
+                  type="button"
+                  size="small"
+                  variant="danger"
+                  ghost
+                  border
+                  onClick={props.onDiscontinueClick}
+                >
+                  <CareIcon className="care-l-ban text-base" />
+                  Discontinue
+                </ButtonV2>
+              </div>
             )}
           </div>
-
-          {!props.readonly && (
-            <div className="flex gap-2 items-center">
-              <ButtonV2
-                disabled={prescription.discontinued}
-                type="button"
-                size="small"
-                variant="secondary"
-                ghost
-                border
-              >
-                <CareIcon className="care-l-syringe text-base" />
-                Administer
-              </ButtonV2>
-              <ButtonV2
-                disabled={prescription.discontinued}
-                type="button"
-                size="small"
-                variant="danger"
-                ghost
-                border
-              >
-                <CareIcon className="care-l-ban text-base" />
-                Discontinue
-              </ButtonV2>
-            </div>
-          )}
         </div>
 
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap gap-2 items-center mt-2">
           <Detail className="flex-[5]" label="Medicine">
             {prescription.medicine}
           </Detail>
@@ -117,6 +113,12 @@ export default function PrescriptionDetailCard({
         {prescription.notes && (
           <Detail label="Notes">
             <ReadMore text={prescription.notes} minChars={120} />
+          </Detail>
+        )}
+
+        {prescription.discontinued && (
+          <Detail label="Reason for discontinuation">
+            {prescription.discontinued_reason}
           </Detail>
         )}
       </div>

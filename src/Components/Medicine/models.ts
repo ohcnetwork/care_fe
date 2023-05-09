@@ -12,6 +12,7 @@ interface BasePrescription {
   discontinued_reason?: string;
   readonly prescribed_by?: PerformedByModel;
   readonly discontinued_date: string;
+  readonly last_administered_on?: string;
   readonly is_migrated?: boolean;
   readonly created_date?: string;
   readonly modified_date?: string;

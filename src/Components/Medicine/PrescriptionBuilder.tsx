@@ -4,10 +4,11 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { NormalPrescription, Prescription } from "./models";
 import DialogModal from "../Common/Dialog";
 import { PRNPrescription } from "./models";
-import PrescriptionForm from "./PrescriptionForm";
+import CreatePrescriptionForm from "./CreatePrescriptionForm";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import { PrescriptionActions } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
+import DiscontinuePrescription from "./DiscontinuePrescription";
 
 interface Props {
   type: Prescription["prescription_type"];
@@ -24,6 +25,7 @@ export default function PrescriptionBuilder({
 
   const [prescriptions, setPrescriptions] = useState<Prescription[]>();
   const [showCreate, setShowCreate] = useState(false);
+  const [showDiscontinueFor, setShowDiscontinueFor] = useState<Prescription>();
 
   const fetchPrescriptions = useCallback(() => {
     dispatch(actions.list({ is_prn })).then((res: any) =>
@@ -37,12 +39,26 @@ export default function PrescriptionBuilder({
 
   return (
     <div>
+      {showDiscontinueFor && (
+        <DiscontinuePrescription
+          prescription={showDiscontinueFor}
+          actions={actions.prescription(showDiscontinueFor.id!)}
+          onClose={(discontinued) => {
+            setShowDiscontinueFor(undefined);
+            if (discontinued) {
+              fetchPrescriptions();
+            }
+          }}
+          key={showDiscontinueFor.id}
+        />
+      )}
       <div className="flex flex-col gap-3">
         {prescriptions?.map((obj, index) => (
           <PrescriptionDetailCard
             key={index}
-            index={index}
             prescription={obj}
+            actions={actions.prescription(obj.id!)}
+            onDiscontinueClick={() => setShowDiscontinueFor(obj)}
           />
         ))}
       </div>
@@ -66,7 +82,7 @@ export default function PrescriptionBuilder({
           description="Add a new prescription to this consultation."
           className="max-w-3xl w-full"
         >
-          <PrescriptionForm
+          <CreatePrescriptionForm
             prescription={
               {
                 ...(is_prn ? DefaultPRNPrescription : DefaultPrescription),
