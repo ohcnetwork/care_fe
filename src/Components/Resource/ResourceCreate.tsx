@@ -1,29 +1,16 @@
 import { useReducer, useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  LegacyTextInputField,
-  LegacyMultilineInputField,
-  LegacyErrorHelperText,
-  LegacySelectField,
-} from "../Common/HelperInputFields";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate } from "raviger";
 import {
+  OptionsType,
   RESOURCE_CATEGORY_CHOICES,
   RESOURCE_SUBCATEGORIES,
 } from "../../Common/constants";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import {
-  Card,
-  CardContent,
-  InputLabel,
-  Radio,
-  RadioGroup,
-  Box,
-  FormControlLabel,
-} from "@material-ui/core";
+import { Card, CardContent } from "@material-ui/core";
 import { phonePreg } from "../../Common/validation";
 
 import { createResource, getAnyFacility } from "../../Redux/actions";
@@ -31,6 +18,13 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import { useTranslation } from "react-i18next";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import RadioFormField from "../Form/FormFields/RadioFormField";
+import { FieldLabel } from "../Form/FormFields/FormField";
+
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -91,6 +85,7 @@ const initialState = {
 export default function ResourceCreate(props: resourceProps) {
   const { goBack } = useAppHistory();
   const { facilityId } = props;
+  const { t } = useTranslation();
 
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
@@ -134,9 +129,9 @@ export default function ResourceCreate(props: resourceProps) {
     const errors = { ...initError };
     let isInvalidForm = false;
     Object.keys(requiredFields).forEach((field) => {
-      const phoneNumber = parsePhoneNumberFromString(state.form[field]);
       switch (field) {
-        case "refering_facility_contact_number":
+        case "refering_facility_contact_number": {
+          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
@@ -148,6 +143,7 @@ export default function ResourceCreate(props: resourceProps) {
             isInvalidForm = true;
           }
           return;
+        }
         default:
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
@@ -160,9 +156,9 @@ export default function ResourceCreate(props: resourceProps) {
     return !isInvalidForm;
   };
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: FieldChangeEvent<string>) => {
     const form = { ...state.form };
-    const { name, value } = e.target;
+    const { name, value } = e;
     form[name] = value;
     dispatch({ type: "set_form", form });
   };
@@ -225,7 +221,7 @@ export default function ResourceCreate(props: resourceProps) {
   return (
     <div className="px-2 pb-2">
       <PageTitle
-        title={"Create Resource Request"}
+        title={t("create_resource_request")}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           resource: { style: "pointer-events-none" },
@@ -236,33 +232,26 @@ export default function ResourceCreate(props: resourceProps) {
         <Card>
           <CardContent>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-              <div>
-                <InputLabel>Name of Contact Person at Facility*</InputLabel>
-                <LegacyTextInputField
-                  fullWidth
-                  name="refering_facility_contact_name"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.refering_facility_contact_name}
-                  onChange={handleChange}
-                  errors={state.errors.refering_facility_contact_name}
-                />
-              </div>
-
-              <div>
-                <PhoneNumberFormField
-                  label="Contact person phone"
-                  name="refering_facility_contact_number"
-                  required
-                  onlyIndia
-                  value={state.form.refering_facility_contact_number}
-                  onChange={handleFormFieldChange}
-                  error={state.errors.refering_facility_contact_number}
-                />
-              </div>
+              <TextFormField
+                required
+                label={t("contact_person")}
+                name="refering_facility_contact_name"
+                value={state.form.refering_facility_contact_name}
+                onChange={handleChange}
+                error={state.errors.refering_facility_contact_name}
+              />
+              <PhoneNumberFormField
+                label={t("contact_phone")}
+                name="refering_facility_contact_number"
+                required
+                onlyIndia
+                value={state.form.refering_facility_contact_number}
+                onChange={handleFormFieldChange}
+                error={state.errors.refering_facility_contact_number}
+              />
 
               <div className="md:col-span-2">
-                <InputLabel>Name of approving facility*</InputLabel>
+                <FieldLabel required>{t("approving_facility")}</FieldLabel>
                 <FacilitySelect
                   multiple={false}
                   facilityType={1500}
@@ -275,104 +264,67 @@ export default function ResourceCreate(props: resourceProps) {
                 />
               </div>
 
-              <div>
-                <InputLabel>Category</InputLabel>
-                <LegacySelectField
-                  name="category"
-                  variant="outlined"
-                  fullWidth
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.category}
-                  options={RESOURCE_CATEGORY_CHOICES}
-                  onChange={handleChange}
-                  className="bg-white h-14 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
+              <SelectFormField
+                label={t("category")}
+                name="category"
+                required
+                value={state.form.category}
+                options={RESOURCE_CATEGORY_CHOICES}
+                optionLabel={(option: string) => option}
+                optionValue={(option: string) => option}
+                onChange={({ value }) => handleValueChange(value, "category")}
+              />
+              <SelectFormField
+                label={t("sub_category")}
+                name="sub_category"
+                required
+                value={state.form.sub_category}
+                options={RESOURCE_SUBCATEGORIES}
+                optionLabel={(option: OptionsType) => option.text}
+                optionValue={(option: OptionsType) => option.id}
+                onChange={({ value }) =>
+                  handleValueChange(value, "sub_category")
+                }
+              />
 
-              <div>
-                <InputLabel>Subcategory</InputLabel>
-                <LegacySelectField
-                  name="sub_category"
-                  variant="outlined"
-                  margin="dense"
-                  fullWidth
-                  value={state.form.sub_category}
-                  options={RESOURCE_SUBCATEGORIES}
-                  onChange={handleChange}
-                  className="bg-white h-14 mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
+              <TextFormField
+                label={t("request_title")}
+                name="title"
+                placeholder={t("request_title_placeholder")}
+                value={state.form.title}
+                onChange={handleChange}
+                error={state.errors.title}
+              />
 
-              <div className="md:col-span-1">
-                <InputLabel>Request Title*</InputLabel>
-                <LegacyTextInputField
-                  rows={5}
-                  name="title"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Type your title here"
-                  value={state.form.title}
-                  onChange={handleChange}
-                  errors={state.errors.title}
-                />
-              </div>
-
-              <div className="md:col-span-1">
-                <div className="w-full">
-                  <InputLabel>Required Quantity</InputLabel>
-                  <LegacyTextInputField
-                    name="requested_quantity"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    value={state.form.required_quantity}
-                    onChange={handleChange}
-                    errors=""
-                  />
-                </div>
-              </div>
+              <TextFormField
+                label={t("required_quantity")}
+                name="requested_quantity"
+                value={state.form.required_quantity}
+                onChange={handleChange}
+              />
 
               <div className="md:col-span-2">
-                <InputLabel>Description of request*</InputLabel>
-                <LegacyMultilineInputField
-                  rows={5}
+                <TextAreaFormField
+                  label={t("request_description")}
                   name="reason"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Type your description here"
+                  rows={5}
+                  required
+                  placeholder={t("request_description_placeholder")}
                   value={state.form.reason}
                   onChange={handleChange}
-                  errors={state.errors.reason}
+                  error={state.errors.reason}
                 />
               </div>
 
-              <div>
-                <InputLabel>Is this an emergency?</InputLabel>
-                <RadioGroup
-                  aria-label="emergency"
-                  name="emergency"
-                  value={state.form.emergency === "true"}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <LegacyErrorHelperText error={state.errors.emergency} />
-              </div>
+              <RadioFormField
+                label={t("is_this_an_emergency")}
+                name="emergency"
+                options={[true, false]}
+                optionDisplay={(o) => (o ? t("yes") : t("no"))}
+                optionValue={(o) => String(o)}
+                value={state.form.emergency}
+                onChange={handleChange}
+              />
 
               <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
                 <Cancel onClick={() => goBack()} />
