@@ -92,10 +92,6 @@ let sumOfArray = items => {
   Js.Array.reduce(\"+.", 0.0, Js.Array.map(IOBalance.quantity, items))
 }
 
-module MedicineAdministrationRecord = {
-  @react.component @module("./MedicineAdministrationRecord")
-  external make: (~consultationId: string) => React.element = "default"
-}
 @react.component
 let make = (~ioBalance, ~updateCB, ~id, ~consultationId) => {
   let (state, send) = React.useReducer(reducer, initialState(ioBalance))
