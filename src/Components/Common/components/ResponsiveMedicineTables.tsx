@@ -13,6 +13,7 @@ export default function ResponsiveMedicineTable(props: {
   fieldsToDisplay: Array<number>;
   actions?: (item: any) => JSX.Element;
   actionLabel?: string;
+  maxWidthColumn?: number;
 }) {
   const [windowSize, setWindowSize] = useState(getWindowSize());
   useEffect(() => {
@@ -50,18 +51,22 @@ export default function ResponsiveMedicineTable(props: {
             {props.list?.map?.((med: any, index: number) => (
               <tr className="bg-white" key={index}>
                 {props.objectKeys.map((key, idx) => {
-                  if (idx === 0)
+                  if (
+                    props.maxWidthColumn !== undefined &&
+                    idx === props.maxWidthColumn
+                  ) {
                     return (
                       <td className="px-6 py-4 w-full text-sm leading-5 font-medium text-gray-900">
                         {med[key]}
                       </td>
                     );
-                  else
-                    return (
-                      <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
-                        {med[key]}
-                      </td>
-                    );
+                  }
+
+                  return (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-900">
+                      {med[key]}
+                    </td>
+                  );
                 })}
                 {props.actions && (
                   <td className="px-6">{props.actions(med)}</td>

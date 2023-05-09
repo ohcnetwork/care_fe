@@ -854,7 +854,7 @@ export const PrescriptionActions = (consultation_external_id: string) => {
     create: (obj: Prescription) =>
       fireRequest("createPrescription", [], obj, pathParams),
 
-    listAdministrations: (query: object) =>
+    listAdministrations: (query?: object) =>
       fireRequest("listAdministrations", [], query, pathParams),
 
     getAdministration: (external_id: string) =>

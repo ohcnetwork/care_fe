@@ -53,6 +53,7 @@ import { validateEmailAddress } from "../../Common/validation";
 import { useTranslation } from "react-i18next";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import PrescriptionsTable from "../Medicine/PrescriptionsTable";
+import MedicineAdministrationsTable from "../Medicine/MedicineAdministrationsTable";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -1093,6 +1094,9 @@ export const ConsultationDetails = (props: any) => {
             </div>
             <div className="mt-8">
               <PrescriptionsTable consultation_id={consultationId} is_prn />
+            </div>
+            <div className="mt-8">
+              <MedicineAdministrationsTable consultation_id={consultationId} />
             </div>
             {consultationData.procedure && (
               <div className="mt-4">

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
-import { formatDate, relativeTime } from "../../Utils/utils";
+import { formatDate } from "../../Utils/utils";
 import { PrescriptionActions } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { Prescription } from "./models";
@@ -9,6 +9,11 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
 import MedicineAdministration from "./MedicineAdministration";
 import DiscontinuePrescription from "./DiscontinuePrescription";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
+import {
+  PRESCRIPTION_FREQUENCIES,
+  PRESCRIPTION_ROUTES,
+} from "./CreatePrescriptionForm";
 
 interface Props {
   is_prn?: boolean;
@@ -102,6 +107,7 @@ export default function PrescriptionsTable({
         <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
             <ResponsiveMedicineTable
+              maxWidthColumn={0}
               theads={
                 is_prn
                   ? [
@@ -126,26 +132,36 @@ export default function PrescriptionsTable({
               list={
                 prescriptions?.map((obj) => ({
                   ...obj,
-                  last_administered: obj.last_administered_on
-                    ? relativeTime(obj.last_administered_on)
-                    : "never",
+                  route__pretty:
+                    obj.route && PRESCRIPTION_ROUTES[obj.route].name,
+                  frequency__pretty:
+                    obj.frequency &&
+                    PRESCRIPTION_FREQUENCIES[obj.frequency].name,
+                  min_hours_between_doses__pretty:
+                    obj.min_hours_between_doses &&
+                    obj.min_hours_between_doses + " hrs",
+                  last_administered__pretty: obj.last_administered_on ? (
+                    <RecordMeta time={obj.last_administered_on} />
+                  ) : (
+                    "never"
+                  ),
                 })) || []
               }
               objectKeys={
                 is_prn
                   ? [
                       "medicine",
-                      "route",
+                      "route__pretty",
                       "dosage",
                       "indicator",
                       "max_dosage",
-                      "min_hours_between_doses",
-                      "last_administered",
+                      "min_hours_between_doses__pretty",
+                      "last_administered__pretty",
                     ]
                   : [
                       "medicine",
-                      "route",
-                      "frequency",
+                      "route__pretty",
+                      "frequency__pretty",
                       "dosage",
                       "days",
                       "notes",
