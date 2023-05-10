@@ -245,7 +245,10 @@ export default function PrescriptionsTable({
                             variant="secondary"
                             ghost
                             border
-                            onClick={() => setShowAdministerFor(med)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowAdministerFor(med);
+                            }}
                           >
                             <CareIcon className="care-l-syringe text-base" />
                             Administer
@@ -256,7 +259,10 @@ export default function PrescriptionsTable({
                             variant="danger"
                             ghost
                             border
-                            onClick={() => setShowDiscontinueFor(med)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowDiscontinueFor(med);
+                            }}
                           >
                             <CareIcon className="care-l-ban text-base" />
                             Discontinue
