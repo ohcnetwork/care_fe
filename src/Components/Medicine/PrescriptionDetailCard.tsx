@@ -54,7 +54,7 @@ export default function PrescriptionDetailCard({
 
             {!props.readonly &&
               prescription.prescription_type !== "DISCHARGE" && (
-                <div className="flex gap-2 items-center">
+                <div className="flex flex-col-reverse sm:flex-row gap-2 items-end">
                   <ButtonV2
                     disabled={prescription.discontinued}
                     onClick={props.onAdministerClick}
@@ -84,53 +84,59 @@ export default function PrescriptionDetailCard({
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 items-center mt-2">
-          <Detail className="flex-[5]" label="Medicine">
+        <div className="grid grid-cols-9 gap-2 items-center mt-2">
+          <Detail className="col-span-9 md:col-span-5" label="Medicine">
             {prescription.medicine}
           </Detail>
-          <Detail className="flex-[2]" label="Route">
+          <Detail className="col-span-5 md:col-span-2" label="Route">
             {prescription.route && PRESCRIPTION_ROUTES[prescription.route].name}
           </Detail>
-          <Detail className="flex-[2]" label="Dosage">
+          <Detail className="col-span-4 md:col-span-2" label="Dosage">
             {prescription.dosage}
           </Detail>
+
+          {prescription.is_prn ? (
+            <>
+              <Detail className="col-span-9 md:col-span-5" label="Indicator">
+                {prescription.indicator}
+              </Detail>
+              <Detail
+                className="col-span-4 md:col-span-2"
+                label="Max dosage in 24 hrs."
+              >
+                {prescription.max_dosage}
+              </Detail>
+              <Detail
+                className="col-span-5 md:col-span-2"
+                label="Min. time b/w doses"
+              >
+                {prescription.max_dosage}
+              </Detail>
+            </>
+          ) : (
+            <>
+              <Detail className="col-span-5" label="Frequency">
+                {prescription.frequency &&
+                  PRESCRIPTION_FREQUENCIES[prescription.frequency].name}
+              </Detail>
+              <Detail className="col-span-4" label="Days">
+                {prescription.days}
+              </Detail>
+            </>
+          )}
+
+          {prescription.notes && (
+            <Detail className="col-span-9" label="Notes">
+              <ReadMore text={prescription.notes} minChars={120} />
+            </Detail>
+          )}
+
+          {prescription.discontinued && (
+            <Detail className="col-span-9" label="Reason for discontinuation">
+              {prescription.discontinued_reason}
+            </Detail>
+          )}
         </div>
-
-        {prescription.is_prn ? (
-          <div className="flex gap-2 items-center">
-            <Detail className="flex-[4]" label="Indicator">
-              {prescription.indicator}
-            </Detail>
-            <Detail className="flex-[3]" label="Max dosage in 24 hrs.">
-              {prescription.max_dosage}
-            </Detail>
-            <Detail className="flex-[3]" label="Min. time b/w doses">
-              {prescription.max_dosage}
-            </Detail>
-          </div>
-        ) : (
-          <div className="flex gap-2 items-center">
-            <Detail className="flex-1" label="Frequency">
-              {prescription.frequency &&
-                PRESCRIPTION_FREQUENCIES[prescription.frequency].name}
-            </Detail>
-            <Detail className="flex-1" label="Days">
-              {prescription.days}
-            </Detail>
-          </div>
-        )}
-
-        {prescription.notes && (
-          <Detail label="Notes">
-            <ReadMore text={prescription.notes} minChars={120} />
-          </Detail>
-        )}
-
-        {prescription.discontinued && (
-          <Detail label="Reason for discontinuation">
-            {prescription.discontinued_reason}
-          </Detail>
-        )}
       </div>
 
       {props.children}

@@ -5,7 +5,7 @@ import { PrescriptionActions } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { Prescription } from "./models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
 import MedicineAdministration from "./MedicineAdministration";
 import DiscontinuePrescription from "./DiscontinuePrescription";
@@ -103,13 +103,41 @@ export default function PrescriptionsTable({
           className="max-w-4xl w-full"
           show
         >
-          <PrescriptionDetailCard
-            prescription={detailedViewFor}
-            actions={prescription(detailedViewFor.id!)}
-            onAdministerClick={() => setShowAdministerFor(detailedViewFor)}
-            onDiscontinueClick={() => setShowDiscontinueFor(detailedViewFor)}
-            key={detailedViewFor.id}
-          />
+          <div className="mt-4 flex flex-col gap-4">
+            <PrescriptionDetailCard
+              prescription={detailedViewFor}
+              actions={prescription(detailedViewFor.id!)}
+              key={detailedViewFor.id}
+              readonly
+            />
+            <div className="flex w-full gap-2 items-center justify-end">
+              <Cancel
+                onClick={() => setDetailedViewFor(undefined)}
+                label="Close"
+              />
+              <Submit
+                disabled={
+                  detailedViewFor.discontinued ||
+                  detailedViewFor.prescription_type === "DISCHARGE"
+                }
+                variant="danger"
+                onClick={() => setShowDiscontinueFor(detailedViewFor)}
+              >
+                <CareIcon className="care-l-ban text-lg" />
+                Discontinue
+              </Submit>
+              <Submit
+                disabled={
+                  detailedViewFor.discontinued ||
+                  detailedViewFor.prescription_type === "DISCHARGE"
+                }
+                onClick={() => setShowAdministerFor(detailedViewFor)}
+              >
+                <CareIcon className="care-l-syringe text-lg" />
+                Administer
+              </Submit>
+            </div>
+          </div>
         </DialogModal>
       )}
       <div className="flex flex-wrap items-center justify-between mb-2">
