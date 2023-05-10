@@ -1,3 +1,4 @@
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import { PrescriptionActions } from "../../Redux/actions";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -29,10 +30,15 @@ export default function ManagePrescriptions({ consultationId }: Props) {
             <PrescriptionBuilder actions={actions} is_prn />
           </div>
         </div>
-        <div className="flex w-full justify-end">
+        <div className="flex gap-3 w-full items-center">
           <ButtonV2 variant="secondary" border onClick={() => goBack()}>
-            Back
+            <CareIcon className="care-l-angle-left-b text-lg" />
+            Return to Patient Dashboard
           </ButtonV2>
+          <span className="text-primary-500 text-sm">
+            <CareIcon className="care-l-check text-base" />
+            <span className="pl-1">All changes have been saved</span>
+          </span>
         </div>
       </div>
     </Page>

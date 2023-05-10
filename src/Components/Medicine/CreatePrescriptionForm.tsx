@@ -12,6 +12,7 @@ import { useState } from "react";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import medicines_list from "../Common/prescription-builder/assets/medicines.json";
 import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export const medicines = medicines_list;
 
@@ -119,6 +120,7 @@ export default function CreatePrescriptionForm(props: {
           ) : (
             <div className="flex gap-4 items-center">
               <SelectFormField
+                position="above"
                 className="flex-1"
                 label="Frequency"
                 {...field("frequency", RequiredFieldValidator())}
@@ -138,6 +140,10 @@ export default function CreatePrescriptionForm(props: {
           )}
 
           <TextAreaFormField label="Notes" {...field("notes")} />
+          <div className="flex gap-2 w-full justify-end mt-2 text-warning-500 text-sm font-medium">
+            <CareIcon className="care-l-exclamation-triangle text-base" />
+            <span>No modifications possible once added</span>
+          </div>
         </>
       )}
     </Form>
