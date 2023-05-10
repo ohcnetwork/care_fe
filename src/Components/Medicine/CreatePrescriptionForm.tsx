@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import { useState } from "react";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import medicines_list from "../Common/prescription-builder/assets/medicines.json";
+import TextWithUnitsFormField from "../Form/FormFields/TextWithUnitsFormField";
 
 export const medicines = medicines_list;
 
@@ -84,12 +85,13 @@ export default function CreatePrescriptionForm(props: {
               optionLabel={([_, { name }]) => name}
               optionValue={([key]) => key}
             />
-            <TextFormField
+            <TextWithUnitsFormField
               className="flex-1"
               label="Dosage"
               type="number"
               {...field("dosage", RequiredFieldValidator())}
               required
+              units={["mg", "ml", "mcg", "units"]}
             />
           </div>
 
