@@ -43,7 +43,7 @@ export default function PrescriptionDetailCard({
 
             {!props.readonly && (
               <div className="flex gap-2 items-center">
-                <ButtonV2
+                {/* <ButtonV2
                   disabled={prescription.discontinued}
                   type="button"
                   size="small"
@@ -53,7 +53,7 @@ export default function PrescriptionDetailCard({
                 >
                   <CareIcon className="care-l-syringe text-base" />
                   Administer
-                </ButtonV2>
+                </ButtonV2> */}
                 <ButtonV2
                   disabled={prescription.discontinued}
                   type="button"

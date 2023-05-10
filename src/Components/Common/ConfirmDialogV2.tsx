@@ -7,7 +7,7 @@ type ConfirmDialogV2Props = {
   description?: React.ReactNode;
   disabled?: boolean;
   show: boolean;
-  action: string;
+  action: React.ReactNode;
   variant?: ButtonVariant;
   onClose: () => void;
   onConfirm: () => void;
@@ -16,33 +16,19 @@ type ConfirmDialogV2Props = {
 };
 
 const ConfirmDialogV2 = ({
-  title,
-  description,
-  show,
   disabled,
   variant,
   action,
-  onClose,
   onConfirm,
   cancelLabel,
   children,
-  className,
+  ...props
 }: ConfirmDialogV2Props) => {
   return (
-    <DialogModal
-      onClose={onClose}
-      title={title}
-      description={
-        <span className={`font-medium text-${variant || "secondary"}-600`}>
-          {description}
-        </span>
-      }
-      show={show}
-      className={className}
-    >
+    <DialogModal {...props}>
       {children}
       <div className="mt-6 flex justify-end gap-2 w-full flex-col md:flex-row">
-        <Cancel onClick={onClose} label={cancelLabel} />
+        <Cancel onClick={props.onClose} label={cancelLabel} />
         <ButtonV2 onClick={onConfirm} variant={variant} disabled={disabled}>
           {action}
         </ButtonV2>
