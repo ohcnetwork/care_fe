@@ -81,7 +81,7 @@ export default function PrescriptionBuilder({
         type="button"
         onClick={() => setShowCreate(true)}
         variant="secondary"
-        className="mt-4 bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900 w-full focus:outline focus:outline-1 focus:outline-offset-1 focus:bg-gray-100 focus:text-gray-900"
+        className="mt-4 bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900 w-full focus:bg-gray-100 focus:text-gray-900"
         align="start"
         disabled={disabled}
       >
