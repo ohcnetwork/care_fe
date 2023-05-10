@@ -30,7 +30,7 @@ export default function ManagePrescriptions({ consultationId }: Props) {
             <PrescriptionBuilder actions={actions} is_prn />
           </div>
         </div>
-        <div className="flex gap-3 w-full items-center">
+        <div className="flex flex-col-reverse md:flex-row gap-3 w-full md:items-center">
           <ButtonV2 variant="secondary" border onClick={() => goBack()}>
             <CareIcon className="care-l-angle-left-b text-lg" />
             Return to Patient Dashboard
