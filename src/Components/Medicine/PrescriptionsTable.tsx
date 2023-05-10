@@ -14,6 +14,7 @@ import {
   PRESCRIPTION_FREQUENCIES,
   PRESCRIPTION_ROUTES,
 } from "./CreatePrescriptionForm";
+import AdministerMedicine from "./AdministerMedicine";
 
 interface Props {
   is_prn?: boolean;
@@ -31,6 +32,7 @@ export default function PrescriptionsTable({
   const [prescriptions, setPrescriptions] = useState<Prescription[]>();
   const [showBulkAdminister, setShowBulkAdminister] = useState(false);
   const [showDiscontinueFor, setShowDiscontinueFor] = useState<Prescription>();
+  const [showAdministerFor, setShowAdministerFor] = useState<Prescription>();
   const dispatch = useDispatch<any>();
 
   const { list, prescription } = useMemo(
@@ -73,11 +75,22 @@ export default function PrescriptionsTable({
         <DiscontinuePrescription
           prescription={showDiscontinueFor}
           actions={prescription(showDiscontinueFor.id!)}
-          onClose={() => {
+          onClose={(success) => {
             setShowDiscontinueFor(undefined);
-            onChange?.();
+            if (success) onChange?.();
           }}
           key={showDiscontinueFor.id}
+        />
+      )}
+      {showAdministerFor && (
+        <AdministerMedicine
+          prescription={showAdministerFor}
+          actions={prescription(showAdministerFor.id!)}
+          onClose={(success) => {
+            setShowAdministerFor(undefined);
+            if (success) onChange?.();
+          }}
+          key={showAdministerFor.id}
         />
       )}
       <div className="flex flex-wrap items-center justify-between mb-2">
@@ -196,16 +209,17 @@ export default function PrescriptionsTable({
 
                       return (
                         <div className="flex gap-1">
-                          {/* <ButtonV2
-                      type="button"
-                      size="small"
-                      variant="secondary"
-                      ghost
-                      border
-                    >
-                      <CareIcon className="care-l-syringe text-base" />
-                      Administer
-                    </ButtonV2> */}
+                          <ButtonV2
+                            type="button"
+                            size="small"
+                            variant="secondary"
+                            ghost
+                            border
+                            onClick={() => setShowAdministerFor(med)}
+                          >
+                            <CareIcon className="care-l-syringe text-base" />
+                            Administer
+                          </ButtonV2>
                           <ButtonV2
                             type="button"
                             size="small"

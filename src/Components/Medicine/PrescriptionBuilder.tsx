@@ -9,6 +9,7 @@ import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import { PrescriptionActions } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import DiscontinuePrescription from "./DiscontinuePrescription";
+import AdministerMedicine from "./AdministerMedicine";
 
 interface Props {
   prescription_type?: Prescription["prescription_type"];
@@ -28,6 +29,7 @@ export default function PrescriptionBuilder({
   const [prescriptions, setPrescriptions] = useState<Prescription[]>();
   const [showCreate, setShowCreate] = useState(false);
   const [showDiscontinueFor, setShowDiscontinueFor] = useState<Prescription>();
+  const [showAdministerFor, setShowAdministerFor] = useState<Prescription>();
 
   const fetchPrescriptions = useCallback(() => {
     dispatch(actions.list({ is_prn, prescription_type })).then((res: any) =>
@@ -45,13 +47,22 @@ export default function PrescriptionBuilder({
         <DiscontinuePrescription
           prescription={showDiscontinueFor}
           actions={actions.prescription(showDiscontinueFor.id!)}
-          onClose={(discontinued) => {
+          onClose={(success) => {
             setShowDiscontinueFor(undefined);
-            if (discontinued) {
-              fetchPrescriptions();
-            }
+            if (success) fetchPrescriptions();
           }}
           key={showDiscontinueFor.id}
+        />
+      )}
+      {showAdministerFor && (
+        <AdministerMedicine
+          prescription={showAdministerFor}
+          actions={actions.prescription(showAdministerFor.id!)}
+          onClose={(success) => {
+            setShowAdministerFor(undefined);
+            if (success) fetchPrescriptions();
+          }}
+          key={showAdministerFor.id}
         />
       )}
       <div className="flex flex-col gap-3">
@@ -61,6 +72,7 @@ export default function PrescriptionBuilder({
             prescription={obj}
             actions={actions.prescription(obj.id!)}
             onDiscontinueClick={() => setShowDiscontinueFor(obj)}
+            onAdministerClick={() => setShowAdministerFor(obj)}
             readonly={disabled}
           />
         ))}

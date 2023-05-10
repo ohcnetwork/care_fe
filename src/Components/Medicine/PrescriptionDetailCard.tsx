@@ -18,6 +18,7 @@ export default function PrescriptionDetailCard({
   children?: React.ReactNode;
   actions: ReturnType<ReturnType<typeof PrescriptionActions>["prescription"]>;
   onDiscontinueClick?: () => void;
+  onAdministerClick?: () => void;
   selected?: boolean;
 }) {
   return (
@@ -54,17 +55,18 @@ export default function PrescriptionDetailCard({
             {!props.readonly &&
               prescription.prescription_type !== "DISCHARGE" && (
                 <div className="flex gap-2 items-center">
-                  {/* <ButtonV2
-                  disabled={prescription.discontinued}
-                  type="button"
-                  size="small"
-                  variant="secondary"
-                  ghost
-                  border
-                >
-                  <CareIcon className="care-l-syringe text-base" />
-                  Administer
-                </ButtonV2> */}
+                  <ButtonV2
+                    disabled={prescription.discontinued}
+                    onClick={props.onAdministerClick}
+                    type="button"
+                    size="small"
+                    variant="secondary"
+                    ghost
+                    border
+                  >
+                    <CareIcon className="care-l-syringe text-base" />
+                    Administer
+                  </ButtonV2>
                   <ButtonV2
                     disabled={prescription.discontinued}
                     type="button"

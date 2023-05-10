@@ -22,9 +22,6 @@ export default function MedicineAdministration(props: Props) {
   const [notes, setNotes] = useState<MedicineAdministrationRecord["notes"][]>(
     []
   );
-  const [timestamps, setTimestamps] = useState<
-    MedicineAdministrationRecord["administered_date"][]
-  >([]);
 
   const prescriptions = useMemo(
     () =>
@@ -37,20 +34,13 @@ export default function MedicineAdministration(props: Props) {
   useEffect(() => {
     setShouldAdminister(Array(prescriptions.length).fill(false));
     setNotes(Array(prescriptions.length).fill(""));
-    setTimestamps(
-      Array(prescriptions.length).fill(new Date().toISOString().slice(0, 16))
-    );
   }, [props.prescriptions]);
 
   const handleSubmit = () => {
     const records: MedicineAdministrationRecord[] = [];
-    prescriptions.forEach((prescription, index) => {
-      if (shouldAdminister[index]) {
-        records.push({
-          prescription: prescriptions[index],
-          notes: notes[index],
-          administered_date: timestamps[index],
-        });
+    prescriptions.forEach((prescription, i) => {
+      if (shouldAdminister[i]) {
+        records.push({ prescription, notes: notes[i] });
       }
     });
 

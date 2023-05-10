@@ -52,7 +52,7 @@ export type MedicineAdministrationRecord = {
   readonly prescription?: Prescription;
   notes: string;
   readonly administered_by?: PerformedByModel;
-  administered_date: string;
+  readonly administered_date?: string;
   readonly created_date?: string;
   readonly modified_date?: string;
 };
