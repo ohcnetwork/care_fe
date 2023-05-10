@@ -27,7 +27,10 @@ export default function MedicineAdministration(props: Props) {
   >([]);
 
   const prescriptions = useMemo(
-    () => props.prescriptions.filter((obj) => !obj.discontinued),
+    () =>
+      props.prescriptions.filter(
+        (obj) => !obj.discontinued && obj.prescription_type !== "DISCHARGE"
+      ),
     [props.prescriptions]
   );
 
@@ -81,6 +84,7 @@ export default function MedicineAdministration(props: Props) {
           prescription={obj}
           readonly
           actions={props.action(obj.id!)}
+          selected={shouldAdminister[index]}
         >
           <div className="w-[400px] ml-4 pl-4 py-2 border-l-2 border-dashed border-gray-500 flex flex-col gap-2">
             <CheckBoxFormField

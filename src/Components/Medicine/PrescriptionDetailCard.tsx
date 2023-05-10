@@ -18,11 +18,15 @@ export default function PrescriptionDetailCard({
   children?: React.ReactNode;
   actions: ReturnType<ReturnType<typeof PrescriptionActions>["prescription"]>;
   onDiscontinueClick?: () => void;
+  selected?: boolean;
 }) {
   return (
     <div
       className={classNames(
-        "flex border-2 border-dashed border-gray-500 border-spacing-2 p-3 rounded",
+        "flex border-2 p-3 rounded transition-all duration-200 ease-in-out",
+        props.selected
+          ? "border-primary-500"
+          : "border-gray-500 border-dashed border-spacing-2",
         prescription.discontinued && "bg-gray-200 opacity-80"
       )}
     >
@@ -30,7 +34,12 @@ export default function PrescriptionDetailCard({
         <div>
           <div className="flex items-center justify-between">
             <div className="flex gap-4 items-center">
-              <h3 className="text-lg font-semibold text-gray-700">
+              <h3
+                className={classNames(
+                  "text-lg font-bold transition-all duration-200 ease-in-out",
+                  props.selected ? "text-black" : "text-gray-700"
+                )}
+              >
                 {prescription.prescription_type === "DISCHARGE" && "Discharge "}
                 {prescription.is_prn ? "PRN Prescription" : "Prescription"} #
                 {prescription.id?.slice(-5)}
