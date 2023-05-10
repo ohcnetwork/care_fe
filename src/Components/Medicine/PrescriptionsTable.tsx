@@ -152,26 +152,28 @@ export default function PrescriptionsTable({
             </span>
           </div>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex w-full mt-2 md:mt-0 md:w-auto flex-col sm:flex-row gap-2 justify-end">
           <ButtonV2
             disabled={readonly}
-            type="button"
             variant="secondary"
             border
             href="prescriptions"
+            className="w-full lg:w-auto"
           >
-            <CareIcon className="care-l-pen" />
-            Manage Prescriptions
+            <CareIcon className="care-l-pen text-lg" />
+            <span className="hidden lg:block">Edit Prescriptions</span>
+            <span className="block lg:hidden">Edit</span>
           </ButtonV2>
           <ButtonV2
             disabled={readonly}
-            type="button"
             ghost
             border
             onClick={() => setShowBulkAdminister(true)}
+            className="w-full lg:w-auto"
           >
             <CareIcon className="care-l-syringe text-lg" />
-            Administer Medicines
+            <span className="hidden lg:block">Administer Medicines</span>
+            <span className="block lg:hidden">Administer</span>
           </ButtonV2>
         </div>
       </div>
