@@ -16,11 +16,11 @@ export default function ManagePrescriptions({ consultationId }: Props) {
           <h3 className="font-semibold text-lg mb-4">
             Prescription Medications
           </h3>
-          <PrescriptionBuilder actions={actions} type="REGULAR" />
+          <PrescriptionBuilder actions={actions} />
         </div>
         <div>
           <h3 className="font-semibold text-lg mb-4 mt-8">PRN Prescriptions</h3>
-          <PrescriptionBuilder actions={actions} type="REGULAR" is_prn />
+          <PrescriptionBuilder actions={actions} is_prn />
         </div>
       </div>
     </Page>

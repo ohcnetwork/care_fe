@@ -31,6 +31,7 @@ export default function PrescriptionDetailCard({
           <div className="flex items-center justify-between">
             <div className="flex gap-4 items-center">
               <h3 className="text-lg font-semibold text-gray-700">
+                {prescription.prescription_type === "DISCHARGE" && "Discharge "}
                 {prescription.is_prn ? "PRN Prescription" : "Prescription"} #
                 {prescription.id?.slice(-5)}
               </h3>
@@ -88,13 +89,10 @@ export default function PrescriptionDetailCard({
             <Detail className="flex-[4]" label="Indicator">
               {prescription.indicator}
             </Detail>
-            <Detail className="flex-[3]" label="Max Dosage in 24 hrs.">
+            <Detail className="flex-[3]" label="Max dosage in 24 hrs.">
               {prescription.max_dosage}
             </Detail>
-            <Detail
-              className="flex-[3]"
-              label="Min. time b/w consecutive doses"
-            >
+            <Detail className="flex-[3]" label="Min. time b/w doses">
               {prescription.max_dosage}
             </Detail>
           </div>

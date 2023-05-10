@@ -39,7 +39,7 @@ export default function DiscontinuePrescription(props: Props) {
         setIsDiscontinuing(false);
         props.onClose(true);
       }}
-      className="max-w-3xl w-full"
+      className="max-w-4xl w-full"
     >
       <div className="flex flex-col gap-8 mt-4">
         <PrescriptionDetailCard

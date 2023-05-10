@@ -124,7 +124,7 @@ export default function PrescriptionsTable({
                       "Dosage",
                       "Indicator Event",
                       "Max. dosage in 24 hrs",
-                      "Min. hours b/w doses",
+                      "Min. time b/w doses",
                       "Last Administered",
                     ]
                   : [
@@ -145,9 +145,10 @@ export default function PrescriptionsTable({
                   frequency__pretty:
                     obj.frequency &&
                     PRESCRIPTION_FREQUENCIES[obj.frequency].name,
+                  days__pretty: obj.days && obj.days + " day(s)",
                   min_hours_between_doses__pretty:
                     obj.min_hours_between_doses &&
-                    obj.min_hours_between_doses + " hrs",
+                    obj.min_hours_between_doses + " hour(s)",
                   last_administered__pretty: obj.last_administered_on ? (
                     <RecordMeta time={obj.last_administered_on} />
                   ) : (
@@ -171,7 +172,7 @@ export default function PrescriptionsTable({
                       "route__pretty",
                       "frequency__pretty",
                       "dosage",
-                      "days",
+                      "days__pretty",
                       "notes",
                       "last_administered__pretty",
                     ]

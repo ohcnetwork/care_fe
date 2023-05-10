@@ -109,7 +109,7 @@ export default function CreatePrescriptionForm(props: {
                 {...field("max_dosage")}
               />
               <SelectFormField
-                label="Min. time b/w consecutive doses"
+                label="Min. time b/w doses"
                 {...field("min_hours_between_doses")}
                 options={[1, 2, 3, 6, 12, 24]}
                 optionLabel={(hours) => `${hours} hrs.`}

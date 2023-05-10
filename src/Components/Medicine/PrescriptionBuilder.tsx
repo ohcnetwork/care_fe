@@ -11,15 +11,17 @@ import { useDispatch } from "react-redux";
 import DiscontinuePrescription from "./DiscontinuePrescription";
 
 interface Props {
-  type: Prescription["prescription_type"];
+  prescription_type?: Prescription["prescription_type"];
   actions: ReturnType<typeof PrescriptionActions>;
   is_prn?: boolean;
+  disabled?: boolean;
 }
 
 export default function PrescriptionBuilder({
-  type,
+  prescription_type,
   actions,
   is_prn = false,
+  disabled,
 }: Props) {
   const dispatch = useDispatch<any>();
 
@@ -28,7 +30,7 @@ export default function PrescriptionBuilder({
   const [showDiscontinueFor, setShowDiscontinueFor] = useState<Prescription>();
 
   const fetchPrescriptions = useCallback(() => {
-    dispatch(actions.list({ is_prn })).then((res: any) =>
+    dispatch(actions.list({ is_prn, prescription_type })).then((res: any) =>
       setPrescriptions(res.data.results)
     );
   }, [dispatch, is_prn]);
@@ -59,6 +61,7 @@ export default function PrescriptionBuilder({
             prescription={obj}
             actions={actions.prescription(obj.id!)}
             onDiscontinueClick={() => setShowDiscontinueFor(obj)}
+            readonly={disabled}
           />
         ))}
       </div>
@@ -68,6 +71,7 @@ export default function PrescriptionBuilder({
         variant="secondary"
         className="mt-4 bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900 w-full focus:outline focus:outline-1 focus:outline-offset-1 focus:bg-gray-100 focus:text-gray-900"
         align="start"
+        disabled={disabled}
       >
         <CareIcon className="care-l-plus text-lg" />
         <span className="font-bold">
@@ -86,7 +90,7 @@ export default function PrescriptionBuilder({
             prescription={
               {
                 ...(is_prn ? DefaultPRNPrescription : DefaultPrescription),
-                prescription_type: type,
+                prescription_type,
               } as Prescription
             }
             create={actions.create}
