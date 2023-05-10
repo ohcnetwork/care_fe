@@ -15,6 +15,8 @@ import {
   PRESCRIPTION_ROUTES,
 } from "./CreatePrescriptionForm";
 import AdministerMedicine from "./AdministerMedicine";
+import DialogModal from "../Common/Dialog";
+import PrescriptionDetailCard from "./PrescriptionDetailCard";
 
 interface Props {
   is_prn?: boolean;
@@ -33,6 +35,7 @@ export default function PrescriptionsTable({
   const [showBulkAdminister, setShowBulkAdminister] = useState(false);
   const [showDiscontinueFor, setShowDiscontinueFor] = useState<Prescription>();
   const [showAdministerFor, setShowAdministerFor] = useState<Prescription>();
+  const [detailedViewFor, setDetailedViewFor] = useState<Prescription>();
   const dispatch = useDispatch<any>();
 
   const { list, prescription } = useMemo(
@@ -93,6 +96,22 @@ export default function PrescriptionsTable({
           key={showAdministerFor.id}
         />
       )}
+      {detailedViewFor && (
+        <DialogModal
+          onClose={() => setDetailedViewFor(undefined)}
+          title="Prescription Details"
+          className="max-w-4xl w-full"
+          show
+        >
+          <PrescriptionDetailCard
+            prescription={detailedViewFor}
+            actions={prescription(detailedViewFor.id!)}
+            onAdministerClick={() => setShowAdministerFor(detailedViewFor)}
+            onDiscontinueClick={() => setShowDiscontinueFor(detailedViewFor)}
+            key={detailedViewFor.id}
+          />
+        </DialogModal>
+      )}
       <div className="flex flex-wrap items-center justify-between mb-2">
         <div className="flex items-center font-semibold leading-relaxed text-gray-900">
           <span className="text-lg mr-3">
@@ -132,6 +151,7 @@ export default function PrescriptionsTable({
         <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
             <ResponsiveMedicineTable
+              onClick={setDetailedViewFor}
               maxWidthColumn={0}
               theads={
                 is_prn
@@ -198,6 +218,16 @@ export default function PrescriptionsTable({
               actions={
                 !readonly
                   ? (med: Prescription) => {
+                      if (med.prescription_type === "DISCHARGE") {
+                        return (
+                          <div className="flex w-full gap-1 items-center justify-center font-medium text-gray-700">
+                            <span className="text-sm">
+                              Discharge Prescription
+                            </span>
+                          </div>
+                        );
+                      }
+
                       if (med.discontinued) {
                         return (
                           <div className="flex w-full gap-1 items-center justify-center font-medium text-gray-700">

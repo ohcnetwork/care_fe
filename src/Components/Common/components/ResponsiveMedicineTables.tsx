@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import AccordionV2 from "./AccordionV2";
+import { classNames } from "../../../Utils/utils";
 
 function getWindowSize() {
   const { innerWidth, innerHeight } = window;
@@ -14,6 +15,7 @@ export default function ResponsiveMedicineTable(props: {
   actions?: (item: any) => JSX.Element;
   actionLabel?: string;
   maxWidthColumn?: number;
+  onClick?: (item: any) => void;
 }) {
   const [windowSize, setWindowSize] = useState(getWindowSize());
   useEffect(() => {
@@ -49,7 +51,14 @@ export default function ResponsiveMedicineTable(props: {
           </thead>
           <tbody>
             {props.list?.map?.((med: any, index: number) => (
-              <tr className="bg-white" key={index}>
+              <tr
+                className={classNames(
+                  "bg-white",
+                  props.onClick && "hover:bg-gray-200 cursor-pointer"
+                )}
+                key={index}
+                onClick={() => props.onClick && props.onClick(med)}
+              >
                 {props.objectKeys.map((key, idx) => {
                   if (
                     props.maxWidthColumn !== undefined &&
