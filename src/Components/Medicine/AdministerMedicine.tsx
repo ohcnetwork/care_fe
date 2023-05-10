@@ -45,10 +45,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
       onConfirm={async () => {
         setIsLoading(true);
         const res = await dispatch(props.actions.administer({ notes }));
-        if (res.status === 201) {
-          const id = prescription.id!.slice(-5);
-          Success({ msg: `Prescription #${id} administered` });
-        }
+        if (res.status === 201) Success({ msg: "Prescription administered" });
         setIsLoading(false);
         props.onClose(true);
       }}

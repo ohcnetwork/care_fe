@@ -7,7 +7,7 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useDispatch } from "react-redux";
-import { Error } from "../../Utils/Notifications";
+import { Error, Success } from "../../Utils/Notifications";
 import { formatDate } from "../../Utils/utils";
 
 interface Props {
@@ -48,20 +48,19 @@ export default function MedicineAdministration(props: Props) {
       Error({ msg: "No medicines selected for administration" });
     }
 
-    const submit = async () => {
-      await Promise.all(
-        records.map(async ({ prescription, ...record }) => {
-          const res = await dispatch(
-            props.action(prescription!.id!).administer(record)
-          );
-          if (res.status !== 201) {
-            Error({ msg: "Error administering medicine" });
-          }
-        })
-      );
-    };
-
-    submit().then(() => props.onDone());
+    Promise.all(
+      records.map(async ({ prescription, ...record }) => {
+        const res = await dispatch(
+          props.action(prescription!.id!).administer(record)
+        );
+        if (res.status !== 201) {
+          Error({ msg: "Error administering medicine" });
+        }
+      })
+    ).then(() => {
+      Success({ msg: "Medicines administered successfully" });
+      props.onDone();
+    });
   };
 
   const selectedCount = shouldAdminister.filter(Boolean).length;
