@@ -19,12 +19,14 @@ interface Props {
   is_prn?: boolean;
   consultation_id: string;
   onChange?: () => void;
+  readonly?: boolean;
 }
 
 export default function PrescriptionsTable({
   is_prn = false,
   consultation_id,
   onChange,
+  readonly,
 }: Props) {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>();
   const [showBulkAdminister, setShowBulkAdminister] = useState(false);
@@ -92,6 +94,7 @@ export default function PrescriptionsTable({
         </div>
         <div className="flex gap-2 items-center">
           <ButtonV2
+            disabled={readonly}
             type="button"
             variant="secondary"
             border
@@ -101,6 +104,7 @@ export default function PrescriptionsTable({
             Manage Prescriptions
           </ButtonV2>
           <ButtonV2
+            disabled={readonly}
             type="button"
             ghost
             border
@@ -178,19 +182,21 @@ export default function PrescriptionsTable({
                     ]
               }
               fieldsToDisplay={[2, 3]}
-              actions={(med: Prescription) => {
-                if (med.discontinued) {
-                  return (
-                    <div className="flex w-full gap-1 items-center justify-center font-medium text-gray-700">
-                      <CareIcon className="care-l-ban" />
-                      <span className="text-sm">Discontinued</span>
-                    </div>
-                  );
-                }
+              actions={
+                !readonly
+                  ? (med: Prescription) => {
+                      if (med.discontinued) {
+                        return (
+                          <div className="flex w-full gap-1 items-center justify-center font-medium text-gray-700">
+                            <CareIcon className="care-l-ban" />
+                            <span className="text-sm">Discontinued</span>
+                          </div>
+                        );
+                      }
 
-                return (
-                  <div className="flex gap-1">
-                    {/* <ButtonV2
+                      return (
+                        <div className="flex gap-1">
+                          {/* <ButtonV2
                       type="button"
                       size="small"
                       variant="secondary"
@@ -200,20 +206,22 @@ export default function PrescriptionsTable({
                       <CareIcon className="care-l-syringe text-base" />
                       Administer
                     </ButtonV2> */}
-                    <ButtonV2
-                      type="button"
-                      size="small"
-                      variant="danger"
-                      ghost
-                      border
-                      onClick={() => setShowDiscontinueFor(med)}
-                    >
-                      <CareIcon className="care-l-ban text-base" />
-                      Discontinue
-                    </ButtonV2>
-                  </div>
-                );
-              }}
+                          <ButtonV2
+                            type="button"
+                            size="small"
+                            variant="danger"
+                            ghost
+                            border
+                            onClick={() => setShowDiscontinueFor(med)}
+                          >
+                            <CareIcon className="care-l-ban text-base" />
+                            Discontinue
+                          </ButtonV2>
+                        </div>
+                      );
+                    }
+                  : undefined
+              }
             />
             {prescriptions?.length === 0 && (
               <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">

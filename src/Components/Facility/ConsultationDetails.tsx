@@ -1095,6 +1095,7 @@ export const ConsultationDetails = (props: any) => {
                 key={medicinesKey}
                 consultation_id={consultationId}
                 onChange={() => setMedicinesKey((k) => k + 1)}
+                readonly={!!consultationData.discharge_date}
               />
             </div>
             <div className="mt-8">
@@ -1103,6 +1104,7 @@ export const ConsultationDetails = (props: any) => {
                 consultation_id={consultationId}
                 is_prn
                 onChange={() => setMedicinesKey((k) => k + 1)}
+                readonly={!!consultationData.discharge_date}
               />
             </div>
             <div className="mt-8">
