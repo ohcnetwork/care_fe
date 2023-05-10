@@ -42,9 +42,10 @@ export default function PrescriptionDetailCard({
               )}
             </div>
 
-            {!props.readonly && (
-              <div className="flex gap-2 items-center">
-                {/* <ButtonV2
+            {!props.readonly &&
+              prescription.prescription_type !== "DISCHARGE" && (
+                <div className="flex gap-2 items-center">
+                  {/* <ButtonV2
                   disabled={prescription.discontinued}
                   type="button"
                   size="small"
@@ -55,20 +56,20 @@ export default function PrescriptionDetailCard({
                   <CareIcon className="care-l-syringe text-base" />
                   Administer
                 </ButtonV2> */}
-                <ButtonV2
-                  disabled={prescription.discontinued}
-                  type="button"
-                  size="small"
-                  variant="danger"
-                  ghost
-                  border
-                  onClick={props.onDiscontinueClick}
-                >
-                  <CareIcon className="care-l-ban text-base" />
-                  Discontinue
-                </ButtonV2>
-              </div>
-            )}
+                  <ButtonV2
+                    disabled={prescription.discontinued}
+                    type="button"
+                    size="small"
+                    variant="danger"
+                    ghost
+                    border
+                    onClick={props.onDiscontinueClick}
+                  >
+                    <CareIcon className="care-l-ban text-base" />
+                    Discontinue
+                  </ButtonV2>
+                </div>
+              )}
           </div>
         </div>
 
