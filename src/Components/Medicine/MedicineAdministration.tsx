@@ -76,7 +76,7 @@ export default function MedicineAdministration(props: Props) {
           actions={props.action(obj.id!)}
           selected={shouldAdminister[index]}
         >
-          <div className="w-[400px] ml-4 pl-4 py-2 border-l-2 border-dashed border-gray-500 flex flex-col gap-2">
+          <div className="w-[400px] mt-4 md:mt-0 pt-4 md:pt-0 md:ml-4 md:pl-4 py-2 border-t-2 md:border-t-0 md:border-l-2 border-dashed border-gray-500 flex flex-col gap-2">
             <CheckBoxFormField
               name="should_administer"
               label="Select for Administration"

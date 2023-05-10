@@ -24,7 +24,7 @@ export default function PrescriptionDetailCard({
   return (
     <div
       className={classNames(
-        "flex border-2 p-3 rounded transition-all duration-200 ease-in-out",
+        "flex flex-col md:flex-row border-2 p-3 rounded transition-all duration-200 ease-in-out",
         props.selected
           ? "border-primary-500"
           : "border-gray-500 border-dashed border-spacing-2",

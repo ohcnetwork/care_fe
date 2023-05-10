@@ -60,7 +60,7 @@ export default function PrescriptionsTable({
       {prescriptions && (
         <SlideOver
           title="Administer Medicines"
-          dialogClass="md:w-[1200px]"
+          dialogClass="w-full md:max-w-[1200px]"
           open={showBulkAdminister}
           setOpen={setShowBulkAdminister}
         >
