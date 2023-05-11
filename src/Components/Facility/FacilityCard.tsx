@@ -218,6 +218,20 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       </DialogModal>
                     </div>
                     <div className="flex gap-2">
+                      {userType !== "Staff" ? (
+                        <ButtonV2
+                          id="facility-notify"
+                          ghost
+                          border
+                          className="h-[38px]"
+                          onClick={(_) => setNotifyModalFor(facility.id)}
+                        >
+                          <CareIcon className="care-l-megaphone text-lg" />
+                          <span className="md:block hidden">Notify</span>
+                        </ButtonV2>
+                      ) : (
+                        <></>
+                      )}
                       <ButtonV2
                         href={`/facility/${facility.id}`}
                         id="facility-details"
@@ -239,20 +253,6 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         <CareIcon className="care-l-user-injured text-lg" />
                         {t("view_patients")}
                       </ButtonV2>
-                      {userType !== "Staff" ? (
-                        <ButtonV2
-                          id="facility-notify"
-                          ghost
-                          border
-                          className="h-[38px]"
-                          onClick={(_) => setNotifyModalFor(facility.id)}
-                        >
-                          <CareIcon className="care-l-megaphone text-lg" />
-                          <span className="md:block hidden">Notify</span>
-                        </ButtonV2>
-                      ) : (
-                        <></>
-                      )}
                     </div>
                   </div>
                 </div>
