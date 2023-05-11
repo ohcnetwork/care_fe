@@ -147,7 +147,16 @@ const ScanABHAQRSection = ({
         label="Enter ABHA Number"
         value={qrValue}
         disabled={!!authMethods.length}
-        onChange={setQrValue}
+        onChange={(value) => {
+          if ([2, 7, 12].includes(value.length)) {
+            if (qrValue.length && qrValue[qrValue.length - 1] === "-") {
+              value.slice(value.length - 1);
+            } else {
+              value += "-";
+            }
+          }
+          setQrValue(value);
+        }}
         parse={async (value: string) => {
           if (!value) return;
 
