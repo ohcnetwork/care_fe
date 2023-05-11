@@ -187,9 +187,10 @@ export default function PrescriptionsTable({
                     "medicine",
                     "route",
                     "dosage",
-                    "indicator_event",
+                    "indicator",
                     "max_dosage_24_hrs",
                     "min_time_bw_doses",
+                    "notes",
                     "last_administered",
                   ]
                 : [
@@ -230,6 +231,7 @@ export default function PrescriptionsTable({
                       "indicator",
                       "max_dosage",
                       "min_hours_between_doses__pretty",
+                      "notes",
                       "last_administered__pretty",
                     ]
                   : [
