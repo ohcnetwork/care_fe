@@ -59,7 +59,7 @@ export default function PrescriptionsTable({
       {prescriptions && (
         <SlideOver
           title={t("administer_medicines")}
-          dialogClass="w-full md:max-w-[1200px]"
+          dialogClass="w-full max-w-sm sm:max-w-md md:max-w-[1200px]"
           open={showBulkAdminister}
           setOpen={setShowBulkAdminister}
         >
@@ -109,7 +109,7 @@ export default function PrescriptionsTable({
               key={detailedViewFor.id}
               readonly
             />
-            <div className="flex w-full gap-2 items-center justify-end">
+            <div className="flex flex-col md:flex-row w-full gap-2 items-center justify-end">
               <Cancel
                 onClick={() => setDetailedViewFor(undefined)}
                 label={t("close")}

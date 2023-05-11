@@ -12,7 +12,6 @@ import { useState } from "react";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import medicines_list from "../Common/prescription-builder/assets/medicines.json";
 import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
 
 export const medicines = medicines_list;
@@ -104,6 +103,7 @@ export default function CreatePrescriptionForm(props: {
                 options={[1, 2, 3, 6, 12, 24]}
                 optionLabel={(hours) => `${hours} hrs.`}
                 optionValue={(hours) => hours}
+                position="above"
               />
             </>
           ) : (
@@ -129,10 +129,6 @@ export default function CreatePrescriptionForm(props: {
           )}
 
           <TextAreaFormField label={t("notes")} {...field("notes")} />
-          <div className="flex gap-2 w-full justify-end mt-2 text-warning-500 text-sm font-medium">
-            <CareIcon className="care-l-exclamation-triangle text-base" />
-            <span>{t("No modifications possible once added")}</span>
-          </div>
         </>
       )}
     </Form>

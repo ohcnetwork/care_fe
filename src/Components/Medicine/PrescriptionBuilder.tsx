@@ -99,7 +99,12 @@ export default function PrescriptionBuilder({
           title={t(
             is_prn ? "add_prn_prescription" : "add_prescription_medication"
           )}
-          description={t("add_prescription_to_consultation_note")}
+          description={
+            <div className="flex gap-2 w-full justify-end mt-2 text-warning-500">
+              <CareIcon className="care-l-exclamation-triangle text-base" />
+              <span>{t("modification_caution_note")}</span>
+            </div>
+          }
           className="max-w-3xl w-full"
         >
           <CreatePrescriptionForm
