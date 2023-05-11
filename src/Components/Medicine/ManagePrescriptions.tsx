@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import { PrescriptionActions } from "../../Redux/actions";
@@ -11,21 +12,22 @@ interface Props {
 
 export default function ManagePrescriptions({ consultationId }: Props) {
   const actions = PrescriptionActions(consultationId);
+  const { t } = useTranslation();
   const { goBack } = useAppHistory();
 
   return (
-    <Page title="Manage Prescriptions">
+    <Page title={t("manage_prescriptions")}>
       <div className="flex flex-col gap-10 rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all w-full max-w-4xl mx-auto">
         <div className="flex flex-col gap-10 divide-y-2 divide-dashed divide-gray-600">
           <div>
             <h3 className="font-semibold text-lg mb-4">
-              Prescription Medications
+              {t("prescription_medications")}
             </h3>
             <PrescriptionBuilder actions={actions} />
           </div>
           <div>
             <h3 className="font-semibold text-lg mb-4 mt-8">
-              PRN Prescriptions
+              {t("prn_prescriptions")}
             </h3>
             <PrescriptionBuilder actions={actions} is_prn />
           </div>
@@ -33,11 +35,11 @@ export default function ManagePrescriptions({ consultationId }: Props) {
         <div className="flex flex-col-reverse md:flex-row gap-3 w-full md:items-center">
           <ButtonV2 variant="secondary" border onClick={() => goBack()}>
             <CareIcon className="care-l-angle-left-b text-lg" />
-            Return to Patient Dashboard
+            {t("return_to_patient_dashboard")}
           </ButtonV2>
           <span className="text-primary-500 text-sm">
             <CareIcon className="care-l-check text-base" />
-            <span className="pl-1">All changes have been saved</span>
+            <span className="pl-1">{t("all_changes_have_been_saved")}</span>
           </span>
         </div>
       </div>

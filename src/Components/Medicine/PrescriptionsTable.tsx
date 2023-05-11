@@ -10,13 +10,10 @@ import SlideOver from "../../CAREUI/interactive/SlideOver";
 import MedicineAdministration from "./MedicineAdministration";
 import DiscontinuePrescription from "./DiscontinuePrescription";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import {
-  PRESCRIPTION_FREQUENCIES,
-  PRESCRIPTION_ROUTES,
-} from "./CreatePrescriptionForm";
 import AdministerMedicine from "./AdministerMedicine";
 import DialogModal from "../Common/Dialog";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   is_prn?: boolean;
@@ -31,12 +28,14 @@ export default function PrescriptionsTable({
   onChange,
   readonly,
 }: Props) {
+  const dispatch = useDispatch<any>();
+  const { t } = useTranslation();
+
   const [prescriptions, setPrescriptions] = useState<Prescription[]>();
   const [showBulkAdminister, setShowBulkAdminister] = useState(false);
   const [showDiscontinueFor, setShowDiscontinueFor] = useState<Prescription>();
   const [showAdministerFor, setShowAdministerFor] = useState<Prescription>();
   const [detailedViewFor, setDetailedViewFor] = useState<Prescription>();
-  const dispatch = useDispatch<any>();
 
   const { list, prescription } = useMemo(
     () => PrescriptionActions(consultation_id),
@@ -59,7 +58,7 @@ export default function PrescriptionsTable({
     <div>
       {prescriptions && (
         <SlideOver
-          title="Administer Medicines"
+          title={t("administer_medicines")}
           dialogClass="w-full md:max-w-[1200px]"
           open={showBulkAdminister}
           setOpen={setShowBulkAdminister}
@@ -99,7 +98,7 @@ export default function PrescriptionsTable({
       {detailedViewFor && (
         <DialogModal
           onClose={() => setDetailedViewFor(undefined)}
-          title="Prescription Details"
+          title={t("prescription_details")}
           className="max-w-4xl w-full"
           show
         >
@@ -113,7 +112,7 @@ export default function PrescriptionsTable({
             <div className="flex w-full gap-2 items-center justify-end">
               <Cancel
                 onClick={() => setDetailedViewFor(undefined)}
-                label="Close"
+                label={t("close")}
               />
               <Submit
                 disabled={
@@ -124,7 +123,7 @@ export default function PrescriptionsTable({
                 onClick={() => setShowDiscontinueFor(detailedViewFor)}
               >
                 <CareIcon className="care-l-ban text-lg" />
-                Discontinue
+                {t("discontinue")}
               </Submit>
               <Submit
                 disabled={
@@ -134,7 +133,7 @@ export default function PrescriptionsTable({
                 onClick={() => setShowAdministerFor(detailedViewFor)}
               >
                 <CareIcon className="care-l-syringe text-lg" />
-                Administer
+                {t("administer")}
               </Submit>
             </div>
           </div>
@@ -161,8 +160,8 @@ export default function PrescriptionsTable({
             className="w-full lg:w-auto"
           >
             <CareIcon className="care-l-pen text-lg" />
-            <span className="hidden lg:block">Edit Prescriptions</span>
-            <span className="block lg:hidden">Edit</span>
+            <span className="hidden lg:block">{t("edit_prescriptions")}</span>
+            <span className="block lg:hidden">{t("edit")}</span>
           </ButtonV2>
           <ButtonV2
             disabled={readonly}
@@ -172,8 +171,8 @@ export default function PrescriptionsTable({
             className="w-full lg:w-auto"
           >
             <CareIcon className="care-l-syringe text-lg" />
-            <span className="hidden lg:block">Administer Medicines</span>
-            <span className="block lg:hidden">Administer</span>
+            <span className="hidden lg:block">{t("administer_medicines")}</span>
+            <span className="block lg:hidden">{t("administer")}</span>
           </ButtonV2>
         </div>
       </div>
@@ -183,35 +182,34 @@ export default function PrescriptionsTable({
             <ResponsiveMedicineTable
               onClick={setDetailedViewFor}
               maxWidthColumn={0}
-              theads={
-                is_prn
-                  ? [
-                      "Medicine",
-                      "Route",
-                      "Dosage",
-                      "Indicator Event",
-                      "Max. dosage in 24 hrs",
-                      "Min. time b/w doses",
-                      "Last Administered",
-                    ]
-                  : [
-                      "Medicine",
-                      "Route",
-                      "Frequency",
-                      "Dosage",
-                      "Days",
-                      "Notes",
-                      "Last Administered",
-                    ]
-              }
+              theads={(is_prn
+                ? [
+                    "medicine",
+                    "route",
+                    "dosage",
+                    "indicator_event",
+                    "max_dosage_24_hrs",
+                    "min_time_bw_doses",
+                    "last_administered",
+                  ]
+                : [
+                    "medicine",
+                    "route",
+                    "dosage",
+                    "frequency",
+                    "days",
+                    "notes",
+                    "last_administered",
+                  ]
+              ).map((_) => t(_))}
               list={
                 prescriptions?.map((obj) => ({
                   ...obj,
                   route__pretty:
-                    obj.route && PRESCRIPTION_ROUTES[obj.route].name,
+                    obj.route && t("PRESCRIPTION_ROUTE_" + obj.route),
                   frequency__pretty:
                     obj.frequency &&
-                    PRESCRIPTION_FREQUENCIES[obj.frequency].name,
+                    t("PRESCRIPTION_FREQUENCY_" + obj.frequency),
                   days__pretty: obj.days && obj.days + " day(s)",
                   min_hours_between_doses__pretty:
                     obj.min_hours_between_doses &&
@@ -252,7 +250,7 @@ export default function PrescriptionsTable({
                         return (
                           <div className="flex w-full gap-1 items-center justify-center font-medium text-gray-700">
                             <span className="text-sm">
-                              Discharge Prescription
+                              {t("discharge_prescription")}
                             </span>
                           </div>
                         );
@@ -262,7 +260,7 @@ export default function PrescriptionsTable({
                         return (
                           <div className="flex w-full gap-1 items-center justify-center font-medium text-gray-700">
                             <CareIcon className="care-l-ban" />
-                            <span className="text-sm">Discontinued</span>
+                            <span className="text-sm">{t("discontinued")}</span>
                           </div>
                         );
                       }
@@ -281,7 +279,7 @@ export default function PrescriptionsTable({
                             }}
                           >
                             <CareIcon className="care-l-syringe text-base" />
-                            Administer
+                            {t("administer")}
                           </ButtonV2>
                           <ButtonV2
                             type="button"
@@ -295,7 +293,7 @@ export default function PrescriptionsTable({
                             }}
                           >
                             <CareIcon className="care-l-ban text-base" />
-                            Discontinue
+                            {t("discontinue")}
                           </ButtonV2>
                         </div>
                       );
@@ -305,7 +303,7 @@ export default function PrescriptionsTable({
             />
             {prescriptions?.length === 0 && (
               <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
-                No data found
+                {t("no_data_found")}
               </div>
             )}
           </div>

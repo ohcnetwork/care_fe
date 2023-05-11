@@ -3,11 +3,8 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import ReadMore from "../Common/components/Readmore";
 import ButtonV2 from "../Common/components/ButtonV2";
-import {
-  PRESCRIPTION_FREQUENCIES,
-  PRESCRIPTION_ROUTES,
-} from "./CreatePrescriptionForm";
 import { PrescriptionActions } from "../../Redux/actions";
+import { useTranslation } from "react-i18next";
 
 export default function PrescriptionDetailCard({
   prescription,
@@ -21,6 +18,7 @@ export default function PrescriptionDetailCard({
   onAdministerClick?: () => void;
   selected?: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       className={classNames(
@@ -41,13 +39,14 @@ export default function PrescriptionDetailCard({
                   props.selected ? "text-black" : "text-gray-700"
                 )}
               >
-                {prescription.prescription_type === "DISCHARGE" && "Discharge "}
-                {prescription.is_prn ? "PRN Prescription" : "Prescription"} #
-                {prescription.id?.slice(-5)}
+                {prescription.prescription_type === "DISCHARGE" &&
+                  `${t("discharge")} `}
+                {t(prescription.is_prn ? "prn_prescription" : "prescription")}
+                {` #${prescription.id?.slice(-5)}`}
               </h3>
               {prescription.discontinued && (
-                <span className="bg-gray-700 text-white font-semibold text-xs px-2 py-1 rounded-full">
-                  DISCONTINUED
+                <span className="bg-gray-700 text-white font-semibold text-xs px-2 py-1 rounded-full uppercase">
+                  {t("discontinued")}
                 </span>
               )}
             </div>
@@ -65,7 +64,7 @@ export default function PrescriptionDetailCard({
                     border
                   >
                     <CareIcon className="care-l-syringe text-base" />
-                    Administer
+                    {t("administer")}
                   </ButtonV2>
                   <ButtonV2
                     disabled={prescription.discontinued}
@@ -77,7 +76,7 @@ export default function PrescriptionDetailCard({
                     onClick={props.onDiscontinueClick}
                   >
                     <CareIcon className="care-l-ban text-base" />
-                    Discontinue
+                    {t("discontinue")}
                   </ButtonV2>
                 </div>
               )}
@@ -85,54 +84,61 @@ export default function PrescriptionDetailCard({
         </div>
 
         <div className="grid grid-cols-9 gap-2 items-center mt-2">
-          <Detail className="col-span-9 md:col-span-5" label="Medicine">
+          <Detail className="col-span-9 md:col-span-5" label={t("medicine")}>
             {prescription.medicine}
           </Detail>
-          <Detail className="col-span-5 md:col-span-2" label="Route">
-            {prescription.route && PRESCRIPTION_ROUTES[prescription.route].name}
+          <Detail className="col-span-5 md:col-span-2" label={t("route")}>
+            {prescription.route &&
+              t("PRESCRIPTION_ROUTE_" + prescription.route)}
           </Detail>
-          <Detail className="col-span-4 md:col-span-2" label="Dosage">
+          <Detail className="col-span-4 md:col-span-2" label={t("dosage")}>
             {prescription.dosage}
           </Detail>
 
           {prescription.is_prn ? (
             <>
-              <Detail className="col-span-9 md:col-span-5" label="Indicator">
+              <Detail
+                className="col-span-9 md:col-span-5"
+                label={t("indicator")}
+              >
                 {prescription.indicator}
               </Detail>
               <Detail
                 className="col-span-4 md:col-span-2"
-                label="Max dosage in 24 hrs."
+                label={t("max_dosage_24_hrs")}
               >
                 {prescription.max_dosage}
               </Detail>
               <Detail
                 className="col-span-5 md:col-span-2"
-                label="Min. time b/w doses"
+                label={t("min_time_bw_doses")}
               >
                 {prescription.max_dosage}
               </Detail>
             </>
           ) : (
             <>
-              <Detail className="col-span-5" label="Frequency">
+              <Detail className="col-span-5" label={t("frequency")}>
                 {prescription.frequency &&
-                  PRESCRIPTION_FREQUENCIES[prescription.frequency].name}
+                  t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)}
               </Detail>
-              <Detail className="col-span-4" label="Days">
+              <Detail className="col-span-4" label={t("days")}>
                 {prescription.days}
               </Detail>
             </>
           )}
 
           {prescription.notes && (
-            <Detail className="col-span-9" label="Notes">
+            <Detail className="col-span-9" label={t("notes")}>
               <ReadMore text={prescription.notes} minChars={120} />
             </Detail>
           )}
 
           {prescription.discontinued && (
-            <Detail className="col-span-9" label="Reason for discontinuation">
+            <Detail
+              className="col-span-9"
+              label={t("reason_for_discontinuation")}
+            >
               {prescription.discontinued_reason}
             </Detail>
           )}
@@ -149,6 +155,7 @@ const Detail = (props: {
   label: string;
   children?: React.ReactNode;
 }) => {
+  const { t } = useTranslation();
   return (
     <div className={classNames("flex flex-col gap-1", props.className)}>
       <label className="text-sm font-medium text-gray-600">{props.label}</label>
@@ -156,7 +163,7 @@ const Detail = (props: {
         {props.children ? (
           <span className="font-medium">{props.children}</span>
         ) : (
-          <span className="text-gray-500 italic">Not Specified</span>
+          <span className="text-gray-500 italic">{t("not_specified")}</span>
         )}
       </div>
     </div>

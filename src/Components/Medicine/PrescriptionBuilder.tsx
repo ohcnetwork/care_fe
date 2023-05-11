@@ -10,6 +10,7 @@ import { PrescriptionActions } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import DiscontinuePrescription from "./DiscontinuePrescription";
 import AdministerMedicine from "./AdministerMedicine";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   prescription_type?: Prescription["prescription_type"];
@@ -24,6 +25,7 @@ export default function PrescriptionBuilder({
   is_prn = false,
   disabled,
 }: Props) {
+  const { t } = useTranslation();
   const dispatch = useDispatch<any>();
 
   const [prescriptions, setPrescriptions] = useState<Prescription[]>();
@@ -87,15 +89,17 @@ export default function PrescriptionBuilder({
       >
         <CareIcon className="care-l-plus text-lg" />
         <span className="font-bold">
-          Add {is_prn ? "PRN Prescription" : "Prescription"}
+          {t(is_prn ? "add_prn_prescription" : "add_prescription_medication")}
         </span>
       </ButtonV2>
       {showCreate && (
         <DialogModal
           onClose={() => setShowCreate(false)}
           show={showCreate}
-          title={is_prn ? "Add PRN Prescription" : "Add Prescription"}
-          description="Add a new prescription to this consultation."
+          title={t(
+            is_prn ? "add_prn_prescription" : "add_prescription_medication"
+          )}
+          description={t("add_prescription_to_consultation_note")}
           className="max-w-3xl w-full"
         >
           <CreatePrescriptionForm

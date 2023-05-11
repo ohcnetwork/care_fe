@@ -13,6 +13,7 @@ import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import medicines_list from "../Common/prescription-builder/assets/medicines.json";
 import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useTranslation } from "react-i18next";
 
 export const medicines = medicines_list;
 
@@ -25,6 +26,7 @@ export default function CreatePrescriptionForm(props: {
 }) {
   const dispatch = useDispatch<any>();
   const [isCreating, setIsCreating] = useState(false);
+  const { t } = useTranslation();
 
   return (
     <Form
@@ -45,32 +47,19 @@ export default function CreatePrescriptionForm(props: {
       noPadding
       validate={(form) => {
         const errors: Partial<Record<keyof Prescription, FieldError>> = {};
-
-        if (!form.medicine) {
-          errors.medicine = "Required";
-        }
-
-        if (!form.dosage) {
-          errors.dosage = "Required";
-        }
-
-        if (form.is_prn) {
-          if (!form.indicator) {
-            errors.indicator = "Required";
-          }
-        } else {
-          if (!form.frequency) {
-            errors.frequency = "Required";
-          }
-        }
-
+        errors.medicine = RequiredFieldValidator()(form.medicine);
+        errors.dosage = RequiredFieldValidator()(form.dosage);
+        if (form.is_prn)
+          errors.indicator = RequiredFieldValidator()(form.indicator);
+        if (!form.is_prn)
+          errors.frequency = RequiredFieldValidator()(form.frequency);
         return errors;
       }}
     >
       {(field) => (
         <>
           <AutocompleteFormField
-            label="Medicine"
+            label={t("medicine")}
             {...field("medicine", RequiredFieldValidator())}
             required
             options={medicines}
@@ -80,15 +69,15 @@ export default function CreatePrescriptionForm(props: {
           <div className="flex gap-4 items-center">
             <SelectFormField
               className="flex-1"
-              label="Route"
+              label={t("route")}
               {...field("route")}
-              options={Object.entries(PRESCRIPTION_ROUTES)}
-              optionLabel={([_, { name }]) => name}
-              optionValue={([key]) => key}
+              options={PRESCRIPTION_ROUTES}
+              optionLabel={(key) => t("PRESCRIPTION_ROUTE_" + key)}
+              optionValue={(key) => key}
             />
             <NumericWithUnitsFormField
               className="flex-1"
-              label="Dosage"
+              label={t("dosage")}
               {...field("dosage", RequiredFieldValidator())}
               required
               units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
@@ -99,18 +88,18 @@ export default function CreatePrescriptionForm(props: {
           {props.prescription.is_prn ? (
             <>
               <TextFormField
-                label="Indicator"
+                label={t("indicator")}
                 {...field("indicator", RequiredFieldValidator())}
                 required
               />
               <TextFormField
-                label="Max. dosage in 24 hours"
+                label={t("max_dosage_24_hrs")}
                 type="number"
                 min={0}
                 {...field("max_dosage")}
               />
               <SelectFormField
-                label="Min. time b/w doses"
+                label={t("min_time_bw_doses")}
                 {...field("min_hours_between_doses")}
                 options={[1, 2, 3, 6, 12, 24]}
                 optionLabel={(hours) => `${hours} hrs.`}
@@ -122,16 +111,16 @@ export default function CreatePrescriptionForm(props: {
               <SelectFormField
                 position="above"
                 className="flex-1"
-                label="Frequency"
+                label={t("frequency")}
                 {...field("frequency", RequiredFieldValidator())}
                 required
                 options={Object.entries(PRESCRIPTION_FREQUENCIES)}
-                optionLabel={([_, { name }]) => name}
+                optionLabel={([key]) => t("PRESCRIPTION_FREQUENCY_" + key)}
                 optionValue={([key]) => key}
               />
               <TextFormField
                 className="flex-1"
-                label="Days"
+                label={t("days")}
                 type="number"
                 min={0}
                 {...field("days")}
@@ -139,10 +128,10 @@ export default function CreatePrescriptionForm(props: {
             </div>
           )}
 
-          <TextAreaFormField label="Notes" {...field("notes")} />
+          <TextAreaFormField label={t("notes")} {...field("notes")} />
           <div className="flex gap-2 w-full justify-end mt-2 text-warning-500 text-sm font-medium">
             <CareIcon className="care-l-exclamation-triangle text-base" />
-            <span>No modifications possible once added</span>
+            <span>{t("No modifications possible once added")}</span>
           </div>
         </>
       )}
@@ -150,22 +139,14 @@ export default function CreatePrescriptionForm(props: {
   );
 }
 
-export const PRESCRIPTION_ROUTES = {
-  ORAL: { name: "Oral" },
-  IV: { name: "IV" },
-  IM: { name: "IM" },
-  SC: { name: "S/C" },
-};
-
+export const PRESCRIPTION_ROUTES = ["ORAL", "IV", "IM", "SC"];
 export const PRESCRIPTION_FREQUENCIES = {
   STAT: {
-    name: "Imediately",
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) => administration),
   },
   OD: {
-    name: "Once daily",
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
@@ -173,7 +154,6 @@ export const PRESCRIPTION_FREQUENCIES = {
       ),
   },
   HS: {
-    name: "Night only",
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
@@ -181,7 +161,6 @@ export const PRESCRIPTION_FREQUENCIES = {
       ),
   },
   BD: {
-    name: "Twice daily",
     slots: 2,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
@@ -189,7 +168,6 @@ export const PRESCRIPTION_FREQUENCIES = {
       ),
   },
   TID: {
-    name: "8th hourly",
     slots: 3,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
@@ -197,7 +175,6 @@ export const PRESCRIPTION_FREQUENCIES = {
       ),
   },
   QID: {
-    name: "6th hourly",
     slots: 4,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
@@ -205,7 +182,6 @@ export const PRESCRIPTION_FREQUENCIES = {
       ),
   },
   Q4H: {
-    name: "4th hourly",
     slots: 6,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
@@ -213,7 +189,6 @@ export const PRESCRIPTION_FREQUENCIES = {
       ),
   },
   QOD: {
-    name: "Alternate day",
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) => {
       const lastAdministration = administrations[0];
@@ -234,7 +209,6 @@ export const PRESCRIPTION_FREQUENCIES = {
     },
   },
   QWK: {
-    name: "Once a week",
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>

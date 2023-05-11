@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { formatDate } from "../../Utils/utils";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   prescription: Prescription;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function AdministerMedicine({ prescription, ...props }: Props) {
+  const { t } = useTranslation();
   const dispatch = useDispatch<any>();
   const [isLoading, setIsLoading] = useState(false);
   const [notes, setNotes] = useState<string>("");
@@ -25,17 +27,17 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
       action={
         <>
           <CareIcon className="care-l-syringe text-lg" />
-          Administer Medicine
+          {t("administer_medicine")}
         </>
       }
-      title="Administer Medicine"
+      title={t("administer_medicine")}
       description={
         <div className="text-gray-600 font-semibold leading-relaxed text-sm">
           <CareIcon className="care-l-history-alt pr-1" /> Last administered
           <span className="pl-1">
             {prescription.last_administered_on
               ? formatDate(prescription.last_administered_on)
-              : "never"}
+              : t("never")}
           </span>
         </div>
       }
@@ -45,7 +47,9 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
       onConfirm={async () => {
         setIsLoading(true);
         const res = await dispatch(props.actions.administer({ notes }));
-        if (res.status === 201) Success({ msg: "Prescription administered" });
+        if (res.status === 201) {
+          Success({ msg: t("medicines_administered") });
+        }
         setIsLoading(false);
         props.onClose(true);
       }}
@@ -58,9 +62,9 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
           actions={props.actions}
         />
         <TextAreaFormField
-          label="Administration Notes"
+          label={t("administration_notes")}
           name="administration_notes"
-          placeholder="Add notes"
+          placeholder={t("add_notes")}
           value={notes}
           onChange={({ value }) => setNotes(value)}
           errorClassName="hidden"

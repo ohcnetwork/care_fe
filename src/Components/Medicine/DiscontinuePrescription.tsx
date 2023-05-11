@@ -6,6 +6,7 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Success } from "../../Utils/Notifications";
 import { useDispatch } from "react-redux";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   prescription: Prescription;
@@ -14,14 +15,15 @@ interface Props {
 }
 
 export default function DiscontinuePrescription(props: Props) {
+  const { t } = useTranslation();
   const dispatch = useDispatch<any>();
   const [isDiscontinuing, setIsDiscontinuing] = useState(false);
   const [discontinuedReason, setDiscontinuedReason] = useState<string>("");
 
   return (
     <ConfirmDialogV2
-      action="Discontinue"
-      title="Are you sure you want to discontinue this prescription?"
+      action={t("discontinue")}
+      title={t("discontinue_caution_note")}
       show
       onClose={() => props.onClose(false)}
       variant="danger"
@@ -31,10 +33,7 @@ export default function DiscontinuePrescription(props: Props) {
           props.actions.discontinue(discontinuedReason)
         );
         if (res.status === 201) {
-          const id = props.prescription.id!.slice(-5);
-          Success({
-            msg: `Prescription #${id} discontinued`,
-          });
+          Success({ msg: t("prescription_discontinued") });
         }
         setIsDiscontinuing(false);
         props.onClose(true);
@@ -48,8 +47,8 @@ export default function DiscontinuePrescription(props: Props) {
           actions={props.actions}
         />
         <TextAreaFormField
-          label="Reason for discontinuation"
-          placeholder="Optional"
+          label={t("reason_for_discontinuation")}
+          placeholder={t("optional")}
           name="discontinuedReason"
           value={discontinuedReason}
           onChange={({ value }) => setDiscontinuedReason(value)}

@@ -9,6 +9,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useDispatch } from "react-redux";
 import { Error, Success } from "../../Utils/Notifications";
 import { formatDate } from "../../Utils/utils";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   prescriptions: Prescription[];
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function MedicineAdministration(props: Props) {
+  const { t } = useTranslation();
   const dispatch = useDispatch<any>();
   const [shouldAdminister, setShouldAdminister] = useState<boolean[]>([]);
   const [notes, setNotes] = useState<MedicineAdministrationRecord["notes"][]>(
@@ -44,21 +46,17 @@ export default function MedicineAdministration(props: Props) {
       }
     });
 
-    if (records.length === 0) {
-      Error({ msg: "No medicines selected for administration" });
-    }
-
     Promise.all(
       records.map(async ({ prescription, ...record }) => {
         const res = await dispatch(
           props.action(prescription!.id!).administer(record)
         );
         if (res.status !== 201) {
-          Error({ msg: "Error administering medicine" });
+          Error({ msg: t("medicines_administered_error") });
         }
       })
     ).then(() => {
-      Success({ msg: "Medicines administered successfully" });
+      Success({ msg: t("medicines_administered") });
       props.onDone();
     });
   };
@@ -78,7 +76,7 @@ export default function MedicineAdministration(props: Props) {
           <div className="w-[400px] mt-4 md:mt-0 pt-4 md:pt-0 md:ml-4 md:pl-4 py-2 border-t-2 md:border-t-0 md:border-l-2 border-dashed border-gray-500 flex flex-col gap-2">
             <CheckBoxFormField
               name="should_administer"
-              label="Select for Administration"
+              label={t("select_for_administration")}
               value={shouldAdminister[index]}
               onChange={(event) =>
                 setShouldAdminister((shouldAdminister) => {
@@ -90,18 +88,19 @@ export default function MedicineAdministration(props: Props) {
               errorClassName="hidden"
             />
             <div className="text-gray-600 font-semibold leading-relaxed text-sm">
-              <CareIcon className="care-l-history-alt pr-1" /> Last administered
+              <CareIcon className="care-l-history-alt pr-1" />{" "}
+              {t("last_administered")}
               <span className="pl-1">
                 {obj.last_administered_on
                   ? formatDate(obj.last_administered_on)
-                  : "never"}
+                  : t("never")}
               </span>
             </div>
             <TextAreaFormField
-              label="Administration Notes"
+              label={t("administration_notes")}
               disabled={!shouldAdminister[index]}
               name="administration_notes"
-              placeholder="Add notes"
+              placeholder={t("add_notes")}
               value={notes[index]}
               onChange={(event) =>
                 setNotes((notes) => {
@@ -118,7 +117,7 @@ export default function MedicineAdministration(props: Props) {
       <div className="flex justify-end">
         <ButtonV2 onClick={handleSubmit} disabled={!selectedCount}>
           <CareIcon className="care-l-syringe text-lg" />
-          Administer Selected Medicines{" "}
+          {t("administer_selected_medicines")}{" "}
           {selectedCount > 0 && `(${selectedCount})`}
         </ButtonV2>
       </div>

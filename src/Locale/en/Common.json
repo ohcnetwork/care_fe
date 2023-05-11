@@ -129,5 +129,17 @@
   "RESPIRATORY_SUPPORT_OXYGEN_SUPPORT": "O2 Support",
   "RESPIRATORY_SUPPORT_NON_INVASIVE": "NIV",
   "RESPIRATORY_SUPPORT_INVASIVE": "IV",
-  "choose_file": "Choose File"
+  "choose_file": "Choose File",
+  "frequency": "Frequency",
+  "days": "Days",
+  "never": "never",
+  "notes": "Notes",
+  "add_notes": "Add notes",
+  "optional": "Optional",
+  "discontinue": "Discontinue",
+  "discontinued": "Discontinued",
+  "not_specified": "Not Specified",
+  "all_changes_have_been_saved": "All changes have been saved",
+  "no_data_found": "No data found",
+  "edit": "Edit"
 }
