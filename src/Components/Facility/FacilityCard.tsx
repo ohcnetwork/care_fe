@@ -157,27 +157,11 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                 <div className="flex py-2 justify-between">
                   <div className="flex justify-between w-full flex-wrap gap-2">
                     <div className="flex gap-2">
-                      {userType !== "Staff" ? (
-                        <ButtonV2
-                          id="facility-notify"
-                          ghost
-                          border
-                          className="h-[38px]"
-                          onClick={(_) => setNotifyModalFor(facility.id)}
-                        >
-                          <CareIcon className="care-l-megaphone text-lg" />
-                          <span className="md:block hidden">
-                            Notify Facility
-                          </span>
-                        </ButtonV2>
-                      ) : (
-                        <></>
-                      )}
                       <div
                         className={`flex items-center justify-center rounded-md text-xl h-[38px] w-fit px-2 ml-auto ${
                           facility.patient_count / facility.bed_count > 0.85
-                            ? "bg-red-500"
-                            : "bg-primary-100"
+                            ? "bg-red-500 button-danger-border"
+                            : "bg-primary-100 button-primary-border"
                         }`}
                       >
                         {" "}
@@ -195,7 +179,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                               : "gray-700"
                           } my-1`}
                         >
-                          Bed Occupancy: {facility.patient_count} /{" "}
+                          Occupancy: {facility.patient_count} /{" "}
                           {facility.bed_count}{" "}
                         </dt>{" "}
                       </div>
@@ -255,6 +239,20 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         <CareIcon className="care-l-user-injured text-lg" />
                         {t("view_patients")}
                       </ButtonV2>
+                      {userType !== "Staff" ? (
+                        <ButtonV2
+                          id="facility-notify"
+                          ghost
+                          border
+                          className="h-[38px]"
+                          onClick={(_) => setNotifyModalFor(facility.id)}
+                        >
+                          <CareIcon className="care-l-megaphone text-lg" />
+                          <span className="md:block hidden">Notify</span>
+                        </ButtonV2>
+                      ) : (
+                        <></>
+                      )}
                     </div>
                   </div>
                 </div>
