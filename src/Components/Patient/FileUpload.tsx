@@ -1,40 +1,42 @@
-import axios from "axios";
+import * as Notification from "../../Utils/Notifications.js";
+
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import { CircularProgress, InputLabel } from "@material-ui/core";
-import loadable from "@loadable/component";
-import React, { useCallback, useState, useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  viewUpload,
-  retrieveUpload,
   createUpload,
-  getPatient,
   editUpload,
+  getPatient,
+  retrieveUpload,
+  viewUpload,
 } from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useDispatch, useSelector } from "react-redux";
+
+import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
+import Box from "@material-ui/core/Box";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import DialogModal from "../Common/Dialog";
 import { FileUploadModel } from "./models";
+import HeadedTabs from "../Common/HeadedTabs";
 import { LegacyTextInputField } from "../Common/HelperInputFields";
 import LinearProgress from "@material-ui/core/LinearProgress";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
-import * as Notification from "../../Utils/Notifications.js";
-import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Modal from "@material-ui/core/Modal";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
-import imageCompression from "browser-image-compression";
-import { formatDate } from "../../Utils/utils";
-import { useTranslation } from "react-i18next";
-import HeadedTabs from "../Common/HeadedTabs";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import DialogModal from "../Common/Dialog";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import Typography from "@material-ui/core/Typography";
+import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Webcam from "react-webcam";
+import axios from "axios";
+import { formatDate } from "../../Utils/utils";
+import imageCompression from "browser-image-compression";
+import loadable from "@loadable/component";
+import { useTranslation } from "react-i18next";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -96,6 +98,7 @@ interface FileUploadProps {
   unspecified: boolean;
   sampleId?: number;
   claimId?: string;
+  communicationId?: string;
 }
 
 interface URLS {
@@ -137,6 +140,7 @@ export const FileUpload = (props: FileUploadProps) => {
     unspecified,
     sampleId,
     claimId,
+    communicationId,
   } = props;
   const id = patientId;
   const dispatch: any = useDispatch();
@@ -286,12 +290,14 @@ export const FileUpload = (props: FileUploadProps) => {
     CONSULTATION: "Upload Consultation Files",
     SAMPLE_MANAGEMENT: "Upload Sample Report",
     CLAIM: "Upload Supporting Info",
+    COMMUNICATION: "Upload Supporting Info",
   };
   const VIEW_HEADING: { [index: string]: string } = {
     PATIENT: "View Patient Files",
     CONSULTATION: "View Consultation Files",
     SAMPLE_MANAGEMENT: "View Sample Report",
     CLAIM: "Supporting Info",
+    COMMUNICATION: "Supporting Info",
   };
 
   const handleClose = () => {
@@ -315,6 +321,8 @@ export const FileUpload = (props: FileUploadProps) => {
         return sampleId;
       case "CLAIM":
         return claimId;
+      case "COMMUNICATION":
+        return communicationId;
     }
   };
 

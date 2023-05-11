@@ -880,6 +880,41 @@ const routes: Routes = {
     path: "/api/v1/hcx/make_claim/",
     method: "POST",
   },
+
+  listHCXCommunications: {
+    path: "/api/v1/hcx/communication/",
+    method: "GET",
+  },
+
+  createHCXCommunication: {
+    path: "/api/v1/hcx/communication/",
+    method: "POST",
+  },
+
+  getHCXCommunication: {
+    path: "/api/v1/hcx/communication/{external_id}/",
+    method: "GET",
+  },
+
+  updateHCXCommunication: {
+    path: "/api/v1/hcx/communication/{external_id}/",
+    method: "PUT",
+  },
+
+  partialUpdateHCXCommunication: {
+    path: "/api/v1/hcx/communication/{external_id}/",
+    method: "PATCH",
+  },
+
+  deleteHCXCommunication: {
+    path: "/api/v1/hcx/communication/{external_id}/",
+    method: "DELETE",
+  },
+
+  hcxSendCommunication: {
+    path: "/api/v1/hcx/send_communication/",
+    method: "POST",
+  },
 };
 
 export default routes;

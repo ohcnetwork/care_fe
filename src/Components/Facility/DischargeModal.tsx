@@ -11,7 +11,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { CircularProgress } from "@material-ui/core";
-import ClaimDetailCard from "../HCX/ClaimDetailCard";
+import ClaimCard from "../HCX/ClaimCard";
 import { ConsultationModel } from "./models";
 import CreateClaimCard from "../HCX/CreateClaimCard";
 import { DISCHARGE_REASONS } from "../../Common/constants";
@@ -329,7 +329,7 @@ const DischargeModal = ({
         <div className="my-5 shadow rounded p-5">
           <h2 className="mb-2">Claim Insurance</h2>
           {latestClaim ? (
-            <ClaimDetailCard claim={latestClaim} />
+            <ClaimCard claim={latestClaim} />
           ) : (
             <CreateClaimCard
               consultationId={consultationData.id}

@@ -64,7 +64,7 @@ export interface IConfig {
 const useConfig = () => {
   const state: any = useSelector((state) => state);
   const { config } = state;
-  return config.data as IConfig;
+  return { ...config.data, enable_hcx: true } as IConfig;
 };
 
 export default useConfig;

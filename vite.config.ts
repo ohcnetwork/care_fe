@@ -1,21 +1,20 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
 import { VitePWA } from "vite-plugin-pwa";
-import { resolve } from "path";
+import { defineConfig } from "vite";
 import { promises as fs } from "fs";
-
+import react from "@vitejs/plugin-react-swc";
+import { resolve } from "path";
 
 export default defineConfig({
   envPrefix: "REACT_",
   plugins: [
     react(),
     VitePWA({
-      strategies: 'injectManifest',
-      srcDir: 'src',
-      filename: 'service-worker.ts',
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "service-worker.ts",
       injectRegister: null,
       injectManifest: {
-        maximumFileSizeToCacheInBytes: 7000000
+        maximumFileSizeToCacheInBytes: 7000000,
       },
       manifest: {
         name: "Care",
@@ -38,7 +37,7 @@ export default defineConfig({
             src: "https://cdn.coronasafe.network/care-manifest/images/icons/icon-512x512.png",
             sizes: "512x512",
             type: "image/png",
-          }
+          },
         ],
       },
     }),
@@ -74,7 +73,7 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: "https://careapi.coronasafe.in",
+        target: "https://local.kha.vin",
         changeOrigin: true,
       },
     },

@@ -37,6 +37,18 @@ export interface HCXPolicyModel {
   modified_date?: string;
 }
 
+export interface HCXCommunicationModel {
+  id?: string;
+  identifier?: string;
+  claim?: string;
+  claim_object?: HCXClaimModel;
+  content?: { type: string; data: string }[];
+  created_by?: string | null;
+  last_modified_by?: string | null;
+  created_date?: string;
+  modified_date?: string;
+}
+
 export interface HCXItemModel {
   id: string;
   name: string;

@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { transformIcons } from "./icon";
+import { useEffect } from "react";
 
 export interface CareIconProps {
   className?: string | undefined;
@@ -13,10 +13,13 @@ export interface CareIconProps {
  *
  * @see [icon library](https://iconscout.com/unicons/)
  */
-export default function CareIcon({ className }: CareIconProps) {
+export default function CareIcon({
+  className,
+  ...rest
+}: CareIconProps & React.HTMLAttributes<HTMLSpanElement>) {
   useEffect(() => transformIcons(), [className]);
   return (
-    <span key={className}>
+    <span {...rest} key={className}>
       <i className={`care ${className}`} />
     </span>
   );

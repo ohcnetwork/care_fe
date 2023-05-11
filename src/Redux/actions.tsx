@@ -1,4 +1,8 @@
-import { HCXClaimModel, HCXPolicyModel } from "../Components/HCX/models";
+import {
+  HCXClaimModel,
+  HCXCommunicationModel,
+  HCXPolicyModel,
+} from "../Components/HCX/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
 export const getConfig = () => {
@@ -891,6 +895,31 @@ export const HCXActions = {
     },
   },
 
+  communications: {
+    list(params: object) {
+      return fireRequest("listHCXCommunications", [], params);
+    },
+    create(obj: HCXCommunicationModel) {
+      return fireRequest("createHCXCommunication", [], obj);
+    },
+    read(id: string) {
+      return fireRequest("getHCXCommunication", [], {}, { external_id: id });
+    },
+    update(id: string, obj: HCXCommunicationModel) {
+      return fireRequest("updateHCXCommunication", [], obj, {
+        external_id: id,
+      });
+    },
+    partialUpdate(id: string, obj: Partial<HCXCommunicationModel>) {
+      return fireRequest("partialUpdateHCXCommunication", [], obj, {
+        external_id: id,
+      });
+    },
+    delete(id: string) {
+      return fireRequest("deleteHCXCommunication", [], {}, { external_id: id });
+    },
+  },
+
   preauths: {
     list(consultation: string) {
       return fireRequest(
@@ -909,5 +938,9 @@ export const HCXActions = {
 
   makeClaim(claim: string) {
     return fireRequest("hcxMakeClaim", [], { claim });
+  },
+
+  sendCommunication(communication: string) {
+    return fireRequest("hcxSendCommunication", [], { communication });
   },
 };

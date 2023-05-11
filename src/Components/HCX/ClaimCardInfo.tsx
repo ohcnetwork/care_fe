@@ -1,11 +1,14 @@
 import { classNames, formatCurrency, formatDate } from "../../Utils/utils";
-import { HCXClaimModel } from "../HCX/models";
+
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { HCXClaimModel } from "./models";
 
 interface IProps {
   claim: HCXClaimModel;
+  setShowMessages: (show: boolean) => void;
 }
 
-export default function ClaimDetailCard({ claim }: IProps) {
+export default function ClaimCardInfo({ claim, setShowMessages }: IProps) {
   const status =
     claim.outcome === "Processing Complete"
       ? claim.error_text
@@ -14,7 +17,7 @@ export default function ClaimDetailCard({ claim }: IProps) {
       : "Pending";
 
   return (
-    <div className="px-6 lg:px-8">
+    <>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-xl font-semibold text-gray-700">
@@ -29,7 +32,12 @@ export default function ClaimDetailCard({ claim }: IProps) {
             .
           </p>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 flex items-center justify-center gap-3">
+        <div className="mt-4 sm:mt-0 sm:ml-16 flex flex-row-reverse items-center justify-center gap-3">
+          <CareIcon
+            onClick={() => setShowMessages(true)}
+            className="care-l-comment-alt-message w-7 h-7 text-gray-600 cursor-pointer hover:text-gray-800"
+          />
+
           {claim.use && (
             <span className="font-bold text-sm p-1 px-2 rounded shadow bg-primary-100 text-primary-500">
               {claim.use}
@@ -157,6 +165,6 @@ export default function ClaimDetailCard({ claim }: IProps) {
           {claim.error_text}
         </div>
       )}
-    </div>
+    </>
   );
 }

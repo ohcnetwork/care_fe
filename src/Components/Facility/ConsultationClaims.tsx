@@ -1,13 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { HCXActions } from "../../Redux/actions";
-import PageTitle from "../Common/PageTitle";
-import ClaimDetailCard from "../HCX/ClaimDetailCard";
-import CreateClaimCard from "../HCX/CreateClaimCard";
-import { HCXClaimModel } from "../HCX/models";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
-import { navigate } from "raviger";
 import * as Notification from "../../Utils/Notifications";
+
+import { useCallback, useEffect, useState } from "react";
+
+import ClaimCard from "../HCX/ClaimCard";
+import CreateClaimCard from "../HCX/CreateClaimCard";
+import { HCXActions } from "../../Redux/actions";
+import { HCXClaimModel } from "../HCX/models";
+import PageTitle from "../Common/PageTitle";
+import { navigate } from "raviger";
+import { useDispatch } from "react-redux";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
 
 interface Props {
   facilityId: string;
@@ -83,7 +85,7 @@ export default function ConsultationClaims({
         <div className="flex flex-col gap-8 w-full max-w-3xl mx-auto">
           {claims?.map((claim) => (
             <div className="p-8 bg-white rounded-lg">
-              <ClaimDetailCard claim={claim} />
+              <ClaimCard claim={claim} />
             </div>
           ))}
         </div>
