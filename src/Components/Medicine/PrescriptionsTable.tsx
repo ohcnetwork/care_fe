@@ -239,8 +239,8 @@ export default function PrescriptionsTable({
                   : [
                       "medicine",
                       "route__pretty",
-                      "frequency__pretty",
                       "dosage",
+                      "frequency__pretty",
                       "days__pretty",
                       "notes",
                       "last_administered__pretty",
