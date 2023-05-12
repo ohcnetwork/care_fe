@@ -10,6 +10,7 @@ import Shifting from "./Shifting.json";
 import Notifications from "./Notifications.json";
 import ExternalResult from "./ExternalResult.json";
 import CoverImageEdit from "./CoverImageEdit.json";
+import Resource from "./Resource.json";
 import SortOptions from "./SortOptions.json";
 
 export default {
@@ -24,6 +25,7 @@ export default {
   ...Facility,
   ...Hub,
   ...Notifications,
+  ...Resource,
   ...Shifting,
   SortOptions,
 };
