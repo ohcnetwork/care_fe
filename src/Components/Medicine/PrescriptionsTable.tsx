@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 
 interface Props {
   is_prn?: boolean;
+  prescription_type?: Prescription["prescription_type"];
   consultation_id: string;
   onChange?: () => void;
   readonly?: boolean;
@@ -24,6 +25,7 @@ interface Props {
 
 export default function PrescriptionsTable({
   is_prn = false,
+  prescription_type = "REGULAR",
   consultation_id,
   onChange,
   readonly,
@@ -43,7 +45,7 @@ export default function PrescriptionsTable({
   );
 
   const fetchPrescriptions = useCallback(() => {
-    dispatch(list({ is_prn })).then((res: any) =>
+    dispatch(list({ is_prn, prescription_type })).then((res: any) =>
       setPrescriptions(res.data.results)
     );
   }, [consultation_id]);
