@@ -32,7 +32,6 @@ import { FileUpload } from "../Patient/FileUpload";
 import InvestigationTab from "./Investigations/investigationsTab";
 import { LegacyTextInputField } from "../Common/HelperInputFields";
 import { make as Link } from "../Common/components/Link.gen";
-import { MedicineTables } from "./Consultations/MedicineTables";
 import { NeurologicalTable } from "./Consultations/NeurologicalTables";
 import { NursingPlot } from "./Consultations/NursingPlot";
 import { NutritionPlots } from "./Consultations/NutritionPlots";
@@ -1114,8 +1113,11 @@ export const ConsultationDetails = (props: any) => {
               />
             </div>
             {consultationData.procedure && (
-              <div className="mt-4">
+              <div className="mt-8">
                 <div className="flex flex-col">
+                  <div className="flex items-center font-semibold leading-relaxed text-gray-900">
+                    <span className="text-lg mr-3">Procedures</span>
+                  </div>
                   <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
                     <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
                       <ResponsiveMedicineTable
@@ -1146,12 +1148,6 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               </div>
             )}
-
-            <MedicineTables
-              facilityId={facilityId}
-              patientId={patientId}
-              consultationId={consultationId}
-            />
           </div>
         )}
         {tab === "FILES" && (
