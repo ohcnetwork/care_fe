@@ -898,6 +898,7 @@ export const ConsultationDetails = (props: any) => {
                             />
                           </div>
                         )}
+
                         {consultationData.special_instruction && (
                           <div className="mt-4">
                             <h5>Special Instruction</h5>
@@ -912,6 +913,44 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
+              {consultationData.procedure && (
+                <div className="bg-white rounded-lg shadow my-4 p-4">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead>
+                        <tr>
+                          <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
+                            Procedure
+                          </th>
+                          <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
+                            Notes
+                          </th>
+                          <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
+                            Time / Frequency
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {consultationData.procedure?.map((procedure, index) => (
+                          <tr key={index}>
+                            <td className="p-4 whitespace-nowrap">
+                              {procedure.procedure}
+                            </td>
+                            <td className="p-4 whitespace-nowrap">
+                              {procedure.notes}
+                            </td>
+                            <td className="p-4 whitespace-nowrap">
+                              {procedure.repetitive
+                                ? procedure.frequency
+                                : formatDate(String(procedure.time))}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
               {consultationData.intubation_start_date && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
