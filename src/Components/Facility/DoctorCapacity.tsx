@@ -147,6 +147,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
   };
 
   const handleSubmit = async (e: any) => {
+    const submitBtnID = e.currentTarget?.id;
     e.preventDefault();
     const valid = validateData();
     if (valid) {
@@ -181,7 +182,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
       }
       handleUpdate();
 
-      if (e.nativeEvent.submitter.id === "save-and-exit") handleClose();
+      if (submitBtnID === "save-and-exit") handleClose();
     }
   };
 
