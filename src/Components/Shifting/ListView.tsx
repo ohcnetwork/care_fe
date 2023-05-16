@@ -18,7 +18,7 @@ import loadable from "@loadable/component";
 import moment from "moment";
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 
@@ -42,6 +42,10 @@ export default function ListView() {
     externalId: undefined,
     loading: false,
   });
+  const rootState: any = useSelector((rootState) => rootState);
+  const { currentUser } = rootState;
+  const userHomeFacilityId = currentUser.data.home_facility;
+  const userType = currentUser.data.user_type;
   const { t } = useTranslation();
 
   const handleTransferComplete = (shift: any) => {
@@ -239,27 +243,33 @@ export default function ListView() {
                 <i className="fas fa-eye mr-2" /> {t("all_details")}
               </ButtonV2>
             </div>
-            {shift.status === "TRANSFER IN PROGRESS" &&
-              shift.assigned_facility && (
-                <div className="mt-2">
-                  <ButtonV2
-                    className="w-full"
-                    onClick={() => setModalFor(shift.external_id)}
-                  >
-                    {t("transfer_to_receiving_facility")}
-                  </ButtonV2>
-                  <ConfirmDialogV2
-                    title={t("confirm_transfer_complete")}
-                    description={t("mark_transfer_complete_confirmation")}
-                    action="Confirm"
-                    show={modalFor === shift.external_id}
-                    onClose={() =>
-                      setModalFor({ externalId: undefined, loading: false })
-                    }
-                    onConfirm={() => handleTransferComplete(shift)}
-                  />
-                </div>
-              )}
+            {shift.status === "COMPLETED" && shift.assigned_facility && (
+              <div className="mt-2">
+                <ButtonV2
+                  className="w-full"
+                  disabled={
+                    !shift.patient_object.allow_transfer ||
+                    !(
+                      ["DistrictAdmin", "StateAdmin"].includes(userType) ||
+                      userHomeFacilityId === shift.assigned_facility
+                    )
+                  }
+                  onClick={() => setModalFor(shift.external_id)}
+                >
+                  {t("transfer_to_receiving_facility")}
+                </ButtonV2>
+                <ConfirmDialogV2
+                  title={t("confirm_transfer_complete")}
+                  description={t("mark_transfer_complete_confirmation")}
+                  action="Confirm"
+                  show={modalFor === shift.external_id}
+                  onClose={() =>
+                    setModalFor({ externalId: undefined, loading: false })
+                  }
+                  onConfirm={() => handleTransferComplete(shift)}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>

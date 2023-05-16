@@ -78,10 +78,10 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
   let requiredFields: any = {
     refering_facility_contact_name: {
-      errorText: "Name of contact of the referring facility",
+      errorText: "Name of contact of the current facility",
     },
     refering_facility_contact_number: {
-      errorText: "Phone number of contact of the referring facility",
+      errorText: "Phone number of contact of the current facility",
       invalidText: "Please enter valid phone number",
     },
     reason: {
@@ -411,8 +411,8 @@ export const ShiftCreate = (props: patientShiftProps) => {
                   required={false}
                   name="patient_category"
                   value={patientCategory}
-                  onChange={(value) => {
-                    setPatientCategory(value);
+                  onChange={(e) => {
+                    setPatientCategory(e.value);
                   }}
                   label="Patient Category"
                 />
