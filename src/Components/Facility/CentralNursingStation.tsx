@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import useFullscreen from "../../Common/hooks/useFullscreen";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   getAllPatient,
   getPermittedFacility,
@@ -18,6 +18,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { LocationSelect } from "../Common/LocationSelect";
 import Pagination from "../Common/Pagination";
+import { SidebarShrinkContext } from "../Common/Sidebar/Sidebar";
 
 const PER_PAGE_LIMIT = 6;
 
@@ -29,6 +30,7 @@ interface Props {
 export default function CentralNursingStation({ facility }: Props) {
   const dispatch = useDispatch<any>();
   const [isFullscreen, setFullscreen] = useFullscreen();
+  const { shrinked, setShrinked } = useContext(SidebarShrinkContext);
 
   const [facilityObject, setFacilityObject] = useState<FacilityModel>();
   const [data, setData] =
@@ -39,6 +41,8 @@ export default function CentralNursingStation({ facility }: Props) {
   });
 
   useEffect(() => {
+    setShrinked(true);
+
     async function fetchFacilityOrObject() {
       if (facilityObject) return facilityObject;
       const res = await dispatch(getPermittedFacility(facility));
@@ -92,6 +96,10 @@ export default function CentralNursingStation({ facility }: Props) {
       );
     }
     fetchData();
+
+    return () => {
+      setShrinked(shrinked);
+    };
   }, [dispatch, facility, qParams.page, qParams.location]);
 
   return (
@@ -148,7 +156,7 @@ export default function CentralNursingStation({ facility }: Props) {
           No Vitals Monitor present in this location or facility.
         </div>
       ) : (
-        <div className="mt-2 grid grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3 gap-2">
+        <div className="mt-2 grid grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3 gap-1">
           {data.map((monitor) => (
             <PatientVitalsMonitor key={monitor.assetBed.id} {...monitor} />
           ))}
