@@ -926,6 +926,9 @@ export const ConsultationDetails = (props: any) => {
                               Notes
                             </th>
                             <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
+                              Repetitive
+                            </th>
+                            <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
                               Time / Frequency
                             </th>
                           </tr>
@@ -939,6 +942,9 @@ export const ConsultationDetails = (props: any) => {
                                 </td>
                                 <td className="p-4 whitespace-normal overflow-hidden">
                                   {procedure.notes}
+                                </td>
+                                <td className="p-4 whitespace-normal overflow-hidden">
+                                  {procedure.repetitive ? "Yes" : "No"}
                                 </td>
                                 <td className="p-4 whitespace-nowrap">
                                   {procedure.repetitive
@@ -1212,39 +1218,6 @@ export const ConsultationDetails = (props: any) => {
                         fieldsToDisplay={[2, 4]}
                       />
                       {consultationData.prn_prescription.length === 0 && (
-                        <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
-                          No data found
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            {consultationData.procedure && (
-              <div className="mt-4">
-                <div className="flex flex-col">
-                  <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                    <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
-                      <ResponsiveMedicineTable
-                        theads={[
-                          "Procedure",
-                          "Repetitive",
-                          "Time",
-                          "Frequency",
-                          "Notes",
-                        ]}
-                        list={consultationData.procedure}
-                        objectKeys={[
-                          "procedure",
-                          "repetitive",
-                          "time",
-                          "frequency",
-                          "notes",
-                        ]}
-                        fieldsToDisplay={[2, 4]}
-                      />
-                      {!consultationData.procedure?.length && (
                         <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
                           No data found
                         </div>
