@@ -18,7 +18,7 @@ import { FacilityModel } from "./models";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { uniqBy } from "lodash";
 import DialogModal from "../Common/Dialog";
-import { LegacyMonitorCard } from "./MonitorCard";
+import { LegacyMonitorCard } from "./LegacyMonitorCard";
 
 interface Monitor {
   patient: PatientModel;

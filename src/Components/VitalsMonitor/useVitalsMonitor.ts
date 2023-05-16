@@ -7,7 +7,7 @@ import VitalsDeviceClient, {
 import VitalsRenderer, { ChannelOptions } from "./VitalsRenderer";
 import useCanvas from "../../Common/hooks/useCanvas";
 
-const MONITOR_RATIO = {
+export const MONITOR_RATIO = {
   w: 13,
   h: 11,
 };

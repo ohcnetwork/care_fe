@@ -156,9 +156,9 @@ export default function CentralNursingStation({ facility }: Props) {
           No Vitals Monitor present in this location or facility.
         </div>
       ) : (
-        <div className="mt-2 grid grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3 gap-1">
-          {data.map((monitor) => (
-            <PatientVitalsMonitor key={monitor.assetBed.id} {...monitor} />
+        <div className="mt-1 grid grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3 gap-1">
+          {data.map((props) => (
+            <PatientVitalsMonitor key={props.assetBed?.id} {...props} />
           ))}
         </div>
       )}

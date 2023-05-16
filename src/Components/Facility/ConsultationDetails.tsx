@@ -1362,3 +1362,52 @@ export const ConsultationDetails = (props: any) => {
     </div>
   );
 };
+
+// TODO: make this thing responsive :/
+// const VitalsCard = ({ consultation }: { consultation: ConsultationModel }) => {
+//   const dispatch = useDispatch<any>();
+//   const [socketUrl, setSocketUrl] = useState<string>();
+
+//   useEffect(() => {
+//     if (!consultation.facility) return;
+//     const fetchData = async () => {
+//       const [facilityRes, assetBedRes] = await Promise.all([
+//         dispatch(getPermittedFacility(consultation.facility as any)),
+//         dispatch(
+//           listAssetBeds({
+//             facility: consultation.facility as any,
+//             bed: consultation.current_bed?.bed_object.id,
+//           })
+//         ),
+//       ]);
+
+//       const { middleware_address } = facilityRes.data as FacilityModel;
+//       const assetbed = assetBedRes.data.results[0] as AssetBedModel;
+
+//       if (
+//         !middleware_address ||
+//         !assetbed ||
+//         !assetbed.asset_object.meta?.local_ip_address
+//       )
+//         return;
+
+//       setSocketUrl(
+//         `wss://${middleware_address}/observations/${assetbed?.asset_object.meta?.local_ip_address}`
+//       );
+//     };
+
+//     fetchData();
+//   }, [consultation]);
+
+//   if (!socketUrl) return null;
+
+//   return (
+//     <PatientVitalsMonitor
+//       socketUrl={socketUrl}
+//       size={{
+//         width: MONITOR_RATIO.w * 64,
+//         height: MONITOR_RATIO.h * 64,
+//       }}
+//     />
+//   );
+// };

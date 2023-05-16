@@ -2,14 +2,23 @@ import { useEffect } from "react";
 import useVitalsMonitor from "./useVitalsMonitor";
 import { PatientModel } from "../Patient/models";
 import { AssetBedModel } from "../Assets/AssetTypes";
+import { Link } from "raviger";
+import { GENDER_TYPES } from "../../Common/constants";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
   patient?: PatientModel;
-  assetBed: AssetBedModel;
+  assetBed?: AssetBedModel;
   socketUrl: string;
+  size?: { width: number; height: number };
 }
 
-export default function PatientVitalsMonitor({ socketUrl }: Props) {
+export default function PatientVitalsMonitor({
+  patient,
+  assetBed,
+  socketUrl,
+  size,
+}: Props) {
   const { connect, waveformCanvas, data } = useVitalsMonitor();
 
   useEffect(() => {
@@ -18,19 +27,55 @@ export default function PatientVitalsMonitor({ socketUrl }: Props) {
 
   return (
     <div className="flex flex-col gap-1 bg-[#020617] p-2 rounded">
-      <div className="flex justify-between px-2 text-white">Hello World</div>
+      {(patient || assetBed) && (
+        <div className="flex items-center justify-between px-2 tracking-wide">
+          <div className="flex items-center gap-2">
+            {patient ? (
+              <Link
+                href={`/facility/${patient.last_consultation?.facility}/patient/${patient.id}/consultation/${patient.last_consultation?.id}`}
+                className="font-bold uppercase text-white"
+              >
+                {patient?.name}
+              </Link>
+            ) : (
+              <span className="flex gap-1 items-center text-gray-500">
+                <CareIcon className="care-l-ban" />
+                No Patient
+              </span>
+            )}
+            {patient && (
+              <span className="text-gray-400 font-bold text-sm">
+                {patient.age}y;{" "}
+                {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
+              </span>
+            )}
+          </div>
+          {assetBed && (
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <span className="flex items-center gap-1">
+                <CareIcon className="care-l-bed text-base" />
+                {assetBed.bed_object.name}
+              </span>
+              <span className="flex items-center gap-1">
+                <CareIcon className="care-l-location-point text-base" />
+                {assetBed.bed_object.location_object?.name}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
       <div className="flex flex-col md:flex-row md:justify-between divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2">
-        <div className="relative" style={{ ...waveformCanvas.size }}>
+        <div className="relative" style={{ ...(size ?? waveformCanvas.size) }}>
           <canvas
             className="absolute top-0 left-0"
             ref={waveformCanvas.background.canvasRef}
-            style={{ ...waveformCanvas.size }}
+            style={{ ...(size ?? waveformCanvas.size) }}
             {...waveformCanvas.size}
           />
           <canvas
             className="absolute top-0 left-0"
             ref={waveformCanvas.foreground.canvasRef}
-            style={{ ...waveformCanvas.size }}
+            style={{ ...(size ?? waveformCanvas.size) }}
             {...waveformCanvas.size}
           />
         </div>

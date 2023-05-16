@@ -11,9 +11,9 @@ import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
 import Card from "../../../CAREUI/display/Card";
 import { Submit } from "../../Common/components/ButtonV2";
-import LegacyPatientVitalsCard from "../../Patient/LegacyPatientVitalsCard";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import TextFormField from "../../Form/FormFields/TextFormField";
+import PatientVitalsMonitor from "../../VitalsMonitor/PatientVitalsMonitor";
 
 interface HL7MonitorProps {
   assetId: string;
@@ -82,9 +82,9 @@ const HL7Monitor = (props: HL7MonitorProps) => {
 
   if (isLoading) return <Loading />;
   return (
-    <>
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="w-full md:w-[350px] shrink-0 flex flex-col gap-4">
+    <div className="flex w-full mx-auto xl:mt-8">
+      <div className="flex flex-col xl:flex-row-reverse gap-4 mx-auto">
+        <div className="w-full xl:max-w-xs shrink-0 flex flex-col gap-4">
           <Card className="w-full flex flex-col">
             <form onSubmit={handleSubmit}>
               <h2 className="text-lg font-bold mb-2">Connection</h2>
@@ -94,6 +94,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                   label="Middleware Hostname"
                   value={middlewareHostname}
                   onChange={(e) => setMiddlewareHostname(e.value)}
+                  errorClassName="hidden"
                 />
                 <TextFormField
                   name="localipAddress"
@@ -110,19 +111,18 @@ const HL7Monitor = (props: HL7MonitorProps) => {
               </div>
             </form>
           </Card>
-          <Card className="">
-            {assetType === "HL7MONITOR" ? (
+          <Card>
+            {assetType === "HL7MONITOR" && (
               <MonitorConfigure asset={asset as AssetData} />
-            ) : null}
+            )}
           </Card>
         </div>
-        <div className="w-full grow-0 overflow-hidden relative rounded-xl bg-white shadow">
-          <LegacyPatientVitalsCard
-            socketUrl={`wss://${facilityMiddlewareHostname}/observations/${localipAddress}`}
-          />
-        </div>
+
+        <PatientVitalsMonitor
+          socketUrl={`wss://${facilityMiddlewareHostname}/observations/${localipAddress}`}
+        />
       </div>
-    </>
+    </div>
   );
 };
 export default HL7Monitor;
