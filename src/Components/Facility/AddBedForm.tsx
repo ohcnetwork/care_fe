@@ -10,10 +10,8 @@ import {
   updateFacilityBed,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  LegacySelectField,
-  LegacyCheckboxField,
-} from "../Common/HelperInputFields";
+import { LegacySelectField } from "../Common/HelperInputFields";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -94,7 +92,7 @@ export const AddBedForm = (props: BedFormProps) => {
       isValid = false;
       setErrors((prev) => ({ ...prev, bedType: "Please select a bed type" }));
     }
-    if (!multipleBeds) {
+    if (multipleBeds === false) {
       setNumberOfBeds(1);
     }
     if (data.number_of_beds < 1) {
@@ -103,6 +101,14 @@ export const AddBedForm = (props: BedFormProps) => {
         ...prev,
         numberOfBeds: "Please enter a number larger than 0.",
       }));
+
+      if (data.number_of_beds > 25) {
+        isValid = false;
+        setErrors((prev) => ({
+          ...prev,
+          numberOfBeds: "Please enter a number smaller than 25.",
+        }));
+      }
     }
 
     return isValid;
@@ -227,10 +233,13 @@ export const AddBedForm = (props: BedFormProps) => {
                 {!bedId && (
                   <div>
                     <div>
-                      <LegacyCheckboxField
+                      <CheckBoxFormField
                         label="Do you want to make multiple beds?"
-                        checked={multipleBeds}
-                        onClick={() => setMultipleBeds(!multipleBeds)}
+                        onChange={() => {
+                          setMultipleBeds(!multipleBeds);
+                          if (!multipleBeds) setNumberOfBeds(1);
+                        }}
+                        name={"multipleBeds"}
                       />
                     </div>
                     <div className="mt-2">
