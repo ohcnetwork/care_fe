@@ -38,7 +38,7 @@ import { NursingPlot } from "./Consultations/NursingPlot";
 import { NutritionPlots } from "./Consultations/NutritionPlots";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import { PatientModel } from "../Patient/models";
-import PatientVitalsCard from "../Patient/PatientVitalsCard";
+import LegacyPatientVitalsCard from "../Patient/LegacyPatientVitalsCard";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 import ReadMore from "../Common/components/Readmore";
@@ -570,7 +570,7 @@ export const ConsultationDetails = (props: any) => {
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
               {!consultationData.discharge_date && (
                 <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
-                  <PatientVitalsCard
+                  <LegacyPatientVitalsCard
                     patient={patientData}
                     facilityId={patientData.facility}
                   />

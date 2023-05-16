@@ -67,7 +67,7 @@ import {
 import { BLACKLISTED_PATHS, LocalStorageKeys } from "../Common/constants";
 import { UpdateFacilityMiddleware } from "../Components/Facility/UpdateFacilityMiddleware";
 import useConfig from "../Common/hooks/useConfig";
-import FacilityCNS from "../Components/Facility/FacilityCNS";
+import LegacyFacilityCNS from "../Components/Facility/LegacyFacilityCNS";
 import ConsultationClaims from "../Components/Facility/ConsultationClaims";
 import { handleSignOut } from "../Utils/utils";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
@@ -324,7 +324,7 @@ export default function AppRouter() {
       facilityId,
     }: any) => <AssetConfigure assetId={assetId} facilityId={facilityId} />,
     "/facility/:facilityId/cns": ({ facilityId }: any) => (
-      <FacilityCNS facilityId={facilityId} />
+      <LegacyFacilityCNS facilityId={facilityId} />
     ),
 
     "/shifting": () =>

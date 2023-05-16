@@ -18,7 +18,7 @@ import { FacilityModel } from "./models";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { uniqBy } from "lodash";
 import DialogModal from "../Common/Dialog";
-import { MonitorCard } from "./MonitorCard";
+import { LegacyMonitorCard } from "./MonitorCard";
 
 interface Monitor {
   patient: PatientModel;
@@ -29,7 +29,11 @@ interface Monitor {
 const PER_PAGE_LIMIT = 6;
 const CNS_REFRESH_INTERVAL = 0.5 * 60e3;
 
-export default function FacilityCNS({ facilityId }: { facilityId: string }) {
+export default function LegacyFacilityCNS({
+  facilityId,
+}: {
+  facilityId: string;
+}) {
   const dispatch = useDispatch<any>();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [monitors, setMonitors] = useState<Monitor[]>();
@@ -280,7 +284,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
                 currentPage * PER_PAGE_LIMIT
               )
               .map(({ patient, socketUrl, asset }) => (
-                <MonitorCard
+                <LegacyMonitorCard
                   key={patient.id}
                   location={asset.location_object}
                   facilityId={facilityId}
@@ -295,7 +299,7 @@ export default function FacilityCNS({ facilityId }: { facilityId: string }) {
                 currentPage * PER_PAGE_LIMIT
               )
               .map(({ patient, socketUrl, asset }) => (
-                <MonitorCard
+                <LegacyMonitorCard
                   key={patient.id}
                   location={asset.location_object}
                   facilityId={facilityId}

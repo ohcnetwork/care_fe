@@ -11,7 +11,7 @@ import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
 import Card from "../../../CAREUI/display/Card";
 import { Submit } from "../../Common/components/ButtonV2";
-import PatientVitalsCard from "../../Patient/PatientVitalsCard";
+import LegacyPatientVitalsCard from "../../Patient/LegacyPatientVitalsCard";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import TextFormField from "../../Form/FormFields/TextFormField";
 
@@ -117,7 +117,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
           </Card>
         </div>
         <div className="w-full grow-0 overflow-hidden relative rounded-xl bg-white shadow">
-          <PatientVitalsCard
+          <LegacyPatientVitalsCard
             socketUrl={`wss://${facilityMiddlewareHostname}/observations/${localipAddress}`}
           />
         </div>

@@ -10,7 +10,7 @@ interface LocationSelectProps {
   className?: string;
   searchAll?: boolean;
   multiple?: boolean;
-  facilityId: number;
+  facilityId: number | string;
   showAll?: boolean;
   selected: string | string[] | null;
   setSelected: (selected: string | string[] | null) => void;
