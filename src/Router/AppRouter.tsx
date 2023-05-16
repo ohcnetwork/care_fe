@@ -67,10 +67,10 @@ import {
 import { BLACKLISTED_PATHS, LocalStorageKeys } from "../Common/constants";
 import { UpdateFacilityMiddleware } from "../Components/Facility/UpdateFacilityMiddleware";
 import useConfig from "../Common/hooks/useConfig";
-import LegacyFacilityCNS from "../Components/Facility/LegacyFacilityCNS";
 import ConsultationClaims from "../Components/Facility/ConsultationClaims";
 import { handleSignOut } from "../Utils/utils";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
+import CentralNursingStation from "../Components/Facility/CentralNursingStation";
 
 export default function AppRouter() {
   const { static_black_logo, enable_hcx } = useConfig();
@@ -324,7 +324,7 @@ export default function AppRouter() {
       facilityId,
     }: any) => <AssetConfigure assetId={assetId} facilityId={facilityId} />,
     "/facility/:facilityId/cns": ({ facilityId }: any) => (
-      <LegacyFacilityCNS facilityId={facilityId} />
+      <CentralNursingStation facility={facilityId} />
     ),
 
     "/shifting": () =>

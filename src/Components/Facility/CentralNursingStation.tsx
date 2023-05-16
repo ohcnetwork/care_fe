@@ -17,6 +17,9 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { LocationSelect } from "../Common/LocationSelect";
+import Pagination from "../Common/Pagination";
+
+const PER_PAGE_LIMIT = 6;
 
 interface Props {
   facility: string;
@@ -31,9 +34,9 @@ export default function CentralNursingStation({ facility }: Props) {
   const [data, setData] =
     useState<Parameters<typeof PatientVitalsMonitor>[0][]>();
   const [totalCount, setTotalCount] = useState(0);
-  const { qParams, updateQuery, Pagination } = useFilters({ limit: 9 });
-
-  // TODO: paginated query
+  const { qParams, updateQuery, updatePage } = useFilters({
+    limit: PER_PAGE_LIMIT,
+  });
 
   useEffect(() => {
     async function fetchFacilityOrObject() {
@@ -47,6 +50,13 @@ export default function CentralNursingStation({ facility }: Props) {
     async function fetchData() {
       setData(undefined);
 
+      const params = {
+        ...qParams,
+        page: qParams.page || 1,
+        limit: PER_PAGE_LIMIT,
+        offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
+      };
+
       const [facilityObj, patientsRes, assetBedsRes] = await Promise.all([
         fetchFacilityOrObject(),
         dispatch(
@@ -55,7 +65,7 @@ export default function CentralNursingStation({ facility }: Props) {
             "cns-list-patients"
           )
         ),
-        dispatch(listAssetBeds({ facility, ...qParams })),
+        dispatch(listAssetBeds({ facility, ...params })),
       ]);
 
       if (
@@ -84,8 +94,6 @@ export default function CentralNursingStation({ facility }: Props) {
     fetchData();
   }, [dispatch, facility, qParams.page, qParams.location]);
 
-  if (!data) return <Loading />;
-
   return (
     <Page
       title="Central Nursing Station"
@@ -102,6 +110,8 @@ export default function CentralNursingStation({ facility }: Props) {
             multiple={false}
             facilityId={facility}
             errors=""
+            errorClassName="hidden"
+            className="w-64"
           />
           <ButtonV2
             variant="secondary"
@@ -121,20 +131,29 @@ export default function CentralNursingStation({ facility }: Props) {
             />
           </ButtonV2>
 
-          <Pagination totalCount={totalCount} />
+          <Pagination
+            className=""
+            cPage={qParams.page}
+            defaultPerPage={PER_PAGE_LIMIT}
+            data={{ totalCount }}
+            onChange={(page) => updatePage(page)}
+          />
         </div>
       }
     >
-      {data.length === 0 && (
+      {data === undefined ? (
+        <Loading />
+      ) : data.length === 0 ? (
         <div className="flex w-full h-[80vh] items-center justify-center text-black text-center">
           No Vitals Monitor present in this location or facility.
         </div>
+      ) : (
+        <div className="mt-2 grid grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3 gap-2">
+          {data.map((monitor) => (
+            <PatientVitalsMonitor key={monitor.assetBed.id} {...monitor} />
+          ))}
+        </div>
       )}
-      <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-1">
-        {data.map((monitor) => (
-          <PatientVitalsMonitor key={monitor.assetBed.id} {...monitor} />
-        ))}
-      </div>
     </Page>
   );
 }

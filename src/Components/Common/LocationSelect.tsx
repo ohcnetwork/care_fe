@@ -14,6 +14,7 @@ interface LocationSelectProps {
   showAll?: boolean;
   selected: string | string[] | null;
   setSelected: (selected: string | string[] | null) => void;
+  errorClassName?: string;
 }
 
 export const LocationSelect = (props: LocationSelectProps) => {
@@ -66,6 +67,7 @@ export const LocationSelect = (props: LocationSelectProps) => {
       optionValue={(option) => option.id}
       error={errors}
       className={className}
+      errorClassName={props.errorClassName}
     />
   ) : (
     <AutocompleteFormField
@@ -82,6 +84,7 @@ export const LocationSelect = (props: LocationSelectProps) => {
       optionValue={(option) => option.id}
       error={errors}
       className={className}
+      errorClassName={props.errorClassName}
     />
   );
 };

@@ -17,7 +17,7 @@ export default function PatientVitalsMonitor({ socketUrl }: Props) {
   }, [socketUrl]);
 
   return (
-    <div className="flex flex-col md:flex-row divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2 bg-slate-950 p-2 rounded">
+    <div className="flex flex-col md:flex-row md:justify-between divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2 bg-slate-900 p-2 rounded">
       <div className="relative" style={{ ...waveformCanvas.size }}>
         <canvas
           className="absolute top-0 left-0"
@@ -32,10 +32,10 @@ export default function PatientVitalsMonitor({ socketUrl }: Props) {
           {...waveformCanvas.size}
         />
       </div>
-      <div className="grid grid-cols-3 md:grid-cols-1 md:divide-y divide-blue-600 text-white font-mono tracking-wider">
+      <div className="grid grid-cols-3 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
         {/* Pulse Rate */}
         <div className="flex justify-between items-center p-1">
-          <div className="flex flex-col h-full items-start text-sm text-green-400 font-bold">
+          <div className="flex flex-col h-full items-start text-sm text-primary-400 font-bold">
             <span>ECG</span>
             <span>{data.pulseRate?.unit ?? "--"}</span>
           </div>
@@ -56,7 +56,7 @@ export default function PatientVitalsMonitor({ socketUrl }: Props) {
           <div className="flex w-full text-sm text-orange-500 font-medium justify-center">
             Sys / Dia
           </div>
-          <div className="flex w-full text-orange-300 text-3xl md:text-5xl font-black justify-center">
+          <div className="flex w-full text-orange-300 text-2xl md:text-4xl font-black justify-center">
             <span>{data.bp?.systolic.value ?? "--"}</span>
             <span>/</span>
             <span>{data.bp?.diastolic.value ?? "--"}</span>
