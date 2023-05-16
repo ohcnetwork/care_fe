@@ -84,15 +84,17 @@ export default function CentralNursingStation({ facility }: Props) {
 
       setTotalCount(assetBedsRes.data.count);
       setData(
-        assetBeds.map((assetBed) => ({
-          assetBed,
-          patient: patients.find(
-            (patient) =>
-              patient.last_consultation?.current_bed?.bed_object.id ===
-              assetBed.bed_object.id
-          ),
-          socketUrl: `wss://${facilityObj.middleware_address}/observations/${assetBed.asset_object.meta?.local_ip_address}`,
-        }))
+        assetBeds
+          .filter((obj) => obj.asset_object.meta?.asset_type === "HL7MONITOR")
+          .map((assetBed) => ({
+            assetBed,
+            patient: patients.find(
+              (patient) =>
+                patient.last_consultation?.current_bed?.bed_object.id ===
+                assetBed.bed_object.id
+            ),
+            socketUrl: `wss://${facilityObj.middleware_address}/observations/${assetBed.asset_object.meta?.local_ip_address}`,
+          }))
       );
     }
     fetchData();
