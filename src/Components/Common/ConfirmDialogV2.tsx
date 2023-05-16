@@ -1,12 +1,13 @@
 import DialogModal from "./Dialog";
-import ButtonV2, { ButtonVariant, Cancel } from "./components/ButtonV2";
+import { ButtonVariant, Cancel, Submit } from "./components/ButtonV2";
 
 type ConfirmDialogV2Props = {
+  className?: string;
   title: React.ReactNode;
   description?: React.ReactNode;
   disabled?: boolean;
   show: boolean;
-  action: string;
+  action: React.ReactNode;
   variant?: ButtonVariant;
   onClose: () => void;
   onConfirm: () => void;
@@ -15,34 +16,22 @@ type ConfirmDialogV2Props = {
 };
 
 const ConfirmDialogV2 = ({
-  title,
-  description,
-  show,
   disabled,
   variant,
   action,
-  onClose,
   onConfirm,
   cancelLabel,
   children,
+  ...props
 }: ConfirmDialogV2Props) => {
   return (
-    <DialogModal
-      onClose={onClose}
-      title={title}
-      description={
-        <span className={`font-medium text-${variant || "secondary"}-500`}>
-          {description}
-        </span>
-      }
-      show={show}
-    >
+    <DialogModal {...props}>
       {children}
       <div className="mt-6 flex justify-end gap-2 w-full flex-col md:flex-row">
-        <Cancel onClick={onClose} label={cancelLabel} />
-        <ButtonV2 onClick={onConfirm} variant={variant} disabled={disabled}>
+        <Cancel onClick={props.onClose} label={cancelLabel} />
+        <Submit onClick={onConfirm} variant={variant} disabled={disabled}>
           {action}
-        </ButtonV2>
+        </Submit>
       </div>
     </DialogModal>
   );

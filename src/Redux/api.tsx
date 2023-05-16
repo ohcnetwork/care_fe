@@ -803,6 +803,43 @@ const routes: Routes = {
     method: "GET",
   },
 
+  // Prescription endpoints
+
+  listPrescriptions: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
+    method: "GET",
+  },
+
+  createPrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
+    method: "POST",
+  },
+
+  listAdministrations: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/",
+    method: "GET",
+  },
+
+  getAdministration: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/{external_id}/",
+    method: "GET",
+  },
+
+  getPrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/",
+    method: "GET",
+  },
+
+  administerPrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/administer/",
+    method: "POST",
+  },
+
+  discontinuePrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
+    method: "POST",
+  },
+
   // HCX Endpoints
 
   listPMJYPackages: {

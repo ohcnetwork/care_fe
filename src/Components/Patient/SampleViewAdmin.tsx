@@ -378,7 +378,7 @@ export default function SampleViewAdmin() {
           </div>
 
           <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
-          <SampleFilter {...advancedFilter} />
+          <SampleFilter {...advancedFilter} key={window.location.search} />
         </div>
         <FilterBadges
           badges={({ badge, value }) => [

@@ -334,7 +334,11 @@ export default function ResultList() {
         </table>
       </div>
       <Pagination totalCount={totalCount} />
-      <ListFilter {...advancedFilter} dataList={lsgWardData} />
+      <ListFilter
+        {...advancedFilter}
+        dataList={lsgWardData}
+        key={window.location.search}
+      />
     </div>
   );
 }
