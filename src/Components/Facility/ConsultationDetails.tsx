@@ -483,19 +483,23 @@ export const ConsultationDetails = (props: any) => {
                                 {consultationData.discharge_notes || "--"}
                               </span>
                             </div>
-                            <PrescriptionsTable
-                              consultation_id={consultationData.id}
-                              is_prn={false}
-                              readonly
-                              prescription_type="DISCHARGE"
-                            />
+                            <div className="overflow-x-auto overflow-y-hidden">
+                              <PrescriptionsTable
+                                consultation_id={consultationData.id}
+                                is_prn={false}
+                                readonly
+                                prescription_type="DISCHARGE"
+                              />
+                            </div>
                             <hr className="border border-gray-300 my-2"></hr>
-                            <PrescriptionsTable
-                              consultation_id={consultationData.id}
-                              is_prn
-                              readonly
-                              prescription_type="DISCHARGE"
-                            />
+                            <div className="overflow-x-auto overflow-y-hidden">
+                              <PrescriptionsTable
+                                consultation_id={consultationData.id}
+                                is_prn
+                                readonly
+                                prescription_type="DISCHARGE"
+                              />
+                            </div>
                           </div>
                         )}
                         {consultationData.discharge_reason === "EXP" && (

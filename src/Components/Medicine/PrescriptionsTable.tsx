@@ -55,6 +55,14 @@ export default function PrescriptionsTable({
   }, [consultation_id]);
 
   const lastModified = prescriptions?.[0]?.modified_date;
+  const tkeys =
+    prescription_type === "REGULAR"
+      ? is_prn
+        ? REGULAR_PRN_TKEYS
+        : REGULAR_NORMAL_TKEYS
+      : is_prn
+      ? DISCHARGE_PRN_TKEYS
+      : DISCHARGE_NORMAL_TKEYS;
 
   return (
     <div>
@@ -188,27 +196,7 @@ export default function PrescriptionsTable({
             <ResponsiveMedicineTable
               onClick={setDetailedViewFor}
               maxWidthColumn={0}
-              theads={(is_prn
-                ? [
-                    "medicine",
-                    "route",
-                    "dosage",
-                    "indicator",
-                    "max_dosage_24_hrs",
-                    "min_time_bw_doses",
-                    "notes",
-                    "last_administered",
-                  ]
-                : [
-                    "medicine",
-                    "route",
-                    "dosage",
-                    "frequency",
-                    "days",
-                    "notes",
-                    "last_administered",
-                  ]
-              ).map((_) => t(_))}
+              theads={Object.keys(tkeys).map((_) => t(_))}
               list={
                 prescriptions?.map((obj) => ({
                   ...obj,
@@ -228,28 +216,7 @@ export default function PrescriptionsTable({
                   ),
                 })) || []
               }
-              objectKeys={
-                is_prn
-                  ? [
-                      "medicine",
-                      "route__pretty",
-                      "dosage",
-                      "indicator",
-                      "max_dosage",
-                      "min_hours_between_doses__pretty",
-                      "notes",
-                      "last_administered__pretty",
-                    ]
-                  : [
-                      "medicine",
-                      "route__pretty",
-                      "dosage",
-                      "frequency__pretty",
-                      "days__pretty",
-                      "notes",
-                      "last_administered__pretty",
-                    ]
-              }
+              objectKeys={Object.values(tkeys)}
               fieldsToDisplay={[2, 3]}
               actions={
                 !readonly
@@ -320,3 +287,41 @@ export default function PrescriptionsTable({
     </div>
   );
 }
+
+const COMMON_TKEYS = {
+  medicine: "medicine",
+  route: "route__pretty",
+  dosage: "dosage",
+};
+
+const REGULAR_NORMAL_TKEYS = {
+  ...COMMON_TKEYS,
+  frequency: "frequency__pretty",
+  days: "days__pretty",
+  notes: "notes",
+  last_administered: "last_administered__pretty",
+};
+
+const REGULAR_PRN_TKEYS = {
+  ...COMMON_TKEYS,
+  indicator: "indicator",
+  max_dosage_24_hrs: "max_dosage",
+  min_time_bw_doses: "min_hours_between_doses__pretty",
+  notes: "notes",
+  last_administered: "last_administered__pretty",
+};
+
+const DISCHARGE_NORMAL_TKEYS = {
+  ...COMMON_TKEYS,
+  frequency: "frequency__pretty",
+  days: "days__pretty",
+  notes: "notes",
+};
+
+const DISCHARGE_PRN_TKEYS = {
+  ...COMMON_TKEYS,
+  indicator: "indicator",
+  max_dosage_24_hrs: "max_dosage",
+  min_time_bw_doses: "min_hours_between_doses__pretty",
+  notes: "notes",
+};

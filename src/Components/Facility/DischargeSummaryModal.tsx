@@ -11,7 +11,8 @@ import {
 } from "../Form/FieldValidators";
 import { useDispatch } from "react-redux";
 import { emailDischargeSummary } from "../../Redux/actions";
-import { Success } from "../../Utils/Notifications";
+import { Error, Success } from "../../Utils/Notifications";
+import { previewDischargeSummary } from "../../Redux/actions";
 
 interface Props {
   show: boolean;
@@ -26,8 +27,22 @@ export default function DischargeSummaryModal(props: Props) {
   const [emailing, setEmailing] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     setDownloading(true);
+
+    const res = await dispatch(
+      previewDischargeSummary({ external_id: props.consultation.id })
+    );
+
+    if (res.status === 200) {
+      window.open(res.data.read_signed_url, "_blank");
+      props.onClose();
+    } else {
+      Error({
+        msg: "Discharge summary is not ready yet. Please try again later.",
+      });
+    }
+    setDownloading(false);
   };
 
   const handleEmail = async () => {
@@ -52,7 +67,10 @@ export default function DischargeSummaryModal(props: Props) {
       Success({
         msg: "We will be sending an email shortly. Please check your inbox.",
       });
+      props.onClose();
     }
+
+    setEmailing(false);
   };
 
   return (
@@ -60,9 +78,19 @@ export default function DischargeSummaryModal(props: Props) {
       show={props.show}
       onClose={props.onClose}
       title="Download discharge summary"
+      className="md:max-w-2xl"
     >
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-col gap-1"></div>
+      <div className="flex flex-col">
+        <div className="flex flex-col gap-1 mb-6">
+          <span className="text-sm text-gray-800">
+            Please enter your email id to receive the discharge summary.
+          </span>
+          <span className="text-sm text-warning-600">
+            <CareIcon className="care-l-exclamation-triangle text-base mr-1" />
+            Disclaimer: This is an automatically generated email using
+            information captured from CARE.
+          </span>
+        </div>
         <TextFormField
           name="email"
           type="email"
@@ -75,19 +103,27 @@ export default function DischargeSummaryModal(props: Props) {
           className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
           role="alert"
         >
-          <strong className="block sm:inline font-bold">
+          <span className="block sm:inline text-sm font-medium">
             Verify you've entered the correct email address before continuing.
             We cannot deliver the email if the email address is invalid.
-          </strong>
+          </span>
         </div>
-        <div className="flex flex-col-reverse lg:flex-row lg:justify-end">
+        <div className="flex flex-col-reverse lg:flex-row gap-2 lg:justify-end mt-6">
           <Cancel onClick={props.onClose} />
           <Submit onClick={handleDownload} disabled={emailing || downloading}>
-            <CareIcon className="care-l-file-download-alt text-lg" />
+            {downloading ? (
+              <CareIcon className="care-l-spinner text-lg animate-spin" />
+            ) : (
+              <CareIcon className="care-l-file-download-alt text-lg" />
+            )}
             <span>Download</span>
           </Submit>
           <Submit onClick={handleEmail} disabled={emailing || downloading}>
-            <CareIcon className="care-l-fast-mail text-lg" />
+            {emailing ? (
+              <CareIcon className="care-l-spinner text-lg animate-spin" />
+            ) : (
+              <CareIcon className="care-l-fast-mail text-lg" />
+            )}
             <span>Send email</span>
           </Submit>
         </div>
