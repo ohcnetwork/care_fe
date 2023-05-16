@@ -584,8 +584,11 @@ export const deleteLastInventoryLog = (params: object) => {
   return fireRequest("deleteLastInventoryLog", [], {}, params);
 };
 
-export const discharge = (params: object, pathParams: object) => {
-  return fireRequest("discharge", [], params, pathParams);
+export const previewDischargeSummary = (pathParams: object) => {
+  return fireRequest("dischargeSummaryPreview", [], {}, pathParams);
+};
+export const emailDischargeSummary = (params: object, pathParams: object) => {
+  return fireRequest("dischargeSummaryEmail", [], params, pathParams);
 };
 export const dischargePatient = (params: object, pathParams: object) => {
   return fireRequest("dischargePatient", [], params, pathParams);

@@ -1,5 +1,6 @@
 import { AssignedToObjectModel } from "../Patient/models";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
+import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 
 export interface LocalBodyModel {
   name: string;
@@ -87,8 +88,8 @@ export interface ConsultationModel {
   created_date?: string;
   discharge_date?: string;
   discharge_reason?: string;
-  discharge_prescription: any;
-  discharge_prn_prescription: any;
+  discharge_prescription: NormalPrescription;
+  discharge_prn_prescription: PRNPrescription;
   discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;

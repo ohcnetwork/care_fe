@@ -588,12 +588,16 @@ const routes: Routes = {
     path: "/api/v1/facility/{facility_external_id}/inventory/delete_last/?item={id}",
     method: "DELETE",
   },
-  discharge: {
-    path: "/api/v1/patient/{external_id}/discharge_summary/",
+  dischargeSummaryPreview: {
+    path: "/api/v1/consultation/{external_id}/preview_discharge_summary",
+    method: "GET",
+  },
+  dischargeSummaryEmail: {
+    path: "/api/v1/consultation/{external_id}/email_discharge_summary/",
     method: "POST",
   },
   dischargePatient: {
-    path: "/api/v1/patient/{id}/discharge_patient/",
+    path: "/api/v1/consultation/{id}/discharge_patient/",
     method: "POST",
   },
   //Profile

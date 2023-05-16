@@ -35,3 +35,11 @@ export const RequiredFieldValidator = (message = "Field is required") => {
     if (Array.isArray(value) && value.length === 0) return message;
   };
 };
+
+export const EmailValidator = (message = "Invalid email address") => {
+  return (value: string): FieldError => {
+    const pattern =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return pattern.test(value) ? undefined : message;
+  };
+};

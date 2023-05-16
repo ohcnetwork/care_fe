@@ -153,30 +153,34 @@ export default function PrescriptionsTable({
             </span>
           </div>
         </div>
-        <div className="flex w-full mt-2 md:mt-0 md:w-auto flex-col sm:flex-row gap-2 justify-end">
-          <ButtonV2
-            disabled={readonly}
-            variant="secondary"
-            border
-            href="prescriptions"
-            className="w-full lg:w-auto"
-          >
-            <CareIcon className="care-l-pen text-lg" />
-            <span className="hidden lg:block">{t("edit_prescriptions")}</span>
-            <span className="block lg:hidden">{t("edit")}</span>
-          </ButtonV2>
-          <ButtonV2
-            disabled={readonly}
-            ghost
-            border
-            onClick={() => setShowBulkAdminister(true)}
-            className="w-full lg:w-auto"
-          >
-            <CareIcon className="care-l-syringe text-lg" />
-            <span className="hidden lg:block">{t("administer_medicines")}</span>
-            <span className="block lg:hidden">{t("administer")}</span>
-          </ButtonV2>
-        </div>
+        {prescription_type === "REGULAR" && (
+          <div className="flex w-full mt-2 md:mt-0 md:w-auto flex-col sm:flex-row gap-2 justify-end">
+            <ButtonV2
+              disabled={readonly}
+              variant="secondary"
+              border
+              href="prescriptions"
+              className="w-full lg:w-auto"
+            >
+              <CareIcon className="care-l-pen text-lg" />
+              <span className="hidden lg:block">{t("edit_prescriptions")}</span>
+              <span className="block lg:hidden">{t("edit")}</span>
+            </ButtonV2>
+            <ButtonV2
+              disabled={readonly}
+              ghost
+              border
+              onClick={() => setShowBulkAdminister(true)}
+              className="w-full lg:w-auto"
+            >
+              <CareIcon className="care-l-syringe text-lg" />
+              <span className="hidden lg:block">
+                {t("administer_medicines")}
+              </span>
+              <span className="block lg:hidden">{t("administer")}</span>
+            </ButtonV2>
+          </div>
+        )}
       </div>
       <div className="flex flex-col">
         <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">

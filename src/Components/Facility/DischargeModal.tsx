@@ -139,7 +139,7 @@ const DischargeModal = ({
             true
           ),
         },
-        { id: consultationData.patient }
+        { id: consultationData.id }
       )
     );
 
