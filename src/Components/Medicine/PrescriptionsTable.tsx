@@ -109,7 +109,7 @@ export default function PrescriptionsTable({
         <DialogModal
           onClose={() => setDetailedViewFor(undefined)}
           title={t("prescription_details")}
-          className="max-w-4xl w-full"
+          className="md:max-w-4xl w-full"
           show
         >
           <div className="mt-4 flex flex-col gap-4">

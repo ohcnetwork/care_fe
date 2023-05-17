@@ -10,7 +10,10 @@ import {
   RequiredFieldValidator,
 } from "../Form/FieldValidators";
 import { useDispatch } from "react-redux";
-import { emailDischargeSummary } from "../../Redux/actions";
+import {
+  emailDischargeSummary,
+  generateDischargeSummary,
+} from "../../Redux/actions";
 import { Error, Success } from "../../Utils/Notifications";
 import { previewDischargeSummary } from "../../Redux/actions";
 
@@ -36,13 +39,37 @@ export default function DischargeSummaryModal(props: Props) {
 
     if (res.status === 200) {
       window.open(res.data.read_signed_url, "_blank");
+      setDownloading(false);
       props.onClose();
-    } else {
-      Error({
-        msg: "Discharge summary is not ready yet. Please try again later.",
-      });
+      return;
     }
-    setDownloading(false);
+
+    const generateRes = dispatch(
+      generateDischargeSummary({ external_id: props.consultation.id })
+    );
+
+    if (generateRes.status !== 200) {
+      Error({ msg: "Something went wrong." });
+      setDownloading(false);
+      return;
+    }
+
+    Success({ msg: "Generating discharge summary..." });
+    setTimeout(async () => {
+      const res = await dispatch(
+        previewDischargeSummary({ external_id: props.consultation.id })
+      );
+      if (res.status === 200) {
+        window.open(res.data.read_signed_url, "_blank");
+        setDownloading(false);
+        props.onClose();
+      } else {
+        Error({
+          msg: "Discharge summary is not ready yet. Please try again later.",
+        });
+        setDownloading(false);
+      }
+    }, 5000);
   };
 
   const handleEmail = async () => {
@@ -110,7 +137,7 @@ export default function DischargeSummaryModal(props: Props) {
         </div>
         <div className="flex flex-col-reverse lg:flex-row gap-2 lg:justify-end mt-6">
           <Cancel onClick={props.onClose} />
-          <Submit onClick={handleDownload} disabled={emailing || downloading}>
+          <Submit onClick={handleDownload} disabled={downloading}>
             {downloading ? (
               <CareIcon className="care-l-spinner text-lg animate-spin" />
             ) : (
@@ -118,7 +145,7 @@ export default function DischargeSummaryModal(props: Props) {
             )}
             <span>Download</span>
           </Submit>
-          <Submit onClick={handleEmail} disabled={emailing || downloading}>
+          <Submit onClick={handleEmail} disabled={emailing}>
             {emailing ? (
               <CareIcon className="care-l-spinner text-lg animate-spin" />
             ) : (

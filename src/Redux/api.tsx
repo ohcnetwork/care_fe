@@ -588,6 +588,10 @@ const routes: Routes = {
     path: "/api/v1/facility/{facility_external_id}/inventory/delete_last/?item={id}",
     method: "DELETE",
   },
+  dischargeSummaryGenerate: {
+    path: "/api/v1/consultation/{external_id}/generate_discharge_summary/",
+    method: "POST",
+  },
   dischargeSummaryPreview: {
     path: "/api/v1/consultation/{external_id}/preview_discharge_summary",
     method: "GET",
