@@ -48,7 +48,7 @@ jobs:
         with:
           env: SKIP_PREFLIGHT_CHECK=true
           install: false
-          start: "npm run dev:react"
+          start: "npx vite --host"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: electron
