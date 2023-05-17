@@ -6,7 +6,7 @@ import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { DoctorModal, OptionsType } from "./models";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel } from "../Common/components/ButtonV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
@@ -147,6 +147,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
   };
 
   const handleSubmit = async (e: any) => {
+    const submitBtnID = e.currentTarget?.id;
     e.preventDefault();
     const valid = validateData();
     if (valid) {
@@ -181,7 +182,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
       }
       handleUpdate();
 
-      if (e.nativeEvent.submitter.id === "save-and-exit") handleClose();
+      if (submitBtnID === "save-and-exit") handleClose();
     }
   };
 
@@ -211,55 +212,56 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
         </div>
       ) : (
         <div className={className}>
-          <form onSubmit={handleSubmit}>
-            <div>
-              <FieldLabel className="mb-2" required={true}>
-                Area of specialization
-              </FieldLabel>
-              <SelectMenuV2
-                id="area-of-specialization"
-                value={doctorTypes.find((type) => type.id == state.form.area)}
-                options={doctorTypes.filter((type) => !type.disabled)}
-                optionLabel={(option) => option.text}
-                requiredError={state.errors.area.length !== 0}
-                onChange={(e) =>
-                  handleFormFieldChange({
-                    name: "area",
-                    value: (e && e.id) || "",
-                  })
-                }
-                disabled={!!id}
-              />
-              <LegacyErrorHelperText error={state.errors.area} />
-            </div>
-            <div>
-              <TextFormField
-                required
-                id="count"
-                label="Count"
-                name="count"
-                type="number"
-                value={state.form.count}
-                onChange={handleFormFieldChange}
-                error={state.errors.count}
-                min={0}
-              />
-            </div>
-            <div>
-              <div className="flex justify-between flex-col md:flex-row mt-4">
-                <div className="flex flex-row w-full sm:w-auto gap-4 mt-2">
-                  <Cancel onClick={() => handleClose()} />
-                </div>
-                <div className="flex flex-row w-full sm:w-auto flex-wrap gap-2 mt-2">
-                  {!isLastOptionType &&
-                    headerText === "Add Doctor Capacity" && (
-                      <Submit id="save-and-exit" label="Save Doctor Capacity" />
-                    )}
-                  <Submit id="doctor-save" label={buttonText} />
-                </div>
+          <div>
+            <FieldLabel className="mb-2" required={true}>
+              Area of specialization
+            </FieldLabel>
+            <SelectMenuV2
+              id="area-of-specialization"
+              value={doctorTypes.find((type) => type.id == state.form.area)}
+              options={doctorTypes.filter((type) => !type.disabled)}
+              optionLabel={(option) => option.text}
+              requiredError={state.errors.area.length !== 0}
+              onChange={(e) =>
+                handleFormFieldChange({
+                  name: "area",
+                  value: (e && e.id) || "",
+                })
+              }
+              disabled={!!id}
+            />
+            <LegacyErrorHelperText error={state.errors.area} />
+          </div>
+          <div>
+            <TextFormField
+              required
+              id="count"
+              label="Count"
+              name="count"
+              type="number"
+              value={state.form.count}
+              onChange={handleFormFieldChange}
+              error={state.errors.count}
+              min={0}
+            />
+          </div>
+          <div>
+            <div className="flex justify-between flex-col md:flex-row mt-4">
+              <div className="flex flex-row w-full sm:w-auto gap-4 mt-2">
+                <Cancel onClick={() => handleClose()} />
+              </div>
+              <div className="flex flex-row w-full sm:w-auto flex-wrap gap-2 mt-2">
+                {!isLastOptionType && headerText === "Add Doctor Capacity" && (
+                  <ButtonV2 id="save-and-exit" onClick={handleSubmit}>
+                    Save Doctor Capacity
+                  </ButtonV2>
+                )}
+                <ButtonV2 id="doctor-save" onClick={handleSubmit}>
+                  {buttonText}
+                </ButtonV2>
               </div>
             </div>
-          </form>
+          </div>
         </div>
       )}
     </div>

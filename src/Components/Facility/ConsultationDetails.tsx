@@ -10,7 +10,6 @@ import { getConsultation, getPatient } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-
 import { ABGPlots } from "./Consultations/ABGPlots";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -32,7 +31,6 @@ import PatientVitalsCard from "../Patient/PatientVitalsCard";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 import ReadMore from "../Common/components/Readmore";
-import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { formatDate } from "../../Utils/utils";
 import loadable from "@loadable/component";
@@ -721,6 +719,7 @@ export const ConsultationDetails = (props: any) => {
                             />
                           </div>
                         )}
+
                         {consultationData.special_instruction && (
                           <div className="mt-4">
                             <h5>Special Instruction</h5>
@@ -735,6 +734,53 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
+              {consultationData.procedure &&
+                consultationData.procedure.length > 0 && (
+                  <div className="bg-white rounded-lg shadow my-4 p-4">
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead>
+                          <tr>
+                            <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
+                              Procedure
+                            </th>
+                            <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
+                              Notes
+                            </th>
+                            <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
+                              Repetitive
+                            </th>
+                            <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
+                              Time / Frequency
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {consultationData.procedure?.map(
+                            (procedure, index) => (
+                              <tr key={index}>
+                                <td className="p-4 whitespace-nowrap overflow-hidden">
+                                  {procedure.procedure}
+                                </td>
+                                <td className="p-4 whitespace-normal overflow-hidden">
+                                  {procedure.notes}
+                                </td>
+                                <td className="p-4 whitespace-normal overflow-hidden">
+                                  {procedure.repetitive ? "Yes" : "No"}
+                                </td>
+                                <td className="p-4 whitespace-nowrap">
+                                  {procedure.repetitive
+                                    ? procedure.frequency
+                                    : formatDate(String(procedure.time))}
+                                </td>
+                              </tr>
+                            )
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               {consultationData.intubation_start_date && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
@@ -940,42 +986,6 @@ export const ConsultationDetails = (props: any) => {
                 consultation_id={consultationId}
               />
             </div>
-            {consultationData.procedure && (
-              <div className="mt-8">
-                <div className="flex flex-col">
-                  <div className="flex items-center font-semibold leading-relaxed text-gray-900">
-                    <span className="text-lg mr-3">Procedures</span>
-                  </div>
-                  <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                    <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
-                      <ResponsiveMedicineTable
-                        theads={[
-                          "Procedure",
-                          "Repetitive",
-                          "Time",
-                          "Frequency",
-                          "Notes",
-                        ]}
-                        list={consultationData.procedure}
-                        objectKeys={[
-                          "procedure",
-                          "repetitive",
-                          "time",
-                          "frequency",
-                          "notes",
-                        ]}
-                        fieldsToDisplay={[2, 4]}
-                      />
-                      {!consultationData.procedure?.length && (
-                        <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
-                          No data found
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
         {tab === "FILES" && (
