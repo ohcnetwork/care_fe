@@ -35,16 +35,16 @@ jobs:
         run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
 
       - name: Change api proxy url 📝
-        run: 'sed --in-place "s^\"proxy\": .*,^\"proxy\": \"http://localhost:9000\",^g" package.json'
+        run: 'sed --in-place "s^\"target\": .*,^\"target\": \"http://localhost:9000\",^g" vite.config.ts'
 
       - name: Install dependencies 📦
-        run: npm install --legacy-peer-deps
+        run: npm install
 
       - name: Compile rescript files ⚙️
         run: "npm run build:res"
 
       - name: Cypress run 🥬
-        uses: cypress-io/github-action@v4
+        uses: cypress-io/github-action@v5
         with:
           env: SKIP_PREFLIGHT_CHECK=true
           install: false
@@ -73,7 +73,7 @@ jobs:
           labels: cypress failed
 
       - name: Upload cypress screenshots on failure 📸
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: cypress-screenshots
@@ -81,7 +81,7 @@ jobs:
 
       # Test run video was always captured, so this action uses "always()" condition
       - name: Upload cypress videos 📹
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: cypress-videos
