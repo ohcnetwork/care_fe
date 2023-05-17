@@ -16,6 +16,7 @@ import {
 } from "../../Redux/actions";
 import { Error, Success } from "../../Utils/Notifications";
 import { previewDischargeSummary } from "../../Redux/actions";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   show: boolean;
@@ -24,51 +25,55 @@ interface Props {
 }
 
 export default function DischargeSummaryModal(props: Props) {
+  const { t } = useTranslation();
   const dispatch = useDispatch<any>();
   const [email, setEmail] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
   const [emailing, setEmailing] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [generating, setGenerating] = useState(false);
 
   const handleDownload = async () => {
     setDownloading(true);
 
-    const res = await dispatch(
-      previewDischargeSummary({ external_id: props.consultation.id })
-    );
-
-    if (res.status === 200) {
-      window.open(res.data.read_signed_url, "_blank");
-      setDownloading(false);
-      props.onClose();
-      return;
-    }
-
-    const generateRes = dispatch(
-      generateDischargeSummary({ external_id: props.consultation.id })
-    );
-
-    if (generateRes.status !== 200) {
-      Error({ msg: "Something went wrong." });
-      setDownloading(false);
-      return;
-    }
-
-    Success({ msg: "Generating discharge summary..." });
-    setTimeout(async () => {
+    if (props.consultation.discharge_date) {
       const res = await dispatch(
         previewDischargeSummary({ external_id: props.consultation.id })
       );
+
       if (res.status === 200) {
         window.open(res.data.read_signed_url, "_blank");
         setDownloading(false);
         props.onClose();
-      } else {
-        Error({
-          msg: "Discharge summary is not ready yet. Please try again later.",
-        });
-        setDownloading(false);
+        return;
       }
+    }
+
+    await dispatch(
+      generateDischargeSummary({ external_id: props.consultation.id })
+    );
+
+    setGenerating(true);
+    Success({ msg: t("generating_discharge_summary") + "..." });
+
+    setTimeout(async () => {
+      setGenerating(false);
+
+      const res = await dispatch(
+        previewDischargeSummary({ external_id: props.consultation.id })
+      );
+
+      if (res.status === 200) {
+        window.open(res.data.read_signed_url, "_blank");
+        setDownloading(false);
+        props.onClose();
+        return;
+      }
+
+      Error({
+        msg: t("discharge_summary_not_ready") + " " + t("try_again_later"),
+      });
+      setDownloading(false);
     }, 5000);
   };
 
@@ -91,9 +96,7 @@ export default function DischargeSummaryModal(props: Props) {
     );
 
     if (res.status === 200) {
-      Success({
-        msg: "We will be sending an email shortly. Please check your inbox.",
-      });
+      Success({ msg: t("email_success") });
       props.onClose();
     }
 
@@ -104,37 +107,27 @@ export default function DischargeSummaryModal(props: Props) {
     <DialogModal
       show={props.show}
       onClose={props.onClose}
-      title="Download discharge summary"
+      title={t("download_discharge_summary")}
       className="md:max-w-2xl"
     >
       <div className="flex flex-col">
         <div className="flex flex-col gap-1 mb-6">
           <span className="text-sm text-gray-800">
-            Please enter your email id to receive the discharge summary.
+            {t("email_discharge_summary_description")}
           </span>
           <span className="text-sm text-warning-600">
             <CareIcon className="care-l-exclamation-triangle text-base mr-1" />
-            Disclaimer: This is an automatically generated email using
-            information captured from CARE.
+            {`${t("disclaimer")}: ${t("generated_summary_caution")}`}
           </span>
         </div>
         <TextFormField
           name="email"
           type="email"
-          placeholder="Email address"
+          placeholder={t("email_address")}
           value={email}
           onChange={(e) => setEmail(e.value)}
           error={emailError}
         />
-        <div
-          className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-          role="alert"
-        >
-          <span className="block sm:inline text-sm font-medium">
-            Verify you've entered the correct email address before continuing.
-            We cannot deliver the email if the email address is invalid.
-          </span>
-        </div>
         <div className="flex flex-col-reverse lg:flex-row gap-2 lg:justify-end mt-6">
           <Cancel onClick={props.onClose} />
           <Submit onClick={handleDownload} disabled={downloading}>
@@ -143,7 +136,13 @@ export default function DischargeSummaryModal(props: Props) {
             ) : (
               <CareIcon className="care-l-file-download-alt text-lg" />
             )}
-            <span>Download</span>
+            <span>
+              {generating
+                ? t("generating") + "..."
+                : downloading
+                ? t("downloading") + "..."
+                : t("download")}
+            </span>
           </Submit>
           <Submit onClick={handleEmail} disabled={emailing}>
             {emailing ? (
@@ -151,7 +150,7 @@ export default function DischargeSummaryModal(props: Props) {
             ) : (
               <CareIcon className="care-l-fast-mail text-lg" />
             )}
-            <span>Send email</span>
+            <span>{t("send_email")}</span>
           </Submit>
         </div>
       </div>
