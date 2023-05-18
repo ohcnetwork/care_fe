@@ -203,7 +203,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
                     <CheckBoxFormField
                       name="bed_is_occupied"
                       label="Hide Monitors without Patient"
-                      value={qParams.bed_is_occupied}
+                      value={qParams.bed_is_occupied === "true"}
                       onChange={({ name, value }) => {
                         if (value) {
                           updateQuery({ [name]: value });
