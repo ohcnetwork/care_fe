@@ -1,4 +1,5 @@
 import { BedModel } from "../Facility/models";
+import { PatientModel } from "../Patient/models";
 
 export interface AssetLocationObject {
   id: string;
@@ -103,4 +104,11 @@ export interface AssetBedModel {
   created_date: string;
   modified_date: string;
   meta: Record<string, any>;
+}
+
+export interface PatientAssetBed {
+  asset: AssetData;
+  bed: BedModel;
+  patient?: PatientModel;
+  meta?: Record<string, any>;
 }

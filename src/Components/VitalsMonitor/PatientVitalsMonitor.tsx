@@ -1,25 +1,23 @@
 import { useEffect } from "react";
 import useVitalsMonitor from "./useVitalsMonitor";
-import { PatientModel } from "../Patient/models";
-import { AssetBedModel } from "../Assets/AssetTypes";
+import { PatientAssetBed } from "../Assets/AssetTypes";
 import { Link } from "raviger";
 import { GENDER_TYPES } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
-  patient?: PatientModel;
-  assetBed?: AssetBedModel;
+  patientAssetBed?: PatientAssetBed;
   socketUrl: string;
   size?: { width: number; height: number };
 }
 
 export default function PatientVitalsMonitor({
-  patient,
-  assetBed,
+  patientAssetBed,
   socketUrl,
   size,
 }: Props) {
   const { connect, waveformCanvas, data } = useVitalsMonitor();
+  const { patient, bed } = patientAssetBed ?? {};
 
   useEffect(() => {
     connect(socketUrl);
@@ -27,7 +25,7 @@ export default function PatientVitalsMonitor({
 
   return (
     <div className="flex flex-col gap-1 bg-[#020617] p-2 rounded">
-      {(patient || assetBed) && (
+      {patientAssetBed && (
         <div className="flex items-center justify-between px-2 tracking-wide">
           <div className="flex items-center gap-2">
             {patient ? (
@@ -50,15 +48,15 @@ export default function PatientVitalsMonitor({
               </span>
             )}
           </div>
-          {assetBed && (
+          {bed && (
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <span className="flex items-center gap-1">
                 <CareIcon className="care-l-bed text-base" />
-                {assetBed.bed_object.name}
+                {bed.name}
               </span>
               <span className="flex items-center gap-1">
                 <CareIcon className="care-l-location-point text-base" />
-                {assetBed.bed_object.location_object?.name}
+                {bed.location_object?.name}
               </span>
             </div>
           )}

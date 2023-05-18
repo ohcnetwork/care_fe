@@ -1,15 +1,12 @@
 import { useDispatch } from "react-redux";
 import useFullscreen from "../../Common/hooks/useFullscreen";
-import { useContext, useEffect, useState } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import {
-  getAllPatient,
   getPermittedFacility,
-  listAssetBeds,
+  listPatientAssetBeds,
 } from "../../Redux/actions";
 import PatientVitalsMonitor from "../VitalsMonitor/PatientVitalsMonitor";
 import useFilters from "../../Common/hooks/useFilters";
-import { PatientModel } from "../Patient/models";
-import { AssetBedModel } from "../Assets/AssetTypes";
 import { FacilityModel } from "./models";
 import Loading from "../Common/Loading";
 import Page from "../Common/components/Page";
@@ -19,33 +16,54 @@ import { classNames } from "../../Utils/utils";
 import { LocationSelect } from "../Common/LocationSelect";
 import Pagination from "../Common/Pagination";
 import { SidebarShrinkContext } from "../Common/Sidebar/Sidebar";
+import { PatientAssetBed } from "../Assets/AssetTypes";
+import { Popover, Transition } from "@headlessui/react";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import { useTranslation } from "react-i18next";
+import { SortOption } from "../Common/SortDropdown";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 
 const PER_PAGE_LIMIT = 6;
 
+const SORT_OPTIONS: SortOption[] = [
+  { isAscending: true, value: "bed__name" },
+  { isAscending: false, value: "-bed__name" },
+  { isAscending: false, value: "-created_date" },
+  { isAscending: true, value: "created_date" },
+];
+
 interface Props {
-  facility: string;
-  location?: string;
+  facilityId: string;
 }
 
-export default function CentralNursingStation({ facility }: Props) {
+export default function CentralNursingStation({ facilityId }: Props) {
+  const { t } = useTranslation();
   const dispatch = useDispatch<any>();
   const [isFullscreen, setFullscreen] = useFullscreen();
-  const { shrinked, setShrinked } = useContext(SidebarShrinkContext);
+  const sidebar = useContext(SidebarShrinkContext);
 
   const [facilityObject, setFacilityObject] = useState<FacilityModel>();
   const [data, setData] =
     useState<Parameters<typeof PatientVitalsMonitor>[0][]>();
   const [totalCount, setTotalCount] = useState(0);
-  const { qParams, updateQuery, updatePage } = useFilters({
+  const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
 
+  // To automatically collapse sidebar.
   useEffect(() => {
-    setShrinked(true);
+    sidebar.setShrinked(true);
 
+    return () => {
+      sidebar.setShrinked(sidebar.shrinked);
+    };
+  }, []);
+
+  useEffect(() => {
     async function fetchFacilityOrObject() {
       if (facilityObject) return facilityObject;
-      const res = await dispatch(getPermittedFacility(facility));
+      const res = await dispatch(getPermittedFacility(facilityId));
       if (res.status !== 200) return;
       setFacilityObject(res.data);
       return res.data as FacilityModel;
@@ -54,92 +72,169 @@ export default function CentralNursingStation({ facility }: Props) {
     async function fetchData() {
       setData(undefined);
 
-      const params = {
+      const filters = {
         ...qParams,
         page: qParams.page || 1,
         limit: PER_PAGE_LIMIT,
         offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
+        asset_class: "HL7MONITOR",
+        ordering: qParams.ordering || "bed__name",
       };
 
-      const [facilityObj, patientsRes, assetBedsRes] = await Promise.all([
+      const [facilityObj, res] = await Promise.all([
         fetchFacilityOrObject(),
-        dispatch(
-          getAllPatient(
-            { facility, is_active: "True", has_bed: "True" },
-            "cns-list-patients"
-          )
-        ),
-        dispatch(listAssetBeds({ facility, ...params })),
+        dispatch(listPatientAssetBeds(facilityId, filters)),
       ]);
 
-      if (
-        !facilityObj ||
-        patientsRes.status !== 200 ||
-        assetBedsRes.status !== 200
-      )
+      if (!facilityObj || res.status !== 200) {
         return;
+      }
 
-      const patients = patientsRes.data.results as PatientModel[];
-      const assetBeds = assetBedsRes.data.results as AssetBedModel[];
+      const entries = res.data.results as PatientAssetBed[];
 
-      setTotalCount(assetBedsRes.data.count);
+      setTotalCount(res.data.count);
       setData(
-        assetBeds
-          .filter((obj) => obj.asset_object.meta?.asset_type === "HL7MONITOR")
-          .map((assetBed) => ({
-            assetBed,
-            patient: patients.find(
-              (patient) =>
-                patient.last_consultation?.current_bed?.bed_object.id ===
-                assetBed.bed_object.id
-            ),
-            socketUrl: `wss://${facilityObj.middleware_address}/observations/${assetBed.asset_object.meta?.local_ip_address}`,
-          }))
+        entries.map(({ patient, asset, bed }) => {
+          const middleware =
+            asset.meta?.middleware_hostname ?? facilityObj?.middleware_address;
+          const local_ip_address = asset.meta?.local_ip_address;
+
+          return {
+            patientAssetBed: { patient, asset, bed },
+            socketUrl: `wss://${middleware}/observations/${local_ip_address}`,
+          };
+        })
       );
     }
     fetchData();
-
-    return () => {
-      setShrinked(shrinked);
-    };
-  }, [dispatch, facility, qParams.page, qParams.location]);
+  }, [
+    dispatch,
+    facilityId,
+    qParams.page,
+    qParams.location,
+    qParams.ordering,
+    qParams.bed_is_occupied,
+  ]);
 
   return (
     <Page
       title="Central Nursing Station"
-      backUrl={`/facility/${facility}/`}
+      backUrl={`/facility/${facilityId}/`}
       noImplicitPadding
       breadcrumbs={false}
       options={
         <div className="flex gap-4 items-center">
-          <LocationSelect
-            name="Facilities"
-            setSelected={(location) => updateQuery({ location })}
-            selected={qParams.location}
-            showAll={false}
-            multiple={false}
-            facilityId={facility}
-            errors=""
-            errorClassName="hidden"
-            className="w-64"
-          />
-          <ButtonV2
-            variant="secondary"
-            border
-            onClick={() => setFullscreen(!isFullscreen)}
-            className="tooltip !h-11"
-            tooltip={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-            tooltipClassName="tooltip-bottom -translate-x-1/2"
-          >
-            <CareIcon
-              className={classNames(
-                isFullscreen
-                  ? "care-l-compress-arrows"
-                  : "care-l-expand-arrows-alt",
-                "text-lg"
-              )}
-            />
-          </ButtonV2>
+          <Popover>
+            <Popover.Button>
+              <ButtonV2 variant="secondary" border>
+                <CareIcon className="care-l-setting text-lg" />
+                Settings and Filters
+              </ButtonV2>
+            </Popover.Button>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-200"
+              enterFrom="opacity-0 translate-y-1"
+              enterTo="opacity-100 translate-y-0"
+              leave="transition ease-in duration-150"
+              leaveFrom="opacity-100 translate-y-0"
+              leaveTo="opacity-0 translate-y-1"
+            >
+              <Popover.Panel className="absolute z-10 mt-1 w-96 transform -translate-x-1/2 px-4 sm:px-0 lg:max-w-3xl">
+                <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
+                  <div className="rounded-t-lg bg-gray-100 px-6 py-4">
+                    <div className="flow-root rounded-md">
+                      <span className="block text-sm text-gray-800">
+                        <span className="font-bold ">{totalCount}</span> Vitals
+                        Monitor present
+                      </span>
+                    </div>
+                  </div>
+                  <div className="rounded-b-lg relative flex flex-col gap-8 bg-white p-6">
+                    <div>
+                      <FieldLabel className="text-sm">
+                        Filter by Location
+                      </FieldLabel>
+                      <div className="flex gap-2 w-full items-center">
+                        <LocationSelect
+                          name="Facilities"
+                          setSelected={(location) => updateQuery({ location })}
+                          selected={qParams.location}
+                          showAll={false}
+                          multiple={false}
+                          facilityId={facilityId}
+                          errors=""
+                          errorClassName="hidden"
+                          className="w-64"
+                        />
+                        {qParams.location && (
+                          <ButtonV2
+                            variant="secondary"
+                            circle
+                            border
+                            onClick={() => removeFilter("location")}
+                          >
+                            Clear
+                          </ButtonV2>
+                        )}
+                      </div>
+                    </div>
+                    <SelectFormField
+                      name="ordering"
+                      label={t("sort_by")}
+                      required
+                      value={qParams.ordering || "bed__name"}
+                      onChange={({ value }) => updateQuery({ ordering: value })}
+                      options={SORT_OPTIONS}
+                      optionLabel={({ value }) => t("SortOptions." + value)}
+                      optionIcon={({ isAscending }) => (
+                        <CareIcon
+                          className={
+                            isAscending
+                              ? "care-l-sort-amount-up"
+                              : "care-l-sort-amount-down"
+                          }
+                        />
+                      )}
+                      optionValue={({ value }) => value}
+                      labelClassName="text-sm"
+                      errorClassName="hidden"
+                    />
+                    <CheckBoxFormField
+                      name="bed_is_occupied"
+                      label="Hide Monitors without Patient"
+                      value={qParams.bed_is_occupied}
+                      onChange={({ name, value }) => {
+                        if (value) {
+                          updateQuery({ [name]: value });
+                        } else {
+                          removeFilter(name);
+                        }
+                      }}
+                      labelClassName="text-sm"
+                      errorClassName="hidden"
+                    />
+                    <ButtonV2
+                      variant="secondary"
+                      border
+                      onClick={() => setFullscreen(!isFullscreen)}
+                      className="tooltip !h-11"
+                    >
+                      <CareIcon
+                        className={classNames(
+                          isFullscreen
+                            ? "care-l-compress-arrows"
+                            : "care-l-expand-arrows-alt",
+                          "text-lg"
+                        )}
+                      />
+                      {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                    </ButtonV2>
+                  </div>
+                </div>
+              </Popover.Panel>
+            </Transition>
+          </Popover>
 
           <Pagination
             className=""
@@ -160,7 +255,10 @@ export default function CentralNursingStation({ facility }: Props) {
       ) : (
         <div className="mt-1 grid grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3 gap-1">
           {data.map((props) => (
-            <PatientVitalsMonitor key={props.assetBed?.id} {...props} />
+            <PatientVitalsMonitor
+              key={props.patientAssetBed?.bed.id}
+              {...props}
+            />
           ))}
         </div>
       )}

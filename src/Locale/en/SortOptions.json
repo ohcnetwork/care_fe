@@ -10,5 +10,7 @@
     "-review_time": "Latest review date first",
     "review_time": "Oldest review date first",
     "name": "Patient name A-Z",
-    "-name": "Patient name Z-A"
+    "-name": "Patient name Z-A",
+    "bed__name": "Bed No. 1-N",
+    "-bed__name": "Bed No. N-1"
 }

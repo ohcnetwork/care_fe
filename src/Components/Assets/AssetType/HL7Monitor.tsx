@@ -80,6 +80,8 @@ const HL7Monitor = (props: HL7MonitorProps) => {
     }
   };
 
+  const middleware = middlewareHostname || facilityMiddlewareHostname;
+
   if (isLoading) return <Loading />;
   return (
     <div className="flex w-full mx-auto xl:mt-8">
@@ -92,6 +94,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                 <TextFormField
                   name="middlewareHostname"
                   label="Middleware Hostname"
+                  placeholder={facilityMiddlewareHostname}
                   value={middlewareHostname}
                   onChange={(e) => setMiddlewareHostname(e.value)}
                   errorClassName="hidden"
@@ -119,7 +122,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
         </div>
 
         <PatientVitalsMonitor
-          socketUrl={`wss://${facilityMiddlewareHostname}/observations/${localipAddress}`}
+          socketUrl={`wss://${middleware}/observations/${localipAddress}`}
         />
       </div>
     </div>

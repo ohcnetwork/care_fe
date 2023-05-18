@@ -17,7 +17,8 @@ export default function CheckBoxFormField(props: FormFieldBaseProps<boolean>) {
         <FieldLabel
           htmlFor={field.id}
           required={field.required}
-          className={`!mb-0 ${field.labelClassName}`}
+          className={props.labelClassName}
+          noPadding
         >
           {field.label}
         </FieldLabel>

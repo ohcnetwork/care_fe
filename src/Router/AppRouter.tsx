@@ -326,7 +326,7 @@ export default function AppRouter() {
       facilityId,
     }: any) => <AssetConfigure assetId={assetId} facilityId={facilityId} />,
     "/facility/:facilityId/cns": ({ facilityId }: any) => (
-      <CentralNursingStation facility={facilityId} />
+      <CentralNursingStation facilityId={facilityId} />
     ),
 
     "/shifting": () =>
