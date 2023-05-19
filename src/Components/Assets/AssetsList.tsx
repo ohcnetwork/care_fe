@@ -242,7 +242,7 @@ const AssetsList = () => {
         {assets.map((asset: AssetData) => (
           <Link
             href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
-            style={{ textDecoration: "none", color: "inherit" }}
+            className="text-inherit"
           >
             <div
               key={asset.id}
