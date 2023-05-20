@@ -1029,7 +1029,7 @@ export const ConsultationDetails = (props: any) => {
               </div>
             </div>
             <div className="xl:w-1/3 w-full pl-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 <PageTitle title="Update Log" hideBack breadcrumbs={false} />
                 <div className="mb-[0.125rem] block min-h-[1.5rem] pl-[1.5rem]">
                   <input
