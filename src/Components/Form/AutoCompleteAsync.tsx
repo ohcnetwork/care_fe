@@ -11,6 +11,7 @@ interface Props {
   fetchData: (search: string) => Promise<any> | undefined;
   onChange: (selected: any) => void;
   optionLabel?: (option: any) => string;
+  optionLabelChip?: (option: any) => string;
   showNOptions?: number;
   multiple?: boolean;
   compareBy?: string;
@@ -30,6 +31,7 @@ const AutoCompleteAsync = (props: Props) => {
     fetchData,
     onChange,
     optionLabel = (option: any) => option.label,
+    optionLabelChip = (option: any) => option.label,
     showNOptions = 10,
     multiple = false,
     compareBy,
@@ -115,8 +117,13 @@ const AutoCompleteAsync = (props: Props) => {
                     value={item}
                   >
                     {({ selected }) => (
-                      <div className="flex justify-between">
+                      <div className="flex justify-between align-center">
                         {optionLabel(item)}
+                        {optionLabelChip(item) && (
+                          <div className="px-2 bg-secondary-100 h-fit rounded-full text-xs text-gray-900 border border-secondary-400">
+                            {optionLabelChip(item)}
+                          </div>
+                        )}
                         {selected && (
                           <CareIcon className="care-l-check text-lg" />
                         )}

@@ -74,6 +74,10 @@ export const BedSelect = (props: BedSelectProps) => {
           option?.location_object?.name
         );
       }}
+      optionLabelChip={(option: any) => {
+        if (Object.keys(option).length === 0) return "";
+        return `${option?.bed_type}` || "Unknown";
+      }}
       compareBy="id"
       error={error}
       className={className}
