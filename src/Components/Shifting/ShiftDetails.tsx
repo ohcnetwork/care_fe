@@ -1,6 +1,11 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
+import {
+  GENDER_TYPES,
+  SHIFTING_CHOICES_PEACETIME,
+  SHIFTING_CHOICES_WARTIME,
+  TEST_TYPE_CHOICES,
+} from "../../Common/constants";
 import { Link, navigate } from "raviger";
 import React, { useCallback, useState } from "react";
 import { deleteShiftRecord, getShiftDetails } from "../../Redux/actions";
@@ -22,8 +27,12 @@ import { useTranslation } from "react-i18next";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function ShiftDetails(props: { id: string }) {
-  const { static_header_logo, kasp_full_string, wartime_shifting } =
-    useConfig();
+  const {
+    static_header_logo,
+    kasp_full_string,
+    wartime_shifting,
+    kasp_enabled,
+  } = useConfig();
   const dispatch: any = useDispatch();
   const initialData: any = {};
   const [data, setData] = useState(initialData);
@@ -33,6 +42,10 @@ export default function ShiftDetails(props: { id: string }) {
   const [openDeleteShiftDialog, setOpenDeleteShiftDialog] =
     React.useState(false);
   const { t } = useTranslation();
+
+  const shiftStatusOptions = wartime_shifting
+    ? SHIFTING_CHOICES_WARTIME
+    : SHIFTING_CHOICES_PEACETIME;
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -164,28 +177,12 @@ export default function ShiftDetails(props: { id: string }) {
               {patientData?.disease_status}
             </span>
           </div>
-
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("srf_id")}:{" "}
-            </span>
-            {(patientData?.srf_id && patientData?.srf_id) || "-"}
-          </div>
           <div>
             <span className="font-semibold leading-relaxed">
               {t("test_type")}:{" "}
             </span>
             {(patientData?.test_type && testType) || "-"}
           </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("date_of_test")}:{" "}
-            </span>
-            {(patientData?.date_of_test &&
-              formatDate(patientData?.date_of_test)) ||
-              "-"}
-          </div>
-
           <div>
             <span className="font-semibold leading-relaxed">
               {t("facility")}:{" "}
@@ -277,71 +274,6 @@ export default function ShiftDetails(props: { id: string }) {
             </span>
             {patientData?.address || "-"}
           </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("contact_with_confirmed_carrier")}:{" "}
-            </span>
-            {patientData?.contact_with_confirmed_carrier ? (
-              <span className="badge badge-pill badge-warning">{t("yes")}</span>
-            ) : (
-              <span className="badge badge-pill badge-secondary">
-                {t("no")}
-              </span>
-            )}
-          </div>
-          <div>
-            <span className="font-semibold leading-relaxed">
-              {t("contact_with_suspected_carrier")}:{" "}
-            </span>
-            {patientData?.contact_with_suspected_carrier ? (
-              <span className="badge badge-pill badge-warning">{t("yes")}</span>
-            ) : (
-              <span className="badge badge-pill badge-secondary">
-                {t("no")}
-              </span>
-            )}
-          </div>
-          {patientData?.estimated_contact_date && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("estimated_contact_date")}:{" "}
-              </span>
-              {formatDate(patientData?.estimated_contact_date)}
-            </div>
-          )}
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              {t("has_sari_severe_acute_respiratory_illness")}{" "}
-            </span>
-            {patientData?.has_SARI ? (
-              <span className="badge badge-pill badge-warning">{t("yes")}</span>
-            ) : (
-              <span className="badge badge-pill badge-secondary">
-                {t("no")}
-              </span>
-            )}
-          </div>
-          <div className="md:col-span-2">
-            <span className="font-semibold leading-relaxed">
-              {t("travel_within_last_28_days")}{" "}
-            </span>
-            {patientData?.past_travel ? (
-              <span className="badge badge-pill badge-warning">{t("yes")}</span>
-            ) : (
-              <span className="badge badge-pill badge-secondary">
-                {t("no")}
-              </span>
-            )}
-          </div>
-          {patientData?.countries_travelled &&
-            !!patientData?.countries_travelled.length && (
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  {t("countries_travelled")}:{" "}
-                </span>
-                {patientData?.countries_travelled.join(", ")}
-              </div>
-            )}
           {patientData?.ongoing_medication && (
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
@@ -356,22 +288,6 @@ export default function ShiftDetails(props: { id: string }) {
                 {t("allergies")}:{" "}
               </span>
               {patientData?.allergies}
-            </div>
-          )}
-          {!!patientData?.number_of_aged_dependents && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("number_of_aged_dependents_above_60")}:{" "}
-              </span>
-              {patientData?.number_of_aged_dependents}
-            </div>
-          )}
-          {!!patientData?.number_of_chronic_diseased_dependents && (
-            <div>
-              <span className="font-semibold leading-relaxed">
-                {t("number_of_chronic_diseased_dependents")}:{" "}
-              </span>
-              {patientData?.number_of_chronic_diseased_dependents}
             </div>
           )}
         </div>
@@ -645,6 +561,15 @@ export default function ShiftDetails(props: { id: string }) {
           options={
             <div className="flex gap-2">
               <ButtonV2
+                tooltip={
+                  ["COMPLETED", "CANCELLED"].includes(data.status)
+                    ? `A shifting request, once ${data.status.toLowerCase()} cannot be updated`
+                    : ""
+                }
+                tooltipClassName="tooltip-top -translate-x-28 -translate-y-1 text-xs"
+                disabled={
+                  data.status === "COMPLETED" || data.status === "CANCELLED"
+                }
                 onClick={() => navigate(`/shifting/${data.external_id}/update`)}
               >
                 {t("update_status_details")}
@@ -684,7 +609,9 @@ export default function ShiftDetails(props: { id: string }) {
               <div>
                 <span className="font-semibold leading-relaxed">Status: </span>
                 <span className="badge badge-pill badge-primary py-1 px-2">
-                  {data.status}
+                  {shiftStatusOptions.find(
+                    (option) => data.status === option.text
+                  )?.label || data.status}
                 </span>
               </div>
               <div>
@@ -717,7 +644,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  {t("contact_person_number")}:{" "}
+                  {t("phone_number_at_current_facility")}:{" "}
                 </span>
                 {data.refering_facility_contact_number ? (
                   <a href={`tel:${data.refering_facility_contact_number}`}>
@@ -752,20 +679,33 @@ export default function ShiftDetails(props: { id: string }) {
                 </span>
                 <span className="badge badge-pill badge-warning py-1 px-2">
                   {" "}
-                  {data.patient_category}
+                  {data.patient_object.last_consultation?.last_daily_round
+                    ?.patient_category ??
+                    data.patient_object.last_consultation?.category}
                 </span>
               </div>
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  {kasp_full_string}:{" "}
-                </span>
-                <span className="badge badge-pill badge-warning py-1 px-2">
-                  {" "}
-                  {data.is_kasp ? t("yes") : t("no")}
-                </span>
-              </div>
+              {kasp_enabled && (
+                <div>
+                  <span className="font-semibold leading-relaxed">
+                    {kasp_full_string}:{" "}
+                  </span>
+                  <span className="badge badge-pill badge-warning py-1 px-2">
+                    {" "}
+                    {data.is_kasp ? t("yes") : t("no")}
+                  </span>
+                </div>
+              )}
               {wartime_shifting && (
                 <>
+                  <div>
+                    <span className="font-semibold leading-relaxed">
+                      {kasp_full_string}:{" "}
+                    </span>
+                    <span className="badge badge-pill badge-warning py-1 px-2">
+                      {" "}
+                      {data.is_kasp ? t("yes") : t("no")}
+                    </span>
+                  </div>
                   <div>
                     <span className="font-semibold leading-relaxed">
                       {t("vehicle_preference")}:{" "}

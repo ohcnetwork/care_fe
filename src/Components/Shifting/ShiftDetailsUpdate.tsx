@@ -4,32 +4,23 @@ import {
   BREATHLESSNESS_LEVEL,
   FACILITY_TYPES,
   PATIENT_CATEGORIES,
-  SHIFTING_CHOICES,
+  SHIFTING_CHOICES_PEACETIME,
+  SHIFTING_CHOICES_WARTIME,
   SHIFTING_VEHICLE_CHOICES,
 } from "../../Common/constants";
-import {
-  Box,
-  Card,
-  CardContent,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-} from "@material-ui/core";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { getShiftDetails, getUserList, updateShift } from "../../Redux/actions";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useEffect, useReducer, useState } from "react";
-
-import { CircularProgress } from "@material-ui/core";
 import { ConsultationModel } from "../Facility/models.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
+import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { LegacyErrorHelperText } from "../Common/HelperInputFields";
-import { LegacySelectField } from "../Common/HelperInputFields";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { UserSelect } from "../Common/UserSelect";
@@ -39,9 +30,12 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
+import CircularProgress from "../Common/components/CircularProgress.js";
+import Card from "../../CAREUI/display/Card";
+import RadioFormField from "../Form/FormFields/RadioFormField.js";
+import Page from "../Common/components/Page.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface patientShiftProps {
   id: string;
@@ -49,7 +43,7 @@ interface patientShiftProps {
 
 export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const { goBack } = useAppHistory();
-  const { kasp_full_string, wartime_shifting } = useConfig();
+  const { kasp_full_string, kasp_enabled, wartime_shifting } = useConfig();
   const dispatchAction: any = useDispatch();
   const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
@@ -90,18 +84,9 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     errors: { ...initError },
   };
 
-  const shiftStatusOptions = SHIFTING_CHOICES.map((obj) => obj.text).filter(
-    (choice) => wartime_shifting || choice !== "PENDING"
-  );
-
   let requiredFields: any = {
     reason: {
       errorText: t("please_enter_a_reason_for_the_shift"),
-    },
-
-    ambulance_number: {
-      errorText: "Ambulance Number is required",
-      invalidText: "Please enter valid Ambulance Number",
     },
   };
 
@@ -173,19 +158,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     return !isInvalidForm;
   };
 
-  const handleChange = (e: any) => {
-    const form = { ...state.form };
-    const { name, value } = e.target;
-    form[name] = value;
-    dispatch({ type: "set_form", form });
-  };
-  const handleTextAreaChange = (e: any) => {
-    const form = { ...state.form };
-    const { name, value } = e;
-    form[name] = value;
-    dispatch({ type: "set_form", form });
-  };
-
   const handleOnSelect = (user: any) => {
     const form = { ...state.form };
     form["assigned_to"] = user?.id;
@@ -213,10 +185,15 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (discharged = false) => {
     const validForm = validateForm();
 
     if (validForm) {
+      if (!discharged && state.form.status === "PATIENT EXPIRED") {
+        setShowDischargeModal(true);
+        return;
+      }
+
       setIsLoading(true);
 
       const data: any = {
@@ -263,11 +240,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           msg: t("shift_request_updated_successfully"),
         });
 
-        if (data.status === "PATIENT EXPIRED") {
-          setShowDischargeModal(true);
-        } else {
-          navigate(`/shifting/${props.id}`);
-        }
+        navigate(`/shifting/${props.id}`);
       } else {
         setIsLoading(false);
       }
@@ -289,8 +262,11 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             };
           d["initial_status"] = res.data.status;
           d["status"] = qParams.status || res.data.status;
+          const patient_category =
+            d.patient.last_consultation?.last_daily_round?.patient_category ??
+            d.patient.last_consultation?.category;
           d["patient_category"] = PATIENT_CATEGORIES.find(
-            (c) => c.text === res.data.patient_category
+            (c) => c.text === patient_category
           )?.id;
           dispatch({ type: "set_form", form: d });
         }
@@ -315,290 +291,235 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   }
 
   return (
-    <div className="px-2 pb-2">
+    <Page title={t("update_shift_request")} backUrl={`/shifting/${props.id}`}>
       <DischargeModal
         show={showDischargeModal}
         onClose={() => setShowDischargeModal(false)}
         consultationData={consultationData}
         discharge_reason="EXP"
         afterSubmit={() => {
-          navigate(
-            `/facility/${consultationData.facility}/patient/${consultationData.patient}/consultation/${consultationData.id}`
-          );
+          handleSubmit(true);
         }}
       />
-      <PageTitle
-        title={t("update_shift_request")}
-        backUrl={`/shifting/${props.id}`}
-      />
-      <div className="mt-4">
-        <Card>
-          <CardContent>
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-              <div className="md:col-span-1">
-                <FieldLabel>{t("status")}</FieldLabel>
-                <LegacySelectField
-                  name="status"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.status}
-                  options={shiftStatusOptions}
-                  onChange={handleChange}
-                  className="bg-white h-14 w-full shadow-sm md:text-sm md:leading-5 mt-2"
-                />
-              </div>
-              <div className="flex-none">
-                <FieldLabel>{t("assigned_to")}</FieldLabel>
-                <div>
-                  {assignedUserLoading ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                    <UserSelect
-                      multiple={false}
-                      selected={assignedUser}
-                      setSelected={handleOnSelect}
-                      errors={""}
-                      facilityId={
-                        state.form?.shifting_approving_facility_object?.id
-                      }
-                    />
-                  )}
-                </div>
-              </div>
-              {wartime_shifting && (
-                <div>
-                  <FieldLabel>
-                    {t("name_of_shifting_approving_facility")}
-                  </FieldLabel>
-                  <FacilitySelect
-                    multiple={false}
-                    name="shifting_approving_facility"
-                    facilityType={1300}
-                    selected={state.form.shifting_approving_facility_object}
-                    setSelected={(obj) =>
-                      setFacility(obj, "shifting_approving_facility_object")
-                    }
-                    errors={state.errors.shifting_approving_facility_object}
-                  />
-                </div>
-              )}
+      <Card className="mt-4 w-full max-w-4xl mx-auto !p-6">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+          <SelectFormField
+            name="status"
+            label={t("status")}
+            required
+            options={
+              wartime_shifting
+                ? SHIFTING_CHOICES_WARTIME
+                : SHIFTING_CHOICES_PEACETIME
+            }
+            value={state.form.status}
+            optionLabel={(option) => option.text}
+            optionValue={(option) => option.text}
+            optionSelectedLabel={(option) => option.text}
+            onChange={handleFormFieldChange}
+            className="bg-white w-full md:leading-5 mt-2 md:col-span-1"
+          />
 
-              <div>
-                <FieldLabel>
-                  {t("what_facility_assign_the_patient_to")}
-                </FieldLabel>
-                <FacilitySelect
+          {wartime_shifting && (
+            <div>
+              <FieldLabel>{t("assigned_to")}</FieldLabel>
+              {assignedUserLoading ? (
+                <CircularProgress />
+              ) : (
+                <UserSelect
                   multiple={false}
-                  freeText={true}
-                  name="assigned_facility"
-                  selected={state.form.assigned_facility_object}
-                  setSelected={(obj) =>
-                    setFacility(obj, "assigned_facility_object")
+                  selected={assignedUser}
+                  setSelected={handleOnSelect}
+                  errors={""}
+                  facilityId={
+                    state.form?.shifting_approving_facility_object?.id
                   }
-                  errors={state.errors.assigned_facility}
                 />
-              </div>
-
-              <div>
-                <FieldLabel>{t("is_this_an_emergency")}</FieldLabel>
-                <RadioGroup
-                  aria-label="emergency"
-                  name="emergency"
-                  value={[true, "true"].includes(state.form.emergency)}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label={t("yes")}
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label={t("no")}
-                    />
-                  </Box>
-                </RadioGroup>
-                <LegacyErrorHelperText error={state.errors.emergency} />
-              </div>
-
-              <div>
-                <FieldLabel>
-                  {t("is")} {kasp_full_string}?
-                </FieldLabel>
-                <RadioGroup
-                  aria-label="is_kasp"
-                  name="is_kasp"
-                  value={[true, "true"].includes(state.form.is_kasp)}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label={t("yes")}
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label={t("no")}
-                    />
-                  </Box>
-                </RadioGroup>
-                <LegacyErrorHelperText error={state.errors.is_kasp} />
-              </div>
-
-              <div>
-                <FieldLabel>{t("is_this_an_upshift")}</FieldLabel>
-                <RadioGroup
-                  aria-label={t("is_it_upshift")}
-                  name="is_up_shift"
-                  value={[true, "true"].includes(state.form.is_up_shift)}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label={t("yes")}
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label={t("no")}
-                    />
-                  </Box>
-                </RadioGroup>
-                <LegacyErrorHelperText error={state.errors.is_up_shift} />
-              </div>
-
-              <div className="md:col-span-2">
-                <PatientCategorySelect
-                  required={false}
-                  name="patient_category"
-                  value={state.form.patient_category}
-                  onChange={handleFormFieldChange}
-                  label="Patient Category"
-                />
-              </div>
-
-              {wartime_shifting && (
-                <>
-                  <div className="md:col-span-1">
-                    <FieldLabel>{t("preferred_vehicle")}</FieldLabel>
-                    <LegacySelectField
-                      name="preferred_vehicle_choice"
-                      variant="outlined"
-                      margin="dense"
-                      optionArray={true}
-                      value={state.form.preferred_vehicle_choice}
-                      options={["", ...vehicleOptions]}
-                      onChange={handleChange}
-                      className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5"
-                      errors={state.errors.preferred_vehicle_choice}
-                    />
-                  </div>
-                  <div className="md:col-span-1">
-                    <FieldLabel>{t("preferred_facility_type")}*</FieldLabel>
-                    <LegacySelectField
-                      name="assigned_facility_type"
-                      variant="outlined"
-                      margin="dense"
-                      optionArray={true}
-                      value={state.form.assigned_facility_type}
-                      options={["", ...facilityOptions]}
-                      onChange={handleChange}
-                      className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5"
-                      errors={state.errors.assigned_facility_type}
-                    />
-                  </div>
-                  <div className="md:col-span-1">
-                    <FieldLabel>{t("severity_of_breathlessness")}*</FieldLabel>
-                    <LegacySelectField
-                      name="breathlessness_level"
-                      variant="outlined"
-                      margin="dense"
-                      optionArray={true}
-                      value={state.form.breathlessness_level}
-                      options={BREATHLESSNESS_LEVEL}
-                      onChange={handleChange}
-                      className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5"
-                    />
-                  </div>{" "}
-                </>
               )}
-              <div className="md:col-span-2">
-                <TextAreaFormField
-                  rows={5}
-                  name="reason"
-                  label={t("reason_for_shift")}
-                  required
-                  placeholder={t("type_your_reason_here") + "*"}
-                  value={state.form.reason}
-                  onChange={handleTextAreaChange}
-                  error={state.errors.reason}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <TextFormField
-                  label="Name of ambulance driver"
-                  name="ambulance_driver_name"
-                  placeholder="Name of ambulance driver"
-                  value={state.form.ambulance_driver_name}
-                  onChange={handleTextFormFieldChange}
-                />
-              </div>
-
-              <div className="md:col-span-1">
-                <PhoneNumberFormField
-                  name="ambulance_phone_number"
-                  label="Ambulance Phone Number"
-                  value={state.form.ambulance_phone_number}
-                  onChange={(event) => {
-                    handleFormFieldChange(event);
-                  }}
-                  error={state.errors.ambulance_phone_number}
-                />
-              </div>
-
-              <div className="md:col-span-1">
-                <TextFormField
-                  label="Ambulance No."
-                  required
-                  name="ambulance_number"
-                  placeholder="Ambulance No."
-                  value={state.form.ambulance_number}
-                  onChange={handleTextFormFieldChange}
-                  error={state.errors.ambulance_number}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <TextAreaFormField
-                  rows={5}
-                  name="comments"
-                  label={t("any_other_comments")}
-                  placeholder={t("type_any_extra_comments_here")}
-                  value={state.form.comments}
-                  onChange={handleTextAreaChange}
-                  error={state.errors.comments}
-                />
-              </div>
-
-              <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <Cancel onClick={() => goBack()} />
-                <Submit onClick={handleSubmit} />
-              </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+          )}
+
+          {wartime_shifting && (
+            <div>
+              <FieldLabel>
+                {t("name_of_shifting_approving_facility")}
+              </FieldLabel>
+              <FacilitySelect
+                multiple={false}
+                name="shifting_approving_facility"
+                facilityType={1300}
+                selected={state.form.shifting_approving_facility_object}
+                setSelected={(obj) =>
+                  setFacility(obj, "shifting_approving_facility_object")
+                }
+                errors={state.errors.shifting_approving_facility_object}
+              />
+            </div>
+          )}
+
+          <div>
+            <FieldLabel>{t("what_facility_assign_the_patient_to")}</FieldLabel>
+            <FacilitySelect
+              multiple={false}
+              freeText
+              name="assigned_facility"
+              className="mt-4"
+              selected={state.form.assigned_facility_object}
+              setSelected={(obj) =>
+                setFacility(obj, "assigned_facility_object")
+              }
+              errors={state.errors.assigned_facility}
+            />
+          </div>
+
+          <RadioFormField
+            label={t("is_this_an_emergency")}
+            name="emergency"
+            value={state.form.emergency?.toString()}
+            onChange={handleFormFieldChange}
+            options={[
+              { label: t("yes"), value: "true" },
+              { label: t("no"), value: "false" },
+            ]}
+            optionDisplay={(option) => option.label}
+            optionValue={(option) => option.value}
+          />
+
+          {kasp_enabled && (
+            <RadioFormField
+              name="is_kasp"
+              value={state.form.is_kasp?.toString()}
+              label={t("is") + " " + kasp_full_string + "?"}
+              options={[
+                { label: t("yes"), value: "true" },
+                { label: t("no"), value: "false" },
+              ]}
+              optionValue={(option) => option.value}
+              optionDisplay={(option) => option.label}
+              onChange={handleFormFieldChange}
+            />
+          )}
+
+          <RadioFormField
+            label={t("is_this_an_upshift")}
+            name="is_up_shift"
+            value={state.form.is_up_shift?.toString()}
+            options={[
+              { label: t("yes"), value: "true" },
+              { label: t("no"), value: "false" },
+            ]}
+            optionValue={(option) => option.value}
+            optionDisplay={(option) => option.label}
+            onChange={handleFormFieldChange}
+          />
+
+          <PatientCategorySelect
+            required={false}
+            name="patient_category"
+            value={state.form.patient_category}
+            onChange={handleFormFieldChange}
+            label="Patient Category"
+            className="md:col-span-2"
+          />
+
+          {wartime_shifting && (
+            <>
+              <SelectFormField
+                name="preferred_vehicle_choice"
+                label={t("preferred_vehicle")}
+                value={state.form.preferred_vehicle_choice}
+                options={vehicleOptions}
+                optionLabel={(option) => option}
+                optionValue={(option) => option}
+                onChange={handleFormFieldChange}
+                className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5"
+                error={state.errors.preferred_vehicle_choice}
+              />
+              <SelectFormField
+                name="assigned_facility_type"
+                required
+                label={t("preferred_facility_type")}
+                value={state.form.assigned_facility_type}
+                options={facilityOptions}
+                optionLabel={(option) => option}
+                optionValue={(option) => option}
+                onChange={handleFormFieldChange}
+                className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5 md:col-span-1"
+                error={state.errors.assigned_facility_type}
+              />
+              <SelectFormField
+                name="breathlessness_level"
+                required
+                label={t("severity_of_breathlessness")}
+                value={state.form.breathlessness_level}
+                options={BREATHLESSNESS_LEVEL}
+                optionLabel={(option) => option}
+                optionValue={(option) => option}
+                onChange={handleFormFieldChange}
+                className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5 md:col-span-1"
+              />
+            </>
+          )}
+
+          <TextAreaFormField
+            className="md:col-span-2"
+            rows={5}
+            name="reason"
+            label={t("reason_for_shift")}
+            required
+            placeholder={t("type_your_reason_here") + "*"}
+            value={state.form.reason}
+            onChange={handleFormFieldChange}
+            error={state.errors.reason}
+          />
+
+          <TextFormField
+            className="md:col-span-2"
+            label="Name of ambulance driver"
+            name="ambulance_driver_name"
+            placeholder="Name of ambulance driver"
+            value={state.form.ambulance_driver_name}
+            onChange={handleTextFormFieldChange}
+          />
+
+          <PhoneNumberFormField
+            className="md:col-span-1"
+            name="ambulance_phone_number"
+            label="Ambulance Phone Number"
+            value={state.form.ambulance_phone_number}
+            onChange={(event) => {
+              handleFormFieldChange(event);
+            }}
+            error={state.errors.ambulance_phone_number}
+          />
+
+          <TextFormField
+            label="Ambulance No."
+            name="ambulance_number"
+            className="md:col-span-1"
+            placeholder="Ambulance No."
+            value={state.form.ambulance_number}
+            onChange={handleTextFormFieldChange}
+            error={state.errors.ambulance_number}
+          />
+
+          <TextAreaFormField
+            className="md:col-span-2"
+            rows={5}
+            name="comments"
+            label={t("any_other_comments")}
+            placeholder={t("type_any_extra_comments_here")}
+            value={state.form.comments}
+            onChange={handleFormFieldChange}
+            error={state.errors.comments}
+          />
+
+          <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
+            <Cancel onClick={() => goBack()} />
+            <Submit onClick={() => handleSubmit()} />
+          </div>
+        </div>
+      </Card>
+    </Page>
   );
 };

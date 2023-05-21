@@ -29,7 +29,7 @@
 
 - 💬 Comment on the issue if you are willing to take it up, and link the pull request with the issue.
 - 🏷️ Tag `@coronasafe/code-reviewers` for faster resolution.
-- 📸 Attach screenshots in the pull requests shwoing the changes made in the UI.
+- 📸 Attach screenshots in the pull requests showing the changes made in the UI.
 
 #### Install the required dependencies
 

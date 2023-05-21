@@ -1,7 +1,7 @@
 import axios from "axios";
 import { CircularProgress, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -31,6 +31,10 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
+import Webcam from "react-webcam";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -152,6 +156,26 @@ export const FileUpload = (props: FileUploadProps) => {
   const [audioFileError, setAudioFileError] = useState<string>("");
   const [contentType, setcontentType] = useState<string>("");
   const [downloadURL, setDownloadURL] = useState<string>();
+  const FACING_MODE_USER = "user";
+  const FACING_MODE_ENVIRONMENT = { exact: "environment" };
+  const webRef = useRef<any>(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [facingMode, setFacingMode] = useState<any>(FACING_MODE_USER);
+  const videoConstraints = {
+    width: 1280,
+    height: 720,
+    facingMode: "user",
+  };
+  const { width } = useWindowDimensions();
+  const LaptopScreenBreakpoint = 640;
+  const isLaptopScreen = width >= LaptopScreenBreakpoint ? true : false;
+  const handleSwitchCamera = useCallback(() => {
+    setFacingMode((prevState: any) =>
+      prevState === FACING_MODE_USER
+        ? FACING_MODE_ENVIRONMENT
+        : FACING_MODE_USER
+    );
+  }, []);
   const initialState = {
     open: false,
     isImage: false,
@@ -170,6 +194,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [modalOpenForEdit, setModalOpenForEdit] = useState(false);
+  const [modalOpenForCamera, setModalOpenForCamera] = useState(false);
   const [modalOpenForArchive, setModalOpenForArchive] = useState(false);
   const [modalOpenForMoreDetails, setModalOpenForMoreDetails] = useState(false);
   const [archiveReason, setArchiveReason] = useState("");
@@ -205,6 +230,18 @@ export const FileUpload = (props: FileUploadProps) => {
     }
     fetchPatientName();
   }, [dispatch, patientId]);
+
+  const captureImage = () => {
+    setPreviewImage(webRef.current.getScreenshot());
+    fetch(webRef.current.getScreenshot())
+      .then((res) => res.blob())
+      .then((blob) => {
+        const myFile = new File([blob], "image.png", {
+          type: blob.type,
+        });
+        setFile(myFile);
+      });
+  };
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -1112,7 +1149,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 {downloadURL && downloadURL.length > 0 && (
                   <a
                     href={downloadURL}
-                    download={file_state.name}
+                    download={`${file_state.name}.${file_state.extension}`}
                     className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
                   >
                     <i className="fas fa-download mr-2" />
@@ -1155,6 +1192,159 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
         )}
       </Modal>
+      <DialogModal
+        show={modalOpenForCamera}
+        title={
+          <div className="flex flex-row">
+            <div className="rounded-full bg-primary-100 py-4 px-5">
+              <CareIcon className="care-l-camera-change text-lg text-primary-500" />
+            </div>
+            <div className="m-4">
+              <h1 className="text-black text-xl "> Camera</h1>
+            </div>
+          </div>
+        }
+        className="max-w-2xl"
+        onClose={() => setModalOpenForCamera(false)}
+      >
+        <div>
+          {!previewImage ? (
+            <div className="m-3">
+              <Webcam
+                audio={false}
+                height={720}
+                screenshotFormat="image/jpeg"
+                width={1280}
+                ref={webRef}
+                videoConstraints={{ ...videoConstraints, facingMode }}
+              />
+            </div>
+          ) : (
+            <div className="m-3">
+              <img src={previewImage} />
+            </div>
+          )}
+        </div>
+
+        {/* buttons for mobile screens */}
+        <div className="flex justify-evenly m-4 sm:hidden ">
+          <div>
+            {!previewImage ? (
+              <ButtonV2 onClick={handleSwitchCamera} className="m-2">
+                {t("switch")}
+              </ButtonV2>
+            ) : (
+              <></>
+            )}
+          </div>
+          <div>
+            {!previewImage ? (
+              <>
+                <div>
+                  <ButtonV2
+                    onClick={() => {
+                      captureImage();
+                    }}
+                    className="m-2"
+                  >
+                    {t("capture")}
+                  </ButtonV2>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex space-x-2">
+                  <ButtonV2
+                    onClick={() => {
+                      setPreviewImage(null);
+                    }}
+                    className="m-2"
+                  >
+                    {t("retake")}
+                  </ButtonV2>
+                  <Submit
+                    onClick={() => {
+                      setModalOpenForCamera(false);
+                    }}
+                    className="m-2"
+                  >
+                    {t("submit")}
+                  </Submit>
+                </div>
+              </>
+            )}
+          </div>
+          <div className="sm:flex-1">
+            <ButtonV2
+              variant="secondary"
+              onClick={() => {
+                setPreviewImage(null);
+                setModalOpenForCamera(false);
+              }}
+              className="m-2"
+            >
+              {t("close")}
+            </ButtonV2>
+          </div>
+        </div>
+        {/* buttons for laptop screens */}
+        <div className={`${isLaptopScreen ? " " : " hidden "}`}>
+          <div className="flex m-4 lg:hidden">
+            <ButtonV2 onClick={handleSwitchCamera}>
+              <CareIcon className="care-l-camera-change text-lg" />
+              {`${t("switch")} ${t("camera")}`}
+            </ButtonV2>
+          </div>
+
+          <div className="flex justify-end  p-4 gap-2">
+            <div>
+              {!previewImage ? (
+                <>
+                  <div>
+                    <ButtonV2
+                      onClick={() => {
+                        captureImage();
+                      }}
+                    >
+                      <CareIcon className="care-l-capture text-lg" />
+                      {t("capture")}
+                    </ButtonV2>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex space-x-2">
+                    <ButtonV2
+                      onClick={() => {
+                        setPreviewImage(null);
+                      }}
+                    >
+                      {t("retake")}
+                    </ButtonV2>
+                    <Submit
+                      onClick={() => {
+                        setModalOpenForCamera(false);
+                      }}
+                    >
+                      {t("submit")}
+                    </Submit>
+                  </div>
+                </>
+              )}
+            </div>
+            <div className="sm:flex-1" />
+            <ButtonV2
+              variant="secondary"
+              onClick={() => {
+                setPreviewImage(null);
+                setModalOpenForCamera(false);
+              }}
+            >
+              {`${t("close")} ${t("camera")}`}
+            </ButtonV2>
+          </div>
+        </div>
+      </DialogModal>
       <DialogModal
         show={modalOpenForEdit}
         title={
@@ -1388,25 +1578,37 @@ export const FileUpload = (props: FileUploadProps) => {
                 {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
-                  <div className="flex flex-col gap-2 md:flex-row justify-between md:items-center items-stretch">
-                    <label className="flex items-center btn btn-primary">
-                      <i className="fas fa-file-arrow-down mr-2" /> Choose file
-                      <input
-                        title="changeFile"
-                        onChange={onFileChange}
-                        type="file"
-                        hidden
-                      />
-                    </label>
-                    <button
-                      className="btn btn-primary"
+                  <div className="flex flex-col md:flex-row gap-2 items-center justify-start md:justify-end">
+                    <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
+                      {({ isAuthorized }) =>
+                        isAuthorized ? (
+                          <label className="font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square button-primary-default">
+                            <CareIcon className="care-l-file-upload-alt text-lg" />
+                            {t("choose_file")}
+                            <input
+                              title="changeFile"
+                              onChange={onFileChange}
+                              type="file"
+                              hidden
+                            />
+                          </label>
+                        ) : (
+                          <></>
+                        )
+                      }
+                    </AuthorizedChild>
+                    <ButtonV2 onClick={() => setModalOpenForCamera(true)}>
+                      <CareIcon className="care-l-camera text-lg mr-2" />
+                      Open Camera
+                    </ButtonV2>
+                    <ButtonV2
+                      authorizeFor={NonReadOnlyUsers}
                       disabled={!file || !uploadFileName || !isActive}
-                      onClick={() => {
-                        handleUpload({ status });
-                      }}
+                      onClick={() => handleUpload({ status })}
                     >
-                      <i className="fas fa-cloud-arrow-up mr-2" /> Upload
-                    </button>
+                      <CareIcon className="care-l-cloud-upload text-lg" />
+                      {t("upload")}
+                    </ButtonV2>
                   </div>
                 )}
                 {file && (
