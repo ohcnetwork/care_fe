@@ -187,9 +187,9 @@ class VentilatorVitalsRenderer {
     const deltaRows = Math.floor(cursor.x / size.width);
     ctx.clearRect(
       cursor.x - deltaRows * size.width,
-      1 + transform(channel.options.highLimit) + (deltaRows * size.height) / 4,
+      1 + transform(channel.options.highLimit) + (deltaRows * size.height) / 3,
       10,
-      size.height / 4
+      size.height / 3 + 5
     );
   }
 
