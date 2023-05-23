@@ -78,7 +78,7 @@ interface Options {
  * - Render frequency is set manually and is independent of the sampling rate.
  * - Manages rendering of all the vitals channels.
  */
-class VitalsRenderer {
+class HL7VitalsRenderer {
   constructor(options: Options) {
     const {
       ecg,
@@ -221,7 +221,7 @@ class VitalsRenderer {
   }
 }
 
-export default VitalsRenderer;
+export default HL7VitalsRenderer;
 
 /**
  * Maps a value from one range to another.

@@ -13,7 +13,7 @@ import Card from "../../../CAREUI/display/Card";
 import { Submit } from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import TextFormField from "../../Form/FormFields/TextFormField";
-import PatientVitalsMonitor from "../../VitalsMonitor/PatientVitalsMonitor";
+import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 
 interface HL7MonitorProps {
   assetId: string;
@@ -121,7 +121,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
           </Card>
         </div>
 
-        <PatientVitalsMonitor
+        <HL7PatientVitalsMonitor
           socketUrl={`wss://${middleware}/observations/${localipAddress}`}
         />
       </div>

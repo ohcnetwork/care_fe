@@ -3,7 +3,7 @@ import HL7DeviceClient, {
   HL7MonitorData,
   HL7VitalsWaveformData,
 } from "./HL7DeviceClient";
-import VitalsRenderer, { ChannelOptions } from "./VitalsRenderer";
+import HL7VitalsRenderer, { ChannelOptions } from "./HL7VitalsRenderer";
 import useCanvas from "../../Common/hooks/useCanvas";
 import { VitalsValueBase as VitalsValue } from "./types";
 
@@ -27,7 +27,7 @@ interface VitalsBPValue {
   map: VitalsValue;
 }
 
-export default function useVitalsMonitor() {
+export default function useHL7VitalsMonitor() {
   const waveformForegroundCanvas = useCanvas();
   const waveformBackgroundCanvas = useCanvas();
 
@@ -41,7 +41,7 @@ export default function useVitalsMonitor() {
 
   // Waveform data states.
   const device = useRef<HL7DeviceClient>();
-  const renderer = useRef<VitalsRenderer | null>(null);
+  const renderer = useRef<HL7VitalsRenderer | null>(null);
 
   const ecgOptionsRef = useRef<ChannelOptions>();
   const plethOptionsRef = useRef<ChannelOptions>();
@@ -62,7 +62,7 @@ export default function useVitalsMonitor() {
         )
           return;
 
-        renderer.current = new VitalsRenderer({
+        renderer.current = new HL7VitalsRenderer({
           foregroundRenderContext: waveformForegroundCanvas.contextRef.current!,
           backgroundRenderContext: waveformBackgroundCanvas.contextRef.current!,
           size: MONITOR_WAVEFORMS_CANVAS_SIZE,
@@ -142,7 +142,7 @@ const getChannel = (observation: HL7VitalsWaveformData): ChannelOptions => {
 };
 
 const ingestTo = (
-  vitalsRenderer: VitalsRenderer,
+  vitalsRenderer: HL7VitalsRenderer,
   channel: "ecg" | "pleth" | "spo2"
 ) => {
   return (observation: HL7MonitorData) => {

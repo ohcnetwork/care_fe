@@ -5,7 +5,7 @@ import {
   getPermittedFacility,
   listPatientAssetBeds,
 } from "../../Redux/actions";
-import PatientVitalsMonitor from "../VitalsMonitor/PatientVitalsMonitor";
+import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import useFilters from "../../Common/hooks/useFilters";
 import { FacilityModel } from "./models";
 import Loading from "../Common/Loading";
@@ -45,7 +45,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
 
   const [facilityObject, setFacilityObject] = useState<FacilityModel>();
   const [data, setData] =
-    useState<Parameters<typeof PatientVitalsMonitor>[0][]>();
+    useState<Parameters<typeof HL7PatientVitalsMonitor>[0][]>();
   const [totalCount, setTotalCount] = useState(0);
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
@@ -255,7 +255,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
       ) : (
         <div className="mt-1 grid grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3 gap-1">
           {data.map((props) => (
-            <PatientVitalsMonitor
+            <HL7PatientVitalsMonitor
               key={props.patientAssetBed?.bed.id}
               {...props}
             />
