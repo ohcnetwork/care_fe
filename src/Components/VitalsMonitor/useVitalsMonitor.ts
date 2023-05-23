@@ -1,11 +1,11 @@
 import { useCallback, useRef, useState } from "react";
-import VitalsDeviceClient, {
-  VitalsData,
-  VitalsValue,
-  VitalsWaveformData,
-} from "./VitalsDeviceClient";
+import HL7DeviceClient, {
+  HL7MonitorData,
+  HL7VitalsWaveformData,
+} from "./HL7DeviceClient";
 import VitalsRenderer, { ChannelOptions } from "./VitalsRenderer";
 import useCanvas from "../../Common/hooks/useCanvas";
+import { VitalsValueBase as VitalsValue } from "./types";
 
 export const MONITOR_RATIO = {
   w: 13,
@@ -40,7 +40,7 @@ export default function useVitalsMonitor() {
   const [temperature2, setTemperature2] = useState<VitalsValue>();
 
   // Waveform data states.
-  const device = useRef<VitalsDeviceClient>();
+  const device = useRef<HL7DeviceClient>();
   const renderer = useRef<VitalsRenderer | null>(null);
 
   const ecgOptionsRef = useRef<ChannelOptions>();
@@ -51,7 +51,7 @@ export default function useVitalsMonitor() {
     (socketUrl: string) => {
       device.current?.disconnect();
 
-      device.current = new VitalsDeviceClient(socketUrl);
+      device.current = new HL7DeviceClient(socketUrl);
       device.current.connect();
 
       function obtainRenderer() {
@@ -77,7 +77,8 @@ export default function useVitalsMonitor() {
         device.current!.on("pleth-waveform", ingestTo(_renderer, "pleth"));
         device.current!.on("spo2-waveform", ingestTo(_renderer, "spo2"));
 
-        const hook = (set: (data: any) => void) => (d: VitalsData) => set(d);
+        const hook = (set: (data: any) => void) => (d: HL7MonitorData) =>
+          set(d);
         device.current!.on("heart-rate", hook(setPulseRate));
         device.current!.on("SpO2", hook(setSpo2));
         device.current!.on("respiratory-rate", hook(setRespiratoryRate));
@@ -87,17 +88,23 @@ export default function useVitalsMonitor() {
       }
 
       device.current.once("ecg-waveform", (observation) => {
-        ecgOptionsRef.current = getChannel(observation as VitalsWaveformData);
+        ecgOptionsRef.current = getChannel(
+          observation as HL7VitalsWaveformData
+        );
         obtainRenderer();
       });
 
       device.current.once("pleth-waveform", (observation) => {
-        plethOptionsRef.current = getChannel(observation as VitalsWaveformData);
+        plethOptionsRef.current = getChannel(
+          observation as HL7VitalsWaveformData
+        );
         obtainRenderer();
       });
 
       device.current.once("spo2-waveform", (observation) => {
-        spo2OptionsRef.current = getChannel(observation as VitalsWaveformData);
+        spo2OptionsRef.current = getChannel(
+          observation as HL7VitalsWaveformData
+        );
         obtainRenderer();
       });
     },
@@ -123,7 +130,7 @@ export default function useVitalsMonitor() {
   };
 }
 
-const getChannel = (observation: VitalsWaveformData): ChannelOptions => {
+const getChannel = (observation: HL7VitalsWaveformData): ChannelOptions => {
   return {
     samplingRate: parseInt(
       observation["sampling rate"]?.replace("/sec", "") ?? "-1"
@@ -138,10 +145,10 @@ const ingestTo = (
   vitalsRenderer: VitalsRenderer,
   channel: "ecg" | "pleth" | "spo2"
 ) => {
-  return (observation: VitalsData) => {
+  return (observation: HL7MonitorData) => {
     vitalsRenderer.append(
       channel,
-      (observation as VitalsWaveformData).data
+      (observation as HL7VitalsWaveformData).data
         .split(" ")
         .map((x) => parseInt(x)) || []
     );

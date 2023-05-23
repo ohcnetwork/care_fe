@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import { VitalsDataBase, VitalsValueBase, VitalsWaveformBase } from "./types";
 
 const WAVEFORM_KEY_MAP: Record<string, EventName> = {
   II: "ecg-waveform",
@@ -11,13 +12,13 @@ const WAVEFORM_KEY_MAP: Record<string, EventName> = {
  * events for each observation.
  *
  * @example
- * const device = new VitalsDeviceClient("wss://vitals-middleware.local/observations/192.168.1.14");
+ * const device = new HL7DeviceClient("wss://vitals-middleware.local/observations/192.168.1.14");
  *
  * device.on("SpO2", (observation) => {
  *  console.log(observation.value);
  * });
  */
-class VitalsDeviceClient extends EventEmitter {
+class HL7DeviceClient extends EventEmitter {
   constructor(socketUrl: string) {
     super();
     this.ws = new WebSocket(socketUrl);
@@ -43,41 +44,26 @@ class VitalsDeviceClient extends EventEmitter {
     this.ws.close();
   }
 
-  on(event: EventName, listener: (data: VitalsData) => void): this {
+  on(event: EventName, listener: (data: HL7MonitorData) => void): this {
     return super.on(event, listener);
   }
 
-  emit(event: EventName, data: VitalsData): boolean {
+  emit(event: EventName, data: HL7MonitorData): boolean {
     return super.emit(event, data);
   }
 
-  once(event: EventName, listener: (data: VitalsData) => void): this {
+  once(event: EventName, listener: (data: HL7MonitorData) => void): this {
     return super.once(event, listener);
   }
 
-  off(event: EventName, listener: (data: VitalsData) => void): this {
+  off(event: EventName, listener: (data: HL7MonitorData) => void): this {
     return super.off(event, listener);
   }
 }
 
-export default VitalsDeviceClient;
+export default HL7DeviceClient;
 
-interface VitalsDataBase {
-  device_id: string;
-  "date-time": string;
-  "patient-id": string;
-  "patient-name": string;
-}
-
-export interface VitalsValue {
-  value: number;
-  unit: string;
-  interpretation: string;
-  "low-limit": number;
-  "high-limit": number;
-}
-
-export interface VitalsValueData extends VitalsDataBase, VitalsValue {
+export interface HL7VitalsValueData extends VitalsDataBase, VitalsValueBase {
   observation_id:
     | "heart-rate"
     | "ST"
@@ -88,43 +74,35 @@ export interface VitalsValueData extends VitalsDataBase, VitalsValue {
     | "body-temperature2";
 }
 
-export interface VitalsWaveformData extends VitalsDataBase {
-  observation_id: "waveform";
-
+export interface HL7VitalsWaveformData extends VitalsWaveformBase {
   "wave-name": "II" | "Pleth" | "Respiration";
-  resolution: string;
-  "sampling rate": string;
-  "data-baseline": number;
-  "data-low-limit": number;
-  "data-high-limit": number;
-  data: string;
 }
 
-export interface VitalsBloodPressureData extends VitalsDataBase {
+export interface HL7VitalsBloodPressureData extends VitalsDataBase {
   observation_id: "blood-pressure";
   status: string;
-  systolic: VitalsValue;
-  diastolic: VitalsValue;
-  map: VitalsValue;
+  systolic: VitalsValueBase;
+  diastolic: VitalsValueBase;
+  map: VitalsValueBase;
 }
 
-export interface VitalsDeviceConnectionData extends VitalsDataBase {
+export interface HL7DeviceConnectionData extends VitalsDataBase {
   observation_id: "device-connection";
   status: "string";
 }
 
-export type VitalsData =
-  | VitalsValueData
-  | VitalsWaveformData
-  | VitalsBloodPressureData
-  | VitalsDeviceConnectionData;
+export type HL7MonitorData =
+  | HL7VitalsValueData
+  | HL7VitalsWaveformData
+  | HL7VitalsBloodPressureData
+  | HL7DeviceConnectionData;
 
 type EventName =
-  | VitalsData["observation_id"]
+  | HL7MonitorData["observation_id"]
   | "ecg-waveform"
   | "pleth-waveform"
   | "spo2-waveform";
 
 const parseObservations = (data: string) => {
-  return JSON.parse(data || "[]") as VitalsData[];
+  return JSON.parse(data || "[]") as HL7MonitorData[];
 };
