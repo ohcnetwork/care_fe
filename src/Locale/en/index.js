@@ -12,6 +12,7 @@ import ExternalResult from "./ExternalResult.json";
 import CoverImageEdit from "./CoverImageEdit.json";
 import Resource from "./Resource.json";
 import SortOptions from "./SortOptions.json";
+import Bed from "./Bed.json";
 
 export default {
   ...Auth,
@@ -27,5 +28,6 @@ export default {
   ...Notifications,
   ...Resource,
   ...Shifting,
+  ...Bed,
   SortOptions,
 };

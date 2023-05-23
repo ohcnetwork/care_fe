@@ -69,18 +69,18 @@ export const BedSelect = (props: BedSelectProps) => {
       selected={selected}
       onChange={setSelected}
       showNOptions={showNOptions}
-      placeholder={t("Search by beds name")}
+      placeholder={t("bed_search_placeholder")}
       fetchData={onBedSearch}
       optionLabel={(option: any) => {
         if (Object.keys(option).length === 0) return "";
         return (
-          `${option.name} ${option?.location_object?.name || t("Unknown")}` ||
+          `${option.name} ${option?.location_object?.name || t("unknown")}` ||
           option?.location_object?.name
         );
       }}
       optionLabelChip={(option: any) => {
         if (Object.keys(option).length === 0) return "";
-        return `${option?.bed_type.replace(/_/g, " ")}` || t("Unknown");
+        return `${t(option?.bed_type)}` || t("unknown");
       }}
       compareBy="id"
       error={error}
