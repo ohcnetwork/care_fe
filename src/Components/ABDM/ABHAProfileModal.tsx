@@ -1,8 +1,8 @@
-// import CareIcon from "../../CAREUI/icons/CareIcon";
-import { formatDate } from "../../Utils/utils";
-import DialogModal from "../Common/Dialog";
 import { AbhaObject } from "../Patient/models";
-
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import DialogModal from "../Common/Dialog";
+import QRCode from "qrcode.react";
+import { formatDate } from "../../Utils/utils";
 interface IProps {
   abha?: AbhaObject;
   show: boolean;
@@ -10,31 +10,87 @@ interface IProps {
 }
 
 const ABHAProfileModal = ({ show, onClose, abha }: IProps) => {
+  console.log(abha);
+
   return (
-    <DialogModal title="ABHA Profile" show={show} onClose={onClose}>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center justify-evenly gap-2 text-lg font-semibold">
-          <span> {abha?.first_name}</span>
-          <span> {abha?.middle_name} </span>
-          <span> {abha?.last_name} </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <span className="text-2xl text-gray-500">#</span>
-          <span className="">{abha?.id}</span>
-        </div>
-      </div>
-      <div className="flex items-center justify-between">
-        <span>{abha?.abha_number}</span>
-        {abha?.health_id && (
-          <div className="flex items-center gap-1">
-            <span>{abha.health_id.split("@")[0]}</span>
-            <span className="text-gray-700 text-sm">@</span>
-            <span>{abha.health_id.split("@")[1] || "care"}</span>
+    <DialogModal
+      title={
+        <p className="flex items-center justify-between">
+          <h4>ABHA Profile</h4>
+          <CareIcon onClick={print} className="care-l-print cursor-pointer" />
+        </p>
+      }
+      show={show}
+      onClose={onClose}
+    >
+      <div
+        id="section-to-print"
+        className="print flex items-center justify-around print:border border-black p-4 print:w-full"
+      >
+        <>
+          <div className="flex flex-col items-center justify-evenly">
+            <div className="flex items-center justify-evenly gap-2 text-lg font-semibold">
+              {abha?.name ? (
+                <span> {abha?.name}</span>
+              ) : (
+                <>
+                  <span> {abha?.first_name}</span>
+                  <span> {abha?.middle_name} </span>
+                  <span> {abha?.last_name} </span>
+                </>
+              )}
+            </div>
+            <span className="font-bold">{abha?.abha_number}</span>
+            {abha?.health_id && (
+              <div className="flex items-center gap-1 font-bold">
+                <span>{abha.health_id.split("@")[0]}</span>
+                <span className="text-gray-700 text-sm">@</span>
+                <span>{abha.health_id.split("@")[1] || "care"}</span>
+              </div>
+            )}
+            <div className="flex flex-col mt-2">
+              {abha?.gender && (
+                <p className="text-sm text-gray-600">
+                  Gender:
+                  <span className="ml-2 text-base font-semibold text-gray-900">
+                    {abha?.gender}
+                  </span>
+                </p>
+              )}
+              {abha?.date_of_birth && (
+                <p className="text-sm text-gray-600">
+                  DOB:
+                  <span className="ml-2 text-base font-semibold text-gray-900">
+                    {abha?.date_of_birth}
+                  </span>
+                </p>
+              )}
+              {abha?.email && (
+                <p className="text-sm text-gray-600">
+                  Email:
+                  <span className="ml-2 text-base font-semibold text-gray-900">
+                    {abha?.email}
+                  </span>
+                </p>
+              )}
+            </div>
           </div>
-        )}
-      </div>
-      <div className="flex mt-2">
-        <span>{abha?.email}</span>
+        </>
+        <>
+          <QRCode
+            className="border border-black p-1"
+            value={JSON.stringify({
+              hidn: abha?.abha_number,
+              phr: abha?.health_id,
+              name: abha?.name,
+              gender: abha?.gender,
+              dob: abha?.date_of_birth,
+              address: abha?.address,
+              "state name": abha?.state,
+              "dist name": abha?.district,
+            })}
+          />
+        </>
       </div>
 
       <div className="flex flex-col mt-4 text-sm text-gray-700">

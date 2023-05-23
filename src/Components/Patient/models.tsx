@@ -30,7 +30,13 @@ export interface AbhaObject {
   abha_number: string;
   email: string | null;
   first_name: string;
+  date_of_birth: string;
+  gender: string;
+  address: string;
+  district: string;
+  state: string;
   health_id: string | null;
+  name: string;
   last_name: string;
   middle_name: string;
   profile_photo: string;
