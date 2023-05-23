@@ -42,17 +42,17 @@ interface Options {
    */
   animationInterval: number;
   /**
-   * Options for ECG channel.
+   * Options for Pressure channel.
    */
-  ecg: ChannelOptions;
+  pressure: ChannelOptions;
   /**
-   * Options for Pleth channel.
+   * Options for Flow channel.
    */
-  pleth: ChannelOptions;
+  flow: ChannelOptions;
   /**
-   * Options for SPO2 channel.
+   * Options for Volume channel.
    */
-  spo2: ChannelOptions;
+  volume: ChannelOptions;
 }
 
 /**
@@ -62,71 +62,75 @@ interface Options {
  * - Render frequency is set manually and is independent of the sampling rate.
  * - Manages rendering of all the vitals channels.
  */
-class HL7VitalsRenderer {
+class VentilatorVitalsRenderer {
   constructor(options: Options) {
     const {
-      ecg,
-      pleth,
-      spo2,
+      pressure,
+      flow,
+      volume,
       size: { height: h, width: w },
     } = options;
 
     this.options = options;
     this.state = {
-      ecg: {
+      pressure: {
         color: "#0ffc03",
         buffer: [],
         cursor: { x: 0, y: 0 },
-        deltaX: w / (DURATION * ecg.samplingRate),
-        transform: lerp(ecg.lowLimit, ecg.highLimit, h * 0.25, 0),
-        chunkSize: ecg.samplingRate * options.animationInterval * 1e-3,
-        options: ecg,
-        rows: 2,
-      },
-
-      pleth: {
-        color: "#ffff24",
-        buffer: [],
-        cursor: { x: 0, y: 0 },
-        deltaX: w / (DURATION * pleth.samplingRate),
-        transform: lerp(pleth.lowLimit, pleth.highLimit, h * 0.75, h * 0.5),
-        chunkSize: pleth.samplingRate * options.animationInterval * 1e-3,
-        options: pleth,
+        deltaX: w / (DURATION * pressure.samplingRate),
+        transform: lerp(pressure.lowLimit, pressure.highLimit, h * 0.33, 0),
+        chunkSize: pressure.samplingRate * options.animationInterval * 1e-3,
+        options: pressure,
         rows: 1,
       },
 
-      spo2: {
+      flow: {
+        color: "#ffff24",
+        buffer: [],
+        cursor: { x: 0, y: 0 },
+        deltaX: w / (DURATION * flow.samplingRate),
+        transform: lerp(flow.lowLimit, flow.highLimit, h * 0.67, h * 0.33),
+        chunkSize: flow.samplingRate * options.animationInterval * 1e-3,
+        options: flow,
+        rows: 1,
+      },
+
+      volume: {
         color: "#2427ff",
         buffer: [],
         cursor: { x: 0, y: 0 },
-        deltaX: w / (DURATION * spo2.samplingRate),
-        transform: lerp(spo2.lowLimit, spo2.highLimit, h, h * 0.75),
-        chunkSize: spo2.samplingRate * options.animationInterval * 1e-3,
-        options: spo2,
+        deltaX: w / (DURATION * volume.samplingRate),
+        transform: lerp(volume.lowLimit, volume.highLimit, h, h * 0.67),
+        chunkSize: volume.samplingRate * options.animationInterval * 1e-3,
+        options: volume,
         rows: 1,
       },
     };
 
     // Draw baseline for each channel.
-    this.initialize(this.state.ecg);
-    this.initialize(this.state.pleth);
-    this.initialize(this.state.spo2);
+    this.initialize(this.state.pressure);
+    this.initialize(this.state.flow);
+    this.initialize(this.state.volume);
 
     // Start rendering.
     setInterval(() => {
-      this.render(this.state.ecg);
-      this.render(this.state.pleth);
-      this.render(this.state.spo2);
+      this.render(this.state.pressure);
+      this.render(this.state.flow);
+      this.render(this.state.volume);
     }, options.animationInterval);
   }
 
   private options: Options;
-  private state: { ecg: ChannelState; pleth: ChannelState; spo2: ChannelState };
+  private state: {
+    pressure: ChannelState;
+    flow: ChannelState;
+    volume: ChannelState;
+  };
 
   /**
    * Appends data to the buffer of the specified channel.
    */
-  append(channel: "ecg" | "pleth" | "spo2", data: number[]) {
+  append(channel: "pressure" | "flow" | "volume", data: number[]) {
     const state = this.state[channel];
     state.buffer.push(...data.map(state.transform));
   }
@@ -205,4 +209,4 @@ class HL7VitalsRenderer {
   }
 }
 
-export default HL7VitalsRenderer;
+export default VentilatorVitalsRenderer;

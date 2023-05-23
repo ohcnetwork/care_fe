@@ -3,9 +3,10 @@ import HL7DeviceClient, {
   HL7MonitorData,
   HL7VitalsWaveformData,
 } from "./HL7DeviceClient";
-import HL7VitalsRenderer, { ChannelOptions } from "./HL7VitalsRenderer";
+import HL7VitalsRenderer from "./HL7VitalsRenderer";
 import useCanvas from "../../Common/hooks/useCanvas";
-import { VitalsValueBase as VitalsValue } from "./types";
+import { ChannelOptions, VitalsValueBase as VitalsValue } from "./types";
+import { getChannel } from "./utils";
 
 export const MONITOR_RATIO = {
   w: 13,
@@ -129,17 +130,6 @@ export default function useHL7VitalsMonitor() {
     device,
   };
 }
-
-const getChannel = (observation: HL7VitalsWaveformData): ChannelOptions => {
-  return {
-    samplingRate: parseInt(
-      observation["sampling rate"]?.replace("/sec", "") ?? "-1"
-    ),
-    baseline: observation["data-baseline"] ?? 0,
-    lowLimit: observation["data-low-limit"] ?? 0,
-    highLimit: observation["data-high-limit"] ?? 0,
-  };
-};
 
 const ingestTo = (
   vitalsRenderer: HL7VitalsRenderer,
