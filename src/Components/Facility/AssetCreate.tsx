@@ -581,6 +581,10 @@ const AssetCreate = (props: AssetProps) => {
                             title: "HL7 Vitals Monitor",
                             value: AssetClass.HL7MONITOR,
                           },
+                          {
+                            title: "Ventilator",
+                            value: AssetClass.VENTILATOR,
+                          },
                         ]}
                         optionLabel={({ title }) => title}
                         optionValue={({ value }) => value}
