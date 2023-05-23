@@ -3,6 +3,8 @@ import { useDispatch } from "react-redux";
 import { listFacilityBeds } from "../../Redux/actions";
 import { BedModel } from "../Facility/models";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
+import { useTranslation } from "react-i18next";
+
 interface BedSelectProps {
   name: string;
   error?: string | undefined;
@@ -32,7 +34,9 @@ export const BedSelect = (props: BedSelectProps) => {
     location,
     showNOptions = 20,
   } = props;
+
   const dispatchAction: any = useDispatch();
+  const { t } = useTranslation();
 
   const onBedSearch = useCallback(
     async (text: string) => {
@@ -65,18 +69,18 @@ export const BedSelect = (props: BedSelectProps) => {
       selected={selected}
       onChange={setSelected}
       showNOptions={showNOptions}
-      placeholder="Search by beds name"
+      placeholder={t("Search by beds name")}
       fetchData={onBedSearch}
       optionLabel={(option: any) => {
         if (Object.keys(option).length === 0) return "";
         return (
-          `${option.name} ${option?.location_object?.name || "Unknown"}` ||
+          `${option.name} ${option?.location_object?.name || t("Unknown")}` ||
           option?.location_object?.name
         );
       }}
       optionLabelChip={(option: any) => {
         if (Object.keys(option).length === 0) return "";
-        return `${option?.bed_type}` || "Unknown";
+        return `${option?.bed_type.replace(/_/g, " ")}` || t("Unknown");
       }}
       compareBy="id"
       error={error}

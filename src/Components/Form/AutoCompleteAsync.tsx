@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Combobox } from "@headlessui/react";
 import { debounce } from "lodash";
 import { DropdownTransition } from "../Common/components/HelperComponents";
@@ -120,7 +120,7 @@ const AutoCompleteAsync = (props: Props) => {
                       <div className="flex justify-between align-center">
                         {optionLabel(item)}
                         {optionLabelChip(item) && (
-                          <div className="px-2 bg-secondary-100 h-fit rounded-full text-xs text-gray-900 border border-secondary-400">
+                          <div className="px-2 mt-1 sm:mt-0 text-center bg-secondary-100 h-fit max-w-fit rounded-full text-xs text-gray-900 border border-secondary-400">
                             {optionLabelChip(item)}
                           </div>
                         )}
