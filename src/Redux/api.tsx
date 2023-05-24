@@ -588,12 +588,20 @@ const routes: Routes = {
     path: "/api/v1/facility/{facility_external_id}/inventory/delete_last/?item={id}",
     method: "DELETE",
   },
-  discharge: {
-    path: "/api/v1/patient/{external_id}/discharge_summary/",
+  dischargeSummaryGenerate: {
+    path: "/api/v1/consultation/{external_id}/generate_discharge_summary/",
+    method: "POST",
+  },
+  dischargeSummaryPreview: {
+    path: "/api/v1/consultation/{external_id}/preview_discharge_summary",
+    method: "GET",
+  },
+  dischargeSummaryEmail: {
+    path: "/api/v1/consultation/{external_id}/email_discharge_summary/",
     method: "POST",
   },
   dischargePatient: {
-    path: "/api/v1/patient/{id}/discharge_patient/",
+    path: "/api/v1/consultation/{id}/discharge_patient/",
     method: "POST",
   },
   //Profile
@@ -797,6 +805,43 @@ const routes: Routes = {
   getAssetTransaction: {
     path: "/api/v1/asset_transaction/{id}",
     method: "GET",
+  },
+
+  // Prescription endpoints
+
+  listPrescriptions: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
+    method: "GET",
+  },
+
+  createPrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
+    method: "POST",
+  },
+
+  listAdministrations: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/",
+    method: "GET",
+  },
+
+  getAdministration: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/{external_id}/",
+    method: "GET",
+  },
+
+  getPrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/",
+    method: "GET",
+  },
+
+  administerPrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/administer/",
+    method: "POST",
+  },
+
+  discontinuePrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
+    method: "POST",
   },
 
   // HCX Endpoints
