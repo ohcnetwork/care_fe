@@ -204,7 +204,7 @@ export default function PrescriptionsTable({
                     obj.route && t("PRESCRIPTION_ROUTE_" + obj.route),
                   frequency__pretty:
                     obj.frequency &&
-                    t("PRESCRIPTION_FREQUENCY_" + obj.frequency),
+                    t("PRESCRIPTION_FREQUENCY_" + obj.frequency.toUpperCase()),
                   days__pretty: obj.days && obj.days + " day(s)",
                   min_hours_between_doses__pretty:
                     obj.min_hours_between_doses &&

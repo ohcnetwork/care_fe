@@ -115,7 +115,9 @@ export default function CreatePrescriptionForm(props: {
                 {...field("frequency", RequiredFieldValidator())}
                 required
                 options={Object.entries(PRESCRIPTION_FREQUENCIES)}
-                optionLabel={([key]) => t("PRESCRIPTION_FREQUENCY_" + key)}
+                optionLabel={([key]) =>
+                  t("PRESCRIPTION_FREQUENCY_" + key.toUpperCase())
+                }
                 optionValue={([key]) => key}
               />
               <TextFormField

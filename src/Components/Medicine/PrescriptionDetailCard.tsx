@@ -120,7 +120,10 @@ export default function PrescriptionDetailCard({
             <>
               <Detail className="col-span-5" label={t("frequency")}>
                 {prescription.frequency &&
-                  t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)}
+                  t(
+                    "PRESCRIPTION_FREQUENCY_" +
+                      prescription.frequency.toUpperCase()
+                  )}
               </Detail>
               <Detail className="col-span-4" label={t("days")}>
                 {prescription.days}
