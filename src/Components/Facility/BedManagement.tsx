@@ -10,6 +10,7 @@ import {
 } from "../../Redux/actions";
 import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
+import ButtonV2 from "../Common/components/ButtonV2";
 import { BedModel } from "./models";
 import { ReactElement } from "react";
 import * as Notification from "../../Utils/Notifications.js";
@@ -32,6 +33,7 @@ interface BedRowProps {
   bedType: string;
   triggerRerender: () => void;
   locationId: string;
+  isOccupied: boolean;
 }
 
 const BedRow = (props: BedRowProps) => {
@@ -43,6 +45,7 @@ const BedRow = (props: BedRowProps) => {
     triggerRerender,
     locationId,
     bedType,
+    isOccupied,
   } = props;
 
   const dispatchAction: any = useDispatch();
@@ -110,13 +113,17 @@ const BedRow = (props: BedRowProps) => {
           </button>
         </div>
         <div className="px-2 py-2 w-full">
-          <button
+          <ButtonV2
             onClick={() => handleDelete(name, id)}
-            className="btn btn-default bg-white w-full border-red-500 text-red-700 active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+            variant="danger"
+            border
+            ghost
+            disabled={isOccupied}
+            tooltip={isOccupied ? "Bed is occupied" : ""}
           >
             <i className="fas fa-trash mr-2"></i>
             Delete
-          </button>
+          </ButtonV2>
         </div>
       </div>
       <BedDeleteDialog
@@ -204,6 +211,7 @@ export const BedManagement = (props: BedManagementProps) => {
         triggerRerender={triggerRerender}
         key={locationId || ""}
         locationId={locationId || ""}
+        isOccupied={bedItem.is_occupied || false}
       />
     ));
   } else if (beds && beds.length === 0) {
