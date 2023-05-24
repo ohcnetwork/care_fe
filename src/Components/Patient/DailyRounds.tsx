@@ -52,7 +52,7 @@ const initForm: any = {
   patient_category: "Comfort",
   current_health: 0,
   recommend_discharge: false,
-  actions: null,
+  action: null,
   review_interval: 0,
   admitted_to: "",
   taken_at: null,
@@ -110,9 +110,32 @@ export const DailyRounds = (props: any) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [prevReviewInterval, setPreviousReviewInterval] = useState(-1);
+  const [prevAction, setPreviousAction] = useState("NO_ACTION");
   const [hasPreviousLog, setHasPreviousLog] = useState(false);
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
+
+  useEffect(() => {
+    (async () => {
+      if (patientId) {
+        const res = await dispatchAction(getPatient({ id: patientId }));
+        if (res.data) {
+          setPatientName(res.data.name);
+          setFacilityName(res.data.facility_object.name);
+          setPreviousReviewInterval(
+            Number(res.data.last_consultation.review_interval)
+          );
+          setPreviousAction(
+            TELEMEDICINE_ACTIONS.find((action) => action.id === res.data.action)
+              ?.text || "NO_ACTION"
+          );
+        }
+      } else {
+        setPatientName("");
+        setFacilityName("");
+      }
+    })();
+  }, [dispatchAction, patientId]);
 
   const fetchRoundDetails = useCallback(
     async (status: statusType) => {
@@ -149,26 +172,7 @@ export const DailyRounds = (props: any) => {
   );
 
   useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        const res = await dispatchAction(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-          setPreviousReviewInterval(
-            Number(res.data.last_consultation.review_interval)
-          );
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
-      }
-    }
-    fetchPatientName();
-  }, [dispatchAction, patientId]);
-
-  useEffect(() => {
-    async function fetchHasPreviousLog() {
+    (async () => {
       if (consultationId && !id) {
         const res = await dispatchAction(
           getDailyReport({ limit: 1, offset: 0 }, { consultationId })
@@ -187,8 +191,7 @@ export const DailyRounds = (props: any) => {
           },
         });
       }
-    }
-    fetchHasPreviousLog();
+    })();
   }, [dispatchAction, consultationId, id]);
 
   const validateForm = () => {
@@ -275,10 +278,8 @@ export const DailyRounds = (props: any) => {
           other_details: state.form.other_details,
           consultation: consultationId,
           recommend_discharge: JSON.parse(state.form.recommend_discharge),
-          action: state.form.action,
-          review_interval: Number(
-            state.form.review_interval || prevReviewInterval
-          ),
+          action: prevAction,
+          review_interval: Number(prevReviewInterval),
         };
         if (state.form.rounds_type === "NORMAL") {
           data = {
@@ -648,11 +649,11 @@ export const DailyRounds = (props: any) => {
                       <LegacyNativeSelectField
                         name="action"
                         variant="outlined"
-                        value={state.form.action}
+                        value={prevAction}
                         optionKey="text"
                         optionValue="desc"
                         options={TELEMEDICINE_ACTIONS}
-                        onChange={handleChange}
+                        onChange={(e) => setPreviousAction(e.target.value)}
                       />
                       <LegacyErrorHelperText error={state.errors.action} />
                     </div>
@@ -664,12 +665,14 @@ export const DailyRounds = (props: any) => {
                       <LegacySelectField
                         name="review_interval"
                         variant="standard"
-                        value={state.form.review_interval || prevReviewInterval}
+                        value={prevReviewInterval}
                         options={[
                           { id: -1, text: "select" },
                           ...REVIEW_AT_CHOICES,
                         ]}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setPreviousReviewInterval(Number(e.target.value))
+                        }
                         errors={state.errors.review_interval}
                         className="mt-1"
                       />

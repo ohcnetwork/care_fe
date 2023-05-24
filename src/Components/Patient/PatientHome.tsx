@@ -2,7 +2,7 @@ import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -34,6 +34,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -64,6 +65,11 @@ export const PatientHome = (props: any) => {
   const [isConsultationLoading, setIsConsultationLoading] = useState(false);
   const [isSampleLoading, setIsSampleLoading] = useState(false);
   const [sampleFlag, callSampleList] = useState(false);
+  const rootState: any = useSelector((rootState) => rootState);
+  const { currentUser } = rootState;
+  const userHomeFacilityId = currentUser.data.home_facility;
+  const userType = currentUser.data.user_type;
+  const { t } = useTranslation();
   const [selectedStatus, setSelectedStatus] = useState<{
     status: number;
     sample: any;
@@ -651,16 +657,17 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 )}
-                {patientData.is_vaccinated && patientData.last_vaccinated_date && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-semibold text-zinc-400">
-                      Last Vaccinated on
+                {patientData.is_vaccinated &&
+                  patientData.last_vaccinated_date && (
+                    <div className="sm:col-span-1">
+                      <div className="text-sm leading-5 font-semibold text-zinc-400">
+                        Last Vaccinated on
+                      </div>
+                      <div className="mt-1 text-sm leading-5 font-medium">
+                        {formatDate(patientData.last_vaccinated_date)}
+                      </div>
                     </div>
-                    <div className="mt-1 text-sm leading-5 font-medium">
-                      {formatDate(patientData.last_vaccinated_date)}
-                    </div>
-                  </div>
-                )}
+                  )}
                 {patientData.countries_travelled &&
                   !!patientData.countries_travelled.length && (
                     <div className="sm:col-span-1">
@@ -933,15 +940,24 @@ export const PatientHome = (props: any) => {
                           All Details
                         </ButtonV2>
                       </div>
-                      {shift.status === "TRANSFER IN PROGRESS" &&
+                      {shift.status === "COMPLETED" &&
                         shift.assigned_facility && (
                           <div className="mt-2">
                             <ButtonV2
                               size="small"
                               className="w-full"
+                              disabled={
+                                !shift.patient_object.allow_transfer ||
+                                !(
+                                  ["DistrictAdmin", "StateAdmin"].includes(
+                                    userType
+                                  ) ||
+                                  userHomeFacilityId === shift.assigned_facility
+                                )
+                              }
                               onClick={() => setModalFor(shift.external_id)}
                             >
-                              TRANSFER TO RECEIVING FACILITY
+                              {t("transfer_to_receiving_facility")}
                             </ButtonV2>
                             <Modal
                               open={modalFor === shift.external_id}

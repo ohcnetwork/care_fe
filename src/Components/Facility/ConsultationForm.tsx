@@ -33,12 +33,6 @@ import { UserModel } from "../Users/models";
 import { BedSelect } from "../Common/BedSelect";
 import { dischargePatient } from "../../Redux/actions";
 import Beds from "./Consultations/Beds";
-import PrescriptionBuilder, {
-  PrescriptionType,
-} from "../Common/prescription-builder/PrescriptionBuilder";
-import PRNPrescriptionBuilder, {
-  PRNPrescriptionType,
-} from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
@@ -94,8 +88,6 @@ type FormDetails = {
   ip_no: string;
   op_no: string;
   procedure: ProcedureType[];
-  discharge_advice: PrescriptionType[];
-  prn_prescription: PRNPrescriptionType[];
   investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
   action?: string;
@@ -144,11 +136,9 @@ const initForm: FormDetails = {
   ip_no: "",
   op_no: "",
   procedure: [],
-  discharge_advice: [],
-  prn_prescription: [],
   investigation: [],
   is_telemedicine: "false",
-  action: undefined,
+  action: "NO_ACTION",
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
@@ -223,10 +213,6 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
-    []
-  );
-  const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
   const [InvestigationAdvice, setInvestigationAdvice] = useState<
     InvestigationType[]
   >([]);
@@ -305,12 +291,6 @@ export const ConsultationForm = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
-      setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      setPRNAdvice(
-        !Array.isArray(res.data.prn_prescription)
-          ? []
-          : res.data.prn_prescription
-      );
       setInvestigationAdvice(
         !Array.isArray(res.data.investigation) ? [] : res.data.investigation
       );
@@ -368,7 +348,7 @@ export const ConsultationForm = (props: any) => {
         fetchData(status);
       }
     },
-    [dispatch, fetchData]
+    [fetchData, id]
   );
 
   if (isLoading) return <Loading />;
@@ -489,27 +469,6 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "discharge_advice": {
-          let invalid = false;
-          let errorMsg = "";
-          for (const f of dischargeAdvice) {
-            if (!f.medicine?.replace(/\s/g, "").length) {
-              invalid = true;
-              errorMsg = "Prescription Medicine field can not be empty";
-              break;
-            }
-            if (!f.dosage?.replace(/\s/g, "").length) {
-              invalid = true;
-              errorMsg = "Prescription Frequency field can not be empty";
-              break;
-            }
-          }
-          if (invalid) {
-            errors[field] = errorMsg;
-            invalidForm = true;
-          }
-          return;
-        }
         case "procedure": {
           for (const p of procedures) {
             if (!p.procedure?.replace(/\s/g, "").length) {
@@ -524,21 +483,6 @@ export const ConsultationForm = (props: any) => {
             }
             if (p.repetitive && !p.frequency?.replace(/\s/g, "").length) {
               errors[field] = "Frequency field can not be empty";
-              invalidForm = true;
-              break;
-            }
-          }
-          return;
-        }
-        case "prn_prescription": {
-          for (const f of PRNAdvice) {
-            if (!f.medicine?.replace(/\s/g, "").length) {
-              errors[field] = "Medicine field can not be empty";
-              invalidForm = true;
-              break;
-            }
-            if (!f.indicator?.replace(/\s/g, "").length) {
-              errors[field] = "Indicator field can not be empty";
               invalidForm = true;
               break;
             }
@@ -617,7 +561,7 @@ export const ConsultationForm = (props: any) => {
           death_datetime: death_datetime,
           death_confirmed_doctor: death_confirmed_doctor,
         },
-        { id: patientId }
+        { id }
       )
     );
 
@@ -661,8 +605,6 @@ export const ConsultationForm = (props: any) => {
         icd11_provisional_diagnoses:
           state.form.icd11_provisional_diagnoses_object.map((o) => o.id),
         verified_by: state.form.verified_by,
-        discharge_advice: dischargeAdvice,
-        prn_prescription: PRNAdvice,
         investigation: InvestigationAdvice,
         procedure: procedures,
         patient: patientId,
@@ -693,6 +635,7 @@ export const ConsultationForm = (props: any) => {
       setIsLoading(false);
       if (res && res.data && res.status !== 400) {
         dispatch({ type: "set_form", form: initForm });
+
         if (data.suggestion === "DD") {
           await declareThePatientDead(
             state.form.cause_of_death,
@@ -700,19 +643,21 @@ export const ConsultationForm = (props: any) => {
             state.form.death_confirmed_doctor
           );
         }
-        if (id) {
-          Notification.Success({
-            msg: "Consultation updated successfully",
-          });
+
+        Notification.Success({
+          msg: `Consultation ${id ? "updated" : "created"} successfully`,
+        });
+
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
+        );
+
+        if (data.suggestion === "R") {
+          navigate(`/facility/${facilityId}/patient/${patientId}/shift/new`);
+          return;
+        } else if (!id) {
           navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
-          );
-        } else {
-          Notification.Success({
-            msg: "Consultation created successfully",
-          });
-          navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
+            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}/prescriptions`
           );
         }
       }
@@ -876,7 +821,7 @@ export const ConsultationForm = (props: any) => {
           })}
         </div>
         <div className="w-full h-full flex overflow-auto xl:ml-72">
-          <div className="w-full max-w-4xl 2xl:max-w-4xl">
+          <div className="w-full max-w-4xl">
             <form
               onSubmit={handleSubmit}
               className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
@@ -1177,37 +1122,6 @@ export const ConsultationForm = (props: any) => {
                               error={state.errors.investigation}
                             />
                           </div>
-
-                          <div
-                            id="discharge_advice"
-                            className="col-span-6"
-                            ref={fieldRef["discharge_advice"]}
-                          >
-                            <FieldLabel>Prescription Medication</FieldLabel>
-                            <PrescriptionBuilder
-                              prescriptions={dischargeAdvice}
-                              setPrescriptions={setDischargeAdvice}
-                            />
-                            <LegacyErrorHelperText
-                              error={state.errors.discharge_advice}
-                            />
-                          </div>
-
-                          <div
-                            id="prn_prescription"
-                            className="col-span-6"
-                            ref={fieldRef["prn_prescription"]}
-                          >
-                            <FieldLabel>PRN Prescription</FieldLabel>
-                            <PRNPrescriptionBuilder
-                              prescriptions={PRNAdvice}
-                              setPrescriptions={setPRNAdvice}
-                            />
-                            <LegacyErrorHelperText
-                              error={state.errors.prn_prescription}
-                            />
-                          </div>
-
                           <div
                             id="procedure"
                             className="col-span-6"

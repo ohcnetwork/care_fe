@@ -1,5 +1,3 @@
-import * as Notification from "../../Utils/Notifications";
-
 import {
   CONSULTATION_TABS,
   DISCHARGE_REASONS,
@@ -11,28 +9,19 @@ import { ConsultationModel, ICD11DiagnosisModel } from "./models";
 import { getConsultation, getPatient } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-
+import { useDispatch } from "react-redux";
 import { ABGPlots } from "./Consultations/ABGPlots";
-import { Button } from "@material-ui/core";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Chip from "../../CAREUI/display/Chip";
 import { DailyRoundsList } from "./Consultations/DailyRoundsList";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
 import DischargeModal from "./DischargeModal";
 import DoctorVideoSlideover from "./DoctorVideoSlideover";
 import { Feed } from "./Consultations/Feed";
 import { FileUpload } from "../Patient/FileUpload";
 import InvestigationTab from "./Investigations/investigationsTab";
-import { LegacyTextInputField } from "../Common/HelperInputFields";
 import { make as Link } from "../Common/components/Link.gen";
-import { MedicineTables } from "./Consultations/MedicineTables";
 import { NeurologicalTable } from "./Consultations/NeurologicalTables";
 import { NursingPlot } from "./Consultations/NursingPlot";
 import { NutritionPlots } from "./Consultations/NutritionPlots";
@@ -42,90 +31,38 @@ import PatientVitalsCard from "../Patient/PatientVitalsCard";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 import ReadMore from "../Common/components/Readmore";
-import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
-import { discharge } from "../../Redux/actions";
 import { formatDate } from "../../Utils/utils";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { navigate } from "raviger";
-import { validateEmailAddress } from "../../Common/validation";
+import { useTranslation } from "react-i18next";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import PrescriptionsTable from "../Medicine/PrescriptionsTable";
+import MedicineAdministrationsTable from "../Medicine/MedicineAdministrationsTable";
+import DischargeSummaryModal from "./DischargeSummaryModal";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 
 export const ConsultationDetails = (props: any) => {
+  const [medicinesKey, setMedicinesKey] = useState(0);
+  const { t } = useTranslation();
   const { facilityId, patientId, consultationId } = props;
   const tab = props.tab.toUpperCase();
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {} as ConsultationModel
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
-  const [open, setOpen] = useState(false);
+  const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
+    useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
-
-  const initDischargeSummaryForm: { email: string } = {
-    email: "",
-  };
-  const [dischargeSummaryState, setDischargeSummaryForm] = useState(
-    initDischargeSummaryForm
-  );
-  const [errors, setErrors] = useState<any>({});
   const [showAutomatedRounds, setShowAutomatedRounds] = useState(true);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleDischageClickOpen = () => {
-    setOpenDischargeDialog(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleDischargeClose = () => {
-    setOpenDischargeDialog(false);
-  };
-
-  const handleDischargeSummarySubmit = () => {
-    if (!dischargeSummaryState.email) {
-      const errorField = Object.assign({}, errors);
-      errorField["dischargeSummaryForm"] = "email field can not be blank.";
-      setErrors(errorField);
-    } else if (!validateEmailAddress(dischargeSummaryState.email)) {
-      const errorField = Object.assign({}, errors);
-      errorField["dischargeSummaryForm"] = "Please Enter a Valid Email Address";
-      setErrors(errorField);
-    } else {
-      dispatch(
-        discharge(
-          { email: dischargeSummaryState.email },
-          { external_id: patientData.id }
-        )
-      ).then((response: any) => {
-        if ((response || {}).status === 200) {
-          Notification.Success({
-            msg: "We will be sending an email shortly. Please check your inbox.",
-          });
-        }
-      });
-      setOpen(false);
-    }
-  };
-
-  const handleDischargeSummary = (e: any) => {
-    e.preventDefault();
-    setOpen(false);
-  };
 
   const getPatientGender = (patientData: any) =>
     GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
@@ -146,26 +83,6 @@ export const ConsultationDetails = (props: any) => {
     }
   };
 
-  const handleDischargeSummaryFormChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
-    const { value } = e.target;
-
-    const errorField = Object.assign({}, errors);
-    errorField["dischargeSummaryForm"] = null;
-    setErrors(errorField);
-
-    setDischargeSummaryForm({ email: value });
-  };
-
-  const dischargeSummaryFormSetUserEmail = () => {
-    if (!currentUser.data.email.trim())
-      return Notification.Error({
-        msg: "Email not provided! Please update profile",
-      });
-    setDischargeSummaryForm({ email: currentUser.data.email });
-  };
-
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -184,13 +101,6 @@ export const ConsultationDetails = (props: any) => {
                 return option ? option.text.toLowerCase() : symptom;
               });
             data.symptoms_text = symptoms.join(", ");
-            data.discharge_advice =
-              Object.keys(res.data.discharge_advice).length === 0
-                ? []
-                : res.data.discharge_advice;
-          }
-          if (!Array.isArray(res.data.prn_prescription)) {
-            data.prn_prescription = [];
           }
           setConsultationData(data);
           const id = res.data.patient;
@@ -278,60 +188,15 @@ export const ConsultationDetails = (props: any) => {
 
   return (
     <div>
-      <Dialog open={open} onClose={handleDischargeSummary}>
-        <DialogTitle id="form-dialog-title">
-          Download Discharge Summary
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Please enter your email id to receive the discharge summary.
-            Disclaimer: This is an automatically Generated email using your info
-            Captured in Care System.
-            <div
-              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-              role="alert"
-            >
-              <strong className="block sm:inline font-bold">
-                Please check your email id before continuing. We cannot deliver
-                the email if the email id is invalid
-              </strong>
-            </div>
-          </DialogContentText>
-          <div className="flex justify-end">
-            <a
-              href="#"
-              className="text-xs"
-              onClick={dischargeSummaryFormSetUserEmail}
-            >
-              Fill email input with my email.
-            </a>
-          </div>
-          <LegacyTextInputField
-            type="email"
-            name="email"
-            label="email"
-            variant="outlined"
-            margin="dense"
-            autoComplete="off"
-            value={dischargeSummaryState.email}
-            InputLabelProps={{ shrink: !!dischargeSummaryState.email }}
-            onChange={handleDischargeSummaryFormChange}
-            errors={errors.dischargeSummaryForm}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleDischargeSummarySubmit} color="primary">
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <DischargeSummaryModal
+        consultation={consultationData}
+        show={openDischargeSummaryDialog}
+        onClose={() => setOpenDischargeSummaryDialog(false)}
+      />
 
       <DischargeModal
         show={openDischargeDialog}
-        onClose={handleDischargeClose}
+        onClose={() => setOpenDischargeDialog(false)}
         consultationData={consultationData}
       />
 
@@ -355,7 +220,7 @@ export const ConsultationDetails = (props: any) => {
             backUrl="/patients"
           />
           <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
-            {patientData.is_active && (
+            {!consultationData.discharge_date && (
               <div className="w-full flex flex-col sm:flex-row px-2">
                 <ButtonV2
                   onClick={() =>
@@ -485,18 +350,18 @@ export const ConsultationDetails = (props: any) => {
                 )}
               </div>
               <div className="flex flex-col lg:flex-row gap-2 text-right h-full">
-                <button className="btn btn-primary" onClick={handleClickOpen}>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => setOpenDischargeSummaryDialog(true)}
+                >
                   <i className="fas fa-clipboard-list"></i>
                   &nbsp; Discharge Summary
                 </button>
 
                 <button
                   className="btn btn-primary"
-                  onClick={handleDischageClickOpen}
-                  disabled={
-                    !patientData.is_active ||
-                    patientData.last_consultation?.facility !== facilityId
-                  }
+                  onClick={() => setOpenDischargeDialog(true)}
+                  disabled={!!consultationData.discharge_date}
                 >
                   <i className="fas fa-hospital-user"></i>
                   &nbsp; Discharge from CARE
@@ -572,7 +437,7 @@ export const ConsultationDetails = (props: any) => {
                 <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
                   <PatientVitalsCard
                     patient={patientData}
-                    facilityId={facilityId}
+                    facilityId={patientData.facility}
                   />
                 </section>
               )}
@@ -603,7 +468,10 @@ export const ConsultationDetails = (props: any) => {
                               Discharge Date {" - "}
                               <span className="font-semibold">
                                 {consultationData.discharge_date
-                                  ? formatDate(consultationData.discharge_date)
+                                  ? formatDate(
+                                      consultationData.discharge_date,
+                                      "DD/MM/YYYY"
+                                    )
                                   : "--:--"}
                               </span>
                             </div>
@@ -613,66 +481,22 @@ export const ConsultationDetails = (props: any) => {
                                 {consultationData.discharge_notes || "--"}
                               </span>
                             </div>
-                            <div className="mt-2">
-                              <div className="font-semibold uppercase text-sm">
-                                Prescription
-                              </div>
-                              <div className="my-2">
-                                <div className="overflow-scroll">
-                                  <ResponsiveMedicineTable
-                                    theads={[
-                                      "Medicine",
-                                      "Route",
-                                      "Frequency",
-                                      "Dosage",
-                                      "Days",
-                                      "Notes",
-                                    ]}
-                                    list={
-                                      consultationData.discharge_prescription
-                                    }
-                                    objectKeys={[
-                                      "medicine",
-                                      "route",
-                                      "dosage",
-                                      "dosage_new",
-                                      "days",
-                                      "notes",
-                                    ]}
-                                    fieldsToDisplay={[2, 3]}
-                                  />
-                                </div>
-                              </div>{" "}
+                            <div className="overflow-x-auto overflow-y-hidden">
+                              <PrescriptionsTable
+                                consultation_id={consultationData.id}
+                                is_prn={false}
+                                readonly
+                                prescription_type="DISCHARGE"
+                              />
                             </div>
                             <hr className="border border-gray-300 my-2"></hr>
-                            <div className="mt-2">
-                              <div className="font-semibold uppercase text-sm">
-                                PRN Prescription
-                              </div>
-                              <div className="overflow-scroll">
-                                <ResponsiveMedicineTable
-                                  theads={[
-                                    "Medicine",
-                                    "Route",
-                                    "Dosage",
-                                    "Indicator Event",
-                                    "Max. Dosage in 24 hrs",
-                                    "Min. time between 2 doses",
-                                  ]}
-                                  list={
-                                    consultationData.discharge_prn_prescription
-                                  }
-                                  objectKeys={[
-                                    "medicine",
-                                    "route",
-                                    "dosage",
-                                    "indicator",
-                                    "max_dosage",
-                                    "min_time",
-                                  ]}
-                                  fieldsToDisplay={[2, 4]}
-                                />
-                              </div>
+                            <div className="overflow-x-auto overflow-y-hidden">
+                              <PrescriptionsTable
+                                consultation_id={consultationData.id}
+                                is_prn
+                                readonly
+                                prescription_type="DISCHARGE"
+                              />
                             </div>
                           </div>
                         )}
@@ -689,7 +513,7 @@ export const ConsultationDetails = (props: any) => {
                             <div>
                               Cause of death {" - "}
                               <span className="font-semibold">
-                                {consultationData.discharge_reason || "--"}
+                                {consultationData.discharge_notes || "--"}
                               </span>
                             </div>
                             <div>
@@ -709,7 +533,10 @@ export const ConsultationDetails = (props: any) => {
                               Discharge Date {" - "}
                               <span className="font-semibold">
                                 {consultationData.discharge_date
-                                  ? formatDate(consultationData.discharge_date)
+                                  ? formatDate(
+                                      consultationData.discharge_date,
+                                      "DD/MM/YYYY"
+                                    )
                                   : "--:--"}
                               </span>
                             </div>
@@ -892,6 +719,7 @@ export const ConsultationDetails = (props: any) => {
                             />
                           </div>
                         )}
+
                         {consultationData.special_instruction && (
                           <div className="mt-4">
                             <h5>Special Instruction</h5>
@@ -906,6 +734,53 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
+              {consultationData.procedure &&
+                consultationData.procedure.length > 0 && (
+                  <div className="bg-white rounded-lg shadow my-4 p-4">
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead>
+                          <tr>
+                            <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
+                              Procedure
+                            </th>
+                            <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
+                              Notes
+                            </th>
+                            <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
+                              Repetitive
+                            </th>
+                            <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
+                              Time / Frequency
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {consultationData.procedure?.map(
+                            (procedure, index) => (
+                              <tr key={index}>
+                                <td className="p-4 whitespace-nowrap overflow-hidden">
+                                  {procedure.procedure}
+                                </td>
+                                <td className="p-4 whitespace-normal overflow-hidden">
+                                  {procedure.notes}
+                                </td>
+                                <td className="p-4 whitespace-normal overflow-hidden">
+                                  {procedure.repetitive ? "Yes" : "No"}
+                                </td>
+                                <td className="p-4 whitespace-nowrap">
+                                  {procedure.repetitive
+                                    ? procedure.frequency
+                                    : formatDate(String(procedure.time))}
+                                </td>
+                              </tr>
+                            )
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               {consultationData.intubation_start_date && (
                 <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
                   <div className="px-4 py-5 sm:p-6">
@@ -1088,131 +963,29 @@ export const ConsultationDetails = (props: any) => {
         )}
         {tab === "MEDICINES" && (
           <div>
-            {consultationData.discharge_advice && (
-              <div className="mt-4">
-                <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900 mb-2">
-                  <span className="mr-3">Prescription</span>
-                  <div className="text-xs text-gray-600 mt-2 ">
-                    <i className="fas fa-history text-sm pr-2"></i>
-                    {consultationData.modified_date &&
-                      formatDate(consultationData.modified_date)}
-                  </div>
-                </div>
-                <div className="flex flex-col">
-                  <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                    <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
-                      <ResponsiveMedicineTable
-                        theads={[
-                          "Medicine",
-                          "Route",
-                          "Frequency",
-                          "Dosage",
-                          "Days",
-                          "Notes",
-                        ]}
-                        list={consultationData.discharge_advice}
-                        objectKeys={[
-                          "medicine",
-                          "route",
-                          "dosage",
-                          "dosage_new",
-                          "days",
-                          "notes",
-                        ]}
-                        fieldsToDisplay={[2, 3]}
-                      />
-                      {consultationData.discharge_advice.length === 0 && (
-                        <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
-                          No data found
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            {consultationData.prn_prescription && (
-              <div className="mt-4">
-                <div className="flex flex-wrap text-lg font-semibold leading-relaxed text-gray-900 mb-2">
-                  <span className="mr-3">PRN Prescription</span>
-                  <div className="text-xs text-gray-600 mt-2">
-                    <i className="fas fa-history text-sm pr-2"></i>
-                    {consultationData.modified_date &&
-                      formatDate(consultationData.modified_date)}
-                  </div>
-                </div>
-                <div className="flex flex-col">
-                  <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                    <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
-                      <ResponsiveMedicineTable
-                        theads={[
-                          "Medicine",
-                          "Route",
-                          "Dosage",
-                          "Indicator Event",
-                          "Max. Dosage in 24 hrs",
-                          "Min. time between 2 doses",
-                        ]}
-                        list={consultationData.prn_prescription}
-                        objectKeys={[
-                          "medicine",
-                          "route",
-                          "dosage",
-                          "indicator",
-                          "max_dosage",
-                          "min_time",
-                        ]}
-                        fieldsToDisplay={[2, 4]}
-                      />
-                      {consultationData.prn_prescription.length === 0 && (
-                        <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
-                          No data found
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            {consultationData.procedure && (
-              <div className="mt-4">
-                <div className="flex flex-col">
-                  <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-                    <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
-                      <ResponsiveMedicineTable
-                        theads={[
-                          "Procedure",
-                          "Repetitive",
-                          "Time",
-                          "Frequency",
-                          "Notes",
-                        ]}
-                        list={consultationData.procedure}
-                        objectKeys={[
-                          "procedure",
-                          "repetitive",
-                          "time",
-                          "frequency",
-                          "notes",
-                        ]}
-                        fieldsToDisplay={[2, 4]}
-                      />
-                      {!consultationData.procedure?.length && (
-                        <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
-                          No data found
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <MedicineTables
-              facilityId={facilityId}
-              patientId={patientId}
-              consultationId={consultationId}
-            />
+            <div className="mt-4">
+              <PrescriptionsTable
+                key={medicinesKey}
+                consultation_id={consultationId}
+                onChange={() => setMedicinesKey((k) => k + 1)}
+                readonly={!!consultationData.discharge_date}
+              />
+            </div>
+            <div className="mt-8">
+              <PrescriptionsTable
+                key={medicinesKey}
+                consultation_id={consultationId}
+                is_prn
+                onChange={() => setMedicinesKey((k) => k + 1)}
+                readonly={!!consultationData.discharge_date}
+              />
+            </div>
+            <div className="mt-8">
+              <MedicineAdministrationsTable
+                key={medicinesKey}
+                consultation_id={consultationId}
+              />
+            </div>
           </div>
         )}
         {tab === "FILES" && (
@@ -1325,6 +1098,7 @@ export const ConsultationDetails = (props: any) => {
               />
               <div className="pt-6">
                 <ButtonV2
+                  authorizeFor={NonReadOnlyUsers}
                   disabled={!patientData.is_active}
                   onClick={() =>
                     navigate(
@@ -1333,7 +1107,7 @@ export const ConsultationDetails = (props: any) => {
                   }
                 >
                   <CareIcon className="care-l-plus" />
-                  <span>Log Lab Result</span>
+                  <span>{t("log_lab_results")}</span>
                 </ButtonV2>
               </div>
             </div>

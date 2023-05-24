@@ -25,6 +25,7 @@ import { useTranslation } from "react-i18next";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
 interface AssetManageProps {
   assetId: string;
@@ -324,9 +325,10 @@ const AssetManage = (props: AssetManageProps) => {
                   )
                 }
                 id="update-asset"
+                authorizeFor={NonReadOnlyUsers}
               >
                 <CareIcon className="care-l-pen h-4 mr-1" />
-                Update
+                {t("update")}
               </ButtonV2>
               {asset?.asset_class && (
                 <ButtonV2
@@ -336,19 +338,21 @@ const AssetManage = (props: AssetManageProps) => {
                     )
                   }
                   id="configure-asset"
+                  authorizeFor={NonReadOnlyUsers}
                 >
                   <CareIcon className="care-l-setting h-4" />
-                  Configure
+                  {t("configure")}
                 </ButtonV2>
               )}
               {checkAuthority(user_type, "DistrictAdmin") && (
                 <ButtonV2
+                  authorizeFor={NonReadOnlyUsers}
                   onClick={() => setShowDeleteDialog(true)}
-                  variant={"danger"}
+                  variant="danger"
                   className="inline-flex"
                 >
                   <CareIcon className="care-l-trash h-4" />
-                  <span className="md:hidden">Delete</span>
+                  <span className="md:hidden">{t("delete")}</span>
                 </ButtonV2>
               )}
             </div>
