@@ -13,6 +13,7 @@ import CoverImageEdit from "./CoverImageEdit.json";
 import Resource from "./Resource.json";
 import SortOptions from "./SortOptions.json";
 import Bed from "./Bed.json";
+import Medicine from "./Medicine.json";
 
 export default {
   ...Auth,
@@ -25,6 +26,7 @@ export default {
   ...ExternalResult,
   ...Facility,
   ...Hub,
+  ...Medicine,
   ...Notifications,
   ...Resource,
   ...Shifting,
