@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 import { getPatient } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -8,10 +7,10 @@ import {
   LegacyTextInputField,
   LegacyMultilineInputField,
 } from "../Common/HelperInputFields";
-import { InputLabel } from "@material-ui/core";
+import { FieldLabel } from "../Form/FormFields/FormField";
 import moment from "moment";
 import { formatDate } from "../../Utils/utils";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
 
 export default function PrintDeathReport(props: { id: string }) {
   const initialState = {
@@ -286,19 +285,18 @@ export default function PrintDeathReport(props: { id: string }) {
       {isPrintMode ? (
         previewData()
       ) : (
-        <div className="m-5 p-5 bg-gray-100 border rounded-xl shadow">
-          <PageTitle
-            title={"Covid-19 Death Reporting : Form 1"}
-            crumbsReplacements={{
-              [props.id]: { name: patientName },
-              death_report: { style: "pointer-events-none" },
-            }}
-            backUrl={`/facility/${patientData.facility}/patient/${id}`}
-          />
+        <Page
+          title={"Covid-19 Death Reporting : Form 1"}
+          crumbsReplacements={{
+            [props.id]: { name: patientName },
+            death_report: { style: "pointer-events-none" },
+          }}
+          backUrl={`/facility/${patientData.facility}/patient/${id}`}
+        >
           <div className="grid grid-rows-11">
             <div className="grid grid-cols-1 mt-4 gap-10">
               <div>
-                <InputLabel htmlFor="name">Name</InputLabel>
+                <FieldLabel htmlFor="name">Name</FieldLabel>
                 <LegacyTextInputField
                   name="name"
                   id="name"
@@ -313,7 +311,7 @@ export default function PrintDeathReport(props: { id: string }) {
             </div>
             <div className="grid grid-cols-2 mt-4 gap-10">
               <div>
-                <InputLabel htmlFor="age">Age</InputLabel>
+                <FieldLabel htmlFor="age">Age</FieldLabel>
                 <LegacyTextInputField
                   name="age"
                   id="age"
@@ -326,7 +324,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 />
               </div>
               <div>
-                <InputLabel htmlFor="gender">Gender</InputLabel>
+                <FieldLabel htmlFor="gender">Gender</FieldLabel>
                 <LegacyTextInputField
                   name="gender"
                   id="gender"
@@ -340,7 +338,7 @@ export default function PrintDeathReport(props: { id: string }) {
               </div>
             </div>
             <div className="grid grid-cols-1 mt-4">
-              <InputLabel htmlFor="address">Address</InputLabel>
+              <FieldLabel htmlFor="address">Address</FieldLabel>
               <LegacyMultilineInputField
                 name="address"
                 id="address"
@@ -354,7 +352,7 @@ export default function PrintDeathReport(props: { id: string }) {
             </div>
             <div className="grid grid-cols-2 mt-4 gap-10">
               <div>
-                <InputLabel htmlFor="phone_number">Phone Number</InputLabel>
+                <FieldLabel htmlFor="phone_number">Phone Number</FieldLabel>
                 <LegacyTextInputField
                   name="phone_number"
                   id="phone_number"
@@ -367,9 +365,9 @@ export default function PrintDeathReport(props: { id: string }) {
                 />
               </div>
               <div>
-                <InputLabel htmlFor="is_declared_positive">
+                <FieldLabel htmlFor="is_declared_positive">
                   Whether declared positive
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="is_declared_positive"
                   id="is_declared_positive"
@@ -384,9 +382,9 @@ export default function PrintDeathReport(props: { id: string }) {
             </div>
             <div className="grid grid-cols-2 mt-4 gap-10">
               <div>
-                <InputLabel htmlFor="date_declared_positive">
+                <FieldLabel htmlFor="date_declared_positive">
                   Date of declaring positive
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="date_declared_positive"
                   id="date_declared_positive"
@@ -401,7 +399,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 />
               </div>
               <div>
-                <InputLabel htmlFor="test_type">Type of test done</InputLabel>
+                <FieldLabel htmlFor="test_type">Type of test done</FieldLabel>
                 <LegacyTextInputField
                   name="test_type"
                   id="test_type"
@@ -416,9 +414,9 @@ export default function PrintDeathReport(props: { id: string }) {
             </div>
             <div className="grid grid-cols-4 mt-4 gap-10">
               <div className="col-span-2">
-                <InputLabel htmlFor="date_of_test">
+                <FieldLabel htmlFor="date_of_test">
                   Date of sample collection for Covid testing
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="date_of_test"
                   id="date_of_test"
@@ -431,9 +429,9 @@ export default function PrintDeathReport(props: { id: string }) {
                 />
               </div>
               <div className="col-span-1">
-                <InputLabel htmlFor="date_of_result">
+                <FieldLabel htmlFor="date_of_result">
                   Covid confirmation date
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="date_of_result"
                   id="date_of_result"
@@ -448,7 +446,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 />
               </div>
               <div className="col-span-1">
-                <InputLabel htmlFor="srf_id">SRF ID</InputLabel>
+                <FieldLabel htmlFor="srf_id">SRF ID</FieldLabel>
                 <LegacyTextInputField
                   name="srf_id"
                   id="srf_id"
@@ -463,9 +461,9 @@ export default function PrintDeathReport(props: { id: string }) {
             </div>
             <div className="grid grid-cols-2 mt-4 gap-10">
               <div>
-                <InputLabel htmlFor="hospital_tested_in">
+                <FieldLabel htmlFor="hospital_tested_in">
                   Hospital in which patient tested for SARS COV 2
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="hospital_tested_in"
                   id="hospital_tested_in"
@@ -478,9 +476,9 @@ export default function PrintDeathReport(props: { id: string }) {
                 />
               </div>
               <div>
-                <InputLabel htmlFor="hospital_died_in">
+                <FieldLabel htmlFor="hospital_died_in">
                   Name of the hospital in which the patient died
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="hospital_died_in"
                   id="hospital_died_in"
@@ -495,9 +493,9 @@ export default function PrintDeathReport(props: { id: string }) {
             </div>
             <div className="grid grid-cols-2 mt-4 gap-10">
               <div>
-                <InputLabel htmlFor="date_of_admission">
+                <FieldLabel htmlFor="date_of_admission">
                   Date of admission
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="date_of_admission"
                   id="date_of_admission"
@@ -510,7 +508,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 />
               </div>
               <div>
-                <InputLabel htmlFor="date_of_death">Date of death</InputLabel>
+                <FieldLabel htmlFor="date_of_death">Date of death</FieldLabel>
                 <LegacyTextInputField
                   name="date_of_death"
                   id="date_of_death"
@@ -525,9 +523,9 @@ export default function PrintDeathReport(props: { id: string }) {
             </div>
             <div className="grid grid-cols-2 mt-4 gap-10">
               <div>
-                <InputLabel htmlFor="comorbidities">
+                <FieldLabel htmlFor="comorbidities">
                   Mention the co-morbidities if present
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="comorbidities"
                   id="comorbidities"
@@ -540,9 +538,9 @@ export default function PrintDeathReport(props: { id: string }) {
                 />
               </div>
               <div>
-                <InputLabel htmlFor="history_clinical_course">
+                <FieldLabel htmlFor="history_clinical_course">
                   History and clinical course in the hospital
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="history_clinical_course"
                   id="history_clinical_course"
@@ -557,9 +555,9 @@ export default function PrintDeathReport(props: { id: string }) {
             </div>
             <div className="grid grid-cols-2 mt-4 gap-10">
               <div>
-                <InputLabel htmlFor="brought_dead">
+                <FieldLabel htmlFor="brought_dead">
                   Whether brought dead
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="brought_dead"
                   id="brought_dead"
@@ -572,9 +570,9 @@ export default function PrintDeathReport(props: { id: string }) {
                 />
               </div>
               <div>
-                <InputLabel htmlFor="home_or_cfltc">
+                <FieldLabel htmlFor="home_or_cfltc">
                   If yes was the deceased brought from home/CFLTC
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="home_or_cfltc"
                   id="home_or_cfltc"
@@ -589,9 +587,9 @@ export default function PrintDeathReport(props: { id: string }) {
             </div>
             <div className="grid grid-cols-2 mt-4 gap-10">
               <div>
-                <InputLabel htmlFor="is_vaccinated">
+                <FieldLabel htmlFor="is_vaccinated">
                   Whether vaccinated
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="is_vaccinated"
                   id="is_vaccinated"
@@ -604,9 +602,9 @@ export default function PrintDeathReport(props: { id: string }) {
                 />
               </div>
               <div>
-                <InputLabel htmlFor="kottayam_confirmation_sent">
+                <FieldLabel htmlFor="kottayam_confirmation_sent">
                   Whether NIV/IUBCR Kottayam confirmation sent
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="kottayam_confirmation_sent"
                   id="kottayam_confirmation_sent"
@@ -621,9 +619,9 @@ export default function PrintDeathReport(props: { id: string }) {
             </div>
             <div className="grid grid-cols-2 mt-4 gap-10">
               <div>
-                <InputLabel htmlFor="kottayam_sample_date">
+                <FieldLabel htmlFor="kottayam_sample_date">
                   Sample sent to NIV/IUCBR Kottayam on
-                </InputLabel>
+                </FieldLabel>
                 <LegacyTextInputField
                   name="kottayam_sample_date"
                   id="kottayam_sample_date"
@@ -636,7 +634,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 />
               </div>
               <div>
-                <InputLabel htmlFor="cause_of_death">Cause of death</InputLabel>
+                <FieldLabel htmlFor="cause_of_death">Cause of death</FieldLabel>
                 <LegacyTextInputField
                   name="cause_of_death"
                   id="cause_of_death"
@@ -658,7 +656,7 @@ export default function PrintDeathReport(props: { id: string }) {
               Preview
             </button>
           </div>
-        </div>
+        </Page>
       )}
     </div>
   );
