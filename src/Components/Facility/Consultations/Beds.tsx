@@ -126,7 +126,7 @@ const Beds = (props: BedsProps) => {
         </div>
       )}
       {!discharged ? (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} autocomplete="off">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
             <div>
               <FieldLabel id="asset-type">Bed</FieldLabel>
