@@ -86,7 +86,7 @@ export const useFormFieldPropsResolver = <
 
   return {
     ...props,
-    id: props.id,
+    id: props.id ?? props.name,
     name: props.name,
     onChange: props.onChange,
     value: props.value,
