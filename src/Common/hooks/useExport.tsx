@@ -105,7 +105,11 @@ export default function useExport() {
     return csv;
   };
 
-  const exportCSV = async (filenamePrefix: string, action: any) => {
+  const exportCSV = async (
+    filenamePrefix: string,
+    action: any,
+    parse = (data: string) => data
+  ) => {
     setIsExporting(true);
 
     const filename = `${filenamePrefix}_${getTimestamp()}.csv`;
@@ -115,7 +119,7 @@ export default function useExport() {
       setCsvLinkProps({
         ...csvLinkProps,
         filename,
-        data: parseJSONtoCSV(JSON.stringify(res.data.results)),
+        data: parse(JSON.stringify(res.data.results)),
       });
       document.getElementById(csvLinkProps.id)?.click();
     }
@@ -154,13 +158,13 @@ export default function useExport() {
 
     switch (type) {
       case "csv":
-        exportCSV(filePrefix, action());
+        exportCSV(filePrefix, action(), parseJSONtoCSV);
         break;
       case "json":
         exportJSON(filePrefix, action(), parse);
         break;
       default:
-        exportCSV(filePrefix, action());
+        exportCSV(filePrefix, action(), parseJSONtoCSV);
     }
   };
 
