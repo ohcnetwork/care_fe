@@ -137,6 +137,8 @@
   "RESPIRATORY_SUPPORT_NON_INVASIVE": "NIV",
   "RESPIRATORY_SUPPORT_INVASIVE": "IV",
   "choose_file": "Choose File",
+  "view_faciliy": "View Facility",
+  "view_patients": "View Patients",
   "frequency": "Frequency",
   "days": "Days",
   "never": "never",
