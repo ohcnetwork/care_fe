@@ -86,19 +86,26 @@ const BedRow = (props: BedRowProps) => {
       className="w-full border-b lg:flex justify-between items-center py-6"
     >
       <div className="px-4 lg:w-3/4 space-y-2 mt-2">
-        <div>
+        <div className="flex flex-col sm:flex-row">
           <p className="inline text-xl capitalize break-words">{name}</p> &nbsp;
-          {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
-            <p className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
-              {LOCATION_BED_TYPES.find(
-                (item) => item.id === bedType
-              )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
+          <div>
+            {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
+              <p className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
+                {LOCATION_BED_TYPES.find(
+                  (item) => item.id === bedType
+                )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
+              </p>
+            )}
+            <p
+              className={`${
+                isOccupied
+                  ? "bg-warning-100 text-warning-600"
+                  : "bg-primary-100 text-primary-600"
+              } inline-flex ml-1 items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 w-fit capitalize mb-1`}
+            >
+              {isOccupied ? "Occupied" : "Vacant"}
             </p>
-          )}
-          &nbsp;
-          <p className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
-            {isOccupied ? "Occupied" : "Vacant"}
-          </p>
+          </div>
         </div>
         <p className="break-all">{description}</p>
       </div>
@@ -122,8 +129,10 @@ const BedRow = (props: BedRowProps) => {
             variant="danger"
             border
             ghost
+            className="w-full lg:w-auto"
             disabled={isOccupied}
             tooltip={isOccupied ? "Bed is occupied" : ""}
+            tooltipClassName="w-full lg:w-auto"
           >
             <i className="fas fa-trash mr-2"></i>
             Delete
