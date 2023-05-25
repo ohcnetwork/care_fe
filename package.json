@@ -68,7 +68,7 @@
     "@sentry/browser": "^7.22.0",
     "@storybook/builder-vite": "^7.0.0-rc.8",
     "@yaireo/ui-range": "^2.1.15",
-    "axios": "^0.27.2",
+    "axios": "^1.4.0",
     "browser-image-compression": "^2.0.0",
     "cross-env": "^7.0.3",
     "date-fns": "^2.29.3",
