@@ -79,6 +79,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
         offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
         asset_class: "HL7MONITOR",
         ordering: qParams.ordering || "bed__name",
+        bed_is_occupied: qParams.bed_is_occupied ?? true,
       };
 
       const [facilityObj, res] = await Promise.all([
@@ -203,7 +204,10 @@ export default function CentralNursingStation({ facilityId }: Props) {
                     <CheckBoxFormField
                       name="bed_is_occupied"
                       label="Hide Monitors without Patient"
-                      value={qParams.bed_is_occupied === "true"}
+                      value={
+                        qParams.bed_is_occupied === "true" ||
+                        qParams.bed_is_occupied === undefined
+                      }
                       onChange={({ name, value }) => {
                         if (value) {
                           updateQuery({ [name]: value });
