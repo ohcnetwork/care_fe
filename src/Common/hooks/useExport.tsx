@@ -23,9 +23,9 @@ export default function useExport() {
   };
 
   const getTimestamp = () => {
-    let d = new Date();
-    let date = d.toLocaleDateString();
-    let time = d.toLocaleTimeString();
+    const d = new Date();
+    const date = d.toLocaleDateString();
+    const time = d.toLocaleTimeString();
 
     return date+"_"+time;
 }
