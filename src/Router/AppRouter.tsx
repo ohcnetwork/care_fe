@@ -71,6 +71,7 @@ import FacilityCNS from "../Components/Facility/FacilityCNS";
 import ConsultationClaims from "../Components/Facility/ConsultationClaims";
 import { handleSignOut } from "../Utils/utils";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
+import ManagePrescriptions from "../Components/Medicine/ManagePrescriptions";
 
 export default function AppRouter() {
   const { static_black_logo, enable_hcx } = useConfig();
@@ -177,6 +178,8 @@ export default function AppRouter() {
         unspecified={true}
       />
     ),
+    "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions":
+      (path: any) => <ManagePrescriptions {...path} />,
     "/facility/:facilityId/patient/:patientId/consultation/:id/investigation":
       ({ facilityId, patientId, id }: any) => (
         <Investigation
