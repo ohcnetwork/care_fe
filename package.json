@@ -66,7 +66,7 @@
     "@react-spring/web": "^9.6.1",
     "@rescript/react": "^0.10.3",
     "@sentry/browser": "^7.22.0",
-    "@storybook/builder-vite": "^7.0.0-rc.8",
+    "@storybook/builder-vite": "^7.0.17",
     "@yaireo/ui-range": "^2.1.15",
     "axios": "^0.27.2",
     "browser-image-compression": "^2.0.0",
