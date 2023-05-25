@@ -323,7 +323,7 @@ const AssetsList = () => {
                         json: true,
                         limit: totalCount,
                       }),
-                    type: "json",
+                    type: "csv",
                     filePrefix: `assets_${facility?.name}`,
                     options: {
                       icon: <CareIcon className="care-l-export" />,
