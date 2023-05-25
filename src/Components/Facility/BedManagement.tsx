@@ -95,6 +95,10 @@ const BedRow = (props: BedRowProps) => {
               )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
             </p>
           )}
+          &nbsp;
+          <p className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
+            {isOccupied ? "Occupied" : "Vacant"}
+          </p>
         </div>
         <p className="break-all">{description}</p>
       </div>
