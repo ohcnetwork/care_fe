@@ -87,6 +87,7 @@ const AutoCompleteAsync = (props: Props) => {
                   ? optionLabel && optionLabel(selected)
                   : ""
               }
+              value={query}
               onChange={({ target }) => setQuery(target.value)}
               onFocus={props.onFocus}
               onBlur={props.onBlur}
