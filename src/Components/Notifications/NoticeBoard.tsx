@@ -6,6 +6,11 @@ import { Card, CardContent } from "@material-ui/core";
 import Loading from "../Common/Loading";
 import { formatDate } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
+import CardActions from "@mui/material/CardActions";
+import CardMedia from "@mui/material/CardMedia";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import bell from "./Notificationbell.png";
 
 export const NoticeBoard: any = () => {
   const dispatch: any = useDispatch();
@@ -30,6 +35,7 @@ export const NoticeBoard: any = () => {
   }, [dispatch]);
 
   let notices;
+
   if (data && data.length) {
     notices = (
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-6">
@@ -55,13 +61,34 @@ export const NoticeBoard: any = () => {
     );
   } else {
     notices = (
-      <Card key="no-notice" className="my-4 rounded-lg">
-        <CardContent>
-          <div className="text-xl text-center semibold">
-            {t("no_notices_for_you")}
-          </div>
-        </CardContent>
-      </Card>
+      <div
+        className="  ml-500 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-6 container d-flex align-items-center justify-content-center"
+        style={{ marginLeft: "35%", marginTop: "45px" }}
+      >
+        <Card>
+          <CardMedia
+            component="img"
+            alt="green iguana"
+            height="140"
+            image={bell}
+          />
+          <CardContent>
+            <Typography gutterBottom variant="h5" component="div">
+              You Dont Have Any Notices
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Did you know: We could render a fun fact about health here
+            </Typography>
+          </CardContent>
+          <CardActions>
+            <div style={{ marginLeft: "35%" }}>
+              <Button size="large">
+                <a href="/">Go Home</a>
+              </Button>
+            </div>
+          </CardActions>
+        </Card>
+      </div>
     );
   }
 
