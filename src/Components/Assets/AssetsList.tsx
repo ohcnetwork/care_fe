@@ -360,7 +360,7 @@ const AssetsList = () => {
               />
             </div>
             <ButtonV2
-              className="w-full"
+              className="w-full py-[11px]"
               onClick={() => setIsScannerActive(true)}
             >
               <i className="fas fa-search mr-1"></i> Scan Asset QR

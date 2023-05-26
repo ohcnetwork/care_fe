@@ -14,7 +14,6 @@ import {
   getLocalBody,
   getAnyFacility,
 } from "../../Redux/actions";
-import NavTabs from "../Common/NavTabs";
 import {
   ADMITTED_TO,
   GENDER_TYPES,
@@ -43,6 +42,7 @@ import { useTranslation } from "react-i18next";
 import * as Notification from "../../Utils/Notifications.js";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import SortDropdownMenu from "../Common/SortDropdown";
+import SwitchTabs from "../Common/components/SwitchTabs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -727,8 +727,33 @@ export const PatientManager = () => {
         }}
       />
       <div className="flex flex-col lg:flex-row justify-between items-center">
-        <PageTitle title="Patients" hideBack={true} breadcrumbs={false} />
+        <div className="flex flex-col lg:flex-row lg:gap-5 items-center mb-2 lg:mb-0 w-full lg:w-fit">
+          <PageTitle
+            title="Patients"
+            hideBack={true}
+            breadcrumbs={false}
+            className="mt-2"
+          />
+          <ButtonV2
+            onClick={() => {
+              qParams.facility
+                ? navigate(`/facility/${qParams.facility}/patient`)
+                : setShowDialog(true);
+            }}
+            className="w-full lg:w-fit"
+          >
+            <CareIcon className="care-l-plus text-lg" />
+            <p className="lg:my-[2px]">Add Patient Details</p>
+          </ButtonV2>
+        </div>
         <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end w-full lg:w-fit">
+          <SwitchTabs
+            Tab1="Live"
+            Tab2="Discharged"
+            onClickTab1={() => updateQuery({ is_active: "True" })}
+            onClickTab2={() => updateQuery({ is_active: "False" })}
+            activeTab={tabValue ? true : false}
+          />
           {showDoctorConnect && (
             <ButtonV2
               onClick={() => {
@@ -739,16 +764,7 @@ export const PatientManager = () => {
               <p className="lg:my-[2px]">Doctor Connect</p>
             </ButtonV2>
           )}
-          <ButtonV2
-            onClick={() => {
-              qParams.facility
-                ? navigate(`/facility/${qParams.facility}/patient`)
-                : setShowDialog(true);
-            }}
-          >
-            <CareIcon className="care-l-plus text-lg" />
-            <p className="lg:my-[2px]">Add Patient Details</p>
-          </ButtonV2>
+
           <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
           <SortDropdownMenu
             options={PATIENT_SORT_OPTIONS}
@@ -808,7 +824,7 @@ export const PatientManager = () => {
               count={totalCount}
               loading={isLoading}
               icon={"user-injured"}
-              containerClass="pb-8"
+              containerClass="pb-10"
             />
           </div>
           {/*<div className="bg-white overflow-hidden shadow rounded-lg flex-1">
@@ -937,14 +953,14 @@ export const PatientManager = () => {
       </div>
       <div>
         <PatientFilter {...advancedFilter} key={window.location.search} />
-        <NavTabs
+        {/* <NavTabs
           onChange={(tab) => updateQuery({ is_active: tab ? "False" : "True" })}
           options={[
             { value: 0, label: "Live" },
             { value: 1, label: "Discharged" },
           ]}
           active={tabValue}
-        />
+        /> */}
         <SwipeableViews index={tabValue}>
           <TabPanel value={tabValue} index={0}>
             <div className="mb-4">{managePatients}</div>

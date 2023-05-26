@@ -56,7 +56,7 @@ export const AdvancedFilterButton = ({ onClick }: { onClick: () => void }) => {
       onClick={onClick}
     >
       <CareIcon className="care-l-list-ul text-lg" />
-      <span>{t("advanced_filters")}</span>
+      <span className="py-0.5">{t("advanced_filters")}</span>
     </ButtonV2>
   );
 };
