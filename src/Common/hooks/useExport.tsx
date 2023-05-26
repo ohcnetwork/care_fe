@@ -22,13 +22,7 @@ export default function useExport() {
     return <CSVLink id={id} filename={filename} data={data} />;
   };
 
-  const getTimestamp = () => {
-    let d = new Date();
-    let date = d.toLocaleDateString();
-    let time = d.toLocaleTimeString();
-
-    return date+"_"+time;
-}
+  const getTimestamp = () => new Date().toISOString();
 
   const exportCSV = async (
     filenamePrefix: string,
