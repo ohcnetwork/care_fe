@@ -46,8 +46,8 @@ const DateInputV2: React.FC<Props> = ({
   setIsOpen,
 }) => {
   const [dayCount, setDayCount] = useState<Array<number>>([]);
+  const [visible, setvisible] = useState<boolean>(false);
   const [blankDays, setBlankDays] = useState<Array<number>>([]);
-
   const [datePickerHeaderDate, setDatePickerHeaderDate] = useState(new Date());
   const [type, setType] = useState<DatePickerType>("date");
   const [year, setYear] = useState(new Date());
@@ -99,6 +99,8 @@ const DateInputV2: React.FC<Props> = ({
           date
         )
       );
+
+    setvisible(!visible);
   };
 
   const getDayCount = (date: Date) => {
@@ -205,6 +207,7 @@ const DateInputV2: React.FC<Props> = ({
                 className="w-full"
                 onClick={() => {
                   setIsOpen && setIsOpen(!isOpen);
+                  setvisible(true);
                 }}
               >
                 <input type="hidden" name="date" />
@@ -222,7 +225,7 @@ const DateInputV2: React.FC<Props> = ({
                 </div>
               </Popover.Button>
 
-              {(open || isOpen) && (
+              {visible && open && (
                 <Popover.Panel
                   onBlur={() => {
                     setIsOpen && setIsOpen(false);
