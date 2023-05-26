@@ -67,6 +67,7 @@ export const VoiceRecorder = (props: any) => {
               <ButtonV2
                 onClick={startRecording}
                 authorizeFor={NonReadOnlyUsers}
+                className="w-full"
               >
                 <CareIcon className="care-l-microphone text-lg" />
                 {t("record")}
