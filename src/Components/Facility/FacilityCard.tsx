@@ -158,13 +158,15 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   <div className="flex justify-between w-full flex-wrap gap-2">
                     <div className="flex gap-2">
                       <div
-                        className={`flex items-center justify-center rounded-md text-xl h-[38px] w-fit px-2 ml-auto ${
+                        className={`flex items-center tooltip justify-center rounded-md text-xl h-[38px] w-fit px-2 ml-auto ${
                           facility.patient_count / facility.bed_count > 0.85
                             ? "bg-red-500 button-danger-border"
                             : "bg-primary-100 button-primary-border"
                         }`}
                       >
-                        {" "}
+                        <span className="tooltip-text tooltip-top -translate-x-1/2">
+                          Live Patients / Total beds
+                        </span>{" "}
                         <CareIcon
                           className={`care-l-bed text-${
                             facility.patient_count / facility.bed_count > 0.85
