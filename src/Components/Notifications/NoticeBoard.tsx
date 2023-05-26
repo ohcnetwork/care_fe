@@ -64,7 +64,6 @@ export const NoticeBoard: any = () => {
         <img className="w-full" src={bell} alt="Sunset in the mountains"></img>
         <div className="px-6 py-4">
           <div className="font-bold text-xl mb-2">
-            {" "}
             You Dont Have Any Notices
           </div>
           <p className="text-gray-700 text-base">
