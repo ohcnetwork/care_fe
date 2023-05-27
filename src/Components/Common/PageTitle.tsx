@@ -51,7 +51,10 @@ export default function PageTitle({
   const { goBack } = useAppHistory();
 
   return (
-    <div ref={divRef} className={isInsidePage ? "" : `pt-4 mb-4 ${className}`}>
+    <div
+      ref={divRef}
+      className={isInsidePage ? "" : `pt-4 md:mb-4 mb-2 ${className}`}
+    >
       <PageHeadTitle title={title} />
       <div className={classNames("flex items-center", justifyContents)}>
         <div className="flex items-center">

@@ -11,6 +11,7 @@ interface ExportItem {
   type?: "csv" | "json";
   filePrefix?: string;
   label: string;
+  parse?: (data: string) => string;
   action?: any;
 }
 
@@ -48,7 +49,9 @@ export const ExportMenu = ({
       >
         {exportItems.map((item) => (
           <DropdownItem
-            onClick={() => exportFile(item.action, item.filePrefix, item.type)}
+            onClick={() =>
+              exportFile(item.action, item.filePrefix, item.type, item.parse)
+            }
             {...item.options}
           >
             {item.label}
