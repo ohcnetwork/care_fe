@@ -14,7 +14,7 @@ describe("Authorisation/Authentication", () => {
     cy.url().should("include", "/");
   });
 
-  it("Try login admin with incorrect password", () => {
+  it("Try login as admin with incorrect password", () => {
     cy.log("Logging in the user: devdistrictadmin:Coronasafe@123");
 
     cy.awaitUrl("/", true);
