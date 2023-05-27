@@ -6,8 +6,7 @@ import { Card, CardContent } from "@material-ui/core";
 import Loading from "../Common/Loading";
 import { formatDate } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import bell from "../../../public/images/Notificationbell.png";
-import { navigate } from "raviger";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 export const NoticeBoard: any = () => {
   const dispatch: any = useDispatch();
@@ -32,6 +31,7 @@ export const NoticeBoard: any = () => {
   }, [dispatch]);
 
   let notices;
+
   if (data && data.length) {
     notices = (
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-6">
@@ -58,7 +58,11 @@ export const NoticeBoard: any = () => {
   } else {
     notices = (
       <div className=" m-auto max-w-sm rounded overflow-hidden shadow-lg ">
-        <img className="w-full" src={bell} alt="Sunset in the mountains"></img>
+        <img
+          className="w-full"
+          src={"/images/Notificationbell.png"}
+          alt="bell"
+        ></img>
         <div className="px-6 py-4">
           <div className="font-bold text-xl mb-2">
             You Dont Have Any Notices
@@ -69,14 +73,12 @@ export const NoticeBoard: any = () => {
         </div>
 
         <div className="px-6 pt-4 pb-2">
-          <button
+          <ButtonV2
             className=" mx-28 bg-primary-500 text-white hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-full"
-            onClick={() => {
-              navigate("/");
-            }}
+            href="/"
           >
             Go Home
-          </button>
+          </ButtonV2>
         </div>
       </div>
     );
