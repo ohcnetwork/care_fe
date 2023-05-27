@@ -54,11 +54,11 @@ Authenticate to staging API with any of the following credentials
   password: Coronasafe@123
   role: District Admin
 
-- username: dev-staff
+- username: staff-dev
   password: Coronasafe@123
   role: Staff
 
-- username: dev-doctor
+- username: doc-dev
   password: Coronasafe@123
   role: Doctor
 ```
