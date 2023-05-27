@@ -609,6 +609,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           return;
         case "phone_number":
           phoneNumber = parsePhoneNumberFromString(state.form[field]);
+          console.log(phoneNumber);
+          console.log(state.form[field]);
           if (!state.form[field] || !phoneNumber?.isPossible()) {
             errors[field] = "Please enter valid phone number";
             if (!error_div) error_div = field;
@@ -619,6 +621,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           emergency_phone_number = parsePhoneNumberFromString(
             state.form[field]
           );
+          console.log(emergency_phone_number);
+          console.log(state.form[field]);
           if (!state.form[field] || !emergency_phone_number?.isPossible()) {
             errors[field] = "Please enter valid phone number";
             if (!error_div) error_div = field;
