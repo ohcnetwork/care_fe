@@ -99,6 +99,7 @@ export const AutocompleteMutliSelect = <T, V>(
                   : props.placeholder || "Select"
               }
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
+              autoComplete="off"
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
               <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-gray-900">
