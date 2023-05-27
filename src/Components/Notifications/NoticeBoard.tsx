@@ -74,7 +74,7 @@ export const NoticeBoard: any = () => {
 
         <div className="px-6 pt-4 pb-2">
           <ButtonV2
-            className=" mx-28 bg-primary-500 text-white hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-full"
+            className="mx-28"
             href="/"
           >
             Go Home
