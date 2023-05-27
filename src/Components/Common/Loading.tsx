@@ -1,5 +1,5 @@
 import React from "react";
-const img = "https://cdn.coronasafe.network/break-chain.webp";
+const img = "https://cdn.coronasafe.network/light-logo.svg";
 const Loading = () => {
   return (
     <div className="grid">
