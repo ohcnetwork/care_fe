@@ -91,6 +91,7 @@ const AutoCompleteAsync = (props: Props) => {
               onFocus={props.onFocus}
               onBlur={() => {
                 setQuery("");
+                props.onBlur?.();
               }}
               autoComplete="off"
             />
