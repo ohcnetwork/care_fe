@@ -73,7 +73,7 @@ export const NoticeBoard: any = () => {
         </div>
 
         <div className="px-6 pt-4 pb-2">
-          <ButtonV2 className=" mx-28" href="/">
+          <ButtonV2 className=" mx-28 " href="/">
             Go Home
           </ButtonV2>
         </div>
