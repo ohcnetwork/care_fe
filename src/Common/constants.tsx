@@ -343,7 +343,7 @@ export const ADMITTED_TO = [
   { id: "2", text: "ICU" },
   { id: "6", text: "Bed with oxygen support" },
   { id: "7", text: "Regular" },
-  { id: "8", text: "None" },
+  { id: "None", text: "None" },
 ];
 
 export const RESPIRATORY_SUPPORT = [
