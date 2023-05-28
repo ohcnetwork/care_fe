@@ -384,35 +384,33 @@ const AssetCreate = (props: AssetProps) => {
 
   if (locations.length === 0) {
     return (
-      <div className="px-6 pb-2">
-        <Page
-          title={assetId ? "Update Asset" : "Create New Asset"}
-          crumbsReplacements={{
-            [facilityId]: { name: facilityName },
-            assets: { style: "text-gray-200 pointer-events-none" },
-            [assetId || "????"]: { name },
-          }}
-          backUrl={`/facility/${facilityId}`}
-        >
-          <section className="text-center">
-            <h1 className="text-6xl flex items-center flex-col py-10">
-              <div className="p-5 rounded-full flex items-center justify-center bg-gray-200 w-40 h-40">
-                <CareIcon className="care-l-map-marker text-green-600" />
-              </div>
-            </h1>
-            <p className="text-gray-600">
-              You need at least a location to create an assest.
-            </p>
-            <button
-              className="btn-primary btn mt-5"
-              onClick={() => navigate(`/facility/${facilityId}/location/add`)}
-            >
-              <i className="fas fa-plus text-white mr-2"></i>
-              Add Location
-            </button>
-          </section>
-        </Page>
-      </div>
+      <Page
+        title={assetId ? "Update Asset" : "Create New Asset"}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          assets: { style: "text-gray-200 pointer-events-none" },
+          [assetId || "????"]: { name },
+        }}
+        backUrl={`/facility/${facilityId}`}
+      >
+        <section className="text-center">
+          <h1 className="text-6xl flex items-center flex-col py-10">
+            <div className="p-5 rounded-full flex items-center justify-center bg-gray-200 w-40 h-40">
+              <CareIcon className="care-l-map-marker text-green-600" />
+            </div>
+          </h1>
+          <p className="text-gray-600">
+            You need at least a location to create an assest.
+          </p>
+          <button
+            className="btn-primary btn mt-5"
+            onClick={() => navigate(`/facility/${facilityId}/location/add`)}
+          >
+            <i className="fas fa-plus text-white mr-2"></i>
+            Add Location
+          </button>
+        </section>
+      </Page>
     );
   }
 
@@ -460,7 +458,7 @@ const AssetCreate = (props: AssetProps) => {
   };
 
   return (
-    <div className="pb-2 relative flex flex-col">
+    <div className="relative flex flex-col">
       <Page
         title={`${assetId ? "Update" : "Create"} Asset`}
         className="pl-6 flex-grow-0"
@@ -520,10 +518,10 @@ const AssetCreate = (props: AssetProps) => {
                         error={state.errors.name}
                       />
                     </div>
+                    {/* Location */}
                     <FieldLabel className="text-sm w-max" required>
                       Asset Location
                     </FieldLabel>
-                    {/* Location */}
                     <div ref={fieldRef["location"]} className="col-span-6">
                       <LocationSelect
                         name="Facilities"
@@ -537,8 +535,8 @@ const AssetCreate = (props: AssetProps) => {
                         facilityId={facilityId as unknown as number}
                       />
                     </div>
+                    {/* Asset Type */}
                     <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
-                      {/* Asset Type */}
                       <div ref={fieldRef["asset_type"]} className="flex-1">
                         <SelectFormField
                           label="Asset Type"
@@ -706,10 +704,10 @@ const AssetCreate = (props: AssetProps) => {
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["warranty_amc_end_of_validity"]}
                     >
-                      <label className="mb-2">Warranty / AMC Expiry</label>
                       <TextFormField
                         name="WarrantyAMCExpiry"
                         value={warranty_amc_end_of_validity}
+                        label="Warranty / AMC Expiry"
                         error={state.errors.warranty_amc_end_of_validity}
                         onChange={(event) => {
                           const value = moment(event.value);
@@ -818,9 +816,9 @@ const AssetCreate = (props: AssetProps) => {
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["last_serviced_on"]}
                     >
-                      <label htmlFor="last-serviced-on">Last Serviced On</label>
                       <TextFormField
-                        name="LastServicedOn"
+                        name="last_serviced_on"
+                        label="Last Serviced On"
                         className="mt-2"
                         value={last_serviced_on}
                         error={state.errors.last_serviced_on}
@@ -855,8 +853,6 @@ const AssetCreate = (props: AssetProps) => {
                       />
                     </div>
                   </div>
-
-                  <div />
 
                   <div className="mt-12 flex justify-end gap-x-2 gap-y-2 flex-wrap">
                     <Cancel
