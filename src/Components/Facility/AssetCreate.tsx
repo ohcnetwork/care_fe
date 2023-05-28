@@ -10,7 +10,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import PageTitle from "../Common/PageTitle";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
-import { LegacyErrorHelperText } from "../Common/HelperInputFields";
+import { FieldErrorText } from "../Form/FormFields/FormField";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
@@ -658,9 +658,7 @@ const AssetCreate = (props: AssetProps) => {
                         setNotWorkingReason(e.target.value)
                       }
                     />
-                    <LegacyErrorHelperText
-                      error={state.errors.not_working_reason}
-                    />
+                    <FieldErrorText error={state.errors.not_working_reason} />
                   </div>
                   {/* Divider */}
                   <div className="col-span-6">
@@ -692,7 +690,6 @@ const AssetCreate = (props: AssetProps) => {
                     >
                       <CareIcon className="care-l-focus cursor-pointer text-lg" />
                     </div>
-                    <LegacyErrorHelperText error={state.errors.qr_id} />
                   </div>
                 </div>
                 <div className="grid grid-cols-6 gap-x-6">
@@ -723,6 +720,7 @@ const AssetCreate = (props: AssetProps) => {
                     <TextFormField
                       name="WarrantyAMCExpiry"
                       value={warranty_amc_end_of_validity}
+                      error={state.errors.warranty_amc_end_of_validity}
                       onChange={(event) => {
                         const value = moment(event.value);
                         const date = new Date(value.toDate().toDateString());
@@ -739,9 +737,6 @@ const AssetCreate = (props: AssetProps) => {
                       }}
                       type="date"
                       min={moment().format("YYYY-MM-DD")}
-                    />
-                    <LegacyErrorHelperText
-                      error={state.errors.warranty_amc_end_of_validity}
                     />
                   </div>
 
@@ -838,6 +833,7 @@ const AssetCreate = (props: AssetProps) => {
                       name="LastServicedOn"
                       className="mt-2"
                       value={last_serviced_on}
+                      error={state.errors.last_serviced_on}
                       onChange={(date) => {
                         if (
                           moment(date.value).format("YYYY-MM-DD") >
@@ -854,9 +850,6 @@ const AssetCreate = (props: AssetProps) => {
                       }}
                       type="date"
                       max={moment(new Date()).format("YYYY-MM-DD")}
-                    />
-                    <LegacyErrorHelperText
-                      error={state.errors.last_serviced_on}
                     />
                   </div>
 
@@ -876,7 +869,7 @@ const AssetCreate = (props: AssetProps) => {
                         setNotes(e.target.value)
                       }
                     />
-                    <LegacyErrorHelperText error={state.errors.notes} />
+                    <FieldErrorText error={state.errors.notes} />
                   </div>
                 </div>
 
