@@ -35,7 +35,10 @@ export const NoticeBoard: any = () => {
     notices = (
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-6">
         {data.map((item) => (
-          <div className="max-w-sm rounded overflow-hidden shadow-lg ">
+          <div
+            key={`usr_${item.id}`}
+            className="max-w-sm rounded overflow-hidden shadow-lg "
+          >
             <div className="px-6 py-4">
               <div className="text-justify text-lg">{item.message}</div>
               <div className="text-gray-700 text-md mb-2 mt-2">
