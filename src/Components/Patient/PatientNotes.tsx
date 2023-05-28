@@ -14,6 +14,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import Loading from "../Common/Loading";
 import { RoleButton } from "../Common/RoleButton";
 import { formatDate } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 interface PatientNotesProps {
   patientId: any;
@@ -123,15 +124,19 @@ const PatientNotes = (props: PatientNotesProps) => {
         onChange={(e) => setNoteField(e.target.value)}
       />
       <div className="flex w-full justify-end pr-10">
-        <RoleButton
-          handleClickCB={onAddNote}
-          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
-          disableFor="readOnly"
-          disabled={!patientActive}
-          buttonType="materialUI"
-        >
-          Post Your Note
-        </RoleButton>
+        {patientActive ? (
+          <RoleButton
+            handleClickCB={onAddNote}
+            className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
+            disableFor="readOnly"
+            //disabled={!patientActive}
+            buttonType="materialUI"
+          >
+            Post Your Note
+          </RoleButton>
+        ) : (
+          <ButtonV2 disabled={true}>Post Your Note</ButtonV2>
+        )}
       </div>
       <div className="px-10 py-5">
         <h3 className="text-lg">Added Notes</h3>
