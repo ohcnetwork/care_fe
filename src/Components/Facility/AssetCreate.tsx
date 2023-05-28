@@ -10,10 +10,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import PageTitle from "../Common/PageTitle";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
-import {
-  LegacyActionTextInputField,
-  LegacyErrorHelperText,
-} from "../Common/HelperInputFields";
+import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
@@ -677,23 +674,24 @@ const AssetCreate = (props: AssetProps) => {
                     />
                   </div>
                   {/* Asset QR ID */}
-                  <div className="col-span-6">
-                    <label htmlFor="asset-qr-id">Asset QR ID</label>
-                    <LegacyActionTextInputField
-                      id="qr_code_id"
-                      fullWidth
-                      name="qr_code_id"
-                      placeholder=""
-                      variant="outlined"
-                      margin="dense"
-                      value={qrCodeId}
-                      onChange={(e) => setQrCodeId(e.target.value)}
-                      actionIcon={
-                        <CareIcon className="care-l-focus cursor-pointer text-lg" />
-                      }
-                      action={() => setIsScannerActive(true)}
-                      errors={state.errors.qr_code_id}
-                    />
+                  <div className="col-span-6 flex flex-row items-center gap-3">
+                    <div className="w-full">
+                      <TextFormField
+                        id="qr_code_id"
+                        name="qr_code_id"
+                        placeholder=""
+                        label="Asset QR ID"
+                        value={qrCodeId}
+                        onChange={(e) => setQrCodeId(e.value)}
+                        error={state.errors.qr_code_id}
+                      />
+                    </div>
+                    <div
+                      className="flex items-center justify-self-end ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
+                      onClick={() => setIsScannerActive(true)}
+                    >
+                      <CareIcon className="care-l-focus cursor-pointer text-lg" />
+                    </div>
                     <LegacyErrorHelperText error={state.errors.qr_id} />
                   </div>
                 </div>
