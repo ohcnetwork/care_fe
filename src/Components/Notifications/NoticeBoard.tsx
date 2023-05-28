@@ -5,7 +5,8 @@ import Page from "../Common/components/Page";
 import Loading from "../Common/Loading";
 import { formatDate } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent } from "@material-ui/core";
+import ButtonV2 from "../Common/components/ButtonV2";
+
 export const NoticeBoard: any = () => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
@@ -56,13 +57,27 @@ export const NoticeBoard: any = () => {
     );
   } else {
     notices = (
-      <Card key="no-notice" className="my-4 rounded-lg">
-        <CardContent>
-          <div className="text-xl text-center semibold">
-            {t("no_notices_for_you")}
+      <div className=" m-auto max-w-sm rounded overflow-hidden shadow-lg ">
+        <img
+          className="w-full"
+          src={"/images/Notificationbell.png"}
+          alt="bell"
+        ></img>
+        <div className="px-6 py-4">
+          <div className="font-bold text-xl mb-2">
+            You Dont Have Any Notices
           </div>
-        </CardContent>
-      </Card>
+          <p className="text-gray-700 text-base">
+            Did you know: We could render a fun fact about health here
+          </p>
+        </div>
+
+        <div className="px-6 pt-4 pb-2">
+          <ButtonV2 className=" mx-28 " href="/">
+            Go Home
+          </ButtonV2>
+        </div>
+      </div>
     );
   }
 
