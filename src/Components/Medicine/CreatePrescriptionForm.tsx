@@ -54,6 +54,7 @@ export default function CreatePrescriptionForm(props: {
           errors.frequency = RequiredFieldValidator()(form.frequency);
         return errors;
       }}
+      className="max-w-3xl"
     >
       {(field) => (
         <>
