@@ -53,7 +53,7 @@ const DialogModal = (props: DialogProps) => {
                 <Dialog.Panel
                   className={classNames(
                     className,
-                    fixedWidth && "max-w-md w-full",
+                    fixedWidth && "w-full",
                     "transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
                   )}
                 >
