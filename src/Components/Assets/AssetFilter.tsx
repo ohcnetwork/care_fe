@@ -4,7 +4,10 @@ import { navigate, useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { useDispatch } from "react-redux";
-import { getAnyFacility, getFacilityAssetLocation } from "../../Redux/actions";
+import {
+  getFacilityAssetLocation,
+  getPermittedFacility,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { LocationSelect } from "../Common/LocationSelect";
 import { AssetClass, AssetLocationObject } from "./AssetTypes";
@@ -61,7 +64,9 @@ function AssetFilter(props: any) {
   const fetchFacility = useCallback(
     async (status: statusType) => {
       if (facilityId) {
-        const facilityData: any = await dispatch(getAnyFacility(facilityId));
+        const facilityData: any = await dispatch(
+          getPermittedFacility(facilityId)
+        );
         if (!status.aborted) {
           setFacility(facilityData?.data);
         }
