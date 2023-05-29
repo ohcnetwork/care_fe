@@ -15,6 +15,7 @@ import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -203,7 +204,7 @@ export default function ListView() {
 
         <div className="w-32" />
         <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 w-full lg:w-fit">
-          <ButtonV2 className="py-[9px]" onClick={onBoardViewBtnClick}>
+          <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
             <i
               className="fa fa-list mr-1 transform rotate-90"
               aria-hidden="true"
@@ -211,10 +212,7 @@ export default function ListView() {
             {t("board_view")}
           </ButtonV2>
 
-          <ButtonV2 ghost border onClick={() => advancedFilter.setShow(true)}>
-            <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-            <span>{t("filters")}</span>
-          </ButtonV2>
+          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
         </div>
       </div>
 

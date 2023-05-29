@@ -21,6 +21,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch, useSelector } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -304,7 +305,7 @@ export default function ListView() {
           </div>
           <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 w-full lg:w-fit">
             <ButtonV2
-              className="py-[9px]"
+              className="py-[11px]"
               onClick={() =>
                 navigate("/shifting/board-view", { query: qParams })
               }
@@ -316,10 +317,9 @@ export default function ListView() {
               {t("board_view")}
             </ButtonV2>
 
-            <ButtonV2 ghost border onClick={() => advancedFilter.setShow(true)}>
-              <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-              <span>{t("filters")}</span>
-            </ButtonV2>
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
           </div>
         </>
       }
