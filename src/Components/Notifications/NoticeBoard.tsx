@@ -67,9 +67,6 @@ export const NoticeBoard: any = () => {
           <div className="font-bold text-xl mb-2">
             You Dont Have Any Notices
           </div>
-          <p className="text-gray-700 text-base">
-            Did you know: We could render a fun fact about health here
-          </p>
         </div>
 
         <div className="px-6 pt-4 pb-2">
