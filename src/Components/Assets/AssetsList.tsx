@@ -108,13 +108,15 @@ const AssetsList = () => {
     ]
   );
   const exportToCSV = (data: any) => {
+    // excluded the unnecessry columns and rows from the csv
     const excludedIndices = [3, 4, 5, 13];
     const csvData = data.results;
+    // getiing the headers of csv
     const headers =
       Object.keys(csvData[0])
         .filter((key, index) => !excludedIndices.includes(index))
         .join(",") + "\n";
-
+    // getting the rows of csv
     const rows = csvData
       .map((obj: any) =>
         Object.values(obj)
@@ -122,6 +124,7 @@ const AssetsList = () => {
           .join(",")
       )
       .join("\n");
+    // returning the headers and rows of csv
     return headers + rows;
   };
 
