@@ -107,6 +107,23 @@ const AssetsList = () => {
       dispatch,
     ]
   );
+  const exportToCSV = (data: any) => {
+    const excludedIndices = [3, 4, 5, 13];
+    const csvData = data.results;
+    const headers =
+      Object.keys(csvData[0])
+        .filter((key, index) => !excludedIndices.includes(index))
+        .join(",") + "\n";
+
+    const rows = csvData
+      .map((obj: any) =>
+        Object.values(obj)
+          .filter((value, index) => !excludedIndices.includes(index))
+          .join(",")
+      )
+      .join("\n");
+    return headers + rows;
+  };
 
   useEffect(() => {
     setAssetType(qParams.asset_type);
@@ -315,7 +332,24 @@ const AssetsList = () => {
                     },
                   },
                   {
-                    label: "Export Assets",
+                    label: "Export Assets in CSV",
+                    action: () =>
+                      authorizedForImportExport &&
+                      listAssets({
+                        ...qParams,
+                        csv: true,
+                        limit: totalCount,
+                      }),
+                    type: "csv",
+                    parse: exportToCSV,
+                    filePrefix: `assets_${facility?.name && ""}`,
+                    options: {
+                      icon: <CareIcon className="care-l-export" />,
+                      disabled: totalCount === 0 || !authorizedForImportExport,
+                    },
+                  },
+                  {
+                    label: "Export Assets in JSON",
                     action: () =>
                       authorizedForImportExport &&
                       listAssets({
@@ -324,7 +358,7 @@ const AssetsList = () => {
                         limit: totalCount,
                       }),
                     type: "json",
-                    filePrefix: `assets_${facility?.name}`,
+                    filePrefix: `assets_${facility?.name && ""}`,
                     options: {
                       icon: <CareIcon className="care-l-export" />,
                       disabled: totalCount === 0 || !authorizedForImportExport,
