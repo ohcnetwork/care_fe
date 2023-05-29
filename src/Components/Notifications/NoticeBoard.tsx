@@ -5,7 +5,7 @@ import Page from "../Common/components/Page";
 import Loading from "../Common/Loading";
 import { formatDate } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export const NoticeBoard: any = () => {
   const dispatch: any = useDispatch();
@@ -57,18 +57,13 @@ export const NoticeBoard: any = () => {
     );
   } else {
     notices = (
-      <div className=" m-auto max-w-sm rounded overflow-hidden shadow-lg ">
-        <img
-          className="w-full"
-          src={"/images/Notificationbell.png"}
-          alt="bell"
-        ></img>
-        <div className="px-6 py-4">
-          <div className="font-bold text-xl mb-2">
-            You Dont Have Any Notices
+      <div className=" m-auto max-w-xs flex items-center ">
+        <div className="my-36">
+          <CareIcon className=" text-gray-500 h-auto care-l-bell-slash" />
+          <div className=" m-auto text-gray-500 text-2xl mt-6">
+            No Notice Available
           </div>
         </div>
-
       </div>
     );
   }
