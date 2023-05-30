@@ -1,4 +1,4 @@
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 
 describe("Resource Page", () => {
   before(() => {
@@ -12,7 +12,7 @@ describe("Resource Page", () => {
   });
 
   it("checks if all download button works", () => {
-    cy.get("svg.MuiSvgIcon-root.cursor-pointer").each(($button) => {
+    cy.get("svg.care-svg-icon__baseline.care-l-export").each(($button) => {
       cy.intercept(/\/api\/v1\/resource/).as("resource_download");
       cy.wrap($button).click({ force: true });
       cy.wait("@resource_download").then((interception) => {
