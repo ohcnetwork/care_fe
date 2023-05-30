@@ -86,13 +86,15 @@ describe("Shifting section filter", () => {
   });
 
   it("filter by patient phone number", () => {
-    cy.contains(/^((\+91|91|0)[- ]{0,1})?[123456789]\d{9}$/)
-      .invoke("text")
-      .then((phoneNumber) => {
-        cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-        cy.get("[name='patient_phone_number']").type(phoneNumber);
-        cy.contains("Apply").click().wait("@facilities_filter");
-      });
+    const phoneNumber = "9999999999";
+    cy.intercept(/\/api\/v1\/shift/).as("shiftFilter");
+    cy.get("[name='patient_phone_number']").type(phoneNumber);
+    cy.contains("Apply").click();
+    cy.wait("@shiftFilter").then((interception) => {
+      expect(interception?.request?.query?.patient_phone_number).to.eq(
+        `+91${phoneNumber}`
+      );
+    });
   });
 
   it("filter by created date", () => {
