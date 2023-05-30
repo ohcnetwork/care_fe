@@ -15,7 +15,6 @@ export const postLogin = (params: object) => {
   return fireRequest("login", [], params);
 };
 export const getCurrentUser = () => {
-  console.log(localStorage.getItem(LocalStorageKeys.accessToken), localStorage);
   return fireRequest("currentUser");
 };
 export const signupUser = (params: object) => {
