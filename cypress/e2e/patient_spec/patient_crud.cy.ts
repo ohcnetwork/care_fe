@@ -2,11 +2,8 @@ import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 
 const username = "devdistrictadmin";
 const password = "Coronasafe@123";
-const makePhoneNumber = () =>
-  "99" + Math.floor(Math.random() * 99999999).toString();
-
-const phone_number = makePhoneNumber();
-const emergency_phone_number = makePhoneNumber();
+const phone_number = "9" + parseInt((Math.random() * 10 ** 9).toString());
+const emergency_phone_number = "9430123487";
 const yearOfBirth = "2023";
 let patient_url = "";
 
@@ -82,13 +79,13 @@ describe("Patient Creation", () => {
         cy.get("[role='option']").contains("O+").click();
       });
     cy.get("button").get("[data-testid=submit-button]").click();
+    cy.get("h2").should("contain", "Create Consultation");
     cy.url().should("include", "/patient");
     cy.url().then((url) => {
       cy.log(url);
       patient_url = url.split("/").slice(0, -1).join("/");
       cy.log(patient_url);
     });
-    cy.get("h2").should("contain", "Create Consultation");
   });
 
   it("Dashboard", () => {
@@ -105,23 +102,23 @@ describe("Patient Creation", () => {
       "contain",
       emergency_phone_number
     );
-    cy.get("[data-testid=patient-dashboard]").should("contain", "1999");
+    cy.get("[data-testid=patient-dashboard]").should("contain", yearOfBirth);
     cy.get("[data-testid=patient-dashboard]").should("contain", "O+");
   });
 
   it("Edit", () => {
     cy.awaitUrl(patient_url + "/update");
     cy.get("[data-testid=state] button").should("contain", "Kerala");
-    cy.get("[data-testid=district] select").should("contain", "Ernakulam");
-    cy.get("[data-testid=localbody] select").should("contain", "Alangad");
+    cy.get("[data-testid=district] button").should("contain", "Ernakulam");
+    cy.get("[data-testid=localbody] button").should("contain", "Aikaranad");
     cy.get("[data-testid=current-address] textarea").should(
       "contain",
       "Test Patient Address"
     );
-    // cy.get("[data-testid=permanent-address] input").should("be.checked")
-    cy.get("[data-testid=ward-respective-lsgi] select").should(
+    cy.get("[data-testid=permanent-address] input").should("be.checked");
+    cy.get("[data-testid=ward-respective-lsgi] button").should(
       "contain",
-      "MANAKKAPADY"
+      "PAZHAMTHOTTAM"
     );
     cy.get("[data-testid=pincode] input").should("have.value", "159015");
   });
