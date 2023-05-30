@@ -685,12 +685,7 @@ export const LegacyPhoneNumberField = (props: any) => {
               country={undefined}
               enableLongNumbers={true}
               buttonClass="hidden"
-              inputProps={{
-                id,
-                name,
-                maxLength,
-                autoFocus: true,
-              }}
+              inputProps={{ id, name, maxLength }}
             />
             <ButtonV2
               className="mt-[2px]"
@@ -721,12 +716,7 @@ export const LegacyPhoneNumberField = (props: any) => {
               disabled={disabled}
               autoFormat={!turnOffAutoFormat}
               enableLongNumbers={true}
-              inputProps={{
-                id,
-                name,
-                maxLength,
-                autoFocus: true,
-              }}
+              inputProps={{ id, name, maxLength }}
               {...countryRestriction}
             />
             <ButtonV2
