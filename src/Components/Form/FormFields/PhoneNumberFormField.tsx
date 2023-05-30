@@ -1,6 +1,7 @@
-import { LegacyPhoneNumberField } from "../../Common/HelperInputFields";
-import FormField from "./FormField";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+
+import FormField from "./FormField";
+import { LegacyPhoneNumberField } from "../../Common/HelperInputFields";
 
 type Props = FormFieldBaseProps<string> & {
   placeholder?: string;
@@ -15,6 +16,7 @@ const PhoneNumberFormField = (props: Props) => {
   return (
     <FormField field={field}>
       <LegacyPhoneNumberField
+        id={field.id}
         name={field.name}
         disabled={field.disabled}
         value={field.value}

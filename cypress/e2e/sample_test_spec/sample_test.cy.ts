@@ -1,4 +1,4 @@
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 
 describe("Sample List", () => {
   before(() => {
@@ -13,11 +13,11 @@ describe("Sample List", () => {
 
   it("Search by District name", () => {
     cy.intercept(/\/api\/v1\/test_sample/).as("test_sample");
-    cy.get("[name='district_name_search']").type("TEst");
+    cy.get("[name='district_name']").type("Test");
     cy.wait("@test_sample").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
     });
-    cy.url().should("include", "TEst");
+    cy.url().should("include", "Test");
   });
 
   it("Search by Patient Name", () => {
