@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from "react";
-import loadable from "@loadable/component";
-import SessionRouter from "./Router/SessionRouter";
-import AppRouter from "./Router/AppRouter";
-import { useDispatch, useSelector } from "react-redux";
-import { getConfig, getCurrentUser } from "./Redux/actions";
-import { useAbortableEffect, statusType } from "./Common/utils";
-import axios from "axios";
-import { HistoryAPIProvider } from "./CAREUI/misc/HistoryAPIProvider";
 import * as Sentry from "@sentry/browser";
+
+import React, { useEffect, useState } from "react";
+import { getConfig, getCurrentUser } from "./Redux/actions";
+import { statusType, useAbortableEffect } from "./Common/utils";
+import { useDispatch, useSelector } from "react-redux";
+
+import AppRouter from "./Router/AppRouter";
+import { HistoryAPIProvider } from "./CAREUI/misc/HistoryAPIProvider";
 import { IConfig } from "./Common/hooks/useConfig";
 import { LocalStorageKeys } from "./Common/constants";
 import Plausible from "./Components/Common/Plausible";
+import SessionRouter from "./Router/SessionRouter";
+import axios from "axios";
+import loadable from "@loadable/component";
 
 const Loading = loadable(() => import("./Components/Common/Loading"));
 
@@ -39,11 +41,11 @@ const App: React.FC = () => {
   const updateRefreshToken = () => {
     const refresh = localStorage.getItem(LocalStorageKeys.refreshToken);
     const access = localStorage.getItem(LocalStorageKeys.accessToken);
-    if (!access && refresh) {
-      localStorage.removeItem(LocalStorageKeys.refreshToken);
-      document.location.reload();
-      return;
-    }
+    // if (!access && refresh) {
+    //   localStorage.removeItem(LocalStorageKeys.refreshToken);
+    //   document.location.reload();
+    //   return;
+    // }
     if (!refresh) {
       return;
     }
