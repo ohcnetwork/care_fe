@@ -29,22 +29,16 @@ describe("Patient Creation", () => {
   it("Create a patient", () => {
     cy.visit("/patients");
     cy.get("button").should("contain", "Add Patient Details");
-    cy.get("button").contains("Add Patient Details").click({ force: true });
+    cy.get("#add-patient-div").click();
     cy.get("input[name='facilities']")
       .type("ABCD Hospital, Ernakulam")
       .then(() => {
         cy.get("[role='option']").contains("ABCD Hospital, Ernakulam").click();
       });
-    cy.get("button").contains("Select").click({ force: true });
-    cy.wait(1000);
-    cy.get("[data-testid=phone-number] input")
-      .first()
-      .type(phone_number, { force: true });
-    cy.wait(1000);
-    cy.get("[data-testid=emergency-phone-number] input")
-      .first()
-      .type(emergency_phone_number, { force: true });
-    cy.wait(1000);
+    cy.get("button").should("contain", "Select");
+    cy.get("button").get("#submit").click();
+    cy.get("#phone_number-div").type(phone_number);
+    cy.get("#emergency_phone_number-div").type(emergency_phone_number);
     cy.get("[data-testid=date-of-birth] button").click();
     cy.get("div").contains("1").click();
     cy.get("[data-testid=name] input").type("Test E2E User");
@@ -77,7 +71,7 @@ describe("Patient Creation", () => {
       .then(() => {
         cy.get("[role='option']").contains("1: PAZHAMTHOTTAM").click();
       });
-    cy.get("h1").contains("COVID Details").click({ force: true });
+    cy.get("button").contains("COVID Details").click();
     cy.get("select#test_type").select("ANTIGEN");
     cy.get("[name='is_vaccinated']").check();
     cy.get("[data-testid=pincode] input").type("159015");
@@ -87,7 +81,6 @@ describe("Patient Creation", () => {
       .then(() => {
         cy.get("[role='option']").contains("O+").click();
       });
-    cy.wait(1000);
     cy.get("button").get("[data-testid=submit-button]").click();
     cy.url().should("include", "/patient");
     cy.url().then((url) => {
@@ -95,6 +88,7 @@ describe("Patient Creation", () => {
       patient_url = url.split("/").slice(0, -1).join("/");
       cy.log(patient_url);
     });
+    cy.get("h2").should("contain", "Create Consultation");
   });
 
   it("Dashboard", () => {
