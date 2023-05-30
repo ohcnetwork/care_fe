@@ -47,7 +47,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
 
   return (
     <div key={`usr_${facility.id}`} className="w-full">
-      <div className="block rounded-lg h-full overflow-clip bg-white shadow hover:border-primary-500">
+      <div className="block rounded-lg h-full bg-white shadow hover:border-primary-500">
         <div className="flex h-full">
           <Link
             href={`/facility/${facility.id}`}
@@ -80,7 +80,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
             </Link>
 
             <div className="flex flex-col justify-between w-full h-fit md:h-full">
-              <div className="px-4 py-4 w-full ">
+              <div className="px-4 py-4 w-full">
                 <div className="flow-root">
                   {facility.kasp_empanelled && (
                     <div className="float-right mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
@@ -100,76 +100,91 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       ghost
                     >
                       <CareIcon className="care-l-monitor-heart-rate text-lg" />
-                      <span>CNS</span>
+                      <span>View CNS</span>
                     </ButtonV2>
                   </div>
-                </div>
+                  <div className="flex gap-1 flex-wrap mt-2">
+                    <Chip
+                      text={facility.facility_type}
+                      color="blue"
+                      hideBorder
+                      size="small"
+                    />
+                    {facility.features?.map(
+                      (feature: number, i: number) =>
+                        FACILITY_FEATURE_TYPES.some(
+                          (f) => f.id === feature
+                        ) && (
+                          <Chip
+                            hideBorder
+                            key={i}
+                            text={
+                              FACILITY_FEATURE_TYPES.filter(
+                                (f) => f.id === feature
+                              )[0]?.name
+                            }
+                            color="primary"
+                            size="small"
+                            startIcon={
+                              FACILITY_FEATURE_TYPES.filter(
+                                (f) => f.id === feature
+                              )[0]?.icon
+                            }
+                          />
+                        )
+                    )}
+                  </div>
 
-                <div className="flex gap-1 flex-wrap mt-2">
-                  <Chip
-                    text={facility.facility_type}
-                    color="blue"
-                    hideBorder
-                    size="small"
-                  />
-                  {facility.features?.map(
-                    (feature: number, i: number) =>
-                      FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
-                        <Chip
-                          hideBorder
-                          key={i}
-                          text={
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature
-                            )[0]?.name
-                          }
-                          color="primary"
-                          size="small"
-                          startIcon={
-                            FACILITY_FEATURE_TYPES.filter(
-                              (f) => f.id === feature
-                            )[0]?.icon
-                          }
-                        />
-                      )
-                  )}
-                </div>
-
-                <div className="mt-2 flex justify-between">
-                  <div className="flex flex-col">
-                    <div className="font-semibold">
-                      {facility.local_body_object?.name}
+                  <div className="mt-2 flex justify-between">
+                    <div className="flex flex-col">
+                      <div className="font-semibold">
+                        {facility.local_body_object?.name}
+                      </div>
                     </div>
                   </div>
+                  <a
+                    href={`tel:${facility.phone_number}`}
+                    className="font-semibold tracking-wider text-sm"
+                  >
+                    {parsePhoneNumber(
+                      facility.phone_number as string,
+                      "IN"
+                    ).formatInternational() || "-"}
+                  </a>
                 </div>
-                <a
-                  href={`tel:${facility.phone_number}`}
-                  className="font-semibold tracking-wider text-sm"
-                >
-                  {parsePhoneNumber(
-                    facility.phone_number as string,
-                    "IN"
-                  ).formatInternational() || "-"}
-                </a>
               </div>
               <div className="bg-gray-50 border-t px-2 md:px-3 py-1 flex-none">
                 <div className="flex py-2 justify-between">
                   <div className="flex justify-between w-full flex-wrap gap-2">
-                    <div>
-                      {userType !== "Staff" ? (
-                        <ButtonV2
-                          id="facility-notify"
-                          ghost
-                          border
-                          className="h-[38px]"
-                          onClick={(_) => setNotifyModalFor(facility.id)}
+                    <div className="flex gap-2">
+                      <div
+                        className={`flex items-center tooltip justify-center rounded-md text-xl h-[38px] w-fit px-2 ml-auto ${
+                          facility.patient_count / facility.bed_count > 0.85
+                            ? "bg-red-500 button-danger-border"
+                            : "bg-primary-100 button-primary-border"
+                        }`}
+                      >
+                        <span className="tooltip-text tooltip-right -translate-y-2">
+                          Live Patients / Total beds
+                        </span>{" "}
+                        <CareIcon
+                          className={`care-l-bed text-${
+                            facility.patient_count / facility.bed_count > 0.85
+                              ? "white"
+                              : "primary-600"
+                          } mr-2`}
+                        />{" "}
+                        <dt
+                          className={`text-sm font-semibold text-${
+                            facility.patient_count / facility.bed_count > 0.85
+                              ? "white"
+                              : "gray-700"
+                          } my-1`}
                         >
-                          <CareIcon className="care-l-megaphone text-lg" />
-                          <span className="md:block hidden">Notify</span>
-                        </ButtonV2>
-                      ) : (
-                        <></>
-                      )}
+                          Occupancy: {facility.patient_count} /{" "}
+                          {facility.bed_count}{" "}
+                        </dt>{" "}
+                      </div>
                       <DialogModal
                         show={notifyModalFor === facility.id}
                         title={
@@ -204,7 +219,21 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         </form>
                       </DialogModal>
                     </div>
-                    <div className="flex gap-2 ">
+                    <div className="flex gap-2">
+                      {userType !== "Staff" ? (
+                        <ButtonV2
+                          id="facility-notify"
+                          ghost
+                          border
+                          className="h-[38px]"
+                          onClick={(_) => setNotifyModalFor(facility.id)}
+                        >
+                          <CareIcon className="care-l-megaphone text-lg" />
+                          <span className="md:block hidden">Notify</span>
+                        </ButtonV2>
+                      ) : (
+                        <></>
+                      )}
                       <ButtonV2
                         href={`/facility/${facility.id}`}
                         id="facility-details"
@@ -214,7 +243,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       >
                         <CareIcon className="care-l-hospital text-lg" />
                         <span className="hidden md:inline">
-                          {t("Facility")}
+                          {t("view_faciliy")}
                         </span>
                       </ButtonV2>
                       <ButtonV2
@@ -224,7 +253,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         ghost
                       >
                         <CareIcon className="care-l-user-injured text-lg" />
-                        {t("Patients")}
+                        {t("view_patients")}
                       </ButtonV2>
                     </div>
                   </div>

@@ -7,12 +7,12 @@ import {
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { navigate } from "raviger";
 import moment from "moment";
-import { CSVLink } from "react-csv";
 import { classNames } from "../../Utils/utils";
 import { useDrag, useDrop } from "react-dnd";
 import { formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import CSVLink from "../Common/CSVLink";
 
 const limit = 14;
 
@@ -324,8 +324,6 @@ export default function ResourceBoard({
       <CSVLink
         data={downloadFile}
         filename={`resource-requests-${board}-${now}.csv`}
-        target="_blank"
-        className="hidden"
         id={`resourceRequests-${board}`}
       />
     </div>
