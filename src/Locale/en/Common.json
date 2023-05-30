@@ -132,6 +132,7 @@
   "contact_your_admin_to_add_skills": "Contact your admin to add skills",
   "add": "Add",
   "sort_by": "Sort By",
+  "none": "None",
   "RESPIRATORY_SUPPORT_UNKNOWN": "None",
   "RESPIRATORY_SUPPORT_OXYGEN_SUPPORT": "O2 Support",
   "RESPIRATORY_SUPPORT_NON_INVASIVE": "NIV",
