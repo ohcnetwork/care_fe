@@ -259,8 +259,8 @@ export const TriageForm = (props: triageFormProps) => {
       >
         <ConfirmDialogV2
           title={
-            <div>
-              <CareIcon className="care-l-exclamation-triangle text-red-500 text-lg" />
+            <div className="flex gap-2">
+              <CareIcon className="care-l-exclamation-triangle text-red-500 text-xl" />
               <p>A Triage already exist on this date</p>
             </div>
           }
