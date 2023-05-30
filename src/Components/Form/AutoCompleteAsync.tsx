@@ -118,13 +118,15 @@ const AutoCompleteAsync = (props: Props) => {
                     value={item}
                   >
                     {({ selected }) => (
-                      <div className="flex justify-between align-center">
-                        {optionLabel(item)}
-                        {optionLabelChip(item) && (
-                          <div className="px-2 mt-1 sm:mt-0 text-center bg-secondary-100 h-fit max-w-fit rounded-full text-xs text-gray-900 border border-secondary-400">
-                            {optionLabelChip(item)}
-                          </div>
-                        )}
+                      <div className="flex justify-between items-center">
+                        <div className="flex gap-2 items-center">
+                          {optionLabel(item)}
+                          {optionLabelChip(item) && (
+                            <div className="px-2 mt-1 sm:mt-0 text-center bg-secondary-100 h-fit max-w-fit rounded-full text-xs text-gray-900 border border-secondary-400">
+                              {optionLabelChip(item)}
+                            </div>
+                          )}
+                        </div>
                         {selected && (
                           <CareIcon className="care-l-check text-lg" />
                         )}
