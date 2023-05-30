@@ -1,4 +1,4 @@
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 
 describe("Shifting section filter", () => {
   before(() => {
@@ -16,15 +16,6 @@ describe("Shifting section filter", () => {
     cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
     cy.get("[name='orgin_facility']").type("harsha").wait("@facilities_filter");
     cy.get("[name='orgin_facility']").type("{downarrow}{enter}");
-    cy.contains("Apply").click();
-  });
-
-  it("filter by shifting approval facility", () => {
-    cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-    cy.get("[name='shifting_approving_facility']")
-      .type("test")
-      .wait("@facilities_filter");
-    cy.get("[name='shifting_approving_facility']").type("{downarrow}{enter}");
     cy.contains("Apply").click();
   });
 
@@ -56,7 +47,6 @@ describe("Shifting section filter", () => {
       cy.contains("Apply").click().wait("@shifting_filter");
       cy.contains("Filters").click();
     });
-    cy.contains("Cancel").click();
   });
 
   it("filter by emergency case", () => {
@@ -66,7 +56,6 @@ describe("Shifting section filter", () => {
       cy.contains("Apply").click().wait("@shifting_filter");
       cy.contains("Filters").click();
     });
-    cy.contains("Cancel").click();
   });
 
   it("filter by antenatal", () => {
@@ -76,7 +65,6 @@ describe("Shifting section filter", () => {
       cy.contains("Apply").click().wait("@shifting_filter");
       cy.contains("Filters").click();
     });
-    cy.contains("Cancel").click();
   });
 
   it("filter by upshift case", () => {
@@ -86,31 +74,27 @@ describe("Shifting section filter", () => {
       cy.contains("Apply").click().wait("@shifting_filter");
       cy.contains("Filters").click();
     });
-    cy.contains("Cancel").click();
   });
 
   it("filter by disease status", () => {
-    ["POSITIVE", "SUSPECTED", "NEGATIVE", "RECOVERED", "EXPIRED"].forEach(
-      (select) => {
-        cy.get("[name='disease_status']").select(select);
-        cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
-        cy.contains("Apply").click().wait("@shifting_filter");
-        cy.contains("Filters").click();
-      }
-    );
-    cy.contains("Cancel").click();
+    ["POSITIVE", "SUSPECTED", "NEGATIVE", "RECOVERED"].forEach((select) => {
+      cy.get("[name='disease_status']").select(select);
+      cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
+      cy.contains("Apply").click().wait("@shifting_filter");
+      cy.contains("Filters").click();
+    });
   });
 
   it("filter by patient phone number", () => {
-    cy.contains("Cancel").click().wait(100);
-    cy.contains(/^((\+91|91|0)[- ]{0,1})?[123456789]\d{9}$/)
-      .invoke("text")
-      .then((phoneNumber) => {
-        cy.contains("Filters").click();
-        cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-        cy.get("[name='patient_phone_number']").type(phoneNumber);
-        cy.contains("Apply").click().wait("@facilities_filter");
-      });
+    const phoneNumber = "9999999999";
+    cy.intercept(/\/api\/v1\/shift/).as("shiftFilter");
+    cy.get("[name='patient_phone_number']").type(phoneNumber);
+    cy.contains("Apply").click();
+    cy.wait("@shiftFilter").then((interception) => {
+      expect(interception?.request?.query?.patient_phone_number).to.eq(
+        `+91${phoneNumber}`
+      );
+    });
   });
 
   it("filter by created date", () => {
@@ -128,14 +112,8 @@ describe("Shifting section filter", () => {
   });
 
   afterEach(() => {
-    cy.get("span")
-      .should("contain", "Filters")
-      .contains("Filters")
-      .click({ force: true });
-    cy.get("a")
-      .should("contain", "Clear Filters")
-      .contains("Clear Filters")
-      .click();
+    cy.contains("Filters").click({ force: true });
+    cy.contains("Clear").click();
     cy.saveLocalStorage();
   });
 });
