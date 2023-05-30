@@ -151,7 +151,7 @@ const DischargeModal = ({
       //   setPatientData(dischargeData);
 
       Notification.Success({
-        msg: "Patient Discharged",
+        msg: "Patient Discharged Successfully",
       });
 
       afterSubmit();

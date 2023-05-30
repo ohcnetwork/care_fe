@@ -28,6 +28,7 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { LocationSelect } from "../Common/LocationSelect";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -94,6 +95,7 @@ type AssetFormSection =
 
 const AssetCreate = (props: AssetProps) => {
   const { goBack } = useAppHistory();
+  const { t } = useTranslation();
   const { facilityId, assetId } = props;
 
   let assetTypeInitial: AssetType;
@@ -518,6 +520,7 @@ const AssetCreate = (props: AssetProps) => {
                         error={state.errors.name}
                       />
                     </div>
+
                     {/* Location */}
                     <FieldLabel className="text-sm w-max" required>
                       Asset Location
@@ -568,6 +571,8 @@ const AssetCreate = (props: AssetProps) => {
                       {/* Asset Class */}
                       <div ref={fieldRef["asset_class"]} className="flex-1">
                         <SelectFormField
+                          disabled={!!props.assetId}
+                          placeholder={props.assetId ? t("none") : undefined}
                           name="asset_class"
                           label="Asset Class"
                           value={asset_class}
