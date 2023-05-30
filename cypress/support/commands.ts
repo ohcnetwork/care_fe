@@ -1,5 +1,6 @@
-import { cy, Cypress } from "local-cypress";
 import "cypress-localstorage-commands";
+
+import { Cypress, cy } from "local-cypress";
 
 Cypress.Commands.add("login", (username: string, password: string) => {
   cy.log(`Logging in the user: ${username}:${password}`);
@@ -87,4 +88,24 @@ Cypress.on("uncaught:exception", () => {
   // returning false here prevents Cypress from
   // failing the test
   return false;
+});
+
+/**
+ * getAttached(selector)
+ * getAttached(selectorFn)
+ *
+ * Waits until the selector finds an attached element, then yields it (wrapped).
+ * selectorFn, if provided, is passed $(document). Don't use cy methods inside selectorFn.
+ */
+Cypress.Commands.add("getAttached", (selector) => {
+  const getElement =
+    typeof selector === "function" ? selector : ($d) => $d.find(selector);
+  let $el = null;
+  return cy
+    .document()
+    .should(($d) => {
+      $el = getElement(Cypress.$($d));
+      expect(Cypress.dom.isDetached($el)).to.be.false;
+    })
+    .then(() => cy.wrap($el));
 });
