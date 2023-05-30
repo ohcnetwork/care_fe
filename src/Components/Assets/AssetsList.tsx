@@ -335,7 +335,7 @@ const AssetsList = () => {
                     },
                   },
                   {
-                    label: "Export Assets in CSV",
+                    label: "Export Assets as CSV",
                     action: () =>
                       authorizedForImportExport &&
                       listAssets({
@@ -352,7 +352,7 @@ const AssetsList = () => {
                     },
                   },
                   {
-                    label: "Export Assets in JSON",
+                    label: "Export Assets as JSON",
                     action: () =>
                       authorizedForImportExport &&
                       listAssets({
