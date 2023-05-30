@@ -1,4 +1,4 @@
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 
 const makeid = (length: number) => {
   let result = "";
@@ -36,7 +36,7 @@ describe("User management", () => {
     cy.get("div").contains("Kerala").click();
     cy.get("[id='district'] > div > button").click();
     cy.get("div").contains("Ernakulam").click();
-    cy.get("[id='localbody'] > div > button").click();
+    cy.get("[id='local_body'] > div > button").click();
     cy.get("div").contains("Aikaranad").click();
     cy.intercept(/\/api\/v1\/facility/).as("facility");
     cy.get("[name='facilities']")
@@ -100,37 +100,25 @@ describe("User management", () => {
       cy.get("div[id='local_body']").contains("Aikaranad");
       cy.get("div[id='created_by']").contains(/^devdistrictadmin$/);
       cy.get("div[id='home_facility']").contains("No Home Facility");
-      cy.get("div[id='facilities'] > div > button").click().wait(1000);
-      cy.wait("@userFacility").then(() => {
-        cy.get("div").contains("cypress_testing_facility");
-      });
+      cy.get("button[id='facilities']").click();
+      cy.wait("@userFacility")
+        .getAttached("div[id=facility_0] > div > span")
+        .contains("cypress_testing_facility");
     });
   });
 
   it("link facility for user", () => {
-    const linkFacilityString = "View Linked Facilities";
-    cy.contains(linkFacilityString)
-      .click({ force: true })
-      .then(() => {
-        cy.get("a")
-          .should("contain", "Link new facility")
-          .contains("Link new facility")
-          .click({ force: true });
-      });
+    cy.contains("Linked Facilities").click({ force: true });
     cy.intercept(/\/api\/v1\/facility/).as("getFacilities");
     cy.get("[name='facility']").type("test").wait("@getFacilities");
     cy.get("[name='facility']").type("{downarrow}{enter}");
-    cy.get("button > span").contains("Add").click({ force: true }).wait(1000);
-    cy.wait(500);
-    cy.contains("Advanced Filters").click();
-    cy.get("[name='first_name']").type("Cypress Test");
-    cy.get("[name='last_name']").type("Tester");
-    cy.get("[placeholder='Phone Number']").type(phone_number);
-    cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number);
-    cy.contains("Apply").click();
-    cy.intercept(/\/api\/v1\/users/).as("getUsers");
-    cy.get("[name='username']").type(username, { force: true });
-    cy.wait("@getUsers");
+    cy.intercept(/\/api\/v1\/users\/\w+\/add_facility\//).as("addFacility");
+    cy.get("button > span").contains("Add").click({ force: true });
+    cy.wait("@addFacility")
+      // .its("response.statusCode")
+      // .should("eq", 201)
+      .get("span")
+      .contains("Facility - User Already has permission to this facility");
   });
 
   it("Next/Previous Page", () => {

@@ -1,4 +1,4 @@
-import { cy, describe, it, before, beforeEach, afterEach } from "local-cypress";
+import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 
 describe("Resource filter", () => {
   before(() => {
@@ -48,7 +48,6 @@ describe("Resource filter", () => {
       cy.contains("Apply").click().wait("@resource_filter");
       cy.contains("Filters").click();
     });
-    cy.contains("Cancel").click();
   });
 
   it("filter by emergency case", () => {
@@ -58,7 +57,6 @@ describe("Resource filter", () => {
       cy.contains("Apply").click().wait("@resource_filter");
       cy.contains("Filters").click();
     });
-    cy.contains("Cancel").click();
   });
 
   it("filter by created date", () => {
@@ -79,7 +77,7 @@ describe("Resource filter", () => {
 
   afterEach(() => {
     cy.contains("Filters").click({ force: true });
-    cy.contains("Clear Filters").click();
+    cy.contains("Clear").click();
     cy.saveLocalStorage();
   });
 });
