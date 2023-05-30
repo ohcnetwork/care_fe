@@ -1,8 +1,11 @@
-import axios from "axios";
-import api from "./api";
 import * as Notification from "../Utils/Notifications.js";
+
 import { isEmpty, omitBy } from "lodash";
+
 import { LocalStorageKeys } from "../Common/constants";
+import api from "./api";
+import axios from "axios";
+
 const requestMap: any = api;
 export const actions = {
   FETCH_REQUEST: "FETCH_REQUEST",
@@ -93,6 +96,8 @@ export const fireRequest = (
     if (!request.noAuth && localStorage.getItem(LocalStorageKeys.accessToken)) {
       config.headers["Authorization"] =
         "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken);
+    } else {
+      // TODO: get access token
     }
     const axiosApiCall: any = axios.create(config);
 
