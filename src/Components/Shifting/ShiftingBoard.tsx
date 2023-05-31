@@ -8,7 +8,6 @@ import {
 import { useDrag, useDrop } from "react-dnd";
 
 import ButtonV2 from "../Common/components/ButtonV2";
-import { CSVLink } from "react-csv";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CircularProgress from "../Common/components/CircularProgress";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
@@ -17,6 +16,7 @@ import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
+import CSVLink from "../Common/CSVLink";
 
 const limit = 14;
 
@@ -427,8 +427,6 @@ export default function ShiftingBoard({
       <CSVLink
         data={downloadFile}
         filename={`shift-requests-${board}-${now}.csv`}
-        target="_blank"
-        className="hidden"
         id={`shiftRequests-${board}`}
       />
     </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { CSVLink } from "react-csv";
+import CSVLink from "../../Components/Common/CSVLink";
 
 interface CSVLinkProps {
   id: string;
@@ -17,9 +17,18 @@ export default function useExport() {
     data: "",
   });
 
-  const _CSVLink = () => <CSVLink hidden target="_blank" {...csvLinkProps} />;
+  const _CSVLink = () => {
+    const { filename, data, id } = csvLinkProps;
+    return <CSVLink id={id} filename={filename} data={data} />;
+  };
 
-  const getTimestamp = () => new Date().toISOString();
+  const getTimestamp = () => {
+    const d = new Date();
+    const date = d.toLocaleDateString();
+    const time = d.toLocaleTimeString();
+
+    return date+"_"+time;
+}
 
   const exportCSV = async (
     filenamePrefix: string,

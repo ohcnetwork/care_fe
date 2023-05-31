@@ -453,13 +453,14 @@ button:disabled,
 }
 
 .App-logo {
-    height: 40vmin;
+    height: 10vmin;
     pointer-events: none;
+    filter: brightness(80%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
     .App-logo {
-        animation: App-logo-spin infinite 20s linear;
+        animation: App-logo-blink 1s linear infinite;
     }
 }
 
@@ -473,13 +474,12 @@ button:disabled,
     color: white;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+@keyframes App-logo-blink {
+    0% { opacity: 0;}
+    25% { opacity: 0.5;}
+    50% {opacity: 1;}
+    75% {opacity: 0.5;}
+    100% {opacity: 0;}
 }
 
 .MuiInputBase-input:focus {

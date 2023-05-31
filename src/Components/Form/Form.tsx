@@ -43,6 +43,7 @@ const Form = <T extends FormDetails>({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    event.stopPropagation();
 
     if (validate) {
       const errors = omitBy(validate(state.form), isEmpty) as FormErrors<T>;
@@ -97,7 +98,7 @@ const Form = <T extends FormDetails>({
           <Consumer>{props.children}</Consumer>
         ) : (
           <>
-            <div className="my-6 flex flex-col gap-4">
+            <div className="my-6">
               <Consumer>{props.children}</Consumer>
             </div>
             <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">

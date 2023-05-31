@@ -1,5 +1,11 @@
 import { HCXClaimModel, HCXPolicyModel } from "../Components/HCX/models";
+import {
+  MedicineAdministrationRecord,
+  Prescription,
+} from "../Components/Medicine/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
+
+import { LocalStorageKeys } from "../Common/constants";
 
 export const getConfig = () => {
   return fireRequestForFiles("config");
@@ -580,8 +586,21 @@ export const deleteLastInventoryLog = (params: object) => {
   return fireRequest("deleteLastInventoryLog", [], {}, params);
 };
 
-export const discharge = (params: object, pathParams: object) => {
-  return fireRequest("discharge", [], params, pathParams);
+export const generateDischargeSummary = (pathParams: object) => {
+  return fireRequest("dischargeSummaryGenerate", [], {}, pathParams);
+};
+export const previewDischargeSummary = (pathParams: object) => {
+  return fireRequest(
+    "dischargeSummaryPreview",
+    [],
+    {},
+    pathParams,
+    undefined,
+    true
+  );
+};
+export const emailDischargeSummary = (params: object, pathParams: object) => {
+  return fireRequest("dischargeSummaryEmail", [], params, pathParams);
 };
 export const dischargePatient = (params: object, pathParams: object) => {
   return fireRequest("dischargePatient", [], params, pathParams);
@@ -831,6 +850,62 @@ export const getAssetTransaction = (id: string) =>
 
 export const listPMJYPackages = (query?: string) =>
   fireRequest("listPMJYPackages", [], { query });
+
+/** Prescription related actions */
+export const PrescriptionActions = (consultation_external_id: string) => {
+  const pathParams = { consultation_external_id };
+
+  return {
+    list: (query?: Partial<Prescription>) => {
+      let altKey;
+      if (query?.is_prn !== undefined) {
+        altKey = query?.is_prn
+          ? "listPRNPrescriptions"
+          : "listNormalPrescriptions";
+      }
+      return fireRequest("listPrescriptions", [], query, pathParams, altKey);
+    },
+
+    create: (obj: Prescription) =>
+      fireRequest("createPrescription", [], obj, pathParams),
+
+    listAdministrations: (query?: object) =>
+      fireRequest("listAdministrations", [], query, pathParams),
+
+    getAdministration: (external_id: string) =>
+      fireRequest("getAdministration", [], {}, { ...pathParams, external_id }),
+
+    /** Returns actions specific to a prescription */
+    prescription(external_id: string) {
+      const pathParams = { consultation_external_id, external_id };
+
+      return {
+        /** Read a specific prescription of a consultation */
+        get: () => fireRequest("getPrescription", [], {}, pathParams),
+
+        /** Administer a prescription */
+        administer: (obj: MedicineAdministrationRecord) =>
+          fireRequest(
+            "administerPrescription",
+            [],
+            obj,
+            pathParams,
+            `administer-medicine-${external_id}`
+          ),
+
+        /** Discontinue a prescription */
+        discontinue: (discontinued_reason: string | undefined) =>
+          fireRequest(
+            "discontinuePrescription",
+            [],
+            { discontinued_reason },
+            pathParams,
+            `discontinue-medicine-${external_id}`
+          ),
+      };
+    },
+  };
+};
 
 // HCX Actions
 

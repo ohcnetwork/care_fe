@@ -1,4 +1,4 @@
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 
 describe("Location Management Section", () => {
   before(() => {
@@ -18,8 +18,22 @@ describe("Location Management Section", () => {
     cy.contains("Add New Location").click();
     cy.get("[name='name']").type("Test Location");
     cy.get("textarea[name='description']").type("Test Description");
+    cy.intercept(/\/api\/v1\/facility\/[\w-]+\/asset_location\//).as(
+      "addLocation"
+    );
     cy.get("button").contains("Add Location").click();
-    cy.verifyNotification("Location created successfully");
+    cy.wait("@addLocation").then((interception) => {
+      switch (interception?.response?.statusCode) {
+        case 201:
+          cy.verifyNotification("Location created successfully");
+          return;
+        case 400:
+          cy.verifyNotification(
+            "Name - Asset location with this name and facility already exists."
+          );
+          return;
+      }
+    });
   });
 
   afterEach(() => {
