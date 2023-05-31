@@ -173,9 +173,9 @@ export default function ListFilter(props: any) {
     setFilterState(filterData);
   };
 
-  const handleChange = (event: any) => {
-    const { name } = event.target;
-    let { value } = event.target;
+  const handleChange = (option: any) => {
+    const { name } = option;
+    let { value } = option;
 
     if (value === "--") {
       value = "";
@@ -281,7 +281,7 @@ export default function ListFilter(props: any) {
             optionLabel={(option) => option}
             optionValue={(option) => option}
             optionSelectedLabel={(option) => option}
-            onChange={handleChange}
+            onChange={(option) => handleChange(option)}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
@@ -369,8 +369,10 @@ export default function ListFilter(props: any) {
           optionLabel={(option) => option.label}
           optionDescription={(option) => option.desc}
           optionValue={(option) => option.text}
-          optionSelectedLabel={(option) => option.label}
-          onChange={handleChange}
+          optionSelectedLabel={(option) => option.desc}
+          onChange={(option) => {
+            handleChange(option);
+          }}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
       </div>
@@ -384,7 +386,7 @@ export default function ListFilter(props: any) {
           optionLabel={(option) => option}
           optionValue={(option) => option}
           optionSelectedLabel={(option) => option}
-          onChange={handleChange}
+          onChange={(option) => handleChange(option)}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
       </div>
@@ -399,7 +401,7 @@ export default function ListFilter(props: any) {
             optionLabel={(option) => option}
             optionValue={(option) => option}
             optionSelectedLabel={(option) => option}
-            onChange={handleChange}
+            onChange={(option) => handleChange(option)}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
@@ -414,7 +416,7 @@ export default function ListFilter(props: any) {
           optionLabel={(option) => option}
           optionValue={(option) => option}
           optionSelectedLabel={(option) => option}
-          onChange={handleChange}
+          onChange={(option) => handleChange(option)}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
       </div>
@@ -428,7 +430,7 @@ export default function ListFilter(props: any) {
           optionLabel={(option) => option}
           optionValue={(option) => option}
           optionSelectedLabel={(option) => option}
-          onChange={handleChange}
+          onChange={(option) => handleChange(option)}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
       </div>
@@ -442,7 +444,7 @@ export default function ListFilter(props: any) {
           optionLabel={(option) => option}
           optionValue={(option) => option}
           optionSelectedLabel={(option) => option}
-          onChange={handleChange}
+          onChange={(option) => handleChange(option)}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
       </div>
@@ -456,7 +458,7 @@ export default function ListFilter(props: any) {
           optionLabel={(option) => option}
           optionValue={(option) => option}
           optionSelectedLabel={(option) => option}
-          onChange={handleChange}
+          onChange={(option) => handleChange(option)}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
       </div>
