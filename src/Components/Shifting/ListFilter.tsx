@@ -15,7 +15,7 @@ import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
-import { LegacySelectField } from "../Common/HelperInputFields";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { UserSelect } from "../Common/UserSelect2";
 import moment from "moment";
@@ -274,13 +274,13 @@ export default function ListFilter(props: any) {
       {props.showShiftingStatus && (
         <div>
           <FieldLabel>{t("status")}</FieldLabel>
-          <LegacySelectField
+          <SelectFormField
             name="status"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
             value={filterState.status}
             options={["--", ...shiftStatusOptions]}
+            optionLabel={(option) => option}
+            optionValue={(option) => option}
+            optionSelectedLabel={(option) => option}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
@@ -362,14 +362,14 @@ export default function ListFilter(props: any) {
 
       <div className="-mt-6">
         <FieldLabel>{t("ordering")}</FieldLabel>
-        <LegacySelectField
+        <SelectFormField
           name="ordering"
-          variant="outlined"
-          margin="dense"
-          optionKey="text"
-          optionValue="desc"
           value={filterState.ordering}
           options={SHIFTING_FILTER_ORDER}
+          optionLabel={(option) => option.label}
+          optionDescription={(option) => option.desc}
+          optionValue={(option) => option.text}
+          optionSelectedLabel={(option) => option.label}
           onChange={handleChange}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
@@ -377,13 +377,13 @@ export default function ListFilter(props: any) {
 
       <div>
         <FieldLabel>{t("is_emergency_case")}</FieldLabel>
-        <LegacySelectField
+        <SelectFormField
           name="emergency"
-          variant="outlined"
-          margin="dense"
-          optionArray={true}
           value={filterState.emergency}
           options={["--", "yes", "no"]}
+          optionLabel={(option) => option}
+          optionValue={(option) => option}
+          optionSelectedLabel={(option) => option}
           onChange={handleChange}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
@@ -392,13 +392,13 @@ export default function ListFilter(props: any) {
       {kasp_enabled && (
         <div>
           <FieldLabel>{`${t("is")} ${kasp_string}`}</FieldLabel>
-          <LegacySelectField
+          <SelectFormField
             name="is_kasp"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
             value={filterState.is_kasp}
             options={["--", "yes", "no"]}
+            optionLabel={(option) => option}
+            optionValue={(option) => option}
+            optionSelectedLabel={(option) => option}
             onChange={handleChange}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
@@ -407,13 +407,13 @@ export default function ListFilter(props: any) {
 
       <div>
         <FieldLabel>{t("is_upshift_case")}</FieldLabel>
-        <LegacySelectField
+        <SelectFormField
           name="is_up_shift"
-          variant="outlined"
-          margin="dense"
-          optionArray={true}
           value={filterState.is_up_shift}
           options={["--", "yes", "no"]}
+          optionLabel={(option) => option}
+          optionValue={(option) => option}
+          optionSelectedLabel={(option) => option}
           onChange={handleChange}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
@@ -421,13 +421,13 @@ export default function ListFilter(props: any) {
 
       <div>
         <FieldLabel>{t("disease_status")}</FieldLabel>
-        <LegacySelectField
+        <SelectFormField
           name="disease_status"
-          variant="outlined"
-          margin="dense"
-          optionArray={true}
           value={filterState.disease_status}
           options={["--", ...DISEASE_STATUS]}
+          optionLabel={(option) => option}
+          optionValue={(option) => option}
+          optionSelectedLabel={(option) => option}
           onChange={handleChange}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
@@ -435,13 +435,13 @@ export default function ListFilter(props: any) {
 
       <div>
         <FieldLabel>{t("is_antenatal")}</FieldLabel>
-        <LegacySelectField
+        <SelectFormField
           name="is_antenatal"
-          variant="outlined"
-          margin="dense"
-          optionArray={true}
           value={filterState.is_antenatal}
           options={["--", "yes", "no"]}
+          optionLabel={(option) => option}
+          optionValue={(option) => option}
+          optionSelectedLabel={(option) => option}
           onChange={handleChange}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
@@ -449,13 +449,13 @@ export default function ListFilter(props: any) {
 
       <div>
         <FieldLabel>{t("breathlessness_level")}</FieldLabel>
-        <LegacySelectField
+        <SelectFormField
           name="breathlessness_level"
-          variant="outlined"
-          margin="dense"
-          optionArray={true}
           value={filterState.breathlessness_level}
           options={["--", ...BREATHLESSNESS_LEVEL]}
+          optionLabel={(option) => option}
+          optionValue={(option) => option}
+          optionSelectedLabel={(option) => option}
           onChange={handleChange}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
