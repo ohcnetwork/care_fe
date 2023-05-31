@@ -10,8 +10,7 @@ import {
   SHIFTING_CHOICES_WARTIME,
 } from "../../Common/constants";
 import { getAnyFacility, getUserList } from "../../Redux/actions";
-
-import { CircularProgress } from "@material-ui/core";
+import CircularProgress from "../Common/components/CircularProgress";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
@@ -291,7 +290,7 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("origin_facility")}</FieldLabel>
         <div className="">
           {isOriginLoading ? (
-            <CircularProgress size={20} />
+            <CircularProgress className="h-5 w-5" />
           ) : (
             <FacilitySelect
               multiple={false}
@@ -310,7 +309,7 @@ export default function ListFilter(props: any) {
           <FieldLabel>{t("shifting_approving_facility")}</FieldLabel>
           <div className="">
             {isShiftingLoading ? (
-              <CircularProgress size={20} />
+              <CircularProgress className="h-5 w-5" />
             ) : (
               <FacilitySelect
                 multiple={false}
@@ -331,7 +330,7 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("assigned_facility")}</FieldLabel>
         <div className="">
           {isAssignedLoading ? (
-            <CircularProgress size={20} />
+            <CircularProgress className="h-5 w-5" />
           ) : (
             <FacilitySelect
               multiple={false}
@@ -348,7 +347,7 @@ export default function ListFilter(props: any) {
       <div>
         <FieldLabel>{t("assigned_to")}</FieldLabel>
         {isAssignedUserLoading ? (
-          <CircularProgress size={20} />
+          <CircularProgress className="h-5 w-5" />
         ) : (
           <UserSelect
             name="assigned_to"
