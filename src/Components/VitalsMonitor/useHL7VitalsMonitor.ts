@@ -34,6 +34,7 @@ export default function useHL7VitalsMonitor() {
 
   // Non waveform data states.
   const [pulseRate, setPulseRate] = useState<VitalsValue>();
+  const [heartRate, setHeartRate] = useState<VitalsValue>();
   const [bp, setBp] = useState<VitalsBPValue>();
   const [spo2, setSpo2] = useState<VitalsValue>();
   const [respiratoryRate, setRespiratoryRate] = useState<VitalsValue>();
@@ -80,7 +81,8 @@ export default function useHL7VitalsMonitor() {
 
         const hook = (set: (data: any) => void) => (d: HL7MonitorData) =>
           set(d);
-        device.current!.on("heart-rate", hook(setPulseRate));
+        device.current!.on("pulse-rate", hook(setPulseRate));
+        device.current!.on("heart-rate", hook(setHeartRate));
         device.current!.on("SpO2", hook(setSpo2));
         device.current!.on("respiratory-rate", hook(setRespiratoryRate));
         device.current!.on("body-temperature1", hook(setTemperature1));
@@ -121,6 +123,7 @@ export default function useHL7VitalsMonitor() {
     },
     data: {
       pulseRate,
+      heartRate,
       bp,
       spo2,
       respiratoryRate,

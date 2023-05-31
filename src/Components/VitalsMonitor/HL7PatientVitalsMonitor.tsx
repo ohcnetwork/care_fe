@@ -82,12 +82,12 @@ export default function HL7PatientVitalsMonitor({
           <div className="flex justify-between items-center p-1">
             <div className="flex flex-col h-full items-start text-sm text-primary-400 font-bold">
               <span>ECG</span>
-              <span>{data.pulseRate?.unit ?? "--"}</span>
+              <span>{(data.pulseRate ?? data.heartRate)?.unit ?? "--"}</span>
             </div>
             <span className="text-4xl md:text-6xl font-black text-gray-300">
-              {data.pulseRate?.value ?? "--"}
+              {(data.pulseRate ?? data.heartRate)?.value ?? "--"}
             </span>
-            {data.pulseRate?.value && (
+            {(data.pulseRate ?? data.heartRate)?.value && (
               <span className="text-red-500 animate-pulse font-sans">❤️</span>
             )}
           </div>
