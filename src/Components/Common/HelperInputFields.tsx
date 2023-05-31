@@ -74,10 +74,6 @@ export interface DefaultNativeSelectInputProps extends NativeSelectInputProps {
 
 // Type Declarations
 type TextFieldPropsExtended = TextFieldProps & { errors: string };
-type ActionTextFieldProps = TextFieldPropsExtended & {
-  actionIcon?: React.ReactElement;
-  action?: () => void;
-};
 
 interface DateInputFieldProps extends DatePickerProps {
   value: string;
@@ -131,54 +127,6 @@ export const LegacyTextInputField = (props: TextFieldPropsExtended) => {
         onChange={handleChange}
         onKeyDown={handleKeyDown}
       />
-      <LegacyErrorHelperText error={errors} />
-    </div>
-  );
-};
-
-/**
- * Deprecated. Use `TextFormField` instead.
- */
-export const LegacyActionTextInputField = (props: ActionTextFieldProps) => {
-  const { onChange, type, errors, onKeyDown } = props;
-  const inputType = type === "number" || type === "float" ? "text" : type;
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (typeof onChange !== "function") {
-      return;
-    }
-    if (type === "number" && event.target.value) {
-      event.target.value = event.target.value.replace(/\D/, "");
-    }
-    if (type === "float" && event.target.value) {
-      event.target.value = event.target.value.replace(/(?!\.)\D/, "");
-    }
-    onChange(event);
-  };
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (typeof onKeyDown !== "function") {
-      return;
-    }
-    onKeyDown(event);
-  };
-  return (
-    <div>
-      <div className="flex gap-2 items-center">
-        <TextField
-          {...props}
-          fullWidth
-          type={inputType}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-        />
-        {props.actionIcon && (
-          <div
-            className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
-            onClick={props.action ?? undefined}
-          >
-            {props.actionIcon}
-          </div>
-        )}
-      </div>
       <LegacyErrorHelperText error={errors} />
     </div>
   );
