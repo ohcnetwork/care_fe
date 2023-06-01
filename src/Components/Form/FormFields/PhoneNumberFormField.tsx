@@ -27,7 +27,8 @@ export default function PhoneNumberFormField(props: Props) {
 
     const setValue = (value: string) => {
       asYouType.reset();
-      field.handleChange(asYouType.input(value));
+      asYouType.input(value);
+      field.handleChange(asYouType.getNumberValue());
     };
 
     setValue(field.value || "+91");
@@ -48,6 +49,7 @@ export default function PhoneNumberFormField(props: Props) {
             field.error && "border-danger-500",
             field.className
           )}
+          maxLength={field.value?.startsWith("1800") ? 11 : 15}
           placeholder={props.placeholder}
           value={asYouType.getNumberValue()}
           onChange={(e) => setValue(e.target.value)}
