@@ -46,9 +46,9 @@ describe("User management", () => {
     cy.wait(1000);
     cy.get("input[type='checkbox']").click();
     cy.wait(1000);
-    cy.get("[placeholder='Phone Number']").type(phone_number);
+    cy.get("[name='phone_number']").type(phone_number);
     cy.wait(1000);
-    cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number, {
+    cy.get("[name='alt_phone_number']").type(alt_phone_number, {
       force: true,
     });
     cy.intercept(/users/).as("check_availability");
