@@ -716,7 +716,7 @@ export const UserAdd = (props: UserProps) => {
                   placeholder="Phone Number"
                   label="Phone Number"
                   required
-                  onlyIndia
+                  disableCountry
                 />
                 <Checkbox
                   checked={phoneIsWhatsApp}
@@ -730,7 +730,7 @@ export const UserAdd = (props: UserProps) => {
                 placeholder="WhatsApp Phone Number"
                 label="Whatsapp Number"
                 disabled={phoneIsWhatsApp}
-                onlyIndia
+                disableCountry
               />
 
               <div>
