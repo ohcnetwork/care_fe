@@ -1,4 +1,3 @@
-import { CardContent, Typography } from "@material-ui/core";
 import { navigate } from "raviger";
 import React from "react";
 import { ConsultationModel } from "./models";
@@ -24,10 +23,10 @@ export const ConsultationCard = (props: ConsultationProps) => {
         </div>
       )}
 
-      <CardContent>
+      <>
         <div className="grid gap-4 grid-cols-1 md:grid-cols-4 ml-2 mt-2">
           <div className="sm:col-span-1">
-            <Typography>
+            <>
               <div className="sm:col-span-1">
                 <div className="text-sm leading-5 font-semibold text-zinc-400">
                   Facility
@@ -39,10 +38,10 @@ export const ConsultationCard = (props: ConsultationProps) => {
                   )}
                 </div>
               </div>
-            </Typography>
+            </>
           </div>
           <div className="sm:col-span-1">
-            <Typography className="capitalize">
+            <div className="capitalize">
               <div className="sm:col-span-1">
                 <div className="text-sm leading-5 font-semibold text-zinc-400">
                   Suggestion{" "}
@@ -51,11 +50,11 @@ export const ConsultationCard = (props: ConsultationProps) => {
                   {itemData.suggestion_text?.toLocaleLowerCase()}
                 </div>
               </div>
-            </Typography>
+            </div>
           </div>
           {itemData.kasp_enabled_date && (
             <div className="sm:col-span-1">
-              <Typography>
+              <>
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-semibold text-zinc-400">
                     {kasp_string} Enabled date{" "}
@@ -66,12 +65,12 @@ export const ConsultationCard = (props: ConsultationProps) => {
                       : "-"}
                   </div>
                 </div>
-              </Typography>
+              </>
             </div>
           )}
           {itemData.admitted && itemData.admission_date && (
             <div className="sm:col-span-1">
-              <Typography>
+              <>
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-semibold text-zinc-400">
                     Admitted on
@@ -80,12 +79,12 @@ export const ConsultationCard = (props: ConsultationProps) => {
                     {formatDate(itemData.admission_date)}
                   </div>
                 </div>
-              </Typography>
+              </>
             </div>
           )}
           {!itemData.admitted && (
             <div className="sm:col-span-1">
-              <Typography>
+              <>
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-semibold text-zinc-400">
                     Admitted{" "}
@@ -94,12 +93,12 @@ export const ConsultationCard = (props: ConsultationProps) => {
                     No
                   </div>
                 </div>
-              </Typography>
+              </>
             </div>
           )}
           {itemData.discharge_date && (
             <div className="sm:col-span-1">
-              <Typography>
+              <>
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-semibold text-zinc-400">
                     Discharged on{" "}
@@ -108,7 +107,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                     {formatDate(itemData.discharge_date)}
                   </div>
                 </div>
-              </Typography>
+              </>
             </div>
           )}
         </div>
@@ -165,7 +164,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
             </ButtonV2>
           )}
         </div>
-      </CardContent>
+      </>
     </div>
   );
 };

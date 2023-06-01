@@ -70,7 +70,7 @@ const Form = <T extends FormDetails>({
     <form
       onSubmit={handleSubmit}
       className={classNames(
-        "bg-white rounded w-full max-w-3xl mx-auto",
+        "bg-white rounded w-full mx-auto",
         !props.noPadding && "px-8 md:px-16 py-5 md:py-11",
         props.className
       )}

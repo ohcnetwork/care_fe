@@ -570,6 +570,12 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
+  const getNotificationMessage = () => {
+    if (state.form.suggestion !== "A") return "Patient discharged successfully";
+
+    return `Consultation ${id ? "updated" : "created"} successfully`;
+  };
+
   const handleSubmit = async (
     e:
       | React.FormEvent<HTMLFormElement>
@@ -645,7 +651,7 @@ export const ConsultationForm = (props: any) => {
         }
 
         Notification.Success({
-          msg: `Consultation ${id ? "updated" : "created"} successfully`,
+          msg: getNotificationMessage(),
         });
 
         navigate(
