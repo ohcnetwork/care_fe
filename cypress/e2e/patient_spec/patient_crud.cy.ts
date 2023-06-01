@@ -20,11 +20,10 @@ describe("Patient Creation", () => {
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.awaitUrl("/");
+    cy.awaitUrl("/patients");
   });
 
   it("Create a patient", () => {
-    cy.visit("/patients");
     cy.get("button").should("contain", "Add Patient Details");
     cy.get("#add-patient-div").click();
     cy.get("input[name='facilities']")
