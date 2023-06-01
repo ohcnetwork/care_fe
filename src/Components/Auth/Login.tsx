@@ -15,10 +15,10 @@ import { LocalStorageKeys } from "../../Common/constants";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
-    static_light_logo,
     static_black_logo,
     static_dpg_white_logo,
-    static_coronasafe_logo,
+    static_light_logo,
+    static_ohc_light_logo,
     recaptcha_site_key,
     github_url,
     coronasafe_url,
@@ -236,7 +236,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 target="_blank"
               >
                 <img
-                  src={static_coronasafe_logo}
+                  src={static_ohc_light_logo}
                   className="h-10 inline-block"
                   alt="coronasafe logo"
                 />
