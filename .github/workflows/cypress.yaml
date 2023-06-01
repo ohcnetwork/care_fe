@@ -24,8 +24,8 @@ jobs:
           path: care
 
       - name: Run docker compose up on care 🐳
-        run: cd care && touch .env && make docker_config_file=docker-compose.pre-built.yaml up && cd .. && sleep 30s
-        # Voluntarily kept 30 seconds delay to wait for migrations to complete.
+        run: cd care && touch .env && make docker_config_file=docker-compose.pre-built.yaml up && cd .. && sleep 60s
+        # Voluntarily kept 60 seconds delay to wait for migrations to complete.
 
       - name: Run Django collectstatic and load dummy data on care 🐍
         run: |
