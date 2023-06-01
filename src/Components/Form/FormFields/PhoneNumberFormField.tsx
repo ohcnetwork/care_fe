@@ -41,9 +41,9 @@ export default function PhoneNumberFormField(props: Props) {
       <div className="relative mt-2 rounded-md shadow-sm">
         <input
           type="tel"
-          name="phone-number"
-          autoComplete={props.autoComplete ?? "tel"}
           id={field.id}
+          name={field.name}
+          autoComplete={props.autoComplete ?? "tel"}
           className={classNames(
             "cui-input-base pr-24 md:pr-28 sm:leading-6 tracking-widest",
             field.error && "border-danger-500",
