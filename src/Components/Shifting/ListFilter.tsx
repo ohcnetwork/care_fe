@@ -70,20 +70,20 @@ export default function ListFilter(props: any) {
     shifting_approving_facility_ref: null,
     assigned_facility: filter.assigned_facility || "",
     assigned_facility_ref: null,
-    emergency: filter.emergency || "--",
-    is_up_shift: filter.is_up_shift || "--",
+    emergency: filter.emergency || "",
+    is_up_shift: filter.is_up_shift || "",
     created_date_before: filter.created_date_before || null,
     created_date_after: filter.created_date_after || null,
     modified_date_before: filter.modified_date_before || null,
     modified_date_after: filter.modified_date_after || null,
     patient_phone_number: filter.patient_phone_number || "",
     ordering: filter.ordering || null,
-    is_kasp: filter.is_kasp || "--",
+    is_kasp: filter.is_kasp || "",
     status: filter.status || null,
     assigned_user_ref: null,
     assigned_to: filter.assigned_to || "",
     disease_status: filter.disease_status || "",
-    is_antenatal: filter.is_antenatal || "--",
+    is_antenatal: filter.is_antenatal || "",
     breathlessness_level: filter.breathlessness_level || "",
   });
   const dispatch: any = useDispatch();
@@ -173,23 +173,23 @@ export default function ListFilter(props: any) {
     setFilterState(filterData);
   };
 
-  const handleChange = (option: any) => {
-    const { name } = option;
-    let { value } = option;
+  // const handleChange = (option: any) => {
+  //   const { name } = option;
+  //   let { value } = option;
 
-    if (value === "--") {
-      value = "";
-    }
-    const filterData: any = { ...filterState };
-    filterData[name] = value;
+  //   if (value === "--") {
+  //     value = "";
+  //   }
+  //   const filterData: any = { ...filterState };
+  //   filterData[name] = value;
 
-    setFilterState(filterData);
-  };
+  //   setFilterState(filterData);
+  // };
 
   const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
     setFilterState({
       ...filterState,
-      [event.name]: event.value === "--" ? "" : event.value,
+      [event.name]: event.value,
     });
   };
 
@@ -276,12 +276,13 @@ export default function ListFilter(props: any) {
           <FieldLabel>{t("status")}</FieldLabel>
           <SelectFormField
             name="status"
+            id="status"
+            placeholder="Show all"
             value={filterState.status}
-            options={["--", ...shiftStatusOptions]}
+            options={shiftStatusOptions}
             optionLabel={(option) => option}
             optionValue={(option) => option}
-            optionSelectedLabel={(option) => option}
-            onChange={(option) => handleChange(option)}
+            onChange={(option) => handleFormFieldChange(option)}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
@@ -364,6 +365,8 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("ordering")}</FieldLabel>
         <SelectFormField
           name="ordering"
+          id="ordering"
+          placeholder="No ordering"
           value={filterState.ordering}
           options={SHIFTING_FILTER_ORDER}
           optionLabel={(option) => option.label}
@@ -371,7 +374,7 @@ export default function ListFilter(props: any) {
           optionValue={(option) => option.text}
           optionSelectedLabel={(option) => option.desc}
           onChange={(option) => {
-            handleChange(option);
+            handleFormFieldChange(option);
           }}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
@@ -381,12 +384,13 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("is_emergency_case")}</FieldLabel>
         <SelectFormField
           name="emergency"
+          id="emergency"
+          placeholder="Show all"
           value={filterState.emergency}
-          options={["--", "yes", "no"]}
+          options={["yes", "no"]}
           optionLabel={(option) => option}
           optionValue={(option) => option}
-          optionSelectedLabel={(option) => option}
-          onChange={(option) => handleChange(option)}
+          onChange={(option) => handleFormFieldChange(option)}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
       </div>
@@ -396,12 +400,13 @@ export default function ListFilter(props: any) {
           <FieldLabel>{`${t("is")} ${kasp_string}`}</FieldLabel>
           <SelectFormField
             name="is_kasp"
+            id="is_kasp"
+            placeholder="Show all"
             value={filterState.is_kasp}
-            options={["--", "yes", "no"]}
+            options={["yes", "no"]}
             optionLabel={(option) => option}
             optionValue={(option) => option}
-            optionSelectedLabel={(option) => option}
-            onChange={(option) => handleChange(option)}
+            onChange={(option) => handleFormFieldChange(option)}
             className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
           />
         </div>
@@ -411,12 +416,13 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("is_upshift_case")}</FieldLabel>
         <SelectFormField
           name="is_up_shift"
+          id="is_up_shift"
+          placeholder="Show all"
           value={filterState.is_up_shift}
-          options={["--", "yes", "no"]}
+          options={["yes", "no"]}
           optionLabel={(option) => option}
           optionValue={(option) => option}
-          optionSelectedLabel={(option) => option}
-          onChange={(option) => handleChange(option)}
+          onChange={(option) => handleFormFieldChange(option)}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
       </div>
@@ -425,12 +431,13 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("disease_status")}</FieldLabel>
         <SelectFormField
           name="disease_status"
+          id="disease_status"
+          placeholder="Show all"
           value={filterState.disease_status}
-          options={["--", ...DISEASE_STATUS]}
+          options={DISEASE_STATUS}
           optionLabel={(option) => option}
           optionValue={(option) => option}
-          optionSelectedLabel={(option) => option}
-          onChange={(option) => handleChange(option)}
+          onChange={(option) => handleFormFieldChange(option)}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
       </div>
@@ -439,12 +446,13 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("is_antenatal")}</FieldLabel>
         <SelectFormField
           name="is_antenatal"
+          id="is_antenatal"
+          placeholder="Show all"
           value={filterState.is_antenatal}
-          options={["--", "yes", "no"]}
+          options={["yes", "no"]}
           optionLabel={(option) => option}
           optionValue={(option) => option}
-          optionSelectedLabel={(option) => option}
-          onChange={(option) => handleChange(option)}
+          onChange={(option) => handleFormFieldChange(option)}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
       </div>
@@ -453,12 +461,13 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("breathlessness_level")}</FieldLabel>
         <SelectFormField
           name="breathlessness_level"
+          id="breathlessness_level"
+          placeholder="Show all"
           value={filterState.breathlessness_level}
-          options={["--", ...BREATHLESSNESS_LEVEL]}
+          options={BREATHLESSNESS_LEVEL}
           optionLabel={(option) => option}
           optionValue={(option) => option}
-          optionSelectedLabel={(option) => option}
-          onChange={(option) => handleChange(option)}
+          onChange={(option) => handleFormFieldChange(option)}
           className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
         />
       </div>
