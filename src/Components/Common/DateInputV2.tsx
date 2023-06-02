@@ -1,23 +1,25 @@
-import { useState, useEffect } from "react";
+import { MutableRefObject, useEffect, useState } from "react";
 import {
-  format,
-  subMonths,
   addMonths,
-  subYears,
   addYears,
-  isEqual,
-  getDaysInMonth,
+  format,
   getDay,
+  getDaysInMonth,
+  isEqual,
+  subMonths,
+  subYears,
 } from "date-fns";
+
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Popover } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 
 type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
 
 interface Props {
   id?: string;
+  name?: string;
   className?: string;
   value: Date | undefined;
   min?: Date;
@@ -34,6 +36,7 @@ const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 const DateInputV2: React.FC<Props> = ({
   id,
+  name,
   className,
   value,
   min,
@@ -90,7 +93,11 @@ const DateInputV2: React.FC<Props> = ({
       );
   };
 
-  const setDateValue = (date: number) => () => {
+  type CloseFunction = (
+    focusableElement?: HTMLElement | MutableRefObject<HTMLElement | null>
+  ) => void;
+
+  const setDateValue = (date: number, close: CloseFunction) => () => {
     isDateWithinConstraints(date) &&
       onChange(
         new Date(
@@ -99,6 +106,7 @@ const DateInputV2: React.FC<Props> = ({
           date
         )
       );
+    close();
   };
 
   const getDayCount = (date: Date) => {
@@ -194,7 +202,7 @@ const DateInputV2: React.FC<Props> = ({
     <div>
       <div className="container mx-auto text-black">
         <Popover className="relative">
-          {({ open }) => (
+          {({ open, close }) => (
             <div
               onBlur={() => {
                 setIsOpen && setIsOpen(false);
@@ -210,6 +218,7 @@ const DateInputV2: React.FC<Props> = ({
                 <input type="hidden" name="date" />
                 <input
                   id={id}
+                  name={name}
                   type="text"
                   readOnly
                   disabled={disabled}
@@ -310,7 +319,7 @@ const DateInputV2: React.FC<Props> = ({
                             className="aspect-square w-[14.26%]"
                           >
                             <div
-                              onClick={setDateValue(d)}
+                              onClick={setDateValue(d, close)}
                               className={classNames(
                                 "cursor-pointer flex items-center justify-center text-center h-full text-sm rounded leading-loose transition ease-in-out duration-100 text-black",
                                 value && isSelectedDate(d)

@@ -1,4 +1,4 @@
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 
 class facility {
   static create(facility) {
@@ -31,7 +31,7 @@ class facility {
     features,
     address,
     pincode,
-    tel,
+    phone,
     state,
     district,
     localbody,
@@ -47,63 +47,63 @@ class facility {
     latitude,
     longitude,
   }) {
-    cy.get("[id=facility-type] > div > button").click();
+    cy.get("[id=facility_type] > div > button").click();
     cy.get("div").contains(type).click();
 
-    cy.get("input[id=facility-name]").should("exist").type(name);
+    cy.get("input[id=name]").should("exist").type(name);
 
-    cy.get("[id=facility-features] > div > div > button").click();
+    cy.get("[id=features] > div > div > button").click();
     cy.get("li").contains(features[0]).click();
     cy.get("li").contains(features[1]).click();
     cy.get("body").click();
 
-    cy.get("[id=facility-state] > div > button").click();
+    cy.get("[id=state] > div > button").click();
     cy.get("div").contains(state).click();
 
-    cy.get("[id=facility-district] > div > button").click();
+    cy.get("[id=district] > div > button").click();
     cy.get("div").contains(district).click();
 
-    cy.get("[id=facility-localbody] > div > button").click();
+    cy.get("[id=local_body] > div > button").click();
     cy.get("div").contains(localbody).click();
 
-    cy.get("[id=facility-ward] > div > button").click();
+    cy.get("[id=ward] > div > button").click();
     cy.get("div").contains(ward).click();
 
-    cy.get("textarea[id=facility-address]").should("exist").type(address);
+    cy.get("textarea[id=address]").should("exist").type(address);
 
-    cy.get("input[id=facility-pincode]").should("exist").clear().type(pincode);
+    cy.get("input[id=pincode]").should("exist").clear().type(pincode);
 
-    cy.get("input[type=tel]").should("exist").type(tel);
+    cy.get("input[name=phone_number]").should("exist").type(phone);
 
-    cy.get("input[id=facility-oxygen_capacity]").clear().type(oxygen_capacity);
-    cy.get("input[id=facility-expected_oxygen_requirement]")
+    cy.get("input[id=oxygen_capacity]").clear().type(oxygen_capacity);
+    cy.get("input[id=expected_oxygen_requirement]")
       .should("exist")
       .clear()
       .type(oxygen_requirement);
 
-    cy.get("input[id=facility-type_b_cylinders]")
+    cy.get("input[id=type_b_cylinders]")
       .should("exist")
       .clear()
       .type(type_b_cylinders);
-    cy.get("input[id=facility-expected_type_b_cylinders]")
+    cy.get("input[id=expected_type_b_cylinders]")
       .should("exist")
       .clear()
       .type(expected_type_b_cylinders);
 
-    cy.get("input[id=facility-type_c_cylinders]")
+    cy.get("input[id=type_c_cylinders]")
       .should("exist")
       .clear()
       .type(type_c_cylinders);
-    cy.get("input[id=facility-expected_type_c_cylinders]")
+    cy.get("input[id=expected_type_c_cylinders]")
       .should("exist")
       .clear()
       .type(expected_type_c_cylinders);
 
-    cy.get("input[id=facility-type_d_cylinders]")
+    cy.get("input[id=type_d_cylinders]")
       .should("exist")
       .clear()
       .type(type_d_cylinders);
-    cy.get("input[id=facility-expected_type_d_cylinders]")
+    cy.get("input[id=expected_type_d_cylinders]")
       .should("exist")
       .clear()
       .type(expected_type_d_cylinders);
@@ -138,7 +138,7 @@ describe("Facility", () => {
       ward: "MANAKKAPADY",
       address: "some address",
       pincode: "884656",
-      tel: "9985784535",
+      phone: "9985784535",
       oxygen_capacity: "20",
       oxygen_requirement: "30",
       type_b_cylinders: "20",
@@ -166,7 +166,7 @@ describe("Facility", () => {
     cy.get("[id=area-of-specialization] > div > button").click();
     cy.get("ul > li:nth-child(2)").click();
     cy.get("[id=count]").type("15");
-    cy.get("[id=submit").click();
+    cy.get("[id=save-and-exit").click();
 
     cy.verifyNotification("Doctor count added successfully");
     cy.url().then((url) => {
@@ -185,7 +185,7 @@ describe("Facility", () => {
       ward: "PAZHAMTHOTTAM",
       address: " update",
       pincode: "584675",
-      tel: "9985784535",
+      phone: "9985784535",
       oxygen_capacity: "30",
       oxygen_requirement: "40",
       type_b_cylinders: "23",

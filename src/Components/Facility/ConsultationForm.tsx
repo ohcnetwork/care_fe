@@ -645,7 +645,9 @@ export const ConsultationForm = (props: any) => {
         }
 
         Notification.Success({
-          msg: `Consultation ${id ? "updated" : "created"} successfully`,
+          msg: res.data.discharge_date
+            ? "Patient discharged successfully"
+            : `Consultation ${id ? "updated" : "created"} successfully`,
         });
 
         navigate(
