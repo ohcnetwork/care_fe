@@ -238,14 +238,12 @@ const ScanABHAQRSection = ({
 
                 console.log(response);
                 if (response.status === 200) {
-                  if (setAbha) {
-                    setAbha?.(response.data);
-                  } else {
-                    window.location.reload();
-                    Notification.Success({
-                      msg: "ABHA Number linked successfully",
-                    });
-                  }
+                  setAbha?.(response.data);
+
+                  window.location.reload();
+                  Notification.Success({
+                    msg: "ABHA Number linked successfully",
+                  });
                 } else {
                   Notification.Error({
                     msg: response?.message ?? "Something went wrong!",
