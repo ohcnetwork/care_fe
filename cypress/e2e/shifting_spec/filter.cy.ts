@@ -42,46 +42,115 @@ describe("Shifting section filter", () => {
       "DESC Modified Date",
       "ASC Created Date",
     ].forEach((select) => {
-      cy.get("[name='ordering']").select(select).wait(100);
+      cy.get("[id='ordering'] > div > button")
+        .click()
+        .wait(100)
+        .get("li")
+        .contains(select)
+        .click()
+        .wait(100);
       cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
       cy.contains("Apply").click().wait("@shifting_filter");
       cy.contains("Filters").click();
+      // cy.get("[name='ordering']").select(select).wait(100);
+      // cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
+      // cy.contains("Apply").click().wait("@shifting_filter");
+      // cy.contains("Filters").click();
     });
   });
 
   it("filter by emergency case", () => {
     ["yes", "no"].forEach((select) => {
-      cy.get("[name='emergency']").select(select).wait(100);
+      cy.get("[id='emergency'] > div > button")
+        .click()
+        .wait(100)
+        .get("li")
+        .contains(select)
+        .click()
+        .wait(100);
       cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
       cy.contains("Apply").click().wait("@shifting_filter");
       cy.contains("Filters").click();
+      // cy.get("[name='emergency']").select(select).wait(100);
+      // cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
+      // cy.contains("Apply").click().wait("@shifting_filter");
+      // cy.contains("Filters").click();
     });
   });
 
   it("filter by antenatal", () => {
     ["yes", "no"].forEach((select) => {
-      cy.get("[name='is_antenatal']").select(select);
+      cy.get("[id='is-antenatal'] > div > button")
+        .click()
+        .wait(100)
+        .get("li")
+        .contains(select)
+        .click()
+        .wait(100);
       cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
       cy.contains("Apply").click().wait("@shifting_filter");
       cy.contains("Filters").click();
+      // cy.get("[name='is-antenatal']").select(select);
+      // cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
+      // cy.contains("Apply").click().wait("@shifting_filter");
+      // cy.contains("Filters").click();
     });
   });
 
   it("filter by upshift case", () => {
     ["yes", "no"].forEach((select) => {
-      cy.get("[name='is_up_shift']").select(select);
+      cy.get("[id='is-up-shift'] > div > button")
+        .click()
+        .wait(100)
+        .get("li")
+        .contains(select)
+        .click()
+        .wait(100);
       cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
       cy.contains("Apply").click().wait("@shifting_filter");
       cy.contains("Filters").click();
+      // cy.get("[name='is-up-shift']").select(select);
+      // cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
+      // cy.contains("Apply").click().wait("@shifting_filter");
+      // cy.contains("Filters").click();
     });
   });
 
   it("filter by disease status", () => {
     ["POSITIVE", "SUSPECTED", "NEGATIVE", "RECOVERED"].forEach((select) => {
-      cy.get("[name='disease_status']").select(select);
+      cy.get("[id='disease-status'] > div > button")
+        .click()
+        .wait(100)
+        .get("li")
+        .contains(select)
+        .click()
+        .wait(100);
       cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
       cy.contains("Apply").click().wait("@shifting_filter");
       cy.contains("Filters").click();
+      // cy.get("[name='disease_status']").select(select);
+      // cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
+      // cy.contains("Apply").click().wait("@shifting_filter");
+      // cy.contains("Filters").click();
+    });
+  });
+
+  it("filter by breathlessness level", () => {
+    ["NOT BREATHLESS", "MILD", "MODERATE", "SEVERE"].forEach((select) => {
+      cy.get("[id='breathlessness-level'] > div > button")
+        .click()
+        .wait(100)
+        .get("li")
+        .contains(select)
+        .click()
+        .wait(100);
+      cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
+      cy.contains("Apply").click().wait("@shifting_filter");
+      cy.contains("Filters").click();
+      // cy.get("[name='breathlessness_level']").select(select);
+      // cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
+      // cy.contains("Apply").click().wait("@shifting_filter");
+      // cy.contains("Filters").click();
     });
   });
 

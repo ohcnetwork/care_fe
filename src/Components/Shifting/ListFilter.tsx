@@ -173,19 +173,6 @@ export default function ListFilter(props: any) {
     setFilterState(filterData);
   };
 
-  // const handleChange = (option: any) => {
-  //   const { name } = option;
-  //   let { value } = option;
-
-  //   if (value === "--") {
-  //     value = "";
-  //   }
-  //   const filterData: any = { ...filterState };
-  //   filterData[name] = value;
-
-  //   setFilterState(filterData);
-  // };
-
   const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
     setFilterState({
       ...filterState,
@@ -400,7 +387,7 @@ export default function ListFilter(props: any) {
           <FieldLabel>{`${t("is")} ${kasp_string}`}</FieldLabel>
           <SelectFormField
             name="is_kasp"
-            id="is_kasp"
+            id="is-kasp"
             placeholder="Show all"
             value={filterState.is_kasp}
             options={["yes", "no"]}
@@ -416,7 +403,7 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("is_upshift_case")}</FieldLabel>
         <SelectFormField
           name="is_up_shift"
-          id="is_up_shift"
+          id="is-up-shift"
           placeholder="Show all"
           value={filterState.is_up_shift}
           options={["yes", "no"]}
@@ -431,7 +418,7 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("disease_status")}</FieldLabel>
         <SelectFormField
           name="disease_status"
-          id="disease_status"
+          id="disease-status"
           placeholder="Show all"
           value={filterState.disease_status}
           options={DISEASE_STATUS}
@@ -446,7 +433,7 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("is_antenatal")}</FieldLabel>
         <SelectFormField
           name="is_antenatal"
-          id="is_antenatal"
+          id="is-antenatal"
           placeholder="Show all"
           value={filterState.is_antenatal}
           options={["yes", "no"]}
@@ -461,7 +448,7 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("breathlessness_level")}</FieldLabel>
         <SelectFormField
           name="breathlessness_level"
-          id="breathlessness_level"
+          id="breathlessness-level"
           placeholder="Show all"
           value={filterState.breathlessness_level}
           options={BREATHLESSNESS_LEVEL}
