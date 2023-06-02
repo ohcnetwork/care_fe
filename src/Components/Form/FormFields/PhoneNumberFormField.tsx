@@ -22,19 +22,21 @@ interface Props extends FormFieldBaseProps<string> {
 export default function PhoneNumberFormField(props: Props) {
   const field = useFormFieldPropsResolver(props as any);
 
-  const { asYouType, setValue } = useMemo(() => {
+  const asYouType = useMemo(() => {
     const asYouType = new AsYouType();
 
-    const setValue = (value: string) => {
-      asYouType.reset();
-      asYouType.input(value);
-      field.handleChange(asYouType.getNumberValue());
-    };
+    asYouType.reset();
+    asYouType.input(field.value || "+91");
+    field.handleChange(asYouType.getNumberValue());
 
-    setValue(field.value || "+91");
-
-    return { asYouType, setValue };
+    return asYouType;
   }, []);
+
+  const setValue = (value: string) => {
+    asYouType.reset();
+    asYouType.input(value);
+    field.handleChange(asYouType.getNumberValue());
+  };
 
   return (
     <FormField field={field}>
