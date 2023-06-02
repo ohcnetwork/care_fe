@@ -34,8 +34,7 @@ export default function PhoneNumberFormField(props: Props) {
 
   const setValue = (value: string) => {
     asYouType.reset();
-    asYouType.input(value);
-    field.handleChange(asYouType.getNumberValue());
+    field.handleChange(asYouType.input(value));
   };
 
   return (
@@ -53,7 +52,7 @@ export default function PhoneNumberFormField(props: Props) {
           )}
           maxLength={field.value?.startsWith("1800") ? 11 : 15}
           placeholder={props.placeholder}
-          value={asYouType.getNumberValue()}
+          value={field.value}
           onChange={(e) => setValue(e.target.value)}
         />
         {!props.disableCountry && (
@@ -71,8 +70,8 @@ export default function PhoneNumberFormField(props: Props) {
                 (field.value?.startsWith("1800") ? "1800" : "Other")
               }
               onChange={(e) => {
-                if (e.target.value === "Other") return setValue("");
                 if (e.target.value === "1800") return setValue("1800");
+                if (e.target.value === "Other") return setValue("");
                 setValue(conditionPhoneCode(phoneCodes[e.target.value].code));
               }}
             >
