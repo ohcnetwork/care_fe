@@ -167,11 +167,11 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       <form className="bg-white rounded shadow p-8" onSubmit={handleSubmit}>
         <div className="grid gap-x-4 grid-cols-1 lg:grid-cols-2">
           <TextFormField
+            value={middlewareHostname}
+            onChange={({ value }) => setMiddlewareHostname(value)}
             name="middleware_hostname"
             label="Hospital Middleware Hostname"
             autoComplete="off"
-            value={middlewareHostname}
-            onChange={({ value }) => setMiddlewareHostname(value)}
             required
           />
           <TextFormField
