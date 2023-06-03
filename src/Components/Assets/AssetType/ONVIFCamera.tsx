@@ -156,6 +156,10 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     setLoadingAddPreset(false);
   };
 
+  const handleCameraAddressBlur = () => {
+    setIpAddressError("");
+  };
+
   if (isLoading) return <Loading />;
 
   return (
@@ -176,6 +180,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             autoComplete="off"
             value={cameraAddress}
             onChange={({ value }) => setCameraAddress(value)}
+            onBlur={handleCameraAddressBlur} // Add onBlur event handler
             error={ipAddressError}
             required
           />
