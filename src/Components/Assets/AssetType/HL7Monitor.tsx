@@ -59,7 +59,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
       const data = {
         meta: {
           asset_type: assetType,
-          middleware_hostname: middlewareHostname, // TODO: remove this infavour of facility.middleware_address
+          middleware_hostname: middlewareHostname, // TODO: remove this in favor of facility.middleware_address
           local_ip_address: localipAddress,
         },
       };
@@ -94,6 +94,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                   label="Middleware Hostname"
                   value={middlewareHostname}
                   onChange={(e) => setMiddlewareHostname(e.value)}
+                  required // Added required attribute
                 />
                 <TextFormField
                   name="localipAddress"
@@ -125,4 +126,5 @@ const HL7Monitor = (props: HL7MonitorProps) => {
     </>
   );
 };
+
 export default HL7Monitor;
