@@ -40,6 +40,8 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import { celciusToFahrenheit, fahrenheitToCelcius } from "../../Utils/utils";
+import { getTemperaturePreference } from "../Common/utils/DevicePreference";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -153,6 +155,11 @@ export const DailyRounds = (props: any) => {
                   (i) => i.text === res.data.patient_category
                 )?.id || "Comfort"
               : "Comfort",
+            tempInCelcius: getTemperaturePreference() === "C" ? true : false,
+            temperature:
+              getTemperaturePreference() === "C"
+                ? fahrenheitToCelcius(res.data.temperature)
+                : res.data.temperature,
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
           };
           dispatch({ type: "set_form", form: data });
@@ -227,16 +234,6 @@ export const DailyRounds = (props: any) => {
     });
     dispatch({ type: "set_error", errors });
     return !invalidForm;
-  };
-
-  const fahrenheitToCelcius = (x: any) => {
-    const t = (Number(x) - 32.0) * (5.0 / 9.0);
-    return String(t.toFixed(1));
-  };
-
-  const celciusToFahrenheit = (x: any) => {
-    const t = (Number(x) * 9.0) / 5.0 + 32.0;
-    return String(t.toFixed(1));
   };
 
   const calculateMAP = (systolic: any, diastolic: any) => {
@@ -491,6 +488,17 @@ export const DailyRounds = (props: any) => {
     form.tempInCelcius = !isCelcius;
     dispatch({ type: "set_form", form });
   };
+
+  function handleLocalTemperatureChange(e: any) {
+    if (e.key === "temperature") {
+      if (e.oldValue === "C" && e.newValue === "F") {
+        toggleTemperature();
+      } else if (e.oldValue === "F" && e.newValue === "C") {
+        toggleTemperature();
+      }
+    }
+  }
+  window.addEventListener("storage", handleLocalTemperatureChange);
 
   if (isLoading) {
     return <Loading />;

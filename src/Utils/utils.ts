@@ -224,3 +224,13 @@ export const formatCurrency = (price: number) =>
     style: "currency",
     currency: "INR",
   });
+
+export const fahrenheitToCelcius = (x: any) => {
+  const t = (Number(x) - 32.0) * (5.0 / 9.0);
+  return String(t.toFixed(1));
+};
+
+export const celciusToFahrenheit = (x: any) => {
+  const t = (Number(x) * 9.0) / 5.0 + 32.0;
+  return String(t.toFixed(1));
+};
