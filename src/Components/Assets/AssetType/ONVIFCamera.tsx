@@ -31,7 +31,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [facilityMiddlewareHostname, setFacilityMiddlewareHostname] =
     useState("");
   const [cameraAddress, setCameraAddress] = useState("");
-  const [ipadrdress_error, setIpAddress_error] = useState("");
+  const [ipAddressError, setIpAddressError] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [streamUuid, setStreamUuid] = useState("");
@@ -71,20 +71,34 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
 
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
-    if (checkIfValidIP(cameraAddress)) {
-      setLoadingSetConfiguration(true);
-      setIpAddress_error("");
-      const data = {
-        meta: {
-          asset_type: "CAMERA",
-          middleware_hostname: middlewareHostname, // TODO: remove this infavour of facility.middleware_address
-          local_ip_address: cameraAddress,
-          camera_access_key: `${username}:${password}:${streamUuid}`,
-        },
-      };
-      const res: any = await Promise.resolve(
-        dispatch(partialUpdateAsset(assetId, data))
-      );
+    if (
+      middlewareHostname.trim() === "" ||
+      cameraAddress.trim() === "" ||
+      username.trim() === "" ||
+      password.trim() === "" ||
+      streamUuid.trim() === ""
+    ) {
+      Notification.Error({
+        msg: "Please fill in all the required fields!",
+      });
+      return;
+    }
+    if (!checkIfValidIP(cameraAddress)) {
+      setIpAddressError("Please enter a valid Camera address!");
+      return;
+    }
+    setLoadingSetConfiguration(true);
+    setIpAddressError("");
+    const data = {
+      meta: {
+        asset_type: "CAMERA",
+        middleware_hostname: middlewareHostname,
+        local_ip_address: cameraAddress,
+        camera_access_key: `${username}:${password}:${streamUuid}`,
+      },
+    };
+    try {
+      const res: any = await dispatch(partialUpdateAsset(assetId, data));
       if (res?.status === 200) {
         Notification.Success({
           msg: "Asset Configured Successfully",
@@ -92,13 +106,15 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         window.location.reload();
       } else {
         Notification.Error({
-          msg: "Something went wrong..!",
+          msg: "Something went wrong!",
         });
       }
-      setLoadingSetConfiguration(false);
-    } else {
-      setIpAddress_error("Please Enter a Valid Camera address !!");
+    } catch (error) {
+      Notification.Error({
+        msg: "Something went wrong!",
+      });
     }
+    setLoadingSetConfiguration(false);
   };
 
   const addPreset = async (e: SyntheticEvent) => {
@@ -113,13 +129,11 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       const presetData = await axios.get(
         `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
       );
-      const res: any = await Promise.resolve(
-        dispatch(
-          createAssetBed(
-            { meta: { ...data, ...presetData.data } },
-            assetId,
-            bed?.id as string
-          )
+      const res: any = await dispatch(
+        createAssetBed(
+          { meta: { ...data, ...presetData.data } },
+          assetId,
+          bed?.id as string
         )
       );
       if (res?.status === 201) {
@@ -131,12 +145,12 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         setRefreshPresetsHash(Number(new Date()));
       } else {
         Notification.Error({
-          msg: "Something went wrong..!",
+          msg: "Something went wrong!",
         });
       }
     } catch (e) {
       Notification.Error({
-        msg: "Something went wrong..!",
+        msg: "Something went wrong!",
       });
     }
     setLoadingAddPreset(false);
@@ -154,6 +168,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             autoComplete="off"
             value={middlewareHostname}
             onChange={({ value }) => setMiddlewareHostname(value)}
+            required
           />
           <TextFormField
             name="camera_address"
@@ -161,7 +176,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             autoComplete="off"
             value={cameraAddress}
             onChange={({ value }) => setCameraAddress(value)}
-            error={ipadrdress_error}
+            error={ipAddressError}
+            required
           />
           <TextFormField
             name="username"
@@ -169,6 +185,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             autoComplete="off"
             value={username}
             onChange={({ value }) => setUsername(value)}
+            required
           />
           <TextFormField
             name="password"
@@ -177,6 +194,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             type="password"
             value={password}
             onChange={({ value }) => setPassword(value)}
+            required
           />
           <TextFormField
             name="stream_uuid"
@@ -187,6 +205,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             className="tracking-widest"
             labelClassName="tracking-normal"
             onChange={({ value }) => setStreamUuid(value)}
+            required
           />
         </div>
         <div className="flex justify-end">
@@ -214,4 +233,5 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     </div>
   );
 };
+
 export default ONVIFCamera;
