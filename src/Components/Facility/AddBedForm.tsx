@@ -181,16 +181,9 @@ export const AddBedForm = (props: BedFormProps) => {
                     <SelectFormField
                       id="bed-type"
                       name="bed_type"
-                      placeholder=""
                       label="Bed Type"
                       required
-                      options={[
-                        {
-                          id: "",
-                          name: "Select",
-                        },
-                        ...LOCATION_BED_TYPES,
-                      ]}
+                      options={LOCATION_BED_TYPES}
                       optionValue={(bedType) => bedType.id}
                       optionLabel={(bed) => bed.name}
                       value={bedType}
