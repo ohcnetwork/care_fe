@@ -511,7 +511,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             clickAction={() => cameraPTZ[4].callback()}
           />
         </div>
-        <div className="absolute bottom-8 right-8 grid grid-rows-3 grid-flow-col gap-1 z-10">
+        <div className="absolute bottom-8 left-8 grid grid-rows-3 grid-flow-col gap-1 z-10">
           {[
             false,
             cameraPTZ[2],
