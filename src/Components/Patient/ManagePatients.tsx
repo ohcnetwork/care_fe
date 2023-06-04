@@ -749,7 +749,9 @@ export const PatientManager = () => {
             }}
           >
             <CareIcon className="care-l-plus text-lg" />
-            <p className="lg:my-[2px]">Add Patient Details</p>
+            <p id="add-patient-div" className="lg:my-[2px]">
+              Add Patient Details
+            </p>
           </ButtonV2>
           <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
           <SortDropdownMenu
