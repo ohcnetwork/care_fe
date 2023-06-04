@@ -1,4 +1,4 @@
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 
 const username = "devdistrictadmin";
 const password = "Coronasafe@123";
@@ -120,6 +120,13 @@ describe("Patient Creation", () => {
       "PAZHAMTHOTTAM"
     );
     cy.get("[data-testid=pincode] input").should("have.value", "159015");
+    cy.get("button").get("[data-testid=submit-button]").click();
+    cy.url().should("include", "/patient");
+    cy.url().then((url) => {
+      cy.log(url);
+      patient_url = url.split("/").slice(0, -1).join("/");
+      cy.log(patient_url);
+    });
   });
 
   afterEach(() => {
