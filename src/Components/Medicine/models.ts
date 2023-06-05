@@ -2,7 +2,7 @@ import { PerformedByModel } from "../HCX/misc";
 
 interface BasePrescription {
   readonly id?: string;
-  medicine: string;
+  medicine: MedibaseMedicine;
   route?: "ORAL" | "IV" | "IM" | "SC";
   dosage: string;
   notes?: string;
@@ -55,4 +55,15 @@ export type MedicineAdministrationRecord = {
   readonly administered_date?: string;
   readonly created_date?: string;
   readonly modified_date?: string;
+};
+
+export type MedibaseMedicine = {
+  id: string;
+  name: string;
+  type: "brand" | "generic";
+  company?: string;
+  contents: string;
+  cims_class: string;
+  atc_classification?: string;
+  generic?: string;
 };

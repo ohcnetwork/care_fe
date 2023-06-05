@@ -9,12 +9,9 @@ import { MedicineAdministrationRecord, Prescription } from "./models";
 import { PrescriptionActions } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import medicines_list from "../Common/prescription-builder/assets/medicines.json";
 import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
 import { useTranslation } from "react-i18next";
-
-export const medicines = medicines_list;
+import MedibaseAutocompleteFormField from "./MedibaseAutocompleteFormField";
 
 const prescriptionFormContext = createFormContext<Prescription>();
 
@@ -57,13 +54,10 @@ export default function CreatePrescriptionForm(props: {
     >
       {(field) => (
         <>
-          <AutocompleteFormField
+          <MedibaseAutocompleteFormField
             label={t("medicine")}
             {...field("medicine", RequiredFieldValidator())}
             required
-            options={medicines}
-            optionLabel={(medicine) => medicine}
-            optionValue={(medicine) => medicine}
           />
           <div className="flex gap-4 items-center">
             <SelectFormField
