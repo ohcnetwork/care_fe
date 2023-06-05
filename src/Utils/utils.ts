@@ -225,12 +225,12 @@ export const formatCurrency = (price: number) =>
     currency: "INR",
   });
 
-export const fahrenheitToCelcius = (x: any) => {
-  const t = (Number(x) - 32.0) * (5.0 / 9.0);
+export const fahrenheitToCelsius = (x: number) => {
+  const t = (x - 32.0) * (5.0 / 9.0);
   return String(t.toFixed(1));
 };
 
-export const celciusToFahrenheit = (x: any) => {
-  const t = (Number(x) * 9.0) / 5.0 + 32.0;
+export const celsiusToFahrenheit = (x: number) => {
+  const t = (x * 9.0) / 5.0 + 32.0;
   return String(t.toFixed(1));
 };

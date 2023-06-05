@@ -2,12 +2,14 @@ import { Button } from "@material-ui/core";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import moment from "moment";
-import React, { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { CURRENT_HEALTH_CHANGE, SYMPTOM_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DailyRoundsModel } from "./models";
+import { getTemperaturePreference } from "../Common/utils/DevicePreference";
+import { celsiusToFahrenheit, fahrenheitToCelsius } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
@@ -19,6 +21,9 @@ export const DailyRoundListDetails = (props: any) => {
   const [dailyRoundListDetailsData, setDailyRoundListDetails] =
     useState<DailyRoundsModel>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [temperatureUnit, setTemperatureUnit] = useState(
+    getTemperaturePreference()
+  );
 
   const fetchpatient = useCallback(
     async (status: statusType) => {
@@ -35,7 +40,9 @@ export const DailyRoundListDetails = (props: any) => {
           const data: DailyRoundsModel = {
             ...res.data,
             temperature: Number(res.data.temperature)
-              ? res.data.temperature
+              ? temperatureUnit === "C"
+                ? fahrenheitToCelsius(Number(res.data.temperature))
+                : res.data.temperature
               : "",
             additional_symptoms_text: "",
             medication_given:
@@ -71,6 +78,36 @@ export const DailyRoundListDetails = (props: any) => {
     },
     [dispatch, fetchpatient]
   );
+
+  const toggleTemperatureOnLocalChange = () => {
+    const isCelcius = temperatureUnit === "C" ? true : false;
+    const temp = dailyRoundListDetailsData.temperature;
+
+    const data = { ...dailyRoundListDetailsData };
+    data.temperature = isCelcius
+      ? celsiusToFahrenheit(Number(temp))
+      : fahrenheitToCelsius(Number(temp));
+    setTemperatureUnit(temperatureUnit === "C" ? "F" : "C");
+    setDailyRoundListDetails(data);
+  };
+
+  const handleLocalTemperatureChange = (e: any) => {
+    if (e.key === "temperature") {
+      if (temperatureUnit === "C" && e.newValue === "F") {
+        toggleTemperatureOnLocalChange();
+      }
+      if (temperatureUnit === "F" && e.newValue === "C") {
+        toggleTemperatureOnLocalChange();
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("storage", handleLocalTemperatureChange);
+    return () => {
+      window.removeEventListener("storage", handleLocalTemperatureChange);
+    };
+  }, [dailyRoundListDetailsData.temperature]);
 
   if (isLoading) {
     return <Loading />;
@@ -115,7 +152,8 @@ export const DailyRoundListDetails = (props: any) => {
         <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Temperature: </span>
-            {dailyRoundListDetailsData.temperature || "-"}
+            {`${dailyRoundListDetailsData.temperature} °${temperatureUnit}` ||
+              "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Taken at: </span>

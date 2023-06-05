@@ -40,7 +40,7 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import { celciusToFahrenheit, fahrenheitToCelcius } from "../../Utils/utils";
+import { celsiusToFahrenheit, fahrenheitToCelsius } from "../../Utils/utils";
 import { getTemperaturePreference } from "../Common/utils/DevicePreference";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -64,7 +64,7 @@ const initForm: any = {
   diastolic: null,
   pulse: null,
   resp: null,
-  tempInCelcius: false,
+  tempInCelsius: false,
   temperature: null,
   rhythm: "0",
   rhythm_detail: "",
@@ -155,10 +155,10 @@ export const DailyRounds = (props: any) => {
                   (i) => i.text === res.data.patient_category
                 )?.id || "Comfort"
               : "Comfort",
-            tempInCelcius: getTemperaturePreference() === "C" ? true : false,
+            tempInCelsius: getTemperaturePreference() === "C" ? true : false,
             temperature:
               getTemperaturePreference() === "C"
-                ? fahrenheitToCelcius(res.data.temperature)
+                ? fahrenheitToCelsius(Number(res.data.temperature))
                 : res.data.temperature,
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
           };
@@ -296,8 +296,8 @@ export const DailyRounds = (props: any) => {
                 : undefined,
             pulse: state.form.pulse,
             resp: Number(state.form.resp),
-            temperature: state.form.tempInCelcius
-              ? celciusToFahrenheit(state.form.temperature)
+            temperature: state.form.tempInCelsius
+              ? celsiusToFahrenheit(Number(state.form.temperature))
               : state.form.temperature,
             rhythm: Number(state.form.rhythm) || 0,
             rhythm_detail: state.form.rhythm_detail,
@@ -478,27 +478,32 @@ export const DailyRounds = (props: any) => {
   };
 
   const toggleTemperature = () => {
-    const isCelcius = state.form.tempInCelcius;
+    const isCelsius = state.form.tempInCelsius;
     const temp = state.form.temperature;
 
     const form = { ...state.form };
-    form.temperature = isCelcius
-      ? celciusToFahrenheit(temp)
-      : fahrenheitToCelcius(temp);
-    form.tempInCelcius = !isCelcius;
+    form.temperature = isCelsius
+      ? celsiusToFahrenheit(Number(temp))
+      : fahrenheitToCelsius(Number(temp));
+    form.tempInCelsius = !isCelsius;
     dispatch({ type: "set_form", form });
   };
 
   function handleLocalTemperatureChange(e: any) {
     if (e.key === "temperature") {
-      if (e.oldValue === "C" && e.newValue === "F") {
+      if (e.newValue === "F" && state.form.tempInCelsius) {
         toggleTemperature();
-      } else if (e.oldValue === "F" && e.newValue === "C") {
+      } else if (e.newValue === "C" && !state.form.tempInCelsius) {
         toggleTemperature();
       }
     }
   }
-  window.addEventListener("storage", handleLocalTemperatureChange);
+  useEffect(() => {
+    window.addEventListener("storage", handleLocalTemperatureChange);
+    return () => {
+      window.removeEventListener("storage", handleLocalTemperatureChange);
+    };
+  }, [state.form.temperature]);
 
   if (isLoading) {
     return <Loading />;
@@ -806,7 +811,7 @@ export const DailyRounds = (props: any) => {
                         <div>
                           <FieldLabel className="flex flex-row justify-between">
                             Temperature{" "}
-                            {state.form.tempInCelcius
+                            {state.form.tempInCelsius
                               ? getStatus(
                                   36.4,
                                   "Low",
@@ -830,7 +835,7 @@ export const DailyRounds = (props: any) => {
                                 variant="standard"
                                 value={state.form.temperature}
                                 options={
-                                  state.form.tempInCelcius
+                                  state.form.tempInCelsius
                                     ? generateOptions(35, 41, 0.1, 1)
                                     : generateOptions(95, 106, 0.1, 1)
                                 }
@@ -858,7 +863,7 @@ export const DailyRounds = (props: any) => {
                             >
                               <span className="text-blue-700">
                                 {" "}
-                                {state.form.tempInCelcius ? "C" : "F"}{" "}
+                                {state.form.tempInCelsius ? "C" : "F"}{" "}
                               </span>
                             </div>
                           </div>
