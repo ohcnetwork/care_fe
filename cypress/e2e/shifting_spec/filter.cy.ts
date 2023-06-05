@@ -167,15 +167,27 @@ describe("Shifting section filter", () => {
   });
 
   it("filter by created date", () => {
-    cy.get("[name='created_date_after']").type("22/05/2020");
-    cy.get("[name='created_date_before']").type("09/09/2021");
+    cy.contains("Created Date")
+      .parent()
+      .within(() => {
+        cy.get("input[placeholder='Start date']").click();
+        cy.contains("1").click();
+        cy.get("input[placeholder='End date']").click();
+        cy.contains("21").click();
+      });
     cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
     cy.contains("Apply").click().wait("@shifting_filter");
   });
 
   it("filter by modified date", () => {
-    cy.get("[name='modified_date_after']").type("22/05/2020");
-    cy.get("[name='modified_date_before']").type("09/09/2021");
+    cy.contains("Modified Date")
+      .parent()
+      .within(() => {
+        cy.get("input[placeholder='Start date']").click();
+        cy.contains("1").click();
+        cy.get("input[placeholder='End date']").click();
+        cy.contains("21").click();
+      });
     cy.intercept(/\/api\/v1\/shift/).as("shifting_filter");
     cy.contains("Apply").click().wait("@shifting_filter");
   });

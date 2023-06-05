@@ -3,7 +3,7 @@ import {
   DISEASE_STATUS,
   SHIFTING_FILTER_ORDER,
 } from "../../Common/constants";
-import { DateRangePicker, getDate } from "../Common/DateRangePicker";
+import { DateRange } from "../Common/DateRangeInputV2";
 import React, { useEffect, useState } from "react";
 import {
   SHIFTING_CHOICES_PEACETIME,
@@ -14,6 +14,7 @@ import CircularProgress from "../Common/components/CircularProgress";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
@@ -49,6 +50,9 @@ const clearFilterState = {
   is_antenatal: "",
   breathlessness_level: "",
 };
+
+const getDate = (value: any) =>
+  value && moment(value).isValid() && moment(value).toDate();
 
 export default function ListFilter(props: any) {
   const { kasp_enabled, kasp_string, wartime_shifting } = useConfig();
@@ -236,15 +240,10 @@ export default function ListFilter(props: any) {
     onChange(data);
   };
 
-  const handleDateRangeChange = (
-    startDateId: string,
-    endDateId: string,
-    { startDate, endDate }: any
-  ) => {
+  const handleDateRangeChange = (event: FieldChangeEvent<DateRange>) => {
     const filterData: any = { ...filterState };
-    filterData[startDateId] = startDate?.toString();
-    filterData[endDateId] = endDate?.toString();
-
+    filterData[`${event.name}_after`] = event.value.start?.toString();
+    filterData[`${event.name}_before`] = event.value.end?.toString();
     setFilterState(filterData);
   };
 
@@ -466,33 +465,33 @@ export default function ListFilter(props: any) {
         onChange={handleFormFieldChange}
         errorClassName="hidden"
       />
+      <div className="w-full grid gap-4 grid-cols-1">
+        <DateRangeFormField
+          labelClassName="text-sm"
+          name="created_date"
+          id="created-date"
+          label={t("created_date")}
+          value={{
+            start: getDate(filterState.created_date_after),
+            end: getDate(filterState.created_date_before),
+          }}
+          onChange={handleDateRangeChange}
+          errorClassName="hidden"
+        />
 
-      <DateRangePicker
-        startDate={getDate(filterState.created_date_after)}
-        endDate={getDate(filterState.created_date_before)}
-        onChange={(e) =>
-          handleDateRangeChange("created_date_after", "created_date_before", e)
-        }
-        endDateId={"created_date_before"}
-        startDateId={"created_date_after"}
-        label={t("created_date")}
-        size="small"
-      />
-      <DateRangePicker
-        startDate={getDate(filterState.modified_date_after)}
-        endDate={getDate(filterState.modified_date_before)}
-        onChange={(e) =>
-          handleDateRangeChange(
-            "modified_date_after",
-            "modified_date_before",
-            e
-          )
-        }
-        endDateId={"modified_date_before"}
-        startDateId={"modified_date_after"}
-        label={t("modified_date")}
-        size="small"
-      />
+        <DateRangeFormField
+          labelClassName="text-sm"
+          name="modified_date"
+          id="modified-date"
+          label={t("modified_date")}
+          value={{
+            start: getDate(filterState.modified_date_after),
+            end: getDate(filterState.modified_date_before),
+          }}
+          onChange={handleDateRangeChange}
+          errorClassName="hidden"
+        />
+      </div>
     </FiltersSlideover>
   );
 }
