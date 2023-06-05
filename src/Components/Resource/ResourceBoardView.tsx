@@ -14,6 +14,7 @@ import SwitchTabs from "../Common/components/SwitchTabs";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -67,7 +68,7 @@ export default function BoardView() {
           />
           <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 w-full lg:w-fit lg:mr-4">
             <ButtonV2 className="py-[11px]" onClick={onListViewBtnClick}>
-              <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
+              <CareIcon className="care-l-list-ul" />
               {t("list_view")}
             </ButtonV2>
             <AdvancedFilterButton

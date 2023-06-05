@@ -22,6 +22,7 @@ import { useDispatch, useSelector } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -310,10 +311,7 @@ export default function ListView() {
                 navigate("/shifting/board-view", { query: qParams })
               }
             >
-              <i
-                className="fa fa-list mr-1 transform rotate-90"
-                aria-hidden="true"
-              ></i>
+              <CareIcon className="care-l-list-ul transform rotate-90" />
               {t("board_view")}
             </ButtonV2>
 

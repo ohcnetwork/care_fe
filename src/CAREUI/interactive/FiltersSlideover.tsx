@@ -55,7 +55,7 @@ export const AdvancedFilterButton = ({ onClick }: { onClick: () => void }) => {
       className="bg-white w-full sm:w-auto"
       onClick={onClick}
     >
-      <i className="fa fa-filter" aria-hidden="true"></i>
+      <CareIcon className="care-l-filter" />
       <span className="py-0.5">{t("advanced_filters")}</span>
     </ButtonV2>
   );

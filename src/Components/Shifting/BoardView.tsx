@@ -20,6 +20,7 @@ import withScrolling from "react-dnd-scrolling";
 import ButtonV2 from "../Common/components/ButtonV2";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -98,7 +99,7 @@ export default function BoardView() {
                 navigate("/shifting/list-view", { query: qParams })
               }
             >
-              <i className="fa fa-list-ul mr-1" aria-hidden="true"></i>
+              <CareIcon className="care-l-list-ul" />
               {t("list_view")}
             </ButtonV2>
             <AdvancedFilterButton

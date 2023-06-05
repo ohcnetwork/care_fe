@@ -16,6 +16,7 @@ import { ExportButton } from "../Common/Export";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -205,10 +206,7 @@ export default function ListView() {
         <div className="w-32" />
         <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 w-full lg:w-fit">
           <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
-            <i
-              className="fa fa-list mr-1 transform rotate-90"
-              aria-hidden="true"
-            ></i>
+            <CareIcon className="care-l-list-ul transform rotate-90" />
             {t("board_view")}
           </ButtonV2>
 
