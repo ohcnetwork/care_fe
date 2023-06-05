@@ -137,6 +137,26 @@ describe("Patient Creation with consultation", () => {
     cy.get("#consultation_notes").click().type("generalnote");
     cy.get("#verified_by").click().type("generalnote");
     cy.get("#submit").click();
+    // Below code for the prescription module only present while creating a new consultation
+    cy.contains("button", "Add Prescription Medication")
+      .should("be.visible")
+      .click();
+    cy.wait(1000);
+    cy.get("div#medicine input[placeholder='Select'][role='combobox']")
+      .click()
+      .type("paracet");
+    cy.get("div#medicine [role='option']")
+      .contains("PARACETAMOL TAB IP ,500 mg.")
+      .should("be.visible")
+      .click();
+    cy.get("#dosage").click().type("3");
+    cy.get("#frequency")
+      .click()
+      .then(() => {
+        cy.get("div#frequency [role='option']").contains("Twice daily").click();
+      });
+    cy.get("button#submit").should("be.visible").click();
+    cy.get("[data-testid='return-to-patient-dashboard']").click();
   });
   afterEach(() => {
     cy.saveLocalStorage();
