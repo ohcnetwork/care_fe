@@ -85,7 +85,7 @@ export default function PrescriptionDetailCard({
 
         <div className="grid grid-cols-9 gap-2 items-center mt-2">
           <Detail className="col-span-9 md:col-span-5" label={t("medicine")}>
-            {prescription.medicine}
+            {prescription.medicine.name}
           </Detail>
           <Detail className="col-span-5 md:col-span-2" label={t("route")}>
             {prescription.route &&
