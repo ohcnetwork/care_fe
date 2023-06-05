@@ -27,8 +27,8 @@ export default function useExport() {
     const date = d.toLocaleDateString();
     const time = d.toLocaleTimeString();
 
-    return date+"_"+time;
-}
+    return date + "_" + time;
+  };
 
   const exportCSV = async (
     filenamePrefix: string,
