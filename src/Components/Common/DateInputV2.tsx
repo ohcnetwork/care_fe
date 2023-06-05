@@ -1,23 +1,25 @@
-import { useState, useEffect, MutableRefObject } from "react";
+import { MutableRefObject, useEffect, useState } from "react";
 import {
-  format,
-  subMonths,
   addMonths,
-  subYears,
   addYears,
-  isEqual,
-  getDaysInMonth,
+  format,
   getDay,
+  getDaysInMonth,
+  isEqual,
+  subMonths,
+  subYears,
 } from "date-fns";
+
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Popover } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
 
 type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
 
 interface Props {
   id?: string;
+  name?: string;
   className?: string;
   value: Date | undefined;
   min?: Date;
@@ -34,6 +36,7 @@ const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 
 const DateInputV2: React.FC<Props> = ({
   id,
+  name,
   className,
   value,
   min,
@@ -215,6 +218,7 @@ const DateInputV2: React.FC<Props> = ({
                 <input type="hidden" name="date" />
                 <input
                   id={id}
+                  name={name}
                   type="text"
                   readOnly
                   disabled={disabled}

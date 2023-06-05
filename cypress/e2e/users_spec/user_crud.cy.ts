@@ -187,9 +187,6 @@ describe("Edit Profile Testing", () => {
 
   it("Invalid Whatsapp Number of " + username, () => {
     const whatsapp_num = "11111-11111";
-
-    cy.get(".flag-dropdown").last().find(".arrow").click();
-    cy.get("li[data-flag-key='flag_no_84']").click();
     cy.get("[placeholder='WhatsApp Number']")
       .focus()
       .type(`${backspace}${whatsapp_num}`)
@@ -207,9 +204,6 @@ describe("Edit Profile Testing", () => {
 
   it("Valid Whatsapp Number of " + username, () => {
     const whatsapp_num = "91111-11111";
-
-    cy.get(".flag-dropdown").last().find(".arrow").click();
-    cy.get("li[data-flag-key='flag_no_84']").click();
     cy.get("[placeholder='WhatsApp Number']")
       .focus()
       .type(`${backspace}${whatsapp_num}`)
@@ -227,9 +221,6 @@ describe("Edit Profile Testing", () => {
 
   it("Invalid Phone Number of " + username, () => {
     const phone_num = "11111-11111";
-
-    cy.get(".flag-dropdown").first().find(".arrow").click();
-    cy.get("li[data-flag-key='flag_no_84']").click();
     cy.get("[placeholder='Phone Number']")
       .focus()
       .type(`${backspace}${phone_num}`)
@@ -247,9 +238,6 @@ describe("Edit Profile Testing", () => {
 
   it("Valid Phone Number of " + username, () => {
     const phone_num = "99999-99999";
-
-    cy.get(".flag-dropdown").first().find(".arrow").click();
-    cy.get("li[data-flag-key='flag_no_84']").click();
     cy.get("[placeholder='Phone Number']")
       .focus()
       .type(`${backspace}${phone_num}`)
