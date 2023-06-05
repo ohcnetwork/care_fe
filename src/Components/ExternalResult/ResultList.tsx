@@ -286,10 +286,13 @@ export default function ResultList() {
               />
             </div>
           </div>
+          <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+          </div>
         </div>
-        <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
-          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
-        </div>
+
         <FilterBadges
           badges={({ badge, phoneNumber, dateRange }) => [
             badge("Name", "name"),
