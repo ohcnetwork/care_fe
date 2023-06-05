@@ -158,7 +158,7 @@ export const DailyRounds = (props: any) => {
             tempInCelsius: getTemperaturePreference() === "C" ? true : false,
             temperature:
               getTemperaturePreference() === "C"
-                ? fahrenheitToCelsius(Number(res.data.temperature))
+                ? fahrenheitToCelsius(res.data.temperature)
                 : res.data.temperature,
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
           };
@@ -297,7 +297,7 @@ export const DailyRounds = (props: any) => {
             pulse: state.form.pulse,
             resp: Number(state.form.resp),
             temperature: state.form.tempInCelsius
-              ? celsiusToFahrenheit(Number(state.form.temperature))
+              ? celsiusToFahrenheit(state.form.temperature)
               : state.form.temperature,
             rhythm: Number(state.form.rhythm) || 0,
             rhythm_detail: state.form.rhythm_detail,
@@ -483,8 +483,8 @@ export const DailyRounds = (props: any) => {
 
     const form = { ...state.form };
     form.temperature = isCelsius
-      ? celsiusToFahrenheit(Number(temp))
-      : fahrenheitToCelsius(Number(temp));
+      ? celsiusToFahrenheit(temp)
+      : fahrenheitToCelsius(temp);
     form.tempInCelsius = !isCelsius;
     dispatch({ type: "set_form", form });
   };

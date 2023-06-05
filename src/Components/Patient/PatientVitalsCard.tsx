@@ -1,11 +1,17 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listAssetBeds, getPermittedFacility } from "../../Redux/actions";
-import { classNames } from "../../Utils/utils";
+import {
+  celsiusToFahrenheit,
+  classNames,
+  fahrenheitToCelsius,
+} from "../../Utils/utils";
 import { AssetData } from "../Assets/AssetTypes";
 import ToolTip from "../Common/utils/Tooltip";
 import { PatientModel } from "./models";
 import Waveform, { WaveformType } from "./Waveform";
+import { getTemperaturePreference } from "../Common/utils/DevicePreference";
+import { fahrenheitToCelcius } from "../CriticalCareRecording/HemodynamicParameters/CriticalCare__HemodynamicParametersEditor.bs";
 
 export interface IPatientVitalsCardProps {
   facilityId?: string;
@@ -48,6 +54,68 @@ export default function PatientVitalsCard({
   const [wsUrl, setWsUrl] = useState("");
   const [patientObservations, setPatientObservations] = React.useState<any>();
   const [stats, setStats] = React.useState(false);
+  const [temperatureUnit, setTemperatureUnit] = useState(
+    getTemperaturePreference()
+  );
+
+  const initialTemperature = () => {
+    if (patient?.last_consultation?.last_daily_round?.temperature) {
+      patient = {
+        ...patient,
+        last_consultation: {
+          ...patient?.last_consultation,
+          last_daily_round: {
+            ...patient?.last_consultation?.last_daily_round,
+            temperature:
+              temperatureUnit === "F"
+                ? patient?.last_consultation?.last_daily_round?.temperature
+                : fahrenheitToCelcius(
+                    patient?.last_consultation?.last_daily_round?.temperature
+                  ),
+          },
+        },
+      };
+    }
+  };
+  initialTemperature();
+
+  const handleTemperatureChange = (change: "C->F" | "F->C") => {
+    if (patient?.last_consultation?.last_daily_round?.temperature) {
+      patient = {
+        ...patient,
+        last_consultation: {
+          ...patient?.last_consultation,
+          last_daily_round: {
+            ...patient?.last_consultation?.last_daily_round,
+            temperature:
+              change === "C->F"
+                ? celsiusToFahrenheit(
+                    patient?.last_consultation?.last_daily_round?.temperature
+                  )
+                : fahrenheitToCelsius(
+                    patient?.last_consultation?.last_daily_round?.temperature
+                  ),
+          },
+        },
+      };
+    }
+  };
+
+  useEffect(() => {
+    function handleLocalTemperatureChange(e: any) {
+      if (e.key === "temperature") {
+        if (temperatureUnit === "C" && e.newValue === "F")
+          handleTemperatureChange("C->F");
+        else if (temperatureUnit === "F" && e.newValue === "C")
+          handleTemperatureChange("F->C");
+        setTemperatureUnit(e.newValue);
+      }
+    }
+    window.addEventListener("storage", handleLocalTemperatureChange);
+    return () => {
+      window.removeEventListener("storage", handleLocalTemperatureChange);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -179,7 +247,9 @@ export default function PatientVitalsCard({
       //waveformDefaultSpace: true
     },
     {
-      label: shrinked ? "Temp. (°F)" : "Temperature (°F)",
+      label: shrinked
+        ? `Temp. (°${temperatureUnit})`
+        : `Temperature (°${temperatureUnit})`,
       liveKey: "body-temperature1",
       vitalKey: "temperature",
     },

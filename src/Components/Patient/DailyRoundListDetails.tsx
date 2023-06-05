@@ -21,9 +21,6 @@ export const DailyRoundListDetails = (props: any) => {
   const [dailyRoundListDetailsData, setDailyRoundListDetails] =
     useState<DailyRoundsModel>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [temperatureUnit, setTemperatureUnit] = useState(
-    getTemperaturePreference()
-  );
 
   const fetchpatient = useCallback(
     async (status: statusType) => {
@@ -40,10 +37,11 @@ export const DailyRoundListDetails = (props: any) => {
           const data: DailyRoundsModel = {
             ...res.data,
             temperature: Number(res.data.temperature)
-              ? temperatureUnit === "C"
-                ? fahrenheitToCelsius(Number(res.data.temperature))
-                : res.data.temperature
+              ? getTemperaturePreference() === "F"
+                ? res.data.temperature
+                : fahrenheitToCelsius(Number(res.data.temperature))
               : "",
+            temperatureUnit: getTemperaturePreference(),
             additional_symptoms_text: "",
             medication_given:
               Object.keys(res.data.medication_given).length === 0
@@ -80,23 +78,30 @@ export const DailyRoundListDetails = (props: any) => {
   );
 
   const toggleTemperatureOnLocalChange = () => {
-    const isCelcius = temperatureUnit === "C" ? true : false;
+    const isCelcius =
+      dailyRoundListDetailsData.temperatureUnit === "C" ? true : false;
     const temp = dailyRoundListDetailsData.temperature;
 
     const data = { ...dailyRoundListDetailsData };
     data.temperature = isCelcius
-      ? celsiusToFahrenheit(Number(temp))
-      : fahrenheitToCelsius(Number(temp));
-    setTemperatureUnit(temperatureUnit === "C" ? "F" : "C");
+      ? celsiusToFahrenheit(temp)
+      : fahrenheitToCelsius(temp);
+    data.temperatureUnit = isCelcius ? "F" : "C";
     setDailyRoundListDetails(data);
   };
 
   const handleLocalTemperatureChange = (e: any) => {
     if (e.key === "temperature") {
-      if (temperatureUnit === "C" && e.newValue === "F") {
+      if (
+        dailyRoundListDetailsData.temperatureUnit === "C" &&
+        e.newValue === "F"
+      ) {
         toggleTemperatureOnLocalChange();
       }
-      if (temperatureUnit === "F" && e.newValue === "C") {
+      if (
+        dailyRoundListDetailsData.temperatureUnit === "F" &&
+        e.newValue === "C"
+      ) {
         toggleTemperatureOnLocalChange();
       }
     }
@@ -152,7 +157,7 @@ export const DailyRoundListDetails = (props: any) => {
         <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Temperature: </span>
-            {`${dailyRoundListDetailsData.temperature} °${temperatureUnit}` ||
+            {`${dailyRoundListDetailsData.temperature} °${dailyRoundListDetailsData.temperatureUnit}` ||
               "-"}
           </div>
           <div>
