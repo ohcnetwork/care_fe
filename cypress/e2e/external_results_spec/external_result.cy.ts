@@ -34,7 +34,7 @@ describe("Edit Profile Testing", () => {
     cy.wait("@external_result").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
     });
-    cy.url().should("include", "%2B914738743424");
+    cy.url().should("include", "%2B91+4738+743+42");
   });
 
   it("import", () => {
