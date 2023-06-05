@@ -169,8 +169,8 @@ export const HospitalList = () => {
 
   let facilityList: any[] = [];
   if (data && data.length) {
-    facilityList = data.map((facility: any) => (
-      <FacilityCard facility={facility} userType={userType} />
+    facilityList = data.map((facility: any, index) => (
+      <FacilityCard key={index} facility={facility} userType={userType} />
     ));
   }
 

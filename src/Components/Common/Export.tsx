@@ -47,8 +47,9 @@ export const ExportMenu = ({
         icon={<CareIcon className="care-l-import" />}
         className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500 tooltip"
       >
-        {exportItems.map((item) => (
+        {exportItems.map((item, index) => (
           <DropdownItem
+            key={index}
             onClick={() =>
               exportFile(item.action, item.filePrefix, item.type, item.parse)
             }
