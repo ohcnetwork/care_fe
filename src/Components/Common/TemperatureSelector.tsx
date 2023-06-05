@@ -21,8 +21,12 @@ export const TemperatureSelector = (props: any) => {
       );
     }
   }
-  window.addEventListener("storage", handleLocalTemperatureChange);
-  window.removeEventListener("storage", handleLocalTemperatureChange);
+  useEffect(() => {
+    window.addEventListener("storage", handleLocalTemperatureChange);
+    return () => {
+      window.removeEventListener("storage", handleLocalTemperatureChange);
+    };
+  }, []);
 
   useEffect(() => {
     handleTemperature(temperature);
