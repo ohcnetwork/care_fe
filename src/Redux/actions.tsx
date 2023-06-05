@@ -5,8 +5,6 @@ import {
 } from "../Components/Medicine/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
-import { LocalStorageKeys } from "../Common/constants";
-
 export const getConfig = () => {
   return fireRequestForFiles("config");
 };
@@ -796,6 +794,10 @@ export const editInvestigation = (
 // ICD11
 export const listICD11Diagnosis = (params: object, key: string) => {
   return fireRequest("listICD11Diagnosis", [], params, null, key);
+};
+// Medibase
+export const listMedibaseMedicines = (query: string) => {
+  return fireRequest("listMedibaseMedicines", [], { query });
 };
 
 // Resource
