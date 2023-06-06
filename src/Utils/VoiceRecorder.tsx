@@ -38,7 +38,7 @@ export const VoiceRecorder = (props: any) => {
 
   return (
     <div>
-      <div>
+      <div className="sm:w-full">
         {isRecording ? (
           <>
             <div className="space-x-2 flex">

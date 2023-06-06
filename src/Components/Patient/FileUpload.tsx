@@ -1505,7 +1505,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 InputLabelProps={{ shrink: !!audioName }}
                 value={audioName}
                 disabled={uploadStarted}
-                onChange={(e: any) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   setAudioName(e.target.value);
                 }}
                 errors={audioFileError}
@@ -1514,7 +1514,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 Please allow browser permission before you start speaking
               </div>
               {audiouploadStarted ? (
-                <LinearProgressWithLabel value={uploadPercent} />
+                <LinearProgress variant="determinate" value={uploadPercent} />
               ) : (
                 <div className="flex flex-col lg:flex-row justify-between w-full">
                   {audioBlobExists && (
@@ -1522,9 +1522,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       <ButtonV2
                         variant="danger"
                         className="w-full"
-                        onClick={() => {
-                          deleteAudioBlob();
-                        }}
+                        onClick={deleteAudioBlob}
                       >
                         <CareIcon className="care-l-trash h-4" /> Delete
                       </ButtonV2>
@@ -1538,12 +1536,7 @@ export const FileUpload = (props: FileUploadProps) => {
                   />
                   {audioBlobExists && (
                     <div className="flex items-center w-full md:w-auto">
-                      <ButtonV2
-                        onClick={() => {
-                          handleAudioUpload();
-                        }}
-                        className="w-full"
-                      >
+                      <ButtonV2 onClick={handleAudioUpload} className="w-full">
                         <CareIcon className={"care-l-cloud-upload text-xl"} />
                         Save
                       </ButtonV2>
@@ -1578,7 +1571,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
-                  <div className="flex flex-col md:flex-row gap-2 items-center justify-start md:justify-end">
+                  <div className="flex flex-col md:flex-row gap-2 items-center justify-start md:justify-end w-full">
                     <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
                       {({ isAuthorized }) =>
                         isAuthorized ? (
@@ -1597,18 +1590,23 @@ export const FileUpload = (props: FileUploadProps) => {
                         )
                       }
                     </AuthorizedChild>
-                    <ButtonV2 onClick={() => setModalOpenForCamera(true)}>
-                      <CareIcon className="care-l-camera text-lg mr-2" />
-                      Open Camera
-                    </ButtonV2>
-                    <ButtonV2
-                      authorizeFor={NonReadOnlyUsers}
-                      disabled={!file || !uploadFileName || !isActive}
-                      onClick={() => handleUpload({ status })}
-                    >
-                      <CareIcon className="care-l-cloud-upload text-lg" />
-                      {t("upload")}
-                    </ButtonV2>
+                    <div className="w-min">
+                      <ButtonV2 onClick={() => setModalOpenForCamera(true)}>
+                        <CareIcon className="care-l-camera text-lg mr-2" />
+                        Open Camera
+                      </ButtonV2>
+                    </div>
+
+                    <div>
+                      <ButtonV2
+                        authorizeFor={NonReadOnlyUsers}
+                        disabled={!file || !uploadFileName || !isActive}
+                        onClick={() => handleUpload({ status })}
+                      >
+                        <CareIcon className="care-l-cloud-upload text-lg" />
+                        {t("upload")}
+                      </ButtonV2>
+                    </div>
                   </div>
                 )}
                 {file && (
