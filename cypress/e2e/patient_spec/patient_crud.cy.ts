@@ -48,7 +48,6 @@ describe("Patient Creation with consultation", () => {
     );
     cy.get("[data-testid=permanent-address] input").check();
     cy.get("#pincode").type("682001");
-    cy.wait(2000);
     cy.get("[data-testid=localbody] button")
       .click()
       .then(() => {
@@ -130,7 +129,7 @@ describe("Patient Creation with consultation", () => {
     )
       .click()
       .type("1A");
-    cy.wait(2000);
+    cy.wait(1000);
     cy.get("#icd11_diagnoses_object [role='option']")
       .contains("1A03 Intestinal infections due to Escherichia coli")
       .click();
@@ -141,7 +140,6 @@ describe("Patient Creation with consultation", () => {
     cy.contains("button", "Add Prescription Medication")
       .should("be.visible")
       .click();
-    cy.wait(1000);
     cy.get("div#medicine input[placeholder='Select'][role='combobox']")
       .click()
       .type("paracet");
