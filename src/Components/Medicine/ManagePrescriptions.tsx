@@ -33,7 +33,12 @@ export default function ManagePrescriptions({ consultationId }: Props) {
           </div>
         </div>
         <div className="flex flex-col-reverse md:flex-row gap-3 w-full md:items-center">
-          <ButtonV2 variant="secondary" border onClick={() => goBack()}>
+          <ButtonV2
+            variant="secondary"
+            border
+            onClick={() => goBack()}
+            data-testid="return-to-patient-dashboard"
+          >
             <CareIcon className="care-l-angle-left-b text-lg" />
             {t("return_to_patient_dashboard")}
           </ButtonV2>
