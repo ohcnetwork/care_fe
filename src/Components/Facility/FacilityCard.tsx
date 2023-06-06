@@ -83,7 +83,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
               <div className="px-4 py-4 w-full">
                 <div className="flow-root">
                   {facility.kasp_empanelled && (
-                    <div className="float-right mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
+                    <div className="float-right mt-2 ml-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
                       {kasp_string}
                     </div>
                   )}
