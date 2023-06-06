@@ -1571,7 +1571,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
-                  <div className="flex flex-col md:flex-row gap-2 items-center justify-start md:justify-end w-full">
+                  <div className="flex flex-col md:flex-row gap-2  justify-start md:justify-end w-full">
                     <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
                       {({ isAuthorized }) =>
                         isAuthorized ? (
@@ -1590,7 +1590,7 @@ export const FileUpload = (props: FileUploadProps) => {
                         )
                       }
                     </AuthorizedChild>
-                    <div className="w-min">
+                    <div>
                       <ButtonV2 onClick={() => setModalOpenForCamera(true)}>
                         <CareIcon className="care-l-camera text-lg mr-2" />
                         Open Camera
