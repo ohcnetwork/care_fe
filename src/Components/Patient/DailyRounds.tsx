@@ -1,10 +1,5 @@
-import {
-  CardContent,
-  RadioGroup,
-  Box,
-  FormControlLabel,
-  Radio,
-} from "@material-ui/core";
+import Card from "../../CAREUI/display/Card";
+import RadioFormField from "../Form/FormFields/RadioFormField.js";
 import { navigate } from "raviger";
 import moment from "moment";
 import loadable from "@loadable/component";
@@ -513,7 +508,7 @@ export const DailyRounds = (props: any) => {
       <div className="mt-4">
         <div className="bg-white rounded shadow">
           <form onSubmit={(e) => handleSubmit(e)}>
-            <CardContent>
+            <Card>
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="w-full md:w-1/3">
                   <LegacyDateTimeFiled
@@ -565,29 +560,19 @@ export const DailyRounds = (props: any) => {
               </div>
               {!id && hasPreviousLog && (
                 <div id="clone_last-div" className="mt-4">
-                  <FieldLabel id="clone_last">
-                    Do you want to copy Values from Previous Log?
-                  </FieldLabel>
-                  <RadioGroup
-                    aria-label="clone_last"
+                  <RadioFormField
                     name="clone_last"
+                    label={"Do you want to copy Values from Previous Log?"}
+                    options={[
+                      { label: "Yes", value: "true" },
+                      { label: "No", value: "false" },
+                    ]}
                     value={state.form.clone_last}
                     onChange={handleChange}
-                    style={{ padding: "0px 5px" }}
-                  >
-                    <Box display="flex" flexDirection="row">
-                      <FormControlLabel
-                        value="true"
-                        control={<Radio />}
-                        label="Yes"
-                      />
-                      <FormControlLabel
-                        value="false"
-                        control={<Radio />}
-                        label="No"
-                      />
-                    </Box>
-                  </RadioGroup>
+                    optionDisplay={(option) => option.label}
+                    optionValue={(option) => option.value}
+                    error={state.errors.clone_last}
+                  />
                   <LegacyErrorHelperText error={state.errors.clone_last} />
                 </div>
               )}
@@ -952,7 +937,7 @@ export const DailyRounds = (props: any) => {
                 <Cancel onClick={() => goBack()} />
                 <Submit onClick={(e) => handleSubmit(e)} label={buttonText} />
               </div>
-            </CardContent>
+            </Card>
           </form>
         </div>
       </div>
