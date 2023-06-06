@@ -40,7 +40,7 @@ const App: React.FC = () => {
 
   const updateRefreshToken = () => {
     const refresh = localStorage.getItem(LocalStorageKeys.refreshToken);
-    const access = localStorage.getItem(LocalStorageKeys.accessToken);
+    // const access = localStorage.getItem(LocalStorageKeys.accessToken);
     // if (!access && refresh) {
     //   localStorage.removeItem(LocalStorageKeys.refreshToken);
     //   document.location.reload();
