@@ -36,7 +36,7 @@ describe("Patient Creation with consultation", () => {
     cy.get("#phone_number-div").type(phone_number);
     cy.get("#emergency_phone_number-div").type(emergency_phone_number);
     cy.get("[data-testid=date-of-birth] button").click();
-    cy.get("div").contains("1").click();
+    cy.get("#date-1").click();
     cy.get("[data-testid=name] input").type("Test E2E User");
     cy.get("[data-testid=Gender] button")
       .click()

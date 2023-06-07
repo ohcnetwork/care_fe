@@ -105,8 +105,8 @@ const initForm: any = {
   name: "",
   age: "",
   gender: "",
-  phone_number: "",
-  emergency_phone_number: "",
+  phone_number: "+91",
+  emergency_phone_number: "+91",
   blood_group: "",
   disease_status: diseaseStatus[2],
   is_declared_positive: "false",
@@ -362,7 +362,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         fetchDistricts(res.data.district_object.state),
         fetchLocalBody(res.data.district),
         fetchWards(res.data.local_body),
-        duplicateCheck("+91" + res.data.mobile_number),
+        duplicateCheck(res.data.mobile_number),
       ]);
 
       setShowImport(false);
