@@ -18,7 +18,7 @@ const RadioFormField = <T,>(props: Props<T>) => {
           return (
             <div className="flex gap-2 items-center">
               <input
-                className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500 rounded-full focus:ring-2"
+                className="w-4 h-4 text-primary-600 border-gray-600 focus:ring-primary-500 rounded-full focus:ring-2"
                 type="radio"
                 id={optionId}
                 name={props.name}
