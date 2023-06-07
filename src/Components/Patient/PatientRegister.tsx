@@ -105,7 +105,7 @@ const initForm: any = {
   name: "",
   age: "",
   gender: "",
-  phone_number: null,
+  phone_number: "+91",
   emergency_phone_number: null,
   blood_group: "",
   disease_status: diseaseStatus[2],

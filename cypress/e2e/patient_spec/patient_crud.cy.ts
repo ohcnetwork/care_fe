@@ -64,7 +64,8 @@ describe("Patient Creation with consultation", () => {
       .then(() => {
         cy.get("[role='option']").contains("O+").click();
       });
-    cy.get("button").get("[data-testid=submit-button]").click();
+    cy.get("button[data-testid='submit-button']").click();
+
     cy.get("h2").should("contain", "Create Consultation");
     cy.url().should("include", "/patient");
     cy.url().then((url) => {
