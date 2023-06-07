@@ -220,7 +220,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("Invalid Phone Number of " + username, () => {
-    const phone_num = "11111 11111";
+    const phone_num = "11 1111 111";
     cy.get("[placeholder='Phone Number']")
       .focus()
       .type(`${backspace}${phone_num}`)
