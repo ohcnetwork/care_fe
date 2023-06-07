@@ -11,7 +11,7 @@ const makeid = (length: number) => {
 };
 
 const makePhoneNumber = () =>
-  "9199" + Math.floor(Math.random() * 99999999).toString();
+  "99" + Math.floor(Math.random() * 99999999).toString();
 
 const username = makeid(25);
 const phone_number = makePhoneNumber();
