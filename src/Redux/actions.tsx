@@ -5,8 +5,6 @@ import {
 } from "../Components/Medicine/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
-import { LocalStorageKeys } from "../Common/constants";
-
 export const getConfig = () => {
   return fireRequestForFiles("config");
 };
