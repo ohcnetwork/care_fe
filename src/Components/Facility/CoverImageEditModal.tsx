@@ -1,4 +1,3 @@
-import { Modal } from "@material-ui/core";
 import axios from "axios";
 import {
   ChangeEventHandler,
@@ -20,6 +19,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import * as Notification from "../../Utils/Notifications.js";
 import { useTranslation } from "react-i18next";
 import { LocalStorageKeys } from "../../Common/constants";
+import DialogModal from "../Common/Dialog";
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;
@@ -179,20 +179,19 @@ const CoverImageEditModal = ({
   );
 
   return (
-    <Modal open={open} onClose={closeModal}>
-      <div className="h-full w-full absolute flex items-center justify-center bg-modal overflow-y-auto">
+    <DialogModal
+      show={open}
+      onClose={closeModal}
+      title={t("edit_cover_photo")}
+      description={facility.name}
+      className="md:max-w-4xl"
+    >
+      <div className="h-full w-full flex items-center justify-center overflow-y-auto">
         {!isCameraOpen ? (
-          <form className="m-4 bg-white rounded-xl w-11/12 max-w-3xl min-h-[24rem] max-h-screen overflow-auto flex flex-col shadow">
-            <div className="px-6 py-6 flex flex-col bg-gray-300">
-              <span className="text-xl font-medium">
-                {t("edit_cover_photo")}
-              </span>
-              <span className="mt-1 text-gray-700">{facility.name}</span>
-            </div>
-
+          <form className="w-full min-h-[24rem] max-h-screen overflow-auto flex flex-col">
             {hasImage ? (
               <>
-                <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
+                <div className="flex-1 flex rounded-lg items-center justify-center">
                   <img
                     src={imgSrc}
                     alt={facility.name}
@@ -208,7 +207,7 @@ const CoverImageEditModal = ({
                 onDragOver={dragProps.onDragOver}
                 onDragLeave={dragProps.onDragLeave}
                 onDrop={onDrop}
-                className={`px-3 py-6 flex-1 flex flex-col m-8 rounded-lg items-center justify-center border-[3px] border-dashed ${
+                className={`px-3 py-6 flex-1 flex flex-col mt-8 rounded-lg items-center justify-center border-[3px] border-dashed ${
                   dragProps.dragOver && "border-primary-500"
                 } ${
                   dragProps.fileDropError !== ""
@@ -251,7 +250,7 @@ const CoverImageEditModal = ({
               </div>
             )}
 
-            <div className="flex flex-col sm:flex-row p-4 gap-2">
+            <div className="flex flex-col sm:flex-row pt-4 gap-2">
               <div>
                 <label className="w-full rounded-lg bg-white py-2 px-4 text-primary-500 font-medium border border-primary-500 hover:text-primary-400 hover:border-primary-400 text-sm flex gap-1 items-center justify-center cursor-pointer transition-all">
                   <CareIcon className="care-l-cloud-upload text-lg" />
@@ -303,14 +302,14 @@ const CoverImageEditModal = ({
             </div>
           </form>
         ) : (
-          <div className="m-4 bg-white rounded-xl w-11/12 max-w-3xl min-h-[24rem] max-h-screen overflow-auto flex flex-col shadow">
-            <div className="px-6 py-6 flex flex-col bg-gray-300">
+          <div className="min-h-[24rem] max-h-screen overflow-auto flex flex-col">
+            <div className="flex flex-col bg-gray-300">
               <span className="text-xl font-medium">
                 {t("capture_cover_photo")}
               </span>
               <span className="mt-1 text-gray-700">{facility.name}</span>
             </div>
-            <div className="flex-1 flex m-8 rounded-lg items-center justify-center">
+            <div className="flex-1 flex items-center justify-center">
               {!previewImage ? (
                 <>
                   <Webcam
@@ -453,7 +452,7 @@ const CoverImageEditModal = ({
           </div>
         )}
       </div>
-    </Modal>
+    </DialogModal>
   );
 };
 
