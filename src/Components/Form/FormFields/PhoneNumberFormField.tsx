@@ -26,8 +26,13 @@ export default function PhoneNumberFormField(props: Props) {
     const asYouType = new AsYouType();
 
     asYouType.reset();
-    asYouType.input(field.value || "+91");
-    field.handleChange(asYouType.getNumberValue());
+
+    if (field.value) {
+      asYouType.input(field.value);
+    } else {
+      asYouType.input("+91");
+      field.handleChange(asYouType.getNumberValue());
+    }
 
     return asYouType;
   }, []);
