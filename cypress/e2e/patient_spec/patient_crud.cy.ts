@@ -206,6 +206,15 @@ describe("Patient Creation with consultation", () => {
     cy.get("[data-testid='return-to-patient-dashboard']").click();
   });
 
+  it("Doctor's Note Addition", () => {
+    cy.visit(patient_url + "/notes");
+    cy.get("textarea").type("Patient Note");
+    cy.get("button").contains("Post Your Note").click();
+    cy.wait(1000);
+    cy.verifyNotification("Note added successfully");
+    cy.get("span.added_notes").first().should("contain", "Patient Note");
+  });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });

@@ -141,7 +141,7 @@ const PatientNotes = (props: PatientNotesProps) => {
                 key={note.id}
                 className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
               >
-                <span className="whitespace-pre-wrap break-words">
+                <span className="whitespace-pre-wrap break-words added_notes">
                   {note.note}
                 </span>
                 <div className="mt-3">
