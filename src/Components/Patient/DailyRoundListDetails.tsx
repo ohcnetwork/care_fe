@@ -1,5 +1,3 @@
-import { Button } from "@material-ui/core";
-import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { useCallback, useEffect, useState } from "react";
@@ -10,8 +8,9 @@ import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DailyRoundsModel } from "./models";
 import { getTemperaturePreference } from "../Common/utils/DevicePreference";
 import { celsiusToFahrenheit, fahrenheitToCelsius } from "../../Utils/utils";
+import Page from "../Common/components/Page";
+import ButtonV2 from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
 
@@ -119,11 +118,10 @@ export const DailyRoundListDetails = (props: any) => {
   }
 
   return (
-    <div className="px-2">
-      <PageTitle
-        title={`Consultation Update #${id}`}
-        backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
-      />
+    <Page
+      title={`Consultation Update #${id}`}
+      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
+    >
       <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="max-w-md">
@@ -137,19 +135,11 @@ export const DailyRoundListDetails = (props: any) => {
 
           <div>
             <div className="mt-2">
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${id}/update`
-                  )
-                }
+              <ButtonV2
+                href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${id}/update`}
               >
                 Update Details
-              </Button>
+              </ButtonV2>
             </div>
           </div>
         </div>
@@ -252,6 +242,6 @@ export const DailyRoundListDetails = (props: any) => {
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 };
