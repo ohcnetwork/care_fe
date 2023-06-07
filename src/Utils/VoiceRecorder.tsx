@@ -38,7 +38,7 @@ export const VoiceRecorder = (props: any) => {
 
   return (
     <div>
-      <div className="sm:w-full">
+      <div>
         {isRecording ? (
           <>
             <div className="space-x-2 flex">
@@ -67,6 +67,7 @@ export const VoiceRecorder = (props: any) => {
               <ButtonV2
                 onClick={startRecording}
                 authorizeFor={NonReadOnlyUsers}
+                className="w-full md:w-fit"
               >
                 <CareIcon className="care-l-microphone text-lg" />
                 {t("record")}
