@@ -587,7 +587,7 @@ const AssetCreate = (props: AssetProps) => {
                         data-testid="asset-class-input"
                       >
                         <SelectFormField
-                          disabled={!!props.assetId}
+                          disabled={!!(props.assetId && asset_class)}
                           placeholder={props.assetId ? t("none") : undefined}
                           name="asset_class"
                           label="Asset Class"

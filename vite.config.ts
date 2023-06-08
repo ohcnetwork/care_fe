@@ -4,18 +4,17 @@ import { VitePWA } from "vite-plugin-pwa";
 import { resolve } from "path";
 import { promises as fs } from "fs";
 
-
 export default defineConfig({
   envPrefix: "REACT_",
   plugins: [
     react(),
     VitePWA({
-      strategies: 'injectManifest',
-      srcDir: 'src',
-      filename: 'service-worker.ts',
+      strategies: "injectManifest",
+      srcDir: "src",
+      filename: "service-worker.ts",
       injectRegister: null,
       injectManifest: {
-        maximumFileSizeToCacheInBytes: 7000000
+        maximumFileSizeToCacheInBytes: 7000000,
       },
       manifest: {
         name: "Care",
@@ -38,7 +37,7 @@ export default defineConfig({
             src: "https://cdn.coronasafe.network/care-manifest/images/icons/icon-512x512.png",
             sizes: "512x512",
             type: "image/png",
-          }
+          },
         ],
       },
     }),
@@ -58,6 +57,7 @@ export default defineConfig({
       // workaround for react-phone-input-2 https://github.com/vitejs/vite/issues/2139#issuecomment-1405624744
       defaultIsModuleExports(id) {
         try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
           const module = require(id);
           if (module?.default) {
             return false;
@@ -74,7 +74,16 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: "https://careapi.coronasafe.in",
+        target: "https://careapi.ohc.network",
+        changeOrigin: true,
+      },
+    },
+  },
+  preview: {
+    port: 4000,
+    proxy: {
+      "/api": {
+        target: "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },
