@@ -14,7 +14,7 @@ describe("Asset", () => {
     cy.awaitUrl("/assets");
   });
 
-  it.only("Create an Asset", () => {
+  it("Create an Asset", () => {
     cy.get("button").should("contain", "Create Asset");
     cy.get("[data-testid=create-asset-buttom] button").click();
     cy.get("input[name='facilities']")
