@@ -12,7 +12,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
 import ToolTip from "../Common/utils/Tooltip.js";
 import { formatDate } from "../../Utils/utils";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page.js";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function InventoryLog(props: any) {
@@ -244,7 +244,7 @@ export default function InventoryLog(props: any) {
 
   return (
     <div>
-      <PageTitle
+      <Page
         title="Inventory Log"
         className="mx-3 md:mx-8"
         crumbsReplacements={{
@@ -252,39 +252,40 @@ export default function InventoryLog(props: any) {
           [inventoryId]: { name: itemName },
         }}
         backUrl={`/facility/${facilityId}/inventory`}
-      />
-      <div className="container mx-auto px-4 sm:px-8">
-        <div className="py-8 ">
-          <div className="flex justify-between">
-            <h4>Item: {itemName}</h4>
-            {current_stock > 0 && (
-              <ToolTip
-                text={
-                  <div className="text-sm leading-snug text-justify">
-                    <b>Deletes the last transaction</b> by creating an
-                    equivalent undo transaction and marks both the transactions
-                    as accident.
-                  </div>
-                }
-              >
-                <button
-                  onClick={(_) =>
-                    removeLastInventoryLog(inventory[0].item_object.id)
+      >
+        <div className="container mx-auto px-4 sm:px-8">
+          <div className="py-8 ">
+            <div className="flex justify-between">
+              <h4>Item: {itemName}</h4>
+              {current_stock > 0 && (
+                <ToolTip
+                  text={
+                    <div className="text-sm leading-snug text-justify">
+                      <b>Deletes the last transaction</b> by creating an
+                      equivalent undo transaction and marks both the
+                      transactions as accident.
+                    </div>
                   }
-                  disabled={saving}
-                  className="btn btn-default"
                 >
-                  <span className="text-red-500">
-                    <i className="fas fa-exclamation-circle pr-2"></i>
-                    Delete Last Entry
-                  </span>
-                </button>
-              </ToolTip>
-            )}
+                  <button
+                    onClick={(_) =>
+                      removeLastInventoryLog(inventory[0].item_object.id)
+                    }
+                    disabled={saving}
+                    className="btn btn-default"
+                  >
+                    <span className="text-red-500">
+                      <i className="fas fa-exclamation-circle pr-2"></i>
+                      Delete Last Entry
+                    </span>
+                  </button>
+                </ToolTip>
+              )}
+            </div>
+            {inventoryItem}
           </div>
-          {inventoryItem}
         </div>
-      </div>
+      </Page>
     </div>
   );
 }
