@@ -10,7 +10,7 @@ import {
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
-import { Tooltip } from "@material-ui/core";
+import ToolTip from "../Common/utils/Tooltip.js";
 import { formatDate } from "../../Utils/utils";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
@@ -146,8 +146,8 @@ export default function InventoryLog(props: any) {
           </p>
         </td>
         <td>
-          <Tooltip
-            title={
+          <ToolTip
+            text={
               inventoryItem.probable_accident ? (
                 <div className="text-sm leading-snug text-justify">
                   <b>Unmarks this transaction as accident</b>
@@ -164,7 +164,6 @@ export default function InventoryLog(props: any) {
                 </div>
               )
             }
-            arrow={true}
           >
             <button
               onClick={(_) => flagFacility(inventoryItem.external_id)}
@@ -182,7 +181,7 @@ export default function InventoryLog(props: any) {
                 </span>
               )}
             </button>
-          </Tooltip>
+          </ToolTip>
         </td>
       </tr>
     ));
@@ -259,15 +258,14 @@ export default function InventoryLog(props: any) {
           <div className="flex justify-between">
             <h4>Item: {itemName}</h4>
             {current_stock > 0 && (
-              <Tooltip
-                title={
+              <ToolTip
+                text={
                   <div className="text-sm leading-snug text-justify">
                     <b>Deletes the last transaction</b> by creating an
                     equivalent undo transaction and marks both the transactions
                     as accident.
                   </div>
                 }
-                arrow={true}
               >
                 <button
                   onClick={(_) =>
@@ -281,7 +279,7 @@ export default function InventoryLog(props: any) {
                     Delete Last Entry
                   </span>
                 </button>
-              </Tooltip>
+              </ToolTip>
             )}
           </div>
           {inventoryItem}
