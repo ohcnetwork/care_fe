@@ -18,7 +18,6 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { LegacySelectField } from "../Common/HelperInputFields";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { UserSelect } from "../Common/UserSelect2";
 import moment from "moment";
 import { navigate } from "raviger";
 import parsePhoneNumberFromString from "libphonenumber-js";
@@ -26,6 +25,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import useMergeState from "../../Common/hooks/useMergeState";
 import { useTranslation } from "react-i18next";
+import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 
 const clearFilterState = {
   orgin_facility: "",
@@ -57,7 +57,6 @@ export default function ListFilter(props: any) {
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isShiftingLoading, setShiftingLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
-  const [isAssignedUserLoading, setAssignedUserLoading] = useState(false);
   const { t } = useTranslation();
 
   const shiftStatusOptions = (
@@ -143,16 +142,13 @@ export default function ListFilter(props: any) {
   useEffect(() => {
     async function fetchData() {
       if (filter.assigned_to) {
-        setAssignedUserLoading(true);
         const res = await dispatch(getUserList({ id: filter.assigned_to }));
-
         if (res && res.data && res.data.count) {
           setFilterState({
             ...filterState,
             assigned_user_ref: res.data.results[0],
           });
         }
-        setAssignedUserLoading(false);
       }
     }
     fetchData();
@@ -345,21 +341,13 @@ export default function ListFilter(props: any) {
         </div>
       </div>
 
-      <div>
-        <FieldLabel>{t("assigned_to")}</FieldLabel>
-        {isAssignedUserLoading ? (
-          <CircularProgress size={20} />
-        ) : (
-          <UserSelect
-            name="assigned_to"
-            multiple={false}
-            selected={filterState.assigned_user_ref}
-            setSelected={(obj) => setAssignedUser(obj)}
-            className="shifting-page-filter-dropdown"
-            errors={""}
-          />
-        )}
-      </div>
+      <UserAutocompleteFormField
+        label={t("assigned_to")}
+        name="assigned_to"
+        value={filterState.assigned_user_ref}
+        onChange={({ value }) => setAssignedUser(value)}
+        errorClassName="hidden"
+      />
 
       <div className="-mt-6">
         <FieldLabel>{t("ordering")}</FieldLabel>
