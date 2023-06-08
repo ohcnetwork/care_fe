@@ -40,16 +40,16 @@ jobs:
       - name: Install dependencies 📦
         run: npm install
 
-      - name: Compile rescript files ⚙️
-        run: "npm run build:res"
+      - name: Build & Compile rescript files ⚙️
+        run: "npm run build"
 
       - name: Cypress run 🥬
         uses: cypress-io/github-action@v5
         with:
           env: SKIP_PREFLIGHT_CHECK=true
           install: false
-          start: "npx vite --host"
-          wait-on: "http://localhost:4000"
+          start: "npx vite preview --host"
+          wait-on: "http://localhost:4173"
           wait-on-timeout: 300
           browser: electron
           record: true
