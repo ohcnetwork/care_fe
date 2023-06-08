@@ -11,8 +11,11 @@ on:
 
 jobs:
   cypress-run:
+    strategy:
+      matrix:
+        os: [cypress-test, cypress-test-2]
     if: github.repository == 'coronasafe/care_fe'
-    runs-on: cypress-test
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v3
