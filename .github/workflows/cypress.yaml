@@ -49,7 +49,7 @@ jobs:
           env: SKIP_PREFLIGHT_CHECK=true
           install: false
           start: "npx vite preview --host"
-          wait-on: "http://localhost:4173"
+          wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: electron
           record: true

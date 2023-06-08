@@ -79,7 +79,7 @@ export default defineConfig({
     },
   },
   preview: {
-    port: 4173,
+    port: 4000,
     proxy: {
       "/api": {
         target: "https://careapi.ohc.network",
