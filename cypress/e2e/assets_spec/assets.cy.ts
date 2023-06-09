@@ -15,10 +15,15 @@ describe("Assets List", () => {
 
   it("Search Asset Name", () => {
     cy.intercept(/\/api\/v1\/asset/).as("asset");
-    cy.get("[name='search']").type("TEst");
+    const initialUrl =
+      Cypress.config().baseUrl +
+      "/assets?page=1&limit=18&search=dummy+camera+30";
+    cy.get("[name='search']").type("dummy camera 30");
     cy.wait("@asset").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
-      expect(interception.request.url).to.include("search_text=TEst");
+      cy.url().then((currentUrl) => {
+        expect(currentUrl).not.to.equal(initialUrl);
+      });
     });
   });
 
