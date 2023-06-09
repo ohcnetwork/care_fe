@@ -10,9 +10,9 @@ import {
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
-import ToolTip from "../Common/utils/Tooltip.js";
 import { formatDate } from "../../Utils/utils";
 import Page from "../Common/components/Page.js";
+import CareIcon from "../../CAREUI/icons/CareIcon.js";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function InventoryLog(props: any) {
@@ -146,25 +146,24 @@ export default function InventoryLog(props: any) {
           </p>
         </td>
         <td>
-          <ToolTip
-            text={
-              inventoryItem.probable_accident ? (
+          <div className="tooltip">
+            <div className="tooltip-left tooltip-text">
+              {inventoryItem.probable_accident ? (
                 <div className="text-sm leading-snug text-justify">
                   <b>Unmarks this transaction as accident</b>
                   <br />
                   This action will not affect the total stock.
                 </div>
               ) : (
-                <div className="text-sm leading-snug text-justify">
+                <div className="text-sm leading-snug text-justify ">
                   <b>Marks this transaction as accident</b>
                   <br />
                   This action will not affect the total stock. To delete the
                   transaction, create another transaction that undos the effect
                   of this, or click <i>Delete Last Entry</i>.
                 </div>
-              )
-            }
-          >
+              )}
+            </div>
             <button
               onClick={(_) => flagFacility(inventoryItem.external_id)}
               disabled={saving}
@@ -172,16 +171,17 @@ export default function InventoryLog(props: any) {
             >
               {inventoryItem.probable_accident ? (
                 <span className="text-primary-500">
-                  <i className="fas fa-exclamation-triangle pr-2"></i>UnMark
+                  <CareIcon className="care-l-exclamation-triangle pr-2 text-lg" />
+                  UnMark
                 </span>
               ) : (
                 <span className="text-red-500">
-                  <i className="fas fa-exclamation-circle pr-2"></i>
+                  <CareIcon className="care-l-exclamation-circle pr-2 text-lg" />
                   Mark as Accident
                 </span>
               )}
             </button>
-          </ToolTip>
+          </div>
         </td>
       </tr>
     ));
@@ -258,15 +258,12 @@ export default function InventoryLog(props: any) {
             <div className="flex justify-between">
               <h4>Item: {itemName}</h4>
               {current_stock > 0 && (
-                <ToolTip
-                  text={
-                    <div className="text-sm leading-snug text-justify">
-                      <b>Deletes the last transaction</b> by creating an
-                      equivalent undo transaction and marks both the
-                      transactions as accident.
-                    </div>
-                  }
-                >
+                <div className="tooltip ">
+                  <div className="text-sm leading-snug text-justify tooltip-text tooltip-left">
+                    <b>Deletes the last transaction</b> by creating an
+                    equivalent undo transaction and marks both the transactions
+                    as accident.
+                  </div>
                   <button
                     onClick={(_) =>
                       removeLastInventoryLog(inventory[0].item_object.id)
@@ -275,11 +272,11 @@ export default function InventoryLog(props: any) {
                     className="btn btn-default"
                   >
                     <span className="text-red-500">
-                      <i className="fas fa-exclamation-circle pr-2"></i>
+                      <CareIcon className="care-l-exclamation-circle pr-2 text-lg" />
                       Delete Last Entry
                     </span>
                   </button>
-                </ToolTip>
+                </div>
               )}
             </div>
             {inventoryItem}
