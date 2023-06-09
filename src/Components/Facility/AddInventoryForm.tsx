@@ -2,8 +2,6 @@ import loadable from "@loadable/component";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Card from "../../CAREUI/display/Card";
-import CardContent from "../../CAREUI/display/CardContent";
-import InputLabel from "../../CAREUI/display/InputLabel";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getItems,
@@ -13,10 +11,9 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import Page from "../Common/components/Page";
-import {
-  LegacySelectField,
-  LegacyTextInputField,
-} from "../Common/HelperInputFields";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
 import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -63,6 +60,7 @@ export const AddInventoryForm = (props: any) => {
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
   const [currentUnit, setCurrentUnit] = useState<any>();
   const [facilityName, setFacilityName] = useState("");
+  const [optionLabelId, setOptionLabelId] = useState("");
 
   const limit = 14;
 
@@ -192,6 +190,7 @@ export const AddInventoryForm = (props: any) => {
       item: Number(state.form.id),
       unit: Number(state.form.unit),
     };
+    console.log(optionLabelId);
     // if user has selected "Add stock" or "stockValidation" function is true
     if (data.is_incoming || stockValidation(data)) {
       const res = await dispatchAction(postInventory(data, { facilityId }));
@@ -209,9 +208,11 @@ export const AddInventoryForm = (props: any) => {
       setIsLoading(false);
     }
   };
+
   const handleChange = (e: any) => {
     const form = { ...state.form };
-    form[e.target.name] = e.target.value;
+    form[e.name] = e.value;
+    setOptionLabelId(form);
     dispatch({ type: "set_form", form });
   };
 
@@ -229,75 +230,63 @@ export const AddInventoryForm = (props: any) => {
         <div className="mt-4">
           <Card>
             <form onSubmit={handleSubmit}>
-              <CardContent>
-                <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                  <div>
-                    <InputLabel id="inventory_name_label">
-                      Inventory Name
-                    </InputLabel>
-                    <LegacySelectField
-                      name="id"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.id}
-                      options={data.map((e) => {
-                        return { id: e.id, name: e.name };
-                      })}
-                      onChange={handleChange}
-                      optionKey="id"
-                      optionValue="name"
-                    />
-                  </div>
-                  <div>
-                    <InputLabel id="inventory_description_label">
-                      Status:
-                    </InputLabel>
-                    <LegacySelectField
-                      name="isIncoming"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.isIncoming}
-                      options={[
-                        { id: true, value: "Add Stock" },
-                        { id: false, value: "Use Stock" },
-                      ]}
-                      onChange={handleChange}
-                      optionKey="id"
-                      optionValue="value"
-                      errors={stockError}
-                    />
-                  </div>
-                  <div>
-                    <InputLabel id="quantity">Quantity</InputLabel>
-                    <LegacyTextInputField
-                      name="quantity"
-                      variant="outlined"
-                      margin="dense"
-                      type="float"
-                      value={state.form.quantity}
-                      onChange={handleChange}
-                      errors=""
-                    />
-                  </div>
-                  <div>
-                    <InputLabel id="unit">Unit</InputLabel>
-                    <LegacySelectField
-                      name="unit"
-                      margin="dense"
-                      variant="outlined"
-                      value={state.form.unit}
-                      options={currentUnit || []}
-                      onChange={handleChange}
-                      optionKey="id"
-                      optionValue="name"
-                    />
-                  </div>
+              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+                <div>
+                  <FieldLabel id="inventory_name_label">
+                    Inventory Name
+                  </FieldLabel>
+                  <SelectFormField
+                    name="id"
+                    onChange={handleChange}
+                    value={state.form.id}
+                    options={data.map((e) => {
+                      return { id: e.id, name: e.name };
+                    })}
+                    optionValue={(optionLabelId) => optionLabelId.id}
+                    optionLabel={(inventory) => inventory.name}
+                  />
                 </div>
-                <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-                  <Cancel onClick={() => goBack()} />
-                  <Submit onClick={handleSubmit} label="Add/Update Inventory" />
+                <div>
+                  <FieldLabel id="inventory_description_label">
+                    Status:
+                  </FieldLabel>
+                  <SelectFormField
+                    name="isIncoming"
+                    onChange={handleChange}
+                    value={state.form.isIncoming}
+                    options={[
+                      { id: true, name: "Add Stock" },
+                      { id: false, name: "Use Stock" },
+                    ]}
+                    optionValue={(optionLabelId) => optionLabelId.id}
+                    optionLabel={(inventory) => inventory.name}
+                    error={stockError}
+                  />
                 </div>
-              </CardContent>
+                <div>
+                  <FieldLabel id="quantity">Quantity</FieldLabel>
+                  <TextFormField
+                    name="quantity"
+                    value={state.form.quantity}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div>
+                  <FieldLabel id="unit">Unit</FieldLabel>
+                  <SelectFormField
+                    name="unit"
+                    onChange={handleChange}
+                    value={state.form.unit}
+                    options={currentUnit || []}
+                    optionValue={(optionLabelId: any) => optionLabelId.id}
+                    optionLabel={(inventory) => inventory.name}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={handleSubmit} label="Add/Update Inventory" />
+              </div>
             </form>
           </Card>
         </div>
