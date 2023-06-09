@@ -39,9 +39,7 @@ describe("User management", () => {
     cy.get("[id='local_body'] > div > button").click();
     cy.get("div").contains("Aikaranad").click();
     cy.intercept(/\/api\/v1\/facility/).as("facility");
-    cy.get("[name='facilities']")
-      .type("cypress_testing_facility")
-      .wait("@facility");
+    cy.get("[name='facilities']").type("cypress facility").wait("@facility");
     cy.get("[name='facilities']").type("{enter}");
     cy.wait(1000);
     cy.get("input[type='checkbox']").click();
@@ -103,7 +101,7 @@ describe("User management", () => {
       cy.get("button[id='facilities']").click();
       cy.wait("@userFacility")
         .getAttached("div[id=facility_0] > div > span")
-        .contains("cypress_testing_facility");
+        .contains("cypress facility");
     });
   });
 
