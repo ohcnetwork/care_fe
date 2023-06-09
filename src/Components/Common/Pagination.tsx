@@ -85,73 +85,62 @@ const Pagination = ({
     });
   };
 
-  const NavButtons = {
-    First: () => (
-      <NavButton
-        tooltip="Jump to first page"
-        children={<CareIcon className="care-l-angle-double-left text-lg" />}
-        onClick={() => goToPage(1)}
-        disabled={currentPage === 1}
-      />
-    ),
-
-    Previous: () => (
-      <NavButton
-        tooltip="Previous"
-        onClick={() => goToPage(currentPage - 1)}
-        disabled={currentPage - 1 <= 0}
-        children={<CareIcon className="care-l-angle-left text-lg" />}
-      />
-    ),
-
-    Page: ({ page }: { page: number }) => (
-      <NavButton
-        onClick={() => goToPage(page)}
-        selected={currentPage === page}
-        tooltip={`Move to page ${page}`}
-      >
-        {page}
-      </NavButton>
-    ),
-
-    Next: () => (
-      <NavButton
-        tooltip="Next"
-        children={<CareIcon className="care-l-angle-right text-lg" />}
-        onClick={() => goToPage(currentPage + 1)}
-        disabled={currentPage + 1 > totalPage}
-      />
-    ),
-
-    Last: () => (
-      <NavButton
-        tooltip="Jump to last page"
-        children={<CareIcon className="care-l-angle-double-right text-lg" />}
-        onClick={() => goToPage(totalPage)}
-        disabled={totalPage === 0 || currentPage === totalPage}
-      />
-    ),
-  };
-
   return (
     <div className={className}>
       {/* Mobile view */}
       <div className="flex-1 flex justify-between sm:hidden">
-        <NavButtons.Previous />
-        <NavButtons.Next />
+        <NavButton
+          tooltip="Previous"
+          onClick={() => goToPage(currentPage - 1)}
+          disabled={currentPage - 1 <= 0}
+          children={<CareIcon className="care-l-angle-left text-lg" />}
+        />
+        <NavButton
+          tooltip="Next"
+          children={<CareIcon className="care-l-angle-right text-lg" />}
+          onClick={() => goToPage(currentPage + 1)}
+          disabled={currentPage + 1 > totalPage}
+        />
       </div>
 
       {/* Desktop view */}
       <nav className="hidden sm:flex-1 sm:items-center sm:justify-between relative sm:inline-flex rounded-lg bg-white border border-secondary-300">
-        <NavButtons.First />
-        <NavButtons.Previous />
+        <NavButton
+          tooltip="Jump to first page"
+          children={<CareIcon className="care-l-angle-double-left text-lg" />}
+          onClick={() => goToPage(1)}
+          disabled={currentPage === 1}
+        />
+        <NavButton
+          tooltip="Previous"
+          onClick={() => goToPage(currentPage - 1)}
+          disabled={currentPage - 1 <= 0}
+          children={<CareIcon className="care-l-angle-left text-lg" />}
+        />
 
         {pageNumbers.map((page) => (
-          <NavButtons.Page key={page} page={page} />
+          <NavButton
+            key={page}
+            onClick={() => goToPage(page)}
+            selected={currentPage === page}
+            tooltip={`Move to page ${page}`}
+          >
+            {page}
+          </NavButton>
         ))}
 
-        <NavButtons.Next />
-        <NavButtons.Last />
+        <NavButton
+          tooltip="Next"
+          children={<CareIcon className="care-l-angle-right text-lg" />}
+          onClick={() => goToPage(currentPage + 1)}
+          disabled={currentPage + 1 > totalPage}
+        />
+        <NavButton
+          tooltip="Jump to last page"
+          children={<CareIcon className="care-l-angle-double-right text-lg" />}
+          onClick={() => goToPage(totalPage)}
+          disabled={totalPage === 0 || currentPage === totalPage}
+        />
       </nav>
     </div>
   );

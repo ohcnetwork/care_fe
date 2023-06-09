@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
 import useConfig from "./useConfig";
+import { classNames } from "../../Utils/utils";
 
 export type FilterState = Record<string, unknown>;
 export type FilterParamKeys = string | string[];
@@ -140,16 +141,24 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     );
   };
 
-  const Pagination = ({ totalCount }: { totalCount: number }) => {
+  const Pagination = ({
+    totalCount,
+    noMargin,
+  }: {
+    totalCount: number;
+    noMargin?: boolean;
+  }) => {
     if (!hasPagination) {
       const errorMsg = "Do not render Pagination component, when limit is <= 0";
       return <span className="bg-red-500 text-white">{errorMsg}</span>;
     }
     return (
       <div
-        className={`mt-4 flex w-full justify-center ${
-          totalCount > limit ? "visible" : "invisible"
-        }`}
+        className={classNames(
+          "flex w-full justify-center",
+          totalCount > limit ? "visible" : "invisible",
+          !noMargin && "mt-4"
+        )}
       >
         <PaginationComponent
           cPage={qParams.page}
