@@ -37,7 +37,7 @@ describe("Patient Creation with consultation", () => {
     cy.get("#emergency_phone_number-div").type(emergency_phone_number);
     cy.get("[data-testid=date-of-birth] button").click();
     cy.get("div").contains("1").click();
-    cy.get("[data-testid=name] input").type("Test E2E User");
+    cy.get("[data-testid=name] input").type("Test Cypress User");
     cy.get("[data-testid=Gender] button")
       .click()
       .then(() => {
@@ -94,7 +94,7 @@ describe("Patient Creation with consultation", () => {
 
   it("Edit the patient details", () => {
     cy.awaitUrl(patient_url + "/update");
-    cy.get("[data-testid=name] input").clear().type("Test E2E User Editted");
+    cy.get("[data-testid=name] input").clear().type("Test Cypress Editted");
     cy.get("button").get("[data-testid=submit-button]").click();
     cy.url().should("include", "/patient");
     cy.url().then((url) => {
