@@ -141,9 +141,12 @@ export const FileUpload = (props: FileUploadProps) => {
   const id = patientId;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [uploadedFiles, setuploadedFiles] = useState<Array<FileUploadModel>>([
-    {},
-  ]);
+  const [uploadedArchievedFiles, setuploadedArchievedFiles] = useState<
+    Array<FileUploadModel>
+  >([{}]);
+  const [uploadedUnarchievedFiles, setuploadedUnarchievedFiles] = useState<
+    Array<FileUploadModel>
+  >([{}]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
   const [audiouploadStarted, setAudioUploadStarted] = useState<boolean>(false);
   const [reload, setReload] = useState<boolean>(false);
@@ -187,9 +190,10 @@ export const FileUpload = (props: FileUploadProps) => {
     rotation: 0,
   };
   const [file_state, setFileState] = useState<StateInterface>(initialState);
-
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalArchievedFilesCount, setTotalArchievedFilesCount] = useState(0);
+  const [totalUnarchievedFilesCount, setTotalUnarchievedFilesCount] =
+    useState(0);
   const [offset, setOffset] = useState(0);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
@@ -321,23 +325,39 @@ export const FileUpload = (props: FileUploadProps) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const data = {
+      const unarchivedFileData = {
         file_type: type,
         associating_id: getAssociatedId(),
+        is_archived: false,
         limit: limit,
         offset: offset,
       };
-      const res = await dispatch(viewUpload(data));
+      let res = await dispatch(viewUpload(unarchivedFileData));
       if (!status.aborted) {
         if (res && res.data) {
           audio_urls(res.data.results);
-          setuploadedFiles(
+          setuploadedUnarchievedFiles(
             res.data.results.filter(
               (file: FileUploadModel) =>
                 file.upload_completed || file.file_category === "AUDIO"
             )
           );
-          setTotalCount(res.data.count);
+          setTotalUnarchievedFilesCount(res.data.count);
+        }
+        setIsLoading(false);
+      }
+      const archivedFileData = {
+        file_type: type,
+        associating_id: getAssociatedId(),
+        is_archived: true,
+        limit: limit,
+        offset: offset,
+      };
+      res = await dispatch(viewUpload(archivedFileData));
+      if (!status.aborted) {
+        if (res && res.data) {
+          setuploadedArchievedFiles(res.data.results);
+          setTotalArchievedFilesCount(res.data.count);
         }
         setIsLoading(false);
       }
@@ -1642,66 +1662,56 @@ export const FileUpload = (props: FileUploadProps) => {
       />
 
       <div>
-        {uploadedFiles && uploadedFiles.length > 0 ? (
-          sortFileState === "UNARCHIVED" ? (
-            // First it would check the filtered array contains any files or not else it would state the message
-            <>
-              {[
-                ...uploadedFiles.filter(
-                  (item: FileUploadModel) => !item.is_archived
-                ),
-              ].length > 0 ? (
-                [
-                  ...uploadedFiles.filter(
-                    (item: FileUploadModel) => !item.is_archived
-                  ),
-                ].map((item: FileUploadModel) => renderFileUpload(item))
-              ) : (
-                <div className="mt-4 border bg-white shadow rounded-lg p-4">
-                  <div className="font-bold text-gray-500 text-md flex justify-center items-center">
-                    {"No Unarchived File in the Current Page"}
-                  </div>
+        {sortFileState === "UNARCHIVED" ? (
+          // First it would check the filtered array contains any files or not else it would state the message
+          <>
+            {uploadedUnarchievedFiles.length > 0 ? (
+              uploadedUnarchievedFiles.map((item: FileUploadModel) =>
+                renderFileUpload(item)
+              )
+            ) : (
+              <div className="mt-4 border bg-white shadow rounded-lg p-4">
+                <div className="font-bold text-gray-500 text-md flex justify-center items-center">
+                  {"No Unarchived File in the Current Page"}
                 </div>
-              )}
-            </>
-          ) : (
-            // First it would check the filtered array contains any files or not else it would state the message
-            <>
-              {[
-                ...uploadedFiles.filter(
-                  (item: FileUploadModel) => item.is_archived
-                ),
-              ].length > 0 ? (
-                [
-                  ...uploadedFiles.filter(
-                    (item: FileUploadModel) => item.is_archived
-                  ),
-                ].map((item: FileUploadModel) => renderFileUpload(item))
-              ) : (
-                <div className="mt-4 border bg-white shadow rounded-lg p-4">
-                  <div className="font-bold text-gray-500 text-md flex justify-center items-center">
-                    {"No Archived File in the Current Page"}
-                  </div>
-                </div>
-              )}
-            </>
-          )
+              </div>
+            )}
+            {totalUnarchievedFilesCount > limit && (
+              <div className="mt-4 flex w-full justify-center">
+                <Pagination
+                  cPage={currentPage}
+                  defaultPerPage={limit}
+                  data={{ totalCount: totalUnarchievedFilesCount }}
+                  onChange={handlePagination}
+                />
+              </div>
+            )}
+          </>
         ) : (
-          <div className="mt-4 border bg-white shadow rounded-lg p-4">
-            <div className="font-bold text-gray-500 text-md flex justify-center items-center">
-              {"No Data Found"}
-            </div>
-          </div>
-        )}
-        {totalCount > limit && (
-          <div className="mt-4 flex w-full justify-center">
-            <Pagination
-              cPage={currentPage}
-              defaultPerPage={limit}
-              data={{ totalCount }}
-              onChange={handlePagination}
-            />
-          </div>
+          // First it would check the filtered array contains any files or not else it would state the message
+          <>
+            {uploadedArchievedFiles.length > 0 ? (
+              uploadedArchievedFiles.map((item: FileUploadModel) =>
+                renderFileUpload(item)
+              )
+            ) : (
+              <div className="mt-4 border bg-white shadow rounded-lg p-4">
+                <div className="font-bold text-gray-500 text-md flex justify-center items-center">
+                  {"No Archived File in the Current Page"}
+                </div>
+              </div>
+            )}
+            {totalArchievedFilesCount > limit && (
+              <div className="mt-4 flex w-full justify-center">
+                <Pagination
+                  cPage={currentPage}
+                  defaultPerPage={limit}
+                  data={{ totalCount: totalArchievedFilesCount }}
+                  onChange={handlePagination}
+                />
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

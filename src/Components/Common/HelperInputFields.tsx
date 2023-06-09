@@ -1,4 +1,5 @@
-import DateFnsUtils from "@date-io/date-fns";
+import "react-phone-input-2/lib/high-res.css";
+
 import {
   Checkbox,
   Chip,
@@ -14,23 +15,24 @@ import {
   TextField,
   TextFieldProps,
 } from "@material-ui/core";
-import Box from "@material-ui/core/Box";
-import FormControl from "@material-ui/core/FormControl";
-import { NativeSelectInputProps } from "@material-ui/core/NativeSelect/NativeSelectInput";
-import { SelectProps } from "@material-ui/core/Select";
-import Autocomplete from "@material-ui/lab/Autocomplete";
 import {
   DatePickerProps,
   KeyboardDatePicker,
   KeyboardDateTimePicker,
   MuiPickersUtilsProvider,
 } from "@material-ui/pickers";
-import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
-import React, { ChangeEvent, useEffect, useState } from "react";
 import PhoneInput, { ICountryData } from "react-phone-input-2";
-import "react-phone-input-2/lib/high-res.css";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import React, { ChangeEvent, useEffect, useState } from "react";
+
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import Box from "@material-ui/core/Box";
 import ButtonV2 from "./components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import DateFnsUtils from "@date-io/date-fns";
+import FormControl from "@material-ui/core/FormControl";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+import { NativeSelectInputProps } from "@material-ui/core/NativeSelect/NativeSelectInput";
+import { SelectProps } from "@material-ui/core/Select";
 
 export interface DefaultSelectInputProps extends Omit<SelectProps, "onChange"> {
   options: Array<any>;
@@ -578,6 +580,7 @@ export const LegacyPhoneNumberField = (props: any) => {
     disabled,
     countryCodeEditable = false,
     className,
+    id,
     name,
     requiredError = false,
   } = props;
@@ -683,10 +686,7 @@ export const LegacyPhoneNumberField = (props: any) => {
             country={undefined}
             enableLongNumbers={true}
             buttonClass="hidden"
-            inputProps={{
-              name,
-              maxLength,
-            }}
+            inputProps={{ id, name: enableTollFree ? name : "", maxLength }}
           />
           <ButtonV2
             className="mt-[2px]"
@@ -718,10 +718,7 @@ export const LegacyPhoneNumberField = (props: any) => {
             disabled={disabled}
             autoFormat={!turnOffAutoFormat}
             enableLongNumbers={true}
-            inputProps={{
-              name,
-              maxLength,
-            }}
+            inputProps={{ id, name: enableTollFree ? "" : name, maxLength }}
             {...countryRestriction}
           />
           <ButtonV2

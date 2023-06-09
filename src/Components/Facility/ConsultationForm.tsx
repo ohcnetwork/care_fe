@@ -645,7 +645,9 @@ export const ConsultationForm = (props: any) => {
         }
 
         Notification.Success({
-          msg: `Consultation ${id ? "updated" : "created"} successfully`,
+          msg: res.data.discharge_date
+            ? "Patient discharged successfully"
+            : `Consultation ${id ? "updated" : "created"} successfully`,
         });
 
         navigate(
@@ -655,7 +657,7 @@ export const ConsultationForm = (props: any) => {
         if (data.suggestion === "R") {
           navigate(`/facility/${facilityId}/patient/${patientId}/shift/new`);
           return;
-        } else if (!id) {
+        } else if (!id && data.suggestion === "A") {
           navigate(
             `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}/prescriptions`
           );

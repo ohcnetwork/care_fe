@@ -50,7 +50,7 @@ export default function PatientInfoCard(props: {
         title={bedDialogTitle}
         show={open}
         onClose={() => setOpen(false)}
-        className="w-full max-w-2xl"
+        className="md:max-w-3xl"
       >
         {patient?.facility && patient?.id && consultation?.id ? (
           <Beds

@@ -32,7 +32,9 @@ export default function CountBlock(props: {
           {loading ? (
             <dd className="rounded-lg w-full max-w-[100px] h-10 bg-gray-300 animate-pulse" />
           ) : (
-            <dd className="text-5xl leading-9 font-black">{count}</dd>
+            <dd id="count" className="text-5xl leading-9 font-black">
+              {count}
+            </dd>
           )}
         </div>
       </dl>
