@@ -221,76 +221,74 @@ export const AddInventoryForm = (props: any) => {
   }
 
   return (
-    <div className="px-2">
-      <Page
-        title={"Manage Inventory"}
-        backUrl={`/facility/${facilityId}/inventory`}
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
-      >
-        <div className="mt-4">
-          <Card>
-            <form onSubmit={handleSubmit}>
-              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                <div>
-                  <FieldLabel id="inventory_name_label">
-                    Inventory Name
-                  </FieldLabel>
-                  <SelectFormField
-                    name="id"
-                    onChange={handleChange}
-                    value={state.form.id}
-                    options={data.map((e) => {
-                      return { id: e.id, name: e.name };
-                    })}
-                    optionValue={(optionLabelId) => optionLabelId.id}
-                    optionLabel={(inventory) => inventory.name}
-                  />
-                </div>
-                <div>
-                  <FieldLabel id="inventory_description_label">
-                    Status:
-                  </FieldLabel>
-                  <SelectFormField
-                    name="isIncoming"
-                    onChange={handleChange}
-                    value={state.form.isIncoming}
-                    options={[
-                      { id: true, name: "Add Stock" },
-                      { id: false, name: "Use Stock" },
-                    ]}
-                    optionValue={(optionLabelId) => optionLabelId.id}
-                    optionLabel={(inventory) => inventory.name}
-                    error={stockError}
-                  />
-                </div>
-                <div>
-                  <FieldLabel id="quantity">Quantity</FieldLabel>
-                  <TextFormField
-                    name="quantity"
-                    value={state.form.quantity}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div>
-                  <FieldLabel id="unit">Unit</FieldLabel>
-                  <SelectFormField
-                    name="unit"
-                    onChange={handleChange}
-                    value={state.form.unit}
-                    options={currentUnit || []}
-                    optionValue={(optionLabelId: any) => optionLabelId.id}
-                    optionLabel={(inventory) => inventory.name}
-                  />
-                </div>
+    <Page
+      title={"Manage Inventory"}
+      backUrl={`/facility/${facilityId}/inventory`}
+      crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+    >
+      <div className="mt-4">
+        <Card>
+          <form onSubmit={handleSubmit}>
+            <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div>
+                <FieldLabel id="inventory_name_label">
+                  Inventory Name
+                </FieldLabel>
+                <SelectFormField
+                  name="id"
+                  onChange={handleChange}
+                  value={state.form.id}
+                  options={data.map((e) => {
+                    return { id: e.id, name: e.name };
+                  })}
+                  optionValue={(optionLabelId) => optionLabelId.id}
+                  optionLabel={(inventory) => inventory.name}
+                />
               </div>
-              <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <Cancel onClick={() => goBack()} />
-                <Submit onClick={handleSubmit} label="Add/Update Inventory" />
+              <div>
+                <FieldLabel id="inventory_description_label">
+                  Status:
+                </FieldLabel>
+                <SelectFormField
+                  name="isIncoming"
+                  onChange={handleChange}
+                  value={state.form.isIncoming}
+                  options={[
+                    { id: true, name: "Add Stock" },
+                    { id: false, name: "Use Stock" },
+                  ]}
+                  optionValue={(optionLabelId) => optionLabelId.id}
+                  optionLabel={(inventory) => inventory.name}
+                  error={stockError}
+                />
               </div>
-            </form>
-          </Card>
-        </div>
-      </Page>
-    </div>
+              <div>
+                <FieldLabel id="quantity">Quantity</FieldLabel>
+                <TextFormField
+                  name="quantity"
+                  value={state.form.quantity}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <FieldLabel id="unit">Unit</FieldLabel>
+                <SelectFormField
+                  name="unit"
+                  onChange={handleChange}
+                  value={state.form.unit}
+                  options={currentUnit || []}
+                  optionValue={(optionLabelId: any) => optionLabelId.id}
+                  optionLabel={(inventory) => inventory.name}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
+              <Cancel onClick={() => goBack()} />
+              <Submit onClick={handleSubmit} label="Add/Update Inventory" />
+            </div>
+          </form>
+        </Card>
+      </div>
+    </Page>
   );
 };
