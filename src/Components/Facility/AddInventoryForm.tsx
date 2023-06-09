@@ -60,7 +60,7 @@ export const AddInventoryForm = (props: any) => {
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
   const [currentUnit, setCurrentUnit] = useState<any>();
   const [facilityName, setFacilityName] = useState("");
-  const [optionLabelId, setOptionLabelId] = useState("");
+  const [optionLabel, setOptionLabel] = useState("");
 
   const limit = 14;
 
@@ -190,7 +190,7 @@ export const AddInventoryForm = (props: any) => {
       item: Number(state.form.id),
       unit: Number(state.form.unit),
     };
-    console.log(optionLabelId);
+    console.log(optionLabel);
     // if user has selected "Add stock" or "stockValidation" function is true
     if (data.is_incoming || stockValidation(data)) {
       const res = await dispatchAction(postInventory(data, { facilityId }));
@@ -212,7 +212,7 @@ export const AddInventoryForm = (props: any) => {
   const handleChange = (e: any) => {
     const form = { ...state.form };
     form[e.name] = e.value;
-    setOptionLabelId(form);
+    setOptionLabel(form);
     dispatch({ type: "set_form", form });
   };
 
@@ -241,7 +241,7 @@ export const AddInventoryForm = (props: any) => {
                   options={data.map((e) => {
                     return { id: e.id, name: e.name };
                   })}
-                  optionValue={(optionLabelId) => optionLabelId.id}
+                  optionValue={(optionLabel) => optionLabel.id}
                   optionLabel={(inventory) => inventory.name}
                 />
               </div>
@@ -257,7 +257,7 @@ export const AddInventoryForm = (props: any) => {
                     { id: true, name: "Add Stock" },
                     { id: false, name: "Use Stock" },
                   ]}
-                  optionValue={(optionLabelId) => optionLabelId.id}
+                  optionValue={(optionLabel) => optionLabel.id}
                   optionLabel={(inventory) => inventory.name}
                   error={stockError}
                 />
@@ -277,7 +277,7 @@ export const AddInventoryForm = (props: any) => {
                   onChange={handleChange}
                   value={state.form.unit}
                   options={currentUnit || []}
-                  optionValue={(optionLabelId: any) => optionLabelId.id}
+                  optionValue={(optionLabel: any) => optionLabel.id}
                   optionLabel={(inventory) => inventory.name}
                 />
               </div>
