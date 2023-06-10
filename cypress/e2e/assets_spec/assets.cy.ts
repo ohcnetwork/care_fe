@@ -20,7 +20,7 @@ describe("Asset", () => {
     cy.get("input[name='facilities']")
       .type("Govt Hosp, Ernakulam")
       .then(() => {
-        cy.get("[role='option']").contains("Govt Hosp, Ernakulam").click();
+        cy.get("[role='option']").contains("Dummy Facility 1").click();
       });
     cy.get("button").should("contain", "Select");
     cy.get("button").get("#submit").click();
