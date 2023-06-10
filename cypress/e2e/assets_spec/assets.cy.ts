@@ -18,7 +18,7 @@ describe("Asset", () => {
     cy.get("button").should("contain", "Create Asset");
     cy.get("[data-testid=create-asset-buttom] button").click();
     cy.get("input[name='facilities']")
-      .type("Govt Hosp, Ernakulam")
+      .type("Dummy Facility 1")
       .then(() => {
         cy.get("[role='option']").contains("Dummy Facility 1").click();
       });
