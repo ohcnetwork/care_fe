@@ -165,23 +165,30 @@ export default function InventoryLog(props: any) {
                 </div>
               )}
             </div>
-            <ButtonV2
-              onClick={(_) => flagFacility(inventoryItem.external_id)}
-              disabled={saving}
-              variant="secondary"
-            >
-              {inventoryItem.probable_accident ? (
-                <span className="text-primary-500">
+
+            {inventoryItem.probable_accident ? (
+              <ButtonV2
+                onClick={(_) => flagFacility(inventoryItem.external_id)}
+                disabled={saving}
+                variant="primary"
+              >
+                <span>
                   <CareIcon className="care-l-exclamation-triangle pr-2 text-lg" />
                   UnMark
                 </span>
-              ) : (
-                <span className="text-red-500">
+              </ButtonV2>
+            ) : (
+              <ButtonV2
+                onClick={(_) => flagFacility(inventoryItem.external_id)}
+                disabled={saving}
+                variant="danger"
+              >
+                <span>
                   <CareIcon className="care-l-exclamation-circle pr-2 text-lg" />
                   Mark as Accident
                 </span>
-              )}
-            </ButtonV2>
+              </ButtonV2>
+            )}
           </div>
         </td>
       </tr>
@@ -266,13 +273,13 @@ export default function InventoryLog(props: any) {
                     as accident.
                   </div>
                   <ButtonV2
-                    variant="secondary"
+                    variant="danger"
                     onClick={(_) =>
                       removeLastInventoryLog(inventory[0].item_object.id)
                     }
                     disabled={saving}
                   >
-                    <span className="text-red-500">
+                    <span>
                       <CareIcon className="care-l-exclamation-circle pr-2 text-lg" />
                       Delete Last Entry
                     </span>
