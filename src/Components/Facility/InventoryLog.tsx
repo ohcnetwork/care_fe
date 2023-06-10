@@ -13,6 +13,7 @@ import Pagination from "../Common/Pagination";
 import { formatDate } from "../../Utils/utils";
 import Page from "../Common/components/Page.js";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
+import ButtonV2 from "../Common/components/ButtonV2.js";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function InventoryLog(props: any) {
@@ -164,10 +165,10 @@ export default function InventoryLog(props: any) {
                 </div>
               )}
             </div>
-            <button
+            <ButtonV2
               onClick={(_) => flagFacility(inventoryItem.external_id)}
               disabled={saving}
-              className="btn btn-default"
+              variant="secondary"
             >
               {inventoryItem.probable_accident ? (
                 <span className="text-primary-500">
@@ -180,7 +181,7 @@ export default function InventoryLog(props: any) {
                   Mark as Accident
                 </span>
               )}
-            </button>
+            </ButtonV2>
           </div>
         </td>
       </tr>
@@ -264,18 +265,18 @@ export default function InventoryLog(props: any) {
                     equivalent undo transaction and marks both the transactions
                     as accident.
                   </div>
-                  <button
+                  <ButtonV2
+                    variant="secondary"
                     onClick={(_) =>
                       removeLastInventoryLog(inventory[0].item_object.id)
                     }
                     disabled={saving}
-                    className="btn btn-default"
                   >
                     <span className="text-red-500">
                       <CareIcon className="care-l-exclamation-circle pr-2 text-lg" />
                       Delete Last Entry
                     </span>
-                  </button>
+                  </ButtonV2>
                 </div>
               )}
             </div>
