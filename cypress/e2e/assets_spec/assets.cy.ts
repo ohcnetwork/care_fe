@@ -67,6 +67,7 @@ describe("Asset", () => {
     cy.get("[data-testid=asset-notes-input] textarea").type(
       "Test note for asset creation!"
     );
+    cy.wait(500);
     cy.get("#submit").contains("Create Asset").click();
     cy.verifyNotification("Asset created successfully");
   });
