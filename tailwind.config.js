@@ -2,7 +2,6 @@
 const colors = require("tailwindcss/colors");
 const defaultTheme = require("tailwindcss/defaultTheme");
 
-
 const gray = {
   100: "#FBFAFC",
   200: "#F7F5FA",
@@ -22,6 +21,7 @@ module.exports = {
     screens: {
       vs: "348px",
       ...defaultTheme.screens,
+      "3xl": "1600px",
     },
     extend: {
       fontFamily: {
