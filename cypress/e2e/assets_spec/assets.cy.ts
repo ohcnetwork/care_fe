@@ -3,6 +3,9 @@
 import { cy, describe, before, beforeEach, it } from "local-cypress";
 import { v4 as uuidv4 } from "uuid";
 
+const phone_number = "9" + parseInt((Math.random() * 10 ** 9).toString());
+const serial_no = parseInt((Math.random() * 10 ** 10).toString());
+
 describe("Asset", () => {
   before(() => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
@@ -26,7 +29,7 @@ describe("Asset", () => {
     cy.get("button").get("#submit").click();
     cy.get("[data-testid=asset-name-input] input").type("New Test Asset");
     cy.get("[data-testid=asset-location-input] input").type(
-      "Test Location{enter}"
+      "Camera Location{enter}"
     );
     cy.get("[data-testid=asset-type-input] button")
       .click()
@@ -53,13 +56,11 @@ describe("Asset", () => {
     cy.get("[data-testid=asset-support-name-input] input").type(
       "Customer Support's Name"
     );
-    const phone_number = "9" + parseInt((Math.random() * 10 ** 9).toString());
     cy.get("#customer-support-phone-div").type(phone_number);
     cy.get("[data-testid=asset-support-email-input] input").type(
       "email@support.com"
     );
     cy.get("[data-testid=asset-vendor-name-input] input").type("Vendor's Name");
-    const serial_no = parseInt((Math.random() * 10 ** 10).toString());
     cy.get("[data-testid=asset-serial-number-input] input").type(serial_no);
     cy.get("[data-testid=asset-last-serviced-on-input] input").type(
       "2021-12-25"
