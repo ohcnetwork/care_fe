@@ -14,25 +14,27 @@ describe("Resource filter", () => {
 
   it("filter by origin facility", () => {
     cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-    cy.get("[name='orgin_facility']").type("harsha").wait("@facilities_filter");
-    cy.get("[name='orgin_facility']").type("{downarrow}{enter}");
+    cy.get("[name='orgin_facility']")
+      .type("Dummy Facility 1")
+      .wait("@facilities_filter");
+    cy.get("[role='option']").first().click();
     cy.contains("Apply").click();
   });
 
   it("filter by resource approval facility", () => {
     cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
     cy.get("[name='approving_facility']")
-      .type("test")
+      .type("Dummy Shifting Center")
       .wait("@facilities_filter");
-    cy.get("[name='approving_facility']").type("{downarrow}{enter}");
+    cy.get("[role='option']").first().click();
     cy.contains("Apply").click();
   });
 
   it("filter by assigned facility", () => {
     cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-    cy.get("[name='assigned_facility']").type("center");
+    cy.get("[name='assigned_facility']").type("Dummy Shifting Center");
     cy.wait("@facilities_filter");
-    cy.get("[name='assigned_facility']").type("{downarrow}{enter}");
+    cy.get("[role='option']").first().click();
     cy.contains("Apply").click();
   });
 

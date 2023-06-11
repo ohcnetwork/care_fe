@@ -2,7 +2,7 @@ import { GENDER_TYPES } from "../../Common/constants";
 import { Link } from "raviger";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { PatientModel } from "../Patient/models";
-import PatientVitalsCard from "../Patient/PatientVitalsCard";
+import LegacyPatientVitalsCard from "../Patient/LegacyPatientVitalsCard";
 import { AssetLocationObject } from "../Assets/AssetTypes";
 
 interface MonitorCardProps {
@@ -12,7 +12,7 @@ interface MonitorCardProps {
   location: AssetLocationObject;
 }
 
-export const MonitorCard = ({
+export const LegacyMonitorCard = ({
   facilityId,
   patient,
   socketUrl,
@@ -40,7 +40,7 @@ export const MonitorCard = ({
           {location.name}
         </span>
       </div>
-      <PatientVitalsCard socketUrl={socketUrl} shrinked />
+      <LegacyPatientVitalsCard socketUrl={socketUrl} shrinked />
     </div>
   );
 };

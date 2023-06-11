@@ -571,7 +571,7 @@ const AssetCreate = (props: AssetProps) => {
                       {/* Asset Class */}
                       <div ref={fieldRef["asset_class"]} className="flex-1">
                         <SelectFormField
-                          disabled={!!props.assetId}
+                          disabled={!!(props.assetId && asset_class)}
                           placeholder={props.assetId ? t("none") : undefined}
                           name="asset_class"
                           label="Asset Class"
