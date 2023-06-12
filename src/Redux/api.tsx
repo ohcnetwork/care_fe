@@ -235,6 +235,12 @@ const routes: Routes = {
     method: "POST",
   },
 
+  // Patient Asset Beds (for CNS and Monitoring Hub)
+  listPatientAssetBeds: {
+    path: "/api/v1/facility/{facility_external_id}/patient_asset_beds/",
+    method: "GET",
+  },
+
   // Facility Beds
   listFacilityBeds: {
     path: "/api/v1/bed/",

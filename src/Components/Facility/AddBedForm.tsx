@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@material-ui/core";
+import Card from "../../CAREUI/display/Card";
 import loadable from "@loadable/component";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -10,15 +10,14 @@ import {
   updateFacilityBed,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { LegacySelectField } from "../Common/HelperInputFields";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface BedFormProps {
   facilityId: string;
@@ -134,7 +133,7 @@ export const AddBedForm = (props: BedFormProps) => {
 
   return (
     <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle
+      <Page
         title={headerText}
         backUrl={`/facility/${facilityId}/location/${locationId}/beds`}
         crumbsReplacements={{
@@ -150,71 +149,61 @@ export const AddBedForm = (props: BedFormProps) => {
             },
           }),
         }}
-      />
-      <div className="mt-10">
-        <Card>
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1">
-                <div>
-                  <TextFormField
-                    name="name"
-                    type="text"
-                    label="Name"
-                    id="name"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.value)}
-                    error={errors.name}
-                  />
-                </div>
-                <div>
-                  <TextAreaFormField
-                    rows={5}
-                    label="Description"
-                    name="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.value)}
-                    error={errors.description}
-                  />
-                </div>
+      >
+        <div className="mt-10">
+          <Card>
+            <form onSubmit={(e) => handleSubmit(e)}>
+              <div className="md:p-4">
+                <div className="mt-2 grid gap-4 grid-cols-1">
+                  <div>
+                    <TextFormField
+                      name="name"
+                      type="text"
+                      label="Name"
+                      id="name"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.value)}
+                      error={errors.name}
+                    />
+                  </div>
+                  <div>
+                    <TextAreaFormField
+                      rows={5}
+                      label="Description"
+                      name="description"
+                      value={description}
+                      onChange={(e) => setDescription(e.value)}
+                      error={errors.description}
+                    />
+                  </div>
+                  <div>
+                    <SelectFormField
+                      id="bed-type"
+                      name="bed_type"
+                      label="Bed Type"
+                      required
+                      options={LOCATION_BED_TYPES}
+                      optionValue={(bedType) => bedType.id}
+                      optionLabel={(bed) => bed.name}
+                      value={bedType}
+                      onChange={({ value }) => {
+                        setBedType(value);
+                      }}
+                      error={errors.bedType}
+                    />
+                  </div>
 
-                <div>
-                  <FieldLabel required id="bedType">
-                    Bed Type
-                  </FieldLabel>
-                  <LegacySelectField
-                    id="bed-type"
-                    fullWidth
-                    name="bed_type"
-                    placeholder=""
-                    variant="outlined"
-                    margin="dense"
-                    options={[
-                      {
-                        id: "",
-                        name: "Select",
-                      },
-                      ...LOCATION_BED_TYPES,
-                    ]}
-                    optionValue="name"
-                    value={bedType}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setBedType(e.target.value)
-                    }
-                    errors={errors.bedType}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-                  <Cancel onClick={handleCancel} />
-                  <Submit onClick={handleSubmit} label={buttonText} />
+                  <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+                    <Cancel onClick={handleCancel} />
+                    <Submit onClick={handleSubmit} label={buttonText} />
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </form>
-        </Card>
-      </div>
+            </form>
+          </Card>
+        </div>
+      </Page>
     </div>
   );
 };

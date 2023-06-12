@@ -37,6 +37,7 @@ const extractVirtualNursingAssistantFields = (round?: DailyRoundsModel) => {
   if (!round) return;
   const {
     temperature,
+    tempratureUnit,
     temperature_measured_at,
     bp,
     resp,
@@ -47,6 +48,7 @@ const extractVirtualNursingAssistantFields = (round?: DailyRoundsModel) => {
 
   return {
     temperature,
+    tempratureUnit,
     temperature_measured_at,
     bp,
     resp,

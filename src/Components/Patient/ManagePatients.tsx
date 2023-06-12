@@ -1,48 +1,49 @@
-import loadable from "@loadable/component";
-import { Link, navigate } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import moment from "moment";
-import React, { useEffect, useState, useCallback } from "react";
-import { useDispatch } from "react-redux";
-import SwipeableViews from "react-swipeable-views";
-import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import { Tooltip } from "@material-ui/core";
+import * as Notification from "../../Utils/Notifications.js";
 
-import {
-  getAllPatient,
-  getDistrict,
-  getLocalBody,
-  getAnyFacility,
-} from "../../Redux/actions";
-import NavTabs from "../Common/NavTabs";
 import {
   ADMITTED_TO,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
-  RESPIRATORY_SUPPORT,
   PATIENT_SORT_OPTIONS,
+  RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
-import PatientFilter from "./PatientFilter";
-import { parseOptionId } from "../../Common/utils";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import Chip from "../../CAREUI/display/Chip";
 import { FacilityModel, PatientCategory } from "../Facility/models";
-import SearchInput from "../Form/SearchInput";
-import useFilters from "../../Common/hooks/useFilters";
-import FilterBadge from "../../CAREUI/display/FilterBadge";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { ExportMenu } from "../Common/Export";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
-import CountBlock from "../../CAREUI/display/Count";
-import { useTranslation } from "react-i18next";
-import * as Notification from "../../Utils/Notifications.js";
+import { Link, navigate } from "raviger";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  getAllPatient,
+  getAnyFacility,
+  getDistrict,
+  getLocalBody,
+} from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import Chip from "../../CAREUI/display/Chip";
+import CountBlock from "../../CAREUI/display/Count";
+import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
+import { ExportMenu } from "../Common/Export";
+import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import FilterBadge from "../../CAREUI/display/FilterBadge";
+import NavTabs from "../Common/NavTabs";
+import PatientFilter from "./PatientFilter";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
+import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
+import SwipeableViews from "react-swipeable-views";
+import { Tooltip } from "@material-ui/core";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { parseOptionId } from "../../Common/utils";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { useDispatch } from "react-redux";
+import useFilters from "../../Common/hooks/useFilters";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -492,6 +493,7 @@ export const PatientManager = () => {
       return (
         <Link
           key={`usr_${patient.id}`}
+          data-cy="patient"
           href={patientUrl}
           className={`relative w-full cursor-pointer p-4 pl-5 hover:pl-5 rounded-lg bg-white shadow text-black ring-2 ring-opacity-0 hover:ring-opacity-100 transition-all duration-200 ease-in-out group ${categoryClass}-ring overflow-hidden`}
         >
@@ -747,7 +749,9 @@ export const PatientManager = () => {
             }}
           >
             <CareIcon className="care-l-plus text-lg" />
-            <p className="lg:my-[2px]">Add Patient Details</p>
+            <p id="add-patient-div" className="lg:my-[2px]">
+              Add Patient Details
+            </p>
           </ButtonV2>
           <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
           <SortDropdownMenu

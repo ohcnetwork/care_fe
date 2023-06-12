@@ -73,7 +73,7 @@ class facility {
 
     cy.get("input[id=pincode]").should("exist").clear().type(pincode);
 
-    cy.get("input[id=phone_number]").should("exist").type(phone);
+    cy.get("input[name=phone_number]").should("exist").type(phone);
 
     cy.get("input[id=oxygen_capacity]").clear().type(oxygen_capacity);
     cy.get("input[id=expected_oxygen_requirement]")

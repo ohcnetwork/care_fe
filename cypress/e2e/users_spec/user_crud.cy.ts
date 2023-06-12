@@ -39,9 +39,7 @@ describe("User management", () => {
     cy.get("[id='local_body'] > div > button").click();
     cy.get("div").contains("Aikaranad").click();
     cy.intercept(/\/api\/v1\/facility/).as("facility");
-    cy.get("[name='facilities']")
-      .type("cypress_testing_facility")
-      .wait("@facility");
+    cy.get("[name='facilities']").type("cypress facility").wait("@facility");
     cy.get("[name='facilities']").type("{enter}");
     cy.wait(1000);
     cy.get("input[type='checkbox']").click();
@@ -103,14 +101,14 @@ describe("User management", () => {
       cy.get("button[id='facilities']").click();
       cy.wait("@userFacility")
         .getAttached("div[id=facility_0] > div > span")
-        .contains("cypress_testing_facility");
+        .contains("cypress facility");
     });
   });
 
   it("link facility for user", () => {
     cy.contains("Linked Facilities").click({ force: true });
     cy.intercept(/\/api\/v1\/facility/).as("getFacilities");
-    cy.get("[name='facility']").type("test").wait("@getFacilities");
+    cy.get("[name='facility']").type("cypress facility").wait("@getFacilities");
     cy.get("[name='facility']").type("{downarrow}{enter}");
     cy.intercept(/\/api\/v1\/users\/\w+\/add_facility\//).as("addFacility");
     cy.get("button > span").contains("Add").click({ force: true });
@@ -187,9 +185,6 @@ describe("Edit Profile Testing", () => {
 
   it("Invalid Whatsapp Number of " + username, () => {
     const whatsapp_num = "11111-11111";
-
-    cy.get(".flag-dropdown").last().find(".arrow").click();
-    cy.get("li[data-flag-key='flag_no_84']").click();
     cy.get("[placeholder='WhatsApp Number']")
       .focus()
       .type(`${backspace}${whatsapp_num}`)
@@ -207,9 +202,6 @@ describe("Edit Profile Testing", () => {
 
   it("Valid Whatsapp Number of " + username, () => {
     const whatsapp_num = "91111-11111";
-
-    cy.get(".flag-dropdown").last().find(".arrow").click();
-    cy.get("li[data-flag-key='flag_no_84']").click();
     cy.get("[placeholder='WhatsApp Number']")
       .focus()
       .type(`${backspace}${whatsapp_num}`)
@@ -227,9 +219,6 @@ describe("Edit Profile Testing", () => {
 
   it("Invalid Phone Number of " + username, () => {
     const phone_num = "11111-11111";
-
-    cy.get(".flag-dropdown").first().find(".arrow").click();
-    cy.get("li[data-flag-key='flag_no_84']").click();
     cy.get("[placeholder='Phone Number']")
       .focus()
       .type(`${backspace}${phone_num}`)
@@ -247,9 +236,6 @@ describe("Edit Profile Testing", () => {
 
   it("Valid Phone Number of " + username, () => {
     const phone_num = "99999-99999";
-
-    cy.get(".flag-dropdown").first().find(".arrow").click();
-    cy.get("li[data-flag-key='flag_no_84']").click();
     cy.get("[placeholder='Phone Number']")
       .focus()
       .type(`${backspace}${phone_num}`)
