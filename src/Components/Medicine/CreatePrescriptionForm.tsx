@@ -31,6 +31,9 @@ export default function CreatePrescriptionForm(props: {
       defaults={props.prescription}
       onCancel={props.onDone}
       onSubmit={async (obj) => {
+        obj["medicine"] = obj.medicine_object?.id;
+        delete obj.medicine_object;
+
         setIsCreating(true);
         const res = await dispatch(props.create(obj));
         setIsCreating(false);
@@ -43,7 +46,7 @@ export default function CreatePrescriptionForm(props: {
       noPadding
       validate={(form) => {
         const errors: Partial<Record<keyof Prescription, FieldError>> = {};
-        errors.medicine = RequiredFieldValidator()(form.medicine);
+        errors.medicine_object = RequiredFieldValidator()(form.medicine_object);
         errors.dosage = RequiredFieldValidator()(form.dosage);
         if (form.is_prn)
           errors.indicator = RequiredFieldValidator()(form.indicator);
@@ -57,7 +60,7 @@ export default function CreatePrescriptionForm(props: {
         <>
           <MedibaseAutocompleteFormField
             label={t("medicine")}
-            {...field("medicine", RequiredFieldValidator())}
+            {...field("medicine_object", RequiredFieldValidator())}
             required
           />
           <div className="flex gap-4 items-center">

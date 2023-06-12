@@ -2,7 +2,9 @@ import { PerformedByModel } from "../HCX/misc";
 
 interface BasePrescription {
   readonly id?: string;
-  medicine: MedibaseMedicine;
+  medicine?: string;
+  medicine_object?: MedibaseMedicine;
+  medicine_old?: string;
   route?: "ORAL" | "IV" | "IM" | "SC";
   dosage: string;
   notes?: string;

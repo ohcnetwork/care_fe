@@ -200,6 +200,7 @@ export default function PrescriptionsTable({
               list={
                 prescriptions?.map((obj) => ({
                   ...obj,
+                  medicine: obj.medicine_object?.name,
                   route__pretty:
                     obj.route && t("PRESCRIPTION_ROUTE_" + obj.route),
                   frequency__pretty:
