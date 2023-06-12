@@ -1,4 +1,4 @@
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import reducer from "../src/Redux/Reducer";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import App from "./App";
@@ -30,11 +30,11 @@ const theme = createTheme({
   },
 });
 
-ReactDOM.render(
+const root = createRoot(document.getElementById("root") as HTMLElement);
+root.render(
   <Provider store={store}>
     <ThemeProvider theme={theme}>
       <App />
     </ThemeProvider>
-  </Provider>,
-  document.getElementById("root")
+  </Provider>
 );
