@@ -4,7 +4,6 @@ import loadable from "@loadable/component";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { FieldErrorText } from "../Form/FormFields/FormField";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { navigate, useQueryParams } from "raviger";
@@ -26,9 +25,9 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface resourceProps {
   id: string;
@@ -218,18 +217,18 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={"Update Resource Request"}
-        crumbsReplacements={{ [props.id]: { name: requestTitle } }}
-        backUrl={`/resource/${props.id}`}
-      />
+
+    <Page 
+    title="Update Resource Request"
+    backUrl={`/resource/${props.id}`}
+    crumbsReplacements={{ [props.id]: { name: requestTitle } }}>
+    
       <div className="mt-4">
         <Card className="w-full flex flex-col">
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
             <div className="md:col-span-1">
-              <FieldLabel>Status</FieldLabel>
               <SelectFormField
+                label="Status"
                 name="status"
                 value={state.form.status}
                 options={resourceStatusOptions}
@@ -238,7 +237,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               />
             </div>
             <div className="md:col-span-1">
-              <FieldLabel>Assigned To</FieldLabel>
+               <FieldLabel>Assigned To</FieldLabel>
               <div className="">
                 {assignedUserLoading ? (
                   <CircularProgress />
@@ -336,9 +335,9 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 optionDisplay={(o) => (o ? "Yes" : "No")}
                 optionValue={(o) => String(o)}
                 value={state.form.emergency}
+                error={state.errors.emergency}
               />
 
-              <FieldErrorText error={state.errors.emergency} />
             </div>
 
             <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
@@ -348,6 +347,6 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
           </div>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };
