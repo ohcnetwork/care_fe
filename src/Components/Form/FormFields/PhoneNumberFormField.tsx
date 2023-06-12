@@ -59,6 +59,7 @@ export default function PhoneNumberFormField(props: Props) {
           placeholder={props.placeholder}
           value={field.value}
           onChange={(e) => setValue(e.target.value)}
+          disabled={field.disabled}
         />
         {!props.disableCountry && (
           <div className="absolute inset-y-0 right-0 flex items-center">
@@ -66,6 +67,7 @@ export default function PhoneNumberFormField(props: Props) {
               Country
             </label>
             <select
+              disabled={field.disabled}
               id={field.id + "__country"}
               name="country"
               autoComplete="country"
