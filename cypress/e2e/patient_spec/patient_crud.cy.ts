@@ -27,9 +27,9 @@ describe("Patient Creation with consultation", () => {
     cy.get("button").should("contain", "Add Patient Details");
     cy.get("#add-patient-div").click();
     cy.get("input[name='facilities']")
-      .type("ABCD Hospital, Ernakulam")
+      .type("cypress facility")
       .then(() => {
-        cy.get("[role='option']").contains("ABCD Hospital, Ernakulam").click();
+        cy.get("[role='option']").contains("cypress facility").click();
       });
     cy.get("button").should("contain", "Select");
     cy.get("button").get("#submit").click();

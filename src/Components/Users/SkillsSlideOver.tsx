@@ -94,8 +94,8 @@ export default ({ show, setShow, username }: IProps) => {
         <UnlinkSkillDialog
           skillName={deleteSkill.skill_object.name || ""}
           userName={username}
-          handleCancel={() => setDeleteSkill(null)}
-          handleOk={() => removeSkill(username, deleteSkill.id)}
+          onCancel={() => setDeleteSkill(null)}
+          onSubmit={() => removeSkill(username, deleteSkill.id)}
         />
       )}
       <SlideOverCustom

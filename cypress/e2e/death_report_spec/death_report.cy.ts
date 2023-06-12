@@ -13,7 +13,7 @@ describe("Death Report", () => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/");
     cy.intercept("**/api/v1/patient/**").as("getPatients");
-    cy.get("a").contains("Patients").click({ force: true });
+    cy.get("#facility-patients").contains("Patients").click({ force: true });
     cy.url().should("include", "/patients");
     cy.wait("@getPatients").get("a[data-cy=patient]").first().click();
     cy.url().then((url) => {
