@@ -9,7 +9,6 @@ import {
   getPublicKey,
 } from "../../Redux/actions";
 import { useSelector } from "react-redux";
-import { CircularProgress } from "@material-ui/core";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
@@ -25,6 +24,7 @@ import SlideOver from "../../CAREUI/interactive/SlideOver";
 import ButtonV2 from "../Common/components/ButtonV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { useTranslation } from "react-i18next";
+import CircularProgress from "../Common/components/CircularProgress";
 
 const RESULT_LIMIT = 14;
 
@@ -348,7 +348,7 @@ export default function NotificationsList({
   if (!offset && isLoading) {
     manageResults = (
       <div className="flex items-center justify-center">
-        <CircularProgress color="primary" />
+        <CircularProgress />
       </div>
     );
   } else if (data && data.length) {
@@ -364,7 +364,7 @@ export default function NotificationsList({
         ))}
         {isLoading && (
           <div className="flex items-center justify-center">
-            <CircularProgress color="primary" />
+            <CircularProgress />
           </div>
         )}
         {totalCount > RESULT_LIMIT && offset < totalCount - RESULT_LIMIT && (
