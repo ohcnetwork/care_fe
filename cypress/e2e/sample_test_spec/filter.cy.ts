@@ -13,15 +13,24 @@ describe("Sample Filter", () => {
   });
 
   it("Filter by Status", () => {
-    cy.get("[name='status']").select("APPROVED");
+    cy.get("#status").click();
+    cy.get("li[role='option']")
+      .contains(/^APPROVED$/)
+      .click();
   });
 
   it("Filter by Asset Type", () => {
-    cy.get("[name='result']").select("POSITIVE");
+    cy.get("#result").click();
+    cy.get("li[role='option']")
+      .contains(/^POSITIVE$/)
+      .click();
   });
 
   it("Filter by sample type", () => {
-    cy.get("[name='sample_type']").select("Biopsy");
+    cy.get("#sample_type").click();
+    cy.get("li[role='option']")
+      .contains(/^Biopsy$/)
+      .click();
   });
 
   afterEach(() => {
