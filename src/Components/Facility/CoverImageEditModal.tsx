@@ -173,7 +173,6 @@ const CoverImageEditModal = ({
       {t("max_size_for_image_uploaded_should_be")} 1mb.
       <br />
       {t("allowed_formats_are")} jpg,png,jpeg.
-      <br />
       {t("recommended_aspect_ratio_for")} facility cover photo is 1:1
     </>
   );
@@ -244,8 +243,7 @@ const CoverImageEditModal = ({
                     : `${t("drag_drop_image_to_upload")}`}
                 </p>
                 <p className="mt-4 text-gray-700 font-medium text-center">
-                  {t("no_cover_photo_uploaded_for_this_facility")}. <br />
-                  {commonHint}
+                  {t("no_cover_photo_uploaded_for_this_facility")}. {commonHint}
                 </p>
               </div>
             )}
