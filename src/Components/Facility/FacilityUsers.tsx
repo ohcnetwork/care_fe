@@ -14,8 +14,6 @@ import {
 import Pagination from "../Common/Pagination";
 import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
-
-import { IconButton } from "@material-ui/core";
 import LinkFacilityDialog from "../Users/LinkFacilityDialog";
 import UserDeleteDialog from "../Users/UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
@@ -24,9 +22,10 @@ import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
 import { classNames } from "../../Utils/utils";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import ButtonV2 from "../Common/components/ButtonV2";
+import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function FacilityUsers(props: any) {
   const { facilityId } = props;
@@ -235,9 +234,10 @@ export default function FacilityUsers(props: any) {
             >
               <div className="flex items-center  space-x-1">
                 <div className="font-semibold">{facility.name}</div>
-                <IconButton
+                <ButtonV2
                   size="small"
-                  color="secondary"
+                  circle
+                  variant="secondary"
                   disabled={isFacilityLoading}
                   onClick={() =>
                     setUnlinkFacilityData({
@@ -247,8 +247,8 @@ export default function FacilityUsers(props: any) {
                     })
                   }
                 >
-                  <CareIcon className="care-l-multiply text-xl font-bold" />
-                </IconButton>
+                  <CareIcon className="care-l-multiply" />
+                </ButtonV2>
               </div>
             </div>
           ))}
@@ -452,7 +452,12 @@ export default function FacilityUsers(props: any) {
   }
 
   return (
-    <div>
+    <Page
+      title={`Users - ${facilityData?.name}`}
+      hideBack={true}
+      className="mx-3 md:mx-8"
+      breadcrumbs={false}
+    >
       {linkFacility.show && (
         <LinkFacilityDialog
           username={linkFacility.username}
@@ -460,12 +465,6 @@ export default function FacilityUsers(props: any) {
           handleCancel={hideLinkFacilityModal}
         />
       )}
-      <PageTitle
-        title={`Users - ${facilityData?.name}`}
-        hideBack={true}
-        className="mx-3 md:mx-8"
-        breadcrumbs={false}
-      />
 
       <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-4">
         <CountBlock
@@ -486,6 +485,6 @@ export default function FacilityUsers(props: any) {
           handleOk={handleSubmit}
         />
       )}
-    </div>
+    </Page>
   );
 }

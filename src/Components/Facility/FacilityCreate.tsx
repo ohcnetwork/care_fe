@@ -869,7 +869,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     {...field("phone_number")}
                     label={t("emergency_contact_number")}
                     required
-                    onlyIndia
+                    disableCountry
                   />
                   <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 py-4">
                     <TextFormField
