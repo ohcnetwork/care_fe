@@ -236,6 +236,11 @@ export const deleteAssetBed = (asset_id: string) =>
     }
   );
 
+export const listPatientAssetBeds = (
+  facility_external_id: string,
+  params: object
+) => fireRequest("listPatientAssetBeds", [], params, { facility_external_id });
+
 // Facility Beds
 export const listFacilityBeds = (params: object) =>
   fireRequest("listFacilityBeds", [], params, {});
