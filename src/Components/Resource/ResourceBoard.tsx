@@ -4,7 +4,6 @@ import {
   listResourceRequests,
   downloadResourceRequests,
 } from "../../Redux/actions";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import { navigate } from "raviger";
 import moment from "moment";
 import { classNames } from "../../Utils/utils";
@@ -13,6 +12,7 @@ import { formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CSVLink from "../Common/CSVLink";
+import CircularProgress from "../Common/components/CircularProgress";
 
 const limit = 14;
 
@@ -265,7 +265,7 @@ export default function ResourceBoard({
           <h3 className="text-xs flex items-center h-8">
             {renderBoardTitle(board)}{" "}
             {downloadLoading ? (
-              <CircularProgress className="w-6 h-6 ml-2 text-black" />
+              <CircularProgress />
             ) : (
               <ButtonV2
                 onClick={triggerDownload}
