@@ -11,6 +11,7 @@ on:
 
 jobs:
   cypress-run:
+    permissions: write-all
     if: github.repository == 'coronasafe/care_fe'
     runs-on: ubuntu-latest
     steps:
