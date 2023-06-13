@@ -254,20 +254,18 @@ export default function ListFilter(props: any) {
       }}
     >
       {props.showShiftingStatus && (
-        <div>
-          <FieldLabel>{t("status")}</FieldLabel>
-          <SelectFormField
-            name="status"
-            id="status"
-            placeholder="Show all"
-            value={filterState.status}
-            options={shiftStatusOptions}
-            optionLabel={(option) => option}
-            optionValue={(option) => option}
-            onChange={(option) => handleFormFieldChange(option)}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
+        <SelectFormField
+          name="status"
+          id="status"
+          label={t("status")}
+          placeholder="Show all"
+          value={filterState.status}
+          options={shiftStatusOptions}
+          optionLabel={(option) => option}
+          optionValue={(option) => option}
+          onChange={(option) => handleFormFieldChange(option)}
+          errorClassName="hidden"
+        />
       )}
       <div>
         <FieldLabel>{t("origin_facility")}</FieldLabel>
@@ -340,116 +338,102 @@ export default function ListFilter(props: any) {
         />
       )}
 
-      <div className="-mt-6">
-        <FieldLabel>{t("ordering")}</FieldLabel>
-        <SelectFormField
-          name="ordering"
-          id="ordering"
-          placeholder="No ordering"
-          value={filterState.ordering}
-          options={SHIFTING_FILTER_ORDER}
-          optionLabel={(option) => option.label}
-          optionDescription={(option) => option.desc}
-          optionValue={(option) => option.text}
-          optionSelectedLabel={(option) => option.desc}
-          onChange={(option) => {
-            handleFormFieldChange(option);
-          }}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
+      <SelectFormField
+        name="ordering"
+        id="ordering"
+        label={t("ordering")}
+        placeholder="No ordering"
+        value={filterState.ordering}
+        options={SHIFTING_FILTER_ORDER}
+        optionLabel={(option) => option.label}
+        optionDescription={(option) => option.desc}
+        optionValue={(option) => option.text}
+        optionSelectedLabel={(option) => option.desc}
+        onChange={(option) => {
+          handleFormFieldChange(option);
+        }}
+        errorClassName="hidden"
+      />
 
-      <div>
-        <FieldLabel>{t("is_emergency_case")}</FieldLabel>
-        <SelectFormField
-          name="emergency"
-          id="emergency"
-          placeholder="Show all"
-          value={filterState.emergency}
-          options={["yes", "no"]}
-          optionLabel={(option) => option}
-          optionValue={(option) => option}
-          onChange={(option) => handleFormFieldChange(option)}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
+      <SelectFormField
+        name="emergency"
+        id="emergency"
+        placeholder="Show all"
+        label={t("is_emergency_case")}
+        value={filterState.emergency}
+        options={["yes", "no"]}
+        optionLabel={(option) => option}
+        optionValue={(option) => option}
+        onChange={(option) => handleFormFieldChange(option)}
+        errorClassName="hidden"
+      />
 
       {kasp_enabled && (
-        <div>
-          <FieldLabel>{`${t("is")} ${kasp_string}`}</FieldLabel>
-          <SelectFormField
-            name="is_kasp"
-            id="is-kasp"
-            placeholder="Show all"
-            value={filterState.is_kasp}
-            options={["yes", "no"]}
-            optionLabel={(option) => option}
-            optionValue={(option) => option}
-            onChange={(option) => handleFormFieldChange(option)}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
+        <SelectFormField
+          name="is_kasp"
+          id="is-kasp"
+          placeholder="Show all"
+          label={`${t("is")} ${kasp_string}`}
+          value={filterState.is_kasp}
+          options={["yes", "no"]}
+          optionLabel={(option) => option}
+          optionValue={(option) => option}
+          onChange={(option) => handleFormFieldChange(option)}
+          errorClassName="hidden"
+        />
       )}
 
-      <div>
-        <FieldLabel>{t("is_upshift_case")}</FieldLabel>
-        <SelectFormField
-          name="is_up_shift"
-          id="is-up-shift"
-          placeholder="Show all"
-          value={filterState.is_up_shift}
-          options={["yes", "no"]}
-          optionLabel={(option) => option}
-          optionValue={(option) => option}
-          onChange={(option) => handleFormFieldChange(option)}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
+      <SelectFormField
+        name="is_up_shift"
+        id="is-up-shift"
+        placeholder="Show all"
+        label={t("is_upshift_case")}
+        value={filterState.is_up_shift}
+        options={["yes", "no"]}
+        optionLabel={(option) => option}
+        optionValue={(option) => option}
+        onChange={(option) => handleFormFieldChange(option)}
+        errorClassName="hidden"
+      />
 
-      <div>
-        <FieldLabel>{t("disease_status")}</FieldLabel>
-        <SelectFormField
-          name="disease_status"
-          id="disease-status"
-          placeholder="Show all"
-          value={filterState.disease_status}
-          options={DISEASE_STATUS}
-          optionLabel={(option) => option}
-          optionValue={(option) => option}
-          onChange={(option) => handleFormFieldChange(option)}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
+      <SelectFormField
+        name="disease_status"
+        id="disease-status"
+        placeholder="Show all"
+        label={t("disease_status")}
+        value={filterState.disease_status}
+        options={DISEASE_STATUS}
+        optionLabel={(option) => option}
+        optionValue={(option) => option}
+        onChange={(option) => handleFormFieldChange(option)}
+        errorClassName="hidden"
+      />
 
-      <div>
-        <FieldLabel>{t("is_antenatal")}</FieldLabel>
-        <SelectFormField
-          name="is_antenatal"
-          id="is-antenatal"
-          placeholder="Show all"
-          value={filterState.is_antenatal}
-          options={["yes", "no"]}
-          optionLabel={(option) => option}
-          optionValue={(option) => option}
-          onChange={(option) => handleFormFieldChange(option)}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
+      <SelectFormField
+        name="is_antenatal"
+        id="is-antenatal"
+        placeholder="Show all"
+        label={t("is_antenatal")}
+        value={filterState.is_antenatal}
+        options={["yes", "no"]}
+        optionLabel={(option) => option}
+        optionValue={(option) => option}
+        onChange={(option) => handleFormFieldChange(option)}
+        errorClassName="hidden"
+      />
 
-      <div>
-        <FieldLabel>{t("breathlessness_level")}</FieldLabel>
-        <SelectFormField
-          name="breathlessness_level"
-          id="breathlessness-level"
-          placeholder="Show all"
-          value={filterState.breathlessness_level}
-          options={BREATHLESSNESS_LEVEL}
-          optionLabel={(option) => option}
-          optionValue={(option) => option}
-          onChange={(option) => handleFormFieldChange(option)}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
+      <SelectFormField
+        name="breathlessness_level"
+        id="breathlessness-level"
+        placeholder="Show all"
+        label={t("breathlessness_level")}
+        value={filterState.breathlessness_level}
+        options={BREATHLESSNESS_LEVEL}
+        optionLabel={(option) => option}
+        optionValue={(option) => option}
+        onChange={(option) => handleFormFieldChange(option)}
+        errorClassName="hidden"
+      />
 
       <PhoneNumberFormField
         label={t("patient_phone_number")}
@@ -470,7 +454,6 @@ export default function ListFilter(props: any) {
         onChange={handleDateRangeChange}
         errorClassName="hidden"
       />
-
       <DateRangeFormField
         labelClassName="text-sm"
         name="modified_date"
