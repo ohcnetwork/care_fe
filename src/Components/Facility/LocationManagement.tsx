@@ -9,7 +9,7 @@ import { ReactElement } from "react";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
 interface LocationManagementProps {
@@ -37,10 +37,11 @@ const LocationRow = (props: LocationRowProps) => {
           <p className="text-sm break-all lg:w-3/4">{description}</p>
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row gap-2">
+      <div className="flex flex-col lg:flex-row gap-2 mt-4 lg:mt-0">
         <ButtonV2
           variant="secondary"
           border
+          className="w-full lg:w-auto"
           href={`/facility/${facilityId}/location/${id}/update`}
           authorizeFor={NonReadOnlyUsers}
         >
@@ -50,6 +51,7 @@ const LocationRow = (props: LocationRowProps) => {
         <ButtonV2
           variant="secondary"
           border
+          className="w-full lg:w-auto"
           href={`/facility/${facilityId}/location/${id}/beds`}
         >
           <CareIcon className="care-l-bed text-lg" />
@@ -152,13 +154,11 @@ export const LocationManagement = (props: LocationManagementProps) => {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Location Management"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
-        backUrl={`/facility/${facilityId}`}
-      />
+    <Page
+      title="Location Management"
+      crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+      backUrl={`/facility/${facilityId}`}
+    >
       <div className="container mx-auto px-4 py-2 sm:px-8">
         <div className="flex justify-end">
           <ButtonV2
@@ -171,6 +171,6 @@ export const LocationManagement = (props: LocationManagementProps) => {
         </div>
         {location}
       </div>
-    </div>
+    </Page>
   );
 };
