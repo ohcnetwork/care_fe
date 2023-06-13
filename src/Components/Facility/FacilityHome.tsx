@@ -41,8 +41,8 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
@@ -334,13 +334,12 @@ export const FacilityHome = (props: any) => {
   );
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={facilityData.name || "Facility"}
-        crumbsReplacements={{ [facilityId]: { name: facilityData.name } }}
-        focusOnLoad={true}
-        backUrl="/facility"
-      />
+    <Page
+      title={facilityData.name || "Facility"}
+      crumbsReplacements={{ [facilityId]: { name: facilityData.name } }}
+      focusOnLoad={true}
+      backUrl="/facility"
+    >
       <ConfirmDialogV2
         title={`Delete ${facilityData.name}`}
         description={
@@ -782,6 +781,6 @@ export const FacilityHome = (props: any) => {
           />
         </DialogModal>
       )}
-    </div>
+    </Page>
   );
 };
