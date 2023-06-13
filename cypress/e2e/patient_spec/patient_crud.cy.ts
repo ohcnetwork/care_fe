@@ -157,6 +157,7 @@ describe("Patient Creation with consultation", () => {
     cy.get("button#submit").should("be.visible").click();
     cy.get("[data-testid='return-to-patient-dashboard']").click();
   });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });
