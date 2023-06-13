@@ -12,23 +12,23 @@ describe("Shifting section filter", () => {
     cy.get("button").should("contain", "Filters").contains("Filters").click();
   });
 
-  // it("filter by origin facility", () => {
-  //   cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-  //   cy.get("[name='orgin_facility']")
-  //     .type("Dummy Facility 1")
-  //     .wait("@facilities_filter");
-  //   cy.get("[role='option']").first().click();
-  //   cy.contains("Apply").click();
-  // });
+  it("filter by origin facility", () => {
+    cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
+    cy.get("[name='orgin_facility']")
+      .type("Dummy Facility 1")
+      .wait("@facilities_filter");
+    cy.get("[role='option']").first().click();
+    cy.contains("Apply").click();
+  });
 
-  // it("filter by assigned facility", () => {
-  //   cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-  //   cy.get("[name='assigned_facility']")
-  //     .type("Dummy Shifting Center")
-  //     .wait("@facilities_filter");
-  //   cy.get("[role='option']").first().click();
-  //   cy.contains("Apply").click();
-  // });
+  it("filter by assigned facility", () => {
+    cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
+    cy.get("[name='assigned_facility']")
+      .type("Dummy Shifting Center")
+      .wait("@facilities_filter");
+    cy.get("[role='option']").first().click();
+    cy.contains("Apply").click();
+  });
 
   it("filter by assigned to user", () => {
     cy.intercept(/\/api\/v1\/users/).as("users_filter");
