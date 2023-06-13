@@ -11,7 +11,7 @@ const makeid = (length: number) => {
 };
 
 const makePhoneNumber = () =>
-  "9199" + Math.floor(Math.random() * 99999999).toString();
+  "99" + Math.floor(Math.random() * 9000000000 + 1000000000).toString();
 
 const username = makeid(25);
 const phone_number = makePhoneNumber();
@@ -44,17 +44,15 @@ describe("User management", () => {
     cy.wait(1000);
     cy.get("input[type='checkbox']").click();
     cy.wait(1000);
-    cy.get("[placeholder='Phone Number']").type(phone_number);
+    cy.get("[name='phone_number']").type(phone_number);
     cy.wait(1000);
-    cy.get("[placeholder='WhatsApp Phone Number']").type(alt_phone_number, {
-      force: true,
-    });
+    cy.get("[name='alt_phone_number']").type(alt_phone_number);
     cy.intercept(/users/).as("check_availability");
     cy.get("[id='date_of_birth']").click();
     cy.get("div").contains("20").click();
     cy.get("[id='year-0']").click();
     cy.get("[id='date-1']").click();
-    cy.get("[name='username']").type(username, { force: true });
+    cy.get("[name='username']").type(username);
     cy.wait("@check_availability").its("response.statusCode").should("eq", 200);
     cy.get("[name='password']").type("#@Cypress_test123");
     cy.get("[name='c_password']").type("#@Cypress_test123");
@@ -63,9 +61,7 @@ describe("User management", () => {
     cy.get("[name='email']").type("cypress@tester.com");
     cy.get("[id='gender'] > div > button").click();
     cy.get("div").contains("Male").click();
-    cy.get("button[id='submit']").contains("Save User").click({
-      force: true,
-    });
+    cy.get("button[id='submit']").contains("Save User").click();
     cy.verifyNotification("User added successfully");
   });
 
@@ -184,7 +180,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("Invalid Whatsapp Number of " + username, () => {
-    const whatsapp_num = "11111-11111";
+    const whatsapp_num = "11 1111 111";
     cy.get("[placeholder='WhatsApp Number']")
       .focus()
       .type(`${backspace}${whatsapp_num}`)
@@ -201,7 +197,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("Valid Whatsapp Number of " + username, () => {
-    const whatsapp_num = "91111-11111";
+    const whatsapp_num = "91111 11111";
     cy.get("[placeholder='WhatsApp Number']")
       .focus()
       .type(`${backspace}${whatsapp_num}`)
@@ -218,7 +214,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("Invalid Phone Number of " + username, () => {
-    const phone_num = "11111-11111";
+    const phone_num = "11 1111 111";
     cy.get("[placeholder='Phone Number']")
       .focus()
       .type(`${backspace}${phone_num}`)
@@ -235,7 +231,7 @@ describe("Edit Profile Testing", () => {
   });
 
   it("Valid Phone Number of " + username, () => {
-    const phone_num = "99999-99999";
+    const phone_num = "99999 99999";
     cy.get("[placeholder='Phone Number']")
       .focus()
       .type(`${backspace}${phone_num}`)

@@ -10,9 +10,10 @@ import {
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
-import { Tooltip } from "@material-ui/core";
 import { formatDate } from "../../Utils/utils";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page.js";
+import CareIcon from "../../CAREUI/icons/CareIcon.js";
+import ButtonV2 from "../Common/components/ButtonV2.js";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function InventoryLog(props: any) {
@@ -146,43 +147,49 @@ export default function InventoryLog(props: any) {
           </p>
         </td>
         <td>
-          <Tooltip
-            title={
-              inventoryItem.probable_accident ? (
+          <div className="tooltip">
+            <div className="tooltip-left tooltip-text">
+              {inventoryItem.probable_accident ? (
                 <div className="text-sm leading-snug text-justify">
                   <b>Unmarks this transaction as accident</b>
                   <br />
                   This action will not affect the total stock.
                 </div>
               ) : (
-                <div className="text-sm leading-snug text-justify">
+                <div className="text-sm leading-snug text-justify ">
                   <b>Marks this transaction as accident</b>
                   <br />
                   This action will not affect the total stock. To delete the
                   transaction, create another transaction that undos the effect
                   of this, or click <i>Delete Last Entry</i>.
                 </div>
-              )
-            }
-            arrow={true}
-          >
-            <button
-              onClick={(_) => flagFacility(inventoryItem.external_id)}
-              disabled={saving}
-              className="btn btn-default"
-            >
-              {inventoryItem.probable_accident ? (
-                <span className="text-primary-500">
-                  <i className="fas fa-exclamation-triangle pr-2"></i>UnMark
+              )}
+            </div>
+
+            {inventoryItem.probable_accident ? (
+              <ButtonV2
+                onClick={(_) => flagFacility(inventoryItem.external_id)}
+                disabled={saving}
+                variant="primary"
+              >
+                <span>
+                  <CareIcon className="care-l-exclamation-triangle pr-2 text-lg" />
+                  UnMark
                 </span>
-              ) : (
-                <span className="text-red-500">
-                  <i className="fas fa-exclamation-circle pr-2"></i>
+              </ButtonV2>
+            ) : (
+              <ButtonV2
+                onClick={(_) => flagFacility(inventoryItem.external_id)}
+                disabled={saving}
+                variant="danger"
+              >
+                <span>
+                  <CareIcon className="care-l-exclamation-circle pr-2 text-lg" />
                   Mark as Accident
                 </span>
-              )}
-            </button>
-          </Tooltip>
+              </ButtonV2>
+            )}
+          </div>
         </td>
       </tr>
     ));
@@ -245,7 +252,7 @@ export default function InventoryLog(props: any) {
 
   return (
     <div>
-      <PageTitle
+      <Page
         title="Inventory Log"
         className="mx-3 md:mx-8"
         crumbsReplacements={{
@@ -253,40 +260,37 @@ export default function InventoryLog(props: any) {
           [inventoryId]: { name: itemName },
         }}
         backUrl={`/facility/${facilityId}/inventory`}
-      />
-      <div className="container mx-auto px-4 sm:px-8">
-        <div className="py-8 ">
-          <div className="flex justify-between">
-            <h4>Item: {itemName}</h4>
-            {current_stock > 0 && (
-              <Tooltip
-                title={
-                  <div className="text-sm leading-snug text-justify">
+      >
+        <div className="container mx-auto px-4 sm:px-8">
+          <div className="py-8 ">
+            <div className="flex justify-between">
+              <h4>Item: {itemName}</h4>
+              {current_stock > 0 && (
+                <div className="tooltip ">
+                  <div className="text-sm leading-snug text-justify tooltip-text tooltip-left">
                     <b>Deletes the last transaction</b> by creating an
                     equivalent undo transaction and marks both the transactions
                     as accident.
                   </div>
-                }
-                arrow={true}
-              >
-                <button
-                  onClick={(_) =>
-                    removeLastInventoryLog(inventory[0].item_object.id)
-                  }
-                  disabled={saving}
-                  className="btn btn-default"
-                >
-                  <span className="text-red-500">
-                    <i className="fas fa-exclamation-circle pr-2"></i>
-                    Delete Last Entry
-                  </span>
-                </button>
-              </Tooltip>
-            )}
+                  <ButtonV2
+                    variant="danger"
+                    onClick={(_) =>
+                      removeLastInventoryLog(inventory[0].item_object.id)
+                    }
+                    disabled={saving}
+                  >
+                    <span>
+                      <CareIcon className="care-l-exclamation-circle pr-2 text-lg" />
+                      Delete Last Entry
+                    </span>
+                  </ButtonV2>
+                </div>
+              )}
+            </div>
+            {inventoryItem}
           </div>
-          {inventoryItem}
         </div>
-      </div>
+      </Page>
     </div>
   );
 }
