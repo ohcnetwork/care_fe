@@ -350,7 +350,7 @@ export default function ListFilter(props: any) {
         errorClassName="hidden"
       />
 
-      <div className="-mt-6">
+      <div>
         <FieldLabel>{t("ordering")}</FieldLabel>
         <LegacySelectField
           name="ordering"
