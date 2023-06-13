@@ -14,6 +14,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import ExportMenu from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import CountBlock from "../../CAREUI/display/Count";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import Page from "../Common/components/Page";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -281,22 +282,16 @@ export default function ResultList() {
                 value={qParams.mobile_number || "+91"}
                 onChange={(event) => updateQuery({ [event.name]: event.value })}
                 placeholder="Search by Phone Number"
-                noAutoFormat
               />
             </div>
           </div>
           <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
-            <div className="flex ml-auto gap-2 md:pt-0 pt-2">
-              <button
-                className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-                onClick={() => advancedFilter.setShow(true)}
-              >
-                <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-                <span>Filters</span>
-              </button>
-            </div>
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
           </div>
         </div>
+
         <FilterBadges
           badges={({ badge, phoneNumber, dateRange }) => [
             badge("Name", "name"),
