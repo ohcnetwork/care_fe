@@ -32,11 +32,11 @@ describe("Shifting section filter", () => {
 
   it("filter by assigned to user", () => {
     cy.intercept(/\/api\/v1\/users/).as("users_filter");
-    cy.get("[id='assigned-to']")
+    cy.get("[name='assigned_to']")
       .wait(100)
       .type("cypress")
       .wait("@users_filter");
-    cy.get("[id='assigned-to']").wait(100).type("{downarrow}{enter}");
+    cy.get("[name='assigned_to']").wait(100).type("{downarrow}{enter}");
     cy.contains("Apply").click();
   });
 
