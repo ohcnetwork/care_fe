@@ -1,33 +1,35 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
-import screenfull from "screenfull";
+import * as Notification from "../../../Utils/Notifications.js";
+
 import {
-  CameraPTZ,
   CAMERA_STATES,
+  CameraPTZ,
   getCameraPTZ,
 } from "../../../Common/constants";
-import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import {
   ICameraAssetState,
   StreamStatus,
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
+import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   getConsultation,
+  getPermittedFacility,
   listAssetBeds,
   partialUpdateAssetBed,
-  getPermittedFacility,
 } from "../../../Redux/actions";
-import Loading from "../../Common/Loading";
+import { statusType, useAbortableEffect } from "../../../Common/utils";
+
 import { ConsultationModel } from "../models";
-import * as Notification from "../../../Utils/Notifications.js";
-import useKeyboardShortcut from "use-keyboard-shortcut";
-import { Tooltip } from "@material-ui/core";
 import FeedButton from "./FeedButton";
+import Loading from "../../Common/Loading";
 import ReactPlayer from "react-player";
-import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
+import ToolTip from "../../Common/utils/Tooltip";
 import { classNames } from "../../../Utils/utils";
+import screenfull from "screenfull";
+import { useDispatch } from "react-redux";
+import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 
 interface IFeedProps {
   facilityId: string;
@@ -500,7 +502,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           <div className="pl-3 hideonmobilescreen">
             <FeedCameraPTZHelpButton
               cameraPTZ={cameraPTZ}
-              tooltipPlacement="left-end"
+              tooltipPlacement="CUSTOM"
+              tooltipClassName="-bottom-48 right-40"
             />
           </div>
         </div>
@@ -574,26 +577,15 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
 
 export const FeedCameraPTZHelpButton = (props: {
   cameraPTZ: CameraPTZ[];
-  tooltipPlacement?:
-    | "bottom-end"
-    | "bottom-start"
-    | "bottom"
-    | "left-end"
-    | "left-start"
-    | "left"
-    | "right-end"
-    | "right-start"
-    | "right"
-    | "top-end"
-    | "top-start"
-    | "top";
+  tooltipPlacement: "TOP" | "BOTTOM" | "LEFT" | "RIGHT" | "CUSTOM";
+  tooltipClassName?: string;
 }) => {
-  const { cameraPTZ, tooltipPlacement } = props;
+  const { cameraPTZ, tooltipPlacement, tooltipClassName } = props;
   return (
-    <Tooltip
-      placement={tooltipPlacement ?? "left-start"}
-      arrow={true}
-      title={
+    <ToolTip
+      position={tooltipPlacement ?? "LEFT"}
+      className={tooltipClassName}
+      text={
         <ul className="p-2 text-sm">
           {cameraPTZ.map((option) => {
             return (
@@ -638,6 +630,6 @@ export const FeedCameraPTZHelpButton = (props: {
       <button key="option.action" className="rounded text-2xl text-white/40">
         <i className={"fa fa-circle-question"} />
       </button>
-    </Tooltip>
+    </ToolTip>
   );
 };
