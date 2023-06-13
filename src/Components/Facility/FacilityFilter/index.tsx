@@ -96,8 +96,8 @@ function FacilityFilter(props: any) {
           {...field("kasp_empanelled")}
           label={`${kasp_string} Empanelled`}
           options={[
-            { id: true, text: t("yes") },
-            { id: false, text: t("no") },
+            { id: "true", text: t("yes") },
+            { id: "false", text: t("no") },
           ]}
           optionLabel={(option) => option.text}
           optionValue={(option) => option.id}

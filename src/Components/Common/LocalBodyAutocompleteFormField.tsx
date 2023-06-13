@@ -3,7 +3,7 @@ import { FormFieldBaseProps } from "../Form/FormFields/Utils";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useState } from "react";
-import { getDistrictByState } from "../../Redux/actions";
+import { getLocalbodyByDistrict } from "../../Redux/actions";
 import { IDistrict } from "./DistrictAutocompleteFormField";
 
 export type ILocalBody = {
@@ -26,9 +26,11 @@ export default function LocalBodyAutocompleteFormField(props: Props) {
       if (!props.district) {
         return;
       }
-      const res = await dispatch(getDistrictByState({ id: props.district }));
+      const res = await dispatch(
+        getLocalbodyByDistrict({ id: props.district })
+      );
       if (!status.aborted && res && res.data) {
-        setLocalBodies(res.data.results);
+        setLocalBodies(res.data);
       }
     },
     [dispatch, props.district]
@@ -45,7 +47,7 @@ export default function LocalBodyAutocompleteFormField(props: Props) {
       options={localBodies ?? []}
       optionLabel={(option) => option.name}
       optionValue={(option) => option.id}
-      isLoading={localBodies === undefined}
+      isLoading={!!(props.district && localBodies === undefined)}
       disabled={!props.district}
     />
   );

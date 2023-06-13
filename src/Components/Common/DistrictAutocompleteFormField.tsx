@@ -27,8 +27,8 @@ export default function DistrictAutocompleteFormField(props: Props) {
         return;
       }
       const res = await dispatch(getDistrictByState({ id: props.state }));
-      if (!status.aborted && res && res.data) {
-        setDistricts(res.data.results);
+      if (!status.aborted && res.data) {
+        setDistricts(res.data);
       }
     },
     [dispatch, props.state]
@@ -45,7 +45,7 @@ export default function DistrictAutocompleteFormField(props: Props) {
       options={districts ?? []}
       optionLabel={(option) => option.name}
       optionValue={(option) => option.id}
-      isLoading={districts === undefined}
+      isLoading={!!(props.state && districts === undefined)}
       disabled={!props.state}
     />
   );
