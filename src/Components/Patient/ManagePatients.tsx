@@ -29,7 +29,6 @@ import { ExportMenu } from "../Common/Export";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import FilterBadge from "../../CAREUI/display/FilterBadge";
-import NavTabs from "../Common/NavTabs";
 import PatientFilter from "./PatientFilter";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
@@ -746,7 +745,9 @@ export const PatientManager = () => {
             className="w-full lg:w-fit"
           >
             <CareIcon className="care-l-plus text-lg" />
-            <p id="add-patient-div" className="lg:my-[2px]">Add Patient Details</p>
+            <p id="add-patient-div" className="lg:my-[2px]">
+              Add Patient Details
+            </p>
           </ButtonV2>
         </div>
         <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end w-full lg:w-fit">
@@ -956,14 +957,6 @@ export const PatientManager = () => {
       </div>
       <div>
         <PatientFilter {...advancedFilter} key={window.location.search} />
-        {/* <NavTabs
-          onChange={(tab) => updateQuery({ is_active: tab ? "False" : "True" })}
-          options={[
-            { value: 0, label: "Live" },
-            { value: 1, label: "Discharged" },
-          ]}
-          active={tabValue}
-        /> */}
         <SwipeableViews index={tabValue}>
           <TabPanel value={tabValue} index={0}>
             <div className="mb-4">{managePatients}</div>
