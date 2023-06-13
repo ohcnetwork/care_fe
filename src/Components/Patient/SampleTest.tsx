@@ -231,7 +231,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           optionLabel={(option) => option}
           optionValue={(option) => option}
         />
-        <div className="flex flex-col gap-1 mb-2">
+        <div className="flex flex-col gap-1 mb-6">
           <p className="font-medium">
             Refer below to know more about ICMR Categories
           </p>
