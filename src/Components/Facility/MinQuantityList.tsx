@@ -4,10 +4,9 @@ import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getMinQuantity, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
-import { navigate } from "raviger";
-import { RoleButton } from "../Common/RoleButton";
 import { MinQuantityRequiredModal } from "./MinQuantityRequiredModal";
 import ButtonV2 from "../Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -126,25 +125,21 @@ export default function MinQuantityList(props: any) {
             {inventoryItem.min_quantity}{" "}
             {inventoryItem.item_object?.default_unit?.name}
           </p>
-          <RoleButton
-            className=" bg-primary-500 hover:bg-primary-600 text-white"
-            materialButtonProps={{
-              variant: "contained",
-              color: "primary",
-              size: "medium",
-            }}
-            handleClickCB={() => {
+          <ButtonV2
+            variant="secondary"
+            ghost
+            border
+            onClick={() => {
               setSelectedItem({
                 id: inventoryItem.id,
                 item_id: inventoryItem.item_object?.id,
               });
               setShowMinQuantityRequiredModal(true);
             }}
-            disableFor="readOnly"
-            buttonType="materialUI"
+            authorizeFor={NonReadOnlyUsers}
           >
-            UPDATE
-          </RoleButton>
+            Update
+          </ButtonV2>
         </td>
       </tr>
     ));
@@ -225,21 +220,13 @@ export default function MinQuantityList(props: any) {
       />
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8">
-          <RoleButton
+          <ButtonV2
             className="ml-2"
-            materialButtonProps={{
-              variant: "contained",
-              color: "primary",
-              size: "small",
-            }}
-            handleClickCB={() =>
-              navigate(`/facility/${facilityId}/inventory/min_quantity/set`)
-            }
-            disableFor="readOnly"
-            buttonType="materialUI"
+            href={`/facility/${facilityId}/inventory/min_quantity/set`}
+            authorizeFor={NonReadOnlyUsers}
           >
             Set Min Quantity
-          </RoleButton>
+          </ButtonV2>
           {inventoryItem}
         </div>
       </div>
