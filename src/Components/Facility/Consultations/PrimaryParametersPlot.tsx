@@ -196,10 +196,10 @@ export const PrimaryParametersPlot = ({
             high={60}
           />
         </div>
-        <div className="md:w-full flex justify-center overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow h-80">
-          <h3 className="text-sm text-center">Rhythm</h3>
+        <div className="md:w-full flex overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow h-80">
+          <h3 className="text-sm">Rhythm</h3>
           {Object.keys(rhythmValues).length === 0 ? (
-            <p className="px-4 self-center">No Rhythm data available.</p>
+            <p className="mx-auto self-center">No Rhythm data available.</p>
           ) : (
             <div className="flow-root m-2 overflow-y-scroll h-64">
               <ul role="list" className="-mb-8">
