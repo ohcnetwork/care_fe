@@ -79,7 +79,7 @@ function FacilityFilter(props: any) {
         <StateAutocompleteFormField {...field("state")} />
         <DistrictAutocompleteFormField
           {...field("district")}
-          state={Number(filterState.state)}
+          state={filterState.state}
         />
         <LocalBodyAutocompleteFormField
           {...field("local_body")}
