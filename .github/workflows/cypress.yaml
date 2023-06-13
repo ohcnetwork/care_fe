@@ -35,7 +35,7 @@ jobs:
         run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
 
       - name: Change api proxy url 📝
-        run: 'sed --in-place "s^\"target\": .*,^\"target\": \"http://localhost:9000\",^g" vite.config.ts'
+        run: 'sed --in-place "s^target: .*,^target: \"http://localhost:9000\",^g" vite.config.ts'
 
       - name: Install dependencies 📦
         run: npm install
