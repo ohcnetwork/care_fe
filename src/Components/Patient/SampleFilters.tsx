@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { LegacySelectField } from "../Common/HelperInputFields";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
@@ -10,9 +9,12 @@ import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { CircularProgress } from "@material-ui/core";
 import useMergeState from "../../Common/hooks/useMergeState";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import CircularProgress from "../Common/components/CircularProgress";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 
 const clearFilterState = {
   status: "",
@@ -36,13 +38,8 @@ export default function UserFilter(props: any) {
   const [isFacilityLoading, setFacilityLoading] = useState(false);
   const dispatch: any = useDispatch();
 
-  const handleChange = (event: any) => {
-    const { name, value } = event.target;
-
-    const filterData: any = { ...filterState };
-    filterData[name] = value;
-
-    setFilterState(filterData);
+  const handleChange = ({ name, value }: FieldChangeEvent<unknown>) => {
+    setFilterState({ ...filterState, [name]: value });
   };
 
   const applyFilter = () => {
@@ -70,6 +67,8 @@ export default function UserFilter(props: any) {
     fetchData();
   }, [dispatch]);
 
+  console.log(filterState.sample_type);
+
   return (
     <FiltersSlideover
       advancedFilter={props}
@@ -80,55 +79,49 @@ export default function UserFilter(props: any) {
         closeFilter();
       }}
     >
-      <div className="w-full flex-none">
-        <div className="text-sm font-semibold">Status</div>
-        <LegacySelectField
-          name="status"
-          variant="outlined"
-          margin="dense"
-          value={filterState.status || 0}
-          options={[
-            { id: "", text: "SELECT" },
-            ...SAMPLE_TEST_STATUS.map(({ id, text }) => {
-              return { id, text: text.replaceAll("_", " ") };
-            }),
-          ]}
-          onChange={handleChange}
-          errors=""
-        />
-      </div>
+      <SelectFormField
+        name="status"
+        label="Status"
+        value={filterState.status}
+        onChange={handleChange}
+        options={SAMPLE_TEST_STATUS.map(({ id, text }) => {
+          return { id, text: text.replaceAll("_", " ") };
+        })}
+        optionValue={(option) => option.id}
+        optionLabel={(option) => option.text}
+        labelClassName="text-sm"
+        errorClassName="hidden"
+      />
+
+      <SelectFormField
+        name="result"
+        label="Result"
+        value={filterState.result}
+        onChange={handleChange}
+        options={SAMPLE_TEST_RESULT}
+        optionValue={(option) => option.id}
+        optionLabel={(option) => option.text}
+        labelClassName="text-sm"
+        errorClassName="hidden"
+      />
+
+      <SelectFormField
+        name="sample_type"
+        label="Sample Test Type"
+        value={filterState.sample_type}
+        onChange={handleChange}
+        options={SAMPLE_TYPE_CHOICES}
+        optionValue={(option) => option.id}
+        optionLabel={(option) => option.text}
+        labelClassName="text-sm"
+        errorClassName="hidden"
+      />
 
       <div className="w-full flex-none">
-        <div className="text-sm font-semibold">Result</div>
-        <LegacySelectField
-          name="result"
-          variant="outlined"
-          margin="dense"
-          value={filterState.result || 0}
-          options={[{ id: "", text: "SELECT" }, ...SAMPLE_TEST_RESULT]}
-          onChange={handleChange}
-          errors=""
-        />
-      </div>
-
-      <div className="w-full flex-none">
-        <div className="text-sm font-semibold">Sample Test Type</div>
-        <LegacySelectField
-          name="sample_type"
-          variant="outlined"
-          margin="dense"
-          value={filterState.sample_type}
-          options={[{ id: "", text: "SELECT" }, ...SAMPLE_TYPE_CHOICES]}
-          onChange={handleChange}
-          errors=""
-        />
-      </div>
-
-      <div className="w-full flex-none">
-        <span className="text-sm font-semibold">Facility</span>
-        <div className="">
+        <FieldLabel className="text-sm">Facility</FieldLabel>
+        <div>
           {isFacilityLoading ? (
-            <CircularProgress size={20} />
+            <CircularProgress />
           ) : (
             <FacilitySelect
               multiple={false}
@@ -141,7 +134,6 @@ export default function UserFilter(props: any) {
                   facility_ref: obj,
                 })
               }
-              className="shifting-page-filter-dropdown"
               errors={""}
             />
           )}

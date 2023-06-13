@@ -63,16 +63,42 @@ describe("Resource filter", () => {
 
   it("filter by created date", () => {
     cy.intercept(/\/api\/v1\/resource/).as("resource_filter");
-    cy.get("[name='created_date_after']").type("22/05/2020");
-    cy.get("[name='created_date_before']").type("09/09/2021");
+    cy.get("[name='created_date_after']").click();
+    cy.get(
+      "[role='button'][aria-label='Move backward to switch to the previous month.']"
+    ).click();
+    cy.get("td[tabindex='-1']")
+      .first()
+      .then(($td) => {
+        $td[0].click();
+
+        cy.get("td[tabindex='-1']")
+          .eq(14)
+          .then(($td2) => {
+            $td2[0].click();
+          });
+      });
     cy.contains("Apply").click();
     cy.wait("@resource_filter");
   });
 
   it("filter by modified date", () => {
     cy.intercept(/\/api\/v1\/resource/).as("resource_filter");
-    cy.get("[name='modified_date_after']").type("22/05/2020");
-    cy.get("[name='modified_date_before']").type("09/09/2021");
+    cy.get("[name='modified_date_after']").click();
+    cy.get(
+      "[role='button'][aria-label='Move backward to switch to the previous month.']"
+    ).click();
+    cy.get("td[tabindex='-1']")
+      .first()
+      .then(($td) => {
+        $td[0].click();
+
+        cy.get("td[tabindex='-1']")
+          .eq(14)
+          .then(($td2) => {
+            $td2[0].click();
+          });
+      });
     cy.contains("Apply").click();
     cy.wait("@resource_filter");
   });
