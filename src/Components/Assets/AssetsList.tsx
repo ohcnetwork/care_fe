@@ -366,7 +366,10 @@ const AssetsList = () => {
               <i className="fas fa-search mr-1"></i> Scan Asset QR
             </ButtonV2>
           </div>
-          <div className="flex flex-col md:flex-row w-full">
+          <div
+            className="flex flex-col md:flex-row w-full"
+            data-testid="create-asset-buttom"
+          >
             <ButtonV2
               authorizeFor={NonReadOnlyUsers}
               className="w-full inline-flex items-center justify-center"
