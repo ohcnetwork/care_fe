@@ -17,8 +17,7 @@ import { LOCATION_BED_TYPES } from "../../Common/constants";
 import BedDeleteDialog from "./BedDeleteDialog";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
 interface BedManagementProps {
@@ -82,68 +81,71 @@ const BedRow = (props: BedRowProps) => {
   };
 
   return (
-    <div
-      key={id}
-      className="w-full border-b lg:flex justify-between items-center py-6"
-    >
-      <div className="px-4 lg:w-3/4 space-y-2 mt-2">
-        <div className="flex flex-col sm:flex-row">
-          <p className="inline text-xl capitalize break-words">{name}</p> &nbsp;
-          <div>
-            {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
-              <p className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
-                {LOCATION_BED_TYPES.find(
-                  (item) => item.id === bedType
-                )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
-              </p>
-            )}
-            <p
-              className={`${
-                isOccupied
-                  ? "bg-warning-100 text-warning-600"
-                  : "bg-primary-100 text-primary-600"
-              } inline-flex ml-1 items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 w-fit capitalize mb-1`}
-            >
-              {isOccupied ? "Occupied" : "Vacant"}
-            </p>
-          </div>
-        </div>
-        <p className="break-all">{description}</p>
-      </div>
-      <div className="flex flex-col sm:flex-row gap-2">
-        <ButtonV2
-          href={`/facility/${facilityId}/location/${locationId}/beds/${id}/update`}
-          authorizeFor={NonReadOnlyUsers}
-          className="w-full lg:w-auto"
-          variant="secondary"
-          border
-          ghost
-        >
-          <CareIcon className="care-l-pen text-lg" />
-          Edit
-        </ButtonV2>
-        <ButtonV2
-          onClick={() => handleDelete(name, id)}
-          authorizeFor={NonReadOnlyUsers}
-          variant="danger"
-          border
-          ghost
-          className="w-full lg:w-auto"
-          disabled={isOccupied}
-          tooltip={isOccupied ? "Bed is occupied" : undefined}
-          tooltipClassName="w-full lg:w-auto"
-        >
-          <CareIcon className="care-l-trash-alt text-lg" />
-          Delete
-        </ButtonV2>
-      </div>
+    <>
       <BedDeleteDialog
         name={bedData.name}
         show={bedData.show}
         handleCancel={handleDeleteCancel}
         handleOk={handleDeleteConfirm}
       />
-    </div>
+      <div
+        key={id}
+        className="w-full border-b lg:flex justify-between items-center py-4"
+      >
+        <div className="px-4 lg:w-3/4 space-y-2 mt-2">
+          <div className="flex flex-col sm:flex-row">
+            <p className="inline text-xl capitalize break-words">{name}</p>{" "}
+            &nbsp;
+            <div>
+              {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
+                <p className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
+                  {LOCATION_BED_TYPES.find(
+                    (item) => item.id === bedType
+                  )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
+                </p>
+              )}
+              <p
+                className={`${
+                  isOccupied
+                    ? "bg-warning-100 text-warning-600"
+                    : "bg-primary-100 text-primary-600"
+                } inline-flex ml-1 items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 w-fit capitalize mb-1`}
+              >
+                {isOccupied ? "Occupied" : "Vacant"}
+              </p>
+            </div>
+          </div>
+          <p className="break-all">{description}</p>
+        </div>
+        <div className="flex flex-col lg:flex-row gap-2 mt-4 lg:mt-0">
+          <ButtonV2
+            href={`/facility/${facilityId}/location/${locationId}/beds/${id}/update`}
+            authorizeFor={NonReadOnlyUsers}
+            className="w-full lg:w-auto"
+            variant="secondary"
+            border
+            ghost
+          >
+            <CareIcon className="care-l-pen text-lg" />
+            Edit
+          </ButtonV2>
+          <ButtonV2
+            onClick={() => handleDelete(name, id)}
+            authorizeFor={NonReadOnlyUsers}
+            variant="danger"
+            border
+            ghost
+            className="w-full lg:w-auto"
+            disabled={isOccupied}
+            tooltip={isOccupied ? "Bed is occupied" : undefined}
+            tooltipClassName="w-full lg:w-auto"
+          >
+            <CareIcon className="care-l-trash-alt text-lg" />
+            Delete
+          </ButtonV2>
+        </div>
+      </div>
+    </>
   );
 };
 
@@ -236,7 +238,7 @@ export const BedManagement = (props: BedManagementProps) => {
   if (beds) {
     bed = (
       <>
-        <div className="grow mt-5 bg-white px-2 flex flex-wrap">{BedList}</div>
+        <div className="grow mt-5 bg-white p-4 flex flex-wrap">{BedList}</div>
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
@@ -256,20 +258,18 @@ export const BedManagement = (props: BedManagementProps) => {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Bed Management"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [locationId]: {
-            name: locationName,
-            uri: `/facility/${facilityId}/location`,
-          },
-        }}
-        backUrl={`/facility/${facilityId}/location/${locationId}`}
-      />
-      <div className="container px-4 py-2 sm:px-8">
+    <Page
+      title="Bed Management"
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [locationId]: {
+          name: locationName,
+          uri: `/facility/${facilityId}/location`,
+        },
+      }}
+      backUrl={`/facility/${facilityId}/location/${locationId}`}
+    >
+      <div className="container mx-auto px-4 py-2 sm:px-8">
         <div className="flex justify-end">
           <ButtonV2
             href={`/facility/${facilityId}/location/${locationId}/beds/add`}
@@ -281,6 +281,6 @@ export const BedManagement = (props: BedManagementProps) => {
         </div>
         {bed}
       </div>
-    </div>
+    </Page>
   );
 };

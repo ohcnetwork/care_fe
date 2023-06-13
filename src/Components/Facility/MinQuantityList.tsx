@@ -7,8 +7,8 @@ import Pagination from "../Common/Pagination";
 import { MinQuantityRequiredModal } from "./MinQuantityRequiredModal";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function MinQuantityList(props: any) {
   const { facilityId }: any = props;
@@ -202,22 +202,21 @@ export default function MinQuantityList(props: any) {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Minimum Quantity Required"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          min_quantity: {
-            name: "Min Quantity",
-            uri: `/facility/${facilityId}/inventory/min_quantity/list`,
-          },
-          list: {
-            style: "pointer-events-none",
-          },
-        }}
-        backUrl={`/facility/${facilityId}/inventory`}
-      />
+    <Page
+      title="Minimum Quantity Required"
+      className="mx-3 md:mx-8"
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        min_quantity: {
+          name: "Min Quantity",
+          uri: `/facility/${facilityId}/inventory/min_quantity/list`,
+        },
+        list: {
+          style: "pointer-events-none",
+        },
+      }}
+      backUrl={`/facility/${facilityId}/inventory`}
+    >
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8">
           <ButtonV2
@@ -243,6 +242,6 @@ export default function MinQuantityList(props: any) {
           }}
         />
       )}
-    </div>
+    </Page>
   );
 }
