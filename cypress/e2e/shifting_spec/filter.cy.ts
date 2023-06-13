@@ -14,24 +14,29 @@ describe("Shifting section filter", () => {
 
   it("filter by origin facility", () => {
     cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-    cy.get("[name='orgin_facility']").type("harsha").wait("@facilities_filter");
-    cy.get("[name='orgin_facility']").type("{downarrow}{enter}");
+    cy.get("[name='orgin_facility']")
+      .type("Dummy Facility 1")
+      .wait("@facilities_filter");
+    cy.get("[role='option']").first().click();
     cy.contains("Apply").click();
   });
 
   it("filter by assigned facility", () => {
     cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
     cy.get("[name='assigned_facility']")
-      .type("center")
+      .type("Dummy Shifting Center")
       .wait("@facilities_filter");
-    cy.get("[name='assigned_facility']").type("{downarrow}{enter}");
+    cy.get("[role='option']").first().click();
     cy.contains("Apply").click();
   });
 
   it("filter by assigned to user", () => {
     cy.intercept(/\/api\/v1\/users/).as("users_filter");
-    cy.get("[name='assigned_to']").type("test").wait("@users_filter");
-    cy.get("[name='assigned_to']").type("{downarrow}{enter}");
+    cy.get("[id='assigned_to']")
+      .wait(100)
+      .type("cypress")
+      .wait("@users_filter");
+    cy.get("[id='assigned_to']").wait(100).type("{downarrow}{enter}");
     cy.contains("Apply").click();
   });
 

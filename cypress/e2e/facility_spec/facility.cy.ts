@@ -73,7 +73,7 @@ class facility {
 
     cy.get("input[id=pincode]").should("exist").clear().type(pincode);
 
-    cy.get("input[name=phone_number]").should("exist").type(phone);
+    cy.get("input[name=phone_number]").should("exist").clear().type(phone);
 
     cy.get("input[id=oxygen_capacity]").clear().type(oxygen_capacity);
     cy.get("input[id=expected_oxygen_requirement]")
@@ -138,7 +138,7 @@ describe("Facility", () => {
       ward: "MANAKKAPADY",
       address: "some address",
       pincode: "884656",
-      phone: "9985784535",
+      phone: "+919985784535",
       oxygen_capacity: "20",
       oxygen_requirement: "30",
       type_b_cylinders: "20",
@@ -185,7 +185,7 @@ describe("Facility", () => {
       ward: "PAZHAMTHOTTAM",
       address: " update",
       pincode: "584675",
-      phone: "9985784535",
+      phone: "+919985784535",
       oxygen_capacity: "30",
       oxygen_requirement: "40",
       type_b_cylinders: "23",
