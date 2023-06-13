@@ -249,14 +249,9 @@ export default function ResourceDetails(props: { id: string }) {
       ) : (
         <div className="mx-3 md:mx-8 mb-10">
           <div className="my-4 flex flex-col items-start md:flex-row md:justify-between md:items-center">
-            <div>
-              <button
-                onClick={(_) => setIsPrintMode(true)}
-                className="btn btn-primary"
-              >
-                <i className="fas fa-file-alt mr-2"></i> Approval Letter
-              </button>
-            </div>
+            <ButtonV2 onClick={(_) => setIsPrintMode(true)}>
+              <i className="fas fa-file-alt mr-2"></i> Approval Letter
+            </ButtonV2>
           </div>
           {data.assigned_to_object && (
             <div className="relative rounded-lg shadow bg-primary-200">
