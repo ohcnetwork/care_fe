@@ -8,7 +8,6 @@ import {
   listFacilityBeds,
   deleteFacilityBed,
 } from "../../Redux/actions";
-import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { BedModel } from "./models";
@@ -16,6 +15,8 @@ import { ReactElement } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import BedDeleteDialog from "./BedDeleteDialog";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
@@ -109,35 +110,32 @@ const BedRow = (props: BedRowProps) => {
         </div>
         <p className="break-all">{description}</p>
       </div>
-      <div className="sm:flex">
-        <div className="px-2 py-2 w-full">
-          <button
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/location/${locationId}/beds/${id}/update`
-              )
-            }
-            className="btn btn-default bg-white w-full border-gray-700 transition ease-in-out duration-150 hover:shadow"
-          >
-            <i className="fas fa-pencil-alt mr-2"></i>
-            Edit
-          </button>
-        </div>
-        <div className="px-2 py-2 w-full">
-          <ButtonV2
-            onClick={() => handleDelete(name, id)}
-            variant="danger"
-            border
-            ghost
-            className="w-full lg:w-auto"
-            disabled={isOccupied}
-            tooltip={isOccupied ? "Bed is occupied" : ""}
-            tooltipClassName="w-full lg:w-auto"
-          >
-            <i className="fas fa-trash mr-2"></i>
-            Delete
-          </ButtonV2>
-        </div>
+      <div className="flex flex-col sm:flex-row gap-2">
+        <ButtonV2
+          href={`/facility/${facilityId}/location/${locationId}/beds/${id}/update`}
+          authorizeFor={NonReadOnlyUsers}
+          className="w-full lg:w-auto"
+          variant="secondary"
+          border
+          ghost
+        >
+          <CareIcon className="care-l-pen text-lg" />
+          Edit
+        </ButtonV2>
+        <ButtonV2
+          onClick={() => handleDelete(name, id)}
+          authorizeFor={NonReadOnlyUsers}
+          variant="danger"
+          border
+          ghost
+          className="w-full lg:w-auto"
+          disabled={isOccupied}
+          tooltip={isOccupied ? "Bed is occupied" : undefined}
+          tooltipClassName="w-full lg:w-auto"
+        >
+          <CareIcon className="care-l-trash-alt text-lg" />
+          Delete
+        </ButtonV2>
       </div>
       <BedDeleteDialog
         name={bedData.name}
@@ -273,18 +271,13 @@ export const BedManagement = (props: BedManagementProps) => {
       />
       <div className="container px-4 py-2 sm:px-8">
         <div className="flex justify-end">
-          <button
-            className="px-4 py-1 rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/location/${locationId}/beds/add`,
-                { replace: true }
-              )
-            }
+          <ButtonV2
+            href={`/facility/${facilityId}/location/${locationId}/beds/add`}
+            authorizeFor={NonReadOnlyUsers}
           >
-            <i className="fas fa-plus mr-2"></i>
+            <CareIcon className="care-l-plus text-lg" />
             Add New Bed
-          </button>
+          </ButtonV2>
         </div>
         {bed}
       </div>
