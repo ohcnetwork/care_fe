@@ -458,33 +458,31 @@ export default function ListFilter(props: any) {
         onChange={handleFormFieldChange}
         errorClassName="hidden"
       />
-      <div className="w-full grid gap-4 grid-cols-1">
-        <DateRangeFormField
-          labelClassName="text-sm"
-          name="created_date"
-          id="created-date"
-          label={t("created_date")}
-          value={{
-            start: getDate(filterState.created_date_after),
-            end: getDate(filterState.created_date_before),
-          }}
-          onChange={handleDateRangeChange}
-          errorClassName="hidden"
-        />
+      <DateRangeFormField
+        labelClassName="text-sm"
+        name="created_date"
+        id="created-date"
+        label={t("created_date")}
+        value={{
+          start: getDate(filterState.created_date_after),
+          end: getDate(filterState.created_date_before),
+        }}
+        onChange={handleDateRangeChange}
+        errorClassName="hidden"
+      />
 
-        <DateRangeFormField
-          labelClassName="text-sm"
-          name="modified_date"
-          id="modified-date"
-          label={t("modified_date")}
-          value={{
-            start: getDate(filterState.modified_date_after),
-            end: getDate(filterState.modified_date_before),
-          }}
-          onChange={handleDateRangeChange}
-          errorClassName="hidden"
-        />
-      </div>
+      <DateRangeFormField
+        labelClassName="text-sm"
+        name="modified_date"
+        id="modified-date"
+        label={t("modified_date")}
+        value={{
+          start: getDate(filterState.modified_date_after),
+          end: getDate(filterState.modified_date_before),
+        }}
+        onChange={handleDateRangeChange}
+        errorClassName="hidden"
+      />
     </FiltersSlideover>
   );
 }
