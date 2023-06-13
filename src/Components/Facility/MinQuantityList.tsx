@@ -91,7 +91,7 @@ export default function MinQuantityList(props: any) {
             }}
           >
             <div className="sm:hidden flex justify-between items-center w-full">
-              <div className="flex flex-col">
+              <div className="flex flex-col text-start">
                 <p className="text-gray-900 whitespace-nowrap font-semibold">
                   {inventoryItem.item_object?.name}
                 </p>
@@ -204,7 +204,6 @@ export default function MinQuantityList(props: any) {
   return (
     <Page
       title="Minimum Quantity Required"
-      className="mx-3 md:mx-8"
       crumbsReplacements={{
         [facilityId]: { name: facilityName },
         min_quantity: {
