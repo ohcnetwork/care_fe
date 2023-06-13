@@ -344,6 +344,7 @@ export default function ListFilter(props: any) {
       <UserAutocompleteFormField
         label={t("assigned_to")}
         name="assigned_to"
+        id="assigned_to"
         value={filterState.assigned_user_ref}
         onChange={({ value }) => setAssignedUser(value)}
         errorClassName="hidden"

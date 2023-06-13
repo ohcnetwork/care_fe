@@ -36,7 +36,7 @@ describe("Shifting section filter", () => {
       .wait(100)
       .type("cypress")
       .wait("@users_filter");
-    cy.get("[name='assigned_to']").wait(100).type("{downarrow}{enter}");
+    cy.get("[id='assigned_to']").wait(100).type("{downarrow}{enter}");
     cy.contains("Apply").click();
   });
 
