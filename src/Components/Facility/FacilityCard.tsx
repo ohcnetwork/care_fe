@@ -47,7 +47,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
 
   return (
     <div key={`usr_${facility.id}`} className="w-full">
-      <div className="block rounded-lg h-full overflow-clip bg-white shadow hover:border-primary-500">
+      <div className="block rounded-lg h-full bg-white shadow hover:border-primary-500">
         <div className="flex h-full">
           <Link
             href={`/facility/${facility.id}`}
@@ -83,7 +83,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
               <div className="px-4 py-4 w-full">
                 <div className="flow-root">
                   {facility.kasp_empanelled && (
-                    <div className="float-right mt-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
+                    <div className="float-right mt-2 ml-2 inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-yellow-100 text-yellow-800">
                       {kasp_string}
                     </div>
                   )}
@@ -158,13 +158,15 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   <div className="flex justify-between w-full flex-wrap gap-2">
                     <div className="flex gap-2">
                       <div
-                        className={`flex items-center justify-center rounded-md text-xl h-[38px] w-fit px-2 ml-auto ${
+                        className={`flex items-center tooltip justify-center rounded-md text-xl h-[38px] w-fit px-2 ml-auto ${
                           facility.patient_count / facility.bed_count > 0.85
                             ? "bg-red-500 button-danger-border"
                             : "bg-primary-100 button-primary-border"
                         }`}
                       >
-                        {" "}
+                        <span className="tooltip-text tooltip-bottom md:tooltip-right -translate-y-2">
+                          Live Patients / Total beds
+                        </span>{" "}
                         <CareIcon
                           className={`care-l-bed text-${
                             facility.patient_count / facility.bed_count > 0.85

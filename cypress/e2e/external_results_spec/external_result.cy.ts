@@ -30,11 +30,11 @@ describe("Edit Profile Testing", () => {
 
   it("Search by phone number", () => {
     cy.intercept(/\/api\/v1\/external_result/).as("external_result");
-    cy.get("[placeholder='Search by Phone Number']").type("4738743424");
+    cy.get("[placeholder='Search by Phone Number']").type("7387434255");
     cy.wait("@external_result").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
     });
-    cy.url().should("include", "%2B914738743424");
+    cy.url().should("include", "%2B91+73874+34255");
   });
 
   it("import", () => {

@@ -1,15 +1,16 @@
-import { Button } from "@material-ui/core";
-import { navigate } from "raviger";
 import loadable from "@loadable/component";
 import moment from "moment";
-import React, { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { CURRENT_HEALTH_CHANGE, SYMPTOM_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DailyRoundsModel } from "./models";
+import { getTemperaturePreference } from "../Common/utils/DevicePreference";
+import { celsiusToFahrenheit, fahrenheitToCelsius } from "../../Utils/utils";
+import Page from "../Common/components/Page";
+import ButtonV2 from "../Common/components/ButtonV2";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
 
@@ -35,8 +36,11 @@ export const DailyRoundListDetails = (props: any) => {
           const data: DailyRoundsModel = {
             ...res.data,
             temperature: Number(res.data.temperature)
-              ? res.data.temperature
+              ? getTemperaturePreference() === "F"
+                ? res.data.temperature
+                : fahrenheitToCelsius(Number(res.data.temperature))
               : "",
+            temperatureUnit: getTemperaturePreference(),
             additional_symptoms_text: "",
             medication_given:
               Object.keys(res.data.medication_given).length === 0
@@ -72,16 +76,52 @@ export const DailyRoundListDetails = (props: any) => {
     [dispatch, fetchpatient]
   );
 
+  const toggleTemperatureOnLocalChange = () => {
+    const isCelcius =
+      dailyRoundListDetailsData.temperatureUnit === "C" ? true : false;
+    const temp = dailyRoundListDetailsData.temperature;
+
+    const data = { ...dailyRoundListDetailsData };
+    data.temperature = isCelcius
+      ? celsiusToFahrenheit(temp)
+      : fahrenheitToCelsius(temp);
+    data.temperatureUnit = isCelcius ? "F" : "C";
+    setDailyRoundListDetails(data);
+  };
+
+  const handleLocalTemperatureChange = (e: any) => {
+    if (e.key === "temperature") {
+      if (
+        dailyRoundListDetailsData.temperatureUnit === "C" &&
+        e.newValue === "F"
+      ) {
+        toggleTemperatureOnLocalChange();
+      }
+      if (
+        dailyRoundListDetailsData.temperatureUnit === "F" &&
+        e.newValue === "C"
+      ) {
+        toggleTemperatureOnLocalChange();
+      }
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("storage", handleLocalTemperatureChange);
+    return () => {
+      window.removeEventListener("storage", handleLocalTemperatureChange);
+    };
+  }, [dailyRoundListDetailsData.temperature]);
+
   if (isLoading) {
     return <Loading />;
   }
 
   return (
-    <div className="px-2">
-      <PageTitle
-        title={`Consultation Update #${id}`}
-        backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
-      />
+    <Page
+      title={`Consultation Update #${id}`}
+      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
+    >
       <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
         <div className="flex justify-between">
           <div className="max-w-md">
@@ -95,19 +135,11 @@ export const DailyRoundListDetails = (props: any) => {
 
           <div>
             <div className="mt-2">
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${id}/update`
-                  )
-                }
+              <ButtonV2
+                href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${id}/update`}
               >
                 Update Details
-              </Button>
+              </ButtonV2>
             </div>
           </div>
         </div>
@@ -115,7 +147,8 @@ export const DailyRoundListDetails = (props: any) => {
         <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Temperature: </span>
-            {dailyRoundListDetailsData.temperature || "-"}
+            {`${dailyRoundListDetailsData.temperature} °${dailyRoundListDetailsData.temperatureUnit}` ||
+              "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Taken at: </span>
@@ -209,6 +242,6 @@ export const DailyRoundListDetails = (props: any) => {
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 };

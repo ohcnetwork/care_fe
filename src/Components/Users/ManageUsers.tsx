@@ -1,40 +1,42 @@
-import { useCallback, useEffect, useState } from "react";
-import loadable from "@loadable/component";
-import { useDispatch, useSelector } from "react-redux";
-import moment from "moment";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import * as Notification from "../../Utils/Notifications.js";
+
+import { Button, CircularProgress } from "@material-ui/core";
 import {
   addUserFacility,
+  clearHomeFacility,
+  deleteUser,
   deleteUserFacility,
+  getDistrict,
   getUserList,
   getUserListFacility,
-  deleteUser,
-  getDistrict,
   partialUpdateUser,
-  clearHomeFacility,
 } from "../../Redux/actions";
-import { navigate } from "raviger";
-import { USER_TYPES } from "../../Common/constants";
-import { FacilityModel } from "../Facility/models";
-import { CircularProgress, Button } from "@material-ui/core";
-import LinkFacilityDialog from "./LinkFacilityDialog";
-import UserDeleteDialog from "./UserDeleteDialog";
-import * as Notification from "../../Utils/Notifications.js";
-import UserFilter from "./UserFilter";
-import UserDetails from "../Common/UserDetails";
-import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
-import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
-import SearchInput from "../Form/SearchInput";
-import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
-import useFilters from "../../Common/hooks/useFilters";
-import { classNames } from "../../Utils/utils";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import SkillsSlideOver from "./SkillsSlideOver";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import CountBlock from "../../CAREUI/display/Count";
 import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import CountBlock from "../../CAREUI/display/Count";
+import { FacilityModel } from "../Facility/models";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import LinkFacilityDialog from "./LinkFacilityDialog";
+import SearchInput from "../Form/SearchInput";
+import SkillsSlideOver from "./SkillsSlideOver";
+import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
+import { USER_TYPES } from "../../Common/constants";
+import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
+import UserDeleteDialog from "./UserDeleteDialog";
+import UserDetails from "../Common/UserDetails";
+import UserFilter from "./UserFilter";
+import { classNames } from "../../Utils/utils";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { navigate } from "raviger";
+import useFilters from "../../Common/hooks/useFilters";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -664,7 +666,7 @@ function UserFacilities(props: { user: any }) {
               <div className="text-lg font-bold mb-2 ml-2">Home Facility</div>
               <div className="relative p-2 hover:bg-gray-200 focus:bg-gray-200 transition rounded md:rounded-lg cursor-pointer">
                 <div className="flex justify-between items-center">
-                  <div className="">{user?.home_facility_object?.name}</div>
+                  <span>{user?.home_facility_object?.name}</span>
                   <div className="flex items-center gap-2">
                     <button
                       className="tooltip text-lg text-red-600"
@@ -703,13 +705,14 @@ function UserFacilities(props: { user: any }) {
                   }
                   return (
                     <div
+                      id={`facility_${i}`}
                       key={`facility_${i}`}
                       className={classNames(
                         "relative p-2 hover:bg-gray-200 focus:bg-gray-200 transition rounded md:rounded-lg cursor-pointer"
                       )}
                     >
                       <div className="flex justify-between items-center">
-                        <div className="">{facility.name}</div>
+                        <span>{facility.name}</span>
                         <div className="flex items-center gap-2">
                           <button
                             className="tooltip text-lg hover:text-primary-500"

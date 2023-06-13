@@ -11,6 +11,7 @@ on:
 
 jobs:
   cypress-run:
+    permissions: write-all
     if: github.repository == 'coronasafe/care_fe'
     runs-on: ubuntu-latest
     steps:
@@ -24,8 +25,8 @@ jobs:
           path: care
 
       - name: Run docker compose up on care 🐳
-        run: cd care && touch .env && make docker_config_file=docker-compose.pre-built.yaml up && cd .. && sleep 30s
-        # Voluntarily kept 30 seconds delay to wait for migrations to complete.
+        run: cd care && touch .env && make docker_config_file=docker-compose.pre-built.yaml up && cd .. && sleep 60s
+        # Voluntarily kept 60 seconds delay to wait for migrations to complete.
 
       - name: Run Django collectstatic and load dummy data on care 🐍
         run: |
@@ -35,20 +36,20 @@ jobs:
         run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
 
       - name: Change api proxy url 📝
-        run: 'sed --in-place "s^\"target\": .*,^\"target\": \"http://localhost:9000\",^g" vite.config.ts'
+        run: 'sed --in-place "s^target: .*,^target: \"http://localhost:9000\",^g" vite.config.ts'
 
       - name: Install dependencies 📦
         run: npm install
 
-      - name: Compile rescript files ⚙️
-        run: "npm run build:res"
+      - name: Build & Compile rescript files ⚙️
+        run: "npm run build"
 
       - name: Cypress run 🥬
         uses: cypress-io/github-action@v5
         with:
           env: SKIP_PREFLIGHT_CHECK=true
           install: false
-          start: "npx vite --host"
+          start: "npx vite preview --host"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: electron
@@ -57,6 +58,20 @@ jobs:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
+
+      - name: Remove cypress passed label on failure 🏷️
+        uses: actions-ecosystem/action-remove-labels@v1
+        if: failure()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: cypress passed
+
+      - name: Add cypress passed label on success 🏷️
+        uses: actions-ecosystem/action-add-labels@v1
+        if: success()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: cypress passed
 
       - name: Remove cypress failed label on success 🏷️
         uses: actions-ecosystem/action-remove-labels@v1

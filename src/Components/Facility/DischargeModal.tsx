@@ -4,7 +4,6 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { useCallback, useEffect, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { CircularProgress } from "@material-ui/core";
 import ClaimDetailCard from "../HCX/ClaimDetailCard";
 import { ConsultationModel } from "./models";
 import CreateClaimCard from "../HCX/CreateClaimCard";
@@ -24,6 +23,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
+import CircularProgress from "../Common/components/CircularProgress";
 
 interface PreDischargeFormInterface {
   discharge_reason: string;
@@ -151,7 +151,7 @@ const DischargeModal = ({
       //   setPatientData(dischargeData);
 
       Notification.Success({
-        msg: "Patient Discharged",
+        msg: "Patient Discharged Successfully",
       });
 
       afterSubmit();
@@ -332,7 +332,7 @@ const DischargeModal = ({
       <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
         <Cancel onClick={onClose} />
         {isSendingDischargeApi ? (
-          <CircularProgress size={20} />
+          <CircularProgress />
         ) : (
           <Submit
             onClick={() => handlePatientDischarge(false)}

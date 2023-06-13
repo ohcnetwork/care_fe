@@ -1,4 +1,4 @@
-import { cy, it, describe, before, beforeEach } from "local-cypress";
+import { before, beforeEach, cy, describe, it } from "local-cypress";
 
 const user = { username: "devdistrictadmin", password: "Coronasafe@123" };
 const address = "C-106,\nSector-H,\nAliganj,\nLucknow,\nUttar Pradesh";
@@ -12,9 +12,10 @@ describe("Death Report", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/");
-    cy.get("a").contains("Patients").click({ force: true });
+    cy.intercept("**/api/v1/patient/**").as("getPatients");
+    cy.get("#facility-patients").contains("Patients").click({ force: true });
     cy.url().should("include", "/patients");
-    cy.contains("Details").click();
+    cy.wait("@getPatients").get("a[data-cy=patient]").first().click();
     cy.url().then((url) => {
       const patient_id = url.split("/")[6];
       cy.visit(`/death_report/${patient_id}`, {
@@ -35,14 +36,24 @@ describe("Death Report", () => {
     cy.get("textarea[name='address']").clear().type(address);
     cy.get("input[name='phone_number']").clear().type("+919919266674");
     cy.get("input[name='is_declared_positive']").clear().type("No");
-    cy.get("input[name='date_declared_positive']").clear().type("2021-12-01");
+    cy.get("input[name='date_declared_positive']")
+      .clear({ force: true })
+      .type("2021-12-01", { force: true });
     cy.get("input[name='test_type']").clear().type("Rapid Antigen");
-    cy.get("input[name='date_of_test']").clear().type("2021-12-01");
-    cy.get("input[name='date_of_result']").clear().type("2021-12-01");
+    cy.get("input[name='date_of_test']")
+      .clear({ force: true })
+      .type("2021-12-01", { force: true });
+    cy.get("input[name='date_of_result']")
+      .clear({ force: true })
+      .type("2021-12-01", { force: true });
     cy.get("input[name='hospital_tested_in']").clear().type("Apollo Hospital");
     cy.get("input[name='hospital_died_in']").clear().type("Apollo Hospital");
-    cy.get("input[name='date_of_admission']").clear().type("2021-12-01");
-    cy.get("input[name='date_of_death']").clear().type("2021-12-01");
+    cy.get("input[name='date_of_admission']")
+      .clear({ force: true })
+      .type("2021-12-01", { force: true });
+    cy.get("input[name='date_of_death']")
+      .clear({ force: true })
+      .type("2021-12-01", { force: true });
     cy.get("input[name='comorbidities']").clear().type("awesomeness");
     cy.get("input[name='history_clinical_course']")
       .clear()
@@ -51,7 +62,9 @@ describe("Death Report", () => {
     cy.get("input[name='home_or_cfltc']").clear().type("-");
     cy.get("input[name='is_vaccinated']").clear().type("Yes");
     cy.get("input[name='kottayam_confirmation_sent']").clear().type("Yes");
-    cy.get("input[name='kottayam_sample_date']").clear().type("2021-12-01");
+    cy.get("input[name='kottayam_sample_date']")
+      .clear({ force: true })
+      .type("2021-12-01", { force: true });
     cy.get("input[name='cause_of_death']")
       .clear()
       .type("Too awesome for earth");

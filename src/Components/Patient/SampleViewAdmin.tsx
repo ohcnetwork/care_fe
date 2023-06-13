@@ -401,7 +401,7 @@ export default function SampleViewAdmin() {
               "Sample Test Type",
               "sample_type",
               SAMPLE_TYPE_CHOICES.find(
-                (type) => type.id.toString() === qParams.sample_type
+                (type) => type.id === qParams.sample_type
               )?.text || ""
             ),
             value("Facility", "facility", facilityName),
