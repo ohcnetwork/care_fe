@@ -2,7 +2,7 @@ interface HomeFacilityObjectModel {
   id?: string;
   name?: string;
 }
-export interface UserModel {
+export type UserModel = {
   id?: number;
   username?: string;
   first_name?: string;
@@ -23,7 +23,7 @@ export interface UserModel {
   doctor_qualification?: string;
   doctor_experience_commenced_on?: string;
   doctor_medical_council_registration?: string;
-}
+};
 
 export interface SkillObjectModel {
   id: string;
