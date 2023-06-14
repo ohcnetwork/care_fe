@@ -127,7 +127,10 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
   const options = props.allowRawInput ? getOptions() : mappedOptions;
 
   const value = options.find((o) => props.value == o.value);
-  const filteredOptions = options.filter((o) => o.search.includes(query));
+  const filteredOptions =
+    props.onQuery === undefined
+      ? options.filter((o) => o.search.includes(query))
+      : options;
 
   return (
     <div
