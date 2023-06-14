@@ -11,6 +11,7 @@ on:
 
 jobs:
   cypress-run:
+    permissions: write-all
     if: github.repository == 'coronasafe/care_fe'
     runs-on: ubuntu-latest
     steps:
@@ -35,7 +36,7 @@ jobs:
         run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
 
       - name: Change api proxy url 📝
-        run: 'sed --in-place "s^\"target\": .*,^\"target\": \"http://localhost:9000\",^g" vite.config.ts'
+        run: 'sed --in-place "s^target: .*,^target: \"http://localhost:9000\",^g" vite.config.ts'
 
       - name: Install dependencies 📦
         run: npm install
@@ -57,6 +58,20 @@ jobs:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
+
+      - name: Remove cypress passed label on failure 🏷️
+        uses: actions-ecosystem/action-remove-labels@v1
+        if: failure()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: cypress passed
+
+      - name: Add cypress passed label on success 🏷️
+        uses: actions-ecosystem/action-add-labels@v1
+        if: success()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          labels: cypress passed
 
       - name: Remove cypress failed label on success 🏷️
         uses: actions-ecosystem/action-remove-labels@v1

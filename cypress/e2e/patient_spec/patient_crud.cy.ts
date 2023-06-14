@@ -27,16 +27,16 @@ describe("Patient Creation with consultation", () => {
     cy.get("button").should("contain", "Add Patient Details");
     cy.get("#add-patient-div").click();
     cy.get("input[name='facilities']")
-      .type("ABCD Hospital, Ernakulam")
+      .type("cypress facility")
       .then(() => {
-        cy.get("[role='option']").contains("ABCD Hospital, Ernakulam").click();
+        cy.get("[role='option']").contains("cypress facility").click();
       });
     cy.get("button").should("contain", "Select");
     cy.get("button").get("#submit").click();
     cy.get("#phone_number-div").type(phone_number);
     cy.get("#emergency_phone_number-div").type(emergency_phone_number);
     cy.get("[data-testid=date-of-birth] button").click();
-    cy.get("div").contains("1").click();
+    cy.get("#date-1").click();
     cy.get("[data-testid=name] input").type("Test E2E User");
     cy.get("[data-testid=Gender] button")
       .click()
@@ -64,7 +64,8 @@ describe("Patient Creation with consultation", () => {
       .then(() => {
         cy.get("[role='option']").contains("O+").click();
       });
-    cy.get("button").get("[data-testid=submit-button]").click();
+    cy.get("button[data-testid='submit-button']").click();
+
     cy.get("h2").should("contain", "Create Consultation");
     cy.url().should("include", "/patient");
     cy.url().then((url) => {
@@ -156,6 +157,7 @@ describe("Patient Creation with consultation", () => {
     cy.get("button#submit").should("be.visible").click();
     cy.get("[data-testid='return-to-patient-dashboard']").click();
   });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });

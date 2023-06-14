@@ -508,7 +508,11 @@ const AssetCreate = (props: AssetProps) => {
                     {/* General Details Section */}
                     {sectionTitle("General Details")}
                     {/* Asset Name */}
-                    <div className="col-span-6" ref={fieldRef["name"]}>
+                    <div
+                      className="col-span-6"
+                      ref={fieldRef["name"]}
+                      data-testid="asset-name-input"
+                    >
                       <TextFormField
                         name="name"
                         label="Asset Name"
@@ -523,7 +527,11 @@ const AssetCreate = (props: AssetProps) => {
                     <FieldLabel className="text-sm w-max" required>
                       Asset Location
                     </FieldLabel>
-                    <div ref={fieldRef["location"]} className="col-span-6">
+                    <div
+                      ref={fieldRef["location"]}
+                      className="col-span-6"
+                      data-testid="asset-location-input"
+                    >
                       <LocationSelect
                         name="Facilities"
                         setSelected={(selectedId) =>
@@ -538,7 +546,11 @@ const AssetCreate = (props: AssetProps) => {
                     </div>
                     {/* Asset Type */}
                     <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
-                      <div ref={fieldRef["asset_type"]} className="flex-1">
+                      <div
+                        ref={fieldRef["asset_type"]}
+                        className="flex-1"
+                        data-testid="asset-type-input"
+                      >
                         <SelectFormField
                           label="Asset Type"
                           name="asset_type"
@@ -567,7 +579,11 @@ const AssetCreate = (props: AssetProps) => {
                       </div>
 
                       {/* Asset Class */}
-                      <div ref={fieldRef["asset_class"]} className="flex-1">
+                      <div
+                        ref={fieldRef["asset_class"]}
+                        className="flex-1"
+                        data-testid="asset-class-input"
+                      >
                         <SelectFormField
                           name="asset_class"
                           label="Asset Class"
@@ -591,7 +607,10 @@ const AssetCreate = (props: AssetProps) => {
                       </div>
                     </div>
                     {/* Description */}
-                    <div className="col-span-6">
+                    <div
+                      className="col-span-6"
+                      data-testid="asset-description-input"
+                    >
                       <TextAreaFormField
                         name="asset_description"
                         label="Description"
@@ -602,7 +621,10 @@ const AssetCreate = (props: AssetProps) => {
                       />
                     </div>
                     {/* Divider */}
-                    <div className="col-span-6">
+                    <div
+                      className="col-span-6"
+                      data-testid="asset-divider-input"
+                    >
                       <hr
                         className={
                           "transition-all " +
@@ -613,7 +635,11 @@ const AssetCreate = (props: AssetProps) => {
                       />
                     </div>
                     {/* Working Status */}
-                    <div ref={fieldRef["is_working"]} className="col-span-6">
+                    <div
+                      ref={fieldRef["is_working"]}
+                      className="col-span-6"
+                      data-testid="asset-working-status-input"
+                    >
                       <SwitchV2
                         className="col-span-6"
                         required
@@ -666,7 +692,7 @@ const AssetCreate = (props: AssetProps) => {
                     </div>
                     {/* Asset QR ID */}
                     <div className="col-span-6 flex flex-row items-center gap-3">
-                      <div className="w-full">
+                      <div className="w-full" data-testid="asset-qr-id-input">
                         <TextFormField
                           id="qr_code_id"
                           name="qr_code_id"
@@ -692,6 +718,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["manufacturer"]}
+                      data-testid="asset-manufacturer-input"
                     >
                       <TextFormField
                         id="manufacturer"
@@ -708,6 +735,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["warranty_amc_end_of_validity"]}
+                      data-testid="asset-warranty-input"
                     >
                       <TextFormField
                         name="WarrantyAMCExpiry"
@@ -737,6 +765,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["support_name"]}
+                      data-testid="asset-support-name-input"
                     >
                       <TextFormField
                         id="support-name"
@@ -753,6 +782,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["support_phone"]}
+                      id="customer-support-phone-div"
                     >
                       <PhoneNumberFormField
                         name="support_phone"
@@ -768,6 +798,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["support_email"]}
+                      data-testid="asset-support-email-input"
                     >
                       <TextFormField
                         id="support-email"
@@ -786,6 +817,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["vendor_name"]}
+                      data-testid="asset-vendor-name-input"
                     >
                       <TextFormField
                         id="vendor-name"
@@ -802,6 +834,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["serial_number"]}
+                      data-testid="asset-serial-number-input"
                     >
                       <TextFormField
                         id="serial-number"
@@ -820,6 +853,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["last_serviced_on"]}
+                      data-testid="asset-last-serviced-on-input"
                     >
                       <TextFormField
                         name="last_serviced_on"
@@ -847,7 +881,11 @@ const AssetCreate = (props: AssetProps) => {
                     </div>
 
                     {/* Notes */}
-                    <div className="col-span-6 mt-6" ref={fieldRef["notes"]}>
+                    <div
+                      className="col-span-6 mt-6"
+                      ref={fieldRef["notes"]}
+                      data-testid="asset-notes-input"
+                    >
                       <TextAreaFormField
                         name="notes"
                         label="Notes"
