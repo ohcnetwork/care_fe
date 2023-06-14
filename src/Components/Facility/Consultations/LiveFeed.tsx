@@ -1,22 +1,5 @@
-/* eslint-disable eqeqeq */
-import { useEffect, useState, useRef } from "react";
-import { useDispatch } from "react-redux";
-import screenfull from "screenfull";
-import useKeyboardShortcut from "use-keyboard-shortcut";
-import loadable from "@loadable/component";
-import {
-  listAssetBeds,
-  partialUpdateAssetBed,
-  deleteAssetBed,
-} from "../../../Redux/actions";
-import { getCameraPTZ } from "../../../Common/constants";
-import {
-  StreamStatus,
-  useMSEMediaPlayer,
-} from "../../../Common/hooks/useMSEplayer";
-import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
+
 import {
   Card,
   CardContent,
@@ -24,14 +7,34 @@ import {
   Modal,
   Tooltip,
 } from "@material-ui/core";
-import { FeedCameraPTZHelpButton } from "./Feed";
+import {
+  StreamStatus,
+  useMSEMediaPlayer,
+} from "../../../Common/hooks/useMSEplayer";
+import {
+  deleteAssetBed,
+  listAssetBeds,
+  partialUpdateAssetBed,
+} from "../../../Redux/actions";
+/* eslint-disable eqeqeq */
+import { useEffect, useRef, useState } from "react";
+
 import { AxiosError } from "axios";
-import { isNull } from "lodash";
-import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../models";
-import { LegacyTextInputField } from "../../Common/HelperInputFields";
-import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
+import { BedSelect } from "../../Common/BedSelect";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { FeedCameraPTZHelpButton } from "./Feed";
+import { LegacyTextInputField } from "../../Common/HelperInputFields";
+import { getCameraPTZ } from "../../../Common/constants";
+import { isNull } from "lodash";
+import loadable from "@loadable/component";
+import screenfull from "screenfull";
+import { useDispatch } from "react-redux";
+import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
+import useKeyboardShortcut from "use-keyboard-shortcut";
+import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
+
+const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -478,10 +481,7 @@ const LiveFeed = (props: any) => {
                 );
               })}
               <div className="pl-3 hideonmobilescreen">
-                <FeedCameraPTZHelpButton
-                  cameraPTZ={cameraPTZ}
-                  tooltipPlacement="top"
-                />
+                <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
               </div>
             </div>
           </div>

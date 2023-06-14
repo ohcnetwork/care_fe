@@ -20,11 +20,11 @@ import {
 } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 
+import CareIcon from "../../../CAREUI/icons/CareIcon.js";
 import { ConsultationModel } from "../models";
 import FeedButton from "./FeedButton";
 import Loading from "../../Common/Loading";
 import ReactPlayer from "react-player";
-import ToolTip from "../../Common/utils/Tooltip";
 import { classNames } from "../../../Utils/utils";
 import screenfull from "screenfull";
 import { useDispatch } from "react-redux";
@@ -500,11 +500,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             }
           )}
           <div className="pl-3 hideonmobilescreen">
-            <FeedCameraPTZHelpButton
-              cameraPTZ={cameraPTZ}
-              tooltipPlacement="CUSTOM"
-              tooltipClassName="-bottom-48 right-40"
-            />
+            <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
           </div>
         </div>
         <div className="absolute bottom-8 right-8 z-20">
@@ -575,61 +571,54 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   );
 };
 
-export const FeedCameraPTZHelpButton = (props: {
-  cameraPTZ: CameraPTZ[];
-  tooltipPlacement: "TOP" | "BOTTOM" | "LEFT" | "RIGHT" | "CUSTOM";
-  tooltipClassName?: string;
-}) => {
-  const { cameraPTZ, tooltipPlacement, tooltipClassName } = props;
+export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
+  const { cameraPTZ } = props;
   return (
-    <ToolTip
-      position={tooltipPlacement ?? "LEFT"}
-      className={tooltipClassName}
-      text={
-        <ul className="p-2 text-sm">
-          {cameraPTZ.map((option) => {
-            return (
-              <li key={option.action} className="py-2 flex gap-3 items-center">
-                <span className="font-semibold w-16">{option.label}</span>
-                <div className="flex gap-1">
-                  {option.shortcutKey.map((hotkey, index) => {
-                    const isArrowKey = hotkey.includes("Arrow");
-                    hotkey = hotkey.replace("Control", "Ctrl");
-
-                    const keyElement = (
-                      <div
-                        key={index}
-                        className="font-mono shadow-md border-gray-500 border rounded-md p-1.5"
-                      >
-                        {isArrowKey ? (
-                          <i className={`fa-sm fas fa-${option.icon}`} />
-                        ) : (
-                          hotkey
-                        )}
-                      </div>
-                    );
-
-                    // Skip wrapping with + for joining with next key
-                    if (index === option.shortcutKey.length - 1)
-                      return keyElement;
-
-                    return (
-                      <div key={index} className="flex gap-1 items-center">
-                        {keyElement}
-                        <span className="p-1">+</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      }
+    <button
+      key="option.action"
+      className="tooltip rounded text-2xl text-white/40"
     >
-      <button key="option.action" className="rounded text-2xl text-white/40">
-        <i className={"fa fa-circle-question"} />
-      </button>
-    </ToolTip>
+      <CareIcon className="care-l-question-circle" />
+
+      <ul className="tooltip-text tooltip-left -top-60 right-10 p-2 text-sm">
+        {cameraPTZ.map((option) => {
+          return (
+            <li key={option.action} className="py-2 flex gap-3 items-center">
+              <span className="font-semibold w-16">{option.label}</span>
+              <div className="flex gap-1">
+                {option.shortcutKey.map((hotkey, index) => {
+                  const isArrowKey = hotkey.includes("Arrow");
+                  hotkey = hotkey.replace("Control", "Ctrl");
+
+                  const keyElement = (
+                    <div
+                      key={index}
+                      className="font-mono shadow-md border-gray-500 border rounded-md p-1.5"
+                    >
+                      {isArrowKey ? (
+                        <CareIcon className={`care-${option.icon}`} />
+                      ) : (
+                        hotkey
+                      )}
+                    </div>
+                  );
+
+                  // Skip wrapping with + for joining with next key
+                  if (index === option.shortcutKey.length - 1)
+                    return keyElement;
+
+                  return (
+                    <div key={index} className="flex gap-1 items-center">
+                      {keyElement}
+                      <span className="p-1">+</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </button>
   );
 };
