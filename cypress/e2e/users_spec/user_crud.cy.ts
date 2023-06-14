@@ -252,15 +252,15 @@ describe("Edit Profile Testing", () => {
   });
 });
 
-describe("Delete User", () => {
-  it("deletes user", () => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
-    cy.awaitUrl("/user");
-    cy.get("[name='username']").type(username, { force: true });
-    cy.get("button")
-      .should("contain", "Delete")
-      .contains("Delete")
-      .click({ force: true });
-    cy.get("button.font-medium.btn.btn-danger").click();
-  });
-});
+// describe("Delete User", () => {   // district admin don't have access to delete a user anymore
+//   it("deletes user", () => {
+//     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+//     cy.awaitUrl("/user");
+//     cy.get("[name='username']").type(username, { force: true });
+//     cy.get("button")
+//       .should("contain", "Delete")
+//       .contains("Delete")
+//       .click({ force: true });
+//     cy.get("button.font-medium.btn.btn-danger").click();
+//   });
+// });
