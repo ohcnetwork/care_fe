@@ -1022,7 +1022,10 @@ export const PatientHome = (props: any) => {
           </div>
         </section>
 
-        <section className="grid lg:grid-cols-2 grid-cols-1 mt-5 gap-6">
+        <section
+          className="grid lg:grid-cols-2 grid-cols-1 mt-5 gap-6"
+          data-testid="patient-details"
+        >
           <div className="w-full">
             <div className="bg-white rounded-lg shadow p-7 h-full space-y-2">
               <div className="border-b border-dashed text-gray-900 font-bold text-xl pb-2">
