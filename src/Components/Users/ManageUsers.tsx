@@ -171,22 +171,14 @@ export default function ManageUsers() {
   };
 
   const showDelete = (user: any) => {
-    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateAdmin");
-    const STATE_READ_ONLY_ADMIN_LEVEL =
-      USER_TYPES.indexOf("StateReadOnlyAdmin");
-    const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
-    const level = USER_TYPES.indexOf(user.user_type);
-    const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
     if (user.is_superuser) return true;
 
-    if (currentUserLevel >= STATE_ADMIN_LEVEL)
-      return user.state_object?.id === currentUser?.data?.state;
     if (
-      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL &&
-      currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
-      currentUserLevel > level
+      USER_TYPES.indexOf(currentUser.data.user_type) >=
+      USER_TYPES.indexOf("StateAdmin")
     )
-      return user?.district_object?.id === currentUser?.data?.district;
+      return user.state_object?.id === currentUser?.data?.state;
+
     return false;
   };
 
@@ -253,13 +245,14 @@ export default function ManageUsers() {
                     ></i>
                   ) : null}
                   {showDelete(user) && (
-                    <button
-                      type="button"
-                      className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-white hover:bg-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                    <ButtonV2
+                      variant="danger"
+                      ghost
+                      border
                       onClick={() => handleDelete(user)}
                     >
                       Delete
-                    </button>
+                    </ButtonV2>
                   )}
                 </div>
 
