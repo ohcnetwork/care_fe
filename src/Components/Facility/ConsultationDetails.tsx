@@ -1141,12 +1141,16 @@ export const ConsultationDetails = (props: any) => {
 
 const VitalsCard = ({ consultation }: { consultation: ConsultationModel }) => {
   const dispatch = useDispatch<any>();
+  const [loading, setLoading] = useState(true);
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
 
   useEffect(() => {
     if (!consultation.facility) return;
+
     const fetchData = async () => {
+      setLoading(true);
+
       const [facilityRes, assetBedRes] = await Promise.all([
         dispatch(getPermittedFacility(consultation.facility as any)),
         dispatch(
@@ -1180,13 +1184,23 @@ const VitalsCard = ({ consultation }: { consultation: ConsultationModel }) => {
           `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
         );
       }
+
+      setLoading(false);
     };
 
     fetchData();
   }, [consultation]);
 
+  if (loading) {
+    return (
+      <div className="bg-black flex w-full h-full max-h-[400px] justify-center items-center text-center gap-4 rounded">
+        <Loading />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col lg:flex-row w-full bg-slate-800 gap-2 min-h-[450px]">
+    <div className="flex flex-col lg:flex-row w-full bg-slate-800 gap-1 justify-between min-h-[400px] rounded">
       <div className="flex-1">
         {hl7SocketUrl ? (
           <HL7PatientVitalsMonitor socketUrl={hl7SocketUrl} />
@@ -1207,8 +1221,11 @@ const VitalsCard = ({ consultation }: { consultation: ConsultationModel }) => {
 
 const VitalsDeviceNotConfigured = ({ device }: { device: string }) => {
   return (
-    <div className="hidden lg:flex bg-black w-full h-full items-center justify-center text-center text-gray-700 text-xl">
-      No {device} configured for this bed
+    <div className="hidden lg:flex flex-col gap-4 bg-black w-full h-full items-center justify-center text-center text-gray-700">
+      <CareIcon className="care-l-sync-exclamation text-4xl text-gray-600" />
+      <span className="font-medium text-xl text-gray-700">
+        No {device} configured for this bed
+      </span>
     </div>
   );
 };
