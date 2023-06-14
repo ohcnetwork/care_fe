@@ -23,8 +23,8 @@ export default function UserFilter(props: any) {
   const [filterState, setFilterState] = useMergeState({
     first_name: filter.first_name || "",
     last_name: filter.last_name || "",
-    phone_number: filter.phone_number || "",
-    alt_phone_number: filter.alt_phone_number || "",
+    phone_number: filter.phone_number || "+91",
+    alt_phone_number: filter.alt_phone_number || "+91",
     user_type: filter.user_type || "",
     district_id: filter.district_id || "",
     district_ref: null,
@@ -33,8 +33,8 @@ export default function UserFilter(props: any) {
   const clearFilterState = {
     first_name: "",
     last_name: "",
-    phone_number: "",
-    alt_phone_number: "",
+    phone_number: "+91",
+    alt_phone_number: "+91",
     user_type: "",
     district_id: "",
     district_ref: null,
@@ -59,8 +59,9 @@ export default function UserFilter(props: any) {
     const data = {
       first_name: first_name || "",
       last_name: last_name || "",
-      phone_number: parsePhoneNumberForFilterParam(phone_number),
-      alt_phone_number: parsePhoneNumberForFilterParam(alt_phone_number),
+      phone_number: parsePhoneNumberForFilterParam(phone_number) || "+91",
+      alt_phone_number:
+        parsePhoneNumberForFilterParam(alt_phone_number) || "+91",
       user_type: user_type || "",
       district_id: district_id || "",
     };
