@@ -1,4 +1,5 @@
 import ButtonV2 from "../../Common/components/ButtonV2";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import _ from "lodash";
@@ -101,7 +102,7 @@ export const InvestigationTable = ({
               setShowForm((prev) => !prev);
             }}
           >
-            {!showForm && <i className="fas fa-pencil-alt mr-2" />}
+            {!showForm && <CareIcon className="care-l-edit mr-2" />}
             {showForm ? "Cancel" : "Update Details"}
           </ButtonV2>
           {showForm && (
