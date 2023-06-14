@@ -1199,6 +1199,14 @@ const VitalsCard = ({ consultation }: { consultation: ConsultationModel }) => {
     );
   }
 
+  if (!hl7SocketUrl && !ventilatorSocketUrl) {
+    return (
+      <span className="sr-only">
+        No HL7 Monitor or Ventilator configured for this patient
+      </span>
+    );
+  }
+
   return (
     <div className="flex flex-col lg:flex-row w-full bg-slate-800 gap-1 justify-between min-h-[400px] rounded">
       <div className="flex-1">
