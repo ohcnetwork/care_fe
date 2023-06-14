@@ -96,7 +96,7 @@ class VentilatorVitalsRenderer {
       },
 
       volume: {
-        color: "#2427ff",
+        color: "#03a9f4",
         buffer: [],
         cursor: { x: 0, y: 0 },
         deltaX: w / (DURATION * volume.samplingRate),

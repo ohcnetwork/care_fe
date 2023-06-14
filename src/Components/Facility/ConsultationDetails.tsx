@@ -1186,7 +1186,7 @@ const VitalsCard = ({ consultation }: { consultation: ConsultationModel }) => {
   }, [consultation]);
 
   return (
-    <div className="flex flex-col lg:flex-row w-full bg-slate-800 gap-2">
+    <div className="flex flex-col lg:flex-row w-full bg-slate-800 gap-2 min-h-[450px]">
       <div className="flex-1">
         {hl7SocketUrl ? (
           <HL7PatientVitalsMonitor socketUrl={hl7SocketUrl} />

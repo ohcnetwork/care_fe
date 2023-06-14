@@ -96,7 +96,7 @@ class HL7VitalsRenderer {
       },
 
       spo2: {
-        color: "#2427ff",
+        color: "#03a9f4",
         buffer: [],
         cursor: { x: 0, y: 0 },
         deltaX: w / (DURATION * spo2.samplingRate),
