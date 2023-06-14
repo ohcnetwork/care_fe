@@ -4,6 +4,7 @@ import { PatientAssetBed } from "../Assets/AssetTypes";
 import { Link } from "raviger";
 import { GENDER_TYPES } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import WaveformLabels from "./WaveformLabels";
 
 interface Props {
   patientAssetBed?: PatientAssetBed;
@@ -64,6 +65,14 @@ export default function HL7PatientVitalsMonitor({
       )}
       <div className="flex flex-col md:flex-row md:justify-between divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2">
         <div className="relative" style={{ ...(size ?? waveformCanvas.size) }}>
+          <WaveformLabels
+            labels={{
+              ECG: "text-lime-300",
+              ECG_CHANNEL_2: "invisible",
+              Pleth: "text-yellow-300",
+              SpO2: "text-sky-300",
+            }}
+          />
           <canvas
             className="absolute top-0 left-0"
             ref={waveformCanvas.background.canvasRef}

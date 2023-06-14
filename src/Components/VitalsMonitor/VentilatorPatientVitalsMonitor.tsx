@@ -6,6 +6,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import useVentilatorVitalsMonitor from "./useVentilatorVitalsMonitor";
 import { VitalsValueBase } from "./types";
 import { classNames } from "../../Utils/utils";
+import WaveformLabels from "./WaveformLabels";
 
 interface Props {
   patientAssetBed?: PatientAssetBed;
@@ -66,6 +67,13 @@ export default function VentilatorPatientVitalsMonitor({
       )}
       <div className="flex flex-col md:flex-row md:justify-between divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2">
         <div className="relative" style={{ ...(size ?? waveformCanvas.size) }}>
+          <WaveformLabels
+            labels={{
+              Pressure: "text-lime-300",
+              Flow: "text-yellow-300",
+              Volume: "text-sky-300",
+            }}
+          />
           <canvas
             className="absolute top-0 left-0"
             ref={waveformCanvas.background.canvasRef}
