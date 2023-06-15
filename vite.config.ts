@@ -73,7 +73,7 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: "https://local.kha.vin",
+        target: "https://carehcx-preview.ohc.network",
         changeOrigin: true,
       },
     },
