@@ -42,15 +42,7 @@ export default function DischargeSummaryModal(props: Props) {
       );
 
       if (res.status === 200) {
-        const blob = new Blob([res.data], { type: "application/pdf" });
-        const url = URL.createObjectURL(blob);
-        const isFirefox =
-          navigator.userAgent.toLowerCase().indexOf("firefox") > -1;
-        if (isFirefox) {
-          window.open(url, "_blank");
-        } else {
-          window.open(res.data.read_signed_url, "_blank");
-        }
+        window.open(res.data.read_signed_url, "_blank");
         setDownloading(false);
         props.onClose();
         return;
