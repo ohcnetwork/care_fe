@@ -78,7 +78,7 @@
     "events": "^3.3.0",
     "i18next": "^22.5.0",
     "i18next-browser-languagedetector": "^7.0.0",
-    "libphonenumber-js": "^1.10.30",
+    "libphonenumber-js": "^1.10.36",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "postcss-loader": "^7.0.2",
