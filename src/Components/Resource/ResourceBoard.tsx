@@ -249,7 +249,7 @@ export default function ResourceBoard({
                   csv: 1,
                 })
               }
-              filenamePrefix={`shift_requests_${board}`}
+              filenamePrefix={`resource_requests_${board}`}
             />
           </h3>
           <span className="rounded-lg ml-2 bg-primary-500 text-white px-2">
