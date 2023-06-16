@@ -260,7 +260,6 @@ export interface DailyRoundsModel {
   pulse?: number;
   resp?: number;
   temperature?: string;
-  temperatureUnit?: "C" | "F";
   temperature_measured_at?: string;
   physical_examination_info?: string;
   other_details?: string;
