@@ -321,6 +321,7 @@ export const ConsultationForm = (props: any) => {
             is_telemedicine: `${res.data.is_telemedicine}`,
             is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
+            assigned_to_object: res.data.assigned_to_object,
             ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
@@ -622,7 +623,9 @@ export const ConsultationForm = (props: any) => {
         action: state.form.action,
         review_interval: state.form.review_interval,
         assigned_to:
-          state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
+          state.form.is_telemedicine.toString() === "true"
+            ? state.form.assigned_to
+            : "",
         special_instruction: state.form.special_instruction,
         weight: Number(state.form.weight),
         height: Number(state.form.height),
@@ -1218,8 +1221,8 @@ export const ConsultationForm = (props: any) => {
                           <CheckBoxFormField
                             className="col-span-6"
                             {...field("is_telemedicine")}
+                            value={JSON.parse(state.form.is_telemedicine)}
                             label="Is Telemedicine required for the patient?"
-                            onChange={handleFormFieldChange}
                           />
 
                           {JSON.parse(state.form.is_telemedicine) && (
