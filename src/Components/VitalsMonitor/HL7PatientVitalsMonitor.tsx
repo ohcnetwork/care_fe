@@ -100,7 +100,7 @@ export default function HL7PatientVitalsMonitor({
             {...waveformCanvas.size}
           />
         </div>
-        <div className="grid grid-cols-3 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
+        <div className="grid grid-cols-3 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider max-w-[170px]">
           {/* Pulse Rate */}
           <div className="flex justify-between items-center p-1">
             <div className="flex flex-col h-full items-start text-sm text-primary-400 font-bold">
