@@ -142,7 +142,7 @@ export interface SampleTestModel {
   patient_has_sari?: boolean;
   patient_has_confirmed_contact?: boolean;
   patient_has_suspected_contact?: boolean;
-  patient_travel_history?: string;
+  patient_travel_history?: string[];
   facility?: number;
   facility_object?: {
     id: number;
