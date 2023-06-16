@@ -87,8 +87,8 @@ const initForm: UserForm = {
   first_name: "",
   last_name: "",
   email: "",
-  phone_number: "+91",
-  alt_phone_number: "+91",
+  phone_number: "",
+  alt_phone_number: "",
   age: 0,
   date_of_birth: null,
   state: 0,
@@ -713,7 +713,7 @@ export const UserAdd = (props: UserProps) => {
                 placeholder="Phone Number"
                 label="Phone Number"
                 required
-                disableCountry
+                onlyIndia
               />
               <Checkbox
                 checked={phoneIsWhatsApp}
@@ -727,7 +727,7 @@ export const UserAdd = (props: UserProps) => {
               placeholder="WhatsApp Phone Number"
               label="Whatsapp Number"
               disabled={phoneIsWhatsApp}
-              disableCountry
+              onlyIndia
             />
 
             <div>

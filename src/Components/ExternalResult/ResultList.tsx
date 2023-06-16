@@ -282,6 +282,7 @@ export default function ResultList() {
                 value={qParams.mobile_number || "+91"}
                 onChange={(event) => updateQuery({ [event.name]: event.value })}
                 placeholder="Search by Phone Number"
+                noAutoFormat
               />
             </div>
           </div>

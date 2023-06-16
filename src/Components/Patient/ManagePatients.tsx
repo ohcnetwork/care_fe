@@ -111,7 +111,7 @@ export const PatientManager = () => {
 
   const setPhoneNum = (phone_number: string) => {
     setPhoneNumber(phone_number);
-    if (phone_number.length >= 13) {
+    if (phone_number.length === 15) {
       setPhoneNumberError("");
       updateQuery({ phone_number });
       return;
@@ -128,7 +128,7 @@ export const PatientManager = () => {
 
   const setEmergencyPhoneNum = (emergency_phone_number: string) => {
     setEmergencyPhoneNumber(emergency_phone_number);
-    if (emergency_phone_number.length >= 13) {
+    if (emergency_phone_number.length === 15) {
       setEmergencyPhoneNumberError("");
       updateQuery({ emergency_phone_number });
       return;
