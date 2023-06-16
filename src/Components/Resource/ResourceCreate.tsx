@@ -227,104 +227,102 @@ export default function ResourceCreate(props: resourceProps) {
       }}
       backUrl={`/facility/${facilityId}`}
     >
-      <Card className="mt-4">
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-          <TextFormField
+      <Card className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
+        <TextFormField
+          required
+          label={t("contact_person")}
+          name="refering_facility_contact_name"
+          value={state.form.refering_facility_contact_name}
+          onChange={handleChange}
+          error={state.errors.refering_facility_contact_name}
+        />
+        <PhoneNumberFormField
+          label={t("contact_phone")}
+          name="refering_facility_contact_number"
+          required
+          disableCountry
+          value={state.form.refering_facility_contact_number}
+          onChange={handleFormFieldChange}
+          error={state.errors.refering_facility_contact_number}
+        />
+
+        <div>
+          <FieldLabel required>{t("approving_facility")}</FieldLabel>
+          <FacilitySelect
+            multiple={false}
+            facilityType={1500}
+            name="approving_facility"
+            selected={state.form.approving_facility}
+            setSelected={(value: any) =>
+              handleValueChange(value, "approving_facility")
+            }
+            errors={state.errors.approving_facility}
+          />
+        </div>
+
+        <RadioFormField
+          label={t("is_this_an_emergency")}
+          name="emergency"
+          options={[true, false]}
+          optionDisplay={(o) => (o ? t("yes") : t("no"))}
+          optionValue={(o) => String(o)}
+          value={state.form.emergency}
+          onChange={handleChange}
+        />
+
+        <SelectFormField
+          label={t("category")}
+          name="category"
+          required
+          value={state.form.category}
+          options={RESOURCE_CATEGORY_CHOICES}
+          optionLabel={(option: string) => option}
+          optionValue={(option: string) => option}
+          onChange={({ value }) => handleValueChange(value, "category")}
+        />
+        <SelectFormField
+          label={t("sub_category")}
+          name="sub_category"
+          required
+          value={state.form.sub_category}
+          options={RESOURCE_SUBCATEGORIES}
+          optionLabel={(option: OptionsType) => option.text}
+          optionValue={(option: OptionsType) => option.id}
+          onChange={({ value }) => handleValueChange(value, "sub_category")}
+        />
+
+        <TextFormField
+          label={t("request_title")}
+          name="title"
+          placeholder={t("request_title_placeholder")}
+          value={state.form.title}
+          onChange={handleChange}
+          error={state.errors.title}
+        />
+
+        <TextFormField
+          label={t("required_quantity")}
+          name="requested_quantity"
+          value={state.form.required_quantity}
+          onChange={handleChange}
+        />
+
+        <div className="md:col-span-2">
+          <TextAreaFormField
+            label={t("request_description")}
+            name="reason"
+            rows={5}
             required
-            label={t("contact_person")}
-            name="refering_facility_contact_name"
-            value={state.form.refering_facility_contact_name}
+            placeholder={t("request_description_placeholder")}
+            value={state.form.reason}
             onChange={handleChange}
-            error={state.errors.refering_facility_contact_name}
+            error={state.errors.reason}
           />
-          <PhoneNumberFormField
-            label={t("contact_phone")}
-            name="refering_facility_contact_number"
-            required
-            disableCountry
-            value={state.form.refering_facility_contact_number}
-            onChange={handleFormFieldChange}
-            error={state.errors.refering_facility_contact_number}
-          />
+        </div>
 
-          <div className="md:col-span-2">
-            <FieldLabel required>{t("approving_facility")}</FieldLabel>
-            <FacilitySelect
-              multiple={false}
-              facilityType={1500}
-              name="approving_facility"
-              selected={state.form.approving_facility}
-              setSelected={(value: any) =>
-                handleValueChange(value, "approving_facility")
-              }
-              errors={state.errors.approving_facility}
-            />
-          </div>
-
-          <SelectFormField
-            label={t("category")}
-            name="category"
-            required
-            value={state.form.category}
-            options={RESOURCE_CATEGORY_CHOICES}
-            optionLabel={(option: string) => option}
-            optionValue={(option: string) => option}
-            onChange={({ value }) => handleValueChange(value, "category")}
-          />
-          <SelectFormField
-            label={t("sub_category")}
-            name="sub_category"
-            required
-            value={state.form.sub_category}
-            options={RESOURCE_SUBCATEGORIES}
-            optionLabel={(option: OptionsType) => option.text}
-            optionValue={(option: OptionsType) => option.id}
-            onChange={({ value }) => handleValueChange(value, "sub_category")}
-          />
-
-          <TextFormField
-            label={t("request_title")}
-            name="title"
-            placeholder={t("request_title_placeholder")}
-            value={state.form.title}
-            onChange={handleChange}
-            error={state.errors.title}
-          />
-
-          <TextFormField
-            label={t("required_quantity")}
-            name="requested_quantity"
-            value={state.form.required_quantity}
-            onChange={handleChange}
-          />
-
-          <div className="md:col-span-2">
-            <TextAreaFormField
-              label={t("request_description")}
-              name="reason"
-              rows={5}
-              required
-              placeholder={t("request_description_placeholder")}
-              value={state.form.reason}
-              onChange={handleChange}
-              error={state.errors.reason}
-            />
-          </div>
-
-          <RadioFormField
-            label={t("is_this_an_emergency")}
-            name="emergency"
-            options={[true, false]}
-            optionDisplay={(o) => (o ? t("yes") : t("no"))}
-            optionValue={(o) => String(o)}
-            value={state.form.emergency}
-            onChange={handleChange}
-          />
-
-          <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
-            <Cancel onClick={() => goBack()} />
-            <Submit onClick={handleSubmit} />
-          </div>
+        <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-end mt-4">
+          <Cancel onClick={() => goBack()} />
+          <Submit onClick={handleSubmit} />
         </div>
       </Card>
     </Page>
