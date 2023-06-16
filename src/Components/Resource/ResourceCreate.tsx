@@ -298,6 +298,7 @@ export default function ResourceCreate(props: resourceProps) {
           value={state.form.title}
           onChange={handleChange}
           error={state.errors.title}
+          required
         />
 
         <TextFormField
