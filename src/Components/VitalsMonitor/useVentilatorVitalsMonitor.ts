@@ -27,6 +27,7 @@ export default function useVentilatorVitalsMonitor() {
   const waveformBackgroundCanvas = useCanvas();
 
   // Non waveform data states.
+  const [isOnline, setIsOnline] = useState<boolean>(false);
   const [peep, setPeep] = useState<VitalsValue>();
   const [respRate, setRespRate] = useState<VitalsValue>();
   const [inspTime, setInspTime] = useState<VitalsValue>();
@@ -42,6 +43,7 @@ export default function useVentilatorVitalsMonitor() {
 
   const connect = useCallback(
     (socketUrl: string) => {
+      setIsOnline(false);
       device.current?.disconnect();
 
       device.current = new VentilatorDeviceClient(socketUrl);
@@ -54,6 +56,8 @@ export default function useVentilatorVitalsMonitor() {
           !volumeOptionsRef.current
         )
           return;
+
+        setIsOnline(true);
 
         renderer.current = new VentilatorVitalsRenderer({
           foregroundRenderContext: waveformForegroundCanvas.contextRef.current!,
@@ -119,6 +123,7 @@ export default function useVentilatorVitalsMonitor() {
       fio2,
     },
     device,
+    isOnline,
   };
 }
 

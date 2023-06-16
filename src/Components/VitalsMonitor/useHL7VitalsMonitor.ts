@@ -33,6 +33,7 @@ export default function useHL7VitalsMonitor() {
   const waveformBackgroundCanvas = useCanvas();
 
   // Non waveform data states.
+  const [isOnline, setIsOnline] = useState<boolean>(false);
   const [pulseRate, setPulseRate] = useState<VitalsValue>();
   const [heartRate, setHeartRate] = useState<VitalsValue>();
   const [bp, setBp] = useState<VitalsBPValue>();
@@ -51,6 +52,7 @@ export default function useHL7VitalsMonitor() {
 
   const connect = useCallback(
     (socketUrl: string) => {
+      setIsOnline(false);
       device.current?.disconnect();
 
       device.current = new HL7DeviceClient(socketUrl);
@@ -63,6 +65,8 @@ export default function useHL7VitalsMonitor() {
           !spo2OptionsRef.current
         )
           return;
+
+        setIsOnline(true);
 
         renderer.current = new HL7VitalsRenderer({
           foregroundRenderContext: waveformForegroundCanvas.contextRef.current!,
@@ -131,6 +135,7 @@ export default function useHL7VitalsMonitor() {
       temperature2,
     },
     device,
+    isOnline,
   };
 }
 

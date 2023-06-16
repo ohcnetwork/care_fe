@@ -19,7 +19,8 @@ export default function VentilatorPatientVitalsMonitor({
   socketUrl,
   size,
 }: Props) {
-  const { connect, waveformCanvas, data } = useVentilatorVitalsMonitor();
+  const { connect, waveformCanvas, data, isOnline } =
+    useVentilatorVitalsMonitor();
   const { patient, bed } = patientAssetBed ?? {};
 
   useEffect(() => {
@@ -66,7 +67,20 @@ export default function VentilatorPatientVitalsMonitor({
         </div>
       )}
       <div className="flex flex-col md:flex-row md:justify-between divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2">
-        <div className="relative" style={{ ...(size ?? waveformCanvas.size) }}>
+        <div
+          className={classNames(
+            "flex flex-col gap-1 justify-center items-center text-center p-1 text-warning-500 font-medium font-mono",
+            isOnline && "hidden"
+          )}
+          style={{ ...(size ?? waveformCanvas.size) }}
+        >
+          <CareIcon className="care-l-cloud-times text-4xl animate-pulse mb-2" />
+          <span className="font-bold">No incoming data from Ventilator</span>
+        </div>
+        <div
+          className={classNames("relative", !isOnline && "hidden")}
+          style={{ ...(size ?? waveformCanvas.size) }}
+        >
           <WaveformLabels
             labels={{
               Pressure: "text-lime-300",
