@@ -144,13 +144,15 @@ export const SetInventoryForm = (props: any) => {
       }}
       backUrl={`/facility/${facilityId}/inventory/min_quantity/list`}
     >
-      <Card>
+      <Card className="mt-10 max-w-3xl mx-auto">
         <form
           onSubmit={(e) => handleSubmit(e)}
           className="mt-6 grid gap-4 grid-cols-1 md:grid-cols-2"
         >
           <SelectFormField
+            className="md:col-span-2"
             name="id"
+            required
             label="Inventory Name"
             value={state.form.id}
             options={data}
@@ -160,22 +162,25 @@ export const SetInventoryForm = (props: any) => {
           />
 
           <TextFormField
-            name="unit"
-            label="Unit"
-            value={currentUnit}
-            onChange={handleChange}
-          />
-
-          <TextFormField
+            label="Minimum Quantity"
+            required
             name="quantity"
             type="number"
             value={state.form.quantity}
             onChange={handleChange}
           />
 
-          <div className="sm:flex sm:justify-between mt-4 col-span-1 md:col-span-2">
+          <TextFormField
+            name="unit"
+            label="Unit"
+            value={currentUnit}
+            onChange={handleChange}
+            disabled
+          />
+
+          <div className="flex flex-col sm:flex-row justify-end mt-4 col-span-2 gap-2">
             <Cancel onClick={() => goBack()} />
-            <Submit onClick={handleSubmit} label="Set" />
+            <Submit label="Set" />
           </div>
         </form>
       </Card>
