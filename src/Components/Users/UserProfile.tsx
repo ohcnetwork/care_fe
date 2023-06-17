@@ -23,7 +23,6 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import moment from "moment";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
-import { TemperatureSelector } from "../Common/TemperatureSelector";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -706,21 +705,6 @@ export default function UserProfile() {
           </div>
           <div className="mt-5 md:mt-0 md:col-span-2">
             <LanguageSelector className="bg-white w-full" />
-          </div>
-        </div>
-        <div className="md:grid md:grid-cols-3 md:gap-6 mt-6 mb-8">
-          <div className="md:col-span-1">
-            <div className="px-4 sm:px-0">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">
-                Temperature Unit
-              </h3>
-              <p className="mt-1 text-sm leading-5 text-gray-600">
-                Set your temperature unit preference
-              </p>
-            </div>
-          </div>
-          <div className="mt-5 md:mt-0 md:col-span-2">
-            <TemperatureSelector className="bg-white w-full" />
           </div>
         </div>
         <div className="md:grid md:grid-cols-3 md:gap-6 mt-6 mb-8">

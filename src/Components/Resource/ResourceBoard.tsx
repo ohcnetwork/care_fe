@@ -9,10 +9,7 @@ import moment from "moment";
 import { classNames } from "../../Utils/utils";
 import { useDrag, useDrop } from "react-dnd";
 import { formatDate } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import CSVLink from "../Common/CSVLink";
-import CircularProgress from "../Common/components/CircularProgress";
+import { ExportButton } from "../Common/Export";
 
 const limit = 14;
 
@@ -21,8 +18,6 @@ interface boardProps {
   filterProp: any;
   formatFilter: any;
 }
-
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 const renderBoardTitle = (board: string) => board;
 
@@ -163,10 +158,8 @@ export default function ResourceBoard({
 }: boardProps) {
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>([]);
-  const [downloadFile, setDownloadFile] = useState("");
   const [totalCount, setTotalCount] = useState();
   const [currentPage, setCurrentPage] = useState(1);
-  const [downloadLoading, setDownloadLoading] = useState(false);
   const [isLoading, setIsLoading] = useState({ board: false, more: false });
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "resource-card",
@@ -193,21 +186,6 @@ export default function ResourceBoard({
       }
       setIsLoading((loading) => reduceLoading("COMPLETE", loading));
     });
-  };
-
-  const triggerDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const res = await dispatch(
-      downloadResourceRequests({
-        ...formatFilter({ ...filterProp, status: board }),
-        csv: 1,
-      })
-    );
-    // file ready to download
-    setDownloadLoading(false);
-    setDownloadFile(res.data);
-    document.getElementById(`resourceRequests-${board}`)?.click();
   };
 
   useEffect(() => {
@@ -264,22 +242,15 @@ export default function ResourceBoard({
         <div className="flex justify-between p-4 mx-2 rounded bg-white shadow items-center">
           <h3 className="text-xs flex items-center h-8">
             {renderBoardTitle(board)}{" "}
-            {downloadLoading ? (
-              <CircularProgress />
-            ) : (
-              <ButtonV2
-                onClick={triggerDownload}
-                className="tooltip p-4"
-                variant="secondary"
-                ghost
-                circle
-              >
-                <CareIcon className="care-l-import text-lg font-bold" />
-                <span className="tooltip-text tooltip-bottom -translate-x-16">
-                  Download
-                </span>
-              </ButtonV2>
-            )}
+            <ExportButton
+              action={() =>
+                downloadResourceRequests({
+                  ...formatFilter({ ...filterProp, status: board }),
+                  csv: 1,
+                })
+              }
+              filenamePrefix={`resource_requests_${board}`}
+            />
           </h3>
           <span className="rounded-lg ml-2 bg-primary-500 text-white px-2">
             {totalCount || "0"}
@@ -321,11 +292,6 @@ export default function ResourceBoard({
             </button>
           ))}
       </div>
-      <CSVLink
-        data={downloadFile}
-        filename={`resource-requests-${board}-${now}.csv`}
-        id={`resourceRequests-${board}`}
-      />
     </div>
   );
 }
