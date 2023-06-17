@@ -183,6 +183,7 @@ export default function ListFilter(props: any) {
           optionValue={(option) => option.text}
           onChange={handleChange}
           placeholder="Show all"
+          errorClassName="hidden"
         />
       )}
 
@@ -243,6 +244,7 @@ export default function ListFilter(props: any) {
         optionValue={(option) => option.text}
         onChange={handleChange}
         placeholder="None"
+        errorClassName="hidden"
       />
 
       <SelectFormField
@@ -254,6 +256,7 @@ export default function ListFilter(props: any) {
         optionValue={(option) => option}
         onChange={handleChange}
         placeholder="Show all"
+        errorClassName="hidden"
       />
 
       <DateRangeFormField
