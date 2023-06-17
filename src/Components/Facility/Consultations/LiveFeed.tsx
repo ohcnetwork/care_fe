@@ -292,8 +292,12 @@ const LiveFeed = (props: any) => {
           title="Are you sure you want to delete this preset?"
           description={
             <span>
-              Preset: {toDelete.meta.preset_name} (in bed:{" "}
-              {toDelete.bed_object.name})
+              <p>
+                Preset: <strong>{toDelete.meta.preset_name}</strong>
+              </p>
+              <p>
+                Bed: <strong>{toDelete.bed_object.name}</strong>
+              </p>
             </span>
           }
           action="Delete"
