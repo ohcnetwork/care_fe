@@ -19,6 +19,8 @@ type AutocompleteMultiSelectFormFieldProps<T, V> = FormFieldBaseProps<V[]> & {
   optionValue?: OptionCallback<T, V>;
   onQuery?: (query: string) => void;
   dropdownIcon?: React.ReactNode | undefined;
+  isLoading?: boolean;
+  selectAll?: boolean;
 };
 
 const AutocompleteMultiSelectFormField = <T, V>(
@@ -147,6 +149,7 @@ export const AutocompleteMutliSelect = <T, V>(
                   {props.selectAll && (
                     <Combobox.Option
                       id={`${props.id}-option-select-all`}
+                      key={`${props.id}-option-select-all`}
                       className={dropdownOptionClassNames}
                       value={{ value: "select-all" }}
                     >
@@ -160,8 +163,8 @@ export const AutocompleteMutliSelect = <T, V>(
                   )}
                   {filteredOptions.map((option, index) => (
                     <Combobox.Option
-                      id={`${props.id}-option-${option.value}`}
-                      key={index}
+                      id={`${props.id}-option-${index}`}
+                      key={`${props.id}-option-${index}`}
                       className={dropdownOptionClassNames}
                       value={option}
                     >
