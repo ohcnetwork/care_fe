@@ -9,13 +9,13 @@ import * as Notification from "../../../Utils/Notifications.js";
 import Loading from "../../Common/Loading";
 import { BedModel, CurrentBed } from "../models";
 import { BedSelect } from "../../Common/BedSelect";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import { formatDate } from "../../../Utils/utils";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import moment from "moment";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import TextFormField from "../../Form/FormFields/TextFormField";
+import CircularProgress from "../../Common/components/CircularProgress";
 
 const formatDateTime: () => string = () => {
   const current = new Date();

@@ -27,15 +27,15 @@ describe("Resource Page", () => {
     cy.wait("@resource").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
     });
-    cy.contains("Active").should("have.class", "bg-gray-200");
-    cy.contains("Completed").should("have.class", "bg-white");
+    cy.contains("Active").should("have.class", "text-primary-500");
+    cy.contains("Completed").should("have.class", "text-white");
     cy.intercept(/\/api\/v1\/resource/).as("resource");
     cy.contains("Active").click();
     cy.wait("@resource").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
     });
-    cy.contains("Active").should("have.class", "bg-white");
-    cy.contains("Completed").should("have.class", "bg-gray-200");
+    cy.contains("Active").should("have.class", "text-white");
+    cy.contains("Completed").should("have.class", "text-primary-500");
   });
 
   it("switch between list view and board view", () => {

@@ -32,12 +32,12 @@ describe("Shifting Page", () => {
   it("switch between active/archived", () => {
     cy.intercept(/\/api\/v1\/shift/).as("shifting");
     cy.contains("Archived").click().wait("@shifting");
-    cy.contains("Active").should("have.class", "bg-gray-200");
-    cy.contains("Archived").should("have.class", "bg-white");
+    cy.contains("Active").should("have.class", "text-primary-500");
+    cy.contains("Archived").should("have.class", "text-white");
     cy.intercept(/\/api\/v1\/shift/).as("shifting");
     cy.contains("Active").click().wait("@shifting");
-    cy.contains("Active").should("have.class", "bg-white");
-    cy.contains("Archived").should("have.class", "bg-gray-200");
+    cy.contains("Active").should("have.class", "text-white");
+    cy.contains("Archived").should("have.class", "text-primary-500");
   });
 
   afterEach(() => {
