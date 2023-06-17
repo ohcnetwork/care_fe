@@ -97,7 +97,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
       setData(
         entries.map(({ patient, asset, bed }) => {
           const middleware =
-            asset.meta?.middleware_hostname ?? facilityObj?.middleware_address;
+            asset.meta?.middleware_hostname || facilityObj?.middleware_address;
           const local_ip_address = asset.meta?.local_ip_address;
 
           return {
