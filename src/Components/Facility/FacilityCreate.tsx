@@ -2,7 +2,7 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import { CapacityModal, DoctorModal } from "./models";
-import { Card, CardContent } from "@material-ui/core";
+import Card from "../../CAREUI/display/Card.js";
 import {
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
@@ -12,7 +12,7 @@ import {
   MultiSelectFormField,
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
-import React, { useCallback, useReducer, useState } from "react";
+import React, { Fragment, useCallback, useReducer, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
 import {
   createFacility,
@@ -42,7 +42,7 @@ import DoctorsCountCard from "./DoctorsCountCard";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import GLocationPicker from "../Common/GLocationPicker";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import Popover from "@material-ui/core/Popover";
+import { Dialog, Popover, Transition } from "@headlessui/react";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -55,7 +55,7 @@ import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page.js";
 
 interface FacilityProps {
   facilityId?: string;
@@ -171,11 +171,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [bedCapacityKey, setBedCapacityKey] = useState(0);
   const [docCapacityKey, setDocCapacityKey] = useState(0);
   const { goBack } = useAppHistory();
-
-  const [anchorEl, setAnchorEl] = React.useState<
-    (EventTarget & Element) | null
-  >(null);
-
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
 
@@ -409,10 +404,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     }
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const validateForm = () => {
     const errors = { ...initError };
     let invalidForm = false;
@@ -561,9 +552,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     return <Loading />;
   }
 
-  const open = Boolean(anchorEl);
-  const id = open ? "map-popover" : undefined;
-
   let capacityList: any = null;
   let totalBedCount = 0;
   let totalOccupiedBedCount = 0;
@@ -682,339 +670,350 @@ export const FacilityCreate = (props: FacilityProps) => {
     case 3:
       return (
         <div className="px-2 pb-2">
-          <PageTitle
+          <Page
             title={headerText}
             crumbsReplacements={{
               [createdFacilityId || "????"]: { name: state.form.name },
             }}
-          />
-          <Steps steps={getSteps()} />
-          <div className="mt-3">
-            <DoctorCapacity
-              key={docCapacityKey}
-              className="max-w-2xl w-full mx-auto"
-              facilityId={createdFacilityId || ""}
-              handleClose={() => {
-                navigate(`/facility/${createdFacilityId}`);
-              }}
-              handleUpdate={async () => {
-                const doctorRes = await dispatchAction(
-                  listDoctor({}, { facilityId: createdFacilityId })
-                );
-                if (doctorRes && doctorRes.data) {
-                  setDoctorData(doctorRes.data.results);
-                }
-              }}
-            />
-          </div>
-          <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
-            <div className="md:flex justify-between md:pb-2">
-              <div className="font-bold text-xl mb-2">{t("doctors_list")}</div>
+          >
+            <Steps steps={getSteps()} />
+            <div className="mt-3">
+              <DoctorCapacity
+                key={docCapacityKey}
+                className="max-w-2xl w-full mx-auto"
+                facilityId={createdFacilityId || ""}
+                handleClose={() => {
+                  navigate(`/facility/${createdFacilityId}`);
+                }}
+                handleUpdate={async () => {
+                  const doctorRes = await dispatchAction(
+                    listDoctor({}, { facilityId: createdFacilityId })
+                  );
+                  if (doctorRes && doctorRes.data) {
+                    setDoctorData(doctorRes.data.results);
+                  }
+                }}
+              />
             </div>
-            <div className="mt-4">{doctorList}</div>
-          </div>
+            <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
+              <div className="md:flex justify-between md:pb-2">
+                <div className="font-bold text-xl mb-2">{t("doctors_list")}</div>
+              </div>
+              <div className="mt-4">{doctorList}</div>
+            </div>
+          </Page>
         </div>
       );
     case 2:
       return (
         <div className="px-2 pb-2">
-          <PageTitle
+          <Page
             title={headerText}
             crumbsReplacements={{
               [createdFacilityId || "????"]: { name: state.form.name },
             }}
-          />
-          <Steps steps={getSteps()} />
-          <div className="mt-3">
-            <BedCapacity
-              key={bedCapacityKey}
-              className="max-w-2xl w-full mx-auto"
-              facilityId={createdFacilityId || ""}
-              handleClose={() => {
-                setCurrentStep(3);
-              }}
-              handleUpdate={async () => {
-                const capacityRes = await dispatchAction(
-                  listCapacity({}, { facilityId: createdFacilityId })
-                );
-                if (capacityRes && capacityRes.data) {
-                  setCapacityData(capacityRes.data.results);
-                }
-              }}
-            />
-          </div>
-          <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
-            <div className="md:flex justify-between  md:border-b md:pb-2">
-              <div className="font-semibold text-xl mb-2">
-                {t("bed_capacity")}
-              </div>
+          >
+            <Steps steps={getSteps()} />
+            <div className="mt-3">
+              <BedCapacity
+                key={bedCapacityKey}
+                className="max-w-2xl w-full mx-auto"
+                facilityId={createdFacilityId || ""}
+                handleClose={() => {
+                  setCurrentStep(3);
+                }}
+                handleUpdate={async () => {
+                  const capacityRes = await dispatchAction(
+                    listCapacity({}, { facilityId: createdFacilityId })
+                  );
+                  if (capacityRes && capacityRes.data) {
+                    setCapacityData(capacityRes.data.results);
+                  }
+                }}
+              />
             </div>
-            <div>{capacityList}</div>
-          </div>
+            <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
+              <div className="md:flex justify-between  md:border-b md:pb-2">
+                <div className="font-semibold text-xl mb-2">
+                  {t("bed_capacity")}
+                </div>
+              </div>
+              <div>{capacityList}</div>
+            </div>
+          </Page>
         </div>
       );
     case 1:
     default:
       return (
         <div className="px-2 pb-2">
-          <PageTitle
+          <Page
             title={headerText}
             crumbsReplacements={{
               [facilityId || "????"]: { name: state.form.name },
             }}
-          />
-          {!facilityId && <Steps steps={getSteps()} />}
-          <Card className="mt-4">
-            <CardContent>
-              <form onSubmit={(e) => handleSubmit(e)}>
-                <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                  <SelectFormField
-                    {...field("facility_type")}
-                    required
-                    options={FACILITY_TYPES}
-                    optionLabel={(o) => o.text}
-                    optionValue={(o) => o.text}
-                  />
-                  <TextFormField
-                    {...field("name")}
-                    required
-                    label={t("facility_name")}
-                  />
-                  <MultiSelectFormField
-                    {...field("features")}
-                    placeholder={t("features")}
-                    options={FACILITY_FEATURE_TYPES}
-                    optionLabel={(o) => o.name}
-                    optionValue={(o) => o.id}
-                  />
-                  <div>
-                    <TextFormField
-                      {...field("pincode")}
+          >
+            {!facilityId && <Steps steps={getSteps()} />}
+            <Card className="mt-4">
+              <div className="md:p-4">
+                <form onSubmit={(e) => handleSubmit(e)}>
+                  <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                    <SelectFormField
+                      {...field("facility_type")}
                       required
-                      onChange={handlePincodeChange}
+                      options={FACILITY_TYPES}
+                      optionLabel={(o) => o.text}
+                      optionValue={(o) => o.text}
                     />
-                    {showAutoFilledPincode && (
-                      <div className="flex items-center gap-2 text-primary-500">
-                        <CareIcon className="care-l-check-circle" />
-                        <span className="text-sm">
-                          State and district auto-filled from pincode
-                        </span>
-                      </div>
+                    <TextFormField
+                      {...field("name")}
+                      required
+                      label={t("facility_name")}
+                    />
+                    <MultiSelectFormField
+                      {...field("features")}
+                      placeholder={t("features")}
+                      options={FACILITY_FEATURE_TYPES}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                    />
+                    <div>
+                      <TextFormField
+                        {...field("pincode")}
+                        required
+                        onChange={handlePincodeChange}
+                      />
+                      {showAutoFilledPincode && (
+                        <div className="flex items-center gap-2 text-primary-500">
+                          <CareIcon className="care-l-check-circle" />
+                          <span className="text-sm">
+                            State and district auto-filled from pincode
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                    <SelectFormField
+                      {...field("state")}
+                      required
+                      placeholder="Choose State"
+                      className={isStateLoading ? "animate-pulse" : ""}
+                      disabled={isStateLoading}
+                      options={states}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      onChange={(event) => {
+                        handleChange(event);
+                        if (!event) return;
+                        fetchDistricts(event.value);
+                      }}
+                    />
+                    <SelectFormField
+                      {...field("district")}
+                      placeholder="Choose District"
+                      required
+                      className={isDistrictLoading ? "animate-pulse" : ""}
+                      disabled={isDistrictLoading}
+                      options={districts}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      onChange={(event) => {
+                        handleChange(event);
+                        if (!event) return;
+                        fetchLocalBody(event.value);
+                      }}
+                    />
+                    <SelectFormField
+                      {...field("local_body")}
+                      required
+                      className={isLocalbodyLoading ? "animate-pulse" : ""}
+                      disabled={isLocalbodyLoading}
+                      placeholder="Choose Local Body"
+                      options={localBodies}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                      onChange={(event) => {
+                        handleChange(event);
+                        if (!event) return;
+                        fetchWards(event.value);
+                      }}
+                    />
+                    <SelectFormField
+                      {...field("ward")}
+                      required
+                      className={isWardLoading ? "animate-pulse" : ""}
+                      disabled={isWardLoading}
+                      placeholder="Choose Ward"
+                      options={ward
+                        .sort((a, b) => a.number - b.number)
+                        .map((e) => {
+                          return {
+                            id: e.id,
+                            name: e.number + ": " + e.name,
+                          };
+                        })}
+                      optionLabel={(o) => o.name}
+                      optionValue={(o) => o.id}
+                    />
+                    <TextAreaFormField {...field("address")} required />
+                    <PhoneNumberFormField
+                      {...field("phone_number")}
+                      label={t("emergency_contact_number")}
+                      required
+                      disableCountry
+                    />
+                    <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 py-4">
+                      <TextFormField
+                        {...field("oxygen_capacity")}
+                        type="number"
+                        placeholder="0"
+                        label={t("liquid_oxygen_capacity")}
+                        trailingPadding=" "
+                        trailing={<FieldUnit unit={t("litres")} />}
+                        min={0}
+                      />
+                      <TextFormField
+                        {...field("expected_oxygen_requirement")}
+                        type="number"
+                        placeholder="0"
+                        trailingPadding=" "
+                        trailing={<FieldUnit unit={t("litres_per_day")} />}
+                        label={t("expected_burn_rate")}
+                        min={0}
+                      />
+
+                      <TextFormField
+                        {...field("type_b_cylinders")}
+                        type="number"
+                        placeholder="0"
+                        trailingPadding=" "
+                        trailing={<FieldUnit unit={t("cylinders")} />}
+                        min={0}
+                      />
+                      <TextFormField
+                        {...field("expected_type_b_cylinders")}
+                        type="number"
+                        placeholder="0"
+                        label={t("expected_burn_rate")}
+                        trailingPadding=" "
+                        trailing={<FieldUnit unit={t("cylinders_per_day")} />}
+                        min={0}
+                      />
+                      <TextFormField
+                        {...field("type_c_cylinders")}
+                        type="number"
+                        placeholder="0"
+                        trailingPadding=" "
+                        trailing={<FieldUnit unit={t("cylinders")} />}
+                        min={0}
+                      />
+                      <TextFormField
+                        {...field("expected_type_c_cylinders")}
+                        type="number"
+                        placeholder="0"
+                        trailingPadding=" "
+                        trailing={<FieldUnit unit={t("cylinders_per_day")} />}
+                        label={t("expected_burn_rate")}
+                        min={0}
+                      />
+                      <TextFormField
+                        {...field("type_d_cylinders")}
+                        type="number"
+                        placeholder="0"
+                        trailingPadding=" "
+                        trailing={<FieldUnit unit={t("cylinders")} />}
+                        min={0}
+                      />
+                      <TextFormField
+                        {...field("expected_type_d_cylinders")}
+                        type="number"
+                        placeholder="0"
+                        label={t("expected_burn_rate")}
+                        trailingPadding=" "
+                        trailing={<FieldUnit unit={t("cylinders_per_day")} />}
+                        min={0}
+                      />
+                    </div>
+
+                    {kasp_enabled && (
+                      <RadioFormField
+                        {...field("kasp_empanelled")}
+                        label={`Is this facility ${kasp_string} empanelled?`}
+                        options={[true, false]}
+                        optionDisplay={(o) => (o ? "Yes" : "No")}
+                        optionValue={(o) => String(o)}
+                      />
                     )}
                   </div>
-                  <SelectFormField
-                    {...field("state")}
-                    required
-                    placeholder="Choose State"
-                    className={isStateLoading ? "animate-pulse" : ""}
-                    disabled={isStateLoading}
-                    options={states}
-                    optionLabel={(o) => o.name}
-                    optionValue={(o) => o.id}
-                    onChange={(event) => {
-                      handleChange(event);
-                      if (!event) return;
-                      fetchDistricts(event.value);
-                    }}
-                  />
-                  <SelectFormField
-                    {...field("district")}
-                    placeholder="Choose District"
-                    required
-                    className={isDistrictLoading ? "animate-pulse" : ""}
-                    disabled={isDistrictLoading}
-                    options={districts}
-                    optionLabel={(o) => o.name}
-                    optionValue={(o) => o.id}
-                    onChange={(event) => {
-                      handleChange(event);
-                      if (!event) return;
-                      fetchLocalBody(event.value);
-                    }}
-                  />
-                  <SelectFormField
-                    {...field("local_body")}
-                    required
-                    className={isLocalbodyLoading ? "animate-pulse" : ""}
-                    disabled={isLocalbodyLoading}
-                    placeholder="Choose Local Body"
-                    options={localBodies}
-                    optionLabel={(o) => o.name}
-                    optionValue={(o) => o.id}
-                    onChange={(event) => {
-                      handleChange(event);
-                      if (!event) return;
-                      fetchWards(event.value);
-                    }}
-                  />
-                  <SelectFormField
-                    {...field("ward")}
-                    required
-                    className={isWardLoading ? "animate-pulse" : ""}
-                    disabled={isWardLoading}
-                    placeholder="Choose Ward"
-                    options={ward
-                      .sort((a, b) => a.number - b.number)
-                      .map((e) => {
-                        return {
-                          id: e.id,
-                          name: e.number + ": " + e.name,
-                        };
-                      })}
-                    optionLabel={(o) => o.name}
-                    optionValue={(o) => o.id}
-                  />
-                  <TextAreaFormField {...field("address")} required />
-                  <PhoneNumberFormField
-                    {...field("phone_number")}
-                    label={t("emergency_contact_number")}
-                    required
-                    disableCountry
-                  />
-                  <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 py-4">
+
+                  <div className="flex gap-2 items-center">
                     <TextFormField
-                      {...field("oxygen_capacity")}
-                      type="number"
-                      placeholder="0"
-                      label={t("liquid_oxygen_capacity")}
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("litres")} />}
-                      min={0}
-                    />
-                    <TextFormField
-                      {...field("expected_oxygen_requirement")}
-                      type="number"
-                      placeholder="0"
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("litres_per_day")} />}
-                      label={t("expected_burn_rate")}
-                      min={0}
+                      className="flex-1 px-2"
+                      {...field("latitude")}
+                      label={t("location")}
+                      placeholder="Latitude"
                     />
 
+                    <div className="flex flex-col justify-center md:block">
+                      <Popover id="map-popover">
+                        {({open}) => (
+                          <>
+                            <Popover.Button>
+                              <ButtonV2
+                                circle
+                                type="button"
+                                id="facility-location-button"
+                                className="tooltip p-2"
+                              >
+                                <CareIcon className="care-l-map-marker text-xl" />
+                                <span className="tooltip-text tooltip-bottom">
+                                  Select location from map
+                                </span>
+                              </ButtonV2>
+                            </Popover.Button>
+                            <Dialog open={open} onClose={() => null} className="flex h-fit justify-center items-center top-1/4" >
+                              <Transition
+                                as={Fragment}
+                                enter="transition ease-out duration-200"
+                                enterFrom="opacity-0 translate-y-1"
+                                enterTo="opacity-100 translate-y-0"
+                                leave="transition ease-in duration-150"
+                                leaveFrom="opacity-100 translate-y-0"
+                                leaveTo="opacity-0 translate-y-1"
+                              >
+                                <div>
+                                  <Popover.Panel className="relative top-20">
+                                    <GLocationPicker
+                                      lat={Number(state.form.latitude)}
+                                      lng={Number(state.form.longitude)}
+                                      handleOnChange={handleLocationChange}
+                                      handleOnClose={() => null}
+                                      handleOnSelectCurrentLocation={
+                                        handleSelectCurrentLocation
+                                      }
+                                    />
+                                  </Popover.Panel>
+                                </div>
+                              </Transition>
+                            </Dialog>
+                          </>
+                        )}
+                      </Popover>
+                    </div>
                     <TextFormField
-                      {...field("type_b_cylinders")}
-                      type="number"
-                      placeholder="0"
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("cylinders")} />}
-                      min={0}
-                    />
-                    <TextFormField
-                      {...field("expected_type_b_cylinders")}
-                      type="number"
-                      placeholder="0"
-                      label={t("expected_burn_rate")}
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
-                      min={0}
-                    />
-                    <TextFormField
-                      {...field("type_c_cylinders")}
-                      type="number"
-                      placeholder="0"
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("cylinders")} />}
-                      min={0}
-                    />
-                    <TextFormField
-                      {...field("expected_type_c_cylinders")}
-                      type="number"
-                      placeholder="0"
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
-                      label={t("expected_burn_rate")}
-                      min={0}
-                    />
-                    <TextFormField
-                      {...field("type_d_cylinders")}
-                      type="number"
-                      placeholder="0"
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("cylinders")} />}
-                      min={0}
-                    />
-                    <TextFormField
-                      {...field("expected_type_d_cylinders")}
-                      type="number"
-                      placeholder="0"
-                      label={t("expected_burn_rate")}
-                      trailingPadding=" "
-                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
-                      min={0}
+                      className="flex-1 px-2"
+                      {...field("longitude")}
+                      label={<br />}
+                      placeholder="Longitude"
                     />
                   </div>
-
-                  {kasp_enabled && (
-                    <RadioFormField
-                      {...field("kasp_empanelled")}
-                      label={`Is this facility ${kasp_string} empanelled?`}
-                      options={[true, false]}
-                      optionDisplay={(o) => (o ? "Yes" : "No")}
-                      optionValue={(o) => String(o)}
-                    />
-                  )}
-                </div>
-
-                <div className="flex gap-2 items-center">
-                  <TextFormField
-                    className="flex-1 px-2"
-                    {...field("latitude")}
-                    label={t("location")}
-                    placeholder="Latitude"
-                  />
-
-                  <div className="flex flex-col justify-center md:block">
-                    <ButtonV2
-                      circle
-                      type="button"
-                      id="facility-location-button"
-                      onClick={(event) => setAnchorEl(event.currentTarget)}
-                      className="tooltip p-2"
-                    >
-                      <CareIcon className="care-l-map-marker text-xl" />
-                      <span className="tooltip-text tooltip-bottom">
-                        Select location from map
-                      </span>
-                    </ButtonV2>
-                    <Popover
-                      id={id}
-                      open={open}
-                      anchorEl={anchorEl}
-                      onClose={handleClose}
-                      anchorOrigin={{
-                        vertical: "top",
-                        horizontal: "left",
-                      }}
-                      transformOrigin={{
-                        vertical: "top",
-                        horizontal: "left",
-                      }}
-                    >
-                      <GLocationPicker
-                        lat={Number(state.form.latitude)}
-                        lng={Number(state.form.longitude)}
-                        handleOnChange={handleLocationChange}
-                        handleOnClose={handleClose}
-                        handleOnSelectCurrentLocation={
-                          handleSelectCurrentLocation
-                        }
-                      />
-                    </Popover>
+                  <div className="mt-12 flex flex-col-reverse sm:flex-row gap-3 justify-end">
+                    <Cancel onClick={() => goBack()} />
+                    <Submit onClick={handleSubmit} label={buttonText} />
                   </div>
-                  <TextFormField
-                    className="flex-1 px-2"
-                    {...field("longitude")}
-                    label={<br />}
-                    placeholder="Longitude"
-                  />
-                </div>
-                <div className="mt-12 flex flex-col-reverse sm:flex-row gap-3 justify-end">
-                  <Cancel onClick={() => goBack()} />
-                  <Submit onClick={handleSubmit} label={buttonText} />
-                </div>
-              </form>
-            </CardContent>
-          </Card>
+                </form>
+              </div>
+            </Card>
+          </Page>
         </div>
       );
   }
