@@ -156,7 +156,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
         diff_diagnosis: state.form.diff_diagnosis
           ? state.form.diff_diagnosis
           : undefined,
-        testing_facility: state.form.testing_facility,
+        testing_facility: state.form.testing_facility?.id,
         doctor_name: state.form.doctor_name
           ? state.form.doctor_name
           : undefined,
