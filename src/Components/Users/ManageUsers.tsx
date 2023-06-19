@@ -643,6 +643,7 @@ function UserFacilities(props: { user: any }) {
           className="z-40"
         />
         <ButtonV2
+          id="link-facility"
           disabled={!facility}
           className="mt-1"
           onClick={() => addFacility(username, facility)}
