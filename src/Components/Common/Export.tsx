@@ -36,11 +36,10 @@ export const ExportMenu = ({
   disabled,
   exportItems,
 }: ExportMenuProps) => {
-  const { isExporting, exportFile, _CSVLink } = useExport();
+  const { isExporting, exportFile } = useExport();
 
   return (
     <div key="export-menu">
-      <_CSVLink />
       <DropdownMenu
         disabled={isExporting || disabled}
         title={isExporting ? "Exporting..." : label}
@@ -68,11 +67,10 @@ export const ExportButton = ({
   parse,
   ...props
 }: ExportButtonProps) => {
-  const { isExporting, exportFile, _CSVLink } = useExport();
+  const { isExporting, exportFile } = useExport();
 
   return (
     <>
-      <_CSVLink />
       <ButtonV2
         disabled={isExporting || props.disabled}
         onClick={() =>
