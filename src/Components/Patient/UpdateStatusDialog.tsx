@@ -29,14 +29,6 @@ const statusChoices = [...SAMPLE_TEST_STATUS];
 
 const statusFlow = { ...SAMPLE_FLOW_RULES };
 
-const resultTypes = [
-  {
-    id: 0,
-    text: "Select",
-  },
-  ...SAMPLE_TEST_RESULT,
-];
-
 const initForm: any = {
   confirm: false,
   status: 0,
@@ -85,14 +77,6 @@ const UpdateStatusDialog = (props: Props) => {
     form.status = 0;
     dispatch({ type: "set_form", form });
   }, []);
-
-  const newStatusChoices = [
-    {
-      id: 0,
-      desc: "Select",
-    },
-    ...validStatusChoices,
-  ];
 
   const okClicked = () => {
     handleOk(sample, state.form.status, state.form.result);
@@ -179,76 +163,65 @@ const UpdateStatusDialog = (props: Props) => {
   return (
     <ConfirmDialogV2
       title="Update Sample Test Status"
-      description={
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-          <TextFormField
-            className="md:col-span-2"
-            label="Current Status"
-            name="currentStatus"
-            value={currentStatus?.desc}
-            disabled
-            onChange={handleChange}
-          />
-          <SelectFormField
-            className="md:col-span-2"
-            label="New Status"
-            name="status"
-            value={state.form.status}
-            options={newStatusChoices}
-            optionLabel={(i) => i.desc}
-            optionValue={(i) => i.id}
-            onChange={handleChange}
-          />
-          {Number(state.form.status) === 7 && (
-            <>
-              <SelectFormField
-                className="md:col-span-2"
-                label="Result"
-                name="result"
-                value={state.form.result}
-                options={resultTypes}
-                optionLabel={(i) => i.text}
-                optionValue={(i) => i.id}
-                onChange={handleChange}
-              />
-              <div className="font-semibold leading-relaxed text-right">
-                Upload Report :
-              </div>
-              <div className="md:col-span-2">
-                <input title="reportFile" onChange={onFileChange} type="file" />
-              </div>
-              <div className="col-start-2 col-span-2">
-                {uploadStarted && (
-                  <LinearProgressWithLabel value={uploadPercent} />
-                )}
-              </div>
-              <div className="flex justify-end col-start-2 col-span-2">
-                <Submit
-                  type="submit"
-                  onClick={handleUpload}
-                  disabled={uploadDone}
-                >
-                  <CareIcon className="care-l-cloud-upload text-2xl font-bold" />
-                  <span>Upload</span>
-                </Submit>
-              </div>
-            </>
-          )}
-          <CheckBoxFormField
-            className="md:col-span-3"
-            label="I agree to update the sample test status."
-            name="confirm"
-            value={state.form.confirm}
-            onChange={handleChange}
-          />
-        </div>
-      }
       show
       onClose={cancelClicked}
       onConfirm={okClicked}
       disabled={state.form.disabled}
       action="Update Status"
-    />
+    >
+      <div className="mt-4 flex flex-col">
+        <TextFormField
+          label="Current Status"
+          name="currentStatus"
+          value={currentStatus?.desc}
+          disabled
+          onChange={handleChange}
+        />
+        <SelectFormField
+          label="New Status"
+          name="status"
+          value={state.form.status}
+          options={validStatusChoices}
+          optionLabel={(i) => i.desc}
+          optionValue={(i) => i.id}
+          onChange={handleChange}
+        />
+        {Number(state.form.status) === 7 && (
+          <>
+            <SelectFormField
+              label="Result"
+              name="result"
+              value={state.form.result}
+              options={SAMPLE_TEST_RESULT}
+              optionLabel={(i) => i.text}
+              optionValue={(i) => i.id}
+              onChange={handleChange}
+            />
+            <span className="font-semibold leading-relaxed">
+              Upload Report :
+            </span>
+            <input title="reportFile" onChange={onFileChange} type="file" />
+            {uploadStarted && <LinearProgressWithLabel value={uploadPercent} />}
+            <div className="flex justify-end mt-3 mb-4">
+              <Submit
+                type="submit"
+                onClick={handleUpload}
+                disabled={uploadDone}
+              >
+                <CareIcon className="care-l-cloud-upload text-2xl font-bold" />
+                <span>Upload</span>
+              </Submit>
+            </div>
+          </>
+        )}
+        <CheckBoxFormField
+          label="I agree to update the sample test status."
+          name="confirm"
+          value={state.form.confirm}
+          onChange={handleChange}
+        />
+      </div>
+    </ConfirmDialogV2>
   );
 };
 
