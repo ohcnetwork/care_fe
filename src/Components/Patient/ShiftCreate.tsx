@@ -27,7 +27,6 @@ import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
 import Card from "../../CAREUI/display/Card.js";
-import { classNames } from "../../Utils/utils.js";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField.js";
 import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
 
@@ -270,7 +269,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
-      <Card className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
+      <Card className="mt-4 flex flex-col w-full max-w-3xl mx-auto px-8 md:px-16 py-5 md:py-11">
         <TextFormField
           {...field("refering_facility_contact_name")}
           label="Contact person at the current facility"
@@ -305,11 +304,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
           </div>
         )}
 
-        <div
-          className={classNames(
-            wartime_shifting ? "md:col-span-1" : "md-col-span-2"
-          )}
-        >
+        <div>
           <FieldLabel>{t("what_facility_assign_the_patient_to")}</FieldLabel>
           <FacilitySelect
             multiple={false}
@@ -324,6 +319,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
         </div>
 
         <CheckBoxFormField
+          className="mt-6"
           {...field("emergency")}
           label="This is an emergency"
         />
@@ -334,7 +330,6 @@ export const ShiftCreate = (props: patientShiftProps) => {
         />
 
         <PatientCategorySelect
-          className="md:col-span-2"
           required={false}
           {...field("patient_category")}
           value={patientCategory}
@@ -346,7 +341,6 @@ export const ShiftCreate = (props: patientShiftProps) => {
           <>
             <SelectFormField
               {...field("preferred_vehicle_choice")}
-              className="md:col-span-1"
               required
               label="Preferred Vehicle"
               options={SHIFTING_VEHICLE_CHOICES}
@@ -355,7 +349,6 @@ export const ShiftCreate = (props: patientShiftProps) => {
             />
             <SelectFormField
               {...field("assigned_facility_type")}
-              className="md:col-span-1"
               required
               label="Preferred Facility Type"
               options={FACILITY_TYPES}
@@ -364,7 +357,6 @@ export const ShiftCreate = (props: patientShiftProps) => {
             />
             <SelectFormField
               {...field("breathlessness_level")}
-              className="md:col-span-1"
               required
               label="Severity of Breathlessness"
               options={BREATHLESSNESS_LEVEL}
@@ -376,7 +368,6 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
         <TextAreaFormField
           {...field("reason")}
-          className="md:col-span-2"
           label="Reason for shift"
           required
           rows={5}
@@ -385,29 +376,22 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
         <TextFormField
           {...field("ambulance_driver_name")}
-          className="md:col-span-2"
           label="Name of ambulance driver"
         />
 
         <PhoneNumberFormField
           {...field("ambulance_phone_number")}
-          className="md:col-span-1"
           label="Ambulance Phone Number"
         />
 
-        <TextFormField
-          {...field("ambulance_number")}
-          className="md:col-span-1"
-          label="Ambulance No."
-        />
+        <TextFormField {...field("ambulance_number")} label="Ambulance No." />
         <TextAreaFormField
           {...field("comments")}
-          className="md:col-span-2"
           label="Any other comments"
           placeholder="Type any extra comments here"
         />
 
-        <div className="md:col-span-2 flex justify-end mt-4">
+        <div className="mt-4 flex flex-col-reverse md:flex-row gap-2 justify-end">
           <Cancel onClick={() => goBack()} />
           <Submit onClick={handleSubmit} />
         </div>
