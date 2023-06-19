@@ -3,7 +3,7 @@
 import { cy, describe, before, beforeEach, it } from "local-cypress";
 import { v4 as uuidv4 } from "uuid";
 
-const phone_number = "9" + parseInt((Math.random() * 10 ** 9).toString());
+const phone_number = "9999999999";
 const serial_no = parseInt((Math.random() * 10 ** 10).toString());
 
 describe("Asset", () => {
@@ -28,18 +28,20 @@ describe("Asset", () => {
     cy.get("button").should("contain", "Select");
     cy.get("button").get("#submit").click();
     cy.get("[data-testid=asset-name-input] input").type("New Test Asset");
-    cy.get("[data-testid=asset-location-input] input").type(
-      "Camera Location{enter}"
-    );
+    cy.get("[data-testid=asset-location-input] input")
+      .type("Camera Locat")
+      .then(() => {
+        cy.get("[role='option']").contains("Camera Locations").click();
+      });
     cy.get("[data-testid=asset-type-input] button")
       .click()
       .then(() => {
-        cy.get("li").contains("Internal").click();
+        cy.get("[role='option']").contains("Internal").click();
       });
     cy.get("[data-testid=asset-class-input] button")
       .click()
       .then(() => {
-        cy.get("li").contains("ONVIF Camera").click();
+        cy.get("[role='option']").contains("ONVIF Camera").click();
       });
     cy.get("[data-testid=asset-description-input] textarea").type(
       "Test Description"
@@ -90,13 +92,9 @@ describe("Asset", () => {
 
   it("Next/Previous Page", () => {
     // only works for desktop mode
-    cy.get("button")
-      .should("contain", "Next")
-      .contains("Next")
-      .click({ force: true });
-    cy.get("button")
-      .should("contain", "Previous")
-      .contains("Previous")
-      .click({ force: true });
+    cy.get("button#next-pages").click();
+    cy.url().should("include", "page=2");
+    cy.get("button#prev-pages").click();
+    cy.url().should("include", "page=1");
   });
 });
