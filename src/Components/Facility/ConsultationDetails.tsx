@@ -5,10 +5,19 @@ import {
   OptionsType,
   SYMPTOM_CHOICES,
 } from "../../Common/constants";
-import { ConsultationModel, ICD11DiagnosisModel } from "./models";
-import { getConsultation, getPatient } from "../../Redux/actions";
+import {
+  ConsultationModel,
+  FacilityModel,
+  ICD11DiagnosisModel,
+} from "./models";
+import {
+  getConsultation,
+  getPatient,
+  getPermittedFacility,
+  listAssetBeds,
+} from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { ABGPlots } from "./Consultations/ABGPlots";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -27,7 +36,6 @@ import { NursingPlot } from "./Consultations/NursingPlot";
 import { NutritionPlots } from "./Consultations/NutritionPlots";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import { PatientModel } from "../Patient/models";
-import PatientVitalsCard from "../Patient/PatientVitalsCard";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 import ReadMore from "../Common/components/Readmore";
@@ -41,6 +49,10 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import PrescriptionsTable from "../Medicine/PrescriptionsTable";
 import MedicineAdministrationsTable from "../Medicine/MedicineAdministrationsTable";
 import DischargeSummaryModal from "./DischargeSummaryModal";
+import VentilatorPatientVitalsMonitor from "../VitalsMonitor/VentilatorPatientVitalsMonitor";
+
+import { AssetBedModel, AssetClass } from "../Assets/AssetTypes";
+import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -431,14 +443,11 @@ export const ConsultationDetails = (props: any) => {
         </div>
         {tab === "UPDATES" && (
           <div className="flex xl:flex-row flex-col">
-            <div className="xl:w-2/3 w-full">
+            <div className="xl:w-3/4 w-full">
               <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
               {!consultationData.discharge_date && (
                 <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
-                  <PatientVitalsCard
-                    patient={patientData}
-                    facilityId={patientData.facility}
-                  />
+                  <VitalsCard consultation={consultationData} />
                 </section>
               )}
               <div className="grid lg:grid-cols-2 gap-4 mt-4">
@@ -903,7 +912,7 @@ export const ConsultationDetails = (props: any) => {
                 </div>
               </div>
             </div>
-            <div className="xl:w-1/3 w-full pl-4">
+            <div className="xl:w-1/4 w-full pl-4">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 <PageTitle title="Update Log" hideBack breadcrumbs={false} />
                 <div className="md:mb-[0.125rem] mb-[2rem] pl-[1.5rem]">
@@ -1126,6 +1135,105 @@ export const ConsultationDetails = (props: any) => {
         show={showDoctors}
         setShow={setShowDoctors}
       />
+    </div>
+  );
+};
+
+const VitalsCard = ({ consultation }: { consultation: ConsultationModel }) => {
+  const dispatch = useDispatch<any>();
+  const [loading, setLoading] = useState(true);
+  const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
+  const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
+
+  useEffect(() => {
+    if (!consultation.facility) return;
+
+    const fetchData = async () => {
+      setLoading(true);
+
+      const [facilityRes, assetBedRes] = await Promise.all([
+        dispatch(getPermittedFacility(consultation.facility as any)),
+        dispatch(
+          listAssetBeds({
+            facility: consultation.facility as any,
+            bed: consultation.current_bed?.bed_object.id,
+          })
+        ),
+      ]);
+
+      const { middleware_address } = facilityRes.data as FacilityModel;
+      const assetBeds = assetBedRes.data.results as AssetBedModel[];
+
+      const hl7Meta = assetBeds.find(
+        (i) => i.asset_object.asset_class === AssetClass.HL7MONITOR
+      )?.asset_object?.meta;
+      const hl7Middleware = hl7Meta?.middleware_hostname || middleware_address;
+      if (hl7Middleware && hl7Meta?.local_ip_address) {
+        setHL7SocketUrl(
+          `wss://${hl7Middleware}/observations/${hl7Meta.local_ip_address}`
+        );
+      }
+
+      const ventilatorMeta = assetBeds.find(
+        (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
+      )?.asset_object?.meta;
+      const ventilatorMiddleware =
+        ventilatorMeta?.middleware_hostname || middleware_address;
+      if (ventilatorMiddleware && ventilatorMeta?.local_ip_address) {
+        setVentilatorSocketUrl(
+          `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
+        );
+      }
+
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [consultation]);
+
+  if (loading) {
+    return (
+      <div className="bg-black flex w-full h-full max-h-[400px] justify-center items-center text-center gap-4 rounded">
+        <Loading />
+      </div>
+    );
+  }
+
+  if (!hl7SocketUrl && !ventilatorSocketUrl) {
+    return (
+      <span className="sr-only">
+        No HL7 Monitor or Ventilator configured for this patient
+      </span>
+    );
+  }
+
+  return (
+    <div className="flex flex-col lg:flex-row w-full bg-slate-800 gap-1 justify-between min-h-[400px] rounded">
+      <div className="flex-1">
+        {hl7SocketUrl ? (
+          <HL7PatientVitalsMonitor socketUrl={hl7SocketUrl} />
+        ) : (
+          <VitalsDeviceNotConfigured device="HL7 Monitor" />
+        )}
+      </div>
+      <div className="flex-1">
+        {ventilatorSocketUrl ? (
+          <VentilatorPatientVitalsMonitor socketUrl={ventilatorSocketUrl} />
+        ) : (
+          <VitalsDeviceNotConfigured device="Ventilator" />
+        )}
+      </div>
+    </div>
+  );
+};
+
+const VitalsDeviceNotConfigured = ({ device }: { device: string }) => {
+  return (
+    <div className="hidden lg:flex flex-col gap-4 bg-black w-full h-full items-center justify-center text-center text-gray-700">
+      <CareIcon className="care-l-sync-exclamation text-4xl text-gray-600" />
+      <span className="font-medium text-xl text-gray-700">
+        No {device} configured for this bed
+      </span>
     </div>
   );
 };

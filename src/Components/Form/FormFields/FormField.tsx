@@ -8,13 +8,18 @@ type LabelProps = {
   htmlFor?: string;
   children: React.ReactNode;
   className?: string | undefined;
+  noPadding?: boolean;
 };
 
 export const FieldLabel = (props: LabelProps) => {
   return (
     <label
       id={props.id}
-      className={`mb-2 block text-gray-900 text-base font-normal ${props.className}`}
+      className={classNames(
+        "block text-gray-900 text-base font-normal",
+        !props.noPadding && "mb-2",
+        props.className
+      )}
       htmlFor={props.htmlFor}
     >
       {props.children}

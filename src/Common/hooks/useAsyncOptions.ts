@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 
 interface IUseAsyncOptionsArgs {
   debounceInterval?: number;
+  queryResponseExtractor?: (data: any) => any;
 }
 
 /**
@@ -40,7 +41,10 @@ export function useAsyncOptions<T extends Record<string, unknown>>(
       debounce(async (action: any) => {
         setIsLoading(true);
         const res = await dispatch(action);
-        if (res?.data) setQueryOptions(res.data as T[]);
+        if (res?.data)
+          setQueryOptions(
+            args?.queryResponseExtractor?.(res.data) ?? (res.data as T[])
+          );
         setIsLoading(false);
       }, args?.debounceInterval ?? 300),
     [dispatch, args?.debounceInterval]

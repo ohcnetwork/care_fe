@@ -5,8 +5,6 @@ import {
 } from "../Components/Medicine/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
-import { LocalStorageKeys } from "../Common/constants";
-
 export const getConfig = () => {
   return fireRequestForFiles("config");
 };
@@ -237,6 +235,11 @@ export const deleteAssetBed = (asset_id: string) =>
       external_id: asset_id,
     }
   );
+
+export const listPatientAssetBeds = (
+  facility_external_id: string,
+  params: object
+) => fireRequest("listPatientAssetBeds", [], params, { facility_external_id });
 
 // Facility Beds
 export const listFacilityBeds = (params: object) =>

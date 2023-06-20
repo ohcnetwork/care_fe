@@ -35,7 +35,7 @@ const getVital = (
   return "";
 };
 
-export default function PatientVitalsCard({
+export default function LegacyPatientVitalsCard({
   patient,
   socketUrl,
   facilityId,

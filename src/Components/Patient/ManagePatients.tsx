@@ -29,12 +29,12 @@ import { ExportMenu } from "../Common/Export";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import FilterBadge from "../../CAREUI/display/FilterBadge";
-import NavTabs from "../Common/NavTabs";
 import PatientFilter from "./PatientFilter";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
+import SwitchTabs from "../Common/components/SwitchTabs";
 import SwipeableViews from "react-swipeable-views";
 import { Tooltip } from "@material-ui/core";
 import loadable from "@loadable/component";
@@ -111,7 +111,7 @@ export const PatientManager = () => {
 
   const setPhoneNum = (phone_number: string) => {
     setPhoneNumber(phone_number);
-    if (phone_number.length === 15) {
+    if (phone_number.length >= 13) {
       setPhoneNumberError("");
       updateQuery({ phone_number });
       return;
@@ -128,7 +128,7 @@ export const PatientManager = () => {
 
   const setEmergencyPhoneNum = (emergency_phone_number: string) => {
     setEmergencyPhoneNumber(emergency_phone_number);
-    if (emergency_phone_number.length === 15) {
+    if (emergency_phone_number.length >= 13) {
       setEmergencyPhoneNumberError("");
       updateQuery({ emergency_phone_number });
       return;
@@ -729,8 +729,35 @@ export const PatientManager = () => {
         }}
       />
       <div className="flex flex-col lg:flex-row justify-between items-center">
-        <PageTitle title="Patients" hideBack={true} breadcrumbs={false} />
+        <div className="flex flex-col lg:flex-row lg:gap-5 items-center mb-2 lg:mb-0 w-full lg:w-fit">
+          <PageTitle
+            title="Patients"
+            hideBack={true}
+            breadcrumbs={false}
+            className="mt-2"
+          />
+          <ButtonV2
+            onClick={() => {
+              qParams.facility
+                ? navigate(`/facility/${qParams.facility}/patient`)
+                : setShowDialog(true);
+            }}
+            className="w-full lg:w-fit"
+          >
+            <CareIcon className="care-l-plus text-lg" />
+            <p id="add-patient-div" className="lg:my-[2px]">
+              Add Patient Details
+            </p>
+          </ButtonV2>
+        </div>
         <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end w-full lg:w-fit">
+          <SwitchTabs
+            Tab1="Live"
+            Tab2="Discharged"
+            onClickTab1={() => updateQuery({ is_active: "True" })}
+            onClickTab2={() => updateQuery({ is_active: "False" })}
+            activeTab={tabValue ? true : false}
+          />
           {showDoctorConnect && (
             <ButtonV2
               onClick={() => {
@@ -741,16 +768,7 @@ export const PatientManager = () => {
               <p className="lg:my-[2px]">Doctor Connect</p>
             </ButtonV2>
           )}
-          <ButtonV2
-            onClick={() => {
-              qParams.facility
-                ? navigate(`/facility/${qParams.facility}/patient`)
-                : setShowDialog(true);
-            }}
-          >
-            <CareIcon className="care-l-plus text-lg" />
-            <p className="lg:my-[2px]">Add Patient Details</p>
-          </ButtonV2>
+
           <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
           <SortDropdownMenu
             options={PATIENT_SORT_OPTIONS}
@@ -810,7 +828,7 @@ export const PatientManager = () => {
               count={totalCount}
               loading={isLoading}
               icon={"user-injured"}
-              containerClass="pb-8"
+              containerClass="pb-10"
             />
           </div>
           {/*<div className="bg-white overflow-hidden shadow rounded-lg flex-1">
@@ -939,14 +957,6 @@ export const PatientManager = () => {
       </div>
       <div>
         <PatientFilter {...advancedFilter} key={window.location.search} />
-        <NavTabs
-          onChange={(tab) => updateQuery({ is_active: tab ? "False" : "True" })}
-          options={[
-            { value: 0, label: "Live" },
-            { value: 1, label: "Discharged" },
-          ]}
-          active={tabValue}
-        />
         <SwipeableViews index={tabValue}>
           <TabPanel value={tabValue} index={0}>
             <div className="mb-4">{managePatients}</div>
