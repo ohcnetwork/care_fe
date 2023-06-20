@@ -1,16 +1,9 @@
 import * as Notification from "../../Utils/Notifications";
 
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import PRNPrescriptionBuilder, {
-  PRNPrescriptionType,
-} from "../Common/prescription-builder/PRNPrescriptionBuilder";
-import PrescriptionBuilder, {
-  PrescriptionType,
-} from "../Common/prescription-builder/PrescriptionBuilder";
 import { useCallback, useEffect, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { CircularProgress } from "@material-ui/core";
 import ClaimDetailCard from "../HCX/ClaimDetailCard";
 import { ConsultationModel } from "./models";
 import CreateClaimCard from "../HCX/CreateClaimCard";
@@ -19,7 +12,7 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { HCXActions } from "../../Redux/actions";
+import { HCXActions, PrescriptionActions } from "../../Redux/actions";
 import { HCXClaimModel } from "../HCX/models";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -29,6 +22,8 @@ import moment from "moment";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
+import CircularProgress from "../Common/components/CircularProgress";
 
 interface PreDischargeFormInterface {
   discharge_reason: string;
@@ -36,8 +31,6 @@ interface PreDischargeFormInterface {
   discharge_date: string | null;
   death_datetime: string | null;
   death_confirmed_doctor: string | null;
-  discharge_prescription: PrescriptionType[];
-  discharge_prn_prescription: PRNPrescriptionType[];
 }
 
 interface IProps {
@@ -73,15 +66,7 @@ const DischargeModal = ({
       discharge_date,
       death_datetime,
       death_confirmed_doctor: null,
-      discharge_prescription: [],
-      discharge_prn_prescription: [],
     });
-  const [dischargePrescription, setDischargePrescription] = useState<
-    PrescriptionType[]
-  >([]);
-  const [dischargePRNPrescription, setDischargePRNPrescription] = useState<
-    PRNPrescriptionType[]
-  >([]);
   const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
   const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
@@ -153,10 +138,8 @@ const DischargeModal = ({
           discharge_date: moment(preDischargeForm.discharge_date).toISOString(
             true
           ),
-          discharge_prescription: dischargePrescription,
-          discharge_prn_prescription: dischargePRNPrescription,
         },
-        { id: consultationData.patient }
+        { id: consultationData.id }
       )
     );
 
@@ -168,7 +151,7 @@ const DischargeModal = ({
       //   setPatientData(dischargeData);
 
       Notification.Success({
-        msg: "Patient Discharged",
+        msg: "Patient Discharged Successfully",
       });
 
       afterSubmit();
@@ -184,12 +167,14 @@ const DischargeModal = ({
     });
   };
 
+  const prescriptionActions = PrescriptionActions(consultationData.id);
+
   return (
     <DialogModal
       title={
         <div>
           <p>Discharge patient from CARE</p>
-          <span className="mt-1 flex gap-1 text-sm text-secondary-500 font-medium">
+          <span className="mt-1 flex gap-1 text-sm text-warning-500 font-medium">
             <CareIcon className="care-l-exclamation-triangle text-base" />
             <p>Caution: this action is irreversible.</p>
           </span>
@@ -251,18 +236,20 @@ const DischargeModal = ({
               required
               onChange={handleDateChange}
             />
-            <FieldLabel>Discharge Prescription</FieldLabel>
-            <div className="my-2">
+
+            <div className="mb-4">
+              <FieldLabel>Discharge Prescription Medications</FieldLabel>
               <PrescriptionBuilder
-                prescriptions={dischargePrescription}
-                setPrescriptions={setDischargePrescription}
+                actions={prescriptionActions}
+                prescription_type="DISCHARGE"
               />
             </div>
-            <div>
-              <FieldLabel>Discharge PRN Prescription</FieldLabel>
-              <PRNPrescriptionBuilder
-                prescriptions={dischargePRNPrescription}
-                setPrescriptions={setDischargePRNPrescription}
+            <div className="mb-4">
+              <FieldLabel>Discharge PRN Prescriptions</FieldLabel>
+              <PrescriptionBuilder
+                actions={prescriptionActions}
+                prescription_type="DISCHARGE"
+                is_prn
               />
             </div>
           </div>
@@ -345,7 +332,7 @@ const DischargeModal = ({
       <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
         <Cancel onClick={onClose} />
         {isSendingDischargeApi ? (
-          <CircularProgress size={20} />
+          <CircularProgress />
         ) : (
           <Submit
             onClick={() => handlePatientDischarge(false)}

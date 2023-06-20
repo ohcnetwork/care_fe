@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
@@ -192,18 +192,17 @@ const StatelessSidebar = ({
   );
 };
 
+export const SidebarShrinkContext = createContext<{
+  shrinked: boolean;
+  setShrinked: (state: boolean) => void;
+}>({
+  shrinked: false,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setShrinked: () => {},
+});
+
 export const DesktopSidebar = () => {
-  const [shrinked, setShrinked] = useState(
-    () => localStorage.getItem(SIDEBAR_SHRINK_PREFERENCE_KEY) === "true"
-  );
-
-  useEffect(() => {
-    localStorage.setItem(
-      SIDEBAR_SHRINK_PREFERENCE_KEY,
-      shrinked ? "true" : "false"
-    );
-  }, [shrinked]);
-
+  const { shrinked, setShrinked } = useContext(SidebarShrinkContext);
   return (
     <StatelessSidebar
       shrinked={shrinked}

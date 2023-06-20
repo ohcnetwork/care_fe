@@ -7,13 +7,10 @@ import {
 } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import PageTitle from "../Common/PageTitle";
+
+import Page from "../Common/components/Page";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { validateEmailAddress } from "../../Common/validation";
-import {
-  LegacyActionTextInputField,
-  LegacyErrorHelperText,
-} from "../Common/HelperInputFields";
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
@@ -387,16 +384,15 @@ const AssetCreate = (props: AssetProps) => {
 
   if (locations.length === 0) {
     return (
-      <div className="px-6 pb-2">
-        <PageTitle
-          title={assetId ? "Update Asset" : "Create New Asset"}
-          crumbsReplacements={{
-            [facilityId]: { name: facilityName },
-            assets: { style: "text-gray-200 pointer-events-none" },
-            [assetId || "????"]: { name },
-          }}
-          backUrl={`/facility/${facilityId}`}
-        />
+      <Page
+        title={assetId ? "Update Asset" : "Create New Asset"}
+        crumbsReplacements={{
+          [facilityId]: { name: facilityName },
+          assets: { style: "text-gray-200 pointer-events-none" },
+          [assetId || "????"]: { name },
+        }}
+        backUrl={`/facility/${facilityId}`}
+      >
         <section className="text-center">
           <h1 className="text-6xl flex items-center flex-col py-10">
             <div className="p-5 rounded-full flex items-center justify-center bg-gray-200 w-40 h-40">
@@ -414,7 +410,7 @@ const AssetCreate = (props: AssetProps) => {
             Add Location
           </button>
         </section>
-      </div>
+      </Page>
     );
   }
 
@@ -462,8 +458,8 @@ const AssetCreate = (props: AssetProps) => {
   };
 
   return (
-    <div className="pb-2 relative flex flex-col">
-      <PageTitle
+    <div className="relative flex flex-col">
+      <Page
         title={`${assetId ? "Update" : "Create"} Asset`}
         className="pl-6 flex-grow-0"
         crumbsReplacements={{
@@ -476,440 +472,458 @@ const AssetCreate = (props: AssetProps) => {
             ? `/facility/${facilityId}/assets/${assetId}`
             : `/facility/${facilityId}`
         }
-      />
-      <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
-        <div className="hidden xl:flex flex-col w-72 fixed h-full mt-4">
-          {Object.keys(sections).map((sectionTitle) => {
-            const isCurrent = currentSection === sectionTitle;
-            const section = sections[sectionTitle as AssetFormSection];
-            return (
-              <button
-                className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
-                  isCurrent ? "bg-white text-primary-500" : "bg-transparent"
-                } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
-                onClick={() => {
-                  section.ref.current?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                  });
-                  setCurrentSection(sectionTitle as AssetFormSection);
-                }}
+      >
+        <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
+          <div className="hidden xl:flex flex-col w-72 fixed h-full mt-4">
+            {Object.keys(sections).map((sectionTitle) => {
+              const isCurrent = currentSection === sectionTitle;
+              const section = sections[sectionTitle as AssetFormSection];
+              return (
+                <button
+                  className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
+                    isCurrent ? "bg-white text-primary-500" : "bg-transparent"
+                  } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
+                  onClick={() => {
+                    section.ref.current?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "center",
+                    });
+                    setCurrentSection(sectionTitle as AssetFormSection);
+                  }}
+                >
+                  <i className={`${section.iconClass} text-sm`} />
+                  <span>{sectionTitle}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="w-full h-full flex overflow-auto xl:ml-72">
+            <div className="w-full max-w-3xl 2xl:max-w-4xl">
+              <form
+                onSubmit={(e) => handleSubmit(e, false)}
+                className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
               >
-                <i className={`${section.iconClass} text-sm`} />
-                <span>{sectionTitle}</span>
-              </button>
-            );
-          })}
-        </div>
-        <div className="w-full h-full flex overflow-auto xl:ml-72">
-          <div className="w-full max-w-3xl 2xl:max-w-4xl">
-            <form
-              onSubmit={(e) => handleSubmit(e, false)}
-              className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
-            >
-              <div className="grid grid-cols-1 gap-x-12 items-start">
-                <div className="grid grid-cols-6 gap-x-6">
-                  {/* General Details Section */}
-                  {sectionTitle("General Details")}
-                  {/* Asset Name */}
-                  <div className="col-span-6" ref={fieldRef["name"]}>
-                    <TextFormField
-                      name="name"
-                      label="Asset Name"
-                      required
-                      value={name}
-                      onChange={({ value }) => setName(value)}
-                      error={state.errors.name}
-                    />
-                  </div>
-                  <FieldLabel className="text-sm w-max" required>
-                    Asset Location
-                  </FieldLabel>
-                  {/* Location */}
-                  <div ref={fieldRef["location"]} className="col-span-6">
-                    <LocationSelect
-                      name="Facilities"
-                      setSelected={(selectedId) =>
-                        setLocation((selectedId as string) || "")
-                      }
-                      selected={location}
-                      errors=""
-                      showAll={false}
-                      multiple={false}
-                      facilityId={facilityId as unknown as number}
-                    />
-                  </div>
-                  <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
-                    {/* Asset Type */}
-                    <div ref={fieldRef["asset_type"]} className="flex-1">
-                      <SelectFormField
-                        label="Asset Type"
-                        name="asset_type"
-                        required
-                        options={[
-                          {
-                            title: "Internal",
-                            description:
-                              "Asset is inside the facility premises.",
-                            value: AssetType.INTERNAL,
-                          },
-                          {
-                            title: "External",
-                            description:
-                              "Asset is outside the facility premises.",
-                            value: AssetType.EXTERNAL,
-                          },
-                        ]}
-                        value={asset_type}
-                        optionLabel={({ title }) => title}
-                        optionDescription={({ description }) => description}
-                        optionValue={({ value }) => value}
-                        onChange={({ value }) => setAssetType(value)}
-                        error={state.errors.asset_type}
-                      />
-                    </div>
-
-                    {/* Asset Class */}
-                    <div ref={fieldRef["asset_class"]} className="flex-1">
-                      <SelectFormField
-                        name="asset_class"
-                        label="Asset Class"
-                        value={asset_class}
-                        options={[
-                          { title: "ONVIF Camera", value: AssetClass.ONVIF },
-                          {
-                            title: "HL7 Vitals Monitor",
-                            value: AssetClass.HL7MONITOR,
-                          },
-                        ]}
-                        optionLabel={({ title }) => title}
-                        optionValue={({ value }) => value}
-                        onChange={({ value }) => setAssetClass(value)}
-                        error={state.errors.asset_class}
-                      />
-                    </div>
-                  </div>
-                  {/* Description */}
-                  <div className="col-span-6">
-                    <TextAreaFormField
-                      name="asset_description"
-                      label="Description"
-                      placeholder="Details about the equipment"
-                      value={description}
-                      onChange={({ value }) => setDescription(value)}
-                      error={state.errors.description}
-                    />
-                  </div>
-                  {/* Divider */}
-                  <div className="col-span-6">
-                    <hr
-                      className={
-                        "transition-all " +
-                        (is_working === "true"
-                          ? "opacity-0 my-0"
-                          : "opacity-100 my-4")
-                      }
-                    />
-                  </div>
-                  {/* Working Status */}
-                  <div ref={fieldRef["is_working"]} className="col-span-6">
-                    <SwitchV2
+                <div className="grid grid-cols-1 gap-x-12 items-start">
+                  <div className="grid grid-cols-6 gap-x-6">
+                    {/* General Details Section */}
+                    {sectionTitle("General Details")}
+                    {/* Asset Name */}
+                    <div
                       className="col-span-6"
-                      required
-                      name="is_working"
-                      label="Working Status"
-                      options={["true", "false"]}
-                      optionLabel={(option) => {
-                        return (
-                          {
-                            true: "Working",
-                            false: "Not Working",
-                          }[option] || "undefined"
-                        );
-                      }}
-                      optionClassName={(option) =>
-                        option === "false" &&
-                        "bg-danger-500 text-white border-danger-500 focus:ring-danger-500"
-                      }
-                      value={is_working}
-                      onChange={setIsWorking}
-                      error={state.errors.is_working}
-                    />
-                  </div>
-                  {/* Not Working Reason */}
-                  <div
-                    className={
-                      "col-span-6" +
-                      ((is_working !== "false" && " hidden") || "")
-                    }
-                  >
-                    <label htmlFor="not_working_reason">
-                      Why the asset is not working?
-                    </label>
-                    <textarea
-                      id="not_working_reason"
+                      ref={fieldRef["name"]}
+                      data-testid="asset-name-input"
+                    >
+                      <TextFormField
+                        name="name"
+                        label="Asset Name"
+                        required
+                        value={name}
+                        onChange={({ value }) => setName(value)}
+                        error={state.errors.name}
+                      />
+                    </div>
+
+                    {/* Location */}
+                    <FieldLabel className="text-sm w-max" required>
+                      Asset Location
+                    </FieldLabel>
+                    <div
+                      ref={fieldRef["location"]}
+                      className="col-span-6"
+                      data-testid="asset-location-input"
+                    >
+                      <LocationSelect
+                        name="Facilities"
+                        setSelected={(selectedId) =>
+                          setLocation((selectedId as string) || "")
+                        }
+                        selected={location}
+                        errors=""
+                        showAll={false}
+                        multiple={false}
+                        facilityId={facilityId as unknown as number}
+                      />
+                    </div>
+                    {/* Asset Type */}
+                    <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
+                      <div
+                        ref={fieldRef["asset_type"]}
+                        className="flex-1"
+                        data-testid="asset-type-input"
+                      >
+                        <SelectFormField
+                          label="Asset Type"
+                          name="asset_type"
+                          required
+                          options={[
+                            {
+                              title: "Internal",
+                              description:
+                                "Asset is inside the facility premises.",
+                              value: AssetType.INTERNAL,
+                            },
+                            {
+                              title: "External",
+                              description:
+                                "Asset is outside the facility premises.",
+                              value: AssetType.EXTERNAL,
+                            },
+                          ]}
+                          value={asset_type}
+                          optionLabel={({ title }) => title}
+                          optionDescription={({ description }) => description}
+                          optionValue={({ value }) => value}
+                          onChange={({ value }) => setAssetType(value)}
+                          error={state.errors.asset_type}
+                        />
+                      </div>
+
+                      {/* Asset Class */}
+                      <div
+                        ref={fieldRef["asset_class"]}
+                        className="flex-1"
+                        data-testid="asset-class-input"
+                      >
+                        <SelectFormField
+                          name="asset_class"
+                          label="Asset Class"
+                          value={asset_class}
+                          options={[
+                            { title: "ONVIF Camera", value: AssetClass.ONVIF },
+                            {
+                              title: "HL7 Vitals Monitor",
+                              value: AssetClass.HL7MONITOR,
+                            },
+                            {
+                              title: "Ventilator",
+                              value: AssetClass.VENTILATOR,
+                            },
+                          ]}
+                          optionLabel={({ title }) => title}
+                          optionValue={({ value }) => value}
+                          onChange={({ value }) => setAssetClass(value)}
+                          error={state.errors.asset_class}
+                        />
+                      </div>
+                    </div>
+                    {/* Description */}
+                    <div
+                      className="col-span-6"
+                      data-testid="asset-description-input"
+                    >
+                      <TextAreaFormField
+                        name="asset_description"
+                        label="Description"
+                        placeholder="Details about the equipment"
+                        value={description}
+                        onChange={({ value }) => setDescription(value)}
+                        error={state.errors.description}
+                      />
+                    </div>
+                    {/* Divider */}
+                    <div
+                      className="col-span-6"
+                      data-testid="asset-divider-input"
+                    >
+                      <hr
+                        className={
+                          "transition-all " +
+                          (is_working === "true"
+                            ? "opacity-0 my-0"
+                            : "opacity-100 my-4")
+                        }
+                      />
+                    </div>
+                    {/* Working Status */}
+                    <div
+                      ref={fieldRef["is_working"]}
+                      className="col-span-6"
+                      data-testid="asset-working-status-input"
+                    >
+                      <SwitchV2
+                        className="col-span-6"
+                        required
+                        name="is_working"
+                        label="Working Status"
+                        options={["true", "false"]}
+                        optionLabel={(option) => {
+                          return (
+                            {
+                              true: "Working",
+                              false: "Not Working",
+                            }[option] || "undefined"
+                          );
+                        }}
+                        optionClassName={(option) =>
+                          option === "false" &&
+                          "bg-danger-500 text-white border-danger-500 focus:ring-danger-500"
+                        }
+                        value={is_working}
+                        onChange={setIsWorking}
+                        error={state.errors.is_working}
+                      />
+                    </div>
+                    {/* Not Working Reason */}
+                    <div
                       className={
-                        "mt-2 block w-full input" +
-                        ((state.errors.not_working_reason &&
-                          " border-red-500") ||
-                          "")
+                        "col-span-6" +
+                        ((is_working !== "false" && " hidden") || "")
                       }
-                      name="not_working_reason"
-                      placeholder="Describe why the asset is not working"
-                      value={not_working_reason}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                        setNotWorkingReason(e.target.value)
-                      }
-                    />
-                    <LegacyErrorHelperText
-                      error={state.errors.not_working_reason}
-                    />
-                  </div>
-                  {/* Divider */}
-                  <div className="col-span-6">
-                    <hr
-                      className={
-                        "transition-all " +
-                        (is_working === "true"
-                          ? "opacity-0 my-0"
-                          : "opacity-100 mb-7")
-                      }
-                    />
-                  </div>
-                  {/* Asset QR ID */}
-                  <div className="col-span-6">
-                    <label htmlFor="asset-qr-id">Asset QR ID</label>
-                    <LegacyActionTextInputField
-                      id="qr_code_id"
-                      fullWidth
-                      name="qr_code_id"
-                      placeholder=""
-                      variant="outlined"
-                      margin="dense"
-                      value={qrCodeId}
-                      onChange={(e) => setQrCodeId(e.target.value)}
-                      actionIcon={
+                    >
+                      <TextAreaFormField
+                        name="not_working_reason"
+                        label="Why the asset is not working?"
+                        placeholder="Describe why the asset is not working"
+                        value={not_working_reason}
+                        onChange={(e) => setNotWorkingReason(e.value)}
+                        error={state.errors.not_working_reason}
+                      />
+                    </div>
+                    {/* Divider */}
+                    <div className="col-span-6">
+                      <hr
+                        className={
+                          "transition-all " +
+                          (is_working === "true"
+                            ? "opacity-0 my-0"
+                            : "opacity-100 mb-7")
+                        }
+                      />
+                    </div>
+                    {/* Asset QR ID */}
+                    <div className="col-span-6 flex flex-row items-center gap-3">
+                      <div className="w-full" data-testid="asset-qr-id-input">
+                        <TextFormField
+                          id="qr_code_id"
+                          name="qr_code_id"
+                          placeholder=""
+                          label="Asset QR ID"
+                          value={qrCodeId}
+                          onChange={(e) => setQrCodeId(e.value)}
+                          error={state.errors.qr_code_id}
+                        />
+                      </div>
+                      <div
+                        className="flex items-center justify-self-end ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
+                        onClick={() => setIsScannerActive(true)}
+                      >
                         <CareIcon className="care-l-focus cursor-pointer text-lg" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-6 gap-x-6">
+                    {sectionTitle("Warranty Details")}
+
+                    {/* Manufacturer */}
+                    <div
+                      className="col-span-6 sm:col-span-3"
+                      ref={fieldRef["manufacturer"]}
+                      data-testid="asset-manufacturer-input"
+                    >
+                      <TextFormField
+                        id="manufacturer"
+                        name="manufacturer"
+                        label="Manufacturer"
+                        value={manufacturer}
+                        placeholder="Eg. XYZ"
+                        onChange={(e) => setManufacturer(e.value)}
+                        error={state.errors.manufacturer}
+                      />
+                    </div>
+
+                    {/* Warranty / AMC Expiry */}
+                    <div
+                      className="col-span-6 sm:col-span-3"
+                      ref={fieldRef["warranty_amc_end_of_validity"]}
+                      data-testid="asset-warranty-input"
+                    >
+                      <TextFormField
+                        name="WarrantyAMCExpiry"
+                        value={warranty_amc_end_of_validity}
+                        label="Warranty / AMC Expiry"
+                        error={state.errors.warranty_amc_end_of_validity}
+                        onChange={(event) => {
+                          const value = moment(event.value);
+                          const date = new Date(value.toDate().toDateString());
+                          const today = new Date(new Date().toDateString());
+                          if (date < today) {
+                            Notification.Error({
+                              msg: "Warranty / AMC Expiry date can't be in past",
+                            });
+                          } else {
+                            setWarrantyAmcEndOfValidity(
+                              value.format("YYYY-MM-DD")
+                            );
+                          }
+                        }}
+                        type="date"
+                        min={moment().format("YYYY-MM-DD")}
+                      />
+                    </div>
+
+                    {/* Customer Support Name */}
+                    <div
+                      className="col-span-6 sm:col-span-3"
+                      ref={fieldRef["support_name"]}
+                      data-testid="asset-support-name-input"
+                    >
+                      <TextFormField
+                        id="support-name"
+                        name="support_name"
+                        label="Customer Support Name"
+                        placeholder="Eg. ABC"
+                        value={support_name}
+                        onChange={(e) => setSupportName(e.value)}
+                        error={state.errors.support_name}
+                      />
+                    </div>
+
+                    {/* Customer Support Number */}
+                    <div
+                      className="col-span-6 sm:col-span-3"
+                      ref={fieldRef["support_phone"]}
+                      id="customer-support-phone-div"
+                    >
+                      <PhoneNumberFormField
+                        name="support_phone"
+                        label="Customer support number"
+                        required
+                        value={support_phone}
+                        onChange={(e) => setSupportPhone(e.value)}
+                        error={state.errors.support_phone}
+                      />
+                    </div>
+
+                    {/* Customer Support Email */}
+                    <div
+                      className="col-span-6 sm:col-span-3"
+                      ref={fieldRef["support_email"]}
+                      data-testid="asset-support-email-input"
+                    >
+                      <TextFormField
+                        id="support-email"
+                        name="support_email"
+                        label="Customer Support Email"
+                        placeholder="Eg. mail@example.com"
+                        value={support_email}
+                        onChange={(e) => setSupportEmail(e.value)}
+                        error={state.errors.support_email}
+                      />
+                    </div>
+
+                    <div className="sm:col-span-3" />
+
+                    {/* Vendor Name */}
+                    <div
+                      className="col-span-6 sm:col-span-3"
+                      ref={fieldRef["vendor_name"]}
+                      data-testid="asset-vendor-name-input"
+                    >
+                      <TextFormField
+                        id="vendor-name"
+                        name="vendor_name"
+                        label="Vendor Name"
+                        value={vendor_name}
+                        placeholder="Eg. XYZ"
+                        onChange={(e) => setVendorName(e.value)}
+                        error={state.errors.vendor_name}
+                      />
+                    </div>
+
+                    {/* Serial Number */}
+                    <div
+                      className="col-span-6 sm:col-span-3"
+                      ref={fieldRef["serial_number"]}
+                      data-testid="asset-serial-number-input"
+                    >
+                      <TextFormField
+                        id="serial-number"
+                        name="serial_number"
+                        label="Serial Number"
+                        value={serial_number}
+                        onChange={(e) => setSerialNumber(e.value)}
+                        error={state.errors.serial_number}
+                      />
+                    </div>
+
+                    <div className="mt-6" />
+                    {sectionTitle("Service Details")}
+
+                    {/* Last serviced on */}
+                    <div
+                      className="col-span-6 sm:col-span-3"
+                      ref={fieldRef["last_serviced_on"]}
+                      data-testid="asset-last-serviced-on-input"
+                    >
+                      <TextFormField
+                        name="last_serviced_on"
+                        label="Last Serviced On"
+                        className="mt-2"
+                        value={last_serviced_on}
+                        error={state.errors.last_serviced_on}
+                        onChange={(date) => {
+                          if (
+                            moment(date.value).format("YYYY-MM-DD") >
+                            new Date().toLocaleDateString("en-ca")
+                          ) {
+                            Notification.Error({
+                              msg: "Last Serviced date can't be in future",
+                            });
+                          } else {
+                            setLastServicedOn(
+                              moment(date.value).format("YYYY-MM-DD")
+                            );
+                          }
+                        }}
+                        type="date"
+                        max={moment(new Date()).format("YYYY-MM-DD")}
+                      />
+                    </div>
+
+                    {/* Notes */}
+                    <div
+                      className="col-span-6 mt-6"
+                      ref={fieldRef["notes"]}
+                      data-testid="asset-notes-input"
+                    >
+                      <TextAreaFormField
+                        name="notes"
+                        label="Notes"
+                        placeholder="Eg. Details on functionality, service, etc."
+                        value={notes}
+                        onChange={(e) => setNotes(e.value)}
+                        error={state.errors.notes}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-12 flex justify-end gap-x-2 gap-y-2 flex-wrap">
+                    <Cancel
+                      onClick={() =>
+                        navigate(
+                          assetId
+                            ? `/facility/${facilityId}/assets/${assetId}`
+                            : `/facility/${facilityId}`
+                        )
                       }
-                      action={() => setIsScannerActive(true)}
-                      errors={state.errors.qr_code_id}
                     />
-                    <LegacyErrorHelperText error={state.errors.qr_id} />
-                  </div>
-                </div>
-                <div className="grid grid-cols-6 gap-x-6">
-                  {sectionTitle("Warranty Details")}
-
-                  {/* Manufacturer */}
-                  <div
-                    className="col-span-6 sm:col-span-3"
-                    ref={fieldRef["manufacturer"]}
-                  >
-                    <TextFormField
-                      id="manufacturer"
-                      name="manufacturer"
-                      label="Manufacturer"
-                      value={manufacturer}
-                      placeholder="Eg. XYZ"
-                      onChange={(e) => setManufacturer(e.value)}
-                      error={state.errors.manufacturer}
-                    />
-                  </div>
-
-                  {/* Warranty / AMC Expiry */}
-                  <div
-                    className="col-span-6 sm:col-span-3"
-                    ref={fieldRef["warranty_amc_end_of_validity"]}
-                  >
-                    <label className="mb-2">Warranty / AMC Expiry</label>
-                    <TextFormField
-                      name="WarrantyAMCExpiry"
-                      value={warranty_amc_end_of_validity}
-                      onChange={(event) => {
-                        const value = moment(event.value);
-                        const date = new Date(value.toDate().toDateString());
-                        const today = new Date(new Date().toDateString());
-                        if (date < today) {
-                          Notification.Error({
-                            msg: "Warranty / AMC Expiry date can't be in past",
-                          });
-                        } else {
-                          setWarrantyAmcEndOfValidity(
-                            value.format("YYYY-MM-DD")
-                          );
-                        }
-                      }}
-                      type="date"
-                      min={moment().format("YYYY-MM-DD")}
-                    />
-                    <LegacyErrorHelperText
-                      error={state.errors.warranty_amc_end_of_validity}
-                    />
-                  </div>
-
-                  {/* Customer Support Name */}
-                  <div
-                    className="col-span-6 sm:col-span-3"
-                    ref={fieldRef["support_name"]}
-                  >
-                    <TextFormField
-                      id="support-name"
-                      name="support_name"
-                      label="Customer Support Name"
-                      placeholder="Eg. ABC"
-                      value={support_name}
-                      onChange={(e) => setSupportName(e.value)}
-                      error={state.errors.support_name}
-                    />
-                  </div>
-
-                  {/* Customer Support Number */}
-                  <div
-                    className="col-span-6 sm:col-span-3"
-                    ref={fieldRef["support_phone"]}
-                  >
-                    <PhoneNumberFormField
-                      name="support_phone"
-                      label="Customer support number"
-                      required
-                      value={support_phone}
-                      onChange={(e) => setSupportPhone(e.value)}
-                      error={state.errors.support_phone}
-                    />
-                  </div>
-
-                  {/* Customer Support Email */}
-                  <div
-                    className="col-span-6 sm:col-span-3"
-                    ref={fieldRef["support_email"]}
-                  >
-                    <TextFormField
-                      id="support-email"
-                      name="support_email"
-                      label="Customer Support Email"
-                      placeholder="Eg. mail@example.com"
-                      value={support_email}
-                      onChange={(e) => setSupportEmail(e.value)}
-                      error={state.errors.support_email}
-                    />
-                  </div>
-
-                  <div className="sm:col-span-3" />
-
-                  {/* Vendor Name */}
-                  <div
-                    className="col-span-6 sm:col-span-3"
-                    ref={fieldRef["vendor_name"]}
-                  >
-                    <TextFormField
-                      id="vendor-name"
-                      name="vendor_name"
-                      label="Vendor Name"
-                      value={vendor_name}
-                      placeholder="Eg. XYZ"
-                      onChange={(e) => setVendorName(e.value)}
-                      error={state.errors.vendor_name}
-                    />
-                  </div>
-
-                  {/* Serial Number */}
-                  <div
-                    className="col-span-6 sm:col-span-3"
-                    ref={fieldRef["serial_number"]}
-                  >
-                    <TextFormField
-                      id="serial-number"
-                      name="serial_number"
-                      label="Serial Number"
-                      value={serial_number}
-                      onChange={(e) => setSerialNumber(e.value)}
-                      error={state.errors.serial_number}
-                    />
-                  </div>
-
-                  <div className="mt-6" />
-                  {sectionTitle("Service Details")}
-
-                  {/* Last serviced on */}
-                  <div
-                    className="col-span-6 sm:col-span-3"
-                    ref={fieldRef["last_serviced_on"]}
-                  >
-                    <label htmlFor="last-serviced-on">Last Serviced On</label>
-                    <TextFormField
-                      name="LastServicedOn"
-                      className="mt-2"
-                      value={last_serviced_on}
-                      onChange={(date) => {
-                        if (
-                          moment(date.value).format("YYYY-MM-DD") >
-                          new Date().toLocaleDateString("en-ca")
-                        ) {
-                          Notification.Error({
-                            msg: "Last Serviced date can't be in future",
-                          });
-                        } else {
-                          setLastServicedOn(
-                            moment(date.value).format("YYYY-MM-DD")
-                          );
-                        }
-                      }}
-                      type="date"
-                      max={moment(new Date()).format("YYYY-MM-DD")}
-                    />
-                    <LegacyErrorHelperText
-                      error={state.errors.last_serviced_on}
-                    />
-                  </div>
-
-                  {/* Notes */}
-                  <div className="col-span-6 mt-6" ref={fieldRef["notes"]}>
-                    <label htmlFor="notes">Notes</label>
-                    <textarea
-                      id="notes"
-                      className={
-                        "mt-2 block w-full input" +
-                        ((state.errors.notes && " border-red-500") || "")
-                      }
-                      name="notes"
-                      placeholder="Eg. Details on functionality, service, etc."
-                      value={notes}
-                      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                        setNotes(e.target.value)
-                      }
-                    />
-                    <LegacyErrorHelperText error={state.errors.notes} />
-                  </div>
-                </div>
-
-                <div />
-
-                <div className="mt-12 flex justify-end gap-x-2 gap-y-2 flex-wrap">
-                  <Cancel
-                    onClick={() =>
-                      navigate(
-                        assetId
-                          ? `/facility/${facilityId}/assets/${assetId}`
-                          : `/facility/${facilityId}`
-                      )
-                    }
-                  />
-                  <Submit
-                    onClick={(e) => handleSubmit(e, false)}
-                    label={assetId ? "Update" : "Create Asset"}
-                  />
-                  {!assetId && (
                     <Submit
-                      onClick={(e) => handleSubmit(e, true)}
-                      label="Create & Add More"
+                      onClick={(e) => handleSubmit(e, false)}
+                      label={assetId ? "Update" : "Create Asset"}
                     />
-                  )}
+                    {!assetId && (
+                      <Submit
+                        onClick={(e) => handleSubmit(e, true)}
+                        label="Create & Add More"
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
+      </Page>
     </div>
   );
 };

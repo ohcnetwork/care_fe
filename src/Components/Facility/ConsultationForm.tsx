@@ -33,12 +33,6 @@ import { UserModel } from "../Users/models";
 import { BedSelect } from "../Common/BedSelect";
 import { dischargePatient } from "../../Redux/actions";
 import Beds from "./Consultations/Beds";
-import PrescriptionBuilder, {
-  PrescriptionType,
-} from "../Common/prescription-builder/PrescriptionBuilder";
-import PRNPrescriptionBuilder, {
-  PRNPrescriptionType,
-} from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
@@ -94,8 +88,6 @@ type FormDetails = {
   ip_no: string;
   op_no: string;
   procedure: ProcedureType[];
-  discharge_advice: PrescriptionType[];
-  prn_prescription: PRNPrescriptionType[];
   investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
   action?: string;
@@ -144,8 +136,6 @@ const initForm: FormDetails = {
   ip_no: "",
   op_no: "",
   procedure: [],
-  discharge_advice: [],
-  prn_prescription: [],
   investigation: [],
   is_telemedicine: "false",
   action: "NO_ACTION",
@@ -223,10 +213,6 @@ export const ConsultationForm = (props: any) => {
   const { facilityId, patientId, id } = props;
   const [state, dispatch] = useReducer(consultationFormReducer, initialState);
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
-    []
-  );
-  const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
   const [InvestigationAdvice, setInvestigationAdvice] = useState<
     InvestigationType[]
   >([]);
@@ -305,12 +291,6 @@ export const ConsultationForm = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
-      setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      setPRNAdvice(
-        !Array.isArray(res.data.prn_prescription)
-          ? []
-          : res.data.prn_prescription
-      );
       setInvestigationAdvice(
         !Array.isArray(res.data.investigation) ? [] : res.data.investigation
       );
@@ -341,6 +321,7 @@ export const ConsultationForm = (props: any) => {
             is_telemedicine: `${res.data.is_telemedicine}`,
             is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
+            assigned_to_object: res.data.assigned_to_object,
             ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
@@ -368,7 +349,7 @@ export const ConsultationForm = (props: any) => {
         fetchData(status);
       }
     },
-    [dispatch, fetchData]
+    [fetchData, id]
   );
 
   if (isLoading) return <Loading />;
@@ -489,27 +470,6 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "discharge_advice": {
-          let invalid = false;
-          let errorMsg = "";
-          for (const f of dischargeAdvice) {
-            if (!f.medicine?.replace(/\s/g, "").length) {
-              invalid = true;
-              errorMsg = "Prescription Medicine field can not be empty";
-              break;
-            }
-            if (!f.dosage?.replace(/\s/g, "").length) {
-              invalid = true;
-              errorMsg = "Prescription Frequency field can not be empty";
-              break;
-            }
-          }
-          if (invalid) {
-            errors[field] = errorMsg;
-            invalidForm = true;
-          }
-          return;
-        }
         case "procedure": {
           for (const p of procedures) {
             if (!p.procedure?.replace(/\s/g, "").length) {
@@ -524,21 +484,6 @@ export const ConsultationForm = (props: any) => {
             }
             if (p.repetitive && !p.frequency?.replace(/\s/g, "").length) {
               errors[field] = "Frequency field can not be empty";
-              invalidForm = true;
-              break;
-            }
-          }
-          return;
-        }
-        case "prn_prescription": {
-          for (const f of PRNAdvice) {
-            if (!f.medicine?.replace(/\s/g, "").length) {
-              errors[field] = "Medicine field can not be empty";
-              invalidForm = true;
-              break;
-            }
-            if (!f.indicator?.replace(/\s/g, "").length) {
-              errors[field] = "Indicator field can not be empty";
               invalidForm = true;
               break;
             }
@@ -617,7 +562,7 @@ export const ConsultationForm = (props: any) => {
           death_datetime: death_datetime,
           death_confirmed_doctor: death_confirmed_doctor,
         },
-        { id: patientId }
+        { id }
       )
     );
 
@@ -661,8 +606,6 @@ export const ConsultationForm = (props: any) => {
         icd11_provisional_diagnoses:
           state.form.icd11_provisional_diagnoses_object.map((o) => o.id),
         verified_by: state.form.verified_by,
-        discharge_advice: dischargeAdvice,
-        prn_prescription: PRNAdvice,
         investigation: InvestigationAdvice,
         procedure: procedures,
         patient: patientId,
@@ -680,7 +623,9 @@ export const ConsultationForm = (props: any) => {
         action: state.form.action,
         review_interval: state.form.review_interval,
         assigned_to:
-          state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
+          state.form.is_telemedicine.toString() === "true"
+            ? state.form.assigned_to
+            : "",
         special_instruction: state.form.special_instruction,
         weight: Number(state.form.weight),
         height: Number(state.form.height),
@@ -703,7 +648,9 @@ export const ConsultationForm = (props: any) => {
         }
 
         Notification.Success({
-          msg: `Consultation ${id ? "updated" : "created"} successfully`,
+          msg: res.data.discharge_date
+            ? "Patient discharged successfully"
+            : `Consultation ${id ? "updated" : "created"} successfully`,
         });
 
         navigate(
@@ -713,6 +660,10 @@ export const ConsultationForm = (props: any) => {
         if (data.suggestion === "R") {
           navigate(`/facility/${facilityId}/patient/${patientId}/shift/new`);
           return;
+        } else if (!id && data.suggestion === "A") {
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}/prescriptions`
+          );
         }
       }
     }
@@ -1176,37 +1127,6 @@ export const ConsultationForm = (props: any) => {
                               error={state.errors.investigation}
                             />
                           </div>
-
-                          <div
-                            id="discharge_advice"
-                            className="col-span-6"
-                            ref={fieldRef["discharge_advice"]}
-                          >
-                            <FieldLabel>Prescription Medication</FieldLabel>
-                            <PrescriptionBuilder
-                              prescriptions={dischargeAdvice}
-                              setPrescriptions={setDischargeAdvice}
-                            />
-                            <LegacyErrorHelperText
-                              error={state.errors.discharge_advice}
-                            />
-                          </div>
-
-                          <div
-                            id="prn_prescription"
-                            className="col-span-6"
-                            ref={fieldRef["prn_prescription"]}
-                          >
-                            <FieldLabel>PRN Prescription</FieldLabel>
-                            <PRNPrescriptionBuilder
-                              prescriptions={PRNAdvice}
-                              setPrescriptions={setPRNAdvice}
-                            />
-                            <LegacyErrorHelperText
-                              error={state.errors.prn_prescription}
-                            />
-                          </div>
-
                           <div
                             id="procedure"
                             className="col-span-6"
@@ -1301,8 +1221,8 @@ export const ConsultationForm = (props: any) => {
                           <CheckBoxFormField
                             className="col-span-6"
                             {...field("is_telemedicine")}
+                            value={JSON.parse(state.form.is_telemedicine)}
                             label="Is Telemedicine required for the patient?"
-                            onChange={handleFormFieldChange}
                           />
 
                           {JSON.parse(state.form.is_telemedicine) && (
