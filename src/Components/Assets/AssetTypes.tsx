@@ -23,6 +23,7 @@ export enum AssetClass {
   NONE = "NONE",
   ONVIF = "ONVIF",
   HL7MONITOR = "HL7MONITOR",
+  VENTILATOR = "VENTILATOR",
 }
 
 export const assetClassProps = {

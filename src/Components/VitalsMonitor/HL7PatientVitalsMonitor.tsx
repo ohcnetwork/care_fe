@@ -4,6 +4,8 @@ import { PatientAssetBed } from "../Assets/AssetTypes";
 import { Link } from "raviger";
 import { GENDER_TYPES } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import WaveformLabels from "./WaveformLabels";
+import { classNames } from "../../Utils/utils";
 
 interface Props {
   patientAssetBed?: PatientAssetBed;
@@ -16,7 +18,7 @@ export default function HL7PatientVitalsMonitor({
   socketUrl,
   size,
 }: Props) {
-  const { connect, waveformCanvas, data } = useHL7VitalsMonitor();
+  const { connect, waveformCanvas, data, isOnline } = useHL7VitalsMonitor();
   const { patient, bed } = patientAssetBed ?? {};
 
   useEffect(() => {
@@ -63,7 +65,28 @@ export default function HL7PatientVitalsMonitor({
         </div>
       )}
       <div className="flex flex-col md:flex-row md:justify-between divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2">
-        <div className="relative" style={{ ...(size ?? waveformCanvas.size) }}>
+        <div
+          className={classNames(
+            "flex flex-col gap-1 justify-center items-center text-center p-1 text-warning-500 font-medium font-mono",
+            isOnline && "hidden"
+          )}
+          style={{ ...(size ?? waveformCanvas.size) }}
+        >
+          <CareIcon className="care-l-cloud-times text-4xl animate-pulse mb-2" />
+          <span className="font-bold">No incoming data from HL7 Monitor</span>
+        </div>
+        <div
+          className={classNames("relative", !isOnline && "hidden")}
+          style={{ ...(size ?? waveformCanvas.size) }}
+        >
+          <WaveformLabels
+            labels={{
+              ECG: "text-lime-300",
+              ECG_CHANNEL_2: "invisible",
+              Pleth: "text-yellow-300",
+              Resp: "text-sky-300",
+            }}
+          />
           <canvas
             className="absolute top-0 left-0"
             ref={waveformCanvas.background.canvasRef}
@@ -77,17 +100,17 @@ export default function HL7PatientVitalsMonitor({
             {...waveformCanvas.size}
           />
         </div>
-        <div className="grid grid-cols-3 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
+        <div className="grid grid-cols-3 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider max-w-[170px]">
           {/* Pulse Rate */}
           <div className="flex justify-between items-center p-1">
             <div className="flex flex-col h-full items-start text-sm text-primary-400 font-bold">
               <span>ECG</span>
-              <span>{data.pulseRate?.unit ?? "--"}</span>
+              <span>{(data.pulseRate ?? data.heartRate)?.unit ?? "--"}</span>
             </div>
             <span className="text-4xl md:text-6xl font-black text-gray-300">
-              {data.pulseRate?.value ?? "--"}
+              {(data.pulseRate ?? data.heartRate)?.value ?? "--"}
             </span>
-            {data.pulseRate?.value && (
+            {(data.pulseRate ?? data.heartRate)?.value && (
               <span className="text-red-500 animate-pulse font-sans">❤️</span>
             )}
           </div>

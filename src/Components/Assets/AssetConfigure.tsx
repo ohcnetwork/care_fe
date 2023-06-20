@@ -65,6 +65,22 @@ const AssetConfigure = (props: AssetConfigureProps) => {
     );
   }
 
+  if (assetType === "VENTILATOR") {
+    return (
+      <Page
+        title={`Configure Ventilator: ${asset?.name}`}
+        crumbsReplacements={{
+          [facilityId]: { name: asset?.location_object.facility.name },
+          assets: { uri: `/assets?facility=${facilityId}` },
+          [assetId]: { name: asset?.name },
+        }}
+        backUrl={`/facility/${facilityId}/assets/${assetId}`}
+      >
+        <HL7Monitor asset={asset} assetId={assetId} facilityId={facilityId} />
+      </Page>
+    );
+  }
+
   return (
     <Page
       title={`Configure ONVIF Camera: ${asset?.name}`}
