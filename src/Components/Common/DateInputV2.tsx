@@ -224,7 +224,7 @@ const DateInputV2: React.FC<Props> = ({
                   disabled={disabled}
                   className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
                   placeholder={placeholder || "Select date"}
-                  value={value && format(new Date(value), "yyyy-MM-dd")}
+                  value={value && format(value, "yyyy-MM-dd")}
                 />
                 <div className="absolute top-1/2 right-0 p-2 -translate-y-1/2">
                   <CareIcon className="care-l-calendar-alt text-lg text-gray-600" />
