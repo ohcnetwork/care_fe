@@ -23,6 +23,7 @@ const initForm = {
 };
 const initialState = {
   form: { ...initForm },
+  errors: {},
 };
 
 const FormReducer = (state = initialState, action: any) => {
@@ -85,8 +86,9 @@ export const UpdateFacilityMiddleware = (props: any) => {
     e.preventDefault();
     setIsLoading(true);
     if (!state.form.middleware_address) {
-      Notification.Error({
-        msg: "Middleware Address is required",
+      dispatch({
+        type: "set_error",
+        errors: { middleware_address: ["Middleware Address is required"] },
       });
       setIsLoading(false);
       return;
@@ -96,8 +98,11 @@ export const UpdateFacilityMiddleware = (props: any) => {
         /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/
       ) === null
     ) {
-      Notification.Error({
-        msg: "Invalid Middleware Address",
+      dispatch({
+        type: "set_error",
+        errors: {
+          middleware_address: ["Invalid Middleware Address"],
+        },
       });
       setIsLoading(false);
       return;
@@ -151,6 +156,7 @@ export const UpdateFacilityMiddleware = (props: any) => {
                 label="Facility Middleware Address"
                 value={state.form.middleware_address}
                 onChange={(e) => handleChange(e)}
+                error={state.errors?.middleware_address}
               />
             </div>
           </div>
