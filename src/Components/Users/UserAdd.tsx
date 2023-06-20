@@ -131,6 +131,26 @@ const user_create_reducer = (state = initialState, action: any) => {
 const getDate = (value: any) =>
   value && moment(value).isValid() && moment(value).toDate();
 
+export const validateRule = (
+  condition: boolean,
+  content: JSX.Element | string
+) => {
+  return (
+    <div>
+      {condition ? (
+        <i className="fas fa-circle-check text-green-500" />
+      ) : (
+        <i className="fas fa-circle-xmark text-red-500" />
+      )}{" "}
+      <span
+        className={classNames(condition ? "text-primary-500" : "text-red-500")}
+      >
+        {content}
+      </span>
+    </div>
+  );
+};
+
 export const UserAdd = (props: UserProps) => {
   const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
@@ -529,25 +549,6 @@ export const UserAdd = (props: UserProps) => {
     }
     dispatch({ type: "set_error", errors });
     return true;
-  };
-
-  const validateRule = (condition: boolean, content: JSX.Element | string) => {
-    return (
-      <div>
-        {condition ? (
-          <i className="fas fa-circle-check text-green-500" />
-        ) : (
-          <i className="fas fa-circle-xmark text-red-500" />
-        )}{" "}
-        <span
-          className={classNames(
-            condition ? "text-primary-500" : "text-red-500"
-          )}
-        >
-          {content}
-        </span>
-      </div>
-    );
   };
 
   const handleSubmit = async (e: any) => {

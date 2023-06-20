@@ -2120,6 +2120,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             },
                           ])
                         }
+                        data-testid="add-insurance-button"
                       >
                         <CareIcon className="care-l-plus text-lg" />
                         <span>Add Insurance Details</span>
