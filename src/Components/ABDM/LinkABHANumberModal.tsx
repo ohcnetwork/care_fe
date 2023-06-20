@@ -26,6 +26,25 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { classNames } from "../../Utils/utils";
 import { useDispatch } from "react-redux";
 
+export const validateRule = (
+  condition: boolean,
+  content: JSX.Element | string
+) => {
+  return (
+    <div>
+      {condition ? (
+        <i className="fas fa-circle-check text-green-500" />
+      ) : (
+        <i className="fas fa-circle-xmark text-red-500" />
+      )}{" "}
+      <span
+        className={classNames(condition ? "text-primary-500" : "text-red-500")}
+      >
+        {content}
+      </span>
+    </div>
+  );
+};
 interface Props {
   facilityId: string;
   patientId?: string;
@@ -678,6 +697,7 @@ const CreateHealthIDSection = ({
   const dispatch = useDispatch<any>();
   const [healthId, setHealthId] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [isHealthIdInputInFocus, setIsHealthIdInputInFocus] = useState(false);
 
   const handleCreateHealthId = async () => {
     setIsCreating(true);
@@ -702,11 +722,40 @@ const CreateHealthIDSection = ({
         placeholder="Enter Abha Address"
         disabled={isCreating}
         value={healthId}
-        onChange={({ value }) => setHealthId(value)}
+        onChange={({ value }) => {
+          setHealthId(value);
+        }}
+        onFocus={() => setIsHealthIdInputInFocus(true)}
+        onBlur={() => setIsHealthIdInputInFocus(false)}
       />
+      {isHealthIdInputInFocus && (
+        <div className="pl-2 text-small text-gray-500 mb-2">
+          {validateRule(
+            healthId.length >= 4,
+            "Should be atleast 4 character long"
+          )}
+          {validateRule(
+            isNaN(Number(healthId[0])) && healthId[0] !== ".",
+            "Shouldn't start with a number or dot (.)"
+          )}
+          {validateRule(
+            healthId[healthId.length - 1] !== ".",
+            "Shouldn't end with a dot (.)"
+          )}
+          {validateRule(
+            /^[0-9a-zA-Z.]+$/.test(healthId),
+            "Should only contain letters, numbers and dot (.)"
+          )}
+        </div>
+      )}
 
       <div className="flex gap-2 items-center justify-end mt-4">
-        <ButtonV2 disabled={isCreating} onClick={handleCreateHealthId}>
+        <ButtonV2
+          disabled={
+            isCreating || !/^(?![\d.])[a-zA-Z0-9.]{4,}(?<!\.)$/.test(healthId)
+          }
+          onClick={handleCreateHealthId}
+        >
           {isCreating ? "Creating Abha Address..." : "Create Abha Address"}
         </ButtonV2>
       </div>
