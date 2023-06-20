@@ -12,7 +12,7 @@ import {
   MultiSelectFormField,
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
-import React, { useCallback, useReducer, useState } from "react";
+import React, { useCallback, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
 import {
   createFacility,
@@ -53,6 +53,12 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
+import {
+  DraftSection,
+  FormReducerAction,
+  FormReducerAction,
+  useAutoSaveReducer,
+} from "../../Utils/AutoSave.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -128,22 +134,19 @@ const initialState = {
   errors: { ...initError },
 };
 
-type SetFormAction = { type: "set_form"; form: FacilityForm };
-type SetErrorAction = {
-  type: "set_error";
-  errors: Record<keyof FacilityForm, string>;
-};
-type FacilityCreateFormAction = SetFormAction | SetErrorAction;
-
 const facilityCreateReducer = (
   state = initialState,
-  action: FacilityCreateFormAction
+  action: FormReducerAction
 ) => {
   switch (action.type) {
     case "set_form":
       return { ...state, form: action.form };
     case "set_error":
       return { ...state, errors: action.errors };
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
+    }
   }
 };
 
@@ -153,7 +156,10 @@ export const FacilityCreate = (props: FacilityProps) => {
   const dispatchAction: any = useDispatch();
   const { facilityId } = props;
 
-  const [state, dispatch] = useReducer(facilityCreateReducer, initialState);
+  const [state, dispatch] = useAutoSaveReducer(
+    facilityCreateReducer,
+    initialState
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
@@ -767,6 +773,12 @@ export const FacilityCreate = (props: FacilityProps) => {
           <Card className="mt-4">
             <CardContent>
               <form onSubmit={(e) => handleSubmit(e)}>
+                <DraftSection
+                  handleDraftSelect={(newState: any) => {
+                    dispatch({ type: "set_state", state: newState });
+                  }}
+                  formData={state.form}
+                />
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                   <SelectFormField
                     {...field("facility_type")}

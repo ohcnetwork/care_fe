@@ -12,7 +12,7 @@ import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
 import loadable from "@loadable/component";
-import { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   BLOOD_GROUPS,
@@ -76,6 +76,7 @@ import HCXPolicyValidator from "../HCX/validators";
 import { FieldError } from "../Form/FieldValidators";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import DialogModal from "../Common/Dialog";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -121,6 +122,7 @@ const initForm: any = {
   ward: "",
   address: "",
   permanent_address: "",
+  sameAddress: true,
   village: "",
   allergies: "",
   pincode: "",
@@ -176,6 +178,10 @@ const patientFormReducer = (state = initialState, action: any) => {
         errors: action.errors,
       };
     }
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
+    }
     default:
       return state;
   }
@@ -194,7 +200,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const { gov_data_api_key, enable_hcx } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
-  const [state, dispatch] = useReducer(patientFormReducer, initialState);
+  const [state, dispatch] = useAutoSaveReducer(
+    patientFormReducer,
+    initialState
+  );
   const [showAlertMessage, setAlertMessage] = useState({
     show: false,
     message: "",
@@ -216,7 +225,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     transfer?: boolean;
     patientList: Array<DupPatientModel>;
   }>({ patientList: [] });
-  const [sameAddress, setSameAddress] = useState(true);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [{ extId }, setQuery] = useQueryParams();
@@ -437,7 +445,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               : null,
           };
           if (res.data.address !== res.data.permanent_address) {
-            setSameAddress(false);
+            formData["sameAddress"] = false;
           }
           res.data.medical_history.forEach((i: any) => {
             const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
@@ -548,7 +556,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "permanent_address":
-          if (!sameAddress) {
+          if (!state.form.sameAddress) {
             if (!state.form[field]) {
               errors[field] = "Field is required";
               if (!error_div) error_div = field;
@@ -844,7 +852,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ward: state.form.ward,
         village: state.form.village,
         address: state.form.address ? state.form.address : undefined,
-        permanent_address: sameAddress
+        permanent_address: state.form.sameAddress
           ? state.form.address
           : state.form.permanent_address
           ? state.form.permanent_address
@@ -1191,6 +1199,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   Import From External Results
                 </ButtonV2>
                 <form onSubmit={(e) => handleSubmit(e)}>
+                  <DraftSection
+                    handleDraftSelect={(newState) => {
+                      dispatch({ type: "set_state", state: newState });
+                    }}
+                    formData={state.form}
+                  />
                   <Card elevation={0} className="mb-8 rounded overflow-visible">
                     <CardContent>
                       <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
@@ -1327,10 +1341,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             rows={3}
                             id="permanent_address"
                             name="permanent_address"
-                            disabled={sameAddress}
+                            disabled={state.form.sameAddress}
                             placeholder="Enter the permanent address"
                             value={
-                              sameAddress
+                              state.form.sameAddress
                                 ? state.form.address
                                 : state.form.permanent_address
                             }
@@ -1339,8 +1353,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           />
 
                           <LegacyCheckboxField
-                            checked={sameAddress}
-                            onChange={() => setSameAddress(!sameAddress)}
+                            checked={state.form.sameAddress}
+                            onChange={(e: any) => {
+                              handleChange({
+                                target: {
+                                  name: "sameAddress",
+                                  value: e.target.checked,
+                                },
+                              });
+                            }}
                             label="Same as Current Address"
                             className="font-bold"
                           />
