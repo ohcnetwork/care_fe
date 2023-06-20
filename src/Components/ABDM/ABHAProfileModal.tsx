@@ -3,6 +3,9 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
 import QRCode from "qrcode.react";
 import { formatDate } from "../../Utils/utils";
+import html2canvas from "html2canvas";
+import { useRef } from "react";
+
 interface IProps {
   abha?: AbhaObject;
   show: boolean;
@@ -10,20 +13,45 @@ interface IProps {
 }
 
 const ABHAProfileModal = ({ show, onClose, abha }: IProps) => {
-  console.log(abha);
+  const printRef = useRef(null);
 
   return (
     <DialogModal
       title={
         <p className="flex items-center justify-between">
           <h4>ABHA Profile</h4>
-          <CareIcon onClick={print} className="care-l-print cursor-pointer" />
+          <div className="flex items-center gap-2">
+            <CareIcon onClick={print} className="care-l-print cursor-pointer" />
+            <CareIcon
+              onClick={async () => {
+                const element = printRef.current;
+                if (!element) return;
+
+                const canvas = await html2canvas(element);
+                const data = canvas.toDataURL("image/jpg");
+                const link = document.createElement("a");
+
+                if (typeof link.download === "string") {
+                  link.href = data;
+                  link.download = `${abha?.name || "abha"}.jpg`;
+
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                } else {
+                  window.open(data);
+                }
+              }}
+              className="care-l-import cursor-pointer"
+            />
+          </div>
         </p>
       }
       show={show}
       onClose={onClose}
     >
       <div
+        ref={printRef}
         id="section-to-print"
         className="print flex items-center justify-around print:border border-black p-4 print:w-full"
       >
