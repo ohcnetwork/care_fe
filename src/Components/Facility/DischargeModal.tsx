@@ -24,6 +24,8 @@ import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
 import CircularProgress from "../Common/components/CircularProgress";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete";
+import { getAllFacilities } from "../../Redux/actions";
 
 interface PreDischargeFormInterface {
   discharge_reason: string;
@@ -31,6 +33,7 @@ interface PreDischargeFormInterface {
   discharge_date: string | null;
   death_datetime: string | null;
   death_confirmed_doctor: string | null;
+  referred_to_external: string | null;
 }
 
 interface IProps {
@@ -66,12 +69,31 @@ const DischargeModal = ({
       discharge_date,
       death_datetime,
       death_confirmed_doctor: null,
+      referred_to_external: null,
     });
   const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
   const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
+  const [facilities, setFacilities] = useState<any[]>([]); // for referred to external
   const [errors, setErrors] = useState<any>({});
 
+  useEffect(() => {
+    // getAllFacilities(); fetches all hospitals
+    const fetchAllFacilities = async () => {
+      const res = await dispatch(getAllFacilities({}));
+      if (res && res.data) {
+        setFacilities(
+          res.data.results.map((facility: any) => ({
+            id: facility.id,
+            text: facility.name,
+          }))
+        );
+      }
+    };
+    fetchAllFacilities();
+  }, []);
+
+  console.log(facilities);
   const fetchLatestClaim = useCallback(async () => {
     const res = await dispatch(
       HCXActions.claims.list({
@@ -203,6 +225,24 @@ const DischargeModal = ({
           }
           error={errors?.discharge_reason}
         />
+        {preDischargeForm.discharge_reason === "REF" && (
+          <AutocompleteFormField
+            label="Referred to"
+            name="referred_to_external"
+            id="referred_to_external"
+            value={preDischargeForm.referred_to_external}
+            options={facilities}
+            optionValue={({ id }) => id}
+            optionLabel={({ text }) => text}
+            onChange={(e) =>
+              setPreDischargeForm((prev) => ({
+                ...prev,
+                referred_to_external: e.value,
+              }))
+            }
+            error={errors?.discharge_reason}
+          />
+        )}
         <TextAreaFormField
           required={preDischargeForm.discharge_reason == "EXP"}
           label={

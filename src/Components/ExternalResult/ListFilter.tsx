@@ -204,7 +204,7 @@ export default function ListFilter(props: any) {
           multiple
           name="local_bodies"
           options={lsgList}
-          label={t("Local Body")}
+          label={t("Local Bod")}
           variant="outlined"
           placeholder={t("select_local_body")}
           loading={loading}
