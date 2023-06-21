@@ -32,8 +32,6 @@ class facility {
     address,
     pincode,
     phone,
-    state,
-    district,
     localbody,
     ward,
     oxygen_capacity,
@@ -58,12 +56,6 @@ class facility {
     cy.get("body").click();
 
     cy.get("input[id=pincode]").should("exist").clear().type(pincode);
-
-    cy.get("[id=state] > div > button").click();
-    cy.get("div").contains(state).click();
-
-    cy.get("[id=district] > div > button").click();
-    cy.get("div").contains(district).click();
 
     cy.get("[id=local_body] > div > button").click();
     cy.get("div").contains(localbody).click();
@@ -132,8 +124,6 @@ describe("Facility", () => {
       type: "Private Hospital",
       name: "cypress facility",
       features: ["CT Scan", "X-Ray"],
-      state: "Kerala",
-      district: "Ernakulam",
       localbody: "Aikaranad",
       ward: "EZHIPRAM",
       address: "some address",
@@ -179,8 +169,6 @@ describe("Facility", () => {
       type: "TeleMedicine",
       name: " update",
       features: ["X-Ray", "Neonatal Care"],
-      state: "Kerala",
-      district: "Ernakulam",
       localbody: "Alangad",
       ward: "VELIYATHUNADU",
       address: " update",
