@@ -22,6 +22,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
   const dispatchAction: any = useDispatch();
   const [notifyModalFor, setNotifyModalFor] = useState(undefined);
   const [notifyMessage, setNotifyMessage] = useState("");
+  const [notifyError, setNotifyError] = useState("");
 
   const handleNotifySubmit = async (id: any) => {
     const data = {
@@ -29,6 +30,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
       message: notifyMessage,
     };
     if (data.message.trim().length >= 1) {
+      setNotifyError("");
       const res = await dispatchAction(sendNotificationMessages(data));
       if (res && res.status == 204) {
         Notification.Success({
@@ -39,9 +41,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
         Notification.Error({ msg: "Something went wrong..." });
       }
     } else {
-      Notification.Error({
-        msg: "Notification should contain atleast 1 character.",
-      });
+      setNotifyError("Message cannot be empty");
     }
   };
 
@@ -204,11 +204,11 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                           <TextAreaFormField
                             id="NotifyModalMessageInput"
                             name="message"
-                            required
                             rows={5}
                             className="pt-4 pb-2"
                             onChange={(e) => setNotifyMessage(e.value)}
                             placeholder="Type your message..."
+                            error={notifyError}
                           />
                           <div className="flex flex-col-reverse md:flex-row gap-2 justify-between">
                             <Cancel
