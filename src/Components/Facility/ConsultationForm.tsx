@@ -1043,6 +1043,7 @@ export const ConsultationForm = (props: any) => {
                         <DateFormField
                           {...field("admission_date")}
                           required
+                          disableFuture
                           label="Admission date"
                           position="LEFT"
                         />
