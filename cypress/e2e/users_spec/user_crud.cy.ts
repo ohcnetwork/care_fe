@@ -108,7 +108,7 @@ describe("User management", () => {
       .wait("@getFacilities");
     cy.get("li[role='option']").contains("cypress facility").click();
     cy.intercept(/\/api\/v1\/users\/\w+\/add_facility\//).as("addFacility");
-    cy.get("button > span").contains("Add").click();
+    cy.get("button[id='link-facility']").click();
     cy.wait("@addFacility")
       // .its("response.statusCode")
       // .should("eq", 201)

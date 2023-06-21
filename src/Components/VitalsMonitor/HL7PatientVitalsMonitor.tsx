@@ -84,7 +84,7 @@ export default function HL7PatientVitalsMonitor({
               ECG: "text-lime-300",
               ECG_CHANNEL_2: "invisible",
               Pleth: "text-yellow-300",
-              SpO2: "text-sky-300",
+              Resp: "text-sky-300",
             }}
           />
           <canvas
