@@ -36,7 +36,6 @@ import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import SwipeableViews from "react-swipeable-views";
-import { Tooltip } from "@material-ui/core";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { parseOptionId } from "../../Common/utils";
@@ -44,9 +43,9 @@ import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
+import Page from "../Common/components/Page.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -510,28 +509,27 @@ export const PatientManager = () => {
               patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="flex flex-col items-center justify-center h-full">
-                  <Tooltip
-                    title={
+                  <span className="text-gray-900 text-sm text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full tooltip">
+                    {
                       patient?.last_consultation?.current_bed?.bed_object
                         ?.location_object?.name
                     }
-                  >
-                    <p className="text-gray-900 text-sm text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
+                    <span className="tooltip-text tooltip-bottom">
                       {
                         patient?.last_consultation?.current_bed?.bed_object
                           ?.location_object?.name
                       }
-                    </p>
-                  </Tooltip>
-                  <Tooltip
-                    title={
-                      patient?.last_consultation?.current_bed?.bed_object?.name
-                    }
-                  >
-                    <p className="text-base font-bold text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
-                      {patient?.last_consultation?.current_bed?.bed_object.name}
-                    </p>
-                  </Tooltip>
+                    </span>
+                  </span>
+                  <span className="text-base font-bold text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
+                    {patient?.last_consultation?.current_bed?.bed_object.name}
+                    <span className="tooltip-text tooltip-bottom">
+                      {
+                        patient?.last_consultation?.current_bed?.bed_object
+                          ?.name
+                      }
+                    </span>
+                  </span>
                 </div>
               ) : (
                 <div className="flex items-center justify-center min-h-[5rem]">
@@ -717,7 +715,7 @@ export const PatientManager = () => {
   };
 
   return (
-    <div className="px-6">
+    <Page title={t("Patients")} hideBack={true} breadcrumbs={false}>
       <FacilitiesSelectDialogue
         show={showDialog}
         setSelected={(e) => setSelectedFacility(e)}
@@ -730,12 +728,6 @@ export const PatientManager = () => {
       />
       <div className="flex flex-col lg:flex-row justify-between items-center">
         <div className="flex flex-col lg:flex-row lg:gap-5 items-center mb-2 lg:mb-0 w-full lg:w-fit">
-          <PageTitle
-            title="Patients"
-            hideBack={true}
-            breadcrumbs={false}
-            className="mt-2"
-          />
           <ButtonV2
             onClick={() => {
               qParams.facility
@@ -831,27 +823,6 @@ export const PatientManager = () => {
               containerClass="pb-10"
             />
           </div>
-          {/*<div className="bg-white overflow-hidden shadow rounded-lg flex-1">
-              <div className="p-4">
-                <dl>
-                  <div className="flex items-center justify-center rounded-lg text-xl w-10 h-10 bg-yellow-100">
-                    <CareIcon className="care-l-accessible-icon-alt text-yellow-600" />
-                  </div>
-                  <dt className="text-sm font-semibold text-gray-800 truncate mt-2">
-                    Discharged Patients
-                  </dt>
-                  {isLoading ? (
-                    <dd className=" text-5xl leading-9">
-                      <CircularProgress className="text-primary-500" />
-                    </dd>
-                  ) : (
-                    <dd className="text-4xl leading-9 font-bold">
-                      {totalCount}
-                    </dd>
-                  )}
-                </dl>
-              </div>
-            </div>*/}
         </div>
         <div className="w-full col-span-3">
           <div className="col-span-2 mt-2">
@@ -971,6 +942,6 @@ export const PatientManager = () => {
           setShow={setShowDoctors}
         />
       </div>
-    </div>
+    </Page>
   );
 };

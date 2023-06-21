@@ -4,11 +4,11 @@ import {
   dropdownOptionClassNames,
 } from "../MultiSelectMenuV2";
 import React, { useEffect, useState } from "react";
-
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { Combobox } from "@headlessui/react";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
 import FormField from "./FormField";
+import { classNames } from "../../../Utils/utils";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -54,6 +54,7 @@ type AutocompleteMutliSelectProps<T, V = T> = {
   onQuery?: (query: string) => void;
   isLoading?: boolean;
   selectAll?: boolean;
+  error?: string;
 };
 
 /**
@@ -106,7 +107,10 @@ export const AutocompleteMutliSelect = <T, V>(
           <div className="flex">
             <Combobox.Input
               multiple
-              className="cui-input-base pr-16 truncate"
+              className={classNames(
+                "cui-input-base pr-16 truncate",
+                props.error && "border-danger-500"
+              )}
               placeholder={
                 value.length
                   ? `${value.length} item(s) selected`
