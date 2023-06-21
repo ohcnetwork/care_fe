@@ -57,6 +57,8 @@ class facility {
     cy.get("li").contains(features[1]).click();
     cy.get("body").click();
 
+    cy.get("input[id=pincode]").should("exist").clear().type(pincode);
+
     cy.get("[id=state] > div > button").click();
     cy.get("div").contains(state).click();
 
@@ -70,8 +72,6 @@ class facility {
     cy.get("div").contains(ward).click();
 
     cy.get("textarea[id=address]").should("exist").type(address);
-
-    cy.get("input[id=pincode]").should("exist").clear().type(pincode);
 
     cy.get("input[name=phone_number]").should("exist").clear().type(phone);
 
@@ -134,10 +134,10 @@ describe("Facility", () => {
       features: ["CT Scan", "X-Ray"],
       state: "Kerala",
       district: "Ernakulam",
-      localbody: "Alangad",
-      ward: "MANAKKAPADY",
+      localbody: "Aikaranad",
+      ward: "EZHIPRAM",
       address: "some address",
-      pincode: "884656",
+      pincode: "682001",
       phone: "+919985784535",
       oxygen_capacity: "20",
       oxygen_requirement: "30",
@@ -181,10 +181,10 @@ describe("Facility", () => {
       features: ["X-Ray", "Neonatal Care"],
       state: "Kerala",
       district: "Ernakulam",
-      localbody: "Aikaranad",
-      ward: "PAZHAMTHOTTAM",
+      localbody: "Alangad",
+      ward: "VELIYATHUNADU",
       address: " update",
-      pincode: "584675",
+      pincode: "682003",
       phone: "+919985784535",
       oxygen_capacity: "30",
       oxygen_requirement: "40",

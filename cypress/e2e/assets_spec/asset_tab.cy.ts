@@ -41,8 +41,7 @@ describe("Asset Tab", () => {
 
   it("Filter Asset", () => {
     assetFilters.filterAssets(
-      "Dummy hospital 1",
-      "test loc",
+      "Dummy Facility 1",
       "INTERNAL",
       "ACTIVE",
       "ONVIF Camera"

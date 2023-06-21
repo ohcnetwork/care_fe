@@ -1,7 +1,6 @@
 export class AssetFilters {
   filterAssets(
     facilityName: string,
-    location: string,
     assetType: string,
     assetStatus: string,
     assetClass: string

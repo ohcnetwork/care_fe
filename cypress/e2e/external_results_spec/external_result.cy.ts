@@ -39,12 +39,12 @@ describe("Edit Profile Testing", () => {
 
   it("import", () => {
     cy.intercept("POST", "/api/v1/external_result/bulk_upsert").as("import");
-    cy.get("div").contains("Import/Export").click({ force: true });
-    cy.get("div").contains("Import Results").click({ force: true });
+    cy.get("div").contains("Import/Export").click();
+    cy.get("div").contains("Import Results").click();
     cy.get("[id=result-upload]")
       .selectFile("cypress/fixtures/external-result_sample.csv")
       .wait(100);
-    cy.get("button").contains("Save").click({ force: true });
+    cy.get("button").contains("Save").click();
     cy.wait("@import").then((interception) => {
       expect(interception.response.statusCode).to.equal(202);
     });
