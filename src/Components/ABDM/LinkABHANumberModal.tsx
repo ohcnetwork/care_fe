@@ -6,7 +6,7 @@ import {
   confirmWithMobileOtp,
   createHealthId,
   generateAadhaarOtp,
-  generateMobileOtp,
+  checkAndGenerateMobileOtp,
   initiateAbdmAuthentication,
   linkViaQR,
   resentAadhaarOtp,
@@ -583,16 +583,24 @@ const VerifyMobileSection = ({
 
     setOtpDispatched(false);
     setIsSendingOtp(true);
-    const res = await dispatch(generateMobileOtp(txnId, mobile));
+    const res = await dispatch(checkAndGenerateMobileOtp(txnId, mobile));
     setIsSendingOtp(false);
 
     if (res.status === 200 && res.data) {
-      const { txnId } = res.data;
+      const { txnId, mobileLinked } = res.data;
       setTxnId(txnId);
-      setOtpDispatched(true);
-      Notify.Success({
-        msg: "OTP has been sent to the mobile number.",
-      });
+
+      if (mobileLinked) {
+        setIsVerified(true);
+        Notify.Success({
+          msg: "Mobile number verified.",
+        });
+      } else {
+        setOtpDispatched(true);
+        Notify.Success({
+          msg: "OTP has been sent to the mobile number.",
+        });
+      }
     } else {
       Notify.Error({ msg: JSON.stringify(res.data) });
     }

@@ -815,6 +815,9 @@ export const verifyAadhaarOtp = (txnId: string, otp: string) =>
 export const generateMobileOtp = (txnId: string, mobile: string) =>
   fireRequest("generateMobileOtp", [], { txnId, mobile });
 
+export const checkAndGenerateMobileOtp = (txnId: string, mobile: string) =>
+  fireRequest("generateMobileOtp", [], { txnId, mobile });
+
 export const verifyMobileOtp = (txnId: string, otp: string) =>
   fireRequest("verifyMobileOtp", [], { txnId, otp });
 

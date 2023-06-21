@@ -785,6 +785,11 @@ const routes: Routes = {
     method: "POST",
   },
 
+  checkAndGenerateMobileOtp: {
+    path: "/api/v1/abdm/healthid/check_and_generate_mobile_otp/",
+    method: "POST",
+  },
+
   // TODO: resend mobile otp
   verifyMobileOtp: {
     path: "/api/v1/abdm/healthid/verify_mobile_otp/",
