@@ -22,7 +22,6 @@ import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
 import CountBlock from "../../CAREUI/display/Count";
 import { FacilityModel } from "../Facility/models";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import LinkFacilityDialog from "./LinkFacilityDialog";
 import SearchInput from "../Form/SearchInput";
 import SkillsSlideOver from "./SkillsSlideOver";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
@@ -530,11 +529,6 @@ function UserFacilities(props: { user: any }) {
       newFacility: undefined,
     });
   };
-
-  const [linkFacility, setLinkFacility] = useState<{
-    show: boolean;
-    username: string;
-  }>({ show: false, username: "" });
   const hideUnlinkFacilityModal = () => {
     setUnlinkFacilityData({
       show: false,
@@ -583,15 +577,7 @@ function UserFacilities(props: { user: any }) {
     hideUnlinkFacilityModal();
   };
 
-  const hideLinkFacilityModal = () => {
-    setLinkFacility({
-      show: false,
-      username: "",
-    });
-  };
-
   const addFacility = async (username: string, facility: any) => {
-    hideLinkFacilityModal();
     setIsLoading(true);
     const res = await dispatch(addUserFacility(username, String(facility.id)));
     if (res?.status !== 201) {
@@ -610,13 +596,6 @@ function UserFacilities(props: { user: any }) {
 
   return (
     <div className="h-full">
-      {linkFacility.show && (
-        <LinkFacilityDialog
-          username={linkFacility.username}
-          handleOk={addFacility}
-          handleCancel={hideLinkFacilityModal}
-        />
-      )}
       {unlinkFacilityData.show && (
         <UnlinkFacilityDialog
           facilityName={unlinkFacilityData.facility?.name || ""}
