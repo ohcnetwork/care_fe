@@ -720,7 +720,7 @@ export const PatientManager = () => {
       hideBack={true}
       breadcrumbs={false}
       options={
-        <div className="flex flex-col lg:flex-row justify-between items-center">
+        <div className="flex flex-col lg:flex-row justify-between items-center w-full">
           <div className="flex flex-col lg:flex-row lg:gap-5 items-center mb-2 lg:mb-0 w-full lg:w-fit">
             <ButtonV2
               onClick={() => {
