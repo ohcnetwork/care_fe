@@ -183,7 +183,7 @@ const consultationFormReducer = (
         form: { ...state.form, ...action.form },
       };
     }
-    case "set_error": {
+    case "set_errors": {
       return {
         ...state,
         errors: action.errors,
@@ -206,7 +206,7 @@ export const ConsultationForm = (props: any) => {
   const { kasp_enabled, kasp_string } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
-  const [state, dispatch] = useAutoSaveReducer(
+  const [state, dispatch] = useAutoSaveReducer<FormDetails>(
     consultationFormReducer,
     initialState
   );
@@ -532,7 +532,7 @@ export const ConsultationForm = (props: any) => {
       }
     });
     if (invalidForm) {
-      dispatch({ type: "set_error", errors });
+      dispatch({ type: "set_errors", errors });
       const firstError = Object.keys(errors).find((key) => errors[key]);
       if (firstError) {
         fieldRef[firstError].current?.scrollIntoView({
@@ -542,7 +542,7 @@ export const ConsultationForm = (props: any) => {
       }
       return false;
     }
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return true;
   };
 
@@ -769,7 +769,7 @@ export const ConsultationForm = (props: any) => {
       id: name,
       name,
       value: (state.form as any)[name],
-      error: state.errors[name],
+      error: (state.errors as any)[name],
       onChange: handleFormFieldChange,
     };
   };

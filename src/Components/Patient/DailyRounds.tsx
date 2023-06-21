@@ -91,7 +91,7 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
         form: action.form,
       };
     }
-    case "set_error": {
+    case "set_errors": {
       return {
         ...state,
         errors: action.errors,
@@ -110,7 +110,7 @@ export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, consultationId, id } = props;
-  const [state, dispatch] = useAutoSaveReducer(
+  const [state, dispatch] = useAutoSaveReducer<any>(
     DailyRoundsFormReducer,
     initialState
   );
@@ -233,7 +233,7 @@ export const DailyRounds = (props: any) => {
           return;
       }
     });
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return !invalidForm;
   };
 
@@ -538,7 +538,7 @@ export const DailyRounds = (props: any) => {
                     disableFuture={true}
                     showTodayButton={true}
                     onChange={(date) => handleDateChange(date, "taken_at")}
-                    errors={state.errors.taken_at}
+                    errors={state.errors.taken_at as string}
                   />
                 </div>
                 <div className="w-full md:w-1/3">
@@ -667,7 +667,7 @@ export const DailyRounds = (props: any) => {
                         optionKey="text"
                         optionValue="desc"
                         options={TELEMEDICINE_ACTIONS}
-                        onChange={(e) => setPreviousAction(e.target.value)}
+                        onChange={(e: any) => setPreviousAction(e.target.value)}
                       />
                       <LegacyErrorHelperText error={state.errors.action} />
                     </div>

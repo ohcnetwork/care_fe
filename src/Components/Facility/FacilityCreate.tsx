@@ -53,12 +53,8 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import {
-  DraftSection,
-  FormReducerAction,
-  FormReducerAction,
-  useAutoSaveReducer,
-} from "../../Utils/AutoSave.js";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
+import { FormAction } from "../Form/Utils.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -134,14 +130,11 @@ const initialState = {
   errors: { ...initError },
 };
 
-const facilityCreateReducer = (
-  state = initialState,
-  action: FormReducerAction
-) => {
+const facilityCreateReducer = (state = initialState, action: FormAction) => {
   switch (action.type) {
     case "set_form":
       return { ...state, form: action.form };
-    case "set_error":
+    case "set_errors":
       return { ...state, errors: action.errors };
     case "set_state": {
       if (action.state) return action.state;
@@ -156,7 +149,7 @@ export const FacilityCreate = (props: FacilityProps) => {
   const dispatchAction: any = useDispatch();
   const { facilityId } = props;
 
-  const [state, dispatch] = useAutoSaveReducer(
+  const [state, dispatch] = useAutoSaveReducer<FacilityForm>(
     facilityCreateReducer,
     initialState
   );
@@ -478,10 +471,10 @@ export const FacilityCreate = (props: FacilityProps) => {
       }
     });
     if (invalidForm) {
-      dispatch({ type: "set_error", errors });
+      dispatch({ type: "set_errors", errors });
       return false;
     }
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return true;
   };
 
@@ -776,6 +769,11 @@ export const FacilityCreate = (props: FacilityProps) => {
                 <DraftSection
                   handleDraftSelect={(newState: any) => {
                     dispatch({ type: "set_state", state: newState });
+                    Promise.all([
+                      fetchDistricts(newState.form.state),
+                      fetchLocalBody(newState.form.district),
+                      fetchWards(newState.form.local_body),
+                    ]);
                   }}
                   formData={state.form}
                 />
