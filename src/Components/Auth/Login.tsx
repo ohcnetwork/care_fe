@@ -132,12 +132,12 @@ export const Login = (props: { forgot?: boolean }) => {
     if (typeof form.username === "string") {
       if (!form.username.match(/\w/)) {
         hasError = true;
-        err.username = t("field_request");
+        err.username = t("field_required");
       }
     }
     if (!form.username) {
       hasError = true;
-      err.username = t("field_request");
+      err.username = t("field_required");
     }
 
     if (hasError) {
@@ -402,7 +402,6 @@ export const Login = (props: { forgot?: boolean }) => {
                   onChange={handleChange}
                   error={errors.username}
                   outerClassName="my-4"
-                  required
                   size="large"
                   className="font-extrabold"
                 />
