@@ -101,7 +101,7 @@ export default function VentilatorPatientVitalsMonitor({
             {...waveformCanvas.size}
           />
         </div>
-        <div className="grid grid-cols-3 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider max-w-[170px]">
+        <div className="z-50 bg-[#020617] grid grid-cols-3 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
           <NonWaveformData
             label="PEEP"
             attr={data.peep}
