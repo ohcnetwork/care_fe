@@ -15,7 +15,7 @@ import CircularProgress from "../../../Common/components/CircularProgress";
 import { FieldChangeEvent } from "../../../Form/FormFields/Utils";
 import { InvestigationResponse } from "./types";
 import Loading from "../../../Common/Loading";
-import PageTitle from "../../../Common/PageTitle";
+import Page from "../../../Common/components/Page";
 import ReportTable from "./ReportTable";
 import _ from "lodash";
 import { useDispatch } from "react-redux";
@@ -317,14 +317,13 @@ const InvestigationReports = ({ id }: any) => {
   const nextSessionDisabled = isNextSessionDisabled || isLoading.tableData;
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
-      <PageTitle
-        title={"Investigation Reports"}
-        crumbsReplacements={{
-          patient: { style: "pointer-events-none" },
-          [id]: { name: patientDetails.name },
-        }}
-      />
+    <Page
+      title="Investigation Reports"
+      crumbsReplacements={{
+        patient: { style: "pointer-events-none" },
+        [id]: { name: patientDetails.name },
+      }}
+    >
       {!isLoading.investigationGroupLoading ? (
         <>
           <div className="mt-5">
@@ -435,7 +434,7 @@ const InvestigationReports = ({ id }: any) => {
       ) : (
         <Loading />
       )}
-    </div>
+    </Page>
   );
 };
 
