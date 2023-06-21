@@ -4,7 +4,7 @@ import { VitalsDataBase, VitalsValueBase, VitalsWaveformBase } from "./types";
 const WAVEFORM_KEY_MAP: Record<string, EventName> = {
   II: "ecg-waveform",
   Pleth: "pleth-waveform",
-  Respiration: "spo2-waveform",
+  Respiration: "resp-waveform",
 };
 
 /**
@@ -101,7 +101,7 @@ type EventName =
   | HL7MonitorData["observation_id"]
   | "ecg-waveform"
   | "pleth-waveform"
-  | "spo2-waveform";
+  | "resp-waveform";
 
 const parseObservations = (data: string) => {
   return JSON.parse(data || "[]") as HL7MonitorData[];

@@ -143,10 +143,10 @@ export default function HL7PatientVitalsMonitor({
           <div className="flex justify-between items-center p-1">
             <div className="flex gap-2 items-start h-full text-yellow-300 font-bold">
               <span className="text-sm">SpO2</span>
-              <span className="text-xs">{data.spo2?.unit ?? "--"}</span>
+              <span className="text-xs">{data.resp?.unit ?? "--"}</span>
             </div>
             <span className="text-4xl md:text-6xl font-black text-yellow-300 mr-3">
-              {data.spo2?.value ?? "--"}
+              {data.resp?.value ?? "--"}
             </span>
           </div>
 

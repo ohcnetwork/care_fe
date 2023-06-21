@@ -52,7 +52,7 @@ interface Options {
   /**
    * Options for SPO2 channel.
    */
-  spo2: ChannelOptions;
+  resp: ChannelOptions;
 }
 
 /**
@@ -67,7 +67,7 @@ class HL7VitalsRenderer {
     const {
       ecg,
       pleth,
-      spo2,
+      resp,
       size: { height: h, width: w },
     } = options;
 
@@ -95,14 +95,14 @@ class HL7VitalsRenderer {
         rows: 1,
       },
 
-      spo2: {
+      resp: {
         color: "#03a9f4",
         buffer: [],
         cursor: { x: 0, y: 0 },
-        deltaX: w / (DURATION * spo2.samplingRate),
-        transform: lerp(spo2.lowLimit, spo2.highLimit, h, h * 0.75),
-        chunkSize: spo2.samplingRate * options.animationInterval * 1e-3,
-        options: spo2,
+        deltaX: w / (DURATION * resp.samplingRate),
+        transform: lerp(resp.lowLimit, resp.highLimit, h, h * 0.75),
+        chunkSize: resp.samplingRate * options.animationInterval * 1e-3,
+        options: resp,
         rows: 1,
       },
     };
@@ -110,23 +110,23 @@ class HL7VitalsRenderer {
     // Draw baseline for each channel.
     this.initialize(this.state.ecg);
     this.initialize(this.state.pleth);
-    this.initialize(this.state.spo2);
+    this.initialize(this.state.resp);
 
     // Start rendering.
     setInterval(() => {
       this.render(this.state.ecg);
       this.render(this.state.pleth);
-      this.render(this.state.spo2);
+      this.render(this.state.resp);
     }, options.animationInterval);
   }
 
   private options: Options;
-  private state: { ecg: ChannelState; pleth: ChannelState; spo2: ChannelState };
+  private state: { ecg: ChannelState; pleth: ChannelState; resp: ChannelState };
 
   /**
    * Appends data to the buffer of the specified channel.
    */
-  append(channel: "ecg" | "pleth" | "spo2", data: number[]) {
+  append(channel: "ecg" | "pleth" | "resp", data: number[]) {
     const state = this.state[channel];
     state.buffer.push(...data.map(state.transform));
   }

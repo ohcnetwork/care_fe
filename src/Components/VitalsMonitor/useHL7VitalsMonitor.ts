@@ -37,7 +37,7 @@ export default function useHL7VitalsMonitor() {
   const [pulseRate, setPulseRate] = useState<VitalsValue>();
   const [heartRate, setHeartRate] = useState<VitalsValue>();
   const [bp, setBp] = useState<VitalsBPValue>();
-  const [spo2, setSpo2] = useState<VitalsValue>();
+  const [resp, setResp] = useState<VitalsValue>();
   const [respiratoryRate, setRespiratoryRate] = useState<VitalsValue>();
   const [temperature1, setTemperature1] = useState<VitalsValue>();
   const [temperature2, setTemperature2] = useState<VitalsValue>();
@@ -48,7 +48,7 @@ export default function useHL7VitalsMonitor() {
 
   const ecgOptionsRef = useRef<ChannelOptions>();
   const plethOptionsRef = useRef<ChannelOptions>();
-  const spo2OptionsRef = useRef<ChannelOptions>();
+  const respOptionsRef = useRef<ChannelOptions>();
 
   const connect = useCallback(
     (socketUrl: string) => {
@@ -62,7 +62,7 @@ export default function useHL7VitalsMonitor() {
         if (
           !ecgOptionsRef.current ||
           !plethOptionsRef.current ||
-          !spo2OptionsRef.current
+          !respOptionsRef.current
         )
           return;
 
@@ -75,19 +75,19 @@ export default function useHL7VitalsMonitor() {
           animationInterval: 50,
           ecg: ecgOptionsRef.current,
           pleth: plethOptionsRef.current,
-          spo2: spo2OptionsRef.current,
+          resp: respOptionsRef.current,
         });
 
         const _renderer = renderer.current;
         device.current!.on("ecg-waveform", ingestTo(_renderer, "ecg"));
         device.current!.on("pleth-waveform", ingestTo(_renderer, "pleth"));
-        device.current!.on("spo2-waveform", ingestTo(_renderer, "spo2"));
+        device.current!.on("resp-waveform", ingestTo(_renderer, "resp"));
 
         const hook = (set: (data: any) => void) => (d: HL7MonitorData) =>
           set(d);
         device.current!.on("pulse-rate", hook(setPulseRate));
         device.current!.on("heart-rate", hook(setHeartRate));
-        device.current!.on("SpO2", hook(setSpo2));
+        device.current!.on("SpO2", hook(setResp));
         device.current!.on("respiratory-rate", hook(setRespiratoryRate));
         device.current!.on("body-temperature1", hook(setTemperature1));
         device.current!.on("body-temperature2", hook(setTemperature2));
@@ -108,8 +108,8 @@ export default function useHL7VitalsMonitor() {
         obtainRenderer();
       });
 
-      device.current.once("spo2-waveform", (observation) => {
-        spo2OptionsRef.current = getChannel(
+      device.current.once("resp-waveform", (observation) => {
+        respOptionsRef.current = getChannel(
           observation as HL7VitalsWaveformData
         );
         obtainRenderer();
@@ -129,7 +129,7 @@ export default function useHL7VitalsMonitor() {
       pulseRate,
       heartRate,
       bp,
-      spo2,
+      resp,
       respiratoryRate,
       temperature1,
       temperature2,
@@ -141,7 +141,7 @@ export default function useHL7VitalsMonitor() {
 
 const ingestTo = (
   vitalsRenderer: HL7VitalsRenderer,
-  channel: "ecg" | "pleth" | "spo2"
+  channel: "ecg" | "pleth" | "resp"
 ) => {
   return (observation: HL7MonitorData) => {
     vitalsRenderer.append(
