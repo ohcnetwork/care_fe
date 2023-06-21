@@ -158,6 +158,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       </FieldLabel>
                       <div className="flex gap-2 w-full items-center">
                         <LocationSelect
+                          key={qParams.location}
                           name="Facilities"
                           setSelected={(location) => updateQuery({ location })}
                           selected={qParams.location}
