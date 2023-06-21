@@ -28,10 +28,13 @@ export default function PatientInfoCard(props: {
   ip_no?: string | undefined;
   fetchPatientData?: (state: { aborted: boolean }) => void;
   consultationId: string;
+  showAbhaProfile?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [showLinkABHANumber, setShowLinkABHANumber] = useState(false);
-  const [showABHAProfile, setShowABHAProfile] = useState(false);
+  const [showABHAProfile, setShowABHAProfile] = useState(
+    !!props.showAbhaProfile
+  );
   const [isLinkingCareContext, setIsLinkingCareContext] = useState(false);
 
   const dispatch = useDispatch<any>();
@@ -292,6 +295,9 @@ export default function PatientInfoCard(props: {
               onClose={() => setShowLinkABHANumber(false)}
               facilityId={patient.facility as string}
               patientId={patient.id as any}
+              onSuccess={(_) => {
+                window.location.href += "?show-abha-profile=true";
+              }}
             />
           </>
         )}

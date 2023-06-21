@@ -1,4 +1,3 @@
-import * as Notification from "../../Utils/Notifications.js";
 import * as Notify from "../../Utils/Notifications";
 
 import Dropdown, { DropdownItem } from "../Common/components/Menu";
@@ -49,7 +48,7 @@ interface Props {
   facilityId: string;
   patientId?: string;
   patientMobile?: string | undefined;
-  setAbha?: (abha: any) => void;
+  onSuccess?: (abha: any) => void;
   show: boolean;
   onClose: () => void;
 }
@@ -64,13 +63,11 @@ export default function LinkABHANumberModal({
   patientId,
   facilityId,
   patientMobile,
-  setAbha,
+  onSuccess,
   ...props
 }: Props) {
   const [currentStep, setCurrentStep] = useState<Step>("AadhaarVerification");
   const [transactionId, setTransactionId] = useState<string>("sds");
-
-  console.log(currentStep);
 
   const title = (
     <div className="flex gap-3 items-center">
@@ -93,7 +90,7 @@ export default function LinkABHANumberModal({
             }}
             facilityId={facilityId}
             patientId={patientId}
-            setAbha={setAbha}
+            onSuccess={onSuccess}
             closeModal={props.onClose}
           />
         )}
@@ -124,9 +121,11 @@ export default function LinkABHANumberModal({
         {currentStep === "HealthIDCreation" && transactionId && (
           <CreateHealthIDSection
             transactionId={transactionId}
-            onCreateSuccess={() => props.onClose()}
+            onCreateSuccess={(abha) => {
+              props.onClose();
+              onSuccess?.(abha);
+            }}
             patientId={patientId}
-            setAbha={setAbha}
           />
         )}
       </div>
@@ -138,7 +137,7 @@ interface ScanABHAQRSectionProps {
   onSignup: () => void;
   patientId?: string;
   facilityId: string;
-  setAbha?: (abha: any) => void;
+  onSuccess?: (abha: any) => void;
   closeModal?: () => void;
 }
 
@@ -146,7 +145,7 @@ const ScanABHAQRSection = ({
   onSignup,
   patientId,
   facilityId,
-  setAbha,
+  onSuccess,
   closeModal,
 }: ScanABHAQRSectionProps) => {
   const dispatch = useDispatch<any>();
@@ -188,18 +187,17 @@ const ScanABHAQRSection = ({
               );
 
               if (res.status === 200 || res.status === 202) {
-                Notification.Success({ msg: "Request sent successfully" });
+                Notify.Success({ msg: "Request sent successfully" });
                 closeModal?.();
               }
             }
             return abha?.hidn;
           } catch (e) {
             console.log(e);
-            Notification.Error({ msg: "Invalid ABHA QR" });
+            Notify.Error({ msg: "Invalid ABHA QR" });
           }
         }}
       />
-
       {!txnId && (
         <div>
           <span className="text-gray-800 text-xs items-center">
@@ -216,7 +214,6 @@ const ScanABHAQRSection = ({
           </span>
         </div>
       )}
-
       {txnId && (
         <OtpFormField
           name="otp"
@@ -226,7 +223,6 @@ const ScanABHAQRSection = ({
           error=""
         />
       )}
-
       <div className="flex gap-2 items-center justify-between mt-4">
         <span
           onClick={onSignup}
@@ -255,16 +251,13 @@ const ScanABHAQRSection = ({
                     break;
                 }
 
-                console.log(response);
                 if (response.status === 200) {
-                  setAbha?.(response.data);
-
-                  window.location.reload();
-                  Notification.Success({
+                  onSuccess?.(response.data);
+                  Notify.Success({
                     msg: "ABHA Number linked successfully",
                   });
                 } else {
-                  Notification.Error({
+                  Notify.Error({
                     msg: response?.message ?? "Something went wrong!",
                   });
                 }
@@ -683,16 +676,14 @@ const VerifyMobileSection = ({
 
 interface CreateHealthIDSectionProps {
   transactionId: string;
-  onCreateSuccess: (transactionId: string) => void;
+  onCreateSuccess: (abha: any) => void;
   patientId?: string;
-  setAbha?: (abha: any) => void;
 }
 
 const CreateHealthIDSection = ({
   transactionId,
   onCreateSuccess,
   patientId,
-  setAbha,
 }: CreateHealthIDSectionProps) => {
   const dispatch = useDispatch<any>();
   const [healthId, setHealthId] = useState("");
@@ -705,9 +696,8 @@ const CreateHealthIDSection = ({
       createHealthId({ txnId: transactionId, patientId, healthId })
     );
     if (res.status === 200) {
-      setAbha?.(res.data);
       Notify.Success({ msg: "Abha Address created" });
-      onCreateSuccess(res.data.txnId);
+      onCreateSuccess(res.data);
     } else {
       Notify.Error({ msg: JSON.stringify(res.data) });
     }

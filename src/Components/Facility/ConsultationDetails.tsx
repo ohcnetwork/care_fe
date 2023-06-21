@@ -50,7 +50,7 @@ import ViewInvestigations from "./Investigations/ViewInvestigations";
 import { formatDate } from "../../Utils/utils";
 import loadable from "@loadable/component";
 import moment from "moment";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import { validateEmailAddress } from "../../Common/validation";
 interface PreDischargeFormInterface {
   discharge_reason: string;
@@ -69,6 +69,7 @@ export const ConsultationDetails = (props: any) => {
   const [showDoctors, setShowDoctors] = useState(false);
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
+  const [qParams, _] = useQueryParams();
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
@@ -523,6 +524,7 @@ export const ConsultationDetails = (props: any) => {
               ip_no={consultationData.ip_no}
               fetchPatientData={fetchData}
               consultationId={consultationId}
+              showAbhaProfile={qParams["show-abha-profile"] === "true"}
             />
 
             <div className="flex md:flex-row flex-col justify-between border-t px-4 pt-5">

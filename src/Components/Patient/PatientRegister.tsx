@@ -962,7 +962,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           facilityId={facilityId}
           show={showLinkAbhaNumberModal}
           onClose={() => setShowLinkAbhaNumberModal(false)}
-          setAbha={({
+          onSuccess={({
             id,
             abha_profile: {
               healthIdNumber,

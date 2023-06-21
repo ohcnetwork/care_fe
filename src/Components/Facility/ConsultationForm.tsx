@@ -219,6 +219,7 @@ export const ConsultationForm = (props: any) => {
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [abhaNumber, setAbhaNumber] = useState("");
   const [patientName, setPatientName] = useState("");
   const [facilityName, setFacilityName] = useState("");
 
@@ -238,6 +239,7 @@ export const ConsultationForm = (props: any) => {
       if (patientId) {
         const res = await dispatchAction(getPatient({ id: patientId }));
         if (res.data) {
+          setAbhaNumber(res.data.abha_number_object?.abha_number ?? "");
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
         }
@@ -490,7 +492,6 @@ export const ConsultationForm = (props: any) => {
     e.preventDefault();
     console.log("handling");
     const [validForm, error_div] = validateForm();
-    console.log(validForm);
 
     if (!validForm) {
       scrollTo(error_div);
@@ -559,7 +560,9 @@ export const ConsultationForm = (props: any) => {
             msg: "Consultation created successfully",
           });
           navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
+            `/facility/${facilityId}/patient/${patientId}/consultation/${
+              res.data.id
+            }?show-abha-profile=${!!abhaNumber}`
           );
         }
       }
