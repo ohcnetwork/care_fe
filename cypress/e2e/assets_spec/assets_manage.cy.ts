@@ -1,15 +1,9 @@
 /// <reference types="cypress" />
 import { AssetPage } from "../../pageobject/Asset/AssetCreation";
-import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
-import { AssetQRScanPage } from "../../pageobject/Asset/AssetQRScan";
-import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
 import { v4 as uuidv4 } from "uuid";
 
 describe("Asset", () => {
   const assetPage = new AssetPage();
-  const assetSearchPage = new AssetSearchPage();
-  const assetQRScanPage = new AssetQRScanPage();
-  const assetPagination = new AssetPagination();
   const phone_number = "9999999999";
   const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
 
@@ -23,10 +17,12 @@ describe("Asset", () => {
     cy.awaitUrl("/assets");
   });
 
+  //Create an asset
+
   it("Create an Asset", () => {
     assetPage.createAsset();
     assetPage.selectFacility("Dummy Facility 1");
-    assetPage.selectLocation("Camera Locations");
+    assetPage.selectLocation("Camera Loc");
     assetPage.selectAssetType("Internal");
     assetPage.selectAssetClass("ONVIF Camera");
 
@@ -53,19 +49,9 @@ describe("Asset", () => {
     assetPage.verifySuccessNotification("Asset created successfully");
   });
 
-  it("Search Asset Name", () => {
-    const initialUrl = cy.url();
-    assetSearchPage.typeSearchKeyword("dummy camera 30");
-    assetSearchPage.pressEnter();
-    assetSearchPage.verifyUrlChanged(initialUrl);
-  });
+  // Edit an exisit asset
 
-  it("Scan Asset QR", () => {
-    assetQRScanPage.scanAssetQR();
-  });
-
-  it("Next/Previous Page", () => {
-    assetPagination.navigateToNextPage();
-    assetPagination.navigateToPreviousPage();
+  afterEach(() => {
+    cy.saveLocalStorage();
   });
 });

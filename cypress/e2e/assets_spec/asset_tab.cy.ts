@@ -1,8 +1,17 @@
 /// <reference types="cypress" />
 
 import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
+import { AssetQRScanPage } from "../../pageobject/Asset/AssetQRScan";
+import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
+import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
 
-describe("Assets Filter", () => {
+describe("Asset Tab", () => {
+  const assetSearchPage = new AssetSearchPage();
+  const assetQRScanPage = new AssetQRScanPage();
+  const assetPagination = new AssetPagination();
+  const assetFilters = new AssetFilters();
+
   before(() => {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
     cy.saveLocalStorage();
@@ -11,50 +20,42 @@ describe("Assets Filter", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/assets");
-    cy.contains("Advanced Filters").click();
   });
 
-  it("Filter by Facility", () => {
-    cy.get("[name=Facilities]").type("dummy");
-    cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities");
-    cy.wait("@facilities").then((interception) => {
-      console.log("url", interception.response.url);
-      expect(interception.response.statusCode).to.equal(200);
-      expect(interception.request.url).to.include("search_text=dummy");
-    });
-    cy.contains("Apply").click();
-    cy.contains("Facility:");
+  // search for a element
+
+  it("Search Asset Name", () => {
+    const initialUrl = cy.url();
+    assetSearchPage.typeSearchKeyword("dummy camera 30");
+    assetSearchPage.pressEnter();
+    assetSearchPage.verifyUrlChanged(initialUrl);
   });
 
-  it("Filter by Asset Type", () => {
-    cy.get("[id='asset-type'] > div > button")
-      .click()
-      .get("li")
-      .contains("EXTERNAL")
-      .click();
-    cy.contains("Apply").click();
-    cy.contains("Asset Type: EXTERNAL");
+  // scan a asset qr code
+
+  it("Scan Asset QR", () => {
+    assetQRScanPage.scanAssetQR();
   });
 
-  it("Filter by Asset Status", () => {
-    cy.get("[id='asset-status'] > div > button")
-      .click()
-      .get("li")
-      .contains("ACTIVE")
-      .click();
-    cy.contains("Apply").click();
-    cy.contains("Status: ACTIVE");
+  // filter the asset and verify the badges are there
+
+  it("Filter Asset", () => {
+    assetFilters.filterAssets(
+      "Dummy hospital 1",
+      "test loc",
+      "INTERNAL",
+      "ACTIVE",
+      "ONVIF Camera"
+    );
   });
 
-  it("Filter by Asset Class", () => {
-    cy.get("[id='asset-class'] > div > button")
-      .click()
-      .get("li")
-      .contains("ONVIF Camera")
-      .click();
-    cy.contains("Apply").click();
-    cy.contains("Asset Class: ONVIF");
+  // Verify the pagination in the page
+
+  it("Next/Previous Page", () => {
+    assetPagination.navigateToNextPage();
+    assetPagination.navigateToPreviousPage();
   });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });
