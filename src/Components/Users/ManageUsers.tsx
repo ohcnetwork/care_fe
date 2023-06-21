@@ -22,7 +22,6 @@ import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
 import CountBlock from "../../CAREUI/display/Count";
 import { FacilityModel } from "../Facility/models";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import LinkFacilityDialog from "./LinkFacilityDialog";
 import SearchInput from "../Form/SearchInput";
 import SkillsSlideOver from "./SkillsSlideOver";
 import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
@@ -171,22 +170,14 @@ export default function ManageUsers() {
   };
 
   const showDelete = (user: any) => {
-    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateAdmin");
-    const STATE_READ_ONLY_ADMIN_LEVEL =
-      USER_TYPES.indexOf("StateReadOnlyAdmin");
-    const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
-    const level = USER_TYPES.indexOf(user.user_type);
-    const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
     if (user.is_superuser) return true;
 
-    if (currentUserLevel >= STATE_ADMIN_LEVEL)
-      return user.state_object?.id === currentUser?.data?.state;
     if (
-      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL &&
-      currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
-      currentUserLevel > level
+      USER_TYPES.indexOf(currentUser.data.user_type) >=
+      USER_TYPES.indexOf("StateAdmin")
     )
-      return user?.district_object?.id === currentUser?.data?.district;
+      return user.state_object?.id === currentUser?.data?.state;
+
     return false;
   };
 
@@ -253,13 +244,14 @@ export default function ManageUsers() {
                     ></i>
                   ) : null}
                   {showDelete(user) && (
-                    <button
-                      type="button"
-                      className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-white hover:bg-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                    <ButtonV2
+                      variant="danger"
+                      ghost
+                      border
                       onClick={() => handleDelete(user)}
                     >
                       Delete
-                    </button>
+                    </ButtonV2>
                   )}
                 </div>
 
@@ -537,11 +529,6 @@ function UserFacilities(props: { user: any }) {
       newFacility: undefined,
     });
   };
-
-  const [linkFacility, setLinkFacility] = useState<{
-    show: boolean;
-    username: string;
-  }>({ show: false, username: "" });
   const hideUnlinkFacilityModal = () => {
     setUnlinkFacilityData({
       show: false,
@@ -590,15 +577,7 @@ function UserFacilities(props: { user: any }) {
     hideUnlinkFacilityModal();
   };
 
-  const hideLinkFacilityModal = () => {
-    setLinkFacility({
-      show: false,
-      username: "",
-    });
-  };
-
   const addFacility = async (username: string, facility: any) => {
-    hideLinkFacilityModal();
     setIsLoading(true);
     const res = await dispatch(addUserFacility(username, String(facility.id)));
     if (res?.status !== 201) {
@@ -617,13 +596,6 @@ function UserFacilities(props: { user: any }) {
 
   return (
     <div className="h-full">
-      {linkFacility.show && (
-        <LinkFacilityDialog
-          username={linkFacility.username}
-          handleOk={addFacility}
-          handleCancel={hideLinkFacilityModal}
-        />
-      )}
       {unlinkFacilityData.show && (
         <UnlinkFacilityDialog
           facilityName={unlinkFacilityData.facility?.name || ""}

@@ -3,13 +3,12 @@ import { useEffect, useState } from "react";
 import { classNames } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { FieldValidator } from "./FieldValidators";
-import { FormContext, FormContextValue } from "./FormContext";
+import { FormContextValue, createFormContext } from "./FormContext";
 import { FieldChangeEvent } from "./FormFields/Utils";
 import { FormDetails, FormErrors, formReducer } from "./Utils";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 
 type Props<T extends FormDetails> = {
-  context: FormContext<T>;
   className?: string;
   defaults: T;
   asyncGetDefaults?: (() => Promise<T>) | false;
@@ -64,7 +63,7 @@ const Form = <T extends FormDetails>({
     }
   };
 
-  const { Provider, Consumer } = props.context;
+  const { Provider, Consumer } = useMemo(() => createFormContext<T>(), []);
   const disabled = isLoading || props.disabled;
 
   return (

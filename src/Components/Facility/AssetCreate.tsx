@@ -538,10 +538,10 @@ const AssetCreate = (props: AssetProps) => {
                           setLocation((selectedId as string) || "")
                         }
                         selected={location}
-                        errors=""
                         showAll={false}
                         multiple={false}
                         facilityId={facilityId as unknown as number}
+                        errors={state.errors.location}
                       />
                     </div>
                     {/* Asset Type */}
