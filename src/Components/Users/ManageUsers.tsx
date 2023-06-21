@@ -1,6 +1,4 @@
 import * as Notification from "../../Utils/Notifications.js";
-
-import { Button, CircularProgress } from "@material-ui/core";
 import {
   addUserFacility,
   clearHomeFacility,
@@ -36,9 +34,10 @@ import moment from "moment";
 import { navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
+import CircularProgress from "../Common/components/CircularProgress.js";
+import Page from "../Common/components/Page.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ManageUsers() {
   const { width } = useWindowDimensions();
@@ -414,7 +413,12 @@ export default function ManageUsers() {
   }
 
   return (
-    <div>
+    <Page
+      title="User Management"
+      hideBack={true}
+      className="mx-5 px-2"
+      breadcrumbs={false}
+    >
       {expandSkillList && (
         <SkillsSlideOver
           show={expandSkillList}
@@ -422,12 +426,6 @@ export default function ManageUsers() {
           username={selectedUser}
         />
       )}
-      <PageTitle
-        title="User Management"
-        hideBack={true}
-        className="mx-5 px-2"
-        breadcrumbs={false}
-      />
       <SlideOverCustom
         open={expandFacilityList}
         setOpen={setExpandFacilityList}
@@ -492,7 +490,7 @@ export default function ManageUsers() {
           handleOk={handleSubmit}
         />
       )}
-    </div>
+    </Page>
   );
 }
 
@@ -616,19 +614,18 @@ function UserFacilities(props: { user: any }) {
           errors=""
           className="z-40"
         />
-        <Button
-          color="primary"
+        <ButtonV2
+          id="link-facility"
           disabled={!facility}
           className="mt-1"
           onClick={() => addFacility(username, facility)}
-          autoFocus
         >
           Add
-        </Button>
+        </ButtonV2>
       </div>
       {isLoading ? (
         <div className="flex justify-center items-center">
-          <CircularProgress className="text-primary-500" />
+          <CircularProgress />
         </div>
       ) : (
         <div className="flex flex-col">
