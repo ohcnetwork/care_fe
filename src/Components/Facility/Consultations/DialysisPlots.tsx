@@ -8,17 +8,14 @@ import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDate } from "../../../Utils/utils";
 
 export const DialysisPlots = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
@@ -33,7 +30,6 @@ export const DialysisPlots = (props: any) => {
           setTotalCount(res.data.count);
           setResults(res.data.results);
         }
-        setIsLoading(false);
       }
     },
     [consultationId, dispatch, currentPage]
