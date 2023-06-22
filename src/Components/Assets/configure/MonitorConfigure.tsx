@@ -10,7 +10,6 @@ import {
 import * as Notification from "../../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { Submit } from "../../Common/components/ButtonV2";
-import { FieldLabel } from "../../Form/FormFields/FormField";
 
 const saveLink = (assetId: string, bedId: string, dispatch: Dispatch<any>) => {
   dispatch(createAssetBed({}, assetId, bedId));
@@ -75,9 +74,15 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
         }
       }}
     >
-      <div className="flex flex-col">
-        <div className="w-full">
-          <FieldLabel className="">Bed</FieldLabel>
+      <div className="w-full">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="text-lg font-bold">Bed</h2>
+          <Submit ghost border size="small">
+            <i className="fas fa-bed-pulse" />
+            {updateLink ? "Update" : "Save"}
+          </Submit>
+        </div>
+        <div className="flex items-center gap-2">
           <BedSelect
             name="bed"
             setSelected={(selected) => setBed(selected as BedModel)}
@@ -89,10 +94,6 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
             className="w-full"
           />
         </div>
-        <Submit className="shrink-0 w-full mt-6">
-          <i className="fas fa-bed-pulse" />
-          {updateLink ? "Update Bed" : "Save Bed"}
-        </Submit>
       </div>
     </form>
   );

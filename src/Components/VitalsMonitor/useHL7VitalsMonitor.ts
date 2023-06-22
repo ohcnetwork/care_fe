@@ -28,7 +28,15 @@ interface VitalsBPValue {
   map: VitalsValue;
 }
 
-export default function useHL7VitalsMonitor() {
+export interface Options {
+  gains?: {
+    ecg?: number;
+    pleth?: number;
+    resp?: number;
+  };
+}
+
+export default function useHL7VitalsMonitor(options?: Options) {
   const waveformForegroundCanvas = useCanvas();
   const waveformBackgroundCanvas = useCanvas();
 
@@ -79,9 +87,18 @@ export default function useHL7VitalsMonitor() {
         });
 
         const _renderer = renderer.current;
-        device.current!.on("ecg-waveform", ingestTo(_renderer, "ecg"));
-        device.current!.on("pleth-waveform", ingestTo(_renderer, "pleth"));
-        device.current!.on("resp-waveform", ingestTo(_renderer, "resp"));
+        device.current!.on(
+          "ecg-waveform",
+          ingestTo(_renderer, "ecg", options?.gains?.ecg)
+        );
+        device.current!.on(
+          "pleth-waveform",
+          ingestTo(_renderer, "pleth", options?.gains?.pleth)
+        );
+        device.current!.on(
+          "resp-waveform",
+          ingestTo(_renderer, "resp", options?.gains?.resp)
+        );
 
         const hook = (set: (data: any) => void) => (d: HL7MonitorData) =>
           set(d);
@@ -141,14 +158,23 @@ export default function useHL7VitalsMonitor() {
 
 const ingestTo = (
   vitalsRenderer: HL7VitalsRenderer,
-  channel: "ecg" | "pleth" | "resp"
+  channel: "ecg" | "pleth" | "resp",
+  gain = 1
 ) => {
   return (observation: HL7MonitorData) => {
-    vitalsRenderer.append(
-      channel,
+    let data =
       (observation as HL7VitalsWaveformData).data
         .split(" ")
-        .map((x) => parseInt(x)) || []
-    );
+        .map((x) => parseInt(x)) || [];
+
+    const baseline = (observation as HL7VitalsWaveformData)["data-baseline"];
+
+    if (gain !== 1) {
+      data = data.map((x: number) =>
+        Math.round((x - baseline) * gain + baseline)
+      );
+    }
+
+    vitalsRenderer.append(channel, data);
   };
 };

@@ -18,6 +18,7 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   leadingPadding?: string | undefined;
   min?: string | number;
   max?: string | number;
+  step?: string | number;
   onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
 };
@@ -59,6 +60,7 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
       onFocus={props.onFocus}
       onBlur={props.onBlur}
       onChange={(e) => field.handleChange(e.target.value)}
+      step={props.step}
     />
   );
 

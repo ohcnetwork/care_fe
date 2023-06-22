@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import useHL7VitalsMonitor from "./useHL7VitalsMonitor";
+import useHL7VitalsMonitor, { Options } from "./useHL7VitalsMonitor";
 import { PatientAssetBed } from "../Assets/AssetTypes";
 import { Link } from "raviger";
 import { GENDER_TYPES } from "../../Common/constants";
@@ -11,14 +11,17 @@ interface Props {
   patientAssetBed?: PatientAssetBed;
   socketUrl: string;
   size?: { width: number; height: number };
+  options?: Options;
 }
 
 export default function HL7PatientVitalsMonitor({
   patientAssetBed,
   socketUrl,
   size,
+  options,
 }: Props) {
-  const { connect, waveformCanvas, data, isOnline } = useHL7VitalsMonitor();
+  const { connect, waveformCanvas, data, isOnline } =
+    useHL7VitalsMonitor(options);
   const { patient, bed } = patientAssetBed ?? {};
 
   useEffect(() => {
