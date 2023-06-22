@@ -65,7 +65,7 @@ export default function ListFilter(props: any) {
     label: t(name),
     value: filterState[name],
     onChange: handleChange,
-    errorClassName="hidden",
+    errorClassName: "hidden",
   });
 
   const formatDateTime = (dateTime: any) => {
