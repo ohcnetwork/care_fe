@@ -852,7 +852,7 @@ export const linkViaQR = (
   return fireRequest("linkViaQR", [], {
     ...abha_details,
     facilityId,
-    patientId,
+    patientId: patientId ?? null,
   });
 };
 

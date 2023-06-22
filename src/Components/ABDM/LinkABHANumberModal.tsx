@@ -24,6 +24,7 @@ import QRScanner from "../Common/QRScanner";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { classNames } from "../../Utils/utils";
 import { useDispatch } from "react-redux";
+import { CircularProgress } from "@material-ui/core";
 
 export const validateRule = (
   condition: boolean,
@@ -138,7 +139,7 @@ interface ScanABHAQRSectionProps {
   patientId?: string;
   facilityId: string;
   onSuccess?: (abha: any) => void;
-  closeModal?: () => void;
+  closeModal: () => void;
 }
 
 const ScanABHAQRSection = ({
@@ -156,8 +157,18 @@ const ScanABHAQRSection = ({
   const [txnId, setTxnId] = useState("");
   const [otp, setOtp] = useState("");
   const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const supportedAuthMethods = ["MOBILE_OTP", "AADHAAR_OTP"];
+
+  if (isLoading) {
+    return (
+      <div className="flex gap-2 items-center justify-center">
+        <span className="text-3xl font-semibold text-gray-700">Loading</span>
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -177,24 +188,25 @@ const ScanABHAQRSection = ({
         }}
         parse={async (value: string) => {
           if (!value) return;
+          setIsLoading(true);
 
           try {
             const abha = JSON.parse(value);
-            console.log("scan", patientId, abha);
-            if (patientId) {
-              const res = await dispatch(
-                linkViaQR(abha, facilityId, patientId)
-              );
+            console.log(abha);
+            const res = await dispatch(linkViaQR(abha, facilityId, patientId));
 
-              if (res.status === 200 || res.status === 202) {
-                Notify.Success({ msg: "Request sent successfully" });
-                closeModal?.();
-              }
+            if (res?.status === 200 || res?.status === 202) {
+              Notify.Success({ msg: "Request sent successfully" });
+              onSuccess?.(res.data);
+            } else {
+              Notify.Error({ msg: "Linking Failed" });
             }
-            return abha?.hidn;
           } catch (e) {
             console.log(e);
             Notify.Error({ msg: "Invalid ABHA QR" });
+          } finally {
+            setIsLoading(false);
+            closeModal();
           }
         }}
       />

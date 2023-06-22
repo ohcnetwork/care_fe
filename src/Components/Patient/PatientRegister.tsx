@@ -832,6 +832,50 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
+  const handleAbhaLinking = ({
+    id,
+    abha_profile: {
+      healthIdNumber,
+      healthId,
+      name,
+      mobile,
+      gender,
+      monthOfBirth,
+      dayOfBirth,
+      yearOfBirth,
+      pincode,
+    },
+  }: any) => {
+    const values: any = {};
+    if (id) values["abha_number"] = id;
+    if (healthIdNumber) values["health_id_number"] = healthIdNumber;
+    if (healthId) values["health_id"] = healthId;
+    if (name) values["name"] = name;
+    if (mobile) {
+      values["phone_number"] = parsePhoneNumberFromString(mobile, "IN")?.format(
+        "E.164"
+      );
+      values["emergency_phone_number"] = parsePhoneNumberFromString(
+        mobile,
+        "IN"
+      )?.format("E.164");
+    }
+    if (gender)
+      values["gender"] = gender === "M" ? "1" : gender === "F" ? "2" : "3";
+    if (monthOfBirth && dayOfBirth && yearOfBirth)
+      values["date_of_birth"] = new Date(
+        `${monthOfBirth}-${dayOfBirth}-${yearOfBirth}`
+      );
+    if (pincode) {
+      values["pincode"] = pincode;
+    } else {
+      // handle state and district using stateName and districtName
+    }
+
+    handleValuesChange(values);
+    setShowLinkAbhaNumberModal(false);
+  };
+
   const handleChange = (e: any) => {
     const form = { ...state.form };
     switch (e.target.name) {
@@ -962,50 +1006,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           facilityId={facilityId}
           show={showLinkAbhaNumberModal}
           onClose={() => setShowLinkAbhaNumberModal(false)}
-          onSuccess={({
-            id,
-            abha_profile: {
-              healthIdNumber,
-              healthId,
-              name,
-              mobile,
-              gender,
-              monthOfBirth,
-              dayOfBirth,
-              yearOfBirth,
-              pincode,
-            },
-          }: any) => {
-            const values: any = {};
-            if (id) values["abha_number"] = id;
-            if (healthIdNumber) values["health_id_number"] = healthIdNumber;
-            if (healthId) values["health_id"] = healthId;
-            if (name) values["name"] = name;
-            if (mobile) {
-              values["phone_number"] = parsePhoneNumberFromString(
-                mobile,
-                "IN"
-              )?.format("E.164");
-              values["emergency_phone_number"] = parsePhoneNumberFromString(
-                mobile,
-                "IN"
-              )?.format("E.164");
-            }
-            if (gender)
-              values["gender"] =
-                gender === "M" ? "1" : gender === "F" ? "2" : "3";
-            if (monthOfBirth && dayOfBirth && yearOfBirth)
-              values["date_of_birth"] = new Date(
-                `${monthOfBirth}-${dayOfBirth}-${yearOfBirth}`
+          onSuccess={(data: any) => {
+            if (data.facility) {
+              // if patient object
+              navigate(
+                `/facility/${data.facility}/patient/${data.id}/consultation`
               );
-            if (pincode) {
-              values["pincode"] = pincode;
-            } else {
-              // handle state and district using stateName and districtName
+              return;
             }
 
-            handleValuesChange(values);
-            setShowLinkAbhaNumberModal(false);
+            handleAbhaLinking(data);
           }}
         />
       )}
