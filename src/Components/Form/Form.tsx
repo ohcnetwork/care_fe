@@ -1,11 +1,11 @@
 import { isEmpty, omitBy } from "lodash";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { classNames } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { FieldValidator } from "./FieldValidators";
 import { FormContextValue, createFormContext } from "./FormContext";
 import { FieldChangeEvent } from "./FormFields/Utils";
-import { FormDetails, FormErrors, formReducer } from "./Utils";
+import { FormDetails, FormErrors, FormState, formReducer } from "./Utils";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 
 type Props<T extends FormDetails> = {
@@ -77,7 +77,7 @@ const Form = <T extends FormDetails>({
       noValidate
     >
       <DraftSection
-        handleDraftSelect={(newState: any) => {
+        handleDraftSelect={(newState: FormState<T>) => {
           dispatch({ type: "set_state", state: newState });
         }}
         formData={state.form}
@@ -92,7 +92,7 @@ const Form = <T extends FormDetails>({
                 type: "set_field",
                 name,
                 value,
-                error: validate && validate(value),
+                error: validate?.(value),
               }),
             value: state.form[name],
             error: state.errors[name],
