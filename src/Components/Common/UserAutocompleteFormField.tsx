@@ -1,5 +1,5 @@
 import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
-import { getUserList } from "../../Redux/actions";
+import { getFacilityUsers, getUserList } from "../../Redux/actions";
 import { Autocomplete } from "../Form/FormFields/Autocomplete";
 import FormField from "../Form/FormFields/FormField";
 import {
@@ -10,6 +10,7 @@ import { UserModel } from "../Users/models";
 
 type Props = FormFieldBaseProps<UserModel> & {
   placeholder?: string;
+  facilityId?: string;
 };
 
 export default function UserAutocompleteFormField(props: Props) {
@@ -32,7 +33,11 @@ export default function UserAutocompleteFormField(props: Props) {
         optionDescription={(option) => `${option.user_type}`}
         optionValue={(option) => option}
         onQuery={(query) =>
-          fetchOptions(getUserList({ limit: 5, offset: 0, search_text: query }))
+          fetchOptions(
+            props.facilityId
+              ? getFacilityUsers(props.facilityId)
+              : getUserList({ limit: 5, offset: 0, search_text: query })
+          )
         }
         isLoading={isLoading}
       />
