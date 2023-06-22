@@ -254,7 +254,7 @@ export const AddInventoryForm = (props: any) => {
                     { id: true, name: "Add Stock" },
                     { id: false, name: "Use Stock" },
                   ]}
-                  optionValue={(inventory) => inventory.name}
+                  optionValue={(inventory) => inventory.id}
                   optionLabel={(inventory) => inventory.name}
                   error={stockError}
                 />
