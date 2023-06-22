@@ -31,6 +31,7 @@ import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
 import Page from "../Common/components/Page";
+import FilePreviewDialog from "../Common/FilePreviewDialog";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -108,7 +109,7 @@ interface ModalDetails {
   archiveTime?: any;
 }
 
-interface StateInterface {
+export interface StateInterface {
   open: boolean;
   isImage: boolean;
   name: string;
@@ -249,38 +250,6 @@ export const FileUpload = (props: FileUploadProps) => {
     const offset = (page - 1) * limit;
     setCurrentPage(page);
     setOffset(offset);
-  };
-
-  const zoom_values = [
-    "h-1/6 w-1/6 my-40",
-    "h-2/6 w-2/6 my-32",
-    "h-3/6 w-3/6 my-24",
-    "h-4/6 w-4/6 my-20",
-    "h-5/6 w-5/6 my-16",
-    "h-full w-full my-12",
-  ];
-
-  const handleZoomIn = () => {
-    const checkFull = file_state.zoom === zoom_values.length;
-    setFileState({
-      ...file_state,
-      zoom: !checkFull ? file_state.zoom + 1 : file_state.zoom,
-    });
-  };
-
-  const handleZoomOut = () => {
-    const checkFull = file_state.zoom === 1;
-    setFileState({
-      ...file_state,
-      zoom: !checkFull ? file_state.zoom - 1 : file_state.zoom,
-    });
-  };
-
-  const handleRotate = (rotation: number) => {
-    setFileState((prev) => ({
-      ...prev,
-      rotation: prev.rotation + rotation,
-    }));
   };
 
   const UPLOAD_HEADING: { [index: string]: string } = {
@@ -1112,107 +1081,16 @@ export const FileUpload = (props: FileUploadProps) => {
 
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
-      <DialogModal
-        title=""
+      <FilePreviewDialog
         show={file_state.open}
+        fileUrl={fileUrl}
+        file_state={file_state}
+        setFileState={setFileState}
+        downloadURL={downloadURL}
         onClose={handleClose}
         fixedWidth={false}
-        className="w-full h-[80vh] md:h-screen bg-transparent"
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description"
-      >
-        {fileUrl && fileUrl.length > 0 ? (
-          <>
-            <div className="flex absolute h-full sm:h-auto sm:inset-x-4 sm:top-4 p-4 sm:p-0 justify-between flex-col sm:flex-row">
-              <div className="flex gap-3">
-                {file_state.isImage && (
-                  <>
-                    {[
-                      [
-                        t("Zoom In"),
-                        "magnifying-glass-plus",
-                        handleZoomIn,
-                        file_state.zoom === zoom_values.length,
-                      ],
-                      [
-                        t("Zoom Out"),
-                        "magnifying-glass-minus",
-                        handleZoomOut,
-                        file_state.zoom === 1,
-                      ],
-                      [
-                        t("Rotate Left"),
-                        "rotate-left",
-                        () => handleRotate(-90),
-                        false,
-                      ],
-                      [
-                        t("Rotate Right"),
-                        "rotate-right",
-                        () => handleRotate(90),
-                        false,
-                      ],
-                    ].map((button, index) => (
-                      <button
-                        key={index}
-                        onClick={button[2] as () => void}
-                        className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70 z-50"
-                        disabled={button[3] as boolean}
-                      >
-                        <i className={`fas fa-${button[1]} mr-2`} />
-                        {button[0] as string}
-                      </button>
-                    ))}
-                  </>
-                )}
-              </div>
-              <div className="flex gap-3">
-                {downloadURL && downloadURL.length > 0 && (
-                  <a
-                    href={downloadURL}
-                    download={`${file_state.name}.${file_state.extension}`}
-                    className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
-                  >
-                    <i className="fas fa-download mr-2" />
-                    Download
-                  </a>
-                )}
-                <button
-                  onClick={handleClose}
-                  className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
-                >
-                  <i className="fas fa-times mr-2" />
-                  Close
-                </button>
-              </div>
-            </div>
-            {file_state.isImage ? (
-              <img
-                src={fileUrl}
-                alt="file"
-                className={
-                  "object-contain mx-auto " + zoom_values[file_state.zoom]
-                }
-                style={{
-                  transform: `rotate(${file_state.rotation}deg)`,
-                }}
-              />
-            ) : (
-              <iframe
-                title="Source Files"
-                src={fileUrl}
-                className="border-2 border-black bg-white w-4/6 h-5/6 mx-auto my-6"
-              />
-            )}
-          </>
-        ) : (
-          <div className="flex h-screen justify-center items-center">
-            <div className="text-center">
-              <CircularProgress />
-            </div>
-          </div>
-        )}
-      </DialogModal>
+        className="w-full h-[80vh] md:h-screen"
+      />
       <DialogModal
         show={modalOpenForCamera}
         title={
@@ -1508,140 +1386,138 @@ export const FileUpload = (props: FileUploadProps) => {
             : `/facility/${facilityId}/patient/${patientId}`
         }
       >
-        <div className="mt-4">
-          <div className="md:grid grid-cols-2 gap-4">
-            {audio ? (
-              <div className="bg-white border rounded-lg shadow p-4">
-                <div>
-                  <h4>Record and Upload Audio File</h4>
+        <div className="md:grid grid-cols-2 gap-4">
+          {audio ? (
+            <div className="bg-white border rounded-lg shadow p-4">
+              <div>
+                <h4>Record and Upload Audio File</h4>
+              </div>
+              <TextFormField
+                name="consultation_audio_file"
+                type="text"
+                label="Enter Audio File Name (optional)"
+                value={audioName}
+                disabled={uploadStarted}
+                onChange={(e: any) => {
+                  setAudioName(e.value);
+                }}
+                error={audioFileError}
+              />
+              <div className="text-xs">
+                Please allow browser permission before you start speaking
+              </div>
+              {audiouploadStarted ? (
+                <LinearProgressWithLabel value={uploadPercent} />
+              ) : (
+                <div className="flex flex-col lg:flex-row justify-between w-full">
+                  {audioBlobExists && (
+                    <div className="flex items-center w-full md:w-auto">
+                      <ButtonV2
+                        variant="danger"
+                        className="w-full"
+                        onClick={() => {
+                          deleteAudioBlob();
+                        }}
+                      >
+                        <CareIcon className="care-l-trash h-4" /> Delete
+                      </ButtonV2>
+                    </div>
+                  )}
+                  <VoiceRecorder
+                    createAudioBlob={createAudioBlob}
+                    confirmAudioBlobExists={confirmAudioBlobExists}
+                    reset={resetRecording}
+                    setResetRecording={setResetRecording}
+                  />
+                  {audioBlobExists && (
+                    <div className="flex items-center w-full md:w-auto">
+                      <ButtonV2
+                        onClick={() => {
+                          handleAudioUpload();
+                        }}
+                        className="w-full"
+                      >
+                        <CareIcon className={"care-l-cloud-upload text-xl"} />
+                        Save
+                      </ButtonV2>
+                    </div>
+                  )}
                 </div>
+              )}
+            </div>
+          ) : null}
+          {unspecified ? (
+            <div className="mt-4 md:mt-0 bg-white border rounded-lg shadow p-4 flex-wrap">
+              <div>
+                <h4>Upload New File</h4>
+              </div>
+              <div>
                 <TextFormField
-                  name="consultation_audio_file"
+                  name="consultation_file"
                   type="text"
-                  label="Enter Audio File Name (optional)"
-                  value={audioName}
+                  label="Enter File Name"
+                  required
+                  value={uploadFileName}
                   disabled={uploadStarted}
                   onChange={(e: any) => {
-                    setAudioName(e.value);
+                    setUploadFileName(e.value);
                   }}
-                  error={audioFileError}
+                  error={uploadFileError}
                 />
-                <div className="text-xs">
-                  Please allow browser permission before you start speaking
-                </div>
-                {audiouploadStarted ? (
+              </div>
+              <div className="mt-4">
+                {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
-                  <div className="flex flex-col lg:flex-row justify-between w-full">
-                    {audioBlobExists && (
-                      <div className="flex items-center w-full md:w-auto">
-                        <ButtonV2
-                          variant="danger"
-                          className="w-full"
-                          onClick={() => {
-                            deleteAudioBlob();
-                          }}
-                        >
-                          <CareIcon className="care-l-trash h-4" /> Delete
-                        </ButtonV2>
-                      </div>
-                    )}
-                    <VoiceRecorder
-                      createAudioBlob={createAudioBlob}
-                      confirmAudioBlobExists={confirmAudioBlobExists}
-                      reset={resetRecording}
-                      setResetRecording={setResetRecording}
-                    />
-                    {audioBlobExists && (
-                      <div className="flex items-center w-full md:w-auto">
-                        <ButtonV2
-                          onClick={() => {
-                            handleAudioUpload();
-                          }}
-                          className="w-full"
-                        >
-                          <CareIcon className={"care-l-cloud-upload text-xl"} />
-                          Save
-                        </ButtonV2>
-                      </div>
-                    )}
+                  <div className="flex flex-col md:flex-row gap-2 items-center justify-start md:justify-end">
+                    <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
+                      {({ isAuthorized }) =>
+                        isAuthorized ? (
+                          <label className="font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square button-primary-default">
+                            <CareIcon className="care-l-file-upload-alt text-lg" />
+                            {t("choose_file")}
+                            <input
+                              title="changeFile"
+                              onChange={onFileChange}
+                              type="file"
+                              hidden
+                            />
+                          </label>
+                        ) : (
+                          <></>
+                        )
+                      }
+                    </AuthorizedChild>
+                    <ButtonV2 onClick={() => setModalOpenForCamera(true)}>
+                      <CareIcon className="care-l-camera text-lg mr-2" />
+                      Open Camera
+                    </ButtonV2>
+                    <ButtonV2
+                      authorizeFor={NonReadOnlyUsers}
+                      disabled={!file || !uploadFileName || !isActive}
+                      onClick={() => handleUpload({ status })}
+                    >
+                      <CareIcon className="care-l-cloud-upload text-lg" />
+                      {t("upload")}
+                    </ButtonV2>
+                  </div>
+                )}
+                {file && (
+                  <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
+                    {file?.name}
+                    <button
+                      onClick={() => {
+                        setFile(null);
+                        setUploadFileName("");
+                      }}
+                    >
+                      <i className="fas fa-times"></i>
+                    </button>
                   </div>
                 )}
               </div>
-            ) : null}
-            {unspecified ? (
-              <div className="mt-4 md:mt-0 bg-white border rounded-lg shadow p-4 flex-wrap">
-                <div>
-                  <h4>Upload New File</h4>
-                </div>
-                <div>
-                  <TextFormField
-                    name="consultation_file"
-                    type="text"
-                    label="Enter File Name"
-                    required
-                    value={uploadFileName}
-                    disabled={uploadStarted}
-                    onChange={(e: any) => {
-                      setUploadFileName(e.value);
-                    }}
-                    error={uploadFileError}
-                  />
-                </div>
-                <div className="mt-4">
-                  {uploadStarted ? (
-                    <LinearProgressWithLabel value={uploadPercent} />
-                  ) : (
-                    <div className="flex flex-col md:flex-row gap-2 items-center justify-start md:justify-end">
-                      <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
-                        {({ isAuthorized }) =>
-                          isAuthorized ? (
-                            <label className="font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square button-primary-default">
-                              <CareIcon className="care-l-file-upload-alt text-lg" />
-                              {t("choose_file")}
-                              <input
-                                title="changeFile"
-                                onChange={onFileChange}
-                                type="file"
-                                hidden
-                              />
-                            </label>
-                          ) : (
-                            <></>
-                          )
-                        }
-                      </AuthorizedChild>
-                      <ButtonV2 onClick={() => setModalOpenForCamera(true)}>
-                        <CareIcon className="care-l-camera text-lg mr-2" />
-                        Open Camera
-                      </ButtonV2>
-                      <ButtonV2
-                        authorizeFor={NonReadOnlyUsers}
-                        disabled={!file || !uploadFileName || !isActive}
-                        onClick={() => handleUpload({ status })}
-                      >
-                        <CareIcon className="care-l-cloud-upload text-lg" />
-                        {t("upload")}
-                      </ButtonV2>
-                    </div>
-                  )}
-                  {file && (
-                    <div className="mt-2 bg-gray-200 rounded flex items-center justify-between py-2 px-4">
-                      {file?.name}
-                      <button
-                        onClick={() => {
-                          setFile(null);
-                          setUploadFileName("");
-                        }}
-                      >
-                        <i className="fas fa-times"></i>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : null}
-          </div>
+            </div>
+          ) : null}
         </div>
       </Page>
 
@@ -1651,60 +1527,57 @@ export const FileUpload = (props: FileUploadProps) => {
           handleChange={handleTabChange}
           currentTabState={sortFileState}
         />
-
-        <div>
-          {sortFileState === "UNARCHIVED" ? (
-            // First it would check the filtered array contains any files or not else it would state the message
-            <>
-              {uploadedUnarchievedFiles.length > 0 ? (
-                uploadedUnarchievedFiles.map((item: FileUploadModel) =>
-                  renderFileUpload(item)
-                )
-              ) : (
-                <div className="mt-4 border bg-white shadow rounded-lg p-4">
-                  <div className="font-bold text-gray-500 text-md flex justify-center items-center">
-                    {"No Unarchived File in the Current Page"}
-                  </div>
+        {sortFileState === "UNARCHIVED" ? (
+          // First it would check the filtered array contains any files or not else it would state the message
+          <>
+            {uploadedUnarchievedFiles.length > 0 ? (
+              uploadedUnarchievedFiles.map((item: FileUploadModel) =>
+                renderFileUpload(item)
+              )
+            ) : (
+              <div className="mt-4 border bg-white shadow rounded-lg p-4">
+                <div className="font-bold text-gray-500 text-md flex justify-center items-center">
+                  {"No Unarchived File in the Current Page"}
                 </div>
-              )}
-              {totalUnarchievedFilesCount > limit && (
-                <div className="mt-4 flex w-full justify-center">
-                  <Pagination
-                    cPage={currentPage}
-                    defaultPerPage={limit}
-                    data={{ totalCount: totalUnarchievedFilesCount }}
-                    onChange={handlePagination}
-                  />
+              </div>
+            )}
+            {totalUnarchievedFilesCount > limit && (
+              <div className="mt-4 flex w-full justify-center">
+                <Pagination
+                  cPage={currentPage}
+                  defaultPerPage={limit}
+                  data={{ totalCount: totalUnarchievedFilesCount }}
+                  onChange={handlePagination}
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          // First it would check the filtered array contains any files or not else it would state the message
+          <>
+            {uploadedArchievedFiles.length > 0 ? (
+              uploadedArchievedFiles.map((item: FileUploadModel) =>
+                renderFileUpload(item)
+              )
+            ) : (
+              <div className="mt-4 border bg-white shadow rounded-lg p-4">
+                <div className="font-bold text-gray-500 text-md flex justify-center items-center">
+                  {"No Archived File in the Current Page"}
                 </div>
-              )}
-            </>
-          ) : (
-            // First it would check the filtered array contains any files or not else it would state the message
-            <>
-              {uploadedArchievedFiles.length > 0 ? (
-                uploadedArchievedFiles.map((item: FileUploadModel) =>
-                  renderFileUpload(item)
-                )
-              ) : (
-                <div className="mt-4 border bg-white shadow rounded-lg p-4">
-                  <div className="font-bold text-gray-500 text-md flex justify-center items-center">
-                    {"No Archived File in the Current Page"}
-                  </div>
-                </div>
-              )}
-              {totalArchievedFilesCount > limit && (
-                <div className="mt-4 flex w-full justify-center">
-                  <Pagination
-                    cPage={currentPage}
-                    defaultPerPage={limit}
-                    data={{ totalCount: totalArchievedFilesCount }}
-                    onChange={handlePagination}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
+              </div>
+            )}
+            {totalArchievedFilesCount > limit && (
+              <div className="mt-4 flex w-full justify-center">
+                <Pagination
+                  cPage={currentPage}
+                  defaultPerPage={limit}
+                  data={{ totalCount: totalArchievedFilesCount }}
+                  onChange={handlePagination}
+                />
+              </div>
+            )}
+          </>
+        )}
       </Page>
     </div>
   );
