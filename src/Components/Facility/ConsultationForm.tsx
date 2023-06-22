@@ -256,6 +256,7 @@ export const ConsultationForm = (props: any) => {
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
+        setIsLoading(true);
         const res = await dispatchAction(getPatient({ id: patientId }));
         if (res.data) {
           setPatientName(res.data.name);
@@ -272,6 +273,7 @@ export const ConsultationForm = (props: any) => {
         setPatientName("");
         setFacilityName("");
       }
+      if (!id) setIsLoading(false);
     }
     fetchPatientName();
   }, [dispatchAction, patientId]);
@@ -282,7 +284,7 @@ export const ConsultationForm = (props: any) => {
 
   const fetchData = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
+      if (!patientId) setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
       handleFormFieldChange({
         name: "InvestigationAdvice",
@@ -342,11 +344,13 @@ export const ConsultationForm = (props: any) => {
 
   useAbortableEffect(
     (status: statusType) => {
-      if (id) {
+      if (id && patientId && patientName) {
+        fetchData(status);
+      } else if (id && !patientId) {
         fetchData(status);
       }
     },
-    [fetchData, id]
+    [fetchData, id, patientId, patientName]
   );
 
   if (isLoading) return <Loading />;
