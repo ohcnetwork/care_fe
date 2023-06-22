@@ -97,7 +97,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
       setData(
         entries.map(({ patient, asset, bed }) => {
           const middleware =
-            asset.meta?.middleware_hostname ?? facilityObj?.middleware_address;
+            asset.meta?.middleware_hostname || facilityObj?.middleware_address;
           const local_ip_address = asset.meta?.local_ip_address;
 
           return {
@@ -141,7 +141,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
             >
-              <Popover.Panel className="absolute z-10 mt-1 w-96 transform -translate-x-1/2 px-4 sm:px-0 lg:max-w-3xl">
+              <Popover.Panel className="absolute z-30 mt-1 w-96 transform -translate-x-1/2 px-4 sm:px-0 lg:max-w-3xl">
                 <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
                   <div className="rounded-t-lg bg-gray-100 px-6 py-4">
                     <div className="flow-root rounded-md">
@@ -158,6 +158,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       </FieldLabel>
                       <div className="flex gap-2 w-full items-center">
                         <LocationSelect
+                          key={qParams.location}
                           name="Facilities"
                           setSelected={(location) => updateQuery({ location })}
                           selected={qParams.location}

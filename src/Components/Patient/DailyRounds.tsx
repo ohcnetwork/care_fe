@@ -8,7 +8,7 @@ import {
 import { navigate } from "raviger";
 import moment from "moment";
 import loadable from "@loadable/component";
-import { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   SYMPTOM_CHOICES,
@@ -40,8 +40,7 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import { celsiusToFahrenheit, fahrenheitToCelsius } from "../../Utils/utils";
-import { getTemperaturePreference } from "../Common/utils/DevicePreference";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -64,7 +63,7 @@ const initForm: any = {
   diastolic: null,
   pulse: null,
   resp: null,
-  tempInCelsius: false,
+  tempInCelcius: false,
   temperature: null,
   rhythm: "0",
   rhythm_detail: "",
@@ -92,11 +91,15 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
         form: action.form,
       };
     }
-    case "set_error": {
+    case "set_errors": {
       return {
         ...state,
         errors: action.errors,
       };
+    }
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
     }
     default:
       return state;
@@ -107,7 +110,10 @@ export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, consultationId, id } = props;
-  const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
+  const [state, dispatch] = useAutoSaveReducer<any>(
+    DailyRoundsFormReducer,
+    initialState
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
@@ -155,11 +161,6 @@ export const DailyRounds = (props: any) => {
                   (i) => i.text === res.data.patient_category
                 )?.id || "Comfort"
               : "Comfort",
-            tempInCelsius: getTemperaturePreference() === "C" ? true : false,
-            temperature:
-              getTemperaturePreference() === "C"
-                ? fahrenheitToCelsius(res.data.temperature)
-                : res.data.temperature,
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
           };
           dispatch({ type: "set_form", form: data });
@@ -232,8 +233,18 @@ export const DailyRounds = (props: any) => {
           return;
       }
     });
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return !invalidForm;
+  };
+
+  const fahrenheitToCelcius = (x: any) => {
+    const t = (Number(x) - 32.0) * (5.0 / 9.0);
+    return String(t.toFixed(1));
+  };
+
+  const celciusToFahrenheit = (x: any) => {
+    const t = (Number(x) * 9.0) / 5.0 + 32.0;
+    return String(t.toFixed(1));
   };
 
   const calculateMAP = (systolic: any, diastolic: any) => {
@@ -296,8 +307,8 @@ export const DailyRounds = (props: any) => {
                 : undefined,
             pulse: state.form.pulse,
             resp: Number(state.form.resp),
-            temperature: state.form.tempInCelsius
-              ? celsiusToFahrenheit(state.form.temperature)
+            temperature: state.form.tempInCelcius
+              ? celciusToFahrenheit(state.form.temperature)
               : state.form.temperature,
             rhythm: Number(state.form.rhythm) || 0,
             rhythm_detail: state.form.rhythm_detail,
@@ -478,32 +489,16 @@ export const DailyRounds = (props: any) => {
   };
 
   const toggleTemperature = () => {
-    const isCelsius = state.form.tempInCelsius;
+    const isCelcius = state.form.tempInCelcius;
     const temp = state.form.temperature;
 
     const form = { ...state.form };
-    form.temperature = isCelsius
-      ? celsiusToFahrenheit(temp)
-      : fahrenheitToCelsius(temp);
-    form.tempInCelsius = !isCelsius;
+    form.temperature = isCelcius
+      ? celciusToFahrenheit(temp)
+      : fahrenheitToCelcius(temp);
+    form.tempInCelcius = !isCelcius;
     dispatch({ type: "set_form", form });
   };
-
-  function handleLocalTemperatureChange(e: any) {
-    if (e.key === "temperature") {
-      if (e.newValue === "F" && state.form.tempInCelsius) {
-        toggleTemperature();
-      } else if (e.newValue === "C" && !state.form.tempInCelsius) {
-        toggleTemperature();
-      }
-    }
-  }
-  useEffect(() => {
-    window.addEventListener("storage", handleLocalTemperatureChange);
-    return () => {
-      window.removeEventListener("storage", handleLocalTemperatureChange);
-    };
-  }, [state.form.temperature]);
 
   if (isLoading) {
     return <Loading />;
@@ -527,6 +522,12 @@ export const DailyRounds = (props: any) => {
         <div className="bg-white rounded shadow">
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
+              <DraftSection
+                handleDraftSelect={(newState) => {
+                  dispatch({ type: "set_state", state: newState });
+                }}
+                formData={state.form}
+              />
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="w-full md:w-1/3">
                   <LegacyDateTimeFiled
@@ -537,7 +538,7 @@ export const DailyRounds = (props: any) => {
                     disableFuture={true}
                     showTodayButton={true}
                     onChange={(date) => handleDateChange(date, "taken_at")}
-                    errors={state.errors.taken_at}
+                    errors={state.errors.taken_at as string}
                   />
                 </div>
                 <div className="w-full md:w-1/3">
@@ -666,7 +667,7 @@ export const DailyRounds = (props: any) => {
                         optionKey="text"
                         optionValue="desc"
                         options={TELEMEDICINE_ACTIONS}
-                        onChange={(e) => setPreviousAction(e.target.value)}
+                        onChange={(e: any) => setPreviousAction(e.target.value)}
                       />
                       <LegacyErrorHelperText error={state.errors.action} />
                     </div>
@@ -811,7 +812,7 @@ export const DailyRounds = (props: any) => {
                         <div>
                           <FieldLabel className="flex flex-row justify-between">
                             Temperature{" "}
-                            {state.form.tempInCelsius
+                            {state.form.tempInCelcius
                               ? getStatus(
                                   36.4,
                                   "Low",
@@ -835,7 +836,7 @@ export const DailyRounds = (props: any) => {
                                 variant="standard"
                                 value={state.form.temperature}
                                 options={
-                                  state.form.tempInCelsius
+                                  state.form.tempInCelcius
                                     ? generateOptions(35, 41, 0.1, 1)
                                     : generateOptions(95, 106, 0.1, 1)
                                 }
@@ -863,7 +864,7 @@ export const DailyRounds = (props: any) => {
                             >
                               <span className="text-blue-700">
                                 {" "}
-                                {state.form.tempInCelsius ? "C" : "F"}{" "}
+                                {state.form.tempInCelcius ? "C" : "F"}{" "}
                               </span>
                             </div>
                           </div>

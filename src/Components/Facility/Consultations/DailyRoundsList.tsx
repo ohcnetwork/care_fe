@@ -9,8 +9,6 @@ import VirtualNursingAssistantLogUpdateCard from "./DailyRounds/VirtualNursingAs
 import DefaultLogUpdateCard from "./DailyRounds/DefaultLogUpdateCard";
 import { useTranslation } from "react-i18next";
 import LoadingLogUpdateCard from "./DailyRounds/LoadingCard";
-import { getTemperaturePreference } from "../../Common/utils/DevicePreference";
-import { fahrenheitToCelsius } from "../../../Utils/utils";
 
 export const DailyRoundsList = (props: any) => {
   const { t } = useTranslation();
@@ -46,16 +44,7 @@ export const DailyRoundsList = (props: any) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
-          res.data.results.forEach((round: DailyRoundsModel) => {
-            round.temperatureUnit = getTemperaturePreference();
-            round.temperature =
-              round.temperatureUnit === "F"
-                ? round.temperature
-                : fahrenheitToCelsius(round.temperature);
-            return round;
-          });
           setDailyRoundsListData(res.data.results);
-          console.log(res.data.results);
           setTotalCount(res.data.count);
         }
         setIsDailyRoundLoading(false);
@@ -106,7 +95,6 @@ export const DailyRoundsList = (props: any) => {
 
       return (
         <DefaultLogUpdateCard
-          key={itemData.id}
           round={itemData}
           consultationData={consultationData}
           onViewDetails={() => {
