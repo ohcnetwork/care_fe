@@ -420,7 +420,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
                 <span className="font-semibold leading-relaxed">
                   Countries travelled:{" "}
                 </span>
-                {JSON.parse(sampleDetails.patient_travel_history).join(", ")}
+                {sampleDetails.patient_travel_history.join(", ")}
               </div>
             )}
           {sampleDetails.sample_type && (
