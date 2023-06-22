@@ -1,14 +1,7 @@
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import moment from "moment";
-import {
-  createRef,
-  LegacyRef,
-  useCallback,
-  useEffect,
-  useReducer,
-  useState,
-} from "react";
+import { createRef, LegacyRef, useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   CONSULTATION_SUGGESTION,
@@ -55,6 +48,11 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useVisibility from "../../Utils/useVisibility";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import {
+  DraftSection,
+  FormReducerAction,
+  useAutoSaveReducer,
+} from "../../Utils/AutoSave";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -102,12 +100,9 @@ type FormDetails = {
   cause_of_death: string;
   death_datetime: string;
   death_confirmed_doctor: string;
+  InvestigationAdvice: InvestigationType[];
+  procedures: ProcedureType[];
 };
-
-type Action =
-  | { type: "set_form"; form: FormDetails }
-  | { type: "set_error"; errors: FormDetails }
-  | { type: "set_form_field"; field: keyof FormDetails; value: any };
 
 const initForm: FormDetails = {
   symptoms: [],
@@ -150,6 +145,8 @@ const initForm: FormDetails = {
   cause_of_death: "",
   death_datetime: "",
   death_confirmed_doctor: "",
+  InvestigationAdvice: [],
+  procedures: [],
 };
 
 const initError = Object.assign(
@@ -175,7 +172,10 @@ const fieldRef = formErrorKeys.reduce(
   {}
 );
 
-const consultationFormReducer = (state = initialState, action: Action) => {
+const consultationFormReducer = (
+  state = initialState,
+  action: FormReducerAction
+) => {
   switch (action.type) {
     case "set_form": {
       return {
@@ -183,20 +183,15 @@ const consultationFormReducer = (state = initialState, action: Action) => {
         form: { ...state.form, ...action.form },
       };
     }
-    case "set_error": {
+    case "set_errors": {
       return {
         ...state,
         errors: action.errors,
       };
     }
-    case "set_form_field": {
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          [action.field]: action.value,
-        },
-      };
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
     }
   }
 };
@@ -211,12 +206,11 @@ export const ConsultationForm = (props: any) => {
   const { kasp_enabled, kasp_string } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
-  const [state, dispatch] = useReducer(consultationFormReducer, initialState);
+  const [state, dispatch] = useAutoSaveReducer<FormDetails>(
+    consultationFormReducer,
+    initialState
+  );
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [InvestigationAdvice, setInvestigationAdvice] = useState<
-    InvestigationType[]
-  >([]);
-  const [procedures, setProcedures] = useState<ProcedureType[]>([]);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
@@ -267,12 +261,11 @@ export const ConsultationForm = (props: any) => {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
           if (isUpdate) {
-            dispatch({
-              type: "set_form_field",
-              field: "action",
-              value: TELEMEDICINE_ACTIONS.find((a) => a.id === res.data.action)
-                ?.text,
-            });
+            const form = { ...state.form };
+            form.action = TELEMEDICINE_ACTIONS.find(
+              (a) => a.id === res.data.action
+            )?.text;
+            dispatch({ type: "set_form", form });
           }
         }
       } else {
@@ -291,12 +284,16 @@ export const ConsultationForm = (props: any) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
-      setInvestigationAdvice(
-        !Array.isArray(res.data.investigation) ? [] : res.data.investigation
-      );
-      setProcedures(
-        !Array.isArray(res.data.procedure) ? [] : res.data.procedure
-      );
+      handleFormFieldChange({
+        name: "InvestigationAdvice",
+        value: !Array.isArray(res.data.investigation)
+          ? []
+          : res.data.investigation,
+      });
+      handleFormFieldChange({
+        name: "procedures",
+        value: !Array.isArray(res.data.procedure) ? [] : res.data.procedure,
+      });
       if (res.data.suggestion === "R") {
         if (res.data.referred_to_external)
           setSelectedFacility({ id: -1, name: res.data.referred_to_external });
@@ -471,7 +468,7 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "procedure": {
-          for (const p of procedures) {
+          for (const p of state.form.procedures) {
             if (!p.procedure?.replace(/\s/g, "").length) {
               errors[field] = "Procedure field can not be empty";
               invalidForm = true;
@@ -492,7 +489,7 @@ export const ConsultationForm = (props: any) => {
         }
 
         case "investigation": {
-          for (const i of InvestigationAdvice) {
+          for (const i of state.form.InvestigationAdvice) {
             if (!i.type?.length) {
               errors[field] = "Investigation field can not be empty";
               invalidForm = true;
@@ -535,7 +532,7 @@ export const ConsultationForm = (props: any) => {
       }
     });
     if (invalidForm) {
-      dispatch({ type: "set_error", errors });
+      dispatch({ type: "set_errors", errors });
       const firstError = Object.keys(errors).find((key) => errors[key]);
       if (firstError) {
         fieldRef[firstError].current?.scrollIntoView({
@@ -545,7 +542,7 @@ export const ConsultationForm = (props: any) => {
       }
       return false;
     }
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return true;
   };
 
@@ -602,12 +599,16 @@ export const ConsultationForm = (props: any) => {
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
         op_no: state.form.op_no,
-        icd11_diagnoses: state.form.icd11_diagnoses_object.map((o) => o.id),
+        icd11_diagnoses: state.form.icd11_diagnoses_object.map(
+          (o: ICD11DiagnosisModel) => o.id
+        ),
         icd11_provisional_diagnoses:
-          state.form.icd11_provisional_diagnoses_object.map((o) => o.id),
+          state.form.icd11_provisional_diagnoses_object.map(
+            (o: ICD11DiagnosisModel) => o.id
+          ),
         verified_by: state.form.verified_by,
-        investigation: InvestigationAdvice,
-        procedure: procedures,
+        investigation: state.form.InvestigationAdvice,
+        procedure: state.form.procedures,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -768,7 +769,7 @@ export const ConsultationForm = (props: any) => {
       id: name,
       name,
       value: (state.form as any)[name],
-      error: state.errors[name],
+      error: (state.errors as any)[name],
       onChange: handleFormFieldChange,
     };
   };
@@ -831,6 +832,12 @@ export const ConsultationForm = (props: any) => {
               onSubmit={handleSubmit}
               className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
             >
+              <DraftSection
+                handleDraftSelect={(newState: any) => {
+                  dispatch({ type: "set_state", state: newState });
+                }}
+                formData={state.form}
+              />
               <div className="grid grid-cols-1 gap-x-12 items-start">
                 <div className="grid grid-cols-6 gap-x-6">
                   {sectionTitle("Consultation Details")}
@@ -1043,6 +1050,7 @@ export const ConsultationForm = (props: any) => {
                         <DateFormField
                           {...field("admission_date")}
                           required
+                          disableFuture
                           label="Admission date"
                           position="LEFT"
                         />
@@ -1120,8 +1128,13 @@ export const ConsultationForm = (props: any) => {
                           >
                             <FieldLabel>Investigations Suggestions</FieldLabel>
                             <InvestigationBuilder
-                              investigations={InvestigationAdvice}
-                              setInvestigations={setInvestigationAdvice}
+                              investigations={state.form.InvestigationAdvice}
+                              setInvestigations={(investigations) => {
+                                handleFormFieldChange({
+                                  name: "InvestigationAdvice",
+                                  value: investigations,
+                                });
+                              }}
                             />
                             <LegacyErrorHelperText
                               error={state.errors.investigation}
@@ -1134,8 +1147,13 @@ export const ConsultationForm = (props: any) => {
                           >
                             <FieldLabel>Procedures</FieldLabel>
                             <ProcedureBuilder
-                              procedures={procedures}
-                              setProcedures={setProcedures}
+                              procedures={state.form.procedures}
+                              setProcedures={(procedures) => {
+                                handleFormFieldChange({
+                                  name: "procedures",
+                                  value: procedures,
+                                });
+                              }}
                             />
                             <LegacyErrorHelperText
                               error={state.errors.procedure}

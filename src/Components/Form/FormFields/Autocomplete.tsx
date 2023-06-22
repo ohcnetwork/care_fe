@@ -19,6 +19,7 @@ type AutocompleteFormFieldProps<T, V> = FormFieldBaseProps<V> & {
   dropdownIcon?: React.ReactNode | undefined;
   isLoading?: boolean;
   allowRawInput?: boolean;
+  error?: string;
 };
 
 const AutocompleteFormField = <T, V>(
@@ -43,6 +44,7 @@ const AutocompleteFormField = <T, V>(
         onQuery={props.onQuery}
         isLoading={props.isLoading}
         allowRawInput={props.allowRawInput}
+        error={field.error}
         requiredError={field.error ? props.required : false}
       />
     </FormField>
@@ -66,6 +68,7 @@ type AutocompleteProps<T, V = T> = {
   requiredError?: boolean;
   isLoading?: boolean;
   allowRawInput?: boolean;
+  error?: string;
 } & (
   | {
       required?: false;
@@ -132,7 +135,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
   return (
     <div
       className={
-        props.requiredError
+        props.requiredError || props.error
           ? "border rounded border-red-500 " + props.className
           : props.className
       }

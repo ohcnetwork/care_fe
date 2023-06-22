@@ -56,6 +56,7 @@ export interface PatientModel {
   tele_consultation_history?: Array<any>;
   last_consultation?: ConsultationModel;
   address?: string;
+  permanent_address?: string;
   village?: string;
   pincode?: number;
   contact_with_confirmed_carrier?: boolean;

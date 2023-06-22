@@ -29,6 +29,7 @@ const DateRangeFormField = (props: Props) => {
   return (
     <FormField field={field}>
       <DateRangeInputV2
+        name={field.name}
         className={classNames(field.error && "border-red-500")}
         value={field.value}
         onChange={field.handleChange}
