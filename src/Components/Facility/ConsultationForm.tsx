@@ -1280,7 +1280,7 @@ export const ConsultationForm = (props: any) => {
             </form>
             {isUpdate && (
               <>
-                <div className="mt-4 bg-white rounded max-w-3xl px-11 py-8 mx-auto">
+                <div className="mt-4 bg-white rounded max-w-4xl px-11 py-8 mx-auto">
                   <h4>Update Bed</h4>
                   <Beds
                     facilityId={facilityId}
