@@ -163,7 +163,6 @@ export default function ListFilter(props: any) {
             })
           : [];
       setSelectedLsgs(selectedLsgs);
-      setLoading(false);
     }
     getWardList();
   }, []);
@@ -202,6 +201,8 @@ export default function ListFilter(props: any) {
       onClear={() => {
         navigate("/external_results");
         setFilterState(clearFilterState);
+        setSelectedLsgs([]);
+        setWards([]);
         closeFilter();
       }}
     >
