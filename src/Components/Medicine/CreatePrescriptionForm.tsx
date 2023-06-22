@@ -1,7 +1,6 @@
 import moment from "moment";
 import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
 import Form from "../Form/Form";
-import { createFormContext } from "../Form/FormContext";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -13,8 +12,6 @@ import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormFi
 import { useTranslation } from "react-i18next";
 import MedibaseAutocompleteFormField from "./MedibaseAutocompleteFormField";
 
-const prescriptionFormContext = createFormContext<Prescription>();
-
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;
   create: ReturnType<typeof PrescriptionActions>["create"];
@@ -25,9 +22,8 @@ export default function CreatePrescriptionForm(props: {
   const { t } = useTranslation();
 
   return (
-    <Form
+    <Form<Prescription>
       disabled={isCreating}
-      context={prescriptionFormContext}
       defaults={props.prescription}
       onCancel={props.onDone}
       onSubmit={async (obj) => {

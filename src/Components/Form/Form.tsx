@@ -1,14 +1,14 @@
 import { isEmpty, omitBy } from "lodash";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useState } from "react";
 import { classNames } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { FieldValidator } from "./FieldValidators";
-import { FormContext, FormContextValue } from "./FormContext";
+import { FormContextValue, createFormContext } from "./FormContext";
 import { FieldChangeEvent } from "./FormFields/Utils";
-import { FormDetails, FormErrors, formReducer, FormReducer } from "./Utils";
+import { FormDetails, FormErrors, formReducer } from "./Utils";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 
 type Props<T extends FormDetails> = {
-  context: FormContext<T>;
   className?: string;
   defaults: T;
   asyncGetDefaults?: (() => Promise<T>) | false;
@@ -30,7 +30,7 @@ const Form = <T extends FormDetails>({
 }: Props<T>) => {
   const initial = { form: props.defaults, errors: {} };
   const [isLoading, setIsLoading] = useState(!!asyncGetDefaults);
-  const [state, dispatch] = useReducer<FormReducer<T>>(formReducer, initial);
+  const [state, dispatch] = useAutoSaveReducer<T>(formReducer, initial);
 
   useEffect(() => {
     if (!asyncGetDefaults) return;
@@ -63,7 +63,7 @@ const Form = <T extends FormDetails>({
     }
   };
 
-  const { Provider, Consumer } = props.context;
+  const { Provider, Consumer } = useMemo(() => createFormContext<T>(), []);
   const disabled = isLoading || props.disabled;
 
   return (
@@ -76,6 +76,12 @@ const Form = <T extends FormDetails>({
       )}
       noValidate
     >
+      <DraftSection
+        handleDraftSelect={(newState: any) => {
+          dispatch({ type: "set_state", state: newState });
+        }}
+        formData={state.form}
+      />
       <Provider
         value={(name: keyof T, validate?: FieldValidator<T[keyof T]>) => {
           return {
