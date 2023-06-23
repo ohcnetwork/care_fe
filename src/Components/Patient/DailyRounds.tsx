@@ -8,7 +8,7 @@ import {
 import { navigate } from "raviger";
 import moment from "moment";
 import loadable from "@loadable/component";
-import { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   SYMPTOM_CHOICES,
@@ -40,6 +40,7 @@ import { FieldLabel } from "../Form/FormFields/FormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -90,11 +91,15 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
         form: action.form,
       };
     }
-    case "set_error": {
+    case "set_errors": {
       return {
         ...state,
         errors: action.errors,
       };
+    }
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
     }
     default:
       return state;
@@ -105,7 +110,10 @@ export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, consultationId, id } = props;
-  const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
+  const [state, dispatch] = useAutoSaveReducer<any>(
+    DailyRoundsFormReducer,
+    initialState
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
@@ -225,7 +233,7 @@ export const DailyRounds = (props: any) => {
           return;
       }
     });
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return !invalidForm;
   };
 
@@ -514,6 +522,12 @@ export const DailyRounds = (props: any) => {
         <div className="bg-white rounded shadow">
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
+              <DraftSection
+                handleDraftSelect={(newState) => {
+                  dispatch({ type: "set_state", state: newState });
+                }}
+                formData={state.form}
+              />
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="w-full md:w-1/3">
                   <LegacyDateTimeFiled
@@ -524,7 +538,7 @@ export const DailyRounds = (props: any) => {
                     disableFuture={true}
                     showTodayButton={true}
                     onChange={(date) => handleDateChange(date, "taken_at")}
-                    errors={state.errors.taken_at}
+                    errors={state.errors.taken_at as string}
                   />
                 </div>
                 <div className="w-full md:w-1/3">
@@ -653,7 +667,7 @@ export const DailyRounds = (props: any) => {
                         optionKey="text"
                         optionValue="desc"
                         options={TELEMEDICINE_ACTIONS}
-                        onChange={(e) => setPreviousAction(e.target.value)}
+                        onChange={(e: any) => setPreviousAction(e.target.value)}
                       />
                       <LegacyErrorHelperText error={state.errors.action} />
                     </div>
