@@ -1,17 +1,18 @@
-import loadable from "@loadable/component";
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getTestSample } from "../../Redux/actions";
 import { FlowModel, SampleTestModel } from "./models";
-import { FileUpload } from "./FileUpload";
-import { navigate } from "raviger";
 import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useCallback, useState } from "react";
+
+import ButtonV2 from "../Common/components/ButtonV2";
+import Card from "../../CAREUI/display/Card";
+import { FileUpload } from "./FileUpload";
+import Page from "../Common/components/Page";
 import _ from "lodash";
 import { formatDate } from "../../Utils/utils";
-import Card from "../../CAREUI/display/Card";
-import Page from "../Common/components/Page";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { getTestSample } from "../../Redux/actions";
+import loadable from "@loadable/component";
+import { navigate } from "raviger";
+import { useDispatch } from "react-redux";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
