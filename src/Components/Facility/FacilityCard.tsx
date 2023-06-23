@@ -94,14 +94,14 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     >
                       {facility.name}
                     </Link>
-                    <ButtonV2
+                    {/* <ButtonV2
                       href={`/facility/${facility.id}/cns`}
                       border
                       ghost
                     >
                       <CareIcon className="care-l-monitor-heart-rate text-lg" />
                       <span>View CNS</span>
-                    </ButtonV2>
+                    </ButtonV2> */}
                   </div>
                   <div className="flex gap-1 flex-wrap mt-2">
                     <Chip
