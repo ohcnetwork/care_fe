@@ -1,3 +1,4 @@
+import { AssetBedModel, AssetClass } from "../Assets/AssetTypes";
 import {
   CONSULTATION_TABS,
   DISCHARGE_REASONS,
@@ -18,7 +19,7 @@ import {
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+
 import { ABGPlots } from "./Consultations/ABGPlots";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -26,33 +27,32 @@ import Chip from "../../CAREUI/display/Chip";
 import { DailyRoundsList } from "./Consultations/DailyRoundsList";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
 import DischargeModal from "./DischargeModal";
+import DischargeSummaryModal from "./DischargeSummaryModal";
 import DoctorVideoSlideover from "./DoctorVideoSlideover";
 import { Feed } from "./Consultations/Feed";
 import { FileUpload } from "../Patient/FileUpload";
+import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import InvestigationTab from "./Investigations/investigationsTab";
 import { make as Link } from "../Common/components/Link.gen";
+import MedicineAdministrationsTable from "../Medicine/MedicineAdministrationsTable";
 import { NeurologicalTable } from "./Consultations/NeurologicalTables";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { NursingPlot } from "./Consultations/NursingPlot";
 import { NutritionPlots } from "./Consultations/NutritionPlots";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import { PatientModel } from "../Patient/models";
+import PrescriptionsTable from "../Medicine/PrescriptionsTable";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 import ReadMore from "../Common/components/Readmore";
+import VentilatorPatientVitalsMonitor from "../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { formatDate } from "../../Utils/utils";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { navigate } from "raviger";
+import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import PrescriptionsTable from "../Medicine/PrescriptionsTable";
-import MedicineAdministrationsTable from "../Medicine/MedicineAdministrationsTable";
-import DischargeSummaryModal from "./DischargeSummaryModal";
-import VentilatorPatientVitalsMonitor from "../VitalsMonitor/VentilatorPatientVitalsMonitor";
-
-import { AssetBedModel, AssetClass } from "../Assets/AssetTypes";
-import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -1150,12 +1150,13 @@ export const ConsultationDetails = (props: any) => {
 
 const VitalsCard = ({ consultation }: { consultation: ConsultationModel }) => {
   const dispatch = useDispatch<any>();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
 
   useEffect(() => {
-    if (!consultation.facility) return;
+    if (!consultation.facility || !consultation.current_bed?.bed_object.id)
+      return;
 
     const fetchData = async () => {
       setLoading(true);
