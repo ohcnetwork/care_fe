@@ -59,7 +59,7 @@ type UserForm = {
   gender: string;
   password: string;
   c_password: string;
-  facilities: Array<FacilityModel>;
+  facilities: Array<number>;
   home_facility: FacilityModel | null;
   username: string;
   first_name: string;
@@ -120,7 +120,7 @@ const user_create_reducer = (state = initialState, action: any) => {
         form: action.form,
       };
     }
-    case "set_error": {
+    case "set_errors": {
       return {
         ...state,
         errors: action.errors,
@@ -163,7 +163,7 @@ export const UserAdd = (props: UserProps) => {
   const dispatchAction: any = useDispatch();
   const { userId } = props;
 
-  const [state, dispatch] = useAutoSaveReducer(
+  const [state, dispatch] = useAutoSaveReducer<UserForm>(
     user_create_reducer,
     initialState
   );
@@ -198,7 +198,7 @@ export const UserAdd = (props: UserProps) => {
     const usernameCheck = await dispatchAction(
       checkUsername({ username: username })
     );
-    if (usernameCheck === undefined || usernameCheck.status === 409)
+    if (usernameCheck === undefined ?? usernameCheck.status === 409)
       setUsernameExists(userExistsEnums.exists);
     else if (usernameCheck.status === 200)
       setUsernameExists(userExistsEnums.available);
@@ -251,10 +251,10 @@ export const UserAdd = (props: UserProps) => {
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
   const showLocalbody = !(
-    state.form.user_type === "Pharmacist" ||
-    state.form.user_type === "Volunteer" ||
-    state.form.user_type === "Doctor" ||
-    state.form.user_type === "Staff" ||
+    state.form.user_type === "Pharmacist" ??
+    state.form.user_type === "Volunteer" ??
+    state.form.user_type === "Doctor" ??
+    state.form.user_type === "Staff" ??
     state.form.user_type === "StaffReadOnly"
   );
 
@@ -342,7 +342,7 @@ export const UserAdd = (props: UserProps) => {
   useAbortableEffect(
     (status: statusType) => {
       fetchStates(status);
-      if (userType === "Staff" || userType === "StaffReadOnly") {
+      if (userType === "Staff" ?? userType === "StaffReadOnly") {
         fetchFacilities(status);
       }
     },
@@ -384,7 +384,7 @@ export const UserAdd = (props: UserProps) => {
     setSelectedFacility(selected as FacilityModel[]);
     const form = { ...state.form };
     form.facilities = selected
-      ? (selected as FacilityModel[]).map((i) => i.id)
+      ? (selected as FacilityModel[]).map((i) => i.id ?? -1)
       : [];
     dispatch({ type: "set_form", form });
   };
@@ -397,8 +397,8 @@ export const UserAdd = (props: UserProps) => {
         case "facilities":
           if (
             state.form[field].length === 0 &&
-            (userType === "Staff" || userType === "StaffReadOnly") &&
-            (state.form["user_type"] === "Staff" ||
+            (userType === "Staff" ?? userType === "StaffReadOnly") &&
+            (state.form["user_type"] === "Staff" ??
               state.form["user_type"] === "StaffReadOnly")
           ) {
             errors[field] =
@@ -482,7 +482,7 @@ export const UserAdd = (props: UserProps) => {
           if (phoneNumber) {
             is_valid = phoneNumber.isValid();
           }
-          if (!state.form[field] || !is_valid) {
+          if (!state.form[field] ?? !is_valid) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
           }
@@ -511,7 +511,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "email":
           if (
-            state.form[field].length === 0 ||
+            state.form[field].length === 0 ??
             !validateEmailAddress(state.form[field])
           ) {
             errors[field] = "Please enter a valid email address";
@@ -531,7 +531,7 @@ export const UserAdd = (props: UserProps) => {
           }
           return;
         case "district":
-          if (!Number(state.form[field]) || state.form[field] === "") {
+          if (!Number(state.form[field])) {
             errors[field] = "Please select the district";
             invalidForm = true;
           }
@@ -548,10 +548,10 @@ export const UserAdd = (props: UserProps) => {
       }
     });
     if (invalidForm) {
-      dispatch({ type: "set_error", errors });
+      dispatch({ type: "set_errors", errors });
       return false;
     }
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return true;
   };
 
@@ -581,7 +581,7 @@ export const UserAdd = (props: UserProps) => {
             state.form.phone_number_is_whatsapp
               ? state.form.phone_number
               : state.form.alt_phone_number
-          )?.format("E.164") || "",
+          )?.format("E.164") ?? "",
         date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
         age: Number(moment().diff(state.form.date_of_birth, "years", false)),
         doctor_qualification:
@@ -601,14 +601,12 @@ export const UserAdd = (props: UserProps) => {
       };
 
       const res = await dispatchAction(addUser(data));
-      // userId ? updateUser(userId, data) : addUser(data)
       if (
         res &&
-        (res.data || res.data === "") &&
+        (res.data ?? res.data === "") &&
         res.status >= 200 &&
         res.status < 300
       ) {
-        // const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
           Notification.Success({
@@ -679,7 +677,7 @@ export const UserAdd = (props: UserProps) => {
               label="User Type"
               options={userTypes}
               optionLabel={(o) =>
-                o.role + ((o.readOnly && " (Read Only)") || "")
+                o.role + ((o.readOnly && " (Read Only)") ?? "")
               }
               optionValue={(o) => o.id}
             />
@@ -714,7 +712,7 @@ export const UserAdd = (props: UserProps) => {
             <SelectFormField
               {...field("home_facility")}
               label="Home facility"
-              options={selectedFacility || []}
+              options={selectedFacility ?? []}
               optionLabel={(option) => option.name}
               optionValue={(option) => option.id}
               onChange={handleFieldChange}

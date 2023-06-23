@@ -7,7 +7,7 @@ interface AddCardProps {
   onClick: any;
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((_theme) => ({
   card: {
     background: "#ffffff",
     border: "dashed 1px #333",

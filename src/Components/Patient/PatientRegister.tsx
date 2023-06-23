@@ -73,11 +73,10 @@ import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
 import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
-import { FieldError } from "../Form/Fi1eldValidators";
+import { FieldError } from "../Form/FieldValidators";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import DialogModal from "../Common/Dialog";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-// const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -319,7 +318,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (!careExtId) return;
     const res = await dispatchAction(externalResult({ id: careExtId }));
 
-    if (res && res.data) {
+    if (res?.data) {
       const form = { ...state.form };
       form["name"] = res.data.name ? res.data.name : state.form.name;
       form["address"] = res.data.address
@@ -485,7 +484,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const res = await dispatchAction(
         HCXActions.policies.list({ patient: id })
       );
-      if (res && res.data) {
+      if (res?.data) {
         setInsuranceDetails(res.data.results);
       }
     };
@@ -906,7 +905,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ? updatePatient(data, { id })
           : createPatient({ ...data, facility: facilityId })
       );
-      if (res && res.data && res.status != 400) {
+      if (res?.data && res.status != 400) {
         await Promise.all(
           insuranceDetails.map(async (obj) => {
             const policy = {
@@ -1027,7 +1026,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           phone_number: parsePhoneNumberFromString(phoneNo)?.format("E.164"),
         };
         const res = await dispatchAction(searchPatient(query));
-        if (res && res.data && res.data.results) {
+        if (res?.data?.results) {
           const duplicateList = !id
             ? res.data.results
             : res.data.results.filter(

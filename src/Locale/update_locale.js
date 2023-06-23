@@ -1,6 +1,12 @@
 /* eslint-disable no-undef */
 
-const fs = require("fs");
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  writeFileSync,
+  readFileSync,
+} from "fs";
 
 const DEFAULT_LOCALE = "en";
 
@@ -18,11 +24,11 @@ if (lng === DEFAULT_LOCALE) {
 const defaultEntryFile = readFile(`./${DEFAULT_LOCALE}/index.js`);
 const defaultAllJsonFiles = getAllJSONFiles(DEFAULT_LOCALE);
 
-if (fs.existsSync(lng)) {
+if (existsSync(lng)) {
   const allJsonFiles = getAllJSONFiles(lng);
   compareBothFiles(defaultAllJsonFiles, allJsonFiles);
 } else {
-  fs.mkdirSync(`./${lng}`);
+  mkdirSync(`./${lng}`);
 
   for (const file in defaultAllJsonFiles) {
     const defaultJSON = defaultAllJsonFiles[file];
@@ -51,7 +57,7 @@ function compareBothFiles(defaultFile, newFile) {
 }
 
 function getAllJSONFiles(folderName) {
-  const dir = fs.readdirSync(folderName).filter((e) => e.includes(".json"));
+  const dir = readdirSync(folderName).filter((e) => e.includes(".json"));
   const files = {};
   dir.forEach((file) => {
     try {
@@ -64,8 +70,8 @@ function getAllJSONFiles(folderName) {
 }
 
 function writeFile(name, data) {
-  return fs.writeFileSync(name, data);
+  return writeFileSync(name, data);
 }
 function readFile(name) {
-  return fs.readFileSync(name, { encoding: "utf-8" });
+  return readFileSync(name, { encoding: "utf-8" });
 }
