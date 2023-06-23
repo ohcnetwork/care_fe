@@ -424,10 +424,7 @@ const LiveFeed = (props: any) => {
                 );
               })}
               <div className="pl-3 hideonmobilescreen">
-                <FeedCameraPTZHelpButton
-                  cameraPTZ={cameraPTZ}
-                  tooltipPlacement="top"
-                />
+                <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
               </div>
             </div>
           </div>
