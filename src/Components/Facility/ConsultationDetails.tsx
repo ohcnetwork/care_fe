@@ -95,6 +95,55 @@ export const ConsultationDetails = (props: any) => {
     }
   };
 
+  const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
+  const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
+
+  useEffect(() => {
+    if (
+      !consultationData.facility ||
+      !consultationData.current_bed?.bed_object.id
+    )
+      return;
+
+    const fetchData = async () => {
+      const [facilityRes, assetBedRes] = await Promise.all([
+        dispatch(getPermittedFacility(consultationData.facility as any)),
+        dispatch(
+          listAssetBeds({
+            facility: consultationData.facility as any,
+            bed: consultationData.current_bed?.bed_object.id,
+          })
+        ),
+      ]);
+
+      const { middleware_address } = facilityRes.data as FacilityModel;
+      const assetBeds = assetBedRes.data.results as AssetBedModel[];
+
+      const hl7Meta = assetBeds.find(
+        (i) => i.asset_object.asset_class === AssetClass.HL7MONITOR
+      )?.asset_object?.meta;
+      const hl7Middleware = hl7Meta?.middleware_hostname || middleware_address;
+      if (hl7Middleware && hl7Meta?.local_ip_address) {
+        setHL7SocketUrl(
+          `wss://${hl7Middleware}/observations/${hl7Meta.local_ip_address}`
+        );
+      }
+
+      const ventilatorMeta = assetBeds.find(
+        (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
+      )?.asset_object?.meta;
+      const ventilatorMiddleware =
+        ventilatorMeta?.middleware_hostname || middleware_address;
+      if (ventilatorMiddleware && ventilatorMeta?.local_ip_address) {
+        setVentilatorSocketUrl(
+          `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
+        );
+      }
+    };
+
+    fetchData();
+  }, [consultationData]);
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -443,15 +492,50 @@ export const ConsultationDetails = (props: any) => {
         </div>
         {tab === "UPDATES" && (
           <div className="flex flex-col gap-2">
+            {!consultationData.discharge_date &&
+              hl7SocketUrl &&
+              ventilatorSocketUrl && (
+                <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
+                  <div className="flex flex-col lg:flex-row bg-slate-800 gap-1 justify-between rounded mx-auto">
+                    <div className="flex-1 min-h-[400px]">
+                      <HL7PatientVitalsMonitor socketUrl={hl7SocketUrl} />
+                    </div>
+                    <div className="flex-1 min-h-[400px]">
+                      <VentilatorPatientVitalsMonitor
+                        socketUrl={ventilatorSocketUrl}
+                      />
+                    </div>
+                  </div>
+                </section>
+              )}
             <div className="flex xl:flex-row flex-col">
               <div className="xl:w-2/3 w-full">
                 <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
                 <div className="grid lg:grid-cols-2 gap-4 mt-4">
-                  {!consultationData.discharge_date && (
-                    <section className="lg:col-span-2 bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
-                      <VitalsCard consultation={consultationData} />
-                    </section>
-                  )}
+                  {!consultationData.discharge_date &&
+                    ((hl7SocketUrl && !ventilatorSocketUrl) ||
+                      (!hl7SocketUrl && ventilatorSocketUrl)) && (
+                      <section className="lg:col-span-2 bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
+                        {(hl7SocketUrl || ventilatorSocketUrl) && (
+                          <div className="flex flex-col lg:flex-row bg-slate-800 gap-1 justify-between rounded mx-auto">
+                            {hl7SocketUrl && (
+                              <div className="flex-1 min-h-[400px]">
+                                <HL7PatientVitalsMonitor
+                                  socketUrl={hl7SocketUrl}
+                                />
+                              </div>
+                            )}
+                            {ventilatorSocketUrl && (
+                              <div className="flex-1 min-h-[400px]">
+                                <VentilatorPatientVitalsMonitor
+                                  socketUrl={ventilatorSocketUrl}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </section>
+                    )}
                   {consultationData.discharge_date && (
                     <div
                       className={`bg-white overflow-hidden shadow rounded-lg gap-4 ${
@@ -1144,87 +1228,6 @@ export const ConsultationDetails = (props: any) => {
         show={showDoctors}
         setShow={setShowDoctors}
       />
-    </div>
-  );
-};
-
-const VitalsCard = ({ consultation }: { consultation: ConsultationModel }) => {
-  const dispatch = useDispatch<any>();
-  const [loading, setLoading] = useState(false);
-  const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
-  const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
-
-  useEffect(() => {
-    if (!consultation.facility || !consultation.current_bed?.bed_object.id)
-      return;
-
-    const fetchData = async () => {
-      setLoading(true);
-
-      const [facilityRes, assetBedRes] = await Promise.all([
-        dispatch(getPermittedFacility(consultation.facility as any)),
-        dispatch(
-          listAssetBeds({
-            facility: consultation.facility as any,
-            bed: consultation.current_bed?.bed_object.id,
-          })
-        ),
-      ]);
-
-      const { middleware_address } = facilityRes.data as FacilityModel;
-      const assetBeds = assetBedRes.data.results as AssetBedModel[];
-
-      const hl7Meta = assetBeds.find(
-        (i) => i.asset_object.asset_class === AssetClass.HL7MONITOR
-      )?.asset_object?.meta;
-      const hl7Middleware = hl7Meta?.middleware_hostname || middleware_address;
-      if (hl7Middleware && hl7Meta?.local_ip_address) {
-        setHL7SocketUrl(
-          `wss://${hl7Middleware}/observations/${hl7Meta.local_ip_address}`
-        );
-      }
-
-      const ventilatorMeta = assetBeds.find(
-        (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
-      )?.asset_object?.meta;
-      const ventilatorMiddleware =
-        ventilatorMeta?.middleware_hostname || middleware_address;
-      if (ventilatorMiddleware && ventilatorMeta?.local_ip_address) {
-        setVentilatorSocketUrl(
-          `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
-        );
-      }
-
-      setLoading(false);
-    };
-
-    fetchData();
-  }, [consultation]);
-
-  if (loading) {
-    return <div></div>;
-  }
-
-  if (!hl7SocketUrl && !ventilatorSocketUrl) {
-    return (
-      <span className="sr-only">
-        No HL7 Monitor or Ventilator configured for this patient
-      </span>
-    );
-  }
-
-  return (
-    <div className="w-full flex flex-col bg-slate-800 gap-1 justify-between rounded mx-auto">
-      {hl7SocketUrl && (
-        <div className="flex-1 min-h-[400px]">
-          <HL7PatientVitalsMonitor socketUrl={hl7SocketUrl} />
-        </div>
-      )}
-      {ventilatorSocketUrl && (
-        <div className="flex-1 min-h-[400px]">
-          <VentilatorPatientVitalsMonitor socketUrl={ventilatorSocketUrl} />
-        </div>
-      )}
     </div>
   );
 };
