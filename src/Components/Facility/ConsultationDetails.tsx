@@ -443,15 +443,15 @@ export const ConsultationDetails = (props: any) => {
         </div>
         {tab === "UPDATES" && (
           <div className="flex flex-col gap-2">
-            {!consultationData.discharge_date && (
-              <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
-                <VitalsCard consultation={consultationData} />
-              </section>
-            )}
             <div className="flex xl:flex-row flex-col">
               <div className="xl:w-2/3 w-full">
                 <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
                 <div className="grid lg:grid-cols-2 gap-4 mt-4">
+                  {!consultationData.discharge_date && (
+                    <section className="lg:col-span-2 bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
+                      <VitalsCard consultation={consultationData} />
+                    </section>
+                  )}
                   {consultationData.discharge_date && (
                     <div
                       className={`bg-white overflow-hidden shadow rounded-lg gap-4 ${
@@ -1202,11 +1202,7 @@ const VitalsCard = ({ consultation }: { consultation: ConsultationModel }) => {
   }, [consultation]);
 
   if (loading) {
-    return (
-      <div className="bg-black flex w-full h-full max-h-[400px] justify-center items-center text-center gap-4 rounded">
-        <Loading />
-      </div>
-    );
+    return <div></div>;
   }
 
   if (!hl7SocketUrl && !ventilatorSocketUrl) {
@@ -1218,32 +1214,17 @@ const VitalsCard = ({ consultation }: { consultation: ConsultationModel }) => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row w-full bg-slate-800 gap-1 justify-between min-h-[400px] rounded">
-      <div className="flex-1">
-        {hl7SocketUrl ? (
+    <div className="w-full flex flex-col bg-slate-800 gap-1 justify-between rounded mx-auto">
+      {hl7SocketUrl && (
+        <div className="flex-1 min-h-[400px]">
           <HL7PatientVitalsMonitor socketUrl={hl7SocketUrl} />
-        ) : (
-          <VitalsDeviceNotConfigured device="HL7 Monitor" />
-        )}
-      </div>
-      <div className="flex-1">
-        {ventilatorSocketUrl ? (
+        </div>
+      )}
+      {ventilatorSocketUrl && (
+        <div className="flex-1 min-h-[400px]">
           <VentilatorPatientVitalsMonitor socketUrl={ventilatorSocketUrl} />
-        ) : (
-          <VitalsDeviceNotConfigured device="Ventilator" />
-        )}
-      </div>
-    </div>
-  );
-};
-
-const VitalsDeviceNotConfigured = ({ device }: { device: string }) => {
-  return (
-    <div className="hidden lg:flex flex-col gap-4 bg-black w-full h-full items-center justify-center text-center text-gray-700">
-      <CareIcon className="care-l-sync-exclamation text-4xl text-gray-600" />
-      <span className="font-medium text-xl text-gray-700">
-        No {device} configured for this bed
-      </span>
+        </div>
+      )}
     </div>
   );
 };
