@@ -37,6 +37,11 @@ export const assetClassProps = {
     description: "",
     icon: "monitor-heart-rate",
   },
+  VENTILATOR: {
+    name: "Ventilator",
+    description: "",
+    icon: "lungs",
+  },
   NONE: {
     name: "N/A",
     icon: "box",
