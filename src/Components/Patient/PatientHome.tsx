@@ -868,7 +868,7 @@ export const PatientHome = (props: any) => {
                             >
                               <CareIcon className="care-l-plane-fly mr-2 text-lg" />
                               <dd className="font-bold text-sm leading-5 text-gray-900">
-                                {(shift.orgin_facility_object || {})?.name}
+                                {(shift.origin_facility_object || {})?.name}
                               </dd>
                             </dt>
                           </div>
