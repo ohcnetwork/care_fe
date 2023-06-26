@@ -14,10 +14,12 @@ describe("External Results Filters", () => {
 
   it("Advance Filter", () => {
     cy.get("#local_bodies").click();
-    cy.get("[role='option']").contains("Aluva").click();
+    cy.get("[role='option']").should("be.visible");
+    cy.contains("[role='option']", "Aluva").click();
     cy.get("#local_bodies").click();
     cy.get("#wards").click();
-    cy.get("[role='option']").contains("12").click();
+    cy.get("[role='option']").should("be.visible");
+    cy.contains("[role='option']", "12").click();
     cy.contains("Apply").click();
   });
 

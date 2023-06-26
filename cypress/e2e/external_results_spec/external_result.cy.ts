@@ -42,7 +42,7 @@ describe("Edit Profile Testing", () => {
     cy.get("div").contains("Import/Export").click();
     cy.get("div").contains("Import Results").click();
     cy.get("[id=result-upload]")
-      .selectFile("cypress/fixtures/external-result_sample.csv")
+      .selectFile("cypress/fixtures/externalresultsample.csv")
       .wait(100);
     cy.get("button").contains("Save").click();
     cy.wait("@import").then((interception) => {
