@@ -14,7 +14,7 @@ describe("Resource filter", () => {
 
   it("filter by origin facility", () => {
     cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-    cy.get("[name='orgin_facility']")
+    cy.get("[name='origin_facility']")
       .type("Dummy Facility 1")
       .wait("@facilities_filter");
     cy.get("[role='option']").first().click();
