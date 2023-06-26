@@ -159,6 +159,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               <RelativeDateUserMention
                 actionDate={itemData.created_date}
                 user={itemData.created_by}
+                tooltipPosition="left"
               />
             </div>
           }
@@ -167,6 +168,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             <RelativeDateUserMention
               actionDate={itemData.modified_date}
               user={itemData.last_edited_by}
+              tooltipPosition="left"
             />
           </div>
         </div>
