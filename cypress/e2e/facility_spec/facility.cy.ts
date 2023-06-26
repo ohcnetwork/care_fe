@@ -31,6 +31,8 @@ class facility {
     features,
     address,
     pincode,
+    state,
+    district,
     phone,
     localbody,
     ward,
@@ -56,6 +58,12 @@ class facility {
     cy.get("body").click();
 
     cy.get("input[id=pincode]").should("exist").clear().type(pincode);
+
+    cy.get("[id=state] > div > button").click();
+    cy.get("div").contains(state).click();
+
+    cy.get("[id=district] > div > button").click();
+    cy.get("div").contains(district).click();
 
     cy.get("[id=local_body] > div > button").click();
     cy.get("div").contains(localbody).click();
@@ -125,6 +133,8 @@ describe("Facility", () => {
       name: "cypress facility",
       features: ["CT Scan", "X-Ray"],
       pincode: "682001",
+      state: "Kerala",
+      district: "Ernakulam",
       localbody: "Aikaranad",
       ward: "EZHIPRAM",
       address: "some address",
@@ -170,6 +180,8 @@ describe("Facility", () => {
       name: " update",
       features: ["X-Ray", "Neonatal Care"],
       pincode: "682003",
+      state: "Kerala",
+      district: "Ernakulam",
       localbody: "Alangad",
       ward: "VELIYATHUNADU",
       address: " update",
