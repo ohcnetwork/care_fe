@@ -32,6 +32,8 @@ class facility {
     address,
     pincode,
     phone,
+    state,
+    district,
     localbody,
     ward,
     oxygen_capacity,
@@ -48,21 +50,27 @@ class facility {
     cy.get("[id=facility_type] > div > button").click();
     cy.get("div").contains(type).click();
 
+    cy.get("input[id=pincode]").should("exist").clear().type(pincode);
     cy.get("input[id=name]").should("exist").type(name);
+
+    cy.get("[id=state] > div > button").click();
+    cy.get("div").contains(state).click();
 
     cy.get("[id=features] > div > div > button").click();
     cy.get("li").contains(features[0]).click();
     cy.get("li").contains(features[1]).click();
     cy.get("body").click();
 
-    cy.get("input[id=pincode]").should("exist").clear().type(pincode);
+    cy.get("[id=district] > div > button").click();
+    cy.get("div").contains(district).click();
 
     cy.get("textarea[id=address]").should("exist").type(address);
 
     cy.get("[id=local_body] > div > button").click();
     cy.get("div").contains(localbody).click();
 
-    cy.get("input[name=phone_number]").should("exist").clear().type(phone);
+    cy.get("input[name=phone_number]").clear();
+    cy.get("input[name=phone_number]").type(phone);
 
     cy.get("[id=ward] > div > button").click();
     cy.get("div").contains(ward).click();
@@ -125,6 +133,8 @@ describe("Facility", () => {
       name: "cypress facility",
       features: ["CT Scan", "X-Ray"],
       pincode: "682001",
+      state: "Kerala",
+      district: "Ernakulam",
       localbody: "Aikaranad",
       ward: "EZHIPRAM",
       address: "some address",
@@ -170,6 +180,8 @@ describe("Facility", () => {
       name: " update",
       features: ["X-Ray", "Neonatal Care"],
       pincode: "682003",
+      state: "Kerala",
+      district: "Ernakulam",
       localbody: "Alangad",
       ward: "VELIYATHUNADU",
       address: " update",
