@@ -39,7 +39,8 @@ export default function PhoneNumberFormField(props: Props) {
 
   const setValue = (value: string) => {
     asYouType.reset();
-    field.handleChange(asYouType.input(value));
+    asYouType.input(value);
+    field.handleChange(value);
   };
 
   return (
