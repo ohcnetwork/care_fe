@@ -1,5 +1,5 @@
-// FacilityCreation.cy.ts
-import FacilityPage from "../../pageobject/Facility/Facilitycreation";
+// FacilityCreation
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 
 describe("Facility Creation", () => {
   let facilityUrl: string;
