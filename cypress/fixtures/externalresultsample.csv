@@ -1,0 +1,2 @@
+District,srf id,name,age,age in,gender,mobile number,address,ward,local body,local body type,source,Sample Collection Date,result date,test type,lab name,sample type,patient status,Is Repeat,patient category,result
+Ernakulam,00/EKM/0000,Test Upload,24,years,m,8888888888,Upload test address,7,Poothrikka,grama panchayath,Secondary contact aparna,2020-10-14,2020-10-14,Antigen,Karothukuzhi Laboratory,Ag-SD_Biosensor_Standard_Q_COVID-19_Ag_detection_kit,Asymptomatic,NO,Cat 17: All individuals who wish to get themselves tested,Negative
