@@ -2,7 +2,7 @@ import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 
 const username = "devdistrictadmin";
 const password = "Coronasafe@123";
-const phone_number = "9" + parseInt((Math.random() * 10 ** 9).toString());
+const phone_number = "9" + Math.floor(100000000 + Math.random() * 900000000);
 const emergency_phone_number = "9430123487";
 const yearOfBirth = "2023";
 let patient_url = "";
@@ -29,7 +29,7 @@ describe("Patient Creation with consultation", () => {
     cy.get("input[name='facilities']")
       .type("cypress facility")
       .then(() => {
-        cy.get("[role='option']").contains("cypress facility").click();
+        cy.get("[role='option']").first().click();
       });
     cy.get("button").should("contain", "Select");
     cy.get("button").get("#submit").click();
@@ -95,13 +95,62 @@ describe("Patient Creation with consultation", () => {
 
   it("Edit the patient details", () => {
     cy.awaitUrl(patient_url + "/update");
-    cy.get("[data-testid=name] input").clear().type("Test E2E User Editted");
+    cy.get("[data-testid=name] input").clear();
+    cy.get("[data-testid=name] input").type("Test E2E User Edited");
+    cy.get("#emergency_phone_number-div")
+      .clear()
+      .then(() => {
+        cy.get("#emergency_phone_number__country").select("IN");
+      });
+    cy.get("#emergency_phone_number-div").type("9120330220");
+    cy.get("#address").clear().type("Test Patient Address Edited");
+    cy.get("#present_health").type("Severe Cough");
+    cy.get("#ongoing_medication").type("Paracetamol");
+    cy.get("#allergies").type("Dust");
+    cy.get("[name=medical_history_check_1]").uncheck();
+    cy.get("[name=medical_history_check_2]").check();
+    cy.get("#medical_history_2").type("2 months ago");
+    cy.get("[name=medical_history_check_3]").check();
+    cy.get("#medical_history_3").type("1 month ago");
+    cy.get("button").get("[data-testid=add-insurance-button]").click();
+    cy.get("#subscriber_id").type("SUB123");
+    cy.get("#policy_id").type("P123");
+    cy.get("#insurer_id").type("GICOFINDIA");
+    cy.get("#insurer_name").type("GICOFINDIA");
     cy.get("button").get("[data-testid=submit-button]").click();
     cy.url().should("include", "/patient");
     cy.url().then((url) => {
       cy.log(url);
       patient_url = url.split("/").slice(0, -1).join("/");
       cy.log(patient_url);
+    });
+  });
+
+  it("Patient Detail verification post edit", () => {
+    cy.log(patient_url);
+    cy.awaitUrl(patient_url);
+    cy.url().should("include", "/facility/");
+    cy.get("[data-testid=patient-dashboard]").should(
+      "contain",
+      "Test E2E User Edited"
+    );
+    cy.get("[data-testid=patient-dashboard]").should(
+      "contain",
+      "+919120330220"
+    );
+    const patientDetails_values: string[] = [
+      "Test Patient Address Edited",
+      "Severe Cough",
+      "Paracetamol",
+      "Dust",
+      "Diabetes",
+      "2 months ago",
+      "Heart Disease",
+      "1 month ago",
+    ];
+
+    patientDetails_values.forEach((value) => {
+      cy.get("[data-testid=patient-details]").should("contain", value);
     });
   });
 

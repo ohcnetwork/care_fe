@@ -28,7 +28,6 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { LocationSelect } from "../Common/LocationSelect";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -95,7 +94,6 @@ type AssetFormSection =
 
 const AssetCreate = (props: AssetProps) => {
   const { goBack } = useAppHistory();
-  const { t } = useTranslation();
   const { facilityId, assetId } = props;
 
   let assetTypeInitial: AssetType;
@@ -540,10 +538,10 @@ const AssetCreate = (props: AssetProps) => {
                           setLocation((selectedId as string) || "")
                         }
                         selected={location}
-                        errors=""
                         showAll={false}
                         multiple={false}
                         facilityId={facilityId as unknown as number}
+                        errors={state.errors.location}
                       />
                     </div>
                     {/* Asset Type */}
@@ -588,7 +586,6 @@ const AssetCreate = (props: AssetProps) => {
                       >
                         <SelectFormField
                           disabled={!!(props.assetId && asset_class)}
-                          placeholder={props.assetId ? t("none") : undefined}
                           name="asset_class"
                           label="Asset Class"
                           value={asset_class}
@@ -597,6 +594,10 @@ const AssetCreate = (props: AssetProps) => {
                             {
                               title: "HL7 Vitals Monitor",
                               value: AssetClass.HL7MONITOR,
+                            },
+                            {
+                              title: "Ventilator",
+                              value: AssetClass.VENTILATOR,
                             },
                           ]}
                           optionLabel={({ title }) => title}
