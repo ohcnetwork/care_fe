@@ -2,7 +2,7 @@ import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 
 const username = "devdistrictadmin";
 const password = "Coronasafe@123";
-const phone_number = "9" + parseInt((Math.random() * 10 ** 9).toString());
+const phone_number = "9" + Math.floor(100000000 + Math.random() * 900000000);
 const emergency_phone_number = "9430123487";
 const yearOfBirth = "2023";
 let patient_url = "";
@@ -29,7 +29,7 @@ describe("Patient Creation with consultation", () => {
     cy.get("input[name='facilities']")
       .type("cypress facility")
       .then(() => {
-        cy.get("[role='option']").contains("cypress facility").click();
+        cy.get("[role='option']").first().click();
       });
     cy.get("button").should("contain", "Select");
     cy.get("button").get("#submit").click();
