@@ -4,12 +4,11 @@ import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getMinQuantity, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
-import { navigate } from "raviger";
-import { RoleButton } from "../Common/RoleButton";
 import { MinQuantityRequiredModal } from "./MinQuantityRequiredModal";
 import ButtonV2 from "../Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function MinQuantityList(props: any) {
   const { facilityId }: any = props;
@@ -92,7 +91,7 @@ export default function MinQuantityList(props: any) {
             }}
           >
             <div className="sm:hidden flex justify-between items-center w-full">
-              <div className="flex flex-col">
+              <div className="flex flex-col text-start">
                 <p className="text-gray-900 whitespace-nowrap font-semibold">
                   {inventoryItem.item_object?.name}
                 </p>
@@ -126,25 +125,21 @@ export default function MinQuantityList(props: any) {
             {inventoryItem.min_quantity}{" "}
             {inventoryItem.item_object?.default_unit?.name}
           </p>
-          <RoleButton
-            className=" bg-primary-500 hover:bg-primary-600 text-white"
-            materialButtonProps={{
-              variant: "contained",
-              color: "primary",
-              size: "medium",
-            }}
-            handleClickCB={() => {
+          <ButtonV2
+            variant="secondary"
+            ghost
+            border
+            onClick={() => {
               setSelectedItem({
                 id: inventoryItem.id,
                 item_id: inventoryItem.item_object?.id,
               });
               setShowMinQuantityRequiredModal(true);
             }}
-            disableFor="readOnly"
-            buttonType="materialUI"
+            authorizeFor={NonReadOnlyUsers}
           >
-            UPDATE
-          </RoleButton>
+            Update
+          </ButtonV2>
         </td>
       </tr>
     ));
@@ -207,39 +202,29 @@ export default function MinQuantityList(props: any) {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Minimum Quantity Required"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          min_quantity: {
-            name: "Min Quantity",
-            uri: `/facility/${facilityId}/inventory/min_quantity/list`,
-          },
-          list: {
-            style: "pointer-events-none",
-          },
-        }}
-        backUrl={`/facility/${facilityId}/inventory`}
-      />
+    <Page
+      title="Minimum Quantity Required"
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        min_quantity: {
+          name: "Min Quantity",
+          uri: `/facility/${facilityId}/inventory/min_quantity/list`,
+        },
+        list: {
+          style: "pointer-events-none",
+        },
+      }}
+      backUrl={`/facility/${facilityId}/inventory`}
+    >
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8">
-          <RoleButton
+          <ButtonV2
             className="ml-2"
-            materialButtonProps={{
-              variant: "contained",
-              color: "primary",
-              size: "small",
-            }}
-            handleClickCB={() =>
-              navigate(`/facility/${facilityId}/inventory/min_quantity/set`)
-            }
-            disableFor="readOnly"
-            buttonType="materialUI"
+            href={`/facility/${facilityId}/inventory/min_quantity/set`}
+            authorizeFor={NonReadOnlyUsers}
           >
             Set Min Quantity
-          </RoleButton>
+          </ButtonV2>
           {inventoryItem}
         </div>
       </div>
@@ -256,6 +241,6 @@ export default function MinQuantityList(props: any) {
           }}
         />
       )}
-    </div>
+    </Page>
   );
 }

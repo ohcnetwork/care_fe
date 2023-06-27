@@ -14,6 +14,7 @@ import { Submit } from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
+import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
 
 interface HL7MonitorProps {
   assetId: string;
@@ -115,15 +116,22 @@ const HL7Monitor = (props: HL7MonitorProps) => {
             </form>
           </Card>
           <Card>
-            {assetType === "HL7MONITOR" && (
+            {["HL7MONITOR", "VENTILATOR"].includes(assetType) && (
               <MonitorConfigure asset={asset as AssetData} />
             )}
           </Card>
         </div>
 
-        <HL7PatientVitalsMonitor
-          socketUrl={`wss://${middleware}/observations/${localipAddress}`}
-        />
+        {assetType === "HL7MONITOR" && (
+          <HL7PatientVitalsMonitor
+            socketUrl={`wss://${middleware}/observations/${localipAddress}`}
+          />
+        )}
+        {assetType === "VENTILATOR" && (
+          <VentilatorPatientVitalsMonitor
+            socketUrl={`wss://${middleware}/observations/${localipAddress}`}
+          />
+        )}
       </div>
     </div>
   );

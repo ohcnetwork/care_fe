@@ -913,6 +913,7 @@ export const FileUpload = (props: FileUploadProps) => {
           setFile(null);
           setUploadFileName("");
           setReload(!reload);
+          fetchData({ aborted: false });
           Notification.Success({
             msg: "File Uploaded Successfully",
           });

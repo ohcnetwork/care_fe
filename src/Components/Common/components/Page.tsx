@@ -18,7 +18,7 @@ export default function Page(props: PageProps) {
   }
 
   return (
-    <div className={`${padding} ${props.className}`} ref={props.ref}>
+    <div className={`${padding} ${props.className || ""}`} ref={props.ref}>
       <div className="flex flex-col md:flex-row justify-between md:items-center md:gap-6 gap-2">
         <PageTitle
           title={props.title}
