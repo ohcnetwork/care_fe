@@ -163,7 +163,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       const data = {
         category: "OXYGEN",
         status: state.form.status,
-        orgin_facility: state.form.orgin_facility_object?.id,
+        origin_facility: state.form.origin_facility_object?.id,
         approving_facility: state.form?.approving_facility_object?.id,
         assigned_facility: state.form?.assigned_facility_object?.id,
         emergency: [true, "true"].includes(state.form.emergency),

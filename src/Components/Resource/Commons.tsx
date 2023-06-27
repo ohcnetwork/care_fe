@@ -1,7 +1,7 @@
 export const initialFilterData = {
   status: "--",
   facility: "",
-  orgin_facility: "",
+  origin_facility: "",
   approving_facility: "",
   assigned_facility: "",
   emergency: "--",
@@ -19,7 +19,7 @@ export const formatFilter = (params: any) => {
   return {
     status: filter.status === "--" ? null : filter.status,
     facility: "",
-    orgin_facility: filter.orgin_facility || undefined,
+    origin_facility: filter.origin_facility || undefined,
     approving_facility: filter.approving_facility || undefined,
     assigned_facility: filter.assigned_facility || undefined,
     emergency:
