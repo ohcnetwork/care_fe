@@ -14,11 +14,11 @@ describe("Shifting section filter", () => {
 
   it("filter by origin facility", () => {
     cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-    cy.get("[name='orgin_facility']")
+    cy.get("[name='origin_facility']")
       .wait(100)
       .type("Dummy")
       .wait("@facilities_filter");
-    cy.get("[name='orgin_facility']").wait(100).type("{downarrow}{enter}");
+    cy.get("[name='origin_facility']").wait(100).type("{downarrow}{enter}");
     cy.contains("Apply").click();
   });
 
