@@ -1,4 +1,4 @@
-// FacilityCreation.spec.ts
+// FacilityCreation.cy.ts
 import FacilityPage from "../../pageobject/Facility/Facilitycreation";
 
 describe("Facility Creation", () => {
