@@ -413,7 +413,7 @@ const LiveFeed = (props: any) => {
                   >
                     <span className="sr-only">{option.label}</span>
                     {option.icon ? (
-                      <i className={`fas fa-${option.icon} md:p-2`}></i>
+                      <CareIcon className={`care-${option.icon}`} />
                     ) : (
                       <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
                         {option.value}x
@@ -424,10 +424,7 @@ const LiveFeed = (props: any) => {
                 );
               })}
               <div className="pl-3 hideonmobilescreen">
-                <FeedCameraPTZHelpButton
-                  cameraPTZ={cameraPTZ}
-                  tooltipPlacement="top"
-                />
+                <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
               </div>
             </div>
           </div>

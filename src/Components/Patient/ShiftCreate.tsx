@@ -57,13 +57,13 @@ export const ShiftCreate = (props: patientShiftProps) => {
     vehicle_preference: "",
     comments: "",
     refering_facility_contact_name: "",
-    refering_facility_contact_number: "",
+    refering_facility_contact_number: "+91",
     assigned_facility_type: null,
     preferred_vehicle_choice: null,
     breathlessness_level: null,
     patient_category: "",
     ambulance_driver_name: "",
-    ambulance_phone_number: "",
+    ambulance_phone_number: undefined,
     ambulance_number: "",
   };
 
@@ -201,7 +201,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
       const data = {
         status: wartime_shifting ? "PENDING" : "APPROVED",
-        orgin_facility: props.facilityId,
+        origin_facility: props.facilityId,
         shifting_approving_facility: (
           state.form.shifting_approving_facility || {}
         ).id,

@@ -12,14 +12,14 @@ export default function BadgesList(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (!appliedFilters.orgin_facility) return setOrginFacilityName("");
+      if (!appliedFilters.origin_facility) return setOrginFacilityName("");
       const res = await dispatch(
-        getAnyFacility(appliedFilters.orgin_facility, "orgin_facility")
+        getAnyFacility(appliedFilters.origin_facility, "origin_facility")
       );
       setOrginFacilityName(res?.data?.name);
     }
     fetchData();
-  }, [dispatch, appliedFilters.orgin_facility]);
+  }, [dispatch, appliedFilters.origin_facility]);
 
   useEffect(() => {
     async function fetchData() {
@@ -69,7 +69,7 @@ export default function BadgesList(props: any) {
         }),
         ...dateRange("Modified", "modified_date"),
         ...dateRange("Created", "created_date"),
-        value("Origin facility", "orgin_facility", orginFacilityName),
+        value("Origin facility", "origin_facility", orginFacilityName),
         value(
           "Approving facility",
           "approving_facility",
