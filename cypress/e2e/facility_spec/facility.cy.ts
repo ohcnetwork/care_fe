@@ -17,7 +17,7 @@ describe("Facility Creation", () => {
 
   it("Create a new facility", () => {
     facilityPage.visitCreateFacilityPage();
-    facilityPage.fillFacilityName("Cypress Facility");
+    facilityPage.fillFacilityName("cypress facility");
     facilityPage.fillPincode("682001");
     facilityPage.selectState("Kerala");
     facilityPage.selectDistrict("Ernakulam");
@@ -50,7 +50,7 @@ describe("Facility Creation", () => {
     facilityPage.visitUpdateFacilityPage(facilityUrl);
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickUpdateFacilityOption();
-    facilityPage.fillFacilityName("Cypress Facility Updated");
+    facilityPage.fillFacilityName("cypress facility updated");
     facilityPage.fillAddress("Cypress Facility Updated Address");
     facilityPage.fillOxygenCapacity("100");
     facilityPage.fillExpectedOxygenRequirement("80");

@@ -40,7 +40,7 @@ describe("User management", () => {
       .click()
       .type("cypress facility")
       .wait("@facility");
-    cy.get("li[role='option']").contains("cypress facility").click();
+    cy.get("li[role='option']").first().click();
     cy.get("input[type='checkbox']").click();
     cy.get("[name='phone_number']").type(phone_number);
     cy.get("[name='alt_phone_number']").type(alt_phone_number);
@@ -106,7 +106,7 @@ describe("User management", () => {
       .click()
       .type("cypress facility")
       .wait("@getFacilities");
-    cy.get("li[role='option']").contains("cypress facility").click();
+    cy.get("li[role='option']").first().click();
     cy.intercept(/\/api\/v1\/users\/\w+\/add_facility\//).as("addFacility");
     cy.get("button[id='link-facility']").click();
     cy.wait("@addFacility")

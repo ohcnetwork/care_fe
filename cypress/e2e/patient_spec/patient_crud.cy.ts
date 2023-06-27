@@ -29,7 +29,7 @@ describe("Patient Creation with consultation", () => {
     cy.get("input[name='facilities']")
       .type("cypress facility")
       .then(() => {
-        cy.get("[role='option']").contains("cypress facility").click();
+        cy.get("[role='option']").first().click();
       });
     cy.get("button").should("contain", "Select");
     cy.get("button").get("#submit").click();
