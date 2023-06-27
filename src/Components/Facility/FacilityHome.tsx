@@ -1,12 +1,7 @@
 import { navigate } from "raviger";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import loadable from "@loadable/component";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
 import {
   DOCTOR_SPECIALIZATION,
   FACILITY_FEATURE_TYPES,
@@ -45,8 +40,9 @@ import useConfig from "../../Common/hooks/useConfig";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
@@ -338,44 +334,25 @@ export const FacilityHome = (props: any) => {
   );
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={facilityData.name || "Facility"}
-        crumbsReplacements={{ [facilityId]: { name: facilityData.name } }}
-        focusOnLoad={true}
-        backUrl="/facility"
-      />
-      <Dialog
-        maxWidth={"md"}
-        open={openDeleteDialog}
+    <Page
+      title={facilityData.name || "Facility"}
+      crumbsReplacements={{ [facilityId]: { name: facilityData.name } }}
+      focusOnLoad={true}
+      backUrl="/facility"
+    >
+      <ConfirmDialogV2
+        title={`Delete ${facilityData.name}`}
+        description={
+          <span>
+            Are you sure you want to delete <strong>{facilityData.name}</strong>
+          </span>
+        }
+        action="Delete"
+        variant="danger"
+        show={openDeleteDialog}
         onClose={handleDeleteClose}
-      >
-        <DialogTitle className="flex justify-center bg-red-100">
-          Are you sure you want to delete {facilityData.name || "Facility"}?
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            You will not be able to access this facility after it is deleted.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <div className="flex flex-col md:flex-row gap-2 w-full justify-between">
-            <button
-              onClick={handleDeleteClose}
-              className="btn btn-primary w-full md:w-auto"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleDeleteSubmit}
-              id="facility-delete-confirm"
-              className="btn btn-danger w-full md:w-auto"
-            >
-              Delete
-            </button>
-          </div>
-        </DialogActions>
-      </Dialog>
+        onConfirm={handleDeleteSubmit}
+      />
       <CoverImageEditModal
         open={editCoverImage}
         onSave={() =>
@@ -624,7 +601,7 @@ export const FacilityHome = (props: any) => {
               </DropdownMenu>
             </div>
             <div className="flex flex-col justify-end">
-              <ButtonV2
+              {/* <ButtonV2
                 variant="primary"
                 ghost
                 border
@@ -633,7 +610,7 @@ export const FacilityHome = (props: any) => {
               >
                 <CareIcon className="care-l-monitor-heart-rate text-lg" />
                 <span>Central Nursing Station</span>
-              </ButtonV2>
+              </ButtonV2> */}
               <ButtonV2
                 variant="primary"
                 ghost
@@ -804,6 +781,6 @@ export const FacilityHome = (props: any) => {
           />
         </DialogModal>
       )}
-    </div>
+    </Page>
   );
 };

@@ -538,10 +538,10 @@ const AssetCreate = (props: AssetProps) => {
                           setLocation((selectedId as string) || "")
                         }
                         selected={location}
-                        errors=""
                         showAll={false}
                         multiple={false}
                         facilityId={facilityId as unknown as number}
+                        errors={state.errors.location}
                       />
                     </div>
                     {/* Asset Type */}
@@ -585,6 +585,7 @@ const AssetCreate = (props: AssetProps) => {
                         data-testid="asset-class-input"
                       >
                         <SelectFormField
+                          disabled={!!(props.assetId && asset_class)}
                           name="asset_class"
                           label="Asset Class"
                           value={asset_class}

@@ -62,7 +62,7 @@ export default function ListView() {
   }, [
     qParams.status,
     qParams.facility,
-    qParams.orgin_facility,
+    qParams.origin_facility,
     qParams.approving_facility,
     qParams.assigned_facility,
     qParams.emergency,
@@ -122,7 +122,7 @@ export default function ListView() {
                   >
                     <i className="fas fa-plane-departure mr-2"></i>
                     <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {(resource.orgin_facility_object || {}).name}
+                      {(resource.origin_facility_object || {}).name}
                     </dd>
                   </dt>
                 </div>
