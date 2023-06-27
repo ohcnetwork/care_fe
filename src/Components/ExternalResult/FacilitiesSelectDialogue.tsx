@@ -36,6 +36,7 @@ const FacilitiesSelectDialog = (props: Props) => {
           onClick={handleOk}
           disabled={!selectedFacility.id}
           label={t("select")}
+          data-testid="submit-button"
         />
       </div>
     </DialogModal>

@@ -120,7 +120,7 @@ export default function ShiftDetails(props: { id: string }) {
       "\n" +
       t("origin_facility") +
       ":" +
-      data?.orgin_facility_object?.name +
+      data?.origin_facility_object?.name +
       "\n" +
       t("contact_number") +
       ":" +
@@ -352,7 +352,7 @@ export default function ShiftDetails(props: { id: string }) {
             </span>
             {data.is_kasp
               ? t("district_program_management_supporting_unit")
-              : data.orgin_facility_object?.name || "--"}
+              : data.origin_facility_object?.name || "--"}
             {/*  Made static based on #757 */}
           </div>
           <div className="font-bold text-xl text-center mt-6">
@@ -618,7 +618,7 @@ export default function ShiftDetails(props: { id: string }) {
                 <span className="font-semibold leading-relaxed">
                   {t("origin_facility")}:{" "}
                 </span>
-                {data.orgin_facility_object?.name || "--"}
+                {data.origin_facility_object?.name || "--"}
               </div>
               {wartime_shifting && (
                 <div>
@@ -856,7 +856,7 @@ export default function ShiftDetails(props: { id: string }) {
               <div>
                 <h4 className="mt-8">{t("details_of_origin_facility")}</h4>
 
-                {showFacilityCard(data.orgin_facility_object)}
+                {showFacilityCard(data.origin_facility_object)}
               </div>
               {!data.assigned_facility_external && (
                 <div>

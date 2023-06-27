@@ -35,7 +35,7 @@ export default function CollapseV2(props: {
       }
     >
       <div
-        className={`transition-all ease-in-out duration-300 overflow-hidden ${
+        className={`transition-all ease-in-out duration-300 ${
           props.className ? props.className : ""
         }`}
         ref={content}
