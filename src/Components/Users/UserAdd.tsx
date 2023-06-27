@@ -2,7 +2,7 @@ import loadable from "@loadable/component";
 import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import moment from "moment";
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   GENDER_TYPES,
@@ -41,6 +41,7 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import Page from "../Common/components/Page";
 import Card from "../../CAREUI/display/Card";
 import CircularProgress from "../Common/components/CircularProgress";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -66,6 +67,7 @@ type UserForm = {
   email: string;
   phone_number: string;
   alt_phone_number: string;
+  phone_number_is_whatsapp: boolean;
   age: number;
   date_of_birth: Date | null;
   state: number;
@@ -89,6 +91,7 @@ const initForm: UserForm = {
   email: "",
   phone_number: "+91",
   alt_phone_number: "+91",
+  phone_number_is_whatsapp: true,
   age: 0,
   date_of_birth: null,
   state: 0,
@@ -123,6 +126,10 @@ const user_create_reducer = (state = initialState, action: any) => {
         errors: action.errors,
       };
     }
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
+    }
     default:
       return state;
   }
@@ -156,7 +163,10 @@ export const UserAdd = (props: UserProps) => {
   const dispatchAction: any = useDispatch();
   const { userId } = props;
 
-  const [state, dispatch] = useReducer(user_create_reducer, initialState);
+  const [state, dispatch] = useAutoSaveReducer(
+    user_create_reducer,
+    initialState
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
@@ -168,7 +178,6 @@ export const UserAdd = (props: UserProps) => {
   const [districts, setDistricts] = useState<StateObj[]>([]);
   const [localBodies, setLocalBodies] = useState<StateObj[]>([]);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel[]>([]);
-  const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
   const [passwordInputInFocus, setPasswordInputInFocus] = useState(false);
   const [confirmPasswordInputInFocus, setConfirmPasswordInputInFocus] =
@@ -363,18 +372,13 @@ export const UserAdd = (props: UserProps) => {
   };
 
   useAbortableEffect(() => {
-    if (phoneIsWhatsApp) {
+    if (state.form.phone_number_is_whatsapp) {
       handleFieldChange({
         name: "alt_phone_number",
         value: state.form.phone_number,
       });
-    } else {
-      handleFieldChange({
-        name: "alt_phone_number",
-        value: "+91",
-      });
     }
-  }, [phoneIsWhatsApp, state.form.phone_number]);
+  }, [state.form.phone_number_is_whatsapp, state.form.phone_number]);
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     setSelectedFacility(selected as FacilityModel[]);
@@ -573,9 +577,11 @@ export const UserAdd = (props: UserProps) => {
           state.form.phone_number
         )?.format("E.164"),
         alt_phone_number:
-          parsePhoneNumberFromString(state.form.alt_phone_number)?.format(
-            "E.164"
-          ) || "",
+          parsePhoneNumberFromString(
+            state.form.phone_number_is_whatsapp
+              ? state.form.phone_number
+              : state.form.alt_phone_number
+          )?.format("E.164") || "",
         date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
         age: Number(moment().diff(state.form.date_of_birth, "years", false)),
         doctor_qualification:
@@ -649,6 +655,12 @@ export const UserAdd = (props: UserProps) => {
     >
       <Card>
         <form onSubmit={(e) => handleSubmit(e)}>
+          <DraftSection
+            handleDraftSelect={(newState) => {
+              dispatch({ type: "set_state", state: newState });
+            }}
+            formData={state.form}
+          />
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
             <div className="md:col-span-2">
               <FieldLabel>Facilities</FieldLabel>
@@ -717,8 +729,13 @@ export const UserAdd = (props: UserProps) => {
                 disableCountry
               />
               <Checkbox
-                checked={phoneIsWhatsApp}
-                onCheck={setPhoneIsWhatsApp}
+                checked={state.form.phone_number_is_whatsapp}
+                onCheck={(checked) => {
+                  handleFieldChange({
+                    name: "phone_number_is_whatsapp",
+                    value: checked,
+                  });
+                }}
                 label="Is the phone number a WhatsApp number?"
               />
             </div>
@@ -727,7 +744,7 @@ export const UserAdd = (props: UserProps) => {
               {...field("alt_phone_number")}
               placeholder="WhatsApp Phone Number"
               label="Whatsapp Number"
-              disabled={phoneIsWhatsApp}
+              disabled={state.form.phone_number_is_whatsapp}
               disableCountry
             />
 

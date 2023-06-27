@@ -11,6 +11,7 @@ export interface FilterBadgeProps {
 const FilterBadge = ({ name, value, onRemove }: FilterBadgeProps) => {
   return (
     <span
+      data-testid={name}
       className={`${
         !value && "hidden"
       } flex flex-row items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white border border-gray-300 text-gray-600`}

@@ -1,14 +1,15 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { listFacilityAssetLocation, getAnyFacility } from "../../Redux/actions";
-import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
-import { RoleButton } from "../Common/RoleButton";
 import { LocationModel } from "./models";
 import { ReactElement } from "react";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import ButtonV2 from "../Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
 interface LocationManagementProps {
@@ -36,33 +37,26 @@ const LocationRow = (props: LocationRowProps) => {
           <p className="text-sm break-all lg:w-3/4">{description}</p>
         </div>
       </div>
-      <div className="sm:flex">
-        <div className="px-2 py-2 w-full">
-          <RoleButton
-            className="btn btn-default bg-white w-full"
-            handleClickCB={() =>
-              navigate(`/facility/${facilityId}/location/${id}/update`)
-            }
-            disableFor="readOnly"
-            buttonType="html"
-          >
-            <i className="fas fa-pencil-alt w-4 mr-2"></i>
-            Edit
-          </RoleButton>
-        </div>
-        <div className="px-2 py-2 w-full">
-          <RoleButton
-            className="btn btn-default bg-white w-full"
-            handleClickCB={() =>
-              navigate(`/facility/${facilityId}/location/${id}/beds`)
-            }
-            disableFor="readOnly"
-            buttonType="html"
-          >
-            <i className="fas fa-bed-pulse w-4 mr-2"></i>
-            Manage Beds
-          </RoleButton>
-        </div>
+      <div className="flex flex-col lg:flex-row gap-2 mt-4 lg:mt-0">
+        <ButtonV2
+          variant="secondary"
+          border
+          className="w-full lg:w-auto"
+          href={`/facility/${facilityId}/location/${id}/update`}
+          authorizeFor={NonReadOnlyUsers}
+        >
+          <CareIcon className="care-l-pen text-lg" />
+          Edit
+        </ButtonV2>
+        <ButtonV2
+          variant="secondary"
+          border
+          className="w-full lg:w-auto"
+          href={`/facility/${facilityId}/location/${id}/beds`}
+        >
+          <CareIcon className="care-l-bed text-lg" />
+          Manage Beds
+        </ButtonV2>
       </div>
     </div>
   );
@@ -160,29 +154,23 @@ export const LocationManagement = (props: LocationManagementProps) => {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Location Management"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
-        backUrl={`/facility/${facilityId}`}
-      />
+    <Page
+      title="Location Management"
+      crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+      backUrl={`/facility/${facilityId}`}
+    >
       <div className="container mx-auto px-4 py-2 sm:px-8">
         <div className="flex justify-end">
-          <RoleButton
-            className="px-4 py-1 rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
-            handleClickCB={() =>
-              navigate(`/facility/${facilityId}/location/add`)
-            }
-            disableFor="readOnly"
-            buttonType="html"
+          <ButtonV2
+            href={`/facility/${facilityId}/location/add`}
+            authorizeFor={NonReadOnlyUsers}
           >
-            <i className="fas fa-plus mr-2"></i>
+            <CareIcon className="care-l-plus text-lg" />
             Add New Location
-          </RoleButton>
+          </ButtonV2>
         </div>
         {location}
       </div>
-    </div>
+    </Page>
   );
 };
