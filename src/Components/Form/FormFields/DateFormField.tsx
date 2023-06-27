@@ -35,7 +35,11 @@ const DateFormField = (props: Props) => {
         className={classNames(field.error && "border-red-500")}
         id={field.id}
         name={field.name}
-        value={field.value}
+        value={
+          field.value && typeof field.value === "string"
+            ? new Date(field.value)
+            : field.value
+        }
         onChange={field.handleChange}
         disabled={field.disabled}
         max={props.max || (props.disableFuture ? new Date() : undefined)}

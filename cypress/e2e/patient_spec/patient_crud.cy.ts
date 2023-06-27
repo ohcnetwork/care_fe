@@ -95,7 +95,8 @@ describe("Patient Creation with consultation", () => {
 
   it("Edit the patient details", () => {
     cy.awaitUrl(patient_url + "/update");
-    cy.get("[data-testid=name] input").clear().type("Test E2E User Edited");
+    cy.get("[data-testid=name] input").clear();
+    cy.get("[data-testid=name] input").type("Test E2E User Edited");
     cy.get("#emergency_phone_number-div")
       .clear()
       .then(() => {
