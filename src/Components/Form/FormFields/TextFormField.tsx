@@ -1,18 +1,15 @@
-import React, { useState } from "react";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import React, { HTMLInputTypeAttribute, useState } from "react";
+
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { classNames } from "../../../Utils/utils";
 import FormField from "./FormField";
-import {
-  FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
-  resolveFormFieldError,
-} from "./Utils";
+import { classNames } from "../../../Utils/utils";
 
 export type TextFormFieldProps = FormFieldBaseProps<string> & {
   placeholder?: string;
   value?: string | number;
   autoComplete?: string;
-  type?: "email" | "password" | "search" | "text" | "number";
+  type?: HTMLInputTypeAttribute;
   className?: string | undefined;
   inputClassName?: string | undefined;
   removeDefaultClasses?: true | undefined;
@@ -20,22 +17,22 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   trailing?: React.ReactNode | undefined;
   leadingFocused?: React.ReactNode | undefined;
   trailingFocused?: React.ReactNode | undefined;
+  trailingPadding?: string | undefined;
+  leadingPadding?: string | undefined;
   min?: string | number;
   max?: string | number;
-  onFocus?: () => void;
-  onBlur?: () => void;
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
 };
 
 const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-  const error = resolveFormFieldError(props);
-  const borderColor = error ? "border-red-500" : "border-gray-200";
-
+  const field = useFormFieldPropsResolver(props as any);
   const { leading, trailing } = props;
   const leadingFocused = props.leadingFocused || props.leading;
   const trailingFocused = props.trailingFocused || props.trailing;
-  const hasIcon = !!(leading || trailing || leadingFocused || trailingFocused);
-  const padding = `py-3 ${hasIcon ? "px-8" : "px-3"}`;
+  const hasLeading = !!(leading || leadingFocused);
+  const hasTrailing = !!(trailing || trailingFocused);
+  const hasIcon = hasLeading || hasTrailing;
   const [showPassword, setShowPassword] = useState(false);
 
   const getPasswordFieldType = () => {
@@ -45,28 +42,26 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
   let child = (
     <input
       ref={ref as any}
-      id={props.id}
+      id={field.id}
       className={classNames(
-        props.inputClassName,
-        props.removeDefaultClasses
-          ? props.className
-          : `peer text-sm block ${padding} w-full rounded placeholder:text-gray-500 bg-gray-200 focus:bg-white border-2 focus:border-primary-400 outline-none ring-0 transition-all duration-200 ease-in-out ${borderColor} ${props.className}`
+        "cui-input-base peer",
+        hasLeading && (props.leadingPadding || "pl-10"),
+        hasTrailing && (props.trailingPadding || "pr-10"),
+        field.error && "border-danger-500",
+        field.className
       )}
-      disabled={props.disabled}
+      disabled={field.disabled}
       type={props.type === "password" ? getPasswordFieldType() : props.type}
       placeholder={props.placeholder}
-      name={props.name}
-      value={props.value}
+      name={field.name}
+      value={field.value}
       min={props.min}
       max={props.max}
       autoComplete={props.autoComplete}
-      required={props.required}
-      onChange={(event) => {
-        event.preventDefault();
-        handleChange(event.target);
-      }}
+      required={field.required}
       onFocus={props.onFocus}
       onBlur={props.onBlur}
+      onChange={(e) => field.handleChange(e.target.value)}
     />
   );
 
@@ -76,7 +71,7 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
         {child}
         <button
           type="button"
-          className="absolute right-0 top-0 h-full flex items-center px-3 z-10 text-xl"
+          className="absolute right-0 top-0 h-full flex items-center px-3 z-5 text-xl"
           onClick={() => setShowPassword(!showPassword)}
         >
           <CareIcon className={`care-l-eye${showPassword ? "" : "-slash"}`} />
@@ -126,7 +121,7 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
     );
   }
 
-  return <FormField props={props}>{child}</FormField>;
+  return <FormField field={field}>{child}</FormField>;
 });
 
 export default TextFormField;

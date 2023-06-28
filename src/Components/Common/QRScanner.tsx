@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { ActionTextInputField, ErrorHelperText } from "./HelperInputFields";
-import CropFreeIcon from "@material-ui/icons/CropFree"; // TODO: should use care icon
+import * as Notification from "../../Utils/Notifications.js";
+
+import { ActionTextInputField } from "./HelperInputFields";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "./Dialog";
 import QrReader from "react-qr-reader";
-import * as Notification from "../../Utils/Notifications.js";
+import { useState } from "react";
 
 interface IQRScannerModalProps {
   show: boolean;
@@ -79,12 +80,11 @@ const QRScanner = ({
         margin="dense"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        actionIcon={<CropFreeIcon className="cursor-pointer" />}
+        actionIcon={<CareIcon className="care-l-focus text-black" />}
         action={() => setShowScanner(true)}
         errors={error}
         disabled={disabled}
       />
-      <ErrorHelperText error={error} />
 
       <QRScannerModal
         show={showScanner}

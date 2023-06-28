@@ -15,23 +15,47 @@ describe("Assets Filter", () => {
   });
 
   it("Filter by Facility", () => {
+    cy.get("[name=Facilities]").type("dummy");
     cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities");
-    cy.get("[name=Facilities]").type("test");
     cy.wait("@facilities").then((interception) => {
+      console.log("url", interception.response.url);
       expect(interception.response.statusCode).to.equal(200);
-      expect(interception.request.url).to.include("search_text=test");
+      expect(interception.request.url).to.include("search_text=dummy");
     });
+    cy.contains("Apply").click();
+    cy.contains("Facility:");
   });
 
   it("Filter by Asset Type", () => {
-    cy.get("[name='asset_type']").select("EXTERNAL");
+    cy.get("[id='asset-type'] > div > button")
+      .click()
+      .get("li")
+      .contains("EXTERNAL")
+      .click();
+    cy.contains("Apply").click();
+    cy.contains("Asset Type: EXTERNAL");
   });
 
   it("Filter by Asset Status", () => {
-    cy.get("[name='asset_status']").select("ACTIVE");
+    cy.get("[id='asset-status'] > div > button")
+      .click()
+      .get("li")
+      .contains("ACTIVE")
+      .click();
+    cy.contains("Apply").click();
+    cy.contains("Status: ACTIVE");
   });
 
-  afterEach(() => {
+  it("Filter by Asset Class", () => {
+    cy.get("[id='asset-class'] > div > button")
+      .click()
+      .get("li")
+      .contains("ONVIF Camera")
+      .click();
     cy.contains("Apply").click();
+    cy.contains("Asset Class: ONVIF");
+  });
+  afterEach(() => {
+    cy.saveLocalStorage();
   });
 });

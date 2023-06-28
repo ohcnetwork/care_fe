@@ -1,104 +1,108 @@
-import {
-  Card,
-  CardContent,
-  CircularProgress,
-  InputLabel,
-  IconButton,
-  RadioGroup,
-  FormControlLabel,
-  Box,
-  Radio,
-} from "@material-ui/core";
-import Popover from "@material-ui/core/Popover";
-import MyLocationIcon from "@material-ui/icons/MyLocation";
-import { navigate } from "raviger";
-import loadable from "@loadable/component";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import React, { useCallback, useReducer, useState } from "react";
-import { useDispatch } from "react-redux";
+import * as Notification from "../../Utils/Notifications.js";
+
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import { CapacityModal, DoctorModal } from "./models";
+import { Card, CardContent } from "@material-ui/core";
 import {
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
-  KASP_ENABLED,
-  KASP_STRING,
+  getBedTypes,
 } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  phonePreg,
-  validatePincode,
-  validateLatitude,
-  validateLongitude,
-} from "../../Common/validation";
+  MultiSelectFormField,
+  SelectFormField,
+} from "../Form/FormFields/SelectFormField";
+import React, { useCallback, useState } from "react";
+import Steps, { Step } from "../Common/Steps";
 import {
   createFacility,
   getDistrictByState,
-  getPermittedFacility,
   getLocalbodyByDistrict,
+  getPermittedFacility,
   getStates,
-  updateFacility,
   getWardByLocalBody,
+  listCapacity,
+  listDoctor,
+  updateFacility,
 } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
+import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
 import {
-  ErrorHelperText,
-  MultilineInputField,
-  PhoneNumberField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+  phonePreg,
+  validateLatitude,
+  validateLongitude,
+  validatePincode,
+} from "../../Common/validation";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import { BedCapacity } from "./BedCapacity";
+import BedTypeCard from "./BedTypeCard";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { DoctorCapacity } from "./DoctorCapacity";
+import DoctorsCountCard from "./DoctorsCountCard";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import GLocationPicker from "../Common/GLocationPicker";
-import { goBack } from "../../Utils/utils";
-import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
-import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import Popover from "@material-ui/core/Popover";
+import RadioFormField from "../Form/FormFields/RadioFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import loadable from "@loadable/component";
+import { navigate } from "raviger";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
+import { FormAction } from "../Form/Utils.js";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface FacilityProps {
-  facilityId?: number;
+  facilityId?: string;
 }
 
-const facilityTypes = [...FACILITY_TYPES.map((i) => i.text)];
-const initialStates = [{ id: 0, name: "Choose State *" }];
-const initialDistricts = [{ id: 0, name: "Choose District" }];
-const selectStates = [{ id: 0, name: "Please select your state" }];
-const initialLocalbodies = [{ id: 0, name: "Choose Localbody" }];
-const selectDistrict = [{ id: 0, name: "Please select your district" }];
-const selectLocalBody = [
-  { id: 0, name: "Please select your Local Body", number: 0 },
-];
-const initialWards = [{ id: 0, name: "Choose Ward", number: 0 }];
+interface StateObj {
+  id: number;
+  name: string;
+}
+
+interface WardObj extends StateObj {
+  number: number;
+}
 
 type FacilityForm = {
   facility_type: string;
   name: string;
-  state: string;
-  district: string;
-  local_body: string;
+  state: number;
+  district: number;
+  local_body: number;
   features: number[];
-  ward: string;
+  ward: number;
   kasp_empanelled: string;
   address: string;
   phone_number: string;
   latitude: string;
   longitude: string;
   pincode: string;
-  oxygen_capacity: string;
-  type_b_cylinders: string;
-  type_c_cylinders: string;
-  type_d_cylinders: string;
-  expected_oxygen_requirement: string;
-  expected_type_b_cylinders: string;
-  expected_type_c_cylinders: string;
-  expected_type_d_cylinders: string;
+  oxygen_capacity?: number;
+  type_b_cylinders?: number;
+  type_c_cylinders?: number;
+  type_d_cylinders?: number;
+  expected_oxygen_requirement?: number;
+  expected_type_b_cylinders?: number;
+  expected_type_c_cylinders?: number;
+  expected_type_d_cylinders?: number;
 };
 
 const initForm: FacilityForm = {
-  facility_type: "2",
+  facility_type: "Private Hospital",
   name: "",
-  state: "",
-  district: "",
-  local_body: "",
-  ward: "",
+  state: 0,
+  district: 0,
+  local_body: 0,
+  ward: 0,
   kasp_empanelled: "false",
   features: [],
   address: "",
@@ -106,14 +110,14 @@ const initForm: FacilityForm = {
   latitude: "",
   longitude: "",
   pincode: "",
-  oxygen_capacity: "",
-  type_b_cylinders: "",
-  type_c_cylinders: "",
-  type_d_cylinders: "",
-  expected_oxygen_requirement: "",
-  expected_type_b_cylinders: "",
-  expected_type_c_cylinders: "",
-  expected_type_d_cylinders: "",
+  oxygen_capacity: undefined,
+  type_b_cylinders: undefined,
+  type_c_cylinders: undefined,
+  type_d_cylinders: undefined,
+  expected_oxygen_requirement: undefined,
+  expected_type_b_cylinders: undefined,
+  expected_type_c_cylinders: undefined,
+  expected_type_d_cylinders: undefined,
 };
 
 const initError: Record<keyof FacilityForm, string> = Object.assign(
@@ -126,40 +130,46 @@ const initialState = {
   errors: { ...initError },
 };
 
-type SetFormAction = { type: "set_form"; form: FacilityForm };
-type SetErrorAction = {
-  type: "set_error";
-  errors: Record<keyof FacilityForm, string>;
-};
-type FacilityCreateFormAction = SetFormAction | SetErrorAction;
-
-const facilityCreateReducer = (
-  state = initialState,
-  action: FacilityCreateFormAction
-) => {
+const facilityCreateReducer = (state = initialState, action: FormAction) => {
   switch (action.type) {
     case "set_form":
       return { ...state, form: action.form };
-    case "set_error":
+    case "set_errors":
       return { ...state, errors: action.errors };
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
+    }
   }
 };
 
 export const FacilityCreate = (props: FacilityProps) => {
+  const { t } = useTranslation();
+  const { gov_data_api_key, kasp_string, kasp_enabled } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId } = props;
 
-  const [state, dispatch] = useReducer(facilityCreateReducer, initialState);
+  const [state, dispatch] = useAutoSaveReducer<FacilityForm>(
+    facilityCreateReducer,
+    initialState
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
   const [isWardLoading, setIsWardLoading] = useState(false);
-  const [states, setStates] = useState(initialStates);
-  const [districts, setDistricts] = useState(selectStates);
-  const [localBodies, setLocalBodies] = useState(selectDistrict);
-  const [ward, setWard] = useState(selectLocalBody);
-  const { width } = useWindowDimensions();
+  const [states, setStates] = useState<StateObj[]>([]);
+  const [districts, setDistricts] = useState<StateObj[]>([]);
+  const [localBodies, setLocalBodies] = useState<StateObj[]>([]);
+  const [ward, setWard] = useState<WardObj[]>([]);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [createdFacilityId, setCreatedFacilityId] = useState("");
+  const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
+  const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
+  const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
+  const [bedCapacityKey, setBedCapacityKey] = useState(0);
+  const [docCapacityKey, setDocCapacityKey] = useState(0);
+  const { goBack } = useAppHistory();
 
   const [anchorEl, setAnchorEl] = React.useState<
     (EventTarget & Element) | null
@@ -169,50 +179,82 @@ export const FacilityCreate = (props: FacilityProps) => {
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
 
   const fetchDistricts = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
+    async (id: number) => {
+      if (id > 0) {
         setIsDistrictLoading(true);
         const districtList = await dispatchAction(getDistrictByState({ id }));
         if (districtList) {
-          setDistricts([...initialDistricts, ...districtList.data]);
+          setDistricts([...districtList.data]);
         }
         setIsDistrictLoading(false);
-      } else {
-        setDistricts(selectStates);
+        return districtList ? [...districtList.data] : [];
       }
     },
     [dispatchAction]
   );
 
   const fetchLocalBody = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
+    async (id: number) => {
+      if (id > 0) {
         setIsLocalbodyLoading(true);
         const localBodyList = await dispatchAction(
           getLocalbodyByDistrict({ id })
         );
         setIsLocalbodyLoading(false);
         if (localBodyList) {
-          setLocalBodies([...initialLocalbodies, ...localBodyList.data]);
+          setLocalBodies([...localBodyList.data]);
         }
-      } else {
-        setLocalBodies(selectDistrict);
       }
     },
     [dispatchAction]
   );
 
+  const getSteps = (): Step[] => {
+    return [
+      {
+        id: 1,
+        name: "Facility details",
+        onClick: () => {
+          setCurrentStep(1);
+        },
+        status: currentStep === 1 ? "current" : "complete",
+        disabled: currentStep > 1,
+      },
+      {
+        id: 2,
+        name: "Bed Capacity",
+        onClick: () => {
+          setCurrentStep(2);
+        },
+        status:
+          currentStep === 2
+            ? "current"
+            : currentStep > 2
+            ? "complete"
+            : "upcoming",
+        disabled: createdFacilityId == "",
+      },
+      {
+        id: 3,
+        name: "Doctor Capacity",
+        onClick: () => {
+          setCurrentStep(3);
+        },
+        disabled: createdFacilityId == "",
+        status: currentStep === 3 ? "current" : "upcoming",
+      },
+    ];
+  };
+
   const fetchWards = useCallback(
-    async (id: string) => {
-      if (Number(id) > 0) {
+    async (id: number) => {
+      if (id > 0) {
         setIsWardLoading(true);
         const wardList = await dispatchAction(getWardByLocalBody({ id }));
         setIsWardLoading(false);
         if (wardList) {
-          setWard([...initialWards, ...wardList.data.results]);
+          setWard([...wardList.data.results]);
         }
-      } else {
-        setWard(selectLocalBody);
       }
     },
     [dispatchAction]
@@ -227,11 +269,11 @@ export const FacilityCreate = (props: FacilityProps) => {
           const formData = {
             facility_type: res.data.facility_type,
             name: res.data.name,
-            state: res.data.state ? res.data.state : "",
-            district: res.data.district ? res.data.district : "",
-            local_body: res.data.local_body ? res.data.local_body : "",
+            state: res.data.state ? res.data.state : 0,
+            district: res.data.district ? res.data.district : 0,
+            local_body: res.data.local_body ? res.data.local_body : 0,
             features: res.data.features || [],
-            ward: res.data.ward_object ? res.data.ward_object.id : initialWards,
+            ward: res.data.ward_object ? res.data.ward_object.id : 0,
             kasp_empanelled: res.data.kasp_empanelled
               ? String(res.data.kasp_empanelled)
               : "false",
@@ -250,9 +292,7 @@ export const FacilityCreate = (props: FacilityProps) => {
             expected_type_c_cylinders: res.data.expected_type_c_cylinders,
             expected_type_d_cylinders: res.data.expected_type_d_cylinders,
             expected_oxygen_requirement: res.data.expected_oxygen_requirement,
-            oxygen_capacity: res.data.oxygen_capacity
-              ? res.data.oxygen_capacity
-              : "",
+            oxygen_capacity: res.data.oxygen_capacity,
           };
           dispatch({ type: "set_form", form: formData });
           Promise.all([
@@ -274,7 +314,7 @@ export const FacilityCreate = (props: FacilityProps) => {
       setIsStateLoading(true);
       const statesRes = await dispatchAction(getStates());
       if (!status.aborted && statesRes.data.results) {
-        setStates([...initialStates, ...statesRes.data.results]);
+        setStates([...statesRes.data.results]);
       }
       setIsStateLoading(false);
     },
@@ -291,10 +331,10 @@ export const FacilityCreate = (props: FacilityProps) => {
     [dispatch, fetchData]
   );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: FieldChangeEvent<unknown>) => {
     dispatch({
       type: "set_form",
-      form: { ...state.form, [e.target.name]: e.target.value },
+      form: { ...state.form, [e.name]: e.value },
     });
   };
 
@@ -311,11 +351,42 @@ export const FacilityCreate = (props: FacilityProps) => {
     }
   };
 
-  const handleValueChange = (value: any, field: string) => {
+  const handlePincodeChange = async (e: FieldChangeEvent<string>) => {
+    handleChange(e);
+
+    if (!validatePincode(e.value)) return;
+
+    const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
+    if (!pincodeDetails) return;
+
+    const matchedState = states.find((state) => {
+      return includesIgnoreCase(state.name, pincodeDetails.statename);
+    });
+    if (!matchedState) return;
+
+    const fetchedDistricts = await fetchDistricts(matchedState.id);
+    if (!fetchedDistricts) return;
+
+    const matchedDistrict = fetchedDistricts.find((district) => {
+      return includesIgnoreCase(district.name, pincodeDetails.district);
+    });
+    if (!matchedDistrict) return;
+
     dispatch({
       type: "set_form",
-      form: { ...state.form, [field]: value },
+      form: {
+        ...state.form,
+        state: matchedState.id,
+        district: matchedDistrict.id,
+        pincode: e.value,
+      },
     });
+
+    fetchLocalBody(matchedDistrict.id);
+    setShowAutoFilledPincode(true);
+    setTimeout(() => {
+      setShowAutoFilledPincode(false);
+    }, 2000);
   };
 
   const handleSelectCurrentLocation = (
@@ -349,7 +420,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         case "name":
         case "address":
           if (!state.form[field]) {
-            errors[field] = "Field is required";
+            errors[field] = t("required");
             invalidForm = true;
           }
           return;
@@ -359,14 +430,14 @@ export const FacilityCreate = (props: FacilityProps) => {
         case "local_body":
         case "ward":
           if (!Number(state.form[field])) {
-            errors[field] = "Field is required";
+            errors[field] = t("required");
             invalidForm = true;
           }
           return;
 
         case "pincode":
           if (!validatePincode(state.form[field])) {
-            errors[field] = "Please enter valid pincode";
+            errors[field] = t("invalid_pincode");
             invalidForm = true;
           }
           return;
@@ -378,20 +449,19 @@ export const FacilityCreate = (props: FacilityProps) => {
             !phoneNumber?.isPossible() ||
             !phonePreg(String(phoneNumber?.number))
           ) {
-            errors[field] = "Please enter valid phone number";
+            errors[field] = t("invalid_phone_number");
             invalidForm = true;
           }
           return;
         case "latitude":
           if (!!state.form.latitude && !validateLatitude(state.form[field])) {
-            errors[field] = "Please enter valid latitude between -90 and 90.";
+            errors[field] = t("latitude_invalid");
             invalidForm = true;
           }
           return;
         case "longitude":
           if (!!state.form.longitude && !validateLongitude(state.form[field])) {
-            errors[field] =
-              "Please enter valid longitude between -180 and 180.";
+            errors[field] = t("longitude_invalid");
             invalidForm = true;
           }
           return;
@@ -401,16 +471,17 @@ export const FacilityCreate = (props: FacilityProps) => {
       }
     });
     if (invalidForm) {
-      dispatch({ type: "set_error", errors });
+      dispatch({ type: "set_errors", errors });
       return false;
     }
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return true;
   };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validated = validateForm();
+    console.log(state.form);
     if (validated) {
       setIsLoading(true);
       const data = {
@@ -430,30 +501,30 @@ export const FacilityCreate = (props: FacilityProps) => {
           state.form.phone_number
         )?.format("E.164"),
         oxygen_capacity: state.form.oxygen_capacity
-          ? Number(state.form.oxygen_capacity)
+          ? state.form.oxygen_capacity
           : 0,
         type_b_cylinders: state.form.type_b_cylinders
-          ? Number(state.form.type_b_cylinders)
+          ? state.form.type_b_cylinders
           : 0,
         type_c_cylinders: state.form.type_c_cylinders
-          ? Number(state.form.type_c_cylinders)
+          ? state.form.type_c_cylinders
           : 0,
         type_d_cylinders: state.form.type_d_cylinders
-          ? Number(state.form.type_d_cylinders)
+          ? state.form.type_d_cylinders
           : 0,
         expected_oxygen_requirement: state.form.expected_oxygen_requirement
-          ? Number(state.form.expected_oxygen_requirement)
+          ? state.form.expected_oxygen_requirement
           : 0,
         expected_type_b_cylinders: state.form.expected_type_b_cylinders
-          ? Number(state.form.expected_type_b_cylinders)
+          ? state.form.expected_type_b_cylinders
           : 0,
 
         expected_type_c_cylinders: state.form.expected_type_c_cylinders
-          ? Number(state.form.expected_type_c_cylinders)
+          ? state.form.expected_type_c_cylinders
           : 0,
 
         expected_type_d_cylinders: state.form.expected_type_d_cylinders
-          ? Number(state.form.expected_type_d_cylinders)
+          ? state.form.expected_type_d_cylinders
           : 0,
       };
       const res = await dispatchAction(
@@ -467,7 +538,8 @@ export const FacilityCreate = (props: FacilityProps) => {
           Notification.Success({
             msg: "Facility added successfully",
           });
-          navigate(`/facility/${id}/bed`);
+          setCreatedFacilityId(id);
+          setCurrentStep(2);
         } else {
           Notification.Success({
             msg: "Facility updated successfully",
@@ -484,527 +556,480 @@ export const FacilityCreate = (props: FacilityProps) => {
     }
   };
 
-  const setLocalBody = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        local_body: e.target.value,
-
-        ward: "0",
-      },
-    });
-  };
-
-  const setDistrict = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        district: e.target.value,
-
-        local_body: "0",
-        ward: "0",
-      },
-    });
-  };
-  const setState = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        state: e.target.value,
-        district: "0",
-        local_body: "0",
-        ward: "0",
-      },
-    });
-  };
-
   if (isLoading) {
     return <Loading />;
   }
 
-  const extremeSmallScreenBreakpoint = 320;
-  const isExtremeSmallScreen =
-    width <= extremeSmallScreenBreakpoint ? true : false;
   const open = Boolean(anchorEl);
   const id = open ? "map-popover" : undefined;
-  return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={headerText}
-        crumbsReplacements={{
-          [facilityId || "????"]: { name: state.form.name },
-        }}
-      />
-      <Card className="mt-4">
-        <CardContent>
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-              <div>
-                <InputLabel id="facility_type-label">Facility Type*</InputLabel>
-                <SelectField
-                  data-test="facility-type"
-                  name="facility_type"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.facility_type}
-                  options={facilityTypes}
-                  onChange={handleChange}
-                  errors={state.errors.facility_type}
-                />
-              </div>
 
-              <div>
-                <InputLabel htmlFor="facility-name" id="name-label">
-                  Facility Name*
-                </InputLabel>
-                <TextInputField
-                  id="facility-name"
-                  fullWidth
-                  name="name"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.name}
-                  onChange={handleChange}
-                  errors={state.errors.name}
-                />
+  let capacityList: any = null;
+  let totalBedCount = 0;
+  let totalOccupiedBedCount = 0;
+
+  if (!capacityData || !capacityData.length) {
+    capacityList = (
+      <h5 className="mt-4 text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+        {t("no_bed_types_found")}
+      </h5>
+    );
+  } else {
+    capacityData.forEach((x) => {
+      totalBedCount += x.total_capacity ? x.total_capacity : 0;
+      totalOccupiedBedCount += x.current_capacity ? x.current_capacity : 0;
+    });
+
+    capacityList = (
+      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-7 w-full">
+        <BedTypeCard
+          label={t("total_beds")}
+          bedCapacityId={0}
+          used={totalOccupiedBedCount}
+          total={totalBedCount}
+          handleUpdate={() => {
+            return;
+          }}
+        />
+        {getBedTypes({ kasp_string, kasp_enabled }).map((x) => {
+          const res = capacityData.find((data) => {
+            return data.room_type === x.id;
+          });
+          if (res) {
+            const removeCurrentBedType = (bedTypeId: number | undefined) => {
+              setCapacityData((state) =>
+                state.filter((i) => i.id !== bedTypeId)
+              );
+              setBedCapacityKey((bedCapacityKey) => bedCapacityKey + 1);
+            };
+            return (
+              <BedTypeCard
+                facilityId={createdFacilityId}
+                bedCapacityId={res.id}
+                key={`bed_${res.id}`}
+                room_type={res.room_type}
+                label={x.text}
+                used={res.current_capacity || 0}
+                total={res.total_capacity || 0}
+                lastUpdated={res.modified_date}
+                removeBedType={removeCurrentBedType}
+                handleUpdate={async () => {
+                  const capacityRes = await dispatchAction(
+                    listCapacity({}, { facilityId: createdFacilityId })
+                  );
+                  if (capacityRes && capacityRes.data) {
+                    setCapacityData(capacityRes.data.results);
+                  }
+                }}
+              />
+            );
+          }
+        })}
+      </div>
+    );
+  }
+  let doctorList: any = null;
+  if (!doctorData || !doctorData.length) {
+    doctorList = (
+      <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+        {t("no_doctors")}
+      </h5>
+    );
+  } else {
+    doctorList = (
+      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-6">
+        {doctorData.map((data: DoctorModal) => {
+          const removeCurrentDoctorData = (doctorId: number | undefined) => {
+            setDoctorData((state) =>
+              state.filter((i: DoctorModal) => i.id !== doctorId)
+            );
+            setDocCapacityKey((docCapacityKey) => docCapacityKey + 1);
+          };
+
+          return (
+            <DoctorsCountCard
+              facilityId={createdFacilityId || ""}
+              key={`bed_${data.id}`}
+              handleUpdate={async () => {
+                const doctorRes = await dispatchAction(
+                  listDoctor({}, { facilityId: createdFacilityId })
+                );
+                if (doctorRes && doctorRes.data) {
+                  setDoctorData(doctorRes.data.results);
+                }
+              }}
+              {...data}
+              removeDoctor={removeCurrentDoctorData}
+            />
+          );
+        })}
+      </div>
+    );
+  }
+
+  const field = (name: string) => {
+    return {
+      name,
+      id: name,
+      label: t(name),
+      value: (state.form as any)[name],
+      error: (state.errors as any)[name],
+      onChange: handleChange,
+    };
+  };
+
+  switch (currentStep) {
+    case 3:
+      return (
+        <div className="px-2 pb-2">
+          <PageTitle
+            title={headerText}
+            crumbsReplacements={{
+              [createdFacilityId || "????"]: { name: state.form.name },
+            }}
+          />
+          <Steps steps={getSteps()} />
+          <div className="mt-3">
+            <DoctorCapacity
+              key={docCapacityKey}
+              className="max-w-2xl w-full mx-auto"
+              facilityId={createdFacilityId || ""}
+              handleClose={() => {
+                navigate(`/facility/${createdFacilityId}`);
+              }}
+              handleUpdate={async () => {
+                const doctorRes = await dispatchAction(
+                  listDoctor({}, { facilityId: createdFacilityId })
+                );
+                if (doctorRes && doctorRes.data) {
+                  setDoctorData(doctorRes.data.results);
+                }
+              }}
+            />
+          </div>
+          <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
+            <div className="md:flex justify-between md:pb-2">
+              <div className="font-bold text-xl mb-2">{t("doctors_list")}</div>
+            </div>
+            <div className="mt-4">{doctorList}</div>
+          </div>
+        </div>
+      );
+    case 2:
+      return (
+        <div className="px-2 pb-2">
+          <PageTitle
+            title={headerText}
+            crumbsReplacements={{
+              [createdFacilityId || "????"]: { name: state.form.name },
+            }}
+          />
+          <Steps steps={getSteps()} />
+          <div className="mt-3">
+            <BedCapacity
+              key={bedCapacityKey}
+              className="max-w-2xl w-full mx-auto"
+              facilityId={createdFacilityId || ""}
+              handleClose={() => {
+                setCurrentStep(3);
+              }}
+              handleUpdate={async () => {
+                const capacityRes = await dispatchAction(
+                  listCapacity({}, { facilityId: createdFacilityId })
+                );
+                if (capacityRes && capacityRes.data) {
+                  setCapacityData(capacityRes.data.results);
+                }
+              }}
+            />
+          </div>
+          <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
+            <div className="md:flex justify-between  md:border-b md:pb-2">
+              <div className="font-semibold text-xl mb-2">
+                {t("bed_capacity")}
               </div>
-              <div className="">
-                <InputLabel id="features-label">Features</InputLabel>
-                <MultiSelectMenuV2
-                  id="features"
-                  placeholder="Features"
-                  value={state.form.features}
-                  options={FACILITY_FEATURE_TYPES}
-                  optionLabel={(o) => o.name}
-                  optionValue={(o) => o.id}
-                  onChange={(o) => handleValueChange(o, "features")}
+            </div>
+            <div>{capacityList}</div>
+          </div>
+        </div>
+      );
+    case 1:
+    default:
+      return (
+        <div className="px-2 pb-2">
+          <PageTitle
+            title={headerText}
+            crumbsReplacements={{
+              [facilityId || "????"]: { name: state.form.name },
+            }}
+          />
+          {!facilityId && <Steps steps={getSteps()} />}
+          <Card className="mt-4">
+            <CardContent>
+              <form onSubmit={(e) => handleSubmit(e)}>
+                <DraftSection
+                  handleDraftSelect={(newState: any) => {
+                    dispatch({ type: "set_state", state: newState });
+                    Promise.all([
+                      fetchDistricts(newState.form.state),
+                      fetchLocalBody(newState.form.district),
+                      fetchWards(newState.form.local_body),
+                    ]);
+                  }}
+                  formData={state.form}
                 />
-                <ErrorHelperText error={state.errors.features} />
-              </div>
-              <div>
-                <InputLabel id="gender-label">State*</InputLabel>
-                {isStateLoading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <SelectField
-                    data-test="facility-state"
-                    name="state"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.state}
+                <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                  <SelectFormField
+                    {...field("facility_type")}
+                    required
+                    options={FACILITY_TYPES}
+                    optionLabel={(o) => o.text}
+                    optionValue={(o) => o.text}
+                  />
+                  <TextFormField
+                    {...field("name")}
+                    required
+                    label={t("facility_name")}
+                  />
+                  <MultiSelectFormField
+                    {...field("features")}
+                    placeholder={t("features")}
+                    options={FACILITY_FEATURE_TYPES}
+                    optionLabel={(o) => o.name}
+                    optionValue={(o) => o.id}
+                  />
+                  <div>
+                    <TextFormField
+                      {...field("pincode")}
+                      required
+                      onChange={handlePincodeChange}
+                    />
+                    {showAutoFilledPincode && (
+                      <div className="flex items-center gap-2 text-primary-500">
+                        <CareIcon className="care-l-check-circle" />
+                        <span className="text-sm">
+                          State and district auto-filled from pincode
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <SelectFormField
+                    {...field("state")}
+                    required
+                    placeholder="Choose State"
+                    className={isStateLoading ? "animate-pulse" : ""}
+                    disabled={isStateLoading}
                     options={states}
-                    optionValue="name"
-                    onChange={(e) => [
-                      setState(e),
-                      fetchDistricts(String(e.target.value)),
-                    ]}
-                    errors={state.errors.state}
+                    optionLabel={(o) => o.name}
+                    optionValue={(o) => o.id}
+                    onChange={(event) => {
+                      handleChange(event);
+                      if (!event) return;
+                      fetchDistricts(event.value);
+                    }}
                   />
-                )}
-              </div>
-
-              <div>
-                <InputLabel id="district-label">District*</InputLabel>
-                {isDistrictLoading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <SelectField
-                    data-test="facility-district"
-                    name="district"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.district}
+                  <SelectFormField
+                    {...field("district")}
+                    placeholder="Choose District"
+                    required
+                    className={isDistrictLoading ? "animate-pulse" : ""}
+                    disabled={isDistrictLoading}
                     options={districts}
-                    optionValue="name"
-                    onChange={(e) => [
-                      setDistrict(e),
-                      fetchLocalBody(String(e.target.value)),
-                    ]}
-                    errors={state.errors.district}
+                    optionLabel={(o) => o.name}
+                    optionValue={(o) => o.id}
+                    onChange={(event) => {
+                      handleChange(event);
+                      if (!event) return;
+                      fetchLocalBody(event.value);
+                    }}
                   />
-                )}
-              </div>
-
-              <div className="">
-                <InputLabel id="local_body-label">Localbody*</InputLabel>
-                {isLocalbodyLoading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <SelectField
-                    data-test="facility-localbody"
-                    name="local_body"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.local_body}
+                  <SelectFormField
+                    {...field("local_body")}
+                    required
+                    className={isLocalbodyLoading ? "animate-pulse" : ""}
+                    disabled={isLocalbodyLoading}
+                    placeholder="Choose Local Body"
                     options={localBodies}
-                    optionValue="name"
-                    onChange={(e) => [
-                      setLocalBody(e),
-                      fetchWards(String(e.target.value)),
-                    ]}
-                    errors={state.errors.local_body}
+                    optionLabel={(o) => o.name}
+                    optionValue={(o) => o.id}
+                    onChange={(event) => {
+                      handleChange(event);
+                      if (!event) return;
+                      fetchWards(event.value);
+                    }}
                   />
-                )}
-              </div>
-              <div className="md:col-span-2">
-                <InputLabel id="ward-label">Ward*</InputLabel>
-                {isWardLoading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <SelectField
-                    data-test="facility-ward"
-                    name="ward"
-                    variant="outlined"
-                    margin="dense"
+                  <SelectFormField
+                    {...field("ward")}
+                    required
+                    className={isWardLoading ? "animate-pulse" : ""}
+                    disabled={isWardLoading}
+                    placeholder="Choose Ward"
                     options={ward
                       .sort((a, b) => a.number - b.number)
                       .map((e) => {
-                        return { id: e.id, name: e.number + ": " + e.name };
+                        return {
+                          id: e.id,
+                          name: e.number + ": " + e.name,
+                        };
                       })}
-                    value={state.form.ward}
-                    optionValue="name"
-                    onChange={handleChange}
-                    errors={state.errors.ward}
+                    optionLabel={(o) => o.name}
+                    optionValue={(o) => o.id}
                   />
-                )}
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel htmlFor="facility-address" id="name-label">
-                  Address*
-                </InputLabel>
-                <MultilineInputField
-                  id="facility-address"
-                  rows={5}
-                  name="address"
-                  placeholder=""
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.address}
-                  onChange={handleChange}
-                  errors={state.errors.address}
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="facility-pincode" id="name-label">
-                  Pincode*
-                </InputLabel>
-                <TextInputField
-                  id="facility-pincode"
-                  name="pincode"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={state.form.pincode}
-                  onChange={handleChange}
-                  errors={state.errors.pincode}
-                />
-              </div>
-              <div>
-                <PhoneNumberField
-                  label="Emergency Contact Number*"
-                  value={state.form.phone_number}
-                  onChange={(value: string) =>
-                    handleValueChange(value, "phone_number")
-                  }
-                  errors={state.errors.phone_number}
-                  onlyIndia={true}
-                />
-              </div>
-
-              <div className="md:col-span-2 grid grid-cols-1 xl:grid-cols-2 gap-4 py-4">
-                <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
-                  <div>
-                    <InputLabel
-                      htmlFor="facility-oxygen-capacity"
-                      id="oxygen_capacity"
-                    >
-                      Liquid Oxygen Capacity
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-oxygen-capacity"
-                      name="oxygen_capacity"
-                      type="number"
-                      variant="outlined"
-                      margin="dense"
-                      placeholder="Litres"
-                      value={state.form.oxygen_capacity}
-                      onChange={handleChange}
-                      errors={state.errors.oxygen_capacity}
-                    />
-                  </div>
-                  <div>
-                    <InputLabel
-                      htmlFor="facility-oxygen-requirement"
-                      id="name-label"
-                    >
-                      Expected Burn Rate
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-oxygen-requirement"
-                      name="expected_oxygen_requirement"
-                      type="number"
-                      variant="outlined"
-                      margin="dense"
-                      placeholder="Litres / day"
-                      value={state.form.expected_oxygen_requirement}
-                      onChange={handleChange}
-                      errors={state.errors.expected_oxygen_requirement}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
-                  <div>
-                    <InputLabel
-                      htmlFor="facility-type-b-cylinders"
-                      id="type_b_cylinders"
-                    >
-                      B Type Cylinders
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-type-b-cylinders"
-                      name="type_b_cylinders"
-                      type="number"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.type_b_cylinders}
-                      onChange={handleChange}
-                      errors={state.errors.type_b_cylinders}
-                    />
-                  </div>
-                  <div>
-                    <InputLabel
-                      htmlFor="facility-expected-type-b-cylinders"
-                      id="expected_type_b_cylinders"
-                    >
-                      Expected Burn Rate
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-expected-type-b-cylinders"
-                      name="expected_type_b_cylinders"
-                      type="number"
-                      variant="outlined"
-                      margin="dense"
-                      placeholder="Cylinders / day"
-                      value={state.form.expected_type_b_cylinders}
-                      onChange={handleChange}
-                      errors={state.errors.expected_type_b_cylinders}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
-                  <div>
-                    <InputLabel
-                      htmlFor="facility-type-c-cylinders"
-                      id="type_c_cylinders"
-                    >
-                      C Type Cylinders
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-type-c-cylinders"
-                      name="type_c_cylinders"
-                      type="number"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.type_c_cylinders}
-                      onChange={handleChange}
-                      errors={state.errors.type_c_cylinders}
-                    />
-                  </div>
-                  <div>
-                    <InputLabel
-                      htmlFor="facility-expected-type-c-cylinders"
-                      id="expected_type_c_cylinders"
-                    >
-                      Expected Burn Rate
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-expected-type-c-cylinders"
-                      name="expected_type_c_cylinders"
-                      type="number"
-                      variant="outlined"
-                      margin="dense"
-                      placeholder="Cylinders / day"
-                      value={state.form.expected_type_c_cylinders}
-                      onChange={handleChange}
-                      errors={state.errors.expected_type_c_cylinders}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid vs:grid-cols-2 grid-cols-1 gap-4">
-                  <div>
-                    <InputLabel
-                      htmlFor="facility-type-d-cylinders"
-                      id="type_d_cylinders"
-                    >
-                      D Type Cylinders
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-type-d-cylinders"
-                      name="type_d_cylinders"
-                      type="number"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.type_d_cylinders}
-                      onChange={handleChange}
-                      errors={state.errors.type_d_cylinders}
-                    />
-                  </div>
-                  <div>
-                    <InputLabel
-                      htmlFor="facility-expected-type-d-cylinders"
-                      id="expected_type_d_cylinders"
-                    >
-                      Expected Burn Rate
-                    </InputLabel>
-                    <TextInputField
-                      id="facility-expected-type-d-cylinders"
-                      name="expected_type_d_cylinders"
-                      type="number"
-                      variant="outlined"
-                      margin="dense"
-                      placeholder="Cylinders / day"
-                      value={state.form.expected_type_d_cylinders}
-                      onChange={handleChange}
-                      errors={state.errors.expected_type_d_cylinders}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {KASP_ENABLED && (
-                <div>
-                  <InputLabel
-                    htmlFor="facility-kasp-empanelled"
-                    id="kasp_empanelled"
-                  >
-                    Is this facility {KASP_STRING} empanelled?
-                  </InputLabel>
-                  <RadioGroup
-                    aria-label="kasp_empanelled"
-                    name="kasp_empanelled"
-                    value={state.form.kasp_empanelled}
-                    onChange={handleChange}
-                    style={{ padding: "0px 5px" }}
-                  >
-                    <Box
-                      display="flex"
-                      id="facility-kasp-empanelled"
-                      flexDirection="row"
-                    >
-                      <FormControlLabel
-                        value="true"
-                        control={<Radio />}
-                        label="Yes"
-                      />
-                      <FormControlLabel
-                        value="false"
-                        control={<Radio />}
-                        label="No"
-                      />
-                    </Box>
-                  </RadioGroup>
-                </div>
-              )}
-            </div>
-            <div
-              className={`${
-                isExtremeSmallScreen
-                  ? " grid grid-cols-1 "
-                  : " flex items-center "
-              } mt-4 -mx-2`}
-            >
-              <div className="flex-1 px-2">
-                <InputLabel id="location-label">Location</InputLabel>
-                <TextInputField
-                  name="latitude"
-                  placeholder="Latitude"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.latitude}
-                  onChange={handleChange}
-                  errors={state.errors.latitude}
-                />
-              </div>
-              <div className="pt-4">
-                <IconButton
-                  id="facility-location-button"
-                  onClick={(event) => setAnchorEl(event.currentTarget)}
-                >
-                  <MyLocationIcon />
-                </IconButton>
-                <Popover
-                  id={id}
-                  open={open}
-                  anchorEl={anchorEl}
-                  onClose={handleClose}
-                  anchorOrigin={{
-                    vertical: "top",
-                    horizontal: "left",
-                  }}
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "left",
-                  }}
-                >
-                  <GLocationPicker
-                    lat={Number(state.form.latitude)}
-                    lng={Number(state.form.longitude)}
-                    handleOnChange={handleLocationChange}
-                    handleOnClose={handleClose}
-                    handleOnSelectCurrentLocation={handleSelectCurrentLocation}
+                  <TextAreaFormField {...field("address")} required />
+                  <PhoneNumberFormField
+                    {...field("phone_number")}
+                    label={t("emergency_contact_number")}
+                    required
+                    disableCountry
                   />
-                </Popover>
-              </div>
-              <div className="flex-1 px-2">
-                <InputLabel>&nbsp;</InputLabel>
-                <TextInputField
-                  name="longitude"
-                  placeholder="Longitude"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.longitude}
-                  onChange={handleChange}
-                  errors={state.errors.longitude}
-                />
-              </div>
-            </div>
-            <div
-              className={`${
-                isExtremeSmallScreen
-                  ? " grid grid-cols-1 "
-                  : " flex justify-between "
-              } mt-6 gap-2 `}
-            >
-              <button
-                className="btn btn-default border-2 border-grey-300"
-                onClick={(e) => {
-                  e.preventDefault();
-                  goBack();
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn btn-primary"
-                id="facility-save"
-                type="submit"
-                onClick={(e) => handleSubmit(e)}
-              >
-                <i className="mr-2 fa-regular fa-circle-check"></i> {buttonText}
-              </button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-  );
+                  <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 py-4">
+                    <TextFormField
+                      {...field("oxygen_capacity")}
+                      type="number"
+                      placeholder="0"
+                      label={t("liquid_oxygen_capacity")}
+                      trailingPadding=" "
+                      trailing={<FieldUnit unit={t("litres")} />}
+                      min={0}
+                    />
+                    <TextFormField
+                      {...field("expected_oxygen_requirement")}
+                      type="number"
+                      placeholder="0"
+                      trailingPadding=" "
+                      trailing={<FieldUnit unit={t("litres_per_day")} />}
+                      label={t("expected_burn_rate")}
+                      min={0}
+                    />
+
+                    <TextFormField
+                      {...field("type_b_cylinders")}
+                      type="number"
+                      placeholder="0"
+                      trailingPadding=" "
+                      trailing={<FieldUnit unit={t("cylinders")} />}
+                      min={0}
+                    />
+                    <TextFormField
+                      {...field("expected_type_b_cylinders")}
+                      type="number"
+                      placeholder="0"
+                      label={t("expected_burn_rate")}
+                      trailingPadding=" "
+                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
+                      min={0}
+                    />
+                    <TextFormField
+                      {...field("type_c_cylinders")}
+                      type="number"
+                      placeholder="0"
+                      trailingPadding=" "
+                      trailing={<FieldUnit unit={t("cylinders")} />}
+                      min={0}
+                    />
+                    <TextFormField
+                      {...field("expected_type_c_cylinders")}
+                      type="number"
+                      placeholder="0"
+                      trailingPadding=" "
+                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
+                      label={t("expected_burn_rate")}
+                      min={0}
+                    />
+                    <TextFormField
+                      {...field("type_d_cylinders")}
+                      type="number"
+                      placeholder="0"
+                      trailingPadding=" "
+                      trailing={<FieldUnit unit={t("cylinders")} />}
+                      min={0}
+                    />
+                    <TextFormField
+                      {...field("expected_type_d_cylinders")}
+                      type="number"
+                      placeholder="0"
+                      label={t("expected_burn_rate")}
+                      trailingPadding=" "
+                      trailing={<FieldUnit unit={t("cylinders_per_day")} />}
+                      min={0}
+                    />
+                  </div>
+
+                  {kasp_enabled && (
+                    <RadioFormField
+                      {...field("kasp_empanelled")}
+                      label={`Is this facility ${kasp_string} empanelled?`}
+                      options={[true, false]}
+                      optionDisplay={(o) => (o ? "Yes" : "No")}
+                      optionValue={(o) => String(o)}
+                    />
+                  )}
+                </div>
+
+                <div className="flex gap-2 items-center">
+                  <TextFormField
+                    className="flex-1 px-2"
+                    {...field("latitude")}
+                    label={t("location")}
+                    placeholder="Latitude"
+                  />
+
+                  <div className="flex flex-col justify-center md:block">
+                    <ButtonV2
+                      circle
+                      type="button"
+                      id="facility-location-button"
+                      onClick={(event) => setAnchorEl(event.currentTarget)}
+                      className="tooltip p-2"
+                    >
+                      <CareIcon className="care-l-map-marker text-xl" />
+                      <span className="tooltip-text tooltip-bottom">
+                        Select location from map
+                      </span>
+                    </ButtonV2>
+                    <Popover
+                      id={id}
+                      open={open}
+                      anchorEl={anchorEl}
+                      onClose={handleClose}
+                      anchorOrigin={{
+                        vertical: "top",
+                        horizontal: "left",
+                      }}
+                      transformOrigin={{
+                        vertical: "top",
+                        horizontal: "left",
+                      }}
+                    >
+                      <GLocationPicker
+                        lat={Number(state.form.latitude)}
+                        lng={Number(state.form.longitude)}
+                        handleOnChange={handleLocationChange}
+                        handleOnClose={handleClose}
+                        handleOnSelectCurrentLocation={
+                          handleSelectCurrentLocation
+                        }
+                      />
+                    </Popover>
+                  </div>
+                  <TextFormField
+                    className="flex-1 px-2"
+                    {...field("longitude")}
+                    label={<br />}
+                    placeholder="Longitude"
+                  />
+                </div>
+                <div className="mt-12 flex flex-col-reverse sm:flex-row gap-3 justify-end">
+                  <Cancel onClick={() => goBack()} />
+                  <Submit onClick={handleSubmit} label={buttonText} />
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      );
+  }
+};
+
+const FieldUnit = ({ unit }: { unit: string }) => {
+  return <p className="text-xs text-gray-700 mr-8">{unit}</p>;
 };

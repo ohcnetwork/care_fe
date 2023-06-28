@@ -1,4 +1,3 @@
-import DateFnsUtils from "@date-io/date-fns";
 import {
   Checkbox,
   Chip,
@@ -10,28 +9,25 @@ import {
   ListItemText,
   MenuItem,
   NativeSelect,
-  Radio,
   Select,
   TextField,
   TextFieldProps,
 } from "@material-ui/core";
-import Box from "@material-ui/core/Box";
-import FormControl from "@material-ui/core/FormControl";
-import { NativeSelectInputProps } from "@material-ui/core/NativeSelect/NativeSelectInput";
-import { SelectProps } from "@material-ui/core/Select";
-import Autocomplete from "@material-ui/lab/Autocomplete";
 import {
   DatePickerProps,
   KeyboardDatePicker,
   KeyboardDateTimePicker,
-  KeyboardTimePicker,
   MuiPickersUtilsProvider,
 } from "@material-ui/pickers";
+
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import Box from "@material-ui/core/Box";
+import DateFnsUtils from "@date-io/date-fns";
+import FormControl from "@material-ui/core/FormControl";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
-import { debounce } from "lodash";
-import React, { ChangeEvent } from "react";
-import PhoneInput, { ICountryData } from "react-phone-input-2";
-import "react-phone-input-2/lib/high-res.css";
+import { NativeSelectInputProps } from "@material-ui/core/NativeSelect/NativeSelectInput";
+import React from "react";
+import { SelectProps } from "@material-ui/core/Select";
 
 export interface DefaultSelectInputProps extends Omit<SelectProps, "onChange"> {
   options: Array<any>;
@@ -73,10 +69,6 @@ export interface DefaultNativeSelectInputProps extends NativeSelectInputProps {
 
 // Type Declarations
 type TextFieldPropsExtended = TextFieldProps & { errors: string };
-type ActionTextFieldProps = TextFieldPropsExtended & {
-  actionIcon?: React.ReactElement;
-  action?: () => void;
-};
 
 interface DateInputFieldProps extends DatePickerProps {
   value: string;
@@ -97,13 +89,10 @@ interface CheckboxProps extends Omit<FormControlLabelProps, "control"> {
   label: string;
 }
 
-interface OptionsProps {
-  options: Array<{ id: number | string; text: string }>;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>, checked: boolean) => void;
-  values: Array<{ answerId: number }>;
-}
-
-export const TextInputField = (props: TextFieldPropsExtended) => {
+/**
+ * Deprecated. Use `TextFormField` instead.
+ */
+export const LegacyTextInputField = (props: TextFieldPropsExtended) => {
   const { onChange, type, errors, onKeyDown } = props;
   const inputType = type === "number" || type === "float" ? "text" : type;
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -133,9 +122,27 @@ export const TextInputField = (props: TextFieldPropsExtended) => {
         onChange={handleChange}
         onKeyDown={handleKeyDown}
       />
-      <ErrorHelperText error={errors} />
+      <LegacyErrorHelperText error={errors} />
     </div>
   );
+};
+
+/**
+ * Deprecated. Use `TextAreaFormField` instead.
+ */
+export const LegacyMultilineInputField = (props: TextFieldPropsExtended) => {
+  const { errors } = props;
+  return (
+    <div>
+      <TextField {...props} multiline fullWidth />
+      <LegacyErrorHelperText error={errors} />
+    </div>
+  );
+};
+
+type ActionTextFieldProps = TextFieldPropsExtended & {
+  actionIcon?: React.ReactElement;
+  action?: () => void;
 };
 
 export const ActionTextInputField = (props: ActionTextFieldProps) => {
@@ -178,22 +185,15 @@ export const ActionTextInputField = (props: ActionTextFieldProps) => {
           </div>
         )}
       </div>
-      <ErrorHelperText error={errors} />
+      <LegacyErrorHelperText error={errors} />
     </div>
   );
 };
 
-export const MultilineInputField = (props: TextFieldPropsExtended) => {
-  const { errors } = props;
-  return (
-    <div>
-      <TextField {...props} multiline fullWidth />
-      <ErrorHelperText error={errors} />
-    </div>
-  );
-};
-
-export const DateTimeFiled = (props: DateInputFieldProps) => {
+/**
+ * Deprecated. Use `TextFormField` with `type="datetime-local"` instead.
+ */
+export const LegacyDateTimeFiled = (props: DateInputFieldProps) => {
   const { label, errors, onChange, value, margin, disabled, ...restProps } =
     props;
   return (
@@ -208,12 +208,15 @@ export const DateTimeFiled = (props: DateInputFieldProps) => {
         disabled={disabled}
         {...restProps}
       />
-      <ErrorHelperText error={errors} />
+      <LegacyErrorHelperText error={errors} />
     </MuiPickersUtilsProvider>
   );
 };
 
-export const DateInputField = (props: DateInputFieldProps) => {
+/**
+ * Deprecated. Use `DateFormField` instead.
+ */
+export const LegacyDateInputField = (props: DateInputFieldProps) => {
   const {
     value,
     onChange,
@@ -243,34 +246,20 @@ export const DateInputField = (props: DateInputFieldProps) => {
         }}
         {...restProps}
       />
-      <ErrorHelperText error={errors} />
+      <LegacyErrorHelperText error={errors} />
     </MuiPickersUtilsProvider>
   );
 };
 
-export const TimeInputField = (props: any) => {
-  const { value, onChange, label } = props;
-  return (
-    <MuiPickersUtilsProvider utils={DateFnsUtils}>
-      <KeyboardTimePicker
-        margin="normal"
-        id="time-picker"
-        label={label}
-        value={value}
-        onChange={onChange}
-        KeyboardButtonProps={{
-          "aria-label": "change time",
-        }}
-      />
-    </MuiPickersUtilsProvider>
-  );
-};
-
-export const ErrorHelperText = (props: { error?: string }) => {
+/**
+ * Deprecated. Set `error` on the `FormField` component instead.
+ * Or use `FieldError` to break out of the design.
+ */
+export const LegacyErrorHelperText = (props: { error?: string }) => {
   const { error } = props;
   return (
     <span
-      className={`error-text mt-2 ml-1 transition-all duration-300 ${
+      className={`error-text text-red-500 mt-2 ml-1 transition-all duration-300 ${
         error ? "opacity-100" : "opacity-0"
       }`}
     >
@@ -279,54 +268,10 @@ export const ErrorHelperText = (props: { error?: string }) => {
   );
 };
 
-export const ShowRadioOptions = (props: OptionsProps) => {
-  const { options, onChange, values } = props;
-  return (
-    <div>
-      {options.map((opt: any, i: number) => {
-        const checked = values.findIndex((val: any) => val.answerId == opt.id);
-        return (
-          <div key={i}>
-            <Radio
-              checked={checked !== -1}
-              name="radioBtn"
-              value={opt.id}
-              onChange={onChange}
-            />{" "}
-            {opt.text}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
-export const ShowCheckboxOptions = (props: OptionsProps) => {
-  const { options, onChange, values } = props;
-  return (
-    <div>
-      {options.map((opt: any, i: number) => {
-        const checked = values.indexOf(opt.id) > -1;
-        return (
-          <div key={i}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={checked}
-                  value={opt.id}
-                  onChange={onChange}
-                />
-              }
-              label={opt.text}
-            />
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
-export const NativeSelectField = (props: any) => {
+/**
+ * Deprecated. Use `SelectFormField` instead.
+ */
+export const LegacyNativeSelectField = (props: any) => {
   const { options, variant, label, optionKey, optionValue, ...others } = props;
   return (
     <FormControl style={{ width: "100%" }} variant={variant} margin="dense">
@@ -348,7 +293,10 @@ export const NativeSelectField = (props: any) => {
   );
 };
 
-export const SelectField = (props: DefaultSelectInputProps) => {
+/**
+ * Deprecated. Use `SelectFormField` instead.
+ */
+export const LegacySelectField = (props: DefaultSelectInputProps) => {
   const {
     options,
     optionArray,
@@ -398,12 +346,15 @@ export const SelectField = (props: DefaultSelectInputProps) => {
             })}
         </Select>
       </FormControl>
-      {!!errors && <ErrorHelperText error={errors} />}
+      {!!errors && <LegacyErrorHelperText error={errors} />}
     </>
   );
 };
 
-export const MultiSelectField = (props: MultiSelectInputProps) => {
+/**
+ * Deprecated. Use `MultiSelectFormField` instead.
+ */
+export const LegacyMultiSelectField = (props: MultiSelectInputProps) => {
   const {
     errors,
     options,
@@ -474,12 +425,15 @@ export const MultiSelectField = (props: MultiSelectInputProps) => {
           })}
         </Select>
       </FormControl>
-      {!!errors && <ErrorHelperText error={errors} />}
+      {!!errors && <LegacyErrorHelperText error={errors} />}
     </>
   );
 };
 
-export const CheckboxField = (props: CheckboxProps) => {
+/**
+ * Deprecated.
+ */
+export const LegacyCheckboxField = (props: CheckboxProps) => {
   const { onChange, checked, name, style } = props;
   return (
     <FormControlLabel
@@ -487,52 +441,6 @@ export const CheckboxField = (props: CheckboxProps) => {
       control={<Checkbox checked={checked} name={name} onChange={onChange} />}
       {...props}
     />
-  );
-};
-
-interface AutoCompleteMultiFieldProps {
-  id: string;
-  options: Array<any>;
-  label: string;
-  variant: string;
-  placeholder: string;
-  errors?: string;
-  value: any;
-  onChange: (e: any, selected: any) => void;
-}
-
-export const AutoCompleteMultiField = (props: AutoCompleteMultiFieldProps) => {
-  const {
-    id,
-    options,
-    label,
-    variant,
-    placeholder,
-    errors = "",
-    onChange,
-    value,
-  } = props;
-  return (
-    <>
-      <Autocomplete
-        multiple
-        freeSolo
-        id={id}
-        options={options}
-        onChange={onChange}
-        value={value}
-        filterSelectedOptions
-        renderInput={(params: any) => (
-          <TextField
-            {...params}
-            variant={variant}
-            label={label}
-            placeholder={placeholder}
-          />
-        )}
-      />
-      <ErrorHelperText error={errors} />
-    </>
   );
 };
 
@@ -563,7 +471,18 @@ interface AutoCompleteAsyncFieldProps {
   disabled?: boolean;
 }
 
-export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
+/**
+ * Deprecated.
+ *
+ * Alternatives:
+ * - Use `useAsyncOptions` hook along with `AutocompleteFormField` or
+ * `AutocompleteMultiSelectFormField` instead.
+ * - Use `AutocompleteAsync` component directly.
+ *
+ */
+export const LegacyAutoCompleteAsyncField = (
+  props: AutoCompleteAsyncFieldProps
+) => {
   const {
     name,
     margin,
@@ -634,58 +553,7 @@ export const AutoCompleteAsyncField = (props: AutoCompleteAsyncFieldProps) => {
           />
         )}
       />
-      <ErrorHelperText error={errors} />
-    </>
-  );
-};
-
-export const PhoneNumberField = (props: any) => {
-  const {
-    label,
-    placeholder,
-    errors,
-    onChange,
-    onlyIndia,
-    value,
-    turnOffAutoFormat,
-    disabled,
-    bgColor,
-  } = props;
-  const countryRestriction = onlyIndia ? { onlyCountries: ["in"] } : {};
-  const onChangeHandler = debounce(onChange, 500);
-  const handleChange = (
-    value: string,
-    data: Partial<ICountryData>,
-    event: ChangeEvent<HTMLInputElement>,
-    formattedValue: string
-  ) => {
-    onChangeHandler(formattedValue);
-  };
-  return (
-    <>
-      {label && <InputLabel>{label}</InputLabel>}
-      <div className="flex items-center">
-        <PhoneInput
-          inputClass={` ${
-            bgColor || " bg-gray-200 "
-          }  py-3 text-sm border-gray-200 shadow-none focus:border-primary-400`}
-          countryCodeEditable={false}
-          value={value}
-          placeholder={placeholder}
-          onChange={handleChange}
-          country="in"
-          disabled={disabled}
-          autoFormat={!turnOffAutoFormat}
-          {...countryRestriction}
-        />
-        <div
-          className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
-          onClick={(_) => onChange("+91")}
-        >
-          <i className="fas fa-times text-red-600" />
-        </div>
-      </div>
-      <ErrorHelperText error={errors} />
+      <LegacyErrorHelperText error={errors} />
     </>
   );
 };

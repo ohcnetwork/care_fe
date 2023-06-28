@@ -3,48 +3,33 @@ import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 import moment from "moment";
-import GetAppIcon from "@material-ui/icons/GetApp";
-import { CSVLink } from "react-csv";
 import {
   listResourceRequests,
   downloadResourceRequests,
 } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import ListFilter from "./ListFilter";
-import CircularProgress from "@material-ui/core/CircularProgress";
-
 import { formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
 import { formatDate } from "../../Utils/utils";
 import useFilters from "../../Common/hooks/useFilters";
+import { ExportButton } from "../Common/Export";
+import ButtonV2 from "../Common/components/ButtonV2";
+import { useTranslation } from "react-i18next";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ListView() {
   const dispatch: any = useDispatch();
   const { qParams, Pagination, FilterBadges, advancedFilter, resultsPerPage } =
     useFilters({});
-  const [downloadFile, setDownloadFile] = useState("");
   const [data, setData] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  // state to change download button to loading while file is not ready
-  const [downloadLoading, setDownloadLoading] = useState(false);
+  const { t } = useTranslation();
 
-  const triggerDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const res = await dispatch(
-      downloadResourceRequests({ ...formatFilter(qParams), csv: 1 })
-    );
-    // file ready to download
-    setDownloadLoading(false);
-    setDownloadFile(res.data);
-    document.getElementById("resourceRequests-ALL")?.click();
-  };
   const onBoardViewBtnClick = () =>
     navigate("/resource/board-view", { query: qParams });
   const appliedFilters = formatFilter(qParams);
@@ -205,42 +190,27 @@ export default function ListView() {
     <div className="flex flex-col h-screen px-2 pb-2">
       <div className="md:flex md:items-center md:justify-between px-4">
         <PageTitle
-          title={"Resource"}
-          hideBack={true}
+          title="Resource"
+          hideBack
           componentRight={
-            downloadLoading ? (
-              <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
-            ) : (
-              <GetAppIcon
-                className="cursor-pointer ml-2 mt-2"
-                onClick={triggerDownload}
-              />
-            )
+            <ExportButton
+              action={() =>
+                downloadResourceRequests({ ...appliedFilters, csv: 1 })
+              }
+              filenamePrefix="resource_requests"
+            />
           }
           breadcrumbs={false}
         />
 
         <div className="w-32" />
-        <div className="my-2 md:my-0">
-          <button
-            className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-            onClick={onBoardViewBtnClick}
-          >
-            <i
-              className="fa fa-list mr-1 transform rotate-90"
-              aria-hidden="true"
-            ></i>
-            Board View
-          </button>
-        </div>
-        <div className="flex items-start gap-2">
-          <button
-            className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-            onClick={() => advancedFilter.setShow(true)}
-          >
-            <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-            <span>Filters</span>
-          </button>
+        <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 w-full lg:w-fit">
+          <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
+            <CareIcon className="care-l-list-ul transform rotate-90" />
+            {t("board_view")}
+          </ButtonV2>
+
+          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
         </div>
       </div>
 
@@ -268,19 +238,11 @@ export default function ListView() {
           </div>
         )}
       </div>
-
-      <CSVLink
-        data={downloadFile}
-        filename={`resource-requests--${now}.csv`}
-        target="_blank"
-        className="hidden"
-        id={"resourceRequests-ALL"}
+      <ListFilter
+        {...advancedFilter}
+        showResourceStatus={true}
+        key={window.location.search}
       />
-      <SlideOver {...advancedFilter}>
-        <div className="bg-white min-h-screen p-4">
-          <ListFilter {...advancedFilter} showResourceStatus={true} />
-        </div>
-      </SlideOver>
     </div>
   );
 }

@@ -1,19 +1,13 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  InputLabel,
-} from "@material-ui/core";
-import { DateInputField, SelectField } from "../Common/HelperInputFields";
-import React, { useReducer, useState } from "react";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { useReducer, useState } from "react";
 
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
+import DateFormField from "../Form/FormFields/DateFormField";
 import { DupPatientModel } from "./models";
+import { FieldLabel } from "../Form/FormFields/FormField";
 import { OptionsType } from "../../Common/constants";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import moment from "moment";
 import { navigate } from "raviger";
 import { transferPatient } from "../../Redux/actions";
@@ -40,6 +34,9 @@ const initialState = {
   form: { ...initForm },
   errors: { ...initError },
 };
+
+const getDate = (value: any) =>
+  value && moment(value).isValid() && moment(value).toDate();
 
 const patientFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
@@ -74,14 +71,14 @@ const TransferPatientDialog = (props: Props) => {
 
   const handleChange = (e: any) => {
     const form = { ...state.form };
-    form[e.target.name] = e.target.value;
+    form[e.name] = e.value;
     dispatch({ type: "set_form", form });
   };
 
-  const handleDateChange = (date: any, field: string) => {
-    if (moment(date).isValid()) {
+  const handleDateChange = (e: any) => {
+    if (moment(e.value).isValid()) {
       const form = { ...state.form };
-      form[field] = date;
+      form[e.name] = moment(e.value).format("YYYY-MM-DD");
       dispatch({ type: "set_form", form });
     }
   };
@@ -99,7 +96,7 @@ const TransferPatientDialog = (props: Props) => {
           return;
         case "date_of_birth":
           if (!state.form[field]) {
-            errors[field] = "Please enter date in DD/MM/YYYY format";
+            errors[field] = "Please enter date in YYYY/MM/DD format";
             invalidForm = true;
           }
           return;
@@ -144,9 +141,8 @@ const TransferPatientDialog = (props: Props) => {
   };
 
   return (
-    <Dialog open={true} maxWidth={"sm"}>
-      <DialogTitle id="test-sample-title">Patient Transfer Form</DialogTitle>
-      <DialogContent>
+    <div>
+      <div>
         <div className="grid gap-4 grid-cols-1">
           <div>
             <p className="leading-relaxed">
@@ -156,53 +152,47 @@ const TransferPatientDialog = (props: Props) => {
           </div>
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
             <div>
-              <InputLabel>Patient*</InputLabel>
-              <SelectField
+              <FieldLabel required className="text-sm">
+                Patient
+              </FieldLabel>
+              <SelectFormField
+                id="patient"
                 name="patient"
-                variant="outlined"
-                margin="dense"
-                showEmpty={true}
-                value={state.form.patient}
+                required
+                placeholder="Select patient"
                 options={patientOptions}
+                optionLabel={(patient) => patient.text}
+                optionValue={(patient) => patient.id}
+                value={state.form.patient}
                 onChange={handleChange}
-                errors={state.errors.patient}
+                error={state.errors.patient}
               />
             </div>
             <div>
-              <InputLabel>Date of birth*</InputLabel>
-              <DateInputField
-                fullWidth={true}
-                value={state.form.date_of_birth}
-                onChange={(date) => handleDateChange(date, "date_of_birth")}
-                errors={state.errors.date_of_birth}
-                inputVariant="outlined"
-                margin="dense"
-                openTo="year"
-                disableFuture={true}
+              <DateFormField
+                required
+                name="date_of_birth"
+                label="Date of birth"
+                value={getDate(state.form.date_of_birth)}
+                disableFuture
+                onChange={handleDateChange}
+                position="LEFT"
+                placeholder="Entry Date"
+                error={state.errors.date_of_birth}
               />
             </div>
           </div>
         </div>
-      </DialogContent>
-      <DialogActions className="justify-between flex flex-col md:flex-row">
-        <Button
-          disabled={isLoading}
-          color="secondary"
-          onClick={() => handleCancel()}
-        >
-          Cancel
-        </Button>
-        <Button
+      </div>
+      <div className="justify-between flex flex-col md:flex-row gap-2 pt-4">
+        <Cancel onClick={handleCancel} disabled={isLoading} />
+        <Submit
           disabled={isLoading}
           onClick={handleSubmit}
-          color="primary"
-          variant="contained"
-          startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-        >
-          Transfer Suspect / Patient
-        </Button>
-      </DialogActions>
-    </Dialog>
+          label="Transfer Suspect / Patient"
+        />
+      </div>
+    </div>
   );
 };
 

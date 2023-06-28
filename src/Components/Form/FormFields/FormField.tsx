@@ -1,18 +1,29 @@
+import { classNames } from "../../../Utils/utils";
 import { FieldError } from "../FieldValidators";
-import { FormFieldBaseProps, resolveFormFieldError } from "./Utils";
+import { FormFieldBaseProps } from "./Utils";
 
 type LabelProps = {
+  id?: string | undefined;
   required?: boolean;
   htmlFor?: string;
   children: React.ReactNode;
   className?: string | undefined;
+  noPadding?: boolean;
 };
 
 export const FieldLabel = (props: LabelProps) => {
   return (
-    <label className={`field-label ${props.className}`} htmlFor={props.htmlFor}>
+    <label
+      id={props.id}
+      className={classNames(
+        "block text-gray-900 text-base font-normal",
+        !props.noPadding && "mb-2",
+        props.className
+      )}
+      htmlFor={props.htmlFor}
+    >
       {props.children}
-      {props.required && <span className="text-red-500">{" *"}</span>}
+      {props.required && <span className="text-danger-500">{" *"}</span>}
     </label>
   );
 };
@@ -24,34 +35,38 @@ type ErrorProps = {
 export const FieldErrorText = ({ error, className }: ErrorProps) => {
   return (
     <span
-      className={`field-error ${
-        error ? "opacity-100" : "opacity-0"
-      } transition-opacity duration-300 ${className}`}
+      className={classNames(
+        "error-text font-medium tracking-wide text-danger-500 text-xs mt-2 ml-1 transition-opacity duration-300",
+        error ? "opacity-100" : "opacity-0",
+        className
+      )}
     >
       {error}
     </span>
   );
 };
 
-const FormField = (props: {
-  props: FormFieldBaseProps<any>;
+const FormField = ({
+  field,
+  children,
+}: {
+  field: FormFieldBaseProps<any>;
   children: React.ReactNode;
+  className?: string;
 }) => {
-  const { id, className, required, label, labelClassName, errorClassName } =
-    props.props;
-
   return (
-    <div className={className}>
-      {label && (
-        <FieldLabel htmlFor={id} required={required} className={labelClassName}>
-          {label}
+    <div className={field.className}>
+      {field.label && (
+        <FieldLabel
+          htmlFor={field.id}
+          required={field.required}
+          className={field.labelClassName}
+        >
+          {field.label}
         </FieldLabel>
       )}
-      {props.children}
-      <FieldErrorText
-        error={resolveFormFieldError(props.props)}
-        className={errorClassName}
-      />
+      <div className={field.className}>{children}</div>
+      <FieldErrorText error={field.error} className={field.errorClassName} />
     </div>
   );
 };

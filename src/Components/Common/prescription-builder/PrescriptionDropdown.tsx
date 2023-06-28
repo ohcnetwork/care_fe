@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Tooltip } from "@material-ui/core";
 import { classNames } from "../../../Utils/utils";
 
 export function PrescriptionDropdown(props: {
@@ -11,6 +10,8 @@ export function PrescriptionDropdown(props: {
   type?: "string" | "number";
   min?: number;
   className?: string;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }) {
   const { options, tips, value, setValue } = props;
   const [open, setOpen] = useState(false);
@@ -37,15 +38,14 @@ export function PrescriptionDropdown(props: {
       <input
         type={props.type}
         placeholder={props.placeholder}
-        className={
-          "w-full relative focus:ring-primary-500 focus:border-primary-500 border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white " +
-          (props.className || "")
-        }
+        className={`relative cui-input-base py-2 ${props.className}`}
         onClick={() => setOpen(!open)}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         required
         min={props.min}
+        onFocus={props.onFocus}
+        onBlur={props.onBlur}
       />
       <div
         ref={dropRef}
@@ -70,24 +70,15 @@ export function PrescriptionDropdown(props: {
               </button>
 
               {tips && tips[option] && (
-                <Tooltip
-                  title={
-                    <span className="text-sm font-semibold">
-                      {tips[option]}
-                    </span>
-                  }
-                  placement="right-start"
-                  arrow
-                  onClick={(event) => event.stopPropagation()}
-                  enterTouchDelay={0}
+                <button
+                  onClick={(event) => event.preventDefault()}
+                  className="rounded px-4 tooltip"
                 >
-                  <button
-                    onClick={(event) => event.preventDefault()}
-                    className="rounded px-4"
-                  >
-                    <i className="fa-solid fa-circle-info"></i>
-                  </button>
-                </Tooltip>
+                  <span className="tooltip-text tooltip-right">
+                    {tips[option]}
+                  </span>
+                  <i className="fa-solid fa-circle-info"></i>
+                </button>
               )}
             </div>
           );

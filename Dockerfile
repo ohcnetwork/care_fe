@@ -1,7 +1,9 @@
 #build-stage
-FROM node:lts-buster-slim as build-stage
+FROM node:18-buster-slim as build-stage
 
 WORKDIR /app
+
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 
 COPY package.json package-lock.json ./
 

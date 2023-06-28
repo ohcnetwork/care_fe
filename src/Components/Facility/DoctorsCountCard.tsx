@@ -1,29 +1,29 @@
 import React, { useState } from "react";
-import { navigate } from "raviger";
 import { DoctorModal } from "./models";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
-import { RoleButton } from "../Common/RoleButton";
 import { useDispatch } from "react-redux";
 import { deleteDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-} from "@material-ui/core";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
+import { DoctorCapacity } from "./DoctorCapacity";
+import DialogModal from "../Common/Dialog";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ButtonV2 from "../Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
 interface DoctorsCountProps extends DoctorModal {
-  facilityId: number;
+  facilityId: string;
   removeDoctor: (doctorId: number | undefined) => void;
+  handleUpdate: () => void;
 }
 
 const DoctorsCountCard = (props: DoctorsCountProps) => {
   const specialization = DOCTOR_SPECIALIZATION.find((i) => i.id === props.area);
   const dispatchAction: any = useDispatch();
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<number>(-1);
+
   const handleDeleteSubmit = async () => {
     if (props.area) {
       const res = await dispatchAction(
@@ -62,54 +62,56 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
             <h2 className="font-bold text-xl mt-2">{props.count}</h2>
           </div>
         </div>
-        <div className="bg-[#FBF9FB] py-2 px-3 flex justify-end gap-8 border-t border-[#D2D6DC]">
-          <RoleButton
-            className="font-medium"
-            handleClickCB={() =>
-              navigate(`/facility/${props.facilityId}/doctor/${props.area}`)
-            }
-            disableFor="readOnly"
-            buttonType="html"
+        <div className="bg-[#FBF9FB] py-2 px-3 flex justify-end gap-4 border-t border-[#D2D6DC]">
+          <ButtonV2
+            variant="secondary"
+            ghost
+            onClick={() => {
+              setSelectedId(props.area || 0);
+              setOpen(true);
+            }}
+            authorizeFor={NonReadOnlyUsers}
           >
             Edit
-          </RoleButton>
-          <RoleButton
-            className="font-medium text-[#C81E1E]"
-            handleClickCB={() => setOpenDeleteDialog(true)}
-            disableFor="readOnly"
-            buttonType="html"
+          </ButtonV2>
+          <ButtonV2
+            variant="danger"
+            ghost
+            onClick={() => setOpenDeleteDialog(true)}
+            authorizeFor={NonReadOnlyUsers}
           >
             Delete
-          </RoleButton>
+          </ButtonV2>
         </div>
-        <Dialog
-          maxWidth={"md"}
-          open={openDeleteDialog}
+        <ConfirmDialogV2
+          show={openDeleteDialog}
           onClose={handleDeleteClose}
-        >
-          <DialogTitle className="flex justify-center bg-primary-100">
-            Are you sure you want to delete {specialization?.text} doctors?
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              You will not be able to access this docter specialization type
-              later.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <button onClick={handleDeleteClose} className="btn btn-primary">
-              Cancel
-            </button>
-            <button
-              onClick={handleDeleteSubmit}
-              id="facility-delete-confirm"
-              className="btn btn-danger"
-            >
-              Delete
-            </button>
-          </DialogActions>
-        </Dialog>
+          title={`Delete ${specialization?.text} doctors`}
+          description="You will not be able to access this docter specialization type later."
+          action="Delete"
+          variant="danger"
+          onConfirm={handleDeleteSubmit}
+        />
       </div>
+      {open && (
+        <DialogModal
+          show={open}
+          onClose={() => setOpen(false)}
+          title="Update Doctor Capacity"
+        >
+          <DoctorCapacity
+            facilityId={props.facilityId}
+            handleClose={() => {
+              setOpen(false);
+            }}
+            handleUpdate={() => {
+              props.handleUpdate();
+              setOpen(false);
+            }}
+            id={selectedId}
+          />
+        </DialogModal>
+      )}
     </div>
   );
 };

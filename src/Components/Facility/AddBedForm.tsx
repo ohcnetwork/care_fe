@@ -1,4 +1,4 @@
-import { Card, CardContent, InputLabel } from "@material-ui/core";
+import Card from "../../CAREUI/display/Card";
 import loadable from "@loadable/component";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -10,17 +10,14 @@ import {
   updateFacilityBed,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  MultilineInputField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import TextFormField from "../Form/FormFields/TextFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface BedFormProps {
   facilityId: string;
@@ -92,6 +89,11 @@ export const AddBedForm = (props: BedFormProps) => {
     return isValid;
   };
 
+  const handleCancel = () =>
+    navigate(`/facility/${facilityId}/location/${locationId}/beds`, {
+      replace: true,
+    });
+
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
 
@@ -131,15 +133,9 @@ export const AddBedForm = (props: BedFormProps) => {
 
   return (
     <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle
+      <Page
         title={headerText}
-        backButtonCB={() => {
-          navigate(`/facility/${facilityId}/location/${locationId}/beds`, {
-            replace: true,
-          });
-
-          return 0;
-        }}
+        backUrl={`/facility/${facilityId}/location/${locationId}/beds`}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [locationId]: {
@@ -153,86 +149,61 @@ export const AddBedForm = (props: BedFormProps) => {
             },
           }),
         }}
-      />
-      <div className="mt-10">
-        <Card>
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1">
-                <div>
-                  <InputLabel id="name">Name*</InputLabel>
-                  <TextInputField
-                    name="name"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    errors={errors.name}
-                  />
-                </div>
-                <div>
-                  <InputLabel id="description">Description</InputLabel>
-                  <MultilineInputField
-                    rows={5}
-                    name="description"
-                    variant="outlined"
-                    margin="dense"
-                    type="float"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    errors={errors.description}
-                  />
-                </div>
+      >
+        <div className="mt-10">
+          <Card>
+            <form onSubmit={(e) => handleSubmit(e)}>
+              <div className="md:p-4">
+                <div className="mt-2 grid gap-4 grid-cols-1">
+                  <div>
+                    <TextFormField
+                      name="name"
+                      type="text"
+                      label="Name"
+                      id="name"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.value)}
+                      error={errors.name}
+                    />
+                  </div>
+                  <div>
+                    <TextAreaFormField
+                      rows={5}
+                      label="Description"
+                      name="description"
+                      value={description}
+                      onChange={(e) => setDescription(e.value)}
+                      error={errors.description}
+                    />
+                  </div>
+                  <div>
+                    <SelectFormField
+                      id="bed-type"
+                      name="bed_type"
+                      label="Bed Type"
+                      required
+                      options={LOCATION_BED_TYPES}
+                      optionValue={(bedType) => bedType.id}
+                      optionLabel={(bed) => bed.name}
+                      value={bedType}
+                      onChange={({ value }) => {
+                        setBedType(value);
+                      }}
+                      error={errors.bedType}
+                    />
+                  </div>
 
-                <div>
-                  <InputLabel id="bedType">Bed Type*</InputLabel>
-                  <SelectField
-                    id="bed-type"
-                    fullWidth
-                    name="bed_type"
-                    placeholder=""
-                    variant="outlined"
-                    margin="dense"
-                    options={[
-                      {
-                        id: "",
-                        name: "Select",
-                      },
-                      ...LOCATION_BED_TYPES,
-                    ]}
-                    optionValue="name"
-                    value={bedType}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setBedType(e.target.value)
-                    }
-                    errors={errors.bedType}
-                  />
-                </div>
-
-                <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-                  <ButtonV2
-                    variant="secondary"
-                    onClick={() =>
-                      navigate(
-                        `/facility/${facilityId}/location/${locationId}/beds`,
-                        { replace: true }
-                      )
-                    }
-                  >
-                    <CareIcon className="care-l-times-circle h-5" />
-                    Cancel
-                  </ButtonV2>
-                  <ButtonV2 type="submit" onClick={(e) => handleSubmit(e)}>
-                    <CareIcon className="care-l-check-circle h-5" />
-                    {buttonText}
-                  </ButtonV2>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+                    <Cancel onClick={handleCancel} />
+                    <Submit onClick={handleSubmit} label={buttonText} />
+                  </div>
                 </div>
               </div>
-            </CardContent>
-          </form>
-        </Card>
-      </div>
+            </form>
+          </Card>
+        </div>
+      </Page>
     </div>
   );
 };

@@ -4,10 +4,11 @@ import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getMinQuantity, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
-import { Link, navigate } from "raviger";
-import { RoleButton } from "../Common/RoleButton";
+import { MinQuantityRequiredModal } from "./MinQuantityRequiredModal";
+import ButtonV2 from "../Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function MinQuantityList(props: any) {
   const { facilityId }: any = props;
@@ -20,6 +21,9 @@ export default function MinQuantityList(props: any) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [facilityName, setFacilityName] = useState("");
+  const [showMinQuantityRequiredModal, setShowMinQuantityRequiredModal] =
+    useState(false);
+  const [selectedItem, setSelectedItem] = useState({ id: 0, item_id: 0 });
   const limit = 14;
 
   const fetchData = useCallback(
@@ -75,11 +79,19 @@ export default function MinQuantityList(props: any) {
               {inventoryItem.item_object?.name}
             </p>
           </div>
-          <Link
-            href={`/facility/${facilityId}/inventory/${inventoryItem.id}/update/${inventoryItem.item_object?.id}`}
+          <ButtonV2
+            ghost={true}
+            className="sm:hidden hover:bg-gray-200 w-full"
+            onClick={() => {
+              setSelectedItem({
+                id: inventoryItem.id,
+                item_id: inventoryItem.item_object?.id,
+              });
+              setShowMinQuantityRequiredModal(true);
+            }}
           >
             <div className="sm:hidden flex justify-between items-center w-full">
-              <div className="flex flex-col">
+              <div className="flex flex-col text-start">
                 <p className="text-gray-900 whitespace-nowrap font-semibold">
                   {inventoryItem.item_object?.name}
                 </p>
@@ -106,30 +118,28 @@ export default function MinQuantityList(props: any) {
                 </svg>
               </div>
             </div>
-          </Link>
+          </ButtonV2>
         </td>
         <td className="px-5 py-5 border-b border-gray-200 text-sm sm:flex hidden w-full justify-between">
           <p className="text-gray-900 whitespace-nowrap lowercase mt-2">
             {inventoryItem.min_quantity}{" "}
             {inventoryItem.item_object?.default_unit?.name}
           </p>
-          <RoleButton
-            className=" bg-primary-500 hover:bg-primary-600 text-white"
-            materialButtonProps={{
-              variant: "contained",
-              color: "primary",
-              size: "medium",
+          <ButtonV2
+            variant="secondary"
+            ghost
+            border
+            onClick={() => {
+              setSelectedItem({
+                id: inventoryItem.id,
+                item_id: inventoryItem.item_object?.id,
+              });
+              setShowMinQuantityRequiredModal(true);
             }}
-            handleClickCB={() =>
-              navigate(
-                `/facility/${facilityId}/inventory/${inventoryItem.id}/update/${inventoryItem.item_object?.id}`
-              )
-            }
-            disableFor="readOnly"
-            buttonType="materialUI"
+            authorizeFor={NonReadOnlyUsers}
           >
-            UPDATE
-          </RoleButton>
+            Update
+          </ButtonV2>
         </td>
       </tr>
     ));
@@ -138,7 +148,7 @@ export default function MinQuantityList(props: any) {
       <tr className="bg-white">
         <td
           colSpan={3}
-          className="px-5 py-5 border-b border-gray-200 text-center"
+          className="pxf-5 py-5 border-b border-gray-200 text-center"
         >
           <p className="text-gray-500 whitespace-nowrap">
             No item with minimum quantity set
@@ -192,41 +202,45 @@ export default function MinQuantityList(props: any) {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Minimum Quantity Required"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          min_quantity: {
-            name: "Min Quantity",
-            uri: `/facility/${facilityId}/inventory/min_quantity/list`,
-          },
-          list: {
-            style: "pointer-events-none",
-          },
-        }}
-      />
+    <Page
+      title="Minimum Quantity Required"
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        min_quantity: {
+          name: "Min Quantity",
+          uri: `/facility/${facilityId}/inventory/min_quantity/list`,
+        },
+        list: {
+          style: "pointer-events-none",
+        },
+      }}
+      backUrl={`/facility/${facilityId}/inventory`}
+    >
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8">
-          <RoleButton
+          <ButtonV2
             className="ml-2"
-            materialButtonProps={{
-              variant: "contained",
-              color: "primary",
-              size: "small",
-            }}
-            handleClickCB={() =>
-              navigate(`/facility/${facilityId}/inventory/min_quantity/set`)
-            }
-            disableFor="readOnly"
-            buttonType="materialUI"
+            href={`/facility/${facilityId}/inventory/min_quantity/set`}
+            authorizeFor={NonReadOnlyUsers}
           >
             Set Min Quantity
-          </RoleButton>
+          </ButtonV2>
           {inventoryItem}
         </div>
       </div>
-    </div>
+      {showMinQuantityRequiredModal && (
+        <MinQuantityRequiredModal
+          facilityId={facilityId}
+          inventoryId={selectedItem.id}
+          itemId={selectedItem.item_id}
+          show={showMinQuantityRequiredModal}
+          handleClose={() => setShowMinQuantityRequiredModal(false)}
+          handleUpdate={() => {
+            fetchData({ aborted: false });
+            setShowMinQuantityRequiredModal(false);
+          }}
+        />
+      )}
+    </Page>
   );
 }

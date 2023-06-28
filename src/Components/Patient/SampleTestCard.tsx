@@ -1,4 +1,3 @@
-import { CardContent } from "@material-ui/core";
 import { navigate } from "raviger";
 import React, { useState } from "react";
 import { SampleTestModel } from "./models";
@@ -74,62 +73,70 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
   };
 
   return (
-    <div className="block border rounded-lg bg-white shadow cursor-pointer hover:border-primary-500 text-black mt-4">
-      <CardContent>
-        <div
-          onClick={(_e) =>
-            navigate(
-              `/facility/${facilityId}/patient/${patientId}/sample/${itemData.id}`
-            )
-          }
-          className="grid gap-4 grid-cols-1 md:grid-cols-4 ml-2 mt-2"
-        >
-          <div>
-            <div className="sm:col-span-1">
-              <div className="text-sm leading-5 font-semibold text-zinc-400">
-                Status{" "}
-              </div>
-              <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
-                {_.startCase(_.camelCase(itemData.status))}
-              </div>
+    <div
+      className={`${
+        itemData.result === "POSITIVE"
+          ? "hover:border-red-700 border-red-500 bg-red-100"
+          : itemData.result === "NEGATIVE"
+          ? "hover:border-primary-700 border-primary-500 bg-primary-100"
+          : "bg-white hover:border-primary-500"
+      } block border rounded-lg bg-white shadow cursor-pointer text-black mt-4 p-4`}
+    >
+      <div
+        onClick={(_e) =>
+          navigate(
+            `/facility/${facilityId}/patient/${patientId}/sample/${itemData.id}`
+          )
+        }
+        className="grid gap-4 grid-cols-1 md:grid-cols-4 ml-2 mt-2"
+      >
+        <div>
+          <div className="sm:col-span-1">
+            <div className="text-sm leading-5 font-semibold text-zinc-400">
+              Status{" "}
             </div>
-          </div>
-          <div>
-            <div className="sm:col-span-1">
-              <div className="text-sm leading-5 font-semibold text-zinc-400">
-                Sample Type{" "}
-              </div>
-              <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
-                {itemData.sample_type !== "OTHER TYPE"
-                  ? itemData.sample_type
-                  : itemData.sample_type_other}
-              </div>
-            </div>
-          </div>
-          {itemData.fast_track && (
-            <div>
-              <div className="sm:col-span-1">
-                <div className="text-sm leading-5 font-semibold text-zinc-400">
-                  Fast-Track{" "}
-                </div>
-                <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
-                  {itemData.fast_track}
-                </div>
-              </div>
-            </div>
-          )}
-          <div>
-            <div className="sm:col-span-1">
-              <div className="text-sm leading-5 font-semibold text-zinc-400">
-                Result{" "}
-              </div>
-              <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
-                {_.startCase(_.camelCase(itemData.result))}
-              </div>
+            <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+              {_.startCase(_.camelCase(itemData.status))}
             </div>
           </div>
         </div>
-        <div className="mt-4 flex flex-col md:flex-row justify-between gap-4 ml-2">
+        <div>
+          <div className="sm:col-span-1">
+            <div className="text-sm leading-5 font-semibold text-zinc-400">
+              Sample Type{" "}
+            </div>
+            <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+              {itemData.sample_type !== "OTHER TYPE"
+                ? itemData.sample_type
+                : itemData.sample_type_other}
+            </div>
+          </div>
+        </div>
+        {itemData.fast_track && (
+          <div>
+            <div className="sm:col-span-1">
+              <div className="text-sm leading-5 font-semibold text-zinc-400">
+                Fast-Track{" "}
+              </div>
+              <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+                {itemData.fast_track}
+              </div>
+            </div>
+          </div>
+        )}
+        <div>
+          <div className="sm:col-span-1">
+            <div className="text-sm leading-5 font-semibold text-zinc-400">
+              Result{" "}
+            </div>
+            <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+              {_.startCase(_.camelCase(itemData.result))}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-col md:flex-row justify-between gap-4 m-2">
+        <div className="flex flex-col md:flex-row justify-between gap-4">
           <div>
             <div className="text-gray-700 text-sm mb-2">
               <span className="text-black font-medium">Date of Sample:</span>{" "}
@@ -145,7 +152,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             </div>
           </div>
         </div>
-        <div className="flex flex-col mt-6 gap-2 ml-2">
+        <div className="flex flex-col gap-2">
           {
             <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
               Created:{" "}
@@ -163,33 +170,33 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             />
           </div>
         </div>
-        <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between mx-2">
-          {itemData.status === "APPROVED" && (
-            <ButtonV2
-              onClick={(e) => {
-                e.stopPropagation();
-                handleApproval(4, itemData);
-              }}
-              className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
-            >
-              Send to Collection Centre
-            </ButtonV2>
-          )}
+      </div>
+      <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between mx-2">
+        {itemData.status === "APPROVED" && (
           <ButtonV2
-            onClick={() => showUpdateStatus(itemData)}
-            className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
-            authorizeFor={NonReadOnlyUsers}
-          >
-            Update Sample Test Status
-          </ButtonV2>
-          <ButtonV2
-            onClick={(_e) => navigate(`/sample/${itemData.id}`)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleApproval(4, itemData);
+            }}
             className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
           >
-            Sample Report
+            Send to Collection Centre
           </ButtonV2>
-        </div>
-      </CardContent>
+        )}
+        <ButtonV2
+          onClick={() => showUpdateStatus(itemData)}
+          className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+          authorizeFor={NonReadOnlyUsers}
+        >
+          Update Sample Test Status
+        </ButtonV2>
+        <ButtonV2
+          onClick={(_e) => navigate(`/sample/${itemData.id}`)}
+          className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+        >
+          Sample Report
+        </ButtonV2>
+      </div>
       {statusDialog.show && (
         <UpdateStatusDialog
           sample={statusDialog.sample}

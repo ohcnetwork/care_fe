@@ -1,5 +1,4 @@
 import React, { Dispatch, useEffect } from "react";
-import { InputLabel } from "@material-ui/core";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { AssetData } from "../AssetTypes";
@@ -10,8 +9,9 @@ import {
 } from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
-import ButtonV2 from "../../Common/components/ButtonV2";
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+import { Submit } from "../../Common/components/ButtonV2";
+import { FieldLabel } from "../../Form/FormFields/FormField";
+
 const saveLink = (assetId: string, bedId: string, dispatch: Dispatch<any>) => {
   dispatch(createAssetBed({}, assetId, bedId));
   Notification.Success({ msg: "AssetBed Link created successfully" });
@@ -77,23 +77,22 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
     >
       <div className="flex flex-col">
         <div className="w-full">
-          <InputLabel id="asset-type">Bed</InputLabel>
+          <FieldLabel className="">Bed</FieldLabel>
           <BedSelect
             name="bed"
             setSelected={(selected) => setBed(selected as BedModel)}
             selected={bed}
-            errors=""
+            error=""
             multiple={false}
-            margin="dense"
             location={asset?.location_object?.id}
             facility={asset?.location_object?.facility?.id}
             className="w-full"
           />
         </div>
-        <ButtonV2 className="shrink-0 w-full" variant="primary" type="submit">
+        <Submit className="shrink-0 w-full mt-6">
           <i className="fas fa-bed-pulse" />
           {updateLink ? "Update Bed" : "Save Bed"}
-        </ButtonV2>
+        </Submit>
       </div>
     </form>
   );

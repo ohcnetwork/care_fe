@@ -25,7 +25,11 @@ const createSvg = (className) => {
   el.setAttribute("viewBox", `0 0 ${icon[0]} ${icon[0]}`);
 
   const path = document.createElementNS(xmlns, "path");
-  path.setAttribute("fill", "currentColor");
+  if (icon[2] === false) {
+    path.setAttribute("stroke", "currentColor");
+    path.setAttribute("stroke-width", `${icon[3]}`);
+  }
+  path.setAttribute("fill", icon[2] === false ? "none" : "currentColor");
   path.setAttribute("d", icon[1]);
   el.appendChild(path);
   return el;

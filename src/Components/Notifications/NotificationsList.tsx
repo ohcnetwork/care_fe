@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   getNotifications,
@@ -8,22 +8,23 @@ import {
   updateUserPnconfig,
   getPublicKey,
 } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
-import { SelectField } from "../Common/HelperInputFields";
 import { useSelector } from "react-redux";
-import { Button, CircularProgress } from "@material-ui/core";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
 import { classNames } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-
 import * as Sentry from "@sentry/browser";
 import { formatDate } from "../../Utils/utils";
 import {
   ShrinkedSidebarItem,
   SidebarItem,
 } from "../Common/Sidebar/SidebarItem";
+import SlideOver from "../../CAREUI/interactive/SlideOver";
+import ButtonV2 from "../Common/components/ButtonV2";
+import SelectMenuV2 from "../Form/SelectMenuV2";
+import { useTranslation } from "react-i18next";
+import CircularProgress from "../Common/components/CircularProgress";
 
 const RESULT_LIMIT = 14;
 
@@ -41,6 +42,7 @@ const NotificationTile = ({
   const dispatch: any = useDispatch();
   const [result, setResult] = useState(notification);
   const [isMarkingAsRead, setIsMarkingAsRead] = useState(false);
+  const { t } = useTranslation();
 
   const handleMarkAsRead = async () => {
     setIsMarkingAsRead(true);
@@ -85,7 +87,7 @@ const NotificationTile = ({
         setShowNotifications(false);
       }}
       className={classNames(
-        "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-150 cursor-pointer",
+        "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-200 rounded md:rounded-lg cursor-pointer",
         result.read_at && "text-gray-500"
       )}
     >
@@ -93,38 +95,47 @@ const NotificationTile = ({
         <div className="text-lg font-bold">
           {getNotificationTitle(result.event)}
         </div>
-        <div className="">
+        <div>
           <i className={`${getNotificationIcon(result.event)} fa-2x `} />
         </div>
       </div>
       <div className="text-sm py-1">{result.message}</div>
-      <div className="flex justify-between items-end">
-        <button
-          className={`${
-            result.read_at && "invisible"
-          } h-min inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0`}
-          disabled={isMarkingAsRead}
-          onClick={(event) => {
-            event.stopPropagation();
-            handleMarkAsRead();
-          }}
-        >
-          {isMarkingAsRead ? (
-            <Spinner />
-          ) : (
-            <i className="fa-solid fa-check mr-2 text-primary-500" />
-          )}
-          Mark as Read
-        </button>
-        <div>
-          <div className="text-xs text-right py-1">
-            {formatDate(result.created_date)}
-          </div>
-          <div className="mt-2 text-right min-h-min">
-            <button className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 text-black border rounded text-xs flex-shrink-0">
-              <i className="fas fa-eye mr-2 text-primary-500" /> Visit Link
-            </button>
-          </div>
+      <div className="flex flex-col justify-end gap-2">
+        <div className="text-xs text-right py-1 text-secondary-700">
+          {formatDate(result.created_date)}
+        </div>
+        <div className="flex justify-end gap-2">
+          <ButtonV2
+            className={classNames(
+              "font-semibold px-2 py-1 bg-white hover:bg-secondary-300",
+              result.read_at && "invisible"
+            )}
+            variant="secondary"
+            border
+            ghost
+            disabled={isMarkingAsRead}
+            onClick={(event) => {
+              event.stopPropagation();
+              handleMarkAsRead();
+            }}
+          >
+            <CareIcon
+              className={
+                isMarkingAsRead
+                  ? "care-l-spinner animate-spin"
+                  : "care-l-envelope-check"
+              }
+            />
+            <span className="text-xs">{t("mark_as_read")}</span>
+          </ButtonV2>
+          <ButtonV2
+            border
+            ghost
+            className="font-semibold px-2 py-1 bg-white hover:bg-secondary-300 flex-shrink-0"
+          >
+            <CareIcon className="care-l-envelope-open" />
+            <span className="text-xs">{t("open")}</span>
+          </ButtonV2>
         </div>
       </div>
     </div>
@@ -134,11 +145,13 @@ const NotificationTile = ({
 interface NotificationsListProps {
   shrinked: boolean;
   onClickCB?: () => void;
+  handleOverflow: any;
 }
 
 export default function NotificationsList({
   shrinked,
   onClickCB,
+  handleOverflow,
 }: NotificationsListProps) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -148,23 +161,24 @@ export default function NotificationsList({
   const [isLoading, setIsLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [open, setOpen] = useState(false);
   const [reload, setReload] = useState(false);
   const [eventFilter, setEventFilter] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setShowNotifications(false);
+        setOpen(false);
       }
     }
-    if (showNotifications) document.addEventListener("keydown", handleKeyDown);
+    if (open) document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [showNotifications]);
+  }, [open]);
 
   const intialSubscriptionState = async () => {
     try {
@@ -179,7 +193,6 @@ export default function NotificationsList({
         setIsSubscribed("SubscribedOnAnotherDevice");
       }
     } catch (error) {
-      console.error(`Service worker error...Details: ${error}`);
       Sentry.captureException(error);
     }
   };
@@ -198,22 +211,22 @@ export default function NotificationsList({
     if (status === "NotSubscribed") {
       return (
         <>
-          {" "}
-          <i className="fa-solid fa-bell mr-2"></i>Subscribe
+          <CareIcon className="care-l-bell" />
+          <span className="text-xs">{t("subscribe")}</span>
         </>
       );
     } else if (status === "SubscribedOnAnotherDevice") {
       return (
         <>
-          {" "}
-          <i className="fa-solid fa-bell mr-2"></i>Subscribe On This Device
+          <CareIcon className="care-l-bell" />
+          <span className="text-xs">{t("subscribe_on_this_device")}</span>
         </>
       );
     } else {
       return (
         <>
-          {" "}
-          <i className="fa-solid fa-bell-slash mr-2"></i>Unsubscribe
+          <CareIcon className="care-l-bell-slash" />
+          <span className="text-xs">{t("unsubscribe")}</span>
         </>
       );
     }
@@ -245,16 +258,15 @@ export default function NotificationsList({
               })
               .catch(function (_e) {
                 Error({
-                  msg: "Unsubscribe failed.",
+                  msg: t("unsubscribe_failed"),
                 });
               });
           })
           .catch(function (_e) {
-            Error({ msg: "Subscription Error" });
+            Error({ msg: t("subscription_error") });
           });
       })
       .catch(function (_e) {
-        console.error(`Service worker error...Details: ${_e}`);
         Sentry.captureException(_e);
       });
   };
@@ -293,8 +305,6 @@ export default function NotificationsList({
 
     if (res.status >= 200 && res.status <= 300) {
       setIsSubscribed("SubscribedOnThisDevice");
-    } else {
-      console.log("Error saving web push info.");
     }
     setIsSubscribing(false);
   }
@@ -333,12 +343,12 @@ export default function NotificationsList({
         setOffset((prev) => prev - RESULT_LIMIT);
       });
     intialSubscriptionState();
-  }, [dispatch, reload, showNotifications, offset, eventFilter, isSubscribed]);
+  }, [dispatch, reload, open, offset, eventFilter, isSubscribed]);
 
   if (!offset && isLoading) {
     manageResults = (
       <div className="flex items-center justify-center">
-        <CircularProgress color="primary" />
+        <CircularProgress />
       </div>
     );
   } else if (data && data.length) {
@@ -349,35 +359,36 @@ export default function NotificationsList({
             key={result.id}
             notification={result}
             onClickCB={onClickCB}
-            setShowNotifications={setShowNotifications}
+            setShowNotifications={setOpen}
           />
         ))}
         {isLoading && (
           <div className="flex items-center justify-center">
-            <CircularProgress color="primary" />
+            <CircularProgress />
           </div>
         )}
         {totalCount > RESULT_LIMIT && offset < totalCount - RESULT_LIMIT && (
           <div className="mt-4 flex w-full justify-center py-5 px-4 lg:px-8">
-            <Button
+            <ButtonV2
+              className="w-full"
               disabled={isLoading}
-              variant="contained"
-              color="primary"
-              fullWidth
-              onClick={() => {
-                setOffset((prev) => prev + RESULT_LIMIT);
-              }}
+              variant="secondary"
+              shadow
+              border
+              onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
             >
-              {isLoading ? "Loading..." : "Load More"}
-            </Button>
+              {isLoading ? t("loading") : t("load_more")}
+            </ButtonV2>
           </div>
         )}
       </>
     );
   } else if (data && data.length === 0) {
     manageResults = (
-      <div className="px-4 pt-3 lg:px-8">
-        <h5> No Results Found </h5>
+      <div className="px-4 pt-3 lg:px-8 flex justify-center">
+        <h5 className="text-gray-600 text-xl font-bold">
+          {t("no_results_found")}
+        </h5>
       </div>
     );
   }
@@ -387,92 +398,74 @@ export default function NotificationsList({
   return (
     <>
       <Item
-        text="Notifications"
-        do={() => setShowNotifications(!showNotifications)}
+        text={t("Notifications")}
+        do={() => setOpen(!open)}
         icon={<CareIcon className="care-l-bell h-5" />}
         badgeCount={unreadCount}
+        handleOverflow={handleOverflow}
       />
-      <SlideOver show={showNotifications} setShow={setShowNotifications}>
-        <div className="bg-white h-full">
-          <div className="w-full bg-gray-100 border-b sticky top-0 z-30 px-4 pb-1 lg:px-8">
-            <div className="flex flex-col pt-4 py-2">
-              <div className="grid grid-cols-3">
-                <div>
-                  <button
-                    onClick={(_) => {
-                      setReload(!reload);
-                      setData([]);
-                      setUnreadCount(0);
-                      setOffset(0);
-                    }}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
-                  >
-                    <i className="fa-fw fas fa-sync cursor-pointer mr-2" />{" "}
-                    Reload
-                  </button>
-                </div>
-                <div>
-                  <button
-                    onClick={(_) => setShowNotifications(false)}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs shrink-0"
-                  >
-                    <i className="fa-fw fas fa-times cursor-pointer mr-2" />{" "}
-                    Close
-                  </button>
-                </div>
-                <div>
-                  <button
-                    onClick={handleSubscribeClick}
-                    className="inline-flex items-center font-semibold p-2 md:py-1 bg-white active:bg-gray-300 border rounded text-xs shrink-0"
-                    disabled={isSubscribing}
-                  >
-                    {isSubscribing && <Spinner />}
-                    {getButtonText()}
-                  </button>
-                </div>
-              </div>
-              <div className="flex justify-between items-center">
-                <div className="font-bold text-xl mt-4">Notifications</div>
-                <button
-                  className="inline-flex items-center font-semibold mt-4 p-2 md:py-1 bg-white hover:bg-gray-300 border rounded text-xs flex-shrink-0"
-                  disabled={isMarkingAllAsRead}
-                  onClick={handleMarkAllAsRead}
-                >
-                  {isMarkingAllAsRead ? (
-                    <Spinner />
-                  ) : (
-                    <i className="fa-solid fa-check-double mr-2 text-primary-500" />
-                  )}
-                  Mark All as Read
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <div className="w-2/3">
-                <span className="text-sm font-semibold">
-                  Filter by category
-                </span>
-                <SelectField
-                  name="event_filter"
-                  variant="outlined"
-                  margin="dense"
-                  value={eventFilter}
-                  options={[
-                    { id: "", text: "Show All" },
-                    ...NOTIFICATION_EVENTS.map((i) => {
-                      if (i.id === "MESSAGE") return { ...i, text: "Notices" };
-                      return i;
-                    }),
-                  ]}
-                  onChange={(e: any) => setEventFilter(e.target.value)}
-                />
-              </div>
-            </div>
+      <SlideOver
+        open={open}
+        setOpen={setOpen}
+        slideFrom="right"
+        title={t("Notifications")}
+        dialogClass="md:w-[400px]"
+        onCloseClick={onClickCB}
+      >
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap">
+            <ButtonV2
+              ghost
+              variant="secondary"
+              onClick={() => {
+                setReload(!reload);
+                setData([]);
+                setUnreadCount(0);
+                setOffset(0);
+              }}
+            >
+              <CareIcon className="care-l-sync" />
+              <span className="text-xs">{t("reload")}</span>
+            </ButtonV2>
+            <ButtonV2
+              onClick={handleSubscribeClick}
+              ghost
+              variant="secondary"
+              disabled={isSubscribing}
+            >
+              {isSubscribing && <Spinner />}
+              {getButtonText()}
+            </ButtonV2>
+            <ButtonV2
+              ghost
+              variant="secondary"
+              disabled={isMarkingAllAsRead}
+              onClick={handleMarkAllAsRead}
+            >
+              <CareIcon
+                className={
+                  isMarkingAllAsRead
+                    ? "care-l-spinner animate-spin"
+                    : "care-l-envelope-check"
+                }
+              />
+              <span className="text-xs">{t("mark_all_as_read")}</span>
+            </ButtonV2>
           </div>
 
-          <div>{manageResults}</div>
+          <SelectMenuV2
+            className="mb-2"
+            placeholder={t("filter_by_category")}
+            options={NOTIFICATION_EVENTS}
+            value={eventFilter}
+            optionLabel={(o) => o.text}
+            optionValue={(o) => o.id}
+            optionIcon={(o) => <i className={`${o.icon} `} />}
+            onChange={(v) => setEventFilter(v || "")}
+          />
         </div>
+
+        <div>{manageResults}</div>
       </SlideOver>
     </>
   );

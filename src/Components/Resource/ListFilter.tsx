@@ -1,23 +1,38 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { SelectField } from "../Common/HelperInputFields";
 import { RESOURCE_FILTER_ORDER } from "../../Common/constants";
 import moment from "moment";
 import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { CircularProgress } from "@material-ui/core";
 import { RESOURCE_CHOICES } from "../../Common/constants";
-import { Link } from "raviger";
-import { DateRangePicker, getDate } from "../Common/DateRangePicker";
+import useMergeState from "../../Common/hooks/useMergeState";
+import { navigate } from "raviger";
+import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import CircularProgress from "../Common/components/CircularProgress";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { DateRange } from "../Common/DateRangeInputV2";
+import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 
-function useMergeState(initialState: any) {
-  const [state, setState] = useState(initialState);
-  const setMergedState = (newState: any) =>
-    setState((prevState: any) => Object.assign({}, prevState, newState));
-  return [state, setMergedState];
-}
+const clearFilterState = {
+  orgin_facility: "",
+  orgin_facility_ref: "",
+  approving_facility: "",
+  approving_facility_ref: "",
+  assigned_facility: "",
+  assigned_facility_ref: "",
+  emergency: "",
+  created_date_before: "",
+  created_date_after: "",
+  modified_date_before: "",
+  modified_date_after: "",
+  ordering: "",
+  status: "",
+};
 
-const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
+const getDate = (value: any) =>
+  value && moment(value).isValid() && moment(value).toDate();
 
 export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter } = props;
@@ -97,9 +112,8 @@ export default function ListFilter(props: any) {
     });
   };
 
-  const handleChange = (event: any) => {
-    const { name, value } = event.target;
-    setFilterState({ ...filterState, [name]: value });
+  const handleChange = (e: FieldChangeEvent<unknown>) => {
+    setFilterState({ ...filterState, [e.name]: e.value });
   };
 
   const applyFilter = () => {
@@ -142,167 +156,129 @@ export default function ListFilter(props: any) {
     onChange(data);
   };
 
-  const handleDateRangeChange = (
-    startDateId: string,
-    endDateId: string,
-    { startDate, endDate }: any
-  ) => {
-    const filterData: any = { ...filterState };
-    filterData[startDateId] = startDate?.toString();
-    filterData[endDateId] = endDate?.toString();
-
+  const handleDateRangeChange = (event: FieldChangeEvent<DateRange>) => {
+    const filterData = { ...filterState };
+    filterData[`${event.name}_after`] = event.value.start?.toString();
+    filterData[`${event.name}_before`] = event.value.end?.toString();
     setFilterState(filterData);
   };
+
   return (
-    <div>
-      <div className="flex justify-between">
-        <button className="btn btn-default" onClick={closeFilter}>
-          <i className="fas fa-times mr-2" />
-          Cancel
-        </button>
-        <Link href="/resource" className="btn btn-default hover:text-gray-900">
-          <i className="fas fa-times mr-2" />
-          Clear Filters
-        </Link>
-        <button className="btn btn-primary" onClick={applyFilter}>
-          <i className="fas fa-check mr-2" />
-          Apply
-        </button>
-      </div>
-      <div className="font-light text-md mt-2">Filter By:</div>
-      <div className="flex flex-wrap gap-2">
-        {props.showResourceStatus && (
-          <div className="w-full flex-none">
-            <span className="text-sm font-semibold">Status</span>
-            <SelectField
-              name="status"
-              variant="outlined"
-              margin="dense"
-              optionArray={true}
-              value={filterState.status}
-              options={["--", ...resourceStatusOptions]}
-              onChange={handleChange}
-              className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-            />
-          </div>
+    <FiltersSlideover
+      advancedFilter={props}
+      onApply={applyFilter}
+      onClear={() => {
+        navigate("/resource");
+        setFilterState(clearFilterState);
+        closeFilter();
+      }}
+    >
+      {props.showResourceStatus && (
+        <SelectFormField
+          name="status"
+          label="Status"
+          value={filterState.status}
+          options={RESOURCE_CHOICES}
+          optionLabel={(option) => option.text}
+          optionValue={(option) => option.text}
+          onChange={handleChange}
+          placeholder="Show all"
+          errorClassName="hidden"
+        />
+      )}
+
+      <div>
+        <FieldLabel>Origin facility</FieldLabel>
+        {isOriginLoading ? (
+          <CircularProgress />
+        ) : (
+          <FacilitySelect
+            multiple={false}
+            name="orgin_facility"
+            selected={filterState.orgin_facility_ref}
+            setSelected={(obj) => setFacility(obj, "orgin_facility")}
+            className="resource-page-filter-dropdown"
+            errors={""}
+          />
         )}
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Origin facility</span>
-          <div className="">
-            {isOriginLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <FacilitySelect
-                multiple={false}
-                name="orgin_facility"
-                selected={filterState.orgin_facility_ref}
-                setSelected={(obj) => setFacility(obj, "orgin_facility")}
-                className="resource-page-filter-dropdown"
-                errors={""}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">
-            Resource approving facility
-          </span>
-          <div className="">
-            {isResourceLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <FacilitySelect
-                multiple={false}
-                name="approving_facility"
-                selected={filterState.approving_facility_ref}
-                setSelected={(obj) => setFacility(obj, "approving_facility")}
-                className="resource-page-filter-dropdown"
-                errors={""}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Assigned facility</span>
-          <div className="">
-            {isAssignedLoading ? (
-              <CircularProgress size={20} />
-            ) : (
-              <FacilitySelect
-                multiple={false}
-                name="assigned_facility"
-                selected={filterState.assigned_facility_ref}
-                setSelected={(obj) => setFacility(obj, "assigned_facility")}
-                className="resource-page-filter-dropdown"
-                errors={""}
-              />
-            )}
-          </div>
-        </div>
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Ordering</span>
-          <SelectField
-            name="ordering"
-            variant="outlined"
-            margin="dense"
-            optionKey="text"
-            optionValue="desc"
-            value={filterState.ordering}
-            options={RESOURCE_FILTER_ORDER}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-
-        <div className="w-full flex-none">
-          <span className="text-sm font-semibold">Is emergency case</span>
-          <SelectField
-            name="emergency"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
-            value={filterState.emergency}
-            options={["--", "yes", "no"]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
-
-        <div className="w-full flex-none">
-          <DateRangePicker
-            startDate={getDate(filterState.created_date_after)}
-            endDate={getDate(filterState.created_date_before)}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "created_date_after",
-                "created_date_before",
-                e
-              )
-            }
-            endDateId={"created_date_before"}
-            startDateId={"created_date_after"}
-            label={"Created Date"}
-            size="small"
-          />
-          <DateRangePicker
-            startDate={getDate(filterState.modified_date_after)}
-            endDate={getDate(filterState.modified_date_before)}
-            onChange={(e) =>
-              handleDateRangeChange(
-                "modified_date_after",
-                "modified_date_before",
-                e
-              )
-            }
-            endDateId={"modified_date_before"}
-            startDateId={"modified_date_after"}
-            label={"Modified Date"}
-            size="small"
-          />
-        </div>
       </div>
-    </div>
+
+      <div>
+        <FieldLabel>Resource approving facility</FieldLabel>
+        {isResourceLoading ? (
+          <CircularProgress />
+        ) : (
+          <FacilitySelect
+            multiple={false}
+            name="approving_facility"
+            selected={filterState.approving_facility_ref}
+            setSelected={(obj) => setFacility(obj, "approving_facility")}
+            className="resource-page-filter-dropdown"
+            errors={""}
+          />
+        )}
+      </div>
+
+      <div>
+        <FieldLabel>Assigned facility</FieldLabel>
+        {isAssignedLoading ? (
+          <CircularProgress />
+        ) : (
+          <FacilitySelect
+            multiple={false}
+            name="assigned_facility"
+            selected={filterState.assigned_facility_ref}
+            setSelected={(obj) => setFacility(obj, "assigned_facility")}
+            className="resource-page-filter-dropdown"
+            errors={""}
+          />
+        )}
+      </div>
+
+      <SelectFormField
+        name="ordering"
+        label="Ordering"
+        value={filterState.ordering}
+        options={RESOURCE_FILTER_ORDER}
+        optionLabel={(option) => option.desc}
+        optionValue={(option) => option.text}
+        onChange={handleChange}
+        placeholder="None"
+        errorClassName="hidden"
+      />
+
+      <SelectFormField
+        name="emergency"
+        label="Is emergency case"
+        value={filterState.emergency}
+        options={["yes", "no"]}
+        optionLabel={(option) => option}
+        optionValue={(option) => option}
+        onChange={handleChange}
+        placeholder="Show all"
+        errorClassName="hidden"
+      />
+
+      <DateRangeFormField
+        name="created_date"
+        label="Created between"
+        value={{
+          start: getDate(filterState.created_date_after),
+          end: getDate(filterState.created_date_before),
+        }}
+        onChange={handleDateRangeChange}
+        errorClassName="hidden"
+      />
+      <DateRangeFormField
+        name="modified_date"
+        label="Modified between"
+        value={{
+          start: getDate(filterState.modified_date_after),
+          end: getDate(filterState.modified_date_before),
+        }}
+        onChange={handleDateRangeChange}
+        errorClassName="hidden"
+      />
+    </FiltersSlideover>
   );
 }

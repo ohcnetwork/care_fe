@@ -1,39 +1,51 @@
-import loadable from "@loadable/component";
-import { Link, navigate } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import moment from "moment";
-import React, { useEffect, useState, useCallback } from "react";
-import { CSVLink } from "react-csv";
-import { useDispatch } from "react-redux";
-import SwipeableViews from "react-swipeable-views";
-import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import { CircularProgress, Tooltip } from "@material-ui/core";
+import * as Notification from "../../Utils/Notifications.js";
 
-import {
-  getAllPatient,
-  getDistrict,
-  getLocalBody,
-  getAnyFacility,
-} from "../../Redux/actions";
-import { PhoneNumberField } from "../Common/HelperInputFields";
-import NavTabs from "../Common/NavTabs";
 import {
   ADMITTED_TO,
   GENDER_TYPES,
+  PATIENT_CATEGORIES,
+  PATIENT_SORT_OPTIONS,
+  RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
-  PatientCategoryTailwindClass,
 } from "../../Common/constants";
-import { make as SlideOver } from "../Common/SlideOver.gen";
-import PatientFilterV2 from "./PatientFilterV2";
-import { parseOptionId } from "../../Common/utils";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import Chip from "../../CAREUI/display/Chip";
 import { FacilityModel, PatientCategory } from "../Facility/models";
+import { Link, navigate } from "raviger";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  getAllPatient,
+  getAnyFacility,
+  getDistrict,
+  getLocalBody,
+} from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import Chip from "../../CAREUI/display/Chip";
+import CountBlock from "../../CAREUI/display/Count";
+import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
+import { ExportMenu } from "../Common/Export";
+import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import FilterBadge from "../../CAREUI/display/FilterBadge";
+import PatientFilter from "./PatientFilter";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
+import SortDropdownMenu from "../Common/SortDropdown";
+import SwitchTabs from "../Common/components/SwitchTabs";
+import SwipeableViews from "react-swipeable-views";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { parseOptionId } from "../../Common/utils";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
+import { useTranslation } from "react-i18next";
+import Page from "../Common/components/Page.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -58,24 +70,19 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
-
 const PatientCategoryDisplayText: Record<PatientCategory, string> = {
   "Comfort Care": "COMFORT CARE",
   Stable: "STABLE",
-  "Slightly Abnormal": "ABNORMAL",
+  Abnormal: "ABNORMAL",
   Critical: "CRITICAL",
-  unknown: "UNKNOWN",
 };
 
-export const PatientManager = (props: any) => {
-  const { facilityId } = props;
+export const PatientManager = () => {
+  const { t } = useTranslation();
   const dispatch: any = useDispatch();
-
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<any[]>();
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
-  const [DownloadFile, setDownloadFile] = useState("");
   const {
     qParams,
     updateQuery,
@@ -90,11 +97,51 @@ export const PatientManager = (props: any) => {
     name: "",
   });
   const [showDialog, setShowDialog] = useState(false);
-
+  const [showDoctors, setShowDoctors] = useState(false);
+  const [showDoctorConnect, setShowDoctorConnect] = useState(false);
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadge] = useState("");
-  const [facilityCrumbName, setFacilityCrumbName] = useState("");
+  const [phone_number, setPhoneNumber] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+  const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
+  const [emergencyPhoneNumberError, setEmergencyPhoneNumberError] =
+    useState("");
+
+  const setPhoneNum = (phone_number: string) => {
+    setPhoneNumber(phone_number);
+    if (phone_number.length >= 13) {
+      setPhoneNumberError("");
+      updateQuery({ phone_number });
+      return;
+    }
+
+    if (phone_number === "+91" || phone_number === "") {
+      setPhoneNumberError("");
+      updateQuery({ phone_number: "" });
+      return;
+    }
+
+    setPhoneNumberError("Enter a valid number");
+  };
+
+  const setEmergencyPhoneNum = (emergency_phone_number: string) => {
+    setEmergencyPhoneNumber(emergency_phone_number);
+    if (emergency_phone_number.length >= 13) {
+      setEmergencyPhoneNumberError("");
+      updateQuery({ emergency_phone_number });
+      return;
+    }
+
+    if (emergency_phone_number === "+91" || emergency_phone_number === "") {
+      setEmergencyPhoneNumberError("");
+      updateQuery({ emergency_phone_number: "" });
+      return;
+    }
+
+    setEmergencyPhoneNumberError("Enter a valid number");
+  };
+
   const tabValue = qParams.is_active === "False" ? 1 : 0;
 
   const params = {
@@ -113,7 +160,7 @@ export const PatientManager = (props: any) => {
         )
       : undefined,
     local_body: qParams.lsgBody || undefined,
-    facility: facilityId || qParams.facility,
+    facility: qParams.facility,
     facility_type: qParams.facility_type || undefined,
     district: qParams.district || undefined,
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
@@ -121,7 +168,7 @@ export const PatientManager = (props: any) => {
     created_date_after: qParams.created_date_after || undefined,
     modified_date_before: qParams.modified_date_before || undefined,
     modified_date_after: qParams.modified_date_after || undefined,
-    ordering: qParams.ordering || undefined,
+    ordering: qParams.ordering || "-modified_date",
     category: qParams.category || undefined,
     gender: qParams.gender || undefined,
     age_min: qParams.age_min || undefined,
@@ -157,7 +204,14 @@ export const PatientManager = (props: any) => {
     last_consultation_is_telemedicine:
       qParams.last_consultation_is_telemedicine || undefined,
     is_antenatal: qParams.is_antenatal || undefined,
+    ventilator_interface: qParams.ventilator_interface || undefined,
   };
+
+  useEffect(() => {
+    if (params.facility) {
+      setShowDoctorConnect(true);
+    }
+  }, [qParams.facility]);
 
   const date_range_fields = [
     [params.created_date_before, params.created_date_after],
@@ -190,60 +244,87 @@ export const PatientManager = (props: any) => {
     return 0;
   });
 
-  const isDownloadAllowed =
+  const isExportAllowed =
     durations.every((x) => x >= 0 && x <= 7) &&
     !durations.every((x) => x === 0);
 
   let managePatients: any = null;
-  const handleDownload = async (isFiltered: boolean) => {
-    const filters = {
-      ...params,
-      csv: true,
-      facility: facilityId,
-    };
+
+  const exportPatients = (isFiltered: boolean) => {
+    const filters = { ...params, csv: true, facility: qParams.facility };
     if (!isFiltered) delete filters.is_active;
-    const res = await dispatch(getAllPatient(filters, "downloadPatients"));
-    if (res && res.data && res.status === 200) {
-      setDownloadFile(res.data);
-      document.getElementById("downloadlink")?.click();
-    }
-  };
-  const handleDownloadAll = async () => {
-    await handleDownload(false);
-  };
-  const handleDownloadFiltered = async () => {
-    await handleDownload(true);
+    return () => getAllPatient(filters, "downloadPatients");
   };
 
-  useEffect(() => {
-    async function fetchFacilityName() {
-      if (facilityId) {
-        const res = await dispatch(getAnyFacility(facilityId));
+  const preventDuplicatePatientsDuetoPolicyId = (data: any) => {
+    // Generate a array which contains imforamation of duplicate patient IDs and there respective linenumbers
+    const lines = data.split("\n"); // Split the data into individual lines
+    const idsMap = new Map(); // To store indices of lines with the same patient ID
 
-        setFacilityCrumbName(res?.data?.name || "");
+    lines.map((line: any, i: number) => {
+      const patientId = line.split(",")[0]; // Extract the patient ID from each line
+      if (idsMap.has(patientId)) {
+        idsMap.get(patientId).push(i); // Add the index to the existing array
       } else {
-        setFacilityCrumbName("");
+        idsMap.set(patientId, [i]); // Create a new array with the current index
+      }
+    });
+
+    const linesWithSameId = Array.from(idsMap.entries())
+      .filter(([_, indices]) => indices.length > 1)
+      .map(([patientId, indices]) => ({
+        patientId,
+        indexSame: indices,
+      }));
+
+    // after getting the array of duplicate patient IDs and there respective linenumbers we will merge the policy IDs of the duplicate patients
+
+    linesWithSameId.map((lineInfo) => {
+      const indexes = lineInfo.indexSame;
+      //get policyid of all the duplicate patients and merge them by seperating them with a semicolon
+      const mergedPolicyId = `${indexes.map((currentIndex: number) => {
+        return `${lines[currentIndex].split(",")[5]};`;
+      })}`.replace(/,/g, "");
+      // replace the policy ID of the first patient with the merged policy ID
+      const arrayOfCurrentLine = lines[indexes[0]].split(",");
+      arrayOfCurrentLine[5] = mergedPolicyId;
+      const lineAfterMerge = arrayOfCurrentLine.join(",");
+      lines[indexes[0]] = `${lineAfterMerge}`;
+    });
+
+    // after merging the policy IDs of the duplicate patients we will remove the duplicate patients from the data
+    const uniqueLines = [];
+    const ids = new Set(); // To keep track of unique patient IDs
+
+    for (const line of lines) {
+      const patientId = line.split(",")[0]; // Extract the patient ID from each line
+      if (!ids.has(patientId)) {
+        uniqueLines.push(line);
+        ids.add(patientId);
       }
     }
-    fetchFacilityName();
-  }, [dispatch, facilityId]);
+
+    const cleanedData = uniqueLines.join("\n"); // Join the unique lines back together
+    return cleanedData;
+  };
 
   useEffect(() => {
     setIsLoading(true);
-    dispatch(getAllPatient(params, "listPatients"))
-      .then((res: any) => {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-        }
+    if (!params.phone_number) {
+      setPhoneNumber("+91");
+    }
+    if (!params.emergency_phone_number) {
+      setEmergencyPhoneNumber("+91");
+    }
+    dispatch(getAllPatient(params, "listPatients")).then((res: any) => {
+      if (res && res.data) {
+        setData(res.data.results);
+        setTotalCount(res.data.count);
         setIsLoading(false);
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
+      }
+    });
   }, [
     dispatch,
-    facilityId,
     qParams.last_consultation_admission_date_before,
     qParams.last_consultation_admission_date_after,
     qParams.last_consultation_discharge_date_before,
@@ -284,7 +365,21 @@ export const PatientManager = (props: any) => {
     qParams.last_vaccinated_date_after,
     qParams.last_consultation_is_telemedicine,
     qParams.is_antenatal,
+    qParams.ventilator_interface,
   ]);
+
+  const getTheCategoryFromId = () => {
+    let category_name;
+    if (qParams.category) {
+      category_name = PATIENT_CATEGORIES.find(
+        (item: any) => qParams.category === item.id
+      )?.text;
+
+      return String(category_name);
+    } else {
+      return "";
+    }
+  };
 
   const fetchDistrictName = useCallback(
     async (status: statusType) => {
@@ -342,29 +437,24 @@ export const PatientManager = (props: any) => {
     },
     [fetchFacilityBadgeName]
   );
-
   const LastAdmittedToTypeBadges = () => {
     const badge = (key: string, value: any, id: string) => {
       return (
         value && (
-          <span className="inline-flex items-center px-3 py-1 mt-2 ml-2 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border">
-            {key}
-            {": "}
-            {value}
-            <i
-              className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
-              onClick={(_) => {
-                const lcat = qParams.last_consultation_admitted_bed_type_list
-                  .split(",")
-                  .filter((x: string) => x != id)
-                  .join(",");
-                updateQuery({
-                  ...qParams,
-                  last_consultation_admitted_bed_type_list: lcat,
-                });
-              }}
-            ></i>
-          </span>
+          <FilterBadge
+            name={key}
+            value={value}
+            onRemove={() => {
+              const lcat = qParams.last_consultation_admitted_bed_type_list
+                .split(",")
+                .filter((x: string) => x != id)
+                .join(",");
+              updateQuery({
+                ...qParams,
+                last_consultation_admitted_bed_type_list: lcat,
+              });
+            }}
+          />
         )
       );
     };
@@ -392,13 +482,17 @@ export const PatientManager = (props: any) => {
         patientUrl = `/patient/${patient.id}`;
       }
 
-      const category: PatientCategory =
-        patient?.last_consultation?.category || "unknown";
-      const categoryClass = PatientCategoryTailwindClass[category];
+      const category: PatientCategory | undefined =
+        patient?.last_consultation?.last_daily_round?.patient_category ??
+        patient?.last_consultation?.category;
+      const categoryClass = category
+        ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass
+        : "patient-unknown";
 
       return (
         <Link
           key={`usr_${patient.id}`}
+          data-cy="patient"
           href={patientUrl}
           className={`relative w-full cursor-pointer p-4 pl-5 hover:pl-5 rounded-lg bg-white shadow text-black ring-2 ring-opacity-0 hover:ring-opacity-100 transition-all duration-200 ease-in-out group ${categoryClass}-ring overflow-hidden`}
         >
@@ -406,36 +500,36 @@ export const PatientManager = (props: any) => {
             className={`rounded-l-lg absolute top-0 bottom-0 left-0 h-full w-1 group-hover:w-5 transition-all duration-200 ease-in-out flex items-center ${categoryClass}`}
           >
             <span className="absolute -left-32 -right-32 top-0 bottom-0 flex justify-center items-center text-center transform -rotate-90 text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out">
-              {PatientCategoryDisplayText[category]}
+              {category ? PatientCategoryDisplayText[category] : "UNKNOWN"}
             </span>
           </div>
-          <div className="flex gap-4 items-start">
-            <div className="w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
+          <div className="flex flex-col md:flex-row gap-4 items-start">
+            <div className="w-full md:w-20 h-20 min-w-[5rem] bg-gray-50 rounded-lg border border-gray-300">
               {patient?.last_consultation &&
-              patient?.last_consultation?.current_bed ? (
+              patient?.last_consultation?.current_bed &&
+              patient?.last_consultation?.discharge_date === null ? (
                 <div className="flex flex-col items-center justify-center h-full">
-                  <Tooltip
-                    title={
+                  <span className="text-gray-900 text-sm text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full tooltip">
+                    {
                       patient?.last_consultation?.current_bed?.bed_object
                         ?.location_object?.name
                     }
-                  >
-                    <p className="text-gray-900 text-sm text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
+                    <span className="tooltip-text tooltip-bottom">
                       {
                         patient?.last_consultation?.current_bed?.bed_object
                           ?.location_object?.name
                       }
-                    </p>
-                  </Tooltip>
-                  <Tooltip
-                    title={
-                      patient?.last_consultation?.current_bed?.bed_object?.name
-                    }
-                  >
-                    <p className="text-base font-bold text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
-                      {patient?.last_consultation?.current_bed?.bed_object.name}
-                    </p>
-                  </Tooltip>
+                    </span>
+                  </span>
+                  <span className="text-base font-bold text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
+                    {patient?.last_consultation?.current_bed?.bed_object.name}
+                    <span className="tooltip-text tooltip-bottom">
+                      {
+                        patient?.last_consultation?.current_bed?.bed_object
+                          ?.name
+                      }
+                    </span>
+                  </span>
                 </div>
               ) : (
                 <div className="flex items-center justify-center min-h-[5rem]">
@@ -443,103 +537,120 @@ export const PatientManager = (props: any) => {
                 </div>
               )}
             </div>
-            <div className="pl-2 sm:flex md:block lg:flex gap-2 w-full">
-              <div>
-                <div className="md:flex justify-between w-full">
-                  <div className="text-xl font-semibold capitalize">
-                    <span>{patient.name}</span>
-                    <span className="text-gray-800">{" - " + patient.age}</span>
-                    {patient.action && patient.action != 10 && (
-                      <span className="font-semibold ml-2 text-gray-700">
-                        -{" "}
-                        {
-                          TELEMEDICINE_ACTIONS.find(
-                            (i) => i.id === patient.action
-                          )?.desc
-                        }
-                      </span>
-                    )}
+            <div className="pl-2 md:block flex flex-col md:flex-row gap-2 w-full">
+              <div className="flex gap-2 justify-between w-full">
+                <div className="text-xl font-semibold capitalize">
+                  <span>{patient.name}</span>
+                  <span className="text-gray-800">{" - " + patient.age}</span>
+                  {patient.action && patient.action != 10 && (
+                    <span className="font-semibold ml-2 text-gray-700">
+                      -{" "}
+                      {
+                        TELEMEDICINE_ACTIONS.find(
+                          (i) => i.id === patient.action
+                        )?.desc
+                      }
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {patient.facility_object && (
+                <div className="mb-2">
+                  <div className="flex flex-wrap items-center">
+                    <p className="text-sm font-medium text-gray-700 mr-2">
+                      {patient.facility_object.name}
+                    </p>
+                    <RecordMeta
+                      className="text-sm text-gray-900"
+                      prefix={
+                        <span className="text-gray-600">{t("updated")}</span>
+                      }
+                      time={patient.modified_date}
+                    />
                   </div>
                 </div>
-                {patient.facility_object && (
-                  <div className="mb-2">
-                    <div className="flex flex-wrap items-center">
-                      <p className="text-sm font-medium text-gray-700 mr-2">
-                        {" "}
-                        {patient.facility_object.name}
-                      </p>
-                      <p className="text-sm">
-                        <span className="text-gray-600">last updated</span>{" "}
-                        <span className="font-medium text-gray-900">
-                          {" "}
-                          {moment(patient.modified_date).fromNow()}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                )}
-                <div className="flex w-full">
-                  <div className="flex flex-wrap gap-2 flex-row justify-start">
-                    {/* TODO: Re-enable Review Missed | Temporary Hack for Launch */}
-                    {/* {patient.review_time &&
-                      !patient.last_consultation?.discharge_date &&
-                      Number(patient.last_consultation?.review_interval) > 0 &&
-                      moment().isAfter(patient.review_time) && (
-                        <Chip
-                          color="red"
-                          startIcon="clock"
-                          text="Review Missed"
-                        />
-                      )} */}
-                    {patient.allow_transfer ? (
+              )}
+              <div className="flex w-full">
+                <div className="flex flex-wrap gap-2 flex-row justify-start">
+                  {patient.review_time &&
+                    !patient.last_consultation?.discharge_date &&
+                    Number(patient.last_consultation?.review_interval) > 0 &&
+                    moment().isAfter(patient.review_time) && (
                       <Chip
-                        color="yellow"
-                        startIcon="unlock"
-                        text="Transfer Allowed"
-                      />
-                    ) : (
-                      <Chip
-                        color="primary"
-                        startIcon="lock"
-                        text="Transfer Blocked"
+                        size="small"
+                        color="red"
+                        startIcon="clock"
+                        text="Review Missed"
                       />
                     )}
-                    {patient.disease_status === "POSITIVE" && (
-                      <Chip color="red" startIcon="radiation" text="Positive" />
-                    )}
-                    {patient.gender === 2 &&
-                      patient.is_antenatal &&
-                      patient.is_active && (
-                        <Chip
-                          color="blue"
-                          startIcon="baby-carriage"
-                          text="Antenatal"
-                        />
-                      )}
-                    {patient.is_medical_worker && patient.is_active && (
+                  {patient.disease_status === "POSITIVE" && (
+                    <Chip
+                      size="small"
+                      color="red"
+                      startIcon="radiation"
+                      text="Positive"
+                    />
+                  )}
+                  {patient.gender === 2 &&
+                    patient.is_antenatal &&
+                    patient.is_active && (
                       <Chip
+                        size="small"
                         color="blue"
-                        startIcon="user-md"
-                        text="Medical Worker"
+                        startIcon="baby-carriage"
+                        text="Antenatal"
                       />
                     )}
-                    {patient.disease_status === "EXPIRED" && (
+                  {patient.is_medical_worker && patient.is_active && (
+                    <Chip
+                      size="small"
+                      color="blue"
+                      startIcon="user-md"
+                      text="Medical Worker"
+                    />
+                  )}
+                  {patient.disease_status === "EXPIRED" && (
+                    <Chip
+                      size="small"
+                      color="yellow"
+                      startIcon="exclamation-triangle"
+                      text="Patient Expired"
+                    />
+                  )}
+                  {(!patient.last_consultation ||
+                    patient.last_consultation?.facility !== patient.facility ||
+                    (patient.last_consultation?.discharge_date &&
+                      patient.is_active)) && (
+                    <span className="relative inline-flex">
                       <Chip
-                        color="yellow"
-                        startIcon="exclamation-triangle"
-                        text="Patient Expired"
+                        size="small"
+                        color="red"
+                        startIcon="notes-medical"
+                        text="No Consultation Filed"
                       />
-                    )}
-                    {(!patient.last_consultation ||
-                      patient.last_consultation?.facility !==
-                        patient.facility ||
-                      (patient.last_consultation?.discharge_date &&
-                        patient.is_active)) && (
+                      <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
+                        <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                      </span>
+                    </span>
+                  )}
+                  {!(
+                    patient.last_consultation?.facility !== patient.facility
+                  ) &&
+                    !(
+                      patient.last_consultation?.discharge_date ||
+                      !patient.is_active
+                    ) &&
+                    moment(patient.last_consultation?.modified_date).isBefore(
+                      new Date().getTime() - 24 * 60 * 60 * 1000
+                    ) && (
                       <span className="relative inline-flex">
                         <Chip
+                          size="small"
                           color="red"
-                          startIcon="notes-medical"
-                          text="No Consultation Filed"
+                          startIcon="circle-exclamation"
+                          text="No update in 24 hours"
                         />
                         <span className="flex absolute h-3 w-3 -top-1 -right-1 items-center justify-center">
                           <span className="animate-ping absolute inline-flex h-4 w-4 center rounded-full bg-red-400"></span>
@@ -547,10 +658,24 @@ export const PatientManager = (props: any) => {
                         </span>
                       </span>
                     )}
-                  </div>
                 </div>
               </div>
             </div>
+            {patient.last_consultation?.last_daily_round
+              ?.ventilator_interface &&
+              patient.last_consultation?.last_daily_round
+                ?.ventilator_interface !== "UNKNOWN" && (
+                <div className="rounded-full shrink-0 w-8 h-8 flex items-center justify-center border border-primary-600 text-primary-600 bg-primary-100 font-semibold text-xs mb-auto">
+                  {
+                    RESPIRATORY_SUPPORT.find(
+                      (resp) =>
+                        resp.text ===
+                        patient.last_consultation?.last_daily_round
+                          ?.ventilator_interface
+                    )?.id
+                  }
+                </div>
+              )}
           </div>
         </Link>
       );
@@ -566,7 +691,7 @@ export const PatientManager = (props: any) => {
   } else if (data && data.length) {
     managePatients = (
       <>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4">
           {patientList}
         </div>
         <Pagination totalCount={totalCount} />
@@ -580,8 +705,115 @@ export const PatientManager = (props: any) => {
     );
   }
 
+  const queryField = <T,>(name: string, defaultValue?: T) => {
+    return {
+      name,
+      value: qParams[name] || defaultValue,
+      onChange: (e: FieldChangeEvent<T>) => updateQuery({ [e.name]: e.value }),
+      className: "grow w-full mb-2",
+    };
+  };
+
   return (
-    <div>
+    <Page
+      title={t("Patients")}
+      hideBack={true}
+      breadcrumbs={false}
+      options={
+        <div className="flex flex-col lg:flex-row justify-between items-center w-full">
+          <div className="flex flex-col lg:flex-row lg:gap-5 items-center mb-2 lg:mb-0 w-full lg:w-fit">
+            <ButtonV2
+              onClick={() => {
+                qParams.facility
+                  ? navigate(`/facility/${qParams.facility}/patient`)
+                  : setShowDialog(true);
+              }}
+              className="w-full lg:w-fit"
+            >
+              <CareIcon className="care-l-plus text-lg" />
+              <p id="add-patient-div" className="lg:my-[2px]">
+                Add Patient Details
+              </p>
+            </ButtonV2>
+          </div>
+          <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end w-full lg:w-fit">
+            <SwitchTabs
+              Tab1="Live"
+              Tab2="Discharged"
+              onClickTab1={() => updateQuery({ is_active: "True" })}
+              onClickTab2={() => updateQuery({ is_active: "False" })}
+              activeTab={tabValue ? true : false}
+            />
+            {showDoctorConnect && (
+              <ButtonV2
+                onClick={() => {
+                  setShowDoctors(true);
+                }}
+              >
+                <CareIcon className="care-l-phone text-lg" />
+                <p className="lg:my-[2px]">Doctor Connect</p>
+              </ButtonV2>
+            )}
+
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+            <SortDropdownMenu
+              options={PATIENT_SORT_OPTIONS}
+              selected={qParams.ordering}
+              onSelect={updateQuery}
+            />
+            <div className="tooltip">
+              {!isExportAllowed ? (
+                <ButtonV2
+                  onClick={() => {
+                    advancedFilter.setShow(true);
+                    setTimeout(() => {
+                      const element =
+                        document.getElementById("bed-type-select");
+                      if (element)
+                        element.scrollIntoView({ behavior: "smooth" });
+                      Notification.Warn({
+                        msg: "Please select a seven day period.",
+                      });
+                    }, 500);
+                  }}
+                  className="lg:w-fit w-full mr-5"
+                >
+                  <CareIcon className="care-l-import" />
+                  <span className="lg:my-[3px]">Export</span>
+                </ButtonV2>
+              ) : (
+                <ExportMenu
+                  disabled={!isExportAllowed}
+                  exportItems={[
+                    {
+                      label:
+                        tabValue === 0
+                          ? "Live patients"
+                          : "Discharged patients",
+                      action: exportPatients(true),
+                      parse: preventDuplicatePatientsDuetoPolicyId,
+                    },
+                    {
+                      label: "All patients",
+                      action: exportPatients(false),
+                      parse: preventDuplicatePatientsDuetoPolicyId,
+                    },
+                  ]}
+                />
+              )}
+
+              {!isExportAllowed && (
+                <span className="tooltip-text tooltip-bottom -translate-x-1/2">
+                  Select a seven day period
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      }
+    >
       <FacilitiesSelectDialogue
         show={showDialog}
         setSelected={(e) => setSelectedFacility(e)}
@@ -592,222 +824,64 @@ export const PatientManager = (props: any) => {
           setSelectedFacility({ name: "" });
         }}
       />
-      <div className="flex flex-col right-3 gap-2 mr-3 sm:flex-row ml-auto w-max">
-        <Tooltip
-          title={
-            !isDownloadAllowed ? (
-              <p className="self-end text-sm italic ">
-                * Select a 7 day period
-              </p>
-            ) : (
-              ""
-            )
-          }
-          arrow={true}
-          interactive={true}
-          enterNextDelay={100}
-          enterTouchDelay={0}
-          leaveTouchDelay={1000}
-        >
-          <div className="text-center">
-            <button
-              onClick={handleDownloadFiltered}
-              disabled={!isDownloadAllowed}
-              className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
-            >
-              <span>
-                <i className="fa-solid fa-arrow-down-long mr-2"></i>DOWNLOAD{" "}
-                {tabValue === 0 ? "LIVE" : "DISCHARGED"} LIST
-              </span>
-            </button>
-            <CSVLink
-              id="downloadlink"
-              className="hidden"
-              data={DownloadFile}
-              filename={`patients-${now}.csv`}
-              target="_blank"
-            ></CSVLink>
-          </div>
-        </Tooltip>
-        <div className="flex flex-col gap-2">
-          <Tooltip
-            title={
-              !isDownloadAllowed ? (
-                <p className="self-end text-sm italic ">
-                  * Select a 7 day period
-                </p>
-              ) : (
-                ""
-              )
-            }
-            arrow={true}
-            interactive={true}
-            enterNextDelay={100}
-            enterTouchDelay={0}
-            leaveTouchDelay={1000}
-          >
-            <div>
-              <button
-                disabled={!isDownloadAllowed}
-                onClick={handleDownloadAll}
-                className="btn bg-green-500 hover:bg-green-600 text-white disabled:text-gray-50 disabled:bg-gray-500 disabled:hover:bg-gray-600 font-medium border border-solid w-full sm:w-fit mb-2 sm:mb-0 sm:mr-2"
-              >
-                <span>
-                  <i className="fa-solid fa-arrow-down-long mr-2"></i>
-                  DOWNLOAD ALL PATIENTS
-                </span>
-              </button>
-            </div>
-          </Tooltip>
-        </div>
-        <div>
-          <button
-            className="btn btn-primary w-full md:w-fit sm:w-fit mb-2 sm:mb-0 sm:mr-2"
-            onClick={() => {
-              if (facilityId) {
-                navigate(`/facility/${facilityId}/patient`);
-              } else {
-                setShowDialog(true);
-              }
-            }}
-            data-testid="add-patient-button"
-          >
-            <i className="fas fa-plus mr-2 text-white"></i>
-            <span className="pt-[2px]">Add Details of a Patient</span>
-          </button>
-        </div>
-        <div>
-          <button
-            className="btn btn-primary-ghost w-full md:w-fit"
-            onClick={() => advancedFilter.setShow(true)}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="fill-current w-4 h-4 mr-2"
-            >
-              <line x1="8" y1="6" x2="21" y2="6"></line>
-              <line x1="8" y1="12" x2="21" y2="12">
-                {" "}
-              </line>
-              <line x1="8" y1="18" x2="21" y2="18">
-                {" "}
-              </line>
-              <line x1="3" y1="6" x2="3.01" y2="6">
-                {" "}
-              </line>
-              <line x1="3" y1="12" x2="3.01" y2="12">
-                {" "}
-              </line>
-              <line x1="3" y1="18" x2="3.01" y2="18">
-                {" "}
-              </line>
-            </svg>
-            <span>Advanced Filters</span>
-          </button>
-        </div>
-      </div>
-      <PageTitle
-        title="Patients"
-        hideBack={!facilityId}
-        breadcrumbs={!!facilityId}
-        crumbsReplacements={{ [facilityId]: { name: facilityCrumbName } }}
-        className="md:mt-[-15px]"
-      />
-      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-3 my-4 px-2 md:px-0 mb-[-24px]">
-        <div>
-          <div className="flex flex-col mt-2">
-            <div className="bg-white overflow-hidden shadow rounded-lg mb-2">
-              <div className="px-4 py-5 sm:p-[35px]">
-                <dl>
-                  <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                    Total Patients
-                  </dt>
-                  {/* Show spinner until count is fetched from server */}
-                  {isLoading ? (
-                    <dd className="mt-4 text-5xl leading-9">
-                      <CircularProgress className="text-primary-500" />
-                    </dd>
-                  ) : (
-                    <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                      {totalCount}
-                    </dd>
-                  )}
-                </dl>
-              </div>
-            </div>
+
+      <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-4 my-4 px-2 md:px-0 mb-[-12px]">
+        <div className="flex flex-col xl:flex-row mt-2 h-full gap-3">
+          <div className="flex-1">
+            <CountBlock
+              text="Total Patients"
+              count={totalCount}
+              loading={isLoading}
+              icon={"user-injured"}
+              containerClass="pb-10"
+            />
           </div>
         </div>
-        <div className="w-full col-span-2">
+        <div className="w-full col-span-3">
           <div className="col-span-2 mt-2">
-            <div>
-              <div>
-                <div className="md:flex md:gap-4 mt-1">
-                  <div className="grow lg:max-w-sm w-full mb-2">
-                    <SearchInput
-                      label="Search by Name"
-                      name="name"
-                      onChange={(e) => updateQuery({ [e.name]: e.value })}
-                      value={qParams.name}
-                      placeholder="Search patient"
-                    />
-                  </div>
-                  <div className="grow lg:max-w-sm w-full mb-2">
-                    <SearchInput
-                      label="Search by IP Number"
-                      name="ip_no"
-                      onChange={(e) => updateQuery({ [e.name]: e.value })}
-                      value={qParams.ip_no}
-                      placeholder="Search IP Number"
-                      secondary
-                    />
-                  </div>
-                </div>
-              </div>
+            <div className="md:flex md:gap-4 mt-1">
+              <SearchInput
+                label="Search by Patient"
+                placeholder="Enter patient name"
+                {...queryField("name")}
+              />
+              <SearchInput
+                label="Search by IP Number"
+                placeholder="Enter IP Number"
+                secondary
+                {...queryField("ip_no")}
+              />
             </div>
             <div className="md:flex md:gap-4">
-              <div className="grow lg:max-w-sm w-full">
-                <div className="text-sm font-medium">
-                  Search by Primary Number
-                </div>
-                <PhoneNumberField
-                  bgColor="bg-white"
-                  value={qParams.phone_number || "+91"}
-                  onChange={(value: string) =>
-                    updateQuery({ phone_number: value })
-                  }
-                  turnOffAutoFormat={false}
-                  errors=""
-                />
-              </div>
-              <div className="grow lg:max-w-sm w-full">
-                <div className="text-sm font-medium">
-                  Search by Emergency Number
-                </div>
-                <PhoneNumberField
-                  bgColor="bg-white"
-                  value={qParams.emergency_phone_number || "+91"}
-                  onChange={(value: string) =>
-                    updateQuery({ emergency_phone_number: value })
-                  }
-                  turnOffAutoFormat={false}
-                  errors=""
-                />
-              </div>
+              <PhoneNumberFormField
+                label="Search by Primary Number"
+                {...queryField("phone_number", "+91")}
+                value={phone_number}
+                onChange={(e) => setPhoneNum(e.value)}
+                error={phoneNumberError}
+              />
+              <PhoneNumberFormField
+                label="Search by Emergency Number"
+                {...queryField("emergency_phone_number", "+91")}
+                value={emergency_phone_number}
+                onChange={(e) => setEmergencyPhoneNum(e.value)}
+                error={emergencyPhoneNumberError}
+              />
             </div>
           </div>
         </div>
       </div>
-      <div className="flex flex-wrap w-full col-span-3">
+      <div className="flex flex-wrap col-span-3 mt-6">
         <FilterBadges
-          badges={({ badge, value, kasp, phoneNumber, dateRange, range }) => [
+          badges={({
+            badge,
+            value,
+            kasp,
+            phoneNumber,
+            dateRange,
+            range,
+            ordering,
+          }) => [
             phoneNumber("Primary number", "phone_number"),
             phoneNumber("Emergency number", "emergency_phone_number"),
             badge("Patient name", "name"),
@@ -824,9 +898,15 @@ export const PatientManager = (props: any) => {
             value("Facility", "facility", facilityBadgeName),
             badge("Facility Type", "facility_type"),
             value("District", "district", districtName),
-            badge("Ordering", "ordering"),
-            badge("Category", "category"),
+            ordering(),
+            value("Category", "category", getTheCategoryFromId()),
             badge("Disease Status", "disease_status"),
+            value(
+              "Respiratory Support",
+              "ventilator_interface",
+              qParams.ventilator_interface &&
+                t(`RESPIRATORY_SUPPORT_${qParams.ventilator_interface}`)
+            ),
             value(
               "Gender",
               "gender",
@@ -853,24 +933,14 @@ export const PatientManager = (props: any) => {
               paramKey: "last_consultation_is_telemedicine",
             },
           ]}
+          children={
+            qParams.last_consultation_admitted_bed_type_list &&
+            LastAdmittedToTypeBadges()
+          }
         />
-        {qParams.last_consultation_admitted_bed_type_list &&
-          LastAdmittedToTypeBadges()}
       </div>
       <div>
-        <SlideOver {...advancedFilter}>
-          <div className="bg-white min-h-screen p-4">
-            <PatientFilterV2 {...advancedFilter} />
-          </div>
-        </SlideOver>
-        <NavTabs
-          onChange={(tab) => updateQuery({ is_active: tab ? "False" : "True" })}
-          options={[
-            { value: 0, label: "Live" },
-            { value: 1, label: "Discharged" },
-          ]}
-          active={tabValue}
-        />
+        <PatientFilter {...advancedFilter} key={window.location.search} />
         <SwipeableViews index={tabValue}>
           <TabPanel value={tabValue} index={0}>
             <div className="mb-4">{managePatients}</div>
@@ -879,7 +949,12 @@ export const PatientManager = (props: any) => {
             <div className="mb-4">{managePatients}</div>
           </TabPanel>
         </SwipeableViews>
+        <DoctorVideoSlideover
+          facilityId={params.facility}
+          show={showDoctors}
+          setShow={setShowDoctors}
+        />
       </div>
-    </div>
+    </Page>
   );
 };

@@ -1,29 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { Typography, CardContent, Button } from "@material-ui/core";
-import { TextInputField, ErrorHelperText } from "../Common/HelperInputFields";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
-import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import ExpansionPanel from "@material-ui/core/ExpansionPanel";
-import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
 import { postResetPassword, checkResetToken } from "../../Redux/actions";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
-
-const panelStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      width: "100%",
-    },
-    heading: {
-      fontSize: theme.typography.pxToRem(15),
-    },
-  })
-);
+import { LocalStorageKeys } from "../../Common/constants";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { validateRule } from "../Users/UserAdd";
+import { validatePassword } from "../../Common/validation.js";
 
 export const ResetPassword = (props: any) => {
-  const panel = panelStyles();
-
   const dispatch: any = useDispatch();
   const initForm: any = {
     password: "",
@@ -33,10 +20,13 @@ export const ResetPassword = (props: any) => {
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
-  const [passReg, setPassReg] = useState(0);
+  const [passwordInputInFocus, setPasswordInputInFocus] = useState(false);
+  const [confirmPasswordInputInFocus, setConfirmPasswordInputInFocus] =
+    useState(false);
+
   const { t } = useTranslation();
   const handleChange = (e: any) => {
-    const { value, name } = e.target;
+    const { value, name } = e;
     const fieldValue = Object.assign({}, form);
     const errorField = Object.assign({}, errors);
     if (errorField[name]) {
@@ -44,7 +34,6 @@ export const ResetPassword = (props: any) => {
       setErrors(errorField);
     }
     fieldValue[name] = value;
-    setPassReg(0);
     setForm(fieldValue);
   };
 
@@ -53,12 +42,10 @@ export const ResetPassword = (props: any) => {
     const err = Object.assign({}, errors);
     if (form.password !== form.confirm) {
       hasError = true;
-      setPassReg(1);
       err.confirm = t("password_mismatch");
     }
 
-    const regex = /^(?=.*[a-z]+)(?=.*[A-Z]+)(?=.*[0-9]+)(?=.*[!@#$%^&*]).{8,}$/;
-    if (!regex.test(form.password)) {
+    if (!validatePassword(form.password)) {
       hasError = true;
       err.password = t("invalid_password");
     }
@@ -72,6 +59,8 @@ export const ResetPassword = (props: any) => {
     if (hasError) {
       setErrors(err);
       return false;
+    } else {
+      setErrors({});
     }
     return form;
   };
@@ -84,7 +73,7 @@ export const ResetPassword = (props: any) => {
       dispatch(postResetPassword(valid)).then((resp: any) => {
         const res = resp && resp.data;
         if (res && res.status === "OK") {
-          localStorage.removeItem("care_access_token");
+          localStorage.removeItem(LocalStorageKeys.accessToken);
           Notification.Success({
             msg: t("password_reset_success"),
           });
@@ -121,63 +110,58 @@ export const ResetPassword = (props: any) => {
               handleSubmit(e);
             }}
           >
-            <div className="text-xl font-bold pt-4 text-center">
+            <div className="text-xl font-bold py-4 text-center">
               {t("reset_password")}
             </div>
-            <CardContent>
-              <TextInputField
+            <div className="px-4">
+              <TextFormField
                 type="password"
                 name="password"
                 placeholder={t("new_password")}
-                variant="outlined"
-                margin="dense"
                 onChange={handleChange}
-                errors={errors.password}
+                error={errors.password}
+                onFocus={() => setPasswordInputInFocus(true)}
+                onBlur={() => setPasswordInputInFocus(false)}
               />
-              {passReg === 0 && (
-                <div className={panel.root}>
-                  <ExpansionPanel>
-                    <ExpansionPanelDetails>
-                      <Typography className="text-red-500">
-                        <li>Minimum password length 8</li>
-                        <li>Require at least one digit</li>
-                        <li>Require at least one upper case</li>
-                        <li>Require at least one lower case letter</li>
-                        <li>Require at least one symbol</li>
-                      </Typography>
-                    </ExpansionPanelDetails>
-                  </ExpansionPanel>
+              {passwordInputInFocus && (
+                <div className="pl-2 text-small text-gray-500 mb-2">
+                  {validateRule(
+                    form.password?.length >= 8,
+                    "Password should be atleast 8 characters long"
+                  )}
+                  {validateRule(
+                    form.password !== form.password.toUpperCase(),
+                    "Password should contain at least 1 lowercase letter"
+                  )}
+                  {validateRule(
+                    form.password !== form.password.toLowerCase(),
+                    "Password should contain at least 1 uppercase letter"
+                  )}
+                  {validateRule(
+                    /\d/.test(form.password),
+                    "Password should contain at least 1 number"
+                  )}
                 </div>
               )}
-              <TextInputField
+              <TextFormField
                 type="password"
                 name="confirm"
                 placeholder={t("confirm_password")}
-                variant="outlined"
-                margin="dense"
                 onChange={handleChange}
-                errors={errors.confirm}
+                error={errors.confirm}
+                onFocus={() => setConfirmPasswordInputInFocus(true)}
+                onBlur={() => setConfirmPasswordInputInFocus(false)}
               />
-              <ErrorHelperText error={errors.token} />
-            </CardContent>
-            <div className="mt-4 sm:flex sm:justify-between grid p-4">
-              <Button
-                color="default"
-                variant="contained"
-                onClick={() => navigate("/login")}
-                type="button"
-              >
-                Cancel{" "}
-              </Button>
-              <Button
-                color="primary"
-                variant="contained"
-                type="submit"
-                style={{ marginLeft: "auto" }}
-                onClick={(e) => handleSubmit(e)}
-              >
-                {t("reset")}
-              </Button>
+              {confirmPasswordInputInFocus &&
+                form.confirm.length > 0 &&
+                validateRule(
+                  form.confirm === form.password,
+                  "Confirm password should match the entered password"
+                )}
+            </div>
+            <div className="sm:flex sm:justify-between grid p-4">
+              <Cancel onClick={() => navigate("/login")} />
+              <Submit onClick={(e) => handleSubmit(e)} label="reset" />
             </div>
           </form>
         </div>

@@ -1,32 +1,34 @@
-import { useState, useEffect } from "react";
-import loadable from "@loadable/component";
-import { navigate } from "raviger";
-import { useDispatch } from "react-redux";
-import moment from "moment";
-import GetAppIcon from "@material-ui/icons/GetApp";
-import { CSVLink } from "react-csv";
 import {
-  listShiftRequests,
   completeTransfer,
   downloadShiftRequests,
+  listShiftRequests,
 } from "../../Redux/actions";
-import { make as SlideOver } from "../Common/SlideOver.gen";
-import ListFilter from "./ListFilter";
-import { Modal, Button, CircularProgress } from "@material-ui/core";
+import { useEffect, useState } from "react";
 
-import { formatFilter } from "./Commons";
-import { formatDate } from "../../Utils/utils";
-import SearchInput from "../Form/SearchInput";
-import useFilters from "../../Common/hooks/useFilters";
 import BadgesList from "./BadgesList";
+import ButtonV2 from "../Common/components/ButtonV2";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import { ExportButton } from "../Common/Export";
+import ListFilter from "./ListFilter";
+import Page from "../Common/components/Page";
+import SearchInput from "../Form/SearchInput";
+import { formatDate } from "../../Utils/utils";
+import { formatFilter } from "./Commons";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { navigate } from "raviger";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch, useSelector } from "react-redux";
+import useFilters from "../../Common/hooks/useFilters";
+import { useTranslation } from "react-i18next";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 export default function ListView() {
   const dispatch: any = useDispatch();
+  const { wartime_shifting } = useConfig();
   const {
     qParams,
     updateQuery,
@@ -35,28 +37,18 @@ export default function ListView() {
     advancedFilter,
     resultsPerPage,
   } = useFilters({});
-  const [downloadFile, setDownloadFile] = useState("");
   const [data, setData] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
-  // state to change download button to loading while file is not ready
-  const [downloadLoading, setDownloadLoading] = useState(false);
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
   });
-
-  const triggerDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const res = await dispatch(
-      downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
-    );
-    // file ready to download
-    setDownloadLoading(false);
-    setDownloadFile(res.data);
-    document.getElementById("shiftRequests-ALL")?.click();
-  };
+  const rootState: any = useSelector((rootState) => rootState);
+  const { currentUser } = rootState;
+  const userHomeFacilityId = currentUser.data.home_facility;
+  const userType = currentUser.data.user_type;
+  const { t } = useTranslation();
 
   const handleTransferComplete = (shift: any) => {
     setModalFor({ ...modalFor, loading: true });
@@ -119,13 +111,13 @@ export default function ListView() {
     if (data && !data.length) {
       return (
         <div className="flex flex-1 justify-center text-gray-600 mt-64">
-          No patients to show.
+          {t("no_patients_to_show")}
         </div>
       );
     }
 
     return data.map((shift: any) => (
-      <div key={`shift_${shift.id}`} className="w-full md:w-1/2 mt-6 md:px-7">
+      <div key={`shift_${shift.id}`} className="w-full mt-6">
         <div className="overflow-hidden shadow rounded-lg bg-white h-full">
           <div
             className={
@@ -143,7 +135,7 @@ export default function ListView() {
                 <div>
                   {shift.emergency && (
                     <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
-                      Emergency
+                      {t("emergency")}
                     </span>
                   )}
                 </div>
@@ -151,7 +143,7 @@ export default function ListView() {
               <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
                 <div className="sm:col-span-1">
                   <dt
-                    title="Shifting status"
+                    title={t("shifting_status")}
                     className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                   >
                     <i className="fas fa-truck mr-2" />
@@ -162,7 +154,7 @@ export default function ListView() {
                 </div>
                 <div className="sm:col-span-1">
                   <dt
-                    title="Phone Number"
+                    title={t("phone_number")}
                     className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                   >
                     <i className="fas fa-mobile mr-2" />
@@ -173,7 +165,7 @@ export default function ListView() {
                 </div>
                 <div className="sm:col-span-1">
                   <dt
-                    title=" Origin facility"
+                    title={t("origin_facility")}
                     className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                   >
                     <i className="fas fa-plane-departure mr-2"></i>
@@ -182,34 +174,37 @@ export default function ListView() {
                     </dd>
                   </dt>
                 </div>
+                {wartime_shifting && (
+                  <div className="sm:col-span-1">
+                    <dt
+                      title={t("shifting_approving_facility")}
+                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                    >
+                      <i className="fas fa-user-check mr-2"></i>
+                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                        {(shift.shifting_approving_facility_object || {}).name}
+                      </dd>
+                    </dt>
+                  </div>
+                )}
                 <div className="sm:col-span-1">
                   <dt
-                    title="Shifting approving facility"
-                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                  >
-                    <i className="fas fa-user-check mr-2"></i>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {(shift.shifting_approving_facility_object || {}).name}
-                    </dd>
-                  </dt>
-                </div>
-                <div className="sm:col-span-1">
-                  <dt
-                    title=" Assigned facility"
+                    title={t("assigned_facility")}
                     className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                   >
                     <i className="fas fa-plane-arrival mr-2"></i>
 
                     <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {(shift.assigned_facility_object || {}).name ||
-                        "Yet to be decided"}
+                      {shift.assigned_facility_external ||
+                        shift.assigned_facility_object?.name ||
+                        t("yet_to_be_decided")}
                     </dd>
                   </dt>
                 </div>
 
                 <div className="sm:col-span-1">
                   <dt
-                    title="  Last Modified"
+                    title={t("last_modified")}
                     className={
                       "text-sm leading-5 font-medium flex items-center " +
                       (moment()
@@ -228,7 +223,7 @@ export default function ListView() {
 
                 <div className="sm:col-span-1">
                   <dt
-                    title="Patient Address"
+                    title={t("patient_address")}
                     className="text-sm leading-5 font-medium text-gray-500 flex items-center"
                   >
                     <i className="fas fa-home mr-2"></i>
@@ -241,73 +236,42 @@ export default function ListView() {
             </div>
 
             <div className="mt-2 flex">
-              <button
+              <ButtonV2
                 onClick={(_) => navigate(`/shifting/${shift.external_id}`)}
-                className="btn w-full btn-default bg-white mr-2"
+                variant="secondary"
+                border
+                className="w-full"
               >
-                <i className="fas fa-eye mr-2" /> All Details
-              </button>
+                <i className="fas fa-eye mr-2" /> {t("all_details")}
+              </ButtonV2>
             </div>
-            {shift.status === "TRANSFER IN PROGRESS" &&
-              shift.assigned_facility && (
-                <div className="mt-2">
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    fullWidth
-                    onClick={() => setModalFor(shift.external_id)}
-                  >
-                    TRANSFER TO RECEIVING FACILITY
-                  </Button>
-
-                  <Modal
-                    open={modalFor === shift.external_id}
-                    onClose={(_) =>
-                      setModalFor({ externalId: undefined, loading: false })
-                    }
-                  >
-                    <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                      <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center">
-                        <div className="mb-4">
-                          <h1 className="text-2xl">
-                            Confirm Transfer Complete!
-                          </h1>
-                        </div>
-                        <div className="mb-8">
-                          <p>
-                            Are you sure you want to mark this transfer as
-                            complete? The Origin facility will no longer have
-                            access to this patient
-                          </p>
-                        </div>
-                        <div className="flex gap-2 justify-center">
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            fullWidth
-                            onClick={() => {
-                              setModalFor({
-                                externalId: undefined,
-                                loading: false,
-                              });
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            fullWidth
-                            onClick={(_) => handleTransferComplete(shift)}
-                          >
-                            Confirm
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </Modal>
-                </div>
-              )}
+            {shift.status === "COMPLETED" && shift.assigned_facility && (
+              <div className="mt-2">
+                <ButtonV2
+                  className="w-full"
+                  disabled={
+                    !shift.patient_object.allow_transfer ||
+                    !(
+                      ["DistrictAdmin", "StateAdmin"].includes(userType) ||
+                      userHomeFacilityId === shift.assigned_facility
+                    )
+                  }
+                  onClick={() => setModalFor(shift.external_id)}
+                >
+                  {t("transfer_to_receiving_facility")}
+                </ButtonV2>
+                <ConfirmDialogV2
+                  title={t("confirm_transfer_complete")}
+                  description={t("mark_transfer_complete_confirmation")}
+                  action="Confirm"
+                  show={modalFor === shift.external_id}
+                  onClose={() =>
+                    setModalFor({ externalId: undefined, loading: false })
+                  }
+                  onConfirm={() => handleTransferComplete(shift)}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -315,59 +279,51 @@ export default function ListView() {
   };
 
   return (
-    <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="md:flex md:items-center md:justify-between px-4">
-        <PageTitle
-          title={"Shifting"}
-          hideBack={true}
-          componentRight={
-            downloadLoading ? (
-              <CircularProgress className="mt-2 ml-2 w-6 h-6 text-black" />
-            ) : (
-              <GetAppIcon
-                className="cursor-pointer mt-2 ml-2"
-                onClick={triggerDownload}
-              />
-            )
+    <Page
+      title={t("shifting")}
+      hideBack
+      componentRight={
+        <ExportButton
+          action={() =>
+            downloadShiftRequests({ ...formatFilter(qParams), csv: 1 })
           }
-          breadcrumbs={false}
+          filenamePrefix="shift_requests"
         />
+      }
+      breadcrumbs={false}
+      options={
+        <>
+          <div className="md:px-4">
+            <SearchInput
+              name="patient_name"
+              value={qParams.patient_name}
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              placeholder={t("search_patient")}
+            />
+          </div>
+          <div className="w-32">
+            {/* dummy div to align space as per board view */}
+          </div>
+          <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 w-full lg:w-fit">
+            <ButtonV2
+              className="py-[11px]"
+              onClick={() =>
+                navigate("/shifting/board-view", { query: qParams })
+              }
+            >
+              <CareIcon className="care-l-list-ul transform rotate-90" />
+              {t("board_view")}
+            </ButtonV2>
 
-        <div className="md:px-4">
-          <SearchInput
-            name="patient_name"
-            value={qParams.patient_name}
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            placeholder="Search patient"
-          />
-        </div>
-        <div className="w-32">
-          {/* dummy div to align space as per board view */}
-        </div>
-        <div className="my-2 md:my-0">
-          <button
-            className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-            onClick={() => navigate("/shifting/board-view", { query: qParams })}
-          >
-            <i
-              className="fa fa-list mr-1 transform rotate-90"
-              aria-hidden="true"
-            ></i>
-            Board View
-          </button>
-        </div>
-        <div className="flex items-start gap-2">
-          <button
-            className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-            onClick={() => advancedFilter.setShow(true)}
-          >
-            <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-            <span>Filters</span>
-          </button>
-        </div>
-      </div>
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+          </div>
+        </>
+      }
+    >
       <BadgesList {...{ qParams, FilterBadges }} />
-      <div className="px-1">
+      <div>
         {isLoading ? (
           <Loading />
         ) : (
@@ -378,11 +334,11 @@ export default function ListView() {
                 onClick={refreshList}
               >
                 <i className="fa fa-refresh mr-1" aria-hidden="true"></i>
-                Refresh List
+                {t("refresh_list")}
               </button>
             </div>
 
-            <div className="flex flex-wrap md:-mx-4 mb-5">
+            <div className="grid md:grid-cols-2 gap-x-6 mb-5">
               {showShiftingCardList(data)}
             </div>
             <div>
@@ -391,19 +347,11 @@ export default function ListView() {
           </div>
         )}
       </div>
-
-      <CSVLink
-        data={downloadFile}
-        filename={`shift-requests--${now}.csv`}
-        target="_blank"
-        className="hidden"
-        id={"shiftRequests-ALL"}
+      <ListFilter
+        showShiftingStatus={true}
+        {...advancedFilter}
+        key={window.location.search}
       />
-      <SlideOver {...advancedFilter}>
-        <div className="bg-white min-h-screen p-4">
-          <ListFilter showShiftingStatus={true} {...advancedFilter} />
-        </div>
-      </SlideOver>
-    </div>
+    </Page>
   );
 }

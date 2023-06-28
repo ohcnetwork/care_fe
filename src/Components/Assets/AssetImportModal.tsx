@@ -1,11 +1,22 @@
-import { Modal } from "@material-ui/core";
 import { ChangeEventHandler, useEffect, useState } from "react";
 import useDragAndDrop from "../../Utils/useDragAndDrop";
 import { sleep } from "../../Utils/utils";
 import { FacilityModel } from "../Facility/models";
 import { AssetData } from "./AssetTypes";
 import * as Notification from "../../Utils/Notifications.js";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { listFacilityAssetLocation } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
+import { Link } from "raviger";
+import SelectMenuV2 from "../Form/SelectMenuV2";
+import readXlsxFile from "read-excel-file";
+import {
+  LocalStorageKeys,
+  XLSXAssetImportSchema,
+} from "../../Common/constants";
+import { parseCsvFile } from "../../Utils/utils";
+import useConfig from "../../Common/hooks/useConfig";
+import DialogModal from "../Common/Dialog";
 
 interface Props {
   open: boolean;
@@ -17,6 +28,10 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
   const [isImporting, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>();
   const [preview, setPreview] = useState<AssetData[]>();
+  const [location, setLocation] = useState("");
+  const [locations, setLocations] = useState<any>([]);
+  const dispatchAction: any = useDispatch();
+  const { sample_format_asset_import } = useConfig();
 
   const closeModal = () => {
     setPreview(undefined);
@@ -25,16 +40,54 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
   };
 
   useEffect(() => {
+    dispatchAction(
+      listFacilityAssetLocation({}, { facility_external_id: facility.id })
+    ).then(({ data }: any) => {
+      if (data.count > 0) {
+        setLocations(data.results);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     const readFile = async () => {
       try {
         if (selectedFile) {
-          const parsedData = JSON.parse(await selectedFile.text());
-          setPreview(parsedData);
+          switch (selectedFile.name.split(".").pop()) {
+            case "xlsx": {
+              const parsedData = await readXlsxFile(selectedFile, {
+                schema: XLSXAssetImportSchema,
+              });
+              if (parsedData.errors.length) {
+                parsedData.errors.map((error) => {
+                  Notification.Error({
+                    msg: `Please check the row ${error.row} of column ${error.column}`,
+                  });
+                });
+              } else {
+                setPreview(parsedData.rows as AssetData[]);
+              }
+              break;
+            }
+            case "csv": {
+              const parsedData = await parseCsvFile(
+                selectedFile,
+                XLSXAssetImportSchema
+              );
+              setPreview(parsedData);
+              break;
+            }
+            default: {
+              const parsedData = JSON.parse(await selectedFile.text());
+              setPreview(parsedData);
+            }
+          }
         }
       } catch (e) {
         setPreview(undefined);
+        console.log(e);
         Notification.Error({
-          msg: "Invalid JSON file",
+          msg: "Invalid file",
         });
       }
     };
@@ -65,23 +118,26 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
         is_working: asset.is_working,
         not_working_reason: asset.not_working_reason,
         serial_number: asset.serial_number,
-        location: asset.location_object.id,
+        location: location,
         vendor_name: asset.vendor_name,
         support_name: asset.support_name,
         support_email: asset.support_email,
         support_phone: asset.support_phone,
         qr_code_id: asset.qr_code_id,
         manufacturer: asset.manufacturer,
+        meta: { ...asset.meta },
         warranty_amc_end_of_validity: asset.warranty_amc_end_of_validity,
         last_serviced_on: asset.last_serviced_on,
         notes: asset.notes,
         cancelToken: { promise: {} },
       });
+
       const response = await fetch("/api/v1/asset/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("care_access_token"),
+          Authorization:
+            "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
         },
         body: asset_data,
       });
@@ -116,19 +172,67 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
   };
 
   return (
-    <Modal open={open} onClose={closeModal}>
-      <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-        <form className="m-4 bg-white rounded-xl w-11/12 max-w-3xl min-h-[24rem] max-h-screen overflow-auto flex flex-col shadow">
-          <div className="px-6 py-6 flex flex-col bg-gray-300">
-            <span className="text-xl font-medium">Import Assets</span>
-            <span className="mt-1 text-gray-700">{facility.name}</span>
+    <DialogModal
+      title="Import Assets"
+      show={open}
+      onClose={closeModal}
+      className="w-[48rem]"
+      fixedWidth={false}
+    >
+      <span className="mt-1 text-gray-700">{facility.name}</span>
+      {locations.length === 0 ? (
+        <>
+          <div className="flex flex-col items-center justify-center h-full">
+            <h1 className="text-2xl font-medium text-gray-700 m-7">
+              You need at least one location to import an assest.
+            </h1>
+            <Link href={`/facility/${facility.id}/location/add`}>
+              <a className="bg-primary text-white px-4 py-2 rounded-md">
+                Add Asset Location
+              </a>
+            </Link>
           </div>
-
+          <div className="mt-6 flex flex-col justify-center items-center">
+            <Cancel
+              onClick={closeModal}
+              disabled={isImporting}
+              className="px-4 py-2 w-1/4"
+            />
+          </div>
+        </>
+      ) : (
+        <>
           {preview && preview?.length > 0 ? (
             <div className="flex flex-col rounded-lg items-center justify-center">
               <h1 className="text-2xl font-medium text-gray-700 m-7">
                 {preview.length} assets will be imported
               </h1>
+              <div className="w-1/2 p-4">
+                <label htmlFor="asset-location">
+                  Select location for import *
+                </label>
+                <div className="mt-2">
+                  <SelectMenuV2
+                    required
+                    options={[
+                      {
+                        title: "Select",
+                        description: "Select the location",
+                        value: "0",
+                      },
+                      ...locations.map((location: any) => ({
+                        title: location.name,
+                        description: location.facility.name,
+                        value: location.id,
+                      })),
+                    ]}
+                    optionLabel={(o) => o.title}
+                    optionValue={(o) => o.value}
+                    value={location}
+                    onChange={(e) => setLocation(e)}
+                  />
+                </div>
+              </div>
               <div className="bg-white rounded overflow-y-scroll h-80 border border-gray-500 md:min-w-[500px]">
                 <div className="p-2 border-b flex">
                   <div className="p-2 mr-2 font-bold">#</div>
@@ -153,7 +257,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
               onDragOver={dragProps.onDragOver}
               onDragLeave={dragProps.onDragLeave}
               onDrop={onDrop}
-              className={`px-3 py-6 flex-1 flex flex-col m-8 rounded-lg items-center justify-center border-[3px] border-dashed ${
+              className={`px-3 py-6 flex-1 flex flex-col mb-8 mt-5 rounded-lg items-center justify-center border-[3px] border-dashed ${
                 dragProps.dragOver && "border-primary-500"
               } ${
                 dragProps.fileDropError !== ""
@@ -187,22 +291,26 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
               >
                 {dragProps.fileDropError !== ""
                   ? dragProps.fileDropError
-                  : "Drag & drop JSON file to upload"}
+                  : "Drag & drop JSON / Excel (xlsx, csv)  file to upload"}
               </p>
-              <p className="mt-4 text-gray-700 font-medium text-center">
-                Upload the JSON file exported from Care.
-              </p>
+              <a
+                className="mt-4 ml-auto mr-auto max-w-xs items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                href={sample_format_asset_import}
+              >
+                <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
+                <span>Sample Format</span>
+              </a>
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row p-4 gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <div>
               <label className="rounded-lg bg-white py-2 px-4 text-primary-500 font-medium border border-primary-500 hover:text-primary-400 hover:border-primary-400 text-sm flex gap-1 items-center justify-center cursor-pointer transition-all">
                 <i className="fas fa-cloud-upload-alt mr-2"></i>Upload a file
                 <input
                   title="changeFile"
                   type="file"
-                  accept="application/json"
+                  accept=".json, .xlsx, .csv"
                   className="hidden"
                   onChange={onSelectFile}
                   onClick={() => {
@@ -212,29 +320,25 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
               </label>
             </div>
             <div className="sm:flex-1" />
-            <ButtonV2
-              variant="secondary"
-              onClick={(e) => {
-                e.stopPropagation();
+            <Cancel
+              onClick={() => {
                 closeModal();
                 dragProps.setFileDropError("");
               }}
               disabled={isImporting}
-            >
-              Cancel
-            </ButtonV2>
-            <ButtonV2 onClick={handleUpload} disabled={isImporting}>
+            />
+            <Submit onClick={handleUpload} disabled={isImporting}>
               {isImporting ? (
                 <i className="fa-solid fa-spinner animate-spin" />
               ) : (
                 <i className="fa-solid fa-file-import" />
               )}
               <span>{isImporting ? "Importing..." : "Import"}</span>
-            </ButtonV2>
+            </Submit>
           </div>
-        </form>
-      </div>
-    </Modal>
+        </>
+      )}
+    </DialogModal>
   );
 };
 

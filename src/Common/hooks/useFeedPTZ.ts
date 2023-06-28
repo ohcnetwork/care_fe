@@ -67,6 +67,7 @@ export enum PTZ {
 const getCameraStatus =
   (config: IAsset, dispatch: any) =>
   async (options: IOptions = {}) => {
+    if (!config.id) return;
     const resp = await dispatch(
       operateAsset(config.id, {
         action: {
@@ -83,6 +84,7 @@ const getCameraStatus =
 const getPresets =
   (config: IAsset, dispatch: any) =>
   async (options: IOptions = {}) => {
+    if (!config.id) return;
     const resp = await dispatch(
       operateAsset(config.id, {
         action: {
@@ -103,6 +105,7 @@ interface IGotoPresetPayload {
 const gotoPreset =
   (config: IAsset, dispatch: any) =>
   async (payload: IGotoPresetPayload, options: IOptions = {}) => {
+    if (!config.id) return;
     const resp = await dispatch(
       operateAsset(config.id, {
         action: {
@@ -120,6 +123,7 @@ const gotoPreset =
 const absoluteMove =
   (config: IAsset, dispatch: any) =>
   async (payload: PTZPayload, options: IOptions = {}) => {
+    if (!config.id) return;
     const resp = await dispatch(
       operateAsset(config.id, {
         action: {
@@ -137,6 +141,7 @@ const absoluteMove =
 const relativeMove =
   (config: IAsset, dispatch: any) =>
   async (payload: PTZPayload, options: IOptions = {}) => {
+    if (!config.id) return;
     const resp = await dispatch(
       operateAsset(config.id, {
         action: {

@@ -1,7 +1,11 @@
-import axios from "axios";
-import api from "./api";
 import * as Notification from "../Utils/Notifications.js";
-import querystring from "querystring";
+
+import { isEmpty, omitBy } from "lodash";
+
+import { LocalStorageKeys } from "../Common/constants";
+import api from "./api";
+import axios from "axios";
+
 const requestMap: any = api;
 export const actions = {
   FETCH_REQUEST: "FETCH_REQUEST",
@@ -68,9 +72,14 @@ export const fireRequest = (
     }
     if (request.method === undefined || request.method === "GET") {
       request.method = "GET";
-      const qs = querystring.stringify(params);
-      if (qs !== "") {
-        request.path += `?${qs}`;
+      let qString = "";
+      Object.keys(params).forEach((param: any) => {
+        if (params[param] !== undefined && params[param] !== "") {
+          qString += `${param}=${encodeURIComponent(params[param])}&`;
+        }
+      });
+      if (qString !== "") {
+        request.path += `?${qString}`;
       }
     }
     // set dynamic params in the URL
@@ -84,9 +93,11 @@ export const fireRequest = (
     const config: any = {
       headers: {},
     };
-    if (!request.noAuth && localStorage.getItem("care_access_token")) {
+    if (!request.noAuth && localStorage.getItem(LocalStorageKeys.accessToken)) {
       config.headers["Authorization"] =
-        "Bearer " + localStorage.getItem("care_access_token");
+        "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken);
+    } else {
+      // TODO: get access token
     }
     const axiosApiCall: any = axios.create(config);
 
@@ -119,8 +130,8 @@ export const fireRequest = (
           // currentUser is ignored because on the first page load
           // 403 error is displayed for invalid credential.
           if (error.response.status === 403 && key === "currentUser") {
-            if (localStorage.getItem("care_access_token")) {
-              localStorage.removeItem("care_access_token");
+            if (localStorage.getItem(LocalStorageKeys.accessToken)) {
+              localStorage.removeItem(LocalStorageKeys.accessToken);
             }
             return;
           }
@@ -188,7 +199,7 @@ export const fireRequestV2 = (
   }
   if (request.method === undefined || request.method === "GET") {
     request.method = "GET";
-    const qs = querystring.stringify(params);
+    const qs = new URLSearchParams(omitBy(params, isEmpty)).toString();
     if (qs !== "") {
       request.path += `?${qs}`;
     }
@@ -204,9 +215,9 @@ export const fireRequestV2 = (
   const config: any = {
     headers: {},
   };
-  if (!request.noAuth && localStorage.getItem("care_access_token")) {
+  if (!request.noAuth && localStorage.getItem(LocalStorageKeys.accessToken)) {
     config.headers["Authorization"] =
-      "Bearer " + localStorage.getItem("care_access_token");
+      "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken);
   }
   const axiosApiCall: any = axios.create(config);
 
@@ -236,8 +247,8 @@ export const fireRequestV2 = (
         // currentUser is ignored because on the first page load
         // 403 error is displayed for invalid credential.
         if (error.response.status === 403 && key === "currentUser") {
-          if (localStorage.getItem("care_access_token")) {
-            localStorage.removeItem("care_access_token");
+          if (localStorage.getItem(LocalStorageKeys.accessToken)) {
+            localStorage.removeItem(LocalStorageKeys.accessToken);
           }
         }
 
@@ -296,7 +307,7 @@ export const fireRequestForFiles = (
     }
     if (request.method === undefined || request.method === "GET") {
       request.method = "GET";
-      const qs = querystring.stringify(params);
+      const qs = new URLSearchParams(omitBy(params, isEmpty)).toString();
       if (qs !== "") {
         request.path += `?${qs}`;
       }
@@ -317,9 +328,9 @@ export const fireRequestForFiles = (
     };
     // Content-Type: application/pdf
     // Content-Disposition: inline; filename="filename.pdf"
-    if (!request.noAuth && localStorage.getItem("care_access_token")) {
+    if (!request.noAuth && localStorage.getItem(LocalStorageKeys.accessToken)) {
       config.headers["Authorization"] =
-        "Bearer " + localStorage.getItem("care_access_token");
+        "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken);
     }
     const axiosApiCall: any = axios.create(config);
 
@@ -344,8 +355,8 @@ export const fireRequestForFiles = (
           // currentUser is ignored because on the first page load
           // 403 error is displayed for invalid credential.
           if (error.response.status === 403 && key === "currentUser") {
-            if (localStorage.getItem("care_access_token")) {
-              localStorage.removeItem("care_access_token");
+            if (localStorage.getItem(LocalStorageKeys.accessToken)) {
+              localStorage.removeItem(LocalStorageKeys.accessToken);
             }
             return;
           }

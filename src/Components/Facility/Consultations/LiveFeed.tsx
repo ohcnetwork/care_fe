@@ -1,37 +1,28 @@
-/* eslint-disable eqeqeq */
 import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import screenfull from "screenfull";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import loadable from "@loadable/component";
 import {
   listAssetBeds,
   partialUpdateAssetBed,
   deleteAssetBed,
 } from "../../../Redux/actions";
-import RefreshIcon from "@material-ui/icons/Refresh";
 import { getCameraPTZ } from "../../../Common/constants";
 import {
   StreamStatus,
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-const PageTitle = loadable(() => import("../../Common/PageTitle"));
 import * as Notification from "../../../Utils/Notifications.js";
-import {
-  Card,
-  CardContent,
-  InputLabel,
-  Modal,
-  Tooltip,
-} from "@material-ui/core";
 import { FeedCameraPTZHelpButton } from "./Feed";
 import { AxiosError } from "axios";
-import { isNull } from "lodash";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../models";
-import { TextInputField } from "../../Common/HelperInputFields";
 import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import Page from "../../Common/components/Page";
+import ConfirmDialogV2 from "../../Common/ConfirmDialogV2";
+import { FieldLabel } from "../../Form/FormFields/FormField";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -94,6 +85,19 @@ const LiveFeed = (props: any) => {
     dispatch,
   });
 
+  const fetchCameraPresets = () =>
+    getPresets({
+      onSuccess: (resp) => {
+        setPresets(resp);
+      },
+      onError: (resp) => {
+        resp instanceof AxiosError &&
+          Notification.Error({
+            msg: "Camera is offline",
+          });
+      },
+    });
+
   const getBedPresets = async (id: any) => {
     const bedAssets = await dispatch(
       listAssetBeds({
@@ -146,7 +150,7 @@ const LiveFeed = (props: any) => {
       Notification.Error({ msg: "Something Went Wrong" });
     }
     getBedPresets(cameraAsset?.id);
-    getPresets({});
+    fetchCameraPresets();
     setToUpdate(null);
   };
 
@@ -159,15 +163,7 @@ const LiveFeed = (props: any) => {
 
   useEffect(() => {
     if (cameraAsset?.hostname) {
-      getPresets({
-        onSuccess: (resp) => setPresets(resp.data),
-        onError: (resp) => {
-          resp instanceof AxiosError &&
-            Notification.Error({
-              msg: "Camera is offline",
-            });
-        },
-      });
+      fetchCameraPresets();
     }
   }, []);
 
@@ -183,8 +179,8 @@ const LiveFeed = (props: any) => {
     }
   }, [page.offset, cameraAsset.id, refreshPresetsHash]);
 
-  const viewOptions = (page: number) =>
-    presets
+  const viewOptions = (page: number) => {
+    return presets
       ? Object.entries(presets)
           .map(([key, value]) => ({ label: key, value }))
           .slice(page, page + 10)
@@ -192,7 +188,7 @@ const LiveFeed = (props: any) => {
           label: "Monitor " + (i + 1),
           value: i + 1,
         }));
-
+  };
   useEffect(() => {
     let tId: any;
     if (streamStatus !== StreamStatus.Playing) {
@@ -257,7 +253,7 @@ const LiveFeed = (props: any) => {
             if (response && response.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
               getBedPresets(cameraAsset?.id);
-              getPresets({});
+              fetchCameraPresets();
             }
             setLoading(undefined);
           }
@@ -289,86 +285,50 @@ const LiveFeed = (props: any) => {
   }
 
   return (
-    <div className="mt-4 px-6 mb-2">
-      <PageTitle title="Live Feed" hideBack={true} />
-
+    <Page title="Live Feed" hideBack>
       {toDelete && (
-        <Modal
-          className="flex h-fit justify-center items-center top-1/2"
-          open={!isNull(toDelete)}
-        >
-          <Card>
-            <CardContent>
-              <h5>
-                Confirm delete preset: {toDelete.meta.preset_name} (in bed:{" "}
-                {toDelete.bed_object.name})?
-              </h5>
-              <hr />
-              <div className="flex gap-3 justify-end mt-2">
-                <button
-                  className="bg-red-500 px-3 text-sm py-1 rounded-md text-white"
-                  onClick={() => deletePreset(toDelete.id)}
-                >
-                  Confirm
-                </button>
-                <button className="text-sm" onClick={() => setToDelete(null)}>
-                  Cancel
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        </Modal>
+        <ConfirmDialogV2
+          show
+          title="Are you sure you want to delete this preset?"
+          description={
+            <span>
+              <p>
+                Preset: <strong>{toDelete.meta.preset_name}</strong>
+              </p>
+              <p>
+                Bed: <strong>{toDelete.bed_object.name}</strong>
+              </p>
+            </span>
+          }
+          action="Delete"
+          variant="danger"
+          onClose={() => setToDelete(null)}
+          onConfirm={() => deletePreset(toDelete.id)}
+        />
       )}
       {toUpdate && (
-        <Modal
-          className="flex h-fit justify-center items-center top-1/2"
-          open={!isNull(toUpdate)}
+        <ConfirmDialogV2
+          show
+          title="Update Preset"
+          description={"Preset: " + toUpdate.meta.preset_name}
+          action="Update"
+          variant="primary"
+          onClose={() => setToUpdate(null)}
+          onConfirm={() => updatePreset(toUpdate)}
         >
-          <Card>
-            <CardContent>
-              <h5>Update Preset</h5>
-              <hr />
-              <div>
-                <InputLabel id="asset-type">Bed</InputLabel>
-                <BedSelect
-                  name="bed"
-                  setSelected={(selected) => setBed(selected as BedModel)}
-                  selected={bed}
-                  errors=""
-                  multiple={false}
-                  margin="dense"
-                  location={cameraAsset.location_id}
-                  facility={cameraAsset.facility_id}
-                />
-              </div>
-              <div>
-                <InputLabel id="location">Preset Name</InputLabel>
-                <TextInputField
-                  name="name"
-                  id="location"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={preset}
-                  onChange={(e) => setNewPreset(e.target.value)}
-                  errors=""
-                />
-              </div>
-
-              <div className="flex gap-3 justify-end mt-2">
-                <button
-                  onClick={() => updatePreset(toUpdate)}
-                  className="bg-red-500 px-3 text-sm py-1 rounded-md text-white"
-                >
-                  Confirm
-                </button>
-                <button className="text-sm" onClick={() => setToUpdate(null)}>
-                  Cancel
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-        </Modal>
+          <div className="flex flex-col mt-4">
+            <FieldLabel required>Bed</FieldLabel>
+            <BedSelect
+              name="bed"
+              setSelected={(selected) => setBed(selected as BedModel)}
+              selected={bed}
+              error=""
+              multiple={false}
+              location={cameraAsset.location_id}
+              facility={cameraAsset.facility_id}
+            />
+          </div>
+        </ConfirmDialogV2>
       )}
       <div className="mt-4 flex flex-col">
         <div className="flex flex-col lg:flex-row gap-4 mt-4 relative">
@@ -447,37 +407,24 @@ const LiveFeed = (props: any) => {
                     .replace("ArrowRight", "→");
 
                 return (
-                  <Tooltip
-                    placement="top"
-                    arrow={true}
-                    title={
-                      <span className="text-sm font-semibold">
-                        {`${option.label}  (${shortcutKeyDescription})`}
-                      </span>
-                    }
-                    key={option.action}
+                  <button
+                    className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1 tooltip"
+                    onClick={option.callback}
                   >
-                    <button
-                      className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1"
-                      onClick={option.callback}
-                    >
-                      <span className="sr-only">{option.label}</span>
-                      {option.icon ? (
-                        <i className={`fas fa-${option.icon} md:p-2`}></i>
-                      ) : (
-                        <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
-                          {option.value}x
-                        </span>
-                      )}
-                    </button>
-                  </Tooltip>
+                    <span className="sr-only">{option.label}</span>
+                    {option.icon ? (
+                      <i className={`fas fa-${option.icon} md:p-2`}></i>
+                    ) : (
+                      <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
+                        {option.value}x
+                      </span>
+                    )}
+                    <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">{`${option.label}  (${shortcutKeyDescription})`}</span>
+                  </button>
                 );
               })}
               <div className="pl-3 hideonmobilescreen">
-                <FeedCameraPTZHelpButton
-                  cameraPTZ={cameraPTZ}
-                  tooltipPlacement="top"
-                />
+                <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
               </div>
             </div>
           </div>
@@ -550,7 +497,7 @@ const LiveFeed = (props: any) => {
                             gotoBedPreset(preset);
                             setCurrentPreset(preset);
                             getBedPresets(cameraAsset?.id);
-                            getPresets({});
+                            fetchCameraPresets();
                           }}
                         >
                           <span className="justify-start text-xs font-semibold">
@@ -630,23 +577,17 @@ const LiveFeed = (props: any) => {
                   className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:text-white hover:bg-green-500 w-full"
                   onClick={() => {
                     getBedPresets(cameraAsset?.id);
-                    getPresets({
-                      onError: () => {
-                        Notification.Error({
-                          msg: "Camera is offline",
-                        });
-                      },
-                    });
+                    fetchCameraPresets();
                   }}
                 >
-                  <RefreshIcon /> Refresh
+                  <CareIcon className="care-l-redo text-lg h-4" /> Refresh
                 </button>
               )}
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 };
 

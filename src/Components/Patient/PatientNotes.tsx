@@ -12,8 +12,9 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import Loading from "../Common/Loading";
-import { RoleButton } from "../Common/RoleButton";
 import { formatDate } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
 interface PatientNotesProps {
   patientId: any;
@@ -113,6 +114,7 @@ const PatientNotes = (props: PatientNotesProps) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={`/facility/${facilityId}/patient/${patientId}`}
       />
       <h3 className="text-lg pl-10">Add new notes</h3>
       <textarea
@@ -122,15 +124,13 @@ const PatientNotes = (props: PatientNotesProps) => {
         onChange={(e) => setNoteField(e.target.value)}
       />
       <div className="flex w-full justify-end pr-10">
-        <RoleButton
-          handleClickCB={onAddNote}
-          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
-          disableFor="readOnly"
+        <ButtonV2
+          authorizeFor={NonReadOnlyUsers}
+          onClick={onAddNote}
           disabled={!patientActive}
-          buttonType="materialUI"
         >
           Post Your Note
-        </RoleButton>
+        </ButtonV2>
       </div>
       <div className="px-10 py-5">
         <h3 className="text-lg">Added Notes</h3>
@@ -141,9 +141,9 @@ const PatientNotes = (props: PatientNotesProps) => {
                 key={note.id}
                 className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
               >
-                <div className="flex  w-full ">
-                  <p className="text-justify">{note.note}</p>
-                </div>
+                <span className="whitespace-pre-wrap break-words">
+                  {note.note}
+                </span>
                 <div className="mt-3">
                   <span className="text-xs text-gray-500">
                     {formatDate(note.created_date) || "-"}

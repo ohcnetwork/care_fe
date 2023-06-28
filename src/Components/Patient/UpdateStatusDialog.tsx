@@ -1,12 +1,9 @@
 import {
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
 } from "@material-ui/core";
-import CloudUploadOutlineIcon from "@material-ui/icons/CloudUpload";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import React, { useEffect, useState, useReducer } from "react";
 import axios from "axios";
 import {
@@ -14,12 +11,17 @@ import {
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
 } from "../../Common/constants";
-import { CheckboxField, SelectField } from "../Common/HelperInputFields";
+import {
+  LegacyCheckboxField,
+  LegacySelectField,
+} from "../Common/HelperInputFields";
 import { SampleTestModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
 import { createUpload } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 interface Props {
   sample: SampleTestModel;
@@ -196,7 +198,7 @@ const UpdateStatusDialog = (props: Props) => {
           <div className="md:col-span-2">{currentStatus?.desc}</div>
           <div className="font-semibold leading-relaxed">New Status :</div>
           <div className="md:col-span-2">
-            <SelectField
+            <LegacySelectField
               name="status"
               variant="standard"
               optionValue="desc"
@@ -211,7 +213,7 @@ const UpdateStatusDialog = (props: Props) => {
                 Result :
               </div>
               <div className="md:col-span-2">
-                <SelectField
+                <LegacySelectField
                   name="result"
                   variant="standard"
                   value={state.form.result}
@@ -237,23 +239,19 @@ const UpdateStatusDialog = (props: Props) => {
                 )}
               </div>
               <div className="flex justify-end col-start-2 col-span-2">
-                <Button
-                  color="primary"
-                  variant="contained"
+                <Submit
                   type="submit"
-                  startIcon={
-                    <CloudUploadOutlineIcon>save</CloudUploadOutlineIcon>
-                  }
                   onClick={handleUpload}
                   disabled={uploadDone}
                 >
-                  Upload
-                </Button>
+                  <CareIcon className="care-l-cloud-upload text-2xl font-bold" />
+                  <span>Upload</span>
+                </Submit>
               </div>
             </>
           )}
           <div className="md:col-span-3">
-            <CheckboxField
+            <LegacyCheckboxField
               checked={state.form.confirm}
               onChange={(e: any) =>
                 handleChange(e.target.name, e.target.checked)
@@ -265,16 +263,12 @@ const UpdateStatusDialog = (props: Props) => {
         </div>
       </DialogContent>
       <DialogActions style={{ justifyContent: "space-between" }}>
-        <Button onClick={cancelClicked}>Cancel</Button>
-        <Button
+        <Cancel onClick={cancelClicked} />
+        <Submit
           onClick={okClicked}
-          color="primary"
-          variant="contained"
           disabled={state.form.disabled}
-          startIcon={<CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>}
-        >
-          Update Status
-        </Button>
+          label="Update Status"
+        />
       </DialogActions>
     </Dialog>
   );

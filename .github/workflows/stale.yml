@@ -6,6 +6,7 @@ on:
 jobs:
   stale:
     runs-on: ubuntu-latest
+    if: github.repository == 'coronasafe/care_fe'
     steps:
       - uses: actions/stale@v6
         with:

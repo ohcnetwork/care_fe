@@ -5,18 +5,13 @@ import { classNames } from "../../Utils/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getResourceDetails, deleteResourceRecord } from "../../Redux/actions";
 import { navigate } from "raviger";
-import Button from "@material-ui/core/Button";
-import { KeralaLogo } from "../../Common/constants";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
 import * as Notification from "../../Utils/Notifications.js";
 import CommentSection from "./CommentSection";
 import { formatDate } from "../../Utils/utils";
+import ButtonV2 from "../Common/components/ButtonV2";
+import Page from "../Common/components/Page";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ResourceDetails(props: { id: string }) {
   const dispatch: any = useDispatch();
@@ -102,12 +97,6 @@ export default function ResourceDetails(props: { id: string }) {
   const ApprovalLetter = (data: any) => {
     return (
       <div id="section-to-print" className="print bg-white">
-        <div className="flex justify-center">
-          <img
-            src={`${process.env.PUBLIC_URL}/${KeralaLogo}`}
-            alt="kerala-logo"
-          />
-        </div>
         <div className="mx-20 p-4">
           <div className="font-bold text-xl text-center mt-6">
             APPROVAL LETTER
@@ -240,40 +229,29 @@ export default function ResourceDetails(props: { id: string }) {
   }
 
   return (
-    <div>
+    <Page
+      title={"Resource details"}
+      crumbsReplacements={{ [props.id]: { name: data.title } }}
+      backUrl={"/resource/board-view"}
+    >
       {isPrintMode ? (
         <div className="my-4">
-          <div className="my-4 flex justify-end ">
-            <button
-              onClick={(_) => window.print()}
-              className="btn btn-primary mr-2"
-            >
+          <div className="my-4 flex justify-end gap-2">
+            <ButtonV2 onClick={() => window.print()}>
               <i className="fas fa-print mr-2"></i> Print Approval Letter
-            </button>
-            <button
-              onClick={(_) => setIsPrintMode(false)}
-              className="btn btn-default"
-            >
+            </ButtonV2>
+            <ButtonV2 onClick={() => setIsPrintMode(false)} variant="secondary">
               <i className="fas fa-times mr-2"></i> Close
-            </button>
+            </ButtonV2>
           </div>
           {ApprovalLetter(data)}
         </div>
       ) : (
         <div className="mx-3 md:mx-8 mb-10">
           <div className="my-4 flex flex-col items-start md:flex-row md:justify-between md:items-center">
-            <PageTitle
-              title={"Resource details"}
-              crumbsReplacements={{ [props.id]: { name: data.title } }}
-            />
-            <div>
-              <button
-                onClick={(_) => setIsPrintMode(true)}
-                className="btn btn-primary"
-              >
-                <i className="fas fa-file-alt mr-2"></i> Approval Letter
-              </button>
-            </div>
+            <ButtonV2 onClick={(_) => setIsPrintMode(true)}>
+              <i className="fas fa-file-alt mr-2"></i> Approval Letter
+            </ButtonV2>
           </div>
           {data.assigned_to_object && (
             <div className="relative rounded-lg shadow bg-primary-200">
@@ -293,21 +271,12 @@ export default function ResourceDetails(props: { id: string }) {
           <div className="border rounded-lg bg-white shadow h-full text-black mt-4 p-4">
             <div className="flex flex-col sm:flex-row sm:justify-between mb-4">
               <div className="text-xl font-semibold">{data.title || "--"}</div>
-              <div>
-                <div className="mt-4 sm:mt-2">
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={() =>
-                      navigate(`/resource/${data.external_id}/update`)
-                    }
-                  >
-                    Update Status/Details
-                  </Button>
-                </div>
-              </div>
+              <ButtonV2
+                className="w-full mt-4 sm:mt-2"
+                href={`/resource/${data.external_id}/update`}
+              >
+                Update Status/Details
+              </ButtonV2>
             </div>
 
             <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
@@ -337,7 +306,7 @@ export default function ResourceDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">
-                  Contact person at the facility:{" "}
+                  Contact person at the current facility:{" "}
                 </span>
                 {data.refering_facility_contact_name || "--"}
               </div>
@@ -376,46 +345,25 @@ export default function ResourceDetails(props: { id: string }) {
               </div>
             </div>
 
-            <div className="flex justify-end mt-4 hidden">
+            <div className="flex justify-end mt-4">
               <div>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  color="secondary"
-                  size="small"
+                <ButtonV2
+                  className="w-full"
+                  variant="danger"
                   onClick={() => setOpenDeleteResourceDialog(true)}
                 >
                   Delete Record
-                </Button>
+                </ButtonV2>
 
-                <Dialog
-                  open={openDeleteResourceDialog}
+                <ConfirmDialogV2
+                  title="Authorize resource delete"
+                  description="Are you sure you want to delete this record?"
+                  action="Delete"
+                  variant="danger"
+                  show={openDeleteResourceDialog}
                   onClose={() => setOpenDeleteResourceDialog(false)}
-                >
-                  <DialogTitle id="alert-dialog-title">
-                    Authorize resource delete
-                  </DialogTitle>
-                  <DialogContent>
-                    <DialogContentText id="alert-dialog-description">
-                      Are you sure you want to delete this record?
-                    </DialogContentText>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button
-                      onClick={() => setOpenDeleteResourceDialog(false)}
-                      color="primary"
-                    >
-                      No
-                    </Button>
-                    <Button
-                      color="primary"
-                      onClick={handleResourceDelete}
-                      autoFocus
-                    >
-                      Yes
-                    </Button>
-                  </DialogActions>
-                </Dialog>
+                  onConfirm={handleResourceDelete}
+                />
               </div>
             </div>
           </div>
@@ -483,6 +431,6 @@ export default function ResourceDetails(props: { id: string }) {
           </div>
         </div>
       )}
-    </div>
+    </Page>
   );
 }

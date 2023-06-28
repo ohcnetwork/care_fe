@@ -2,10 +2,12 @@ import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getResourceComments, addResourceComments } from "../../Redux/actions";
-import { Button, CircularProgress } from "@material-ui/core";
 import * as Notification from "../../Utils/Notifications.js";
 import Pagination from "../Common/Pagination";
 import { formatDate } from "../../Utils/utils";
+import CircularProgress from "../Common/components/CircularProgress";
+import ButtonV2 from "../Common/components/ButtonV2";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 
 interface CommentSectionProps {
   id: string;
@@ -71,24 +73,18 @@ const CommentSection = (props: CommentSectionProps) => {
 
   return (
     <div className="w-full flex flex-col">
-      <textarea
-        rows={3}
+      <TextAreaFormField
+        name="comment"
         placeholder="Type your comment"
-        className="mt-4 border border-gray-500 rounded-lg p-4 focus:border-primary-600 focus:ring-primary-600"
         value={commentBox}
-        onChange={(e) => setCommentBox(e.target.value)}
+        onChange={(e) => setCommentBox(e.value)}
       />
       <div className="flex w-full justify-end">
-        <Button
-          onClick={onSubmitComment}
-          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
-        >
-          Post Your Comment
-        </Button>
+        <ButtonV2 onClick={onSubmitComment}>Post Your Comment</ButtonV2>
       </div>
-      <div className=" w-full">
+      <div className="w-full">
         {isLoading ? (
-          <CircularProgress />
+          <CircularProgress className="h-12 w-12" />
         ) : (
           comments.map((comment: any) => (
             <div

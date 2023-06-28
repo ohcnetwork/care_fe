@@ -8,6 +8,8 @@ export function PrescriptionMultiDropdown(props: {
   placeholder?: string;
   type?: "string" | "number";
   min?: number;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }) {
   const { options, selectedValues, setSelectedValues } = props;
   const [open, setOpen] = useState(false);
@@ -33,7 +35,7 @@ export function PrescriptionMultiDropdown(props: {
   return (
     <div className="w-full relative">
       <div className="flex gap-1 flex-wrap my-2">
-        {selectedValues.length > 0 ? (
+        {selectedValues.length > 0 &&
           selectedValues.map((selectedValue, i) => {
             return (
               <div
@@ -53,18 +55,17 @@ export function PrescriptionMultiDropdown(props: {
                 </button>
               </div>
             );
-          })
-        ) : (
-          <div className="my-1 text-red-400">Nothing selected</div>
-        )}
+          })}
       </div>
 
       <input
         placeholder={props.placeholder}
-        className="w-full relative focus:ring-primary-500 focus:border-primary-500 border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+        className="cui-input-base py-2"
         onClick={() => setOpen(!open)}
         value={value}
         onChange={(e) => setValue(e.target.value)}
+        onFocus={props.onFocus}
+        onBlur={props.onBlur}
       />
       <div
         ref={dropRef}
@@ -81,9 +82,10 @@ export function PrescriptionMultiDropdown(props: {
                 type="button"
                 key={i}
                 className={classNames(
-                  "w-full block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900",
-                  selectedValues.includes(option) &&
-                    "bg-primary-100 hover:bg-primary-200"
+                  "w-full block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:text-gray-900 focus:outline-none focus:text-gray-900",
+                  selectedValues.includes(option)
+                    ? "bg-primary-100 hover:bg-primary-200"
+                    : "hover:bg-gray-100 focus:bg-gray-100"
                 )}
                 onClick={() => {
                   setSelectedValues(

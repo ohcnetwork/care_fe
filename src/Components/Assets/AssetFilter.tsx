@@ -1,18 +1,19 @@
-import React from "react";
 import { useState, useEffect, useCallback } from "react";
 import { useAbortableEffect, statusType } from "../../Common/utils";
 import { navigate, useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { useDispatch } from "react-redux";
-import { getAnyFacility, getFacilityAssetLocation } from "../../Redux/actions";
+import {
+  getFacilityAssetLocation,
+  getPermittedFacility,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { SelectField } from "../Common/HelperInputFields";
 import { LocationSelect } from "../Common/LocationSelect";
-import { AssetLocationObject } from "./AssetTypes";
-import FilterButtons from "../Common/FilterButtons";
+import { AssetClass, AssetLocationObject } from "./AssetTypes";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 
 const initialLocation = {
   id: "",
@@ -34,17 +35,28 @@ function AssetFilter(props: any) {
     filter.asset_type ? filter.asset_type : ""
   );
   const [asset_status, setAssetStatus] = useState<string>(filter.status || "");
+  const [asset_class, setAssetClass] = useState<string>(
+    filter.asset_class || ""
+  );
   const [facilityId, setFacilityId] = useState<number | "">(filter.facility);
   const [locationId, setLocationId] = useState<string | "">(filter.location);
   const [qParams, _] = useQueryParams();
 
   useEffect(() => {
-    console.log(facility);
     setFacilityId(facility?.id ? facility?.id : "");
-    setLocationId(location?.id ? location?.id : "");
+    setLocationId(
+      facility.id === qParams.facility ? qParams.location ?? "" : ""
+    );
   }, [facility, location]);
 
   const clearFilter = useCallback(() => {
+    setLocation(initialLocation);
+    setFacility({ name: "" });
+    setAssetType("");
+    setAssetStatus("");
+    setAssetClass("");
+    setFacilityId("");
+    setLocationId("");
     closeFilter();
     const searchQuery = qParams?.search && `?search=${qParams?.search}`;
     if (searchQuery) navigate(`/assets${searchQuery}`);
@@ -54,17 +66,11 @@ function AssetFilter(props: any) {
   const fetchFacility = useCallback(
     async (status: statusType) => {
       if (facilityId) {
-        const [facilityData]: any = await Promise.all([
-          dispatch(getAnyFacility(facilityId)),
-        ]);
+        const facilityData: any = await dispatch(
+          getPermittedFacility(facilityId)
+        );
         if (!status.aborted) {
-          if (!facilityData?.data)
-            Notification.Error({
-              msg: "Something went wrong..!",
-            });
-          else {
-            setFacility(facilityData.data);
-          }
+          setFacility(facilityData?.data);
         }
       }
     },
@@ -79,7 +85,7 @@ function AssetFilter(props: any) {
             getFacilityAssetLocation(String(facilityId), String(locationId))
           ),
         ]);
-        if (!status.aborted) {
+        if (!status.aborted && locationData !== undefined) {
           if (!locationData.data)
             Notification.Error({
               msg: "Something went wrong..!",
@@ -101,6 +107,7 @@ function AssetFilter(props: any) {
     const data = {
       facility: facilityId,
       asset_type: asset_type,
+      asset_class: asset_class,
       status: asset_status,
       location: locationId,
     };
@@ -108,119 +115,92 @@ function AssetFilter(props: any) {
   };
 
   const handleFacilitySelect = (selected: FacilityModel) => {
-    setFacility(selected ? selected : { name: "" });
+    setFacility(selected ? selected : facility);
+    handleLocationSelect("");
   };
-  const handleLocationSelect = (selected: AssetLocationObject) => {
-    setLocation(selected ? selected : initialLocation);
+  const handleLocationSelect = (selectedId: string) => {
+    setLocationId(selectedId);
   };
 
   return (
-    <div>
-      <FilterButtons
-        onClose={closeFilter}
-        onClear={clearFilter}
-        onApply={applyFilter}
-      />
-      <div className="w-full flex-none pt-14">
-        <div className="text-md my-6 flex items-center text-gray-700 gap-2">
-          <CareIcon className="care-l-filter h-5" />
-          <p>Filter by</p>
-        </div>
-
-        <div className="flex flex-wrap gap-4">
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Facility</FieldLabel>
-            <FacilitySelect
-              name="Facilities"
-              setSelected={(selected) =>
-                handleFacilitySelect(selected as FacilityModel)
-              }
-              selected={facility}
-              errors=""
-              showAll
-              multiple={false}
-            />
-          </div>
-          {facilityId && (
-            <div className="w-full flex-none">
-              <FieldLabel className="text-sm">Location</FieldLabel>
-              <LocationSelect
-                name="Facilities"
-                setSelected={(selected) =>
-                  handleLocationSelect(selected as AssetLocationObject)
-                }
-                selected={location}
-                errors=""
-                showAll={false}
-                multiple={false}
-                facilityId={facilityId}
-              />
-            </div>
-          )}
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Asset Type</FieldLabel>
-            <SelectField
-              id="asset-type"
-              fullWidth
-              name="asset_type"
-              placeholder=""
-              variant="outlined"
-              margin="dense"
-              options={[
-                {
-                  id: "",
-                  name: "Select",
-                },
-                {
-                  id: "EXTERNAL",
-                  name: "EXTERNAL",
-                },
-                {
-                  id: "INTERNAL",
-                  name: "INTERNAL",
-                },
-              ]}
-              optionValue="name"
-              value={asset_type}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setAssetType(e.target.value)
-              }
-            />
-          </div>
-
-          <div className="w-full flex-none">
-            <FieldLabel className="text-sm">Asset Status</FieldLabel>
-            <SelectField
-              id="asset-status"
-              fullWidth
-              name="asset_status"
-              placeholder=""
-              variant="outlined"
-              margin="dense"
-              options={[
-                {
-                  id: "",
-                  name: "Select",
-                },
-                {
-                  id: "ACTIVE",
-                  name: "ACTIVE",
-                },
-                {
-                  id: "TRANSFER_IN_PROGRESS",
-                  name: "TRANSFER IN PROGRESS",
-                },
-              ]}
-              optionValue="name"
-              value={asset_status}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setAssetStatus(e.target.value)
-              }
-            />
-          </div>
-        </div>
+    <FiltersSlideover
+      advancedFilter={props}
+      onClear={clearFilter}
+      onApply={applyFilter}
+    >
+      <div className="w-full flex-none">
+        <FieldLabel>Facility</FieldLabel>
+        <FacilitySelect
+          name="Facilities"
+          setSelected={(selected) =>
+            handleFacilitySelect(selected as FacilityModel)
+          }
+          selected={facility}
+          errors=""
+          showAll
+          multiple={false}
+        />
       </div>
-    </div>
+
+      {facilityId && (
+        <div className="w-full flex-none">
+          <FieldLabel>Location</FieldLabel>
+          <LocationSelect
+            name="Facilities"
+            setSelected={(selectedId) =>
+              handleLocationSelect((selectedId as string) || "")
+            }
+            selected={locationId}
+            errors=""
+            showAll={false}
+            multiple={false}
+            facilityId={facilityId}
+          />
+        </div>
+      )}
+
+      <SelectFormField
+        label="Asset Type"
+        errorClassName="hidden"
+        id="asset-type"
+        name="asset_type"
+        options={["EXTERNAL", "INTERNAL"]}
+        optionLabel={(o) => o}
+        optionValue={(o) => o}
+        value={asset_type}
+        onChange={({ value }) => setAssetType(value)}
+      />
+
+      <SelectFormField
+        id="asset-status"
+        name="asset_status"
+        label="Asset Status"
+        errorClassName="hidden"
+        options={["ACTIVE", "TRANSFER_IN_PROGRESS"]}
+        optionLabel={(o) => o.replace(/_/g, " ")}
+        optionValue={(o) => o}
+        value={asset_status}
+        onChange={({ value }) => setAssetStatus(value)}
+      />
+
+      <SelectFormField
+        id="asset-class"
+        name="asset_class"
+        label="Asset Class"
+        errorClassName="hidden"
+        options={[
+          { title: "ONVIF Camera", value: AssetClass.ONVIF },
+          {
+            title: "HL7 Vitals Monitor",
+            value: AssetClass.HL7MONITOR,
+          },
+        ]}
+        optionLabel={({ title }) => title}
+        optionValue={({ value }) => value}
+        value={asset_class}
+        onChange={({ value }) => setAssetClass(value)}
+      />
+    </FiltersSlideover>
   );
 }
 

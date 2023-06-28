@@ -1,9 +1,6 @@
 import React, { useEffect, useReducer, useState } from "react";
-import { MultiSelectField } from "../../Common/HelperInputFields";
 import { TestTable } from "./Table";
 import { useDispatch } from "react-redux";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import { Checkbox, TextField, InputLabel } from "@material-ui/core";
 import {
   createInvestigation,
   listInvestigationGroups,
@@ -11,11 +8,15 @@ import {
   getPatient,
 } from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
-import { navigate } from "raviger";
+import { navigate, useQueryParams } from "raviger";
 import loadable from "@loadable/component";
+import { useTranslation } from "react-i18next";
+import Page from "../../Common/components/Page";
+import AutocompleteMultiSelectFormField from "../../Form/FormFields/AutocompleteMultiselect";
+import { Submit } from "../../Common/components/ButtonV2";
+import Card from "../../../CAREUI/display/Card";
 
 const Loading = loadable(() => import("../../Common/Loading"));
-const PageTitle = loadable(() => import("../../Common/PageTitle"));
 
 const initialState = {
   form: {},
@@ -37,7 +38,7 @@ export interface InvestigationType {
   unit?: string;
   choices?: string;
   ideal_value?: string;
-  groups: [Group];
+  groups: Group[];
 }
 type SearchItem = Group | InvestigationType;
 function isInvestigation(e: SearchItem): e is InvestigationType {
@@ -57,7 +58,7 @@ const testFormReducer = (state = initialState, action: any) => {
   }
 };
 
-let listOfInvestigations = (
+const listOfInvestigations = (
   group_id: string,
   investigations: InvestigationType[]
 ) => {
@@ -66,7 +67,7 @@ let listOfInvestigations = (
   );
 };
 
-let findGroup = (group_id: string, groups: Group[]) => {
+const findGroup = (group_id: string, groups: Group[]) => {
   return groups.find((g) => g.external_id === group_id);
 };
 
@@ -75,7 +76,31 @@ const Investigation = (props: {
   patientId: string;
   facilityId: string;
 }) => {
-  const { consultationId, patientId, facilityId } = props;
+  const { t } = useTranslation();
+  const { patientId, facilityId } = props;
+  const [{ investigations: queryInvestigationsRaw = undefined }] =
+    useQueryParams();
+  const queryInvestigations = queryInvestigationsRaw
+    ? queryInvestigationsRaw.split("_-_")
+    : [];
+
+  const preselectedInvestigations = queryInvestigations.map(
+    (investigation: string) => {
+      return investigation.includes(" (GROUP)")
+        ? {
+            isGroup: true,
+            name: investigation.replace(" (GROUP)", ""),
+          }
+        : {
+            isGroup: false,
+            name: investigation.split(" -- ")[0],
+            groups: investigation
+              .split(" -- ")[1]
+              .split(",")
+              .map((group) => group.split("( ")[1].split(" )")[0]),
+          };
+    }
+  );
 
   const dispatch: any = useDispatch();
   const [selectedGroup, setSelectedGroup] = useState<string[]>([]);
@@ -85,7 +110,6 @@ const Investigation = (props: {
   const [selectedInvestigations, setSelectedInvestigations] = useState<
     InvestigationType[]
   >([]);
-  const [searchInputValue, setSearchInputValue] = useState<string>("");
   const [isLoading, setIsLoading] = useState({
     investigationLoading: false,
     investigationGroupLoading: false,
@@ -96,6 +120,53 @@ const Investigation = (props: {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const searchOptions = [...investigationGroups, ...investigations];
+
+  useEffect(() => {
+    if (investigations.length > 0) {
+      const prefilledGroups = preselectedInvestigations
+        .filter((inv: any) => inv.isGroup)
+        .map((inv: any) =>
+          investigationGroups.find((group) => group.name === inv.name)
+        )
+        .map((group: any) => {
+          return {
+            external_id: group?.external_id || "",
+            name: group?.name || "",
+          };
+        });
+
+      const prefilledInvestigations = preselectedInvestigations
+        .filter((inv: any) => !inv.isGroup)
+        .map((inv: any) => {
+          const investigation = investigations.find(
+            (investigation) => investigation.name === inv.name
+          );
+          // check if investigation contains all groups
+          if (
+            inv.groups.every((group: string) =>
+              investigation?.groups.find(
+                (investigationGroup) => investigationGroup.name === group
+              )
+            )
+          ) {
+            return investigation;
+          }
+        })
+        .filter((investigation: any) => investigation);
+
+      setSelectedInvestigations(prefilledInvestigations);
+      const allGroups = [
+        ...prefilledGroups.map((group: any) => group?.external_id || ""),
+        ...prefilledInvestigations
+          .map((investigation: any) =>
+            investigation?.groups.map((group: any) => group.external_id)
+          )
+          .flat(),
+      ];
+      setSelectedGroup(Array.from(new Set(allGroups)));
+      selectItems([...prefilledGroups, ...prefilledInvestigations]);
+    }
+  }, [investigations, investigationGroups]);
 
   const fetchInvestigations = () => {
     setIsLoading({ ...isLoading, investigationLoading: true });
@@ -140,12 +211,12 @@ const Investigation = (props: {
   }, [props.consultationId]);
 
   const initialiseForm = () => {
-    let investigationsArray = selectedGroup.map((group_id: string) => {
+    const investigationsArray = selectedGroup.map((group_id: string) => {
       return listOfInvestigations(group_id, investigations);
     });
 
-    let flatInvestigations = investigationsArray.flat();
-    let form: any = {};
+    const flatInvestigations = investigationsArray.flat();
+    const form: any = {};
 
     flatInvestigations.forEach(
       (i: InvestigationType) =>
@@ -163,7 +234,7 @@ const Investigation = (props: {
     setState({ type: "set_form", form });
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (_: any) => {
     initialiseForm();
     if (!saving) {
       setSaving(true);
@@ -211,68 +282,31 @@ const Investigation = (props: {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
-      <PageTitle
-        title={"Log Lab Result"}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [patientId]: { name: patientName },
-        }}
-      />
-      <div className="mt-5">
-        <label className="text-sm" id="investigation-group-label">
-          Search Investigations & Groups
-        </label>
-        <Autocomplete
-          multiple
-          id="search-by-test"
-          fullWidth={true}
+    <Page
+      title={t("log_lab_results")}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [patientId]: { name: patientName },
+      }}
+    >
+      <div className="flex flex-col gap-2">
+        <AutocompleteMultiSelectFormField
+          className="mt-5"
+          name="investigations"
+          placeholder="Search Investigations & Groups"
           options={searchOptions}
           value={selectedItems}
-          disableCloseOnSelect
-          inputValue={searchInputValue}
-          getOptionLabel={(option) => option.name}
-          onInputChange={(e, value, reason) => {
-            if (reason === "input" || reason === "clear") {
-              setSearchInputValue(value);
-            }
-          }}
-          renderOption={(option, { selected }) => (
-            <React.Fragment>
-              <Checkbox
-                style={{ marginRight: 8 }}
-                checked={selected}
-                color="primary"
-              />
-              {option.name} |{" "}
-              {isInvestigation(option) &&
-                option.groups.map((e) => {
-                  return (
-                    <div className="px-2 py-1 text-xs font-bold bg-gray-300 rounded-full">
-                      {e.name}
-                    </div>
-                  );
-                })}
-            </React.Fragment>
-          )}
-          renderInput={(params) => (
-            <>
-              <TextField
-                margin="dense"
-                {...params}
-                placeholder="Select Investigation"
-              />
-            </>
-          )}
-          onChange={(_: any, options: SearchItem[]) => {
-            selectItems(options);
-            setSelectedInvestigations(options.filter(isInvestigation));
+          optionLabel={(option) => option.name}
+          optionValue={(option) => option}
+          onChange={({ value }) => {
+            selectItems(value);
+            setSelectedInvestigations(value.filter(isInvestigation));
             setSelectedGroup(
               [
-                ...options
+                ...value
                   .filter((e) => !isInvestigation(e))
                   .map((e) => e.external_id),
-                ...options.reduce<string[]>(
+                ...value.reduce<string[]>(
                   (acc, option) =>
                     acc.concat(
                       isInvestigation(option)
@@ -285,34 +319,38 @@ const Investigation = (props: {
             );
           }}
         />
-      </div>
 
-      {selectedGroup.map((group_id) => {
-        const currentGroupsInvestigations = selectedInvestigations.filter((e) =>
-          e.groups.map((e) => e.external_id).includes(group_id)
-        );
-        const filteredInvestigations = currentGroupsInvestigations.length
-          ? currentGroupsInvestigations
-          : listOfInvestigations(group_id, investigations);
-        const group = findGroup(group_id, investigationGroups);
-        return (
-          <TestTable
-            data={filteredInvestigations}
-            title={group?.name}
-            key={group_id}
-            state={state.form}
-            dispatch={setState}
+        {selectedGroup.map((group_id) => {
+          const currentGroupsInvestigations = selectedInvestigations.filter(
+            (e) => e.groups.map((e) => e.external_id).includes(group_id)
+          );
+          const filteredInvestigations = currentGroupsInvestigations.length
+            ? currentGroupsInvestigations
+            : listOfInvestigations(group_id, investigations);
+          const group = findGroup(group_id, investigationGroups);
+          return (
+            <Card>
+              <TestTable
+                data={filteredInvestigations}
+                title={group?.name}
+                key={group_id}
+                state={state.form}
+                dispatch={setState}
+              />
+            </Card>
+          );
+        })}
+
+        <div className="mt-4 flex justify-end">
+          <Submit
+            className="w-full md:w-auto"
+            onClick={handleSubmit}
+            disabled={saving || !selectedGroup.length}
+            label="Save Investigation"
           />
-        );
-      })}
-      <button
-        className="btn btn-primary mt-4 ml-4"
-        onClick={handleSubmit}
-        disabled={saving || !selectedGroup.length}
-      >
-        Save Investigation
-      </button>
-    </div>
+        </div>
+      </div>
+    </Page>
   );
 };
 

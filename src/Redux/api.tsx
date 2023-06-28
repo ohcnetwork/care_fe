@@ -9,6 +9,12 @@ interface Routes {
 }
 
 const routes: Routes = {
+  config: {
+    path: import.meta.env.REACT_APP_CONFIG || "/config.json",
+    method: "GET",
+    noAuth: true,
+  },
+
   // Auth Endpoints
   login: {
     path: "/api/v1/auth/login/",
@@ -54,6 +60,10 @@ const routes: Routes = {
     path: "/api/v1/users/",
   },
 
+  userListSkill: {
+    path: "/api/v1/users/{username}/skill/",
+  },
+
   userListFacility: {
     path: "/api/v1/users/{username}/get_facilities/",
   },
@@ -63,8 +73,23 @@ const routes: Routes = {
     method: "PUT",
   },
 
+  addUserSkill: {
+    path: "/api/v1/users/{username}/skill/",
+    method: "POST",
+  },
+
   deleteUserFacility: {
     path: "/api/v1/users/{username}/delete_facility/",
+    method: "DELETE",
+  },
+
+  clearHomeFacility: {
+    path: "/api/v1/users/{username}/clear_home_facility/",
+    method: "DELETE",
+  },
+
+  deleteUserSkill: {
+    path: "/api/v1/users/{username}/skill/{id}/",
     method: "DELETE",
   },
 
@@ -109,6 +134,12 @@ const routes: Routes = {
   updateUserPnconfig: {
     path: "/api/v1/users/{username}/pnconfig/",
     method: "PATCH",
+  },
+
+  // Skill Endpoints
+
+  getAllSkills: {
+    path: "/api/v1/skill/",
   },
 
   // Facility Endpoints
@@ -202,6 +233,12 @@ const routes: Routes = {
   operateAsset: {
     path: "/api/v1/asset/{external_id}/operate_assets/",
     method: "POST",
+  },
+
+  // Patient Asset Beds (for CNS and Monitoring Hub)
+  listPatientAssetBeds: {
+    path: "/api/v1/facility/{facility_external_id}/patient_asset_beds/",
+    method: "GET",
   },
 
   // Facility Beds
@@ -557,12 +594,20 @@ const routes: Routes = {
     path: "/api/v1/facility/{facility_external_id}/inventory/delete_last/?item={id}",
     method: "DELETE",
   },
-  discharge: {
-    path: "/api/v1/patient/{external_id}/discharge_summary/",
+  dischargeSummaryGenerate: {
+    path: "/api/v1/consultation/{external_id}/generate_discharge_summary/",
+    method: "POST",
+  },
+  dischargeSummaryPreview: {
+    path: "/api/v1/consultation/{external_id}/preview_discharge_summary",
+    method: "GET",
+  },
+  dischargeSummaryEmail: {
+    path: "/api/v1/consultation/{external_id}/email_discharge_summary/",
     method: "POST",
   },
   dischargePatient: {
-    path: "/api/v1/patient/{id}/discharge_patient/",
+    path: "/api/v1/consultation/{id}/discharge_patient/",
     method: "POST",
   },
   //Profile
@@ -744,6 +789,10 @@ const routes: Routes = {
     path: "/api/v1/asset/{external_id}/",
     method: "GET",
   },
+  deleteAsset: {
+    path: "/api/v1/asset/{external_id}/",
+    method: "DELETE",
+  },
   updateAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "PUT",
@@ -828,6 +877,124 @@ const routes: Routes = {
 
   linkCareContext: {
     path: "/api/v1/abdm/healthid/add_care_context/",
+    method: "POST",
+  },
+  // Prescription endpoints
+
+  listPrescriptions: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
+    method: "GET",
+  },
+
+  createPrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
+    method: "POST",
+  },
+
+  listAdministrations: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/",
+    method: "GET",
+  },
+
+  getAdministration: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/{external_id}/",
+    method: "GET",
+  },
+
+  getPrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/",
+    method: "GET",
+  },
+
+  administerPrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/administer/",
+    method: "POST",
+  },
+
+  discontinuePrescription: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
+    method: "POST",
+  },
+
+  // HCX Endpoints
+
+  listPMJYPackages: {
+    path: "/api/v1/hcx/pmjy_packages/",
+    method: "GET",
+  },
+
+  hcxListPayors: {
+    path: "/api/v1/hcx/payors/",
+    method: "GET",
+  },
+
+  hcxCheckEligibility: {
+    path: "/api/v1/hcx/check_eligibility/",
+    method: "POST",
+  },
+
+  listHCXPolicies: {
+    path: "/api/v1/hcx/policy/",
+    method: "GET",
+  },
+
+  createHCXPolicy: {
+    path: "/api/v1/hcx/policy/",
+    method: "POST",
+  },
+
+  getHCXPolicy: {
+    path: "/api/v1/hcx/policy/{external_id}/",
+    method: "GET",
+  },
+
+  updateHCXPolicy: {
+    path: "/api/v1/hcx/policy/{external_id}/",
+    method: "PUT",
+  },
+
+  partialUpdateHCXPolicy: {
+    path: "/api/v1/hcx/policy/{external_id}/",
+    method: "PATCH",
+  },
+
+  deleteHCXPolicy: {
+    path: "/api/v1/hcx/policy/{external_id}/",
+    method: "DELETE",
+  },
+
+  listHCXClaims: {
+    path: "/api/v1/hcx/claim/",
+    method: "GET",
+  },
+
+  createHCXClaim: {
+    path: "/api/v1/hcx/claim/",
+    method: "POST",
+  },
+
+  getHCXClaim: {
+    path: "/api/v1/hcx/claim/{external_id}/",
+    method: "GET",
+  },
+
+  updateHCXClaim: {
+    path: "/api/v1/hcx/claim/{external_id}/",
+    method: "PUT",
+  },
+
+  partialUpdateHCXClaim: {
+    path: "/api/v1/hcx/claim/{external_id}/",
+    method: "PATCH",
+  },
+
+  deleteHCXClaim: {
+    path: "/api/v1/hcx/claim/{external_id}/",
+    method: "DELETE",
+  },
+
+  hcxMakeClaim: {
+    path: "/api/v1/hcx/make_claim/",
     method: "POST",
   },
 };

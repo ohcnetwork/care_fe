@@ -1,6 +1,5 @@
 import React, { useCallback } from "react";
 import Loading from "../Common/Loading";
-import PageTitle from "../Common/PageTitle";
 import { AssetData } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useDispatch } from "react-redux";
@@ -8,13 +7,15 @@ import { getAsset } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import HL7Monitor from "./AssetType/HL7Monitor";
 import ONVIFCamera from "./AssetType/ONVIFCamera";
+import Page from "../Common/components/Page";
 
 interface AssetConfigureProps {
   assetId: string;
+  facilityId: string;
 }
 
 const AssetConfigure = (props: AssetConfigureProps) => {
-  const { assetId } = props;
+  const { assetId, facilityId } = props;
   const [asset, setAsset] = React.useState<AssetData>();
   const [isLoading, setIsLoading] = React.useState(true);
   const [assetType, setAssetType] = React.useState("");
@@ -47,26 +48,51 @@ const AssetConfigure = (props: AssetConfigureProps) => {
   );
 
   if (isLoading) return <Loading />;
+
+  if (assetType === "HL7MONITOR") {
+    return (
+      <Page
+        title={`Configure HL7 Monitor: ${asset?.name}`}
+        crumbsReplacements={{
+          [facilityId]: { name: asset?.location_object.facility.name },
+          assets: { uri: `/assets?facility=${facilityId}` },
+          [assetId]: { name: asset?.name },
+        }}
+        backUrl={`/facility/${facilityId}/assets/${assetId}`}
+      >
+        <HL7Monitor asset={asset} assetId={assetId} facilityId={facilityId} />
+      </Page>
+    );
+  }
+
+  if (assetType === "VENTILATOR") {
+    return (
+      <Page
+        title={`Configure Ventilator: ${asset?.name}`}
+        crumbsReplacements={{
+          [facilityId]: { name: asset?.location_object.facility.name },
+          assets: { uri: `/assets?facility=${facilityId}` },
+          [assetId]: { name: asset?.name },
+        }}
+        backUrl={`/facility/${facilityId}/assets/${assetId}`}
+      >
+        <HL7Monitor asset={asset} assetId={assetId} facilityId={facilityId} />
+      </Page>
+    );
+  }
+
   return (
-    <div>
-      {assetType === "HL7MONITOR" ? (
-        <>
-          <PageTitle
-            title={`Configure HL7 Monitor: ${asset?.name}`}
-            crumbsReplacements={{ [assetId]: { name: asset?.name } }}
-          />
-          <HL7Monitor asset={asset} assetId={assetId} />
-        </>
-      ) : (
-        <>
-          <PageTitle
-            title={`Configure ONVIF Camera: ${asset?.name}`}
-            crumbsReplacements={{ [assetId]: { name: asset?.name } }}
-          />
-          <ONVIFCamera asset={asset} assetId={assetId} />
-        </>
-      )}
-    </div>
+    <Page
+      title={`Configure ONVIF Camera: ${asset?.name}`}
+      crumbsReplacements={{
+        [facilityId]: { name: asset?.location_object.facility.name },
+        assets: { uri: `/assets?facility=${facilityId}` },
+        [assetId]: { name: asset?.name },
+      }}
+      backUrl={`/facility/${facilityId}/assets/${assetId}`}
+    >
+      <ONVIFCamera asset={asset} assetId={assetId} facilityId={facilityId} />
+    </Page>
   );
 };
 

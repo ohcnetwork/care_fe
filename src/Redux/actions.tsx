@@ -1,7 +1,15 @@
+import { HCXClaimModel, HCXPolicyModel } from "../Components/HCX/models";
+import {
+  MedicineAdministrationRecord,
+  Prescription,
+} from "../Components/Medicine/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
 import { ICreateHealthIdRequest } from "../Components/ABDM/models";
 
+export const getConfig = () => {
+  return fireRequestForFiles("config");
+};
 // User
 export const postLogin = (params: object) => {
   return fireRequest("login", [], params);
@@ -47,13 +55,13 @@ export const updateUserPnconfig = (params: object, pathParams: object) => {
 export const createFacility = (params: object) => {
   return fireRequest("createFacility", [], params);
 };
-export const updateFacility = (id: number, params: object) => {
+export const updateFacility = (id: string, params: object) => {
   return fireRequest("updateFacility", [id], params);
 };
-export const partialUpdateFacility = (id: number, params: object) => {
+export const partialUpdateFacility = (id: string, params: object) => {
   return fireRequest("partialUpdateFacility", [id], params);
 };
-export const deleteFacility = (id: number) => {
+export const deleteFacility = (id: string) => {
   return fireRequest("deleteFacility", [id], {});
 };
 export const deleteFacilityCoverImage = (id: string) => {
@@ -63,15 +71,29 @@ export const getUserList = (params: object) => {
   return fireRequest("userList", [], params);
 };
 
+export const getUserListSkills = (pathParam: object) => {
+  return fireRequest("userListSkill", [], {}, pathParam);
+};
+
 export const partialUpdateUser = (username: string, data: any) => {
   return fireRequest("partialUpdateUser", [], data, { username });
 };
 export const getUserListFacility = (pathParam: object) => {
   return fireRequest("userListFacility", [], {}, pathParam);
 };
+
+export const addUserSkill = (username: string, skill: string) => {
+  return fireRequest("addUserSkill", [], { skill }, { username });
+};
+
 export const addUserFacility = (username: string, facility: string) => {
   return fireRequest("addUserFacility", [], { facility }, { username });
 };
+
+export const deleteUserSkill = (username: string, id: string) => {
+  return fireRequest("deleteUserSkill", [], {}, { username, id });
+};
+
 export const deleteUserFacility = (username: string, facility: string) => {
   return fireRequest(
     "deleteUserFacility",
@@ -80,14 +102,24 @@ export const deleteUserFacility = (username: string, facility: string) => {
     { username }
   );
 };
+
+export const clearHomeFacility = (username: string) => {
+  return fireRequest("clearHomeFacility", [], {}, { username });
+};
+
 export const getPermittedFacilities = (params: object) => {
   return fireRequest("getPermittedFacilities", [], params);
 };
+
 export const getAllFacilities = (params: object) => {
   return fireRequest("getAllFacilities", [], params);
 };
 
-export const getPermittedFacility = (id: number, key?: string) => {
+export const getAllSkills = (params: object) => {
+  return fireRequest("getAllSkills", [], params);
+};
+
+export const getPermittedFacility = (id: number | string, key?: string) => {
   return fireRequest("getPermittedFacility", [], {}, { id: id }, key);
 };
 
@@ -146,8 +178,8 @@ export const partialUpdateFacilityAssetLocation = (
   });
 
 // asset bed
-export const listAssetBeds = (params: object) =>
-  fireRequest("listAssetBeds", [], params, {});
+export const listAssetBeds = (params: object, altKey?: string) =>
+  fireRequest("listAssetBeds", [], params, {}, altKey);
 export const createAssetBed = (
   params: object,
   asset_id: string,
@@ -206,6 +238,11 @@ export const deleteAssetBed = (asset_id: string) =>
     }
   );
 
+export const listPatientAssetBeds = (
+  facility_external_id: string,
+  params: object
+) => fireRequest("listPatientAssetBeds", [], params, { facility_external_id });
+
 // Facility Beds
 export const listFacilityBeds = (params: object) =>
   fireRequest("listFacilityBeds", [], params, {});
@@ -255,7 +292,7 @@ export const listConsultationBeds = (params: object) =>
   fireRequest("listConsultationBeds", [], params, {});
 export const createConsultationBed = (
   params: object,
-  consultation_id: number,
+  consultation_id: string,
   bed_id: string
 ) =>
   fireRequest(
@@ -554,8 +591,21 @@ export const deleteLastInventoryLog = (params: object) => {
   return fireRequest("deleteLastInventoryLog", [], {}, params);
 };
 
-export const discharge = (params: object, pathParams: object) => {
-  return fireRequest("discharge", [], params, pathParams);
+export const generateDischargeSummary = (pathParams: object) => {
+  return fireRequest("dischargeSummaryGenerate", [], {}, pathParams);
+};
+export const previewDischargeSummary = (pathParams: object) => {
+  return fireRequest(
+    "dischargeSummaryPreview",
+    [],
+    {},
+    pathParams,
+    undefined,
+    true
+  );
+};
+export const emailDischargeSummary = (params: object, pathParams: object) => {
+  return fireRequest("dischargeSummaryEmail", [], params, pathParams);
 };
 export const dischargePatient = (params: object, pathParams: object) => {
   return fireRequest("dischargePatient", [], params, pathParams);
@@ -789,6 +839,8 @@ export const createAssetUserLocation = (params: object) =>
   fireRequest("createAssetUserLocation", [], params);
 export const getAsset = (id: string) =>
   fireRequest("getAsset", [], {}, { external_id: id });
+export const deleteAsset = (id: string) =>
+  fireRequest("deleteAsset", [], {}, { external_id: id });
 export const updateAsset = (id: string, params: object) =>
   fireRequest("updateAsset", [], params, { external_id: id });
 export const partialUpdateAsset = (id: string, params: object) =>
@@ -802,7 +854,6 @@ export const getAssetTransaction = (id: string) =>
   fireRequest("getAssetTransaction", [], {}, { id });
 
 // ABDM related
-
 export const generateAadhaarOtp = (aadhaar: string) =>
   fireRequest("generateAadhaarOtp", [], { aadhaar });
 
@@ -858,4 +909,141 @@ export const linkViaQR = (
 
 export const linkCareContext = (consultationId: string) => {
   return fireRequest("linkCareContext", [], { consultation: consultationId });
+};
+export const listPMJYPackages = (query?: string) =>
+  fireRequest("listPMJYPackages", [], { query });
+
+/** Prescription related actions */
+export const PrescriptionActions = (consultation_external_id: string) => {
+  const pathParams = { consultation_external_id };
+
+  return {
+    list: (query?: Partial<Prescription>) => {
+      let altKey;
+      if (query?.is_prn !== undefined) {
+        altKey = query?.is_prn
+          ? "listPRNPrescriptions"
+          : "listNormalPrescriptions";
+      }
+      return fireRequest("listPrescriptions", [], query, pathParams, altKey);
+    },
+
+    create: (obj: Prescription) =>
+      fireRequest("createPrescription", [], obj, pathParams),
+
+    listAdministrations: (query?: object) =>
+      fireRequest("listAdministrations", [], query, pathParams),
+
+    getAdministration: (external_id: string) =>
+      fireRequest("getAdministration", [], {}, { ...pathParams, external_id }),
+
+    /** Returns actions specific to a prescription */
+    prescription(external_id: string) {
+      const pathParams = { consultation_external_id, external_id };
+
+      return {
+        /** Read a specific prescription of a consultation */
+        get: () => fireRequest("getPrescription", [], {}, pathParams),
+
+        /** Administer a prescription */
+        administer: (obj: MedicineAdministrationRecord) =>
+          fireRequest(
+            "administerPrescription",
+            [],
+            obj,
+            pathParams,
+            `administer-medicine-${external_id}`
+          ),
+
+        /** Discontinue a prescription */
+        discontinue: (discontinued_reason: string | undefined) =>
+          fireRequest(
+            "discontinuePrescription",
+            [],
+            { discontinued_reason },
+            pathParams,
+            `discontinue-medicine-${external_id}`
+          ),
+      };
+    },
+  };
+};
+
+// HCX Actions
+export const HCXActions = {
+  checkEligibility: (policy: string) => {
+    return fireRequest("hcxCheckEligibility", [], { policy });
+  },
+
+  payors: {
+    list(query: string) {
+      return fireRequest("hcxListPayors", [], { query });
+    },
+  },
+
+  policies: {
+    list(params: object) {
+      return fireRequest("listHCXPolicies", [], params);
+    },
+    create(obj: HCXPolicyModel) {
+      return fireRequest("createHCXPolicy", [], obj);
+    },
+    read(id: string) {
+      return fireRequest("getHCXPolicy", [], {}, { external_id: id });
+    },
+    update(id: string, obj: HCXPolicyModel) {
+      return fireRequest("updateHCXPolicy", [], obj, { external_id: id });
+    },
+    partialUpdate(id: string, obj: Partial<HCXPolicyModel>) {
+      return fireRequest("partialUpdateHCXPolicy", [], obj, {
+        external_id: id,
+      });
+    },
+    delete(id: string) {
+      return fireRequest("deleteHCXPolicy", [], {}, { external_id: id });
+    },
+  },
+
+  claims: {
+    list(params: object) {
+      return fireRequest("listHCXClaims", [], params);
+    },
+    create(obj: object) {
+      return fireRequest("createHCXClaim", [], obj);
+    },
+    read(id: string) {
+      return fireRequest("getHCXClaim", [], {}, { external_id: id });
+    },
+    update(id: string, obj: HCXClaimModel) {
+      return fireRequest("updateHCXClaim", [], obj, { external_id: id });
+    },
+    partialUpdate(id: string, obj: Partial<HCXClaimModel>) {
+      return fireRequest("partialUpdateHCXClaim", [], obj, {
+        external_id: id,
+      });
+    },
+    delete(id: string) {
+      return fireRequest("deleteHCXClaim", [], {}, { external_id: id });
+    },
+  },
+
+  preauths: {
+    list(consultation: string) {
+      return fireRequest(
+        "listHCXClaims",
+        [],
+        {
+          consultation,
+          ordering: "-modified_date",
+          use: "preauthorization",
+        },
+        {},
+        `listPreAuths-${consultation}`
+      );
+    },
+  },
+
+  makeClaim(claim: string) {
+    return fireRequest("hcxMakeClaim", [], { claim });
+  },
 };

@@ -1,14 +1,14 @@
-import React, { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import loadable from "@loadable/component";
-import { Button } from "@material-ui/core";
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getInventorySummary, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
-import { RoleButton } from "../Common/RoleButton";
 import { classNames } from "../../Utils/utils";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
+import ButtonV2 from "../Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function InventoryList(props: any) {
@@ -152,51 +152,32 @@ export default function InventoryList(props: any) {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Inventory Manager"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
-      />
+    <Page
+      title="Inventory Manager"
+      className="mx-3 md:mx-8"
+      crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+      backUrl={`/facility/${facilityId}`}
+    >
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-4 md:py-8">
-          <div className="flex flex-col md:flex-row">
-            <div className="mt-2">
-              <RoleButton
-                className="w-full"
-                materialButtonProps={{
-                  variant: "contained",
-                  color: "primary",
-                  size: "small",
-                }}
-                handleClickCB={() =>
-                  navigate(`/facility/${facilityId}/inventory/add`)
-                }
-                disableFor="readOnly"
-                buttonType="materialUI"
-              >
-                Manage Inventory
-              </RoleButton>
-            </div>
-            <div className="mt-2">
-              <Button
-                className="md:ml-2 w-full"
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/inventory/min_quantity/list`
-                  )
-                }
-              >
-                Minimum Quantity Required
-              </Button>
-            </div>
+          <div className="flex flex-col md:flex-row gap-2">
+            <ButtonV2
+              className="w-full"
+              href={`/facility/${facilityId}/inventory/add`}
+              authorizeFor={NonReadOnlyUsers}
+            >
+              Manage Inventory
+            </ButtonV2>
+            <ButtonV2
+              className="w-full"
+              href={`/facility/${facilityId}/inventory/min_quantity/list`}
+            >
+              Minimum Quantity Required
+            </ButtonV2>
           </div>
           {inventoryItem}
         </div>
       </div>
-    </div>
+    </Page>
   );
 }

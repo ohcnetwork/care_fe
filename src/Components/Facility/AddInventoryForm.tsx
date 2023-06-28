@@ -1,8 +1,7 @@
-import { Card, CardContent, InputLabel } from "@material-ui/core";
 import loadable from "@loadable/component";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
+import Card from "../../CAREUI/display/Card";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getItems,
@@ -11,11 +10,14 @@ import {
   getInventorySummary,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { SelectField, TextInputField } from "../Common/HelperInputFields";
+import Page from "../Common/components/Page";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
 import { InventoryItemsModel } from "./models";
-import { goBack } from "../../Utils/utils";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const initForm = {
   id: "",
@@ -47,11 +49,12 @@ const inventoryFormReducer = (state = initialState, action: any) => {
 };
 
 export const AddInventoryForm = (props: any) => {
+  const { goBack } = useAppHistory();
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
+  const [offset, _setOffset] = useState(0);
   const [stockError, setStockError] = useState("");
   const [inventory, setInventory] = useState<any>([]);
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
@@ -203,9 +206,10 @@ export const AddInventoryForm = (props: any) => {
       setIsLoading(false);
     }
   };
+
   const handleChange = (e: any) => {
-    let form = { ...state.form };
-    form[e.target.name] = e.target.value;
+    const form = { ...state.form };
+    form[e.name] = e.value;
     dispatch({ type: "set_form", form });
   };
 
@@ -214,103 +218,74 @@ export const AddInventoryForm = (props: any) => {
   }
 
   return (
-    <div className="px-2">
-      <PageTitle
-        title="Manage Inventory"
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
-      />
+    <Page
+      title={"Manage Inventory"}
+      backUrl={`/facility/${facilityId}/inventory`}
+      crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+    >
       <div className="mt-4">
         <Card>
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                <div>
-                  <InputLabel id="inventory_name_label">
-                    Inventory Name
-                  </InputLabel>
-                  <SelectField
-                    name="id"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.id}
-                    options={data.map((e) => {
-                      return { id: e.id, name: e.name };
-                    })}
-                    onChange={handleChange}
-                    optionKey="id"
-                    optionValue="name"
-                  />
-                </div>
-                <div>
-                  <InputLabel id="inventory_description_label">
-                    Status:
-                  </InputLabel>
-                  <SelectField
-                    name="isIncoming"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.isIncoming}
-                    options={[
-                      { id: true, value: "Add Stock" },
-                      { id: false, value: "Use Stock" },
-                    ]}
-                    onChange={handleChange}
-                    optionKey="id"
-                    optionValue="value"
-                    errors={stockError}
-                  />
-                </div>
-                <div>
-                  <InputLabel id="quantity">Quantity</InputLabel>
-                  <TextInputField
-                    name="quantity"
-                    variant="outlined"
-                    margin="dense"
-                    type="float"
-                    value={state.form.quantity}
-                    onChange={handleChange}
-                    errors=""
-                  />
-                </div>
-                <div>
-                  <InputLabel id="unit">Unit</InputLabel>
-                  <SelectField
-                    name="unit"
-                    margin="dense"
-                    variant="outlined"
-                    value={state.form.unit}
-                    options={currentUnit || []}
-                    onChange={handleChange}
-                    optionKey="id"
-                    optionValue="name"
-                  />
-                </div>
+          <form onSubmit={handleSubmit}>
+            <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div>
+                <FieldLabel id="inventory_name_label">
+                  Inventory Name
+                </FieldLabel>
+                <SelectFormField
+                  name="id"
+                  onChange={handleChange}
+                  value={state.form.id}
+                  options={data.map((e) => {
+                    return { id: e.id, name: e.name };
+                  })}
+                  optionValue={(inventory) => inventory.id}
+                  optionLabel={(inventory) => inventory.name}
+                />
               </div>
-              <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <button
-                  color="default"
-                  type="button"
-                  onClick={() => goBack()}
-                  className="w-full sm:w-fit bg-gray-400 hover:bg-gray-500 rounded-md p-2 px-6 mt-2"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  color="primary"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  className="bg-green-500 hover:bg-green-700 w-full text-white sm:w-fit mt-2 rounded-md px-6 font-bold p-2"
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  <CheckCircleOutlineIcon></CheckCircleOutlineIcon> Add/Update
-                  Inventory
-                </button>
+              <div>
+                <FieldLabel id="inventory_description_label">
+                  Status:
+                </FieldLabel>
+                <SelectFormField
+                  name="isIncoming"
+                  onChange={handleChange}
+                  value={state.form.isIncoming}
+                  options={[
+                    { id: true, name: "Add Stock" },
+                    { id: false, name: "Use Stock" },
+                  ]}
+                  optionValue={(inventory) => inventory.name}
+                  optionLabel={(inventory) => inventory.name}
+                  error={stockError}
+                />
               </div>
-            </CardContent>
+              <div>
+                <FieldLabel id="quantity">Quantity</FieldLabel>
+                <TextFormField
+                  name="quantity"
+                  value={state.form.quantity}
+                  onChange={handleChange}
+                />
+              </div>
+              <div>
+                <FieldLabel id="unit">Unit</FieldLabel>
+                <SelectFormField
+                  name="unit"
+                  onChange={handleChange}
+                  value={state.form.unit}
+                  options={currentUnit || []}
+                  optionValue={(inventory) => inventory.id}
+                  optionLabel={(inventory: any) => inventory.name}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
+              <Cancel onClick={() => goBack()} />
+              <Submit onClick={handleSubmit} label="Add/Update Inventory" />
+            </div>
           </form>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };

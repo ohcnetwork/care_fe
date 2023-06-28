@@ -1,31 +1,41 @@
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 
 class facility {
   static create(facility) {
     cy.awaitUrl("/facility/create");
-    this.fillForm(facility);
-    cy.get("[id=facility-save]").should("exist").click();
+    this.fillForm({
+      ...facility,
+      latitude: 800,
+      longitude: 500,
+    });
+    cy.get("[id=submit]").should("exist").click();
     cy.verifyNotification("Facility added successfully");
   }
 
   static update(facility) {
+    cy.get("[id=manage-facility-dropdown]").click();
     cy.get("[id=update-facility]").click();
     cy.url().should("include", "update");
-    this.fillForm(facility);
-    cy.get("[id=facility-save]").should("exist").click();
+    this.fillForm({
+      ...facility,
+      latitude: 900,
+      longitude: 600,
+    });
+    cy.get("[id=submit]").should("exist").click();
     cy.verifyNotification("Facility updated successfully");
   }
 
   static fillForm({
     type,
     name,
+    features,
+    address,
+    pincode,
+    phone,
     state,
     district,
     localbody,
     ward,
-    address,
-    pincode,
-    tel,
     oxygen_capacity,
     oxygen_requirement,
     type_b_cylinders,
@@ -34,60 +44,72 @@ class facility {
     expected_type_c_cylinders,
     type_d_cylinders,
     expected_type_d_cylinders,
+    latitude,
+    longitude,
   }) {
-    cy.get("[data-test=facility-type]").should("exist").type(type);
-    cy.get("[id=facility-name]").should("exist").type(name);
-    cy.get("[data-test=facility-state] select").should("exist").select(state);
-    cy.get("[data-test=facility-district] select")
-      .should("exist")
-      .select(district);
-    cy.get("[data-test=facility-localbody] select")
-      .should("exist")
-      .select(localbody);
-    cy.get("[data-test=facility-ward] select").should("exist").select(ward);
+    cy.get("[id=facility_type] > div > button").click();
+    cy.get("div").contains(type).click();
 
-    cy.get("[id=facility-address]").type(address);
-    cy.get("[id=facility-pincode]").should("exist").clear().type(pincode);
-    cy.get("input[type=tel]").should("exist").type(tel);
+    cy.get("input[id=name]").should("exist").type(name);
 
-    cy.get("[id=facility-oxygen-capacity]").clear().type(oxygen_capacity);
+    cy.get("[id=features] > div > div > button").click();
+    cy.get("li").contains(features[0]).click();
+    cy.get("li").contains(features[1]).click();
+    cy.get("body").click();
 
-    cy.get("[id=facility-oxygen-requirement]")
+    cy.get("[id=state] > div > button").click();
+    cy.get("div").contains(state).click();
+
+    cy.get("[id=district] > div > button").click();
+    cy.get("div").contains(district).click();
+
+    cy.get("[id=local_body] > div > button").click();
+    cy.get("div").contains(localbody).click();
+
+    cy.get("[id=ward] > div > button").click();
+    cy.get("div").contains(ward).click();
+
+    cy.get("textarea[id=address]").should("exist").type(address);
+
+    cy.get("input[id=pincode]").should("exist").clear().type(pincode);
+
+    cy.get("input[name=phone_number]").should("exist").clear().type(phone);
+
+    cy.get("input[id=oxygen_capacity]").clear().type(oxygen_capacity);
+    cy.get("input[id=expected_oxygen_requirement]")
       .should("exist")
       .clear()
       .type(oxygen_requirement);
 
-    cy.get("[id=facility-type-b-cylinders]")
+    cy.get("input[id=type_b_cylinders]")
       .should("exist")
       .clear()
       .type(type_b_cylinders);
-
-    cy.get("[id=facility-expected-type-b-cylinders]")
+    cy.get("input[id=expected_type_b_cylinders]")
       .should("exist")
       .clear()
       .type(expected_type_b_cylinders);
 
-    cy.get("[id=facility-type-c-cylinders]")
+    cy.get("input[id=type_c_cylinders]")
       .should("exist")
       .clear()
       .type(type_c_cylinders);
-
-    cy.get("[id=facility-expected-type-c-cylinders]")
+    cy.get("input[id=expected_type_c_cylinders]")
       .should("exist")
       .clear()
       .type(expected_type_c_cylinders);
 
-    cy.get("[id=facility-type-d-cylinders]")
+    cy.get("input[id=type_d_cylinders]")
       .should("exist")
       .clear()
       .type(type_d_cylinders);
-
-    cy.get("[id=facility-expected-type-d-cylinders]")
+    cy.get("input[id=expected_type_d_cylinders]")
       .should("exist")
       .clear()
       .type(expected_type_d_cylinders);
 
     cy.get("[id=facility-location-button]").click();
+    cy.get("body").wait(7000).click(latitude, longitude);
     cy.get("body").click();
   }
 }
@@ -109,13 +131,14 @@ describe("Facility", () => {
     facility.create({
       type: "Private Hospital",
       name: "cypress facility",
+      features: ["CT Scan", "X-Ray"],
       state: "Kerala",
       district: "Ernakulam",
-      localbody: "Alangad  Block Panchayat, Ernakulam District",
-      ward: "1: MANAKKAPADY",
+      localbody: "Alangad",
+      ward: "MANAKKAPADY",
       address: "some address",
       pincode: "884656",
-      tel: "9985784535",
+      phone: "+919985784535",
       oxygen_capacity: "20",
       oxygen_requirement: "30",
       type_b_cylinders: "20",
@@ -124,31 +147,28 @@ describe("Facility", () => {
       expected_type_c_cylinders: "34",
       type_d_cylinders: "342",
       expected_type_d_cylinders: "43",
+      latitude: "-4.214943141390639",
+      longitude: "1.494140625",
     });
 
+    cy.verifyNotification("Facility added successfully");
+
     // add bed type
-    cy.url().should("include", "bed");
-    cy.get("[id=bed-type]").select("1");
-    cy.get("[id=total-capacity]").type("150");
-    cy.get("[id=currently-occupied]").type("100");
-    cy.get("[id=bed-capacity-save]").click();
+    cy.get("[id=bed-type] > div > button").click();
+    cy.get("div").contains("Non-Covid Ordinary Beds").click();
+    cy.get("input[id=total-capacity]").should("exist").type("150");
+    cy.get("input[id=currently-occupied]").should("exist").type("100");
+    cy.get("[id=bed-capacity-save-and-exit]").click();
+
     cy.verifyNotification("Bed capacity added successfully");
 
-    cy.url().should("include", "bed");
-    cy.get("[id=bed-capacity-cancel]").click();
-
     // add doctor information
-    cy.get("button")
-      .should("contain", "Add Doctor Types")
-      .contains("Add Doctor Types")
-      .click({ force: true });
-    cy.url().should("include", "doctor");
-    cy.get("[id=area-of-specialization]").select("1");
+    cy.get("[id=area-of-specialization] > div > button").click();
+    cy.get("ul > li:nth-child(2)").click();
     cy.get("[id=count]").type("15");
-    cy.get("[id=doctor-save").click();
+    cy.get("[id=save-and-exit").click();
+
     cy.verifyNotification("Doctor count added successfully");
-    cy.url().should("include", "doctor");
-    cy.get("[id=doctor-cancel").click();
     cy.url().then((url) => {
       current_url = url;
     });
@@ -156,15 +176,16 @@ describe("Facility", () => {
 
   it("update facility", () => {
     facility.update({
-      type: "Private Hosp",
+      type: "TeleMedicine",
       name: " update",
+      features: ["X-Ray", "Neonatal Care"],
       state: "Kerala",
       district: "Ernakulam",
-      localbody: "Alangad  Block Panchayat, Ernakulam District",
-      ward: "1: MANAKKAPADY",
+      localbody: "Aikaranad",
+      ward: "PAZHAMTHOTTAM",
       address: " update",
       pincode: "584675",
-      tel: "9985784535",
+      phone: "+919985784535",
       oxygen_capacity: "30",
       oxygen_requirement: "40",
       type_b_cylinders: "23",
@@ -173,7 +194,10 @@ describe("Facility", () => {
       expected_type_c_cylinders: "84",
       type_d_cylinders: "64",
       expected_type_d_cylinders: "4",
+      latitude: "-16.97274101999901",
+      longitude: "11.77734375",
     });
+    cy.verifyNotification("Facility updated successfully");
     cy.url().then((url) => {
       current_url = url;
     });

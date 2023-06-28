@@ -153,7 +153,7 @@ let reducer = (state, action) => {
 }
 
 let handleProneSelect = (send, event) => {
-  ReactEvent.Form.target(event)["checked"] ? send(SetInPronePosition) : send(SetNotInPronePosition)
+  event ? send(SetInPronePosition) : send(SetNotInPronePosition)
 }
 
 let initialState = neurologicalMonitoring => {
@@ -545,7 +545,7 @@ let make = (~updateCB, ~neurologicalMonitoring, ~id, ~consultationId) => {
       </div>
       <div className="my-15 w-full h-1 bg-gray-300" />
       <div className="my-10">
-        <div className="text-3xl font-bold"> {str("Limp Response")} </div>
+        <div className="text-3xl font-bold"> {str("Limb Response")} </div>
         <div>
           {renderLimpResponse(
             ~input=state.limbResponseUpperExtremityRight,

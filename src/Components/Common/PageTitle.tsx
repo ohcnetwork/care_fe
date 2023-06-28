@@ -1,15 +1,19 @@
 import React, { useEffect, useRef } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import PageHeadTitle from "./PageHeadTitle";
-import { classNames, goBack } from "../../Utils/utils";
+import { classNames } from "../../Utils/utils";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
-interface PageTitleProps {
+export interface PageTitleProps {
   title: string;
   hideBack?: boolean;
   backUrl?: string;
-  backButtonCB?: () => number | void;
   className?: string;
   componentRight?: React.ReactNode;
+  /**
+   * If `false` is returned, prevents from going back.
+   */
+  onBackClick?: () => boolean | void;
   justifyContents?:
     | "justify-center"
     | "justify-start"
@@ -20,19 +24,21 @@ interface PageTitleProps {
     [key: string]: { name?: string; uri?: string; style?: string };
   };
   focusOnLoad?: boolean;
+  isInsidePage?: boolean;
 }
 
 export default function PageTitle({
   title,
   hideBack = false,
   backUrl,
-  backButtonCB,
   className = "",
+  onBackClick,
   componentRight = <></>,
   breadcrumbs = true,
   crumbsReplacements = {},
   justifyContents = "justify-start",
   focusOnLoad = false,
+  isInsidePage = false,
 }: PageTitleProps) {
   const divRef = useRef<any>();
 
@@ -42,16 +48,23 @@ export default function PageTitle({
     }
   }, [divRef, focusOnLoad]);
 
-  const onBackButtonClick = () =>
-    backButtonCB ? goBack(backButtonCB()) : goBack(backUrl);
+  const { goBack } = useAppHistory();
 
   return (
-    <div ref={divRef} className={`pt-4 mb-4 ${className}`}>
+    <div
+      ref={divRef}
+      className={isInsidePage ? "" : `pt-4 md:mb-4 mb-2 ${className}`}
+    >
       <PageHeadTitle title={title} />
       <div className={classNames("flex items-center", justifyContents)}>
         <div className="flex items-center">
           {!hideBack && (
-            <button onClick={onBackButtonClick}>
+            <button
+              onClick={() => {
+                if (onBackClick && onBackClick() === false) return;
+                goBack(backUrl);
+              }}
+            >
               <i className="fas fa-chevron-left text-2xl rounded-md p-2 hover:bg-gray-200 mr-1">
                 {" "}
               </i>

@@ -1,6 +1,5 @@
 import {
   CardContent,
-  InputLabel,
   RadioGroup,
   Box,
   FormControlLabel,
@@ -9,7 +8,7 @@ import {
 import { navigate } from "raviger";
 import moment from "moment";
 import loadable from "@loadable/component";
-import { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   SYMPTOM_CHOICES,
@@ -20,14 +19,13 @@ import {
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
-  NativeSelectField,
-  CheckboxField,
-  MultilineInputField,
-  SelectField,
-  ErrorHelperText,
-  DateTimeFiled,
-  MultiSelectField,
-  AutoCompleteAsyncField,
+  LegacyNativeSelectField,
+  LegacyCheckboxField,
+  LegacySelectField,
+  LegacyErrorHelperText,
+  LegacyDateTimeFiled,
+  LegacyMultiSelectField,
+  LegacyAutoCompleteAsyncField,
 } from "../Common/HelperInputFields";
 import {
   createDailyReport,
@@ -37,8 +35,12 @@ import {
   getPatient,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { make as Link } from "../Common/components/Link.gen";
 import { formatDate } from "../../Utils/utils";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -51,7 +53,7 @@ const initForm: any = {
   patient_category: "Comfort",
   current_health: 0,
   recommend_discharge: false,
-  actions: null,
+  action: null,
   review_interval: 0,
   admitted_to: "",
   taken_at: null,
@@ -89,11 +91,15 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
         form: action.form,
       };
     }
-    case "set_error": {
+    case "set_errors": {
       return {
         ...state,
         errors: action.errors,
       };
+    }
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
     }
     default:
       return state;
@@ -101,16 +107,43 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
 };
 
 export const DailyRounds = (props: any) => {
+  const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, consultationId, id } = props;
-  const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
+  const [state, dispatch] = useAutoSaveReducer<any>(
+    DailyRoundsFormReducer,
+    initialState
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [prevReviewInterval, setPreviousReviewInterval] = useState(-1);
+  const [prevAction, setPreviousAction] = useState("NO_ACTION");
   const [hasPreviousLog, setHasPreviousLog] = useState(false);
   const headerText = !id ? "Add Consultation Update" : "Info";
   const buttonText = !id ? "Save" : "Continue";
+
+  useEffect(() => {
+    (async () => {
+      if (patientId) {
+        const res = await dispatchAction(getPatient({ id: patientId }));
+        if (res.data) {
+          setPatientName(res.data.name);
+          setFacilityName(res.data.facility_object.name);
+          setPreviousReviewInterval(
+            Number(res.data.last_consultation.review_interval)
+          );
+          setPreviousAction(
+            TELEMEDICINE_ACTIONS.find((action) => action.id === res.data.action)
+              ?.text || "NO_ACTION"
+          );
+        }
+      } else {
+        setPatientName("");
+        setFacilityName("");
+      }
+    })();
+  }, [dispatchAction, patientId]);
 
   const fetchRoundDetails = useCallback(
     async (status: statusType) => {
@@ -147,26 +180,7 @@ export const DailyRounds = (props: any) => {
   );
 
   useEffect(() => {
-    async function fetchPatientName() {
-      if (patientId) {
-        const res = await dispatchAction(getPatient({ id: patientId }));
-        if (res.data) {
-          setPatientName(res.data.name);
-          setFacilityName(res.data.facility_object.name);
-          setPreviousReviewInterval(
-            Number(res.data.last_consultation.review_interval)
-          );
-        }
-      } else {
-        setPatientName("");
-        setFacilityName("");
-      }
-    }
-    fetchPatientName();
-  }, [dispatchAction, patientId]);
-
-  useEffect(() => {
-    async function fetchHasPreviousLog() {
+    (async () => {
       if (consultationId && !id) {
         const res = await dispatchAction(
           getDailyReport({ limit: 1, offset: 0 }, { consultationId })
@@ -185,8 +199,7 @@ export const DailyRounds = (props: any) => {
           },
         });
       }
-    }
-    fetchHasPreviousLog();
+    })();
   }, [dispatchAction, consultationId, id]);
 
   const validateForm = () => {
@@ -220,7 +233,7 @@ export const DailyRounds = (props: any) => {
           return;
       }
     });
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return !invalidForm;
   };
 
@@ -241,8 +254,6 @@ export const DailyRounds = (props: any) => {
     }
     return map.toFixed(2);
   };
-
-  console.log(state.form.review_interval);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -275,10 +286,8 @@ export const DailyRounds = (props: any) => {
           other_details: state.form.other_details,
           consultation: consultationId,
           recommend_discharge: JSON.parse(state.form.recommend_discharge),
-          action: state.form.action,
-          review_interval: Number(
-            state.form.review_interval || prevReviewInterval
-          ),
+          action: prevAction,
+          review_interval: Number(prevReviewInterval),
         };
         if (state.form.rounds_type === "NORMAL") {
           data = {
@@ -371,6 +380,13 @@ export const DailyRounds = (props: any) => {
   const handleChange = (e: any) => {
     const form = { ...state.form };
     const { name, value } = e.target;
+    form[name] = value;
+    dispatch({ type: "set_form", form });
+  };
+
+  const handleTextAreaChange = (e: any) => {
+    const form = { ...state.form };
+    const { name, value } = e;
     form[name] = value;
     dispatch({ type: "set_form", form });
   };
@@ -496,14 +512,25 @@ export const DailyRounds = (props: any) => {
           [facilityId]: { name: facilityName },
           [patientId]: { name: patientName },
         }}
+        backUrl={
+          id
+            ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
+            : `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+        }
       />
       <div className="mt-4">
         <div className="bg-white rounded shadow">
           <form onSubmit={(e) => handleSubmit(e)}>
             <CardContent>
+              <DraftSection
+                handleDraftSelect={(newState) => {
+                  dispatch({ type: "set_state", state: newState });
+                }}
+                formData={state.form}
+              />
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="w-full md:w-1/3">
-                  <DateTimeFiled
+                  <LegacyDateTimeFiled
                     label="Measured At"
                     margin="dense"
                     value={state.form.taken_at}
@@ -511,16 +538,16 @@ export const DailyRounds = (props: any) => {
                     disableFuture={true}
                     showTodayButton={true}
                     onChange={(date) => handleDateChange(date, "taken_at")}
-                    errors={state.errors.taken_at}
+                    errors={state.errors.taken_at as string}
                   />
                 </div>
                 <div className="w-full md:w-1/3">
-                  <InputLabel id="rounds_type">Round Type</InputLabel>
-                  <SelectField
+                  <LegacySelectField
                     className=""
                     name="rounds_type"
                     variant="standard"
                     margin="dense"
+                    label="Round Type"
                     options={[
                       {
                         id: "NORMAL",
@@ -538,13 +565,11 @@ export const DailyRounds = (props: any) => {
                   />
                 </div>
                 <div className="w-full md:w-1/3">
-                  <InputLabel id="category-label" required>
-                    Category
-                  </InputLabel>
-                  <SelectField
+                  <LegacySelectField
                     name="patient_category"
                     variant="standard"
                     margin="dense"
+                    label="Category"
                     value={state.form.patient_category}
                     options={PATIENT_CATEGORIES}
                     onChange={handleChange}
@@ -554,9 +579,9 @@ export const DailyRounds = (props: any) => {
               </div>
               {!id && hasPreviousLog && (
                 <div id="clone_last-div" className="mt-4">
-                  <InputLabel id="clone_last">
+                  <FieldLabel id="clone_last">
                     Do you want to copy Values from Previous Log?
-                  </InputLabel>
+                  </FieldLabel>
                   <RadioGroup
                     aria-label="clone_last"
                     name="clone_last"
@@ -577,111 +602,91 @@ export const DailyRounds = (props: any) => {
                       />
                     </Box>
                   </RadioGroup>
-                  <ErrorHelperText error={state.errors.clone_last} />
+                  <LegacyErrorHelperText error={state.errors.clone_last} />
                 </div>
               )}
               {(state.form.clone_last === "false" || id) && (
                 <div>
                   <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 my-4">
                     <div>
-                      <InputLabel id="physical-examination-info-label">
-                        Physical Examination Info
-                      </InputLabel>
-                      <MultilineInputField
+                      <TextAreaFormField
                         rows={5}
+                        label=" Physical Examination Info"
                         name="physical_examination_info"
-                        variant="outlined"
-                        margin="dense"
-                        type="text"
-                        InputLabelProps={{
-                          shrink: !!state.form.physical_examination_info,
-                        }}
                         value={state.form.physical_examination_info}
-                        onChange={handleChange}
-                        errors={state.errors.physical_examination_info}
+                        onChange={handleTextAreaChange}
+                        error={state.errors.physical_examination_info}
                       />
                     </div>
 
                     <div>
-                      <InputLabel id="other-details-label">
-                        Other Details
-                      </InputLabel>
-                      <MultilineInputField
+                      <TextAreaFormField
                         rows={5}
+                        label=" Other Details"
                         name="other_details"
-                        variant="outlined"
-                        margin="dense"
-                        type="text"
-                        InputLabelProps={{ shrink: !!state.form.other_details }}
                         value={state.form.other_details}
-                        onChange={handleChange}
-                        errors={state.errors.other_details}
+                        onChange={handleTextAreaChange}
+                        error={state.errors.other_details}
                       />
                     </div>
 
                     <div className="md:col-span-2">
-                      <InputLabel id="symptoms-label">Symptoms</InputLabel>
-                      <MultiSelectField
+                      <FieldLabel id="symptoms-label">Symptoms</FieldLabel>
+                      <LegacyMultiSelectField
                         name="additional_symptoms"
                         variant="outlined"
                         value={state.form.additional_symptoms}
                         options={symptomChoices}
                         onChange={handleSymptomChange}
                       />
-                      <ErrorHelperText
+                      <LegacyErrorHelperText
                         error={state.errors.additional_symptoms}
                       />
                     </div>
 
                     {state.form.otherSymptom && (
                       <div className="md:col-span-2">
-                        <InputLabel id="other-symptoms-label">
-                          Other Symptom Details
-                        </InputLabel>
-                        <MultilineInputField
+                        <TextAreaFormField
                           rows={5}
+                          label="Other Symptom Details"
                           name="other_symptoms"
-                          variant="outlined"
-                          margin="dense"
-                          type="text"
                           placeholder="Enter the other symptoms here"
-                          InputLabelProps={{
-                            shrink: !!state.form.other_symptoms,
-                          }}
                           value={state.form.other_symptoms}
-                          onChange={handleChange}
-                          errors={state.errors.other_symptoms}
+                          onChange={handleTextAreaChange}
+                          error={state.errors.other_symptoms}
                         />
                       </div>
                     )}
 
                     <div className="flex-1">
-                      <InputLabel id="action-label">Action </InputLabel>
-                      <NativeSelectField
+                      <FieldLabel id="action-label">Action </FieldLabel>
+                      <LegacyNativeSelectField
                         name="action"
                         variant="outlined"
-                        value={state.form.action}
+                        value={prevAction}
                         optionKey="text"
                         optionValue="desc"
                         options={TELEMEDICINE_ACTIONS}
-                        onChange={handleChange}
+                        onChange={(e: any) => setPreviousAction(e.target.value)}
                       />
-                      <ErrorHelperText error={state.errors.action} />
+                      <LegacyErrorHelperText error={state.errors.action} />
                     </div>
 
                     <div className="flex-1">
-                      <InputLabel id="review_interval-label">
+                      <FieldLabel id="review_interval-label">
                         Review After{" "}
-                      </InputLabel>
-                      <SelectField
+                      </FieldLabel>
+                      <LegacySelectField
                         name="review_interval"
                         variant="standard"
-                        value={state.form.review_interval || prevReviewInterval}
+                        value={prevReviewInterval}
                         options={[
                           { id: -1, text: "select" },
                           ...REVIEW_AT_CHOICES,
                         ]}
-                        onChange={handleChange}
+                        onChange={(e) =>
+                          setPreviousReviewInterval(Number(e.target.value))
+                        }
                         errors={state.errors.review_interval}
                         className="mt-1"
                       />
@@ -690,7 +695,7 @@ export const DailyRounds = (props: any) => {
                       </div>
                     </div>
                     <div>
-                      <CheckboxField
+                      <LegacyCheckboxField
                         checked={state.form.recommend_discharge}
                         onChange={handleCheckboxFieldChange}
                         name="recommend_discharge"
@@ -708,17 +713,17 @@ export const DailyRounds = (props: any) => {
                           <div className="flex flex-row justify-between">
                             <h4>BP</h4>
                             <p className="text-sm font-semibold">{`MAP: ${calculateMAP(
-                              state.form.systolic,
-                              state.form.diastolic
+                              state.form.bp?.systolic,
+                              state.form.bp?.diastolic
                             )}`}</p>
                           </div>
                           <div className="md:grid gap-2 grid-cols-1 md:grid-cols-2">
                             <div>
-                              <InputLabel className="flex flex-row justify-between">
+                              <FieldLabel className="flex flex-row justify-between">
                                 Systolic
                                 {getStatus(100, "Low", 140, "High", "systolic")}
-                              </InputLabel>
-                              <AutoCompleteAsyncField
+                              </FieldLabel>
+                              <LegacyAutoCompleteAsyncField
                                 name="systolic"
                                 multiple={false}
                                 variant="standard"
@@ -743,11 +748,11 @@ export const DailyRounds = (props: any) => {
                               />
                             </div>
                             <div>
-                              <InputLabel className="flex flex-row justify-between">
+                              <FieldLabel className="flex flex-row justify-between">
                                 Diastolic{" "}
                                 {getStatus(50, "Low", 90, "High", "diastolic")}
-                              </InputLabel>
-                              <AutoCompleteAsyncField
+                              </FieldLabel>
+                              <LegacyAutoCompleteAsyncField
                                 name="diastolic"
                                 multiple={false}
                                 variant="standard"
@@ -774,7 +779,7 @@ export const DailyRounds = (props: any) => {
                           </div>
                         </div>
                         <div>
-                          <InputLabel className="flex flex-row justify-between">
+                          <FieldLabel className="flex flex-row justify-between">
                             {"Pulse (bpm)"}
                             {getStatus(
                               40,
@@ -783,8 +788,8 @@ export const DailyRounds = (props: any) => {
                               "Tachycardia",
                               "pulse"
                             )}
-                          </InputLabel>
-                          <AutoCompleteAsyncField
+                          </FieldLabel>
+                          <LegacyAutoCompleteAsyncField
                             name="pulse"
                             multiple={false}
                             variant="standard"
@@ -805,7 +810,7 @@ export const DailyRounds = (props: any) => {
                           />
                         </div>
                         <div>
-                          <InputLabel className="flex flex-row justify-between">
+                          <FieldLabel className="flex flex-row justify-between">
                             Temperature{" "}
                             {state.form.tempInCelcius
                               ? getStatus(
@@ -822,10 +827,10 @@ export const DailyRounds = (props: any) => {
                                   "High",
                                   "temperature"
                                 )}
-                          </InputLabel>
+                          </FieldLabel>
                           <div className="flex flex-row">
                             <div className="grow mr-2">
-                              <AutoCompleteAsyncField
+                              <LegacyAutoCompleteAsyncField
                                 name="temperature"
                                 multiple={false}
                                 variant="standard"
@@ -865,11 +870,11 @@ export const DailyRounds = (props: any) => {
                           </div>
                         </div>
                         <div>
-                          <InputLabel className="flex flex-row justify-between">
+                          <FieldLabel className="flex flex-row justify-between">
                             {"Respiratory Rate (bpm) *"}
                             {getStatus(12, "Low", 16, "High", "resp")}
-                          </InputLabel>
-                          <AutoCompleteAsyncField
+                          </FieldLabel>
+                          <LegacyAutoCompleteAsyncField
                             name="resp"
                             multiple={false}
                             variant="standard"
@@ -891,7 +896,7 @@ export const DailyRounds = (props: any) => {
                           />
                         </div>
                         <div>
-                          <InputLabel className="flex flex-row justify-between">
+                          <FieldLabel className="flex flex-row justify-between">
                             {"SPO2 (%)"}
                             {getStatus(
                               90,
@@ -900,8 +905,8 @@ export const DailyRounds = (props: any) => {
                               "High",
                               "ventilator_spo2"
                             )}
-                          </InputLabel>
-                          <AutoCompleteAsyncField
+                          </FieldLabel>
+                          <LegacyAutoCompleteAsyncField
                             name="ventilator_spo2"
                             multiple={false}
                             variant="standard"
@@ -922,13 +927,19 @@ export const DailyRounds = (props: any) => {
                           />
                         </div>
                         <div className="">
-                          <InputLabel className="flex flex-row justify-between">
+                          <FieldLabel className="flex flex-row justify-between">
                             Rhythm
-                          </InputLabel>
-                          <SelectField
+                          </FieldLabel>
+                          <LegacySelectField
                             name="rhythm"
                             variant="standard"
-                            value={state.form.rhythm}
+                            value={
+                              RHYTHM_CHOICES.find(
+                                (choice) =>
+                                  choice.text.toUpperCase() ===
+                                  state.form.rhythm
+                              )?.id
+                            }
                             options={RHYTHM_CHOICES}
                             onChange={handleChange}
                             errors={state.errors.rhythm}
@@ -936,19 +947,13 @@ export const DailyRounds = (props: any) => {
                           />
                         </div>
                         <div className="md:col-span-2 mt-2">
-                          <InputLabel>Rhythm Description</InputLabel>
-                          <MultilineInputField
+                          <TextAreaFormField
                             rows={5}
+                            label="Rhythm Description"
                             name="rhythm_detail"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
-                            InputLabelProps={{
-                              shrink: !!state.form.rhythm_detail,
-                            }}
                             value={state.form.rhythm_detail}
-                            onChange={handleChange}
-                            errors={state.errors.rhythm_detail}
+                            onChange={handleTextAreaChange}
+                            error={state.errors.rhythm_detail}
                           />
                         </div>
                       </div>
@@ -958,20 +963,8 @@ export const DailyRounds = (props: any) => {
               )}
 
               <div className="mt-4 flex flex-col md:flex-row gap-2 justify-between">
-                <Link
-                  className="btn btn-default bg-white mt-2"
-                  href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}
-                >
-                  Back
-                </Link>
-                <button
-                  type="submit"
-                  className="btn btn-primary ml-auto text-base w-full md:w-auto"
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  <i className="fa-regular fa-circle-check mr-2"></i>{" "}
-                  {buttonText}
-                </button>
+                <Cancel onClick={() => goBack()} />
+                <Submit onClick={(e) => handleSubmit(e)} label={buttonText} />
               </div>
             </CardContent>
           </form>

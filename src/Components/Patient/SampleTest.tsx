@@ -1,32 +1,22 @@
-import { Button, Card, CardContent, InputLabel } from "@material-ui/core";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
-import { useReducer, useCallback, useState, useEffect } from "react";
+import { useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
-import {
-  createSampleTest,
-  getAllFacilities,
-  getPatient,
-} from "../../Redux/actions";
+import { createSampleTest, getPatient } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  CheckboxField,
-  MultilineInputField,
-  SelectField,
-  TextInputField,
-} from "../Common/HelperInputFields";
-import { SampleTestModel, FacilityNameModel } from "./models";
-import Typography from "@material-ui/core/Typography";
-import Container from "@material-ui/core/Container";
-import { goBack } from "../../Utils/utils";
+import { SampleTestModel } from "./models";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import Page from "../Common/components/Page";
+import { FacilitySelect } from "../Common/FacilitySelect";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
-
-const icmrCategories = [...ICMR_CATEGORY];
-const sampleTestTypes = [...SAMPLE_TYPE_CHOICES];
 
 const initForm: SampleTestModel = {
   isFastTrack: false,
@@ -76,60 +66,16 @@ const sampleTestFormReducer = (state = initialState, action: any) => {
   }
 };
 
-export const SampleTest = (props: any) => {
+export const SampleTest = ({ facilityId, patientId }: any) => {
+  const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
-  const { facilityId, patientId } = props;
   const [state, dispatch] = useReducer(sampleTestFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
-  const [facilityNames, setFacilityNames] = useState<Array<FacilityNameModel>>(
-    []
-  );
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
 
   const headerText = "Request Sample";
   const buttonText = "Confirm your request to send sample for testing";
-
-  const fetchFacilityNames = useCallback(
-    async (status: statusType) => {
-      const coronaLabType = 950;
-      const labType = 9;
-      setIsLoading(true);
-      const LabList = await dispatchAction(
-        getAllFacilities({ facility_type: labType })
-      );
-
-      const CoronaLabList = await dispatchAction(
-        getAllFacilities({ facility_type: coronaLabType })
-      );
-
-      if (
-        !status.aborted &&
-        LabList.data.results &&
-        CoronaLabList.data.results
-      ) {
-        setFacilityNames([
-          ...LabList.data.results,
-          ...CoronaLabList.data.results,
-        ]);
-        dispatch({
-          type: "set_form",
-          form: {
-            ...state.form,
-            testing_facility: LabList.data.results[0]?.id,
-          },
-        });
-      }
-      setIsLoading(false);
-    },
-    [dispatchAction]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchFacilityNames(status);
-    },
-    [dispatch, fetchFacilityNames]
-  );
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -148,9 +94,9 @@ export const SampleTest = (props: any) => {
   }, [dispatchAction, patientId]);
 
   const validateForm = () => {
-    let errors = { ...initError };
+    const errors = { ...initError };
     let invalidForm = false;
-    Object.keys(state.form).forEach((field, i) => {
+    Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "fast_track":
           if (state.form.isFastTrack && !state.form[field]) {
@@ -158,12 +104,6 @@ export const SampleTest = (props: any) => {
             invalidForm = true;
           }
           break;
-        // case "icmr_category":
-        //   if (!state.form[field]) {
-        //     errors[field] = "Please Choose a category";
-        //     invalidForm = true;
-        //   }
-        //   break;
         case "icmr_label":
           if (!state.form[field]) {
             errors[field] = "Please specify the label";
@@ -182,12 +122,6 @@ export const SampleTest = (props: any) => {
             invalidForm = true;
           }
           break;
-        // case "testing_facility":
-        //   if (!state.form[field]) {
-        //     errors[field] = "Please Choose a testing facility";
-        //     invalidForm = true;
-        //   }
-        //   break;
         default:
           return;
       }
@@ -222,7 +156,7 @@ export const SampleTest = (props: any) => {
         diff_diagnosis: state.form.diff_diagnosis
           ? state.form.diff_diagnosis
           : undefined,
-        testing_facility: state.form.testing_facility,
+        testing_facility: state.form.testing_facility?.id,
         doctor_name: state.form.doctor_name
           ? state.form.doctor_name
           : undefined,
@@ -248,294 +182,144 @@ export const SampleTest = (props: any) => {
     }
   };
 
-  const handleChange = (e: any) => {
-    const form = { ...state.form };
-    form[e.target.name] = e.target.value;
-    dispatch({ type: "set_form", form });
+  const handleFormFieldChange = (e: FieldChangeEvent<unknown>) => {
+    dispatch({ type: "set_form", form: { ...state.form, [e.name]: e.value } });
   };
 
-  const handleCheckboxFieldChange = (e: any) => {
-    const form = { ...state.form };
-    const { checked, name } = e.target;
-    form[name] = checked;
-    dispatch({ type: "set_form", form });
-  };
+  const field = (name: string, label: string) => ({
+    name,
+    label,
+    value: state.form[name],
+    onChange: handleFormFieldChange,
+    error: state.errors[name],
+  });
 
   if (isLoading) {
     return <Loading />;
   }
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={headerText}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [patientId]: { name: patientName },
-        }}
-      />
-      <div className="mt-4">
-        <Card>
-          <CardContent>
-            <form onSubmit={(e) => handleSubmit(e)}>
-              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                <div className="space-y-4">
-                  <div>
-                    <InputLabel>Sample Test Type*</InputLabel>
-                    <SelectField
-                      name="sample_type"
-                      variant="outlined"
-                      margin="dense"
-                      optionArray={false}
-                      value={state.form.sample_type}
-                      options={sampleTestTypes}
-                      onChange={handleChange}
-                      errors={state.errors.sample_type}
-                    />
-                  </div>
-                  {state.form.sample_type === "OTHER TYPE" && (
-                    <div>
-                      <InputLabel>Sample Test Type Details*</InputLabel>
-                      <MultilineInputField
-                        rows={4}
-                        name="sample_type_other"
-                        variant="outlined"
-                        margin="dense"
-                        type="text"
-                        value={state.form.sample_type_other}
-                        onChange={handleChange}
-                        errors={state.errors.sample_type_other}
-                      />
-                    </div>
-                  )}
-                </div>
-                <div className="row-span-3 space-y-4">
-                  <div>
-                    <InputLabel>ICMR Category (for COVID Test)</InputLabel>
-                    <SelectField
-                      name="icmr_category"
-                      variant="outlined"
-                      margin="dense"
-                      optionArray={true}
-                      value={state.form.icmr_category}
-                      options={icmrCategories}
-                      onChange={handleChange}
-                      errors={state.errors.icmr_category}
-                    />
-                  </div>
-                  <Container>
-                    <InputLabel>
-                      Reference below to know more about ICMR Categories
-                    </InputLabel>
-                    <Typography>
-                      <li>
-                        Cat 0 - Repeat Sample of Positive Case / Follow Up case
-                      </li>
-                      <li>
-                        Cat 1 - Symptomatic International Traveller in last 14
-                        days
-                      </li>
-                      <li>Cat 2 - Symptomatic contact of lab confirmed Case</li>
-                      <li>Cat 3 - Symptomatic Healthcare Worker</li>
-                      <li>
-                        Cat 4 - Hospitalized SARI (Severe Acute Respiratory
-                        illness Patient)
-                      </li>
-                      <li>
-                        Cat 5a - Asymptomatic Direct and High Risk contact of
-                        confirmed case - family Member
-                      </li>
-                      <li>
-                        Cat 5b - Asymptomatic Healthcare worker in contact with
-                        confirmed case without adequate protection
-                      </li>
-                    </Typography>
-                  </Container>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <InputLabel>Label*</InputLabel>
-                    <TextInputField
-                      name="icmr_label"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.icmr_label}
-                      onChange={handleChange}
-                      errors={state.errors.icmr_label}
-                    />
-                  </div>
-                  <div className="mt-4 w-full">
-                    <InputLabel>Testing Facility Name</InputLabel>
-                    <SelectField
-                      name="testing_facility"
-                      variant="outlined"
-                      margin="dense"
-                      value={state.form.testing_facility || ""}
-                      options={facilityNames.map((e) => {
-                        return { id: e.id, name: e.name };
-                      })}
-                      optionValue="name"
-                      optionKey="id"
-                      onChange={handleChange}
-                      errors={state.errors.testing_facility}
-                    />
-                  </div>
-                  <div className="flex items-center">
-                    <CheckboxField
-                      checked={state.form.isFastTrack}
-                      onChange={handleCheckboxFieldChange}
-                      name="isFastTrack"
-                      label="Is fast-track testing required?"
-                    />
-                  </div>
-                  {state.form.isFastTrack && (
-                    <div>
-                      <InputLabel>
-                        Provide reasons for fast-track testing*
-                      </InputLabel>
-                      <MultilineInputField
-                        rows={4}
-                        name="fast_track"
-                        variant="outlined"
-                        margin="dense"
-                        type="text"
-                        InputLabelProps={{ shrink: !!state.form.fast_track }}
-                        value={state.form.fast_track}
-                        onChange={handleChange}
-                        errors={state.errors.fast_track}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
-                <div>
-                  <InputLabel>Doctor's Name</InputLabel>
-                  <TextInputField
-                    name="doctor_name"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.doctor_name}
-                    onChange={handleChange}
-                    errors={state.errors.doctor_name}
-                  />
-                </div>
-                <div className="flex items-center">
-                  <CheckboxField
-                    checked={state.form.is_atypical_presentation}
-                    onChange={handleCheckboxFieldChange}
-                    name="is_atypical_presentation"
-                    label="Is atypical presentation?"
-                  />
-                </div>
-                {state.form.is_atypical_presentation && (
-                  <div>
-                    <InputLabel>Atypical presentation details*</InputLabel>
-                    <MultilineInputField
-                      rows={4}
-                      name="atypical_presentation"
-                      variant="outlined"
-                      margin="dense"
-                      type="text"
-                      value={state.form.atypical_presentation}
-                      onChange={handleChange}
-                      errors={state.errors.atypical_presentation}
-                    />
-                  </div>
-                )}
-                <div>
-                  <InputLabel>Diagnosis</InputLabel>
-                  <MultilineInputField
-                    rows={4}
-                    name="diagnosis"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    value={state.form.diagnosis}
-                    onChange={handleChange}
-                    errors={state.errors.diagnosis}
-                  />
-                </div>
-                <div>
-                  <InputLabel>Etiology identified</InputLabel>
-                  <MultilineInputField
-                    rows={4}
-                    name="etiology_identified"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    value={state.form.etiology_identified}
-                    onChange={handleChange}
-                    errors={state.errors.etiology_identified}
-                  />
-                </div>
-                <div>
-                  <InputLabel>Differential diagnosis</InputLabel>
-                  <MultilineInputField
-                    rows={4}
-                    name="diff_diagnosis"
-                    variant="outlined"
-                    margin="dense"
-                    type="text"
-                    value={state.form.diff_diagnosis}
-                    onChange={handleChange}
-                    errors={state.errors.diff_diagnosis}
-                  />
-                </div>
-              </div>
-              <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
-                <div className="flex items-center">
-                  <CheckboxField
-                    checked={state.form.has_sari}
-                    onChange={handleCheckboxFieldChange}
-                    name="has_sari"
-                    label="SARI - Severe Acute Respiratory illness ?"
-                  />
-                </div>
-                <div className="flex items-center">
-                  <CheckboxField
-                    checked={state.form.has_ari}
-                    onChange={handleCheckboxFieldChange}
-                    name="has_ari"
-                    label="ARI - Acute Respiratory illness ?"
-                  />
-                </div>
-                <div className="flex items-center">
-                  <CheckboxField
-                    checked={state.form.is_unusual_course}
-                    onChange={handleCheckboxFieldChange}
-                    name="is_unusual_course"
-                    label="Is unusual course?"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-between mt-4">
-                <Button
-                  color="default"
-                  variant="contained"
-                  type="button"
-                  onClick={() => goBack()}
-                >
-                  {" "}
-                  Cancel{" "}
-                </Button>
-                <Button
-                  color="primary"
-                  variant="contained"
-                  type="submit"
-                  style={{ marginLeft: "auto" }}
-                  startIcon={
-                    <CheckCircleOutlineIcon>save</CheckCircleOutlineIcon>
-                  }
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  {" "}
-                  {buttonText}{" "}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <Page
+      title={headerText}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [patientId]: { name: patientName },
+      }}
+      backUrl={`/facility/${facilityId}/patient/${patientId}`}
+    >
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded w-full mx-auto px-8 md:px-16 py-5 md:py-11 max-w-5xl"
+      >
+        <SelectFormField
+          {...field("sample_type", "Sample Test Type")}
+          required
+          options={SAMPLE_TYPE_CHOICES}
+          optionLabel={(option) => option.text}
+          optionValue={(option) => option.id}
+        />
+
+        {state.form.sample_type === "OTHER TYPE" && (
+          <TextAreaFormField
+            {...field("sample_type_other", "Sample Test Type Details")}
+            required
+          />
+        )}
+
+        <SelectFormField
+          {...field("icmr_category", "ICMR Category (for COVID Test)")}
+          options={ICMR_CATEGORY}
+          optionLabel={(option) => option}
+          optionValue={(option) => option}
+        />
+        <div className="flex flex-col gap-1 mb-6">
+          <p className="font-medium">
+            Refer below to know more about ICMR Categories
+          </p>
+          <span>
+            <li>Cat 0 - Repeat Sample of Positive Case / Follow Up case</li>
+            <li>Cat 1 - Symptomatic International Traveller in last 14 days</li>
+            <li>Cat 2 - Symptomatic contact of lab confirmed Case</li>
+            <li>Cat 3 - Symptomatic Healthcare Worker</li>
+            <li>
+              Cat 4 - Hospitalized SARI (Severe Acute Respiratory illness
+              Patient)
+            </li>
+            <li>
+              Cat 5a - Asymptomatic Direct and High Risk contact of confirmed
+              case - family Member
+            </li>
+            <li>
+              Cat 5b - Asymptomatic Healthcare worker in contact with confirmed
+              case without adequate protection
+            </li>
+          </span>
+        </div>
+
+        <TextFormField {...field("icmr_label", "ICMR Label")} required />
+        <div className="w-full flex-none mb-6">
+          <FieldLabel>Testing Facility</FieldLabel>
+          <FacilitySelect
+            name="testing_facility"
+            setSelected={(selected) =>
+              dispatch({
+                type: "set_form",
+                form: { ...state.form, testing_facility: selected },
+              })
+            }
+            facilityType={950}
+            selected={state.form.testing_facility}
+            errors={state.errors.testing_facility}
+            showAll
+            multiple={false}
+          />
+        </div>
+        <CheckBoxFormField
+          {...field("isFastTrack", "Is fast-track testing required?")}
+        />
+        {state.form.isFastTrack && (
+          <TextAreaFormField
+            {...field("fast_track", "Reasons for fast-track testing")}
+            required
+          />
+        )}
+
+        <TextFormField {...field("doctor_name", "Doctor's Name")} />
+        <CheckBoxFormField
+          {...field("is_atypical_presentation", "Is atypical presentation?")}
+        />
+        {state.form.is_atypical_presentation && (
+          <div>
+            <TextAreaFormField
+              {...field(
+                "atypical_presentation",
+                "Atypical presentation details"
+              )}
+              required
+            />
+          </div>
+        )}
+        <TextAreaFormField {...field("diagnosis", "Diagnosis")} />
+        <TextAreaFormField
+          {...field("etiology_identified", "Etiology identified")}
+        />
+        <TextAreaFormField
+          {...field("diff_diagnosis", "Differential diagnosis")}
+        />
+
+        <CheckBoxFormField
+          {...field("has_sari", "Has SARI (Severe Acute Respiratory illness)?")}
+        />
+        <CheckBoxFormField
+          {...field("has_ari", "Has ARI (Acute Respiratory illness)?")}
+        />
+        <CheckBoxFormField
+          {...field("is_unusual_course", "Is unusual course?")}
+        />
+        <div className="flex flex-col lg:flex-row gap-2 justify-end mt-4">
+          <Cancel onClick={() => goBack()} />
+          <Submit onClick={handleSubmit} label={buttonText} />
+        </div>
+      </form>
+    </Page>
   );
 };

@@ -1,4 +1,5 @@
-import { ErrorHelperText } from "../HelperInputFields";
+import { FieldLabel } from "../../Form/FormFields/FormField";
+import { LegacyErrorHelperText } from "../HelperInputFields";
 
 type SwitchProps<T> = {
   name?: string;
@@ -16,12 +17,13 @@ type SwitchProps<T> = {
 export default function SwitchV2<T>(props: SwitchProps<T>) {
   return (
     <div className={props.className}>
-      {props.label && (
-        <label htmlFor="is_working" className="mb-3">
-          {props.label}
-          {props.required && " *"}
-        </label>
-      )}
+      <FieldLabel
+        htmlFor={props.name}
+        required={props.required}
+        className="mb-3"
+      >
+        {props.label}
+      </FieldLabel>
       <ul role="list" className="flex">
         {props.options.map((option, index) => {
           const selected = option === props.value;
@@ -49,7 +51,7 @@ export default function SwitchV2<T>(props: SwitchProps<T>) {
           );
         })}
       </ul>
-      <ErrorHelperText error={props.error} />
+      <LegacyErrorHelperText error={props.error} />
     </div>
   );
 }

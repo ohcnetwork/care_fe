@@ -1,8 +1,7 @@
-import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -23,20 +22,19 @@ import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import { ErrorHelperText } from "../Common/HelperInputFields";
-import Modal from "@material-ui/core/Modal";
 import Chip from "../../CAREUI/display/Chip";
 import { classNames, formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useTranslation } from "react-i18next";
+import CircularProgress from "../Common/components/CircularProgress";
+import Page from "../Common/components/Page";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import { FieldErrorText } from "../Form/FormFields/FormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
@@ -64,6 +62,11 @@ export const PatientHome = (props: any) => {
   const [isConsultationLoading, setIsConsultationLoading] = useState(false);
   const [isSampleLoading, setIsSampleLoading] = useState(false);
   const [sampleFlag, callSampleList] = useState(false);
+  const rootState: any = useSelector((rootState) => rootState);
+  const { currentUser } = rootState;
+  const userHomeFacilityId = currentUser.data.home_facility;
+  const userType = currentUser.data.user_type;
+  const { t } = useTranslation();
   const [selectedStatus, setSelectedStatus] = useState<{
     status: number;
     sample: any;
@@ -333,7 +336,7 @@ export const PatientHome = (props: any) => {
   let consultationList, sampleList;
 
   if (isConsultationLoading) {
-    consultationList = <CircularProgress size={20} />;
+    consultationList = <CircularProgress />;
   } else if (consultationListData.length === 0) {
     consultationList = (
       <div>
@@ -354,7 +357,7 @@ export const PatientHome = (props: any) => {
   }
 
   if (isSampleLoading) {
-    sampleList = <CircularProgress size={20} />;
+    sampleList = <CircularProgress />;
   } else if (sampleListData.length === 0) {
     sampleList = (
       <div>
@@ -388,7 +391,14 @@ export const PatientHome = (props: any) => {
   };
 
   return (
-    <div className="px-2 pb-2">
+    <Page
+      title={"Patient Details"}
+      crumbsReplacements={{
+        [facilityId]: { name: patientData?.facility_object?.name },
+        [id]: { name: patientData?.name },
+      }}
+      backUrl={facilityId ? `/facility/${facilityId}/patients` : "/patients"}
+    >
       {showAlertMessage.show && (
         <AlertDialog
           title={showAlertMessage.title}
@@ -398,16 +408,7 @@ export const PatientHome = (props: any) => {
         />
       )}
 
-      <div id="revamp">
-        <PageTitle
-          title={"Patient Details"}
-          backUrl="/patients"
-          crumbsReplacements={{
-            [facilityId]: { name: patientData?.facility_object?.name },
-            [id]: { name: patientData?.name },
-          }}
-        />
-
+      <div>
         <div className="relative mt-2">
           <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
             <div className="md:flex">
@@ -457,7 +458,7 @@ export const PatientHome = (props: any) => {
                 <p className="font-bold text-red-800">
                   <i className="fas fa-exclamation-triangle mr-2" />
                   <span className="inline">
-                    You have not created a consultation for the patient in
+                    You have not created a consultation for the patient in{" "}
                     <strong>{patientData.facility_object?.name || "-"} </strong>
                   </span>
                 </p>
@@ -479,82 +480,88 @@ export const PatientHome = (props: any) => {
           </div>
         )}
         <section className="lg:flex" data-testid="patient-dashboard">
-          <div className="lg:w-2/3 mx-2 h-full">
-            <div className="bg-white rounded-lg shadow pt-11 pb-5 pl-9 h-full">
-              <div className="flex flex-row">
-                <h1 className="font-bold text-2xl pb-3 flex flex-row">
-                  {patientData.name} - {patientData.age}
-                </h1>
-                <div className="flex flex-wrap gap-2 ml-auto mr-9">
-                  {patientData.is_vaccinated ? (
-                    <Chip color="blue" startIcon="syringe" text="Vaccinated" />
-                  ) : (
-                    <Chip
-                      color="yellow"
-                      startIcon="exclamation-triangle"
-                      text="Not Vaccinated"
-                    />
-                  )}
-                  {patientData.allow_transfer ? (
-                    <Chip
-                      color="yellow"
-                      startIcon="unlock"
-                      text="Transfer Allowed"
-                    />
-                  ) : (
-                    <Chip
-                      color="primary"
-                      startIcon="lock"
-                      text="Transfer Blocked"
-                    />
-                  )}
-                  {patientData.gender === 2 &&
-                    patientData.is_antenatal &&
-                    patientData.is_active && (
+          <div className="lg:w-2/3 mx-2">
+            <div className="bg-white rounded-lg shadow flex flex-col justify-between pt-11 pb-5 pl-9 h-full">
+              <div>
+                <div className="flex flex-row">
+                  <h1 className="font-bold text-2xl pb-3 flex flex-row">
+                    {patientData.name} - {patientData.age}
+                  </h1>
+                  <div className="flex flex-wrap gap-2 ml-auto mr-9">
+                    {patientData.is_vaccinated ? (
                       <Chip
                         color="blue"
-                        startIcon="baby-carriage"
-                        text="Antenatal"
+                        startIcon="syringe"
+                        text="Vaccinated"
+                      />
+                    ) : (
+                      <Chip
+                        color="yellow"
+                        startIcon="exclamation-triangle"
+                        text="Not Vaccinated"
                       />
                     )}
-                  {patientData.contact_with_confirmed_carrier && (
-                    <Chip
-                      color="red"
-                      startIcon="exclamation-triangle"
-                      text="Contact with confirmed carrier"
-                    />
-                  )}
-                  {patientData.contact_with_suspected_carrier && (
-                    <Chip
-                      color="yellow"
-                      startIcon="exclamation-triangle"
-                      text="Contact with suspected carrier"
-                    />
-                  )}
-                  {patientData.past_travel && (
-                    <Chip
-                      color="yellow"
-                      startIcon="exclamation-triangle"
-                      text="Travel (within last 28 days)"
-                    />
-                  )}
-                  {patientData.last_consultation?.is_telemedicine && (
-                    <Chip
-                      color="purple"
-                      startIcon="phone"
-                      text="Telemedicine"
-                    />
-                  )}
+                    {patientData.allow_transfer ? (
+                      <Chip
+                        color="yellow"
+                        startIcon="unlock"
+                        text="Transfer Allowed"
+                      />
+                    ) : (
+                      <Chip
+                        color="primary"
+                        startIcon="lock"
+                        text="Transfer Blocked"
+                      />
+                    )}
+                    {patientData.gender === 2 &&
+                      patientData.is_antenatal &&
+                      patientData.is_active && (
+                        <Chip
+                          color="blue"
+                          startIcon="baby-carriage"
+                          text="Antenatal"
+                        />
+                      )}
+                    {patientData.contact_with_confirmed_carrier && (
+                      <Chip
+                        color="red"
+                        startIcon="exclamation-triangle"
+                        text="Contact with confirmed carrier"
+                      />
+                    )}
+                    {patientData.contact_with_suspected_carrier && (
+                      <Chip
+                        color="yellow"
+                        startIcon="exclamation-triangle"
+                        text="Contact with suspected carrier"
+                      />
+                    )}
+                    {patientData.past_travel && (
+                      <Chip
+                        color="yellow"
+                        startIcon="exclamation-triangle"
+                        text="Travel (within last 28 days)"
+                      />
+                    )}
+                    {patientData.last_consultation?.is_telemedicine && (
+                      <Chip
+                        color="purple"
+                        startIcon="phone"
+                        text="Telemedicine"
+                      />
+                    )}
+                  </div>
                 </div>
+                <h3 className="text-base font-medium">
+                  <i className="fa-regular fa-hospital mr-2 text-emerald-900" />
+                  {patientData.facility_object?.name || "-"}
+                </h3>
+                <p className="text-sm text-zinc-500 mt-4 mb-7 font-medium">
+                  {patientGender} | {patientData.blood_group || "-"}
+                </p>
               </div>
-              <h3 className="text-base font-medium">
-                <i className="fa-regular fa-hospital mr-2 text-emerald-900" />
-                {patientData.facility_object?.name || "-"}
-              </h3>
-              <p className="text-sm text-zinc-500 mt-4 mb-7 font-medium">
-                {patientGender} | {patientData.blood_group || "-"}
-              </p>
-              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 md:grid-cols-2 lg:grid-cols-3 mt-2 mb-8">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-2 md:gap-y-8 md:grid-cols-2 lg:grid-cols-3 mt-2 mb-8 items-center">
                 <div className="sm:col-span-1">
                   <div className="text-sm leading-5 font-semibold text-zinc-400">
                     Date of Birth
@@ -623,7 +630,7 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 )}
-                {patientData.is_vaccinated && patientData.number_of_doses && (
+                {patientData.is_vaccinated && !!patientData.number_of_doses && (
                   <div className="sm:col-span-1">
                     <div className="text-sm leading-5 font-semibold text-zinc-400">
                       Number of vaccine doses
@@ -643,16 +650,17 @@ export const PatientHome = (props: any) => {
                     </div>
                   </div>
                 )}
-                {patientData.is_vaccinated && patientData.last_vaccinated_date && (
-                  <div className="sm:col-span-1">
-                    <div className="text-sm leading-5 font-semibold text-zinc-400">
-                      Last Vaccinated on
+                {patientData.is_vaccinated &&
+                  patientData.last_vaccinated_date && (
+                    <div className="sm:col-span-1">
+                      <div className="text-sm leading-5 font-semibold text-zinc-400">
+                        Last Vaccinated on
+                      </div>
+                      <div className="mt-1 text-sm leading-5 font-medium">
+                        {formatDate(patientData.last_vaccinated_date)}
+                      </div>
                     </div>
-                    <div className="mt-1 text-sm leading-5 font-medium">
-                      {formatDate(patientData.last_vaccinated_date)}
-                    </div>
-                  </div>
-                )}
+                  )}
                 {patientData.countries_travelled &&
                   !!patientData.countries_travelled.length && (
                     <div className="sm:col-span-1">
@@ -660,11 +668,7 @@ export const PatientHome = (props: any) => {
                         Countries travelled
                       </div>
                       <div className="mt-1 text-sm leading-5 font-medium">
-                        {Array.isArray(patientData.countries_travelled)
-                          ? patientData.countries_travelled.join(", ")
-                          : patientData.countries_travelled
-                              .split(",")
-                              .join(", ")}
+                        {patientData.countries_travelled.join(", ")}
                       </div>
                     </div>
                   )}
@@ -677,8 +681,7 @@ export const PatientHome = (props: any) => {
               className="space-y-2 flex-col justify-between flex h-full"
             >
               <div>
-                {/* TODO: Re-enable Review Missed | Temporary Hack for Launch */}
-                {/* {patientData.review_time &&
+                {patientData.review_time &&
                   !patientData.last_consultation?.discharge_date &&
                   Number(patientData.last_consultation?.review_interval) >
                     0 && (
@@ -695,10 +698,10 @@ export const PatientHome = (props: any) => {
                         {(moment().isBefore(patientData.review_time)
                           ? "Review before: "
                           : "Review Missed: ") +
-                            "") + formatDate(patientData.review_time)}
+                          formatDate(patientData.review_time)}
                       </p>
                     </div>
-                  )} */}
+                  )}
                 <div className="p-2 bg-white rounded-sm shadow text-center mb-6">
                   <div className="flex justify-between">
                     <div className="w-1/2 border-r-2">
@@ -930,65 +933,38 @@ export const PatientHome = (props: any) => {
                           All Details
                         </ButtonV2>
                       </div>
-                      {shift.status === "TRANSFER IN PROGRESS" &&
+                      {shift.status === "COMPLETED" &&
                         shift.assigned_facility && (
                           <div className="mt-2">
                             <ButtonV2
                               size="small"
                               className="w-full"
+                              disabled={
+                                !shift.patient_object.allow_transfer ||
+                                !(
+                                  ["DistrictAdmin", "StateAdmin"].includes(
+                                    userType
+                                  ) ||
+                                  userHomeFacilityId === shift.assigned_facility
+                                )
+                              }
                               onClick={() => setModalFor(shift.external_id)}
                             >
-                              TRANSFER TO RECEIVING FACILITY
+                              {t("transfer_to_receiving_facility")}
                             </ButtonV2>
-                            <Modal
-                              open={modalFor === shift.external_id}
+                            <ConfirmDialogV2
+                              title="Confirm Transfer Complete"
+                              description="Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient"
+                              show={modalFor === shift.external_id}
+                              action="Confirm"
                               onClose={() =>
                                 setModalFor({
                                   externalId: undefined,
                                   loading: false,
                                 })
                               }
-                            >
-                              <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                                <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center">
-                                  <div className="mb-4">
-                                    <h1 className="text-2xl">
-                                      Confirm Transfer Complete!
-                                    </h1>
-                                  </div>
-                                  <div className="mb-8">
-                                    <p>
-                                      Are you sure you want to mark this
-                                      transfer as complete? The Origin facility
-                                      will no longer have access to this patient
-                                    </p>
-                                  </div>
-                                  <div className="flex gap-2 justify-center">
-                                    <ButtonV2
-                                      size="small"
-                                      className="w-full"
-                                      onClick={() => {
-                                        setModalFor({
-                                          externalId: undefined,
-                                          loading: false,
-                                        });
-                                      }}
-                                    >
-                                      Cancel
-                                    </ButtonV2>
-                                    <ButtonV2
-                                      size="small"
-                                      className="w-full"
-                                      onClick={() =>
-                                        handleTransferComplete(shift)
-                                      }
-                                    >
-                                      Confirm
-                                    </ButtonV2>
-                                  </div>
-                                </div>
-                              </div>
-                            </Modal>
+                              onConfirm={() => handleTransferComplete(shift)}
+                            />
                           </div>
                         )}
                     </div>
@@ -1003,7 +979,10 @@ export const PatientHome = (props: any) => {
           </div>
         </section>
 
-        <section className="grid lg:grid-cols-2 grid-cols-1 mt-5 gap-6">
+        <section
+          className="grid lg:grid-cols-2 grid-cols-1 mt-5 gap-6"
+          data-testid="patient-details"
+        >
           <div className="w-full">
             <div className="bg-white rounded-lg shadow p-7 h-full space-y-2">
               <div className="border-b border-dashed text-gray-900 font-bold text-xl pb-2">
@@ -1351,7 +1330,8 @@ export const PatientHome = (props: any) => {
               <div className="border-b border-dashed text-gray-900 font-semibold text-left text-lg space-y-2">
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     disabled={
                       !(
                         patientData.is_active &&
@@ -1371,7 +1351,8 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     onClick={() =>
                       navigate(`/patient/${id}/investigation_reports`)
                     }
@@ -1382,7 +1363,8 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/files`
@@ -1395,7 +1377,8 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
@@ -1410,7 +1393,8 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
@@ -1425,7 +1409,8 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/notes`
@@ -1438,7 +1423,8 @@ export const PatientHome = (props: any) => {
                 </div>
                 <div>
                   <ButtonV2
-                    className="w-full justify-start"
+                    className="w-full"
+                    align="start"
                     onClick={() => setOpenAssignVolunteerDialog(true)}
                     disabled={false}
                     authorizeFor={NonReadOnlyUsers}
@@ -1453,16 +1439,11 @@ export const PatientHome = (props: any) => {
         </section>
       </div>
 
-      <Dialog
-        maxWidth={"md"}
-        open={openAssignVolunteerDialog}
+      <ConfirmDialogV2
+        title={`Assign a volunteer to ${patientData.name}`}
+        show={openAssignVolunteerDialog}
         onClose={() => setOpenAssignVolunteerDialog(false)}
-      >
-        <div className="mx-10 my-5">
-          <DialogTitle id="form-dialog-title">
-            Assign a volunteer to {patientData.name}
-          </DialogTitle>
-
+        description={
           <div>
             <OnlineUsersSelect
               userId={assignedVolunteerObject?.id || patientData.assigned_to}
@@ -1471,23 +1452,12 @@ export const PatientHome = (props: any) => {
               user_type={"Volunteer"}
               outline={false}
             />
-            <ErrorHelperText error={errors.assignedVolunteer} />
+            <FieldErrorText error={errors.assignedVolunteer} />
           </div>
-
-          <DialogActions>
-            <ButtonV2
-              variant="secondary"
-              onClick={() => {
-                handleVolunteerSelect(patientData.assigned_to_object);
-                setOpenAssignVolunteerDialog(false);
-              }}
-            >
-              Cancel
-            </ButtonV2>
-            <ButtonV2 onClick={handleAssignedVolunteer}>Submit</ButtonV2>
-          </DialogActions>
-        </div>
-      </Dialog>
+        }
+        action="Assign"
+        onConfirm={handleAssignedVolunteer}
+      />
 
       <div>
         <h2 className="font-semibold text-2xl leading-tight ml-0 mt-9">
@@ -1522,6 +1492,6 @@ export const PatientHome = (props: any) => {
           </div>
         )}
       </div>
-    </div>
+    </Page>
   );
 };
