@@ -17,6 +17,7 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   sample: SampleTestModel;
@@ -54,6 +55,7 @@ const updateStatusReducer = (state = initialState, action: any) => {
 };
 
 const UpdateStatusDialog = (props: Props) => {
+  const { t } = useTranslation();
   const { sample, handleOk, handleCancel } = props;
   const [state, dispatch] = useReducer(updateStatusReducer, initialState);
   const [file, setfile] = useState<File>();
@@ -200,18 +202,30 @@ const UpdateStatusDialog = (props: Props) => {
             <span className="font-semibold leading-relaxed">
               Upload Report :
             </span>
-            <input title="reportFile" onChange={onFileChange} type="file" />
-            {uploadStarted && <LinearProgressWithLabel value={uploadPercent} />}
-            <div className="flex justify-end mt-3 mb-4">
-              <Submit
-                type="submit"
-                onClick={handleUpload}
-                disabled={uploadDone}
-              >
-                <CareIcon className="care-l-cloud-upload text-2xl font-bold" />
-                <span>Upload</span>
-              </Submit>
-            </div>
+            {uploadStarted ? (
+              <LinearProgressWithLabel value={uploadPercent} />
+            ) : (
+              <div className="flex flex-col md:flex-row justify-between gap-2 mt-3 mb-4">
+                <label className="font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square button-primary-default">
+                  <CareIcon className="care-l-file-upload-alt text-lg" />
+                  {t("choose_file")}
+                  <input
+                    title="changeFile"
+                    onChange={onFileChange}
+                    type="file"
+                    hidden
+                  />
+                </label>
+                <Submit
+                  type="submit"
+                  onClick={handleUpload}
+                  disabled={uploadDone}
+                >
+                  <CareIcon className="care-l-cloud-upload text-lg" />
+                  <span>Upload</span>
+                </Submit>
+              </div>
+            )}
           </>
         )}
         <CheckBoxFormField
