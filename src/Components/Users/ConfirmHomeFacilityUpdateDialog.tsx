@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 
 interface ConfirmDialogProps {
   previousFacilityName: string;
@@ -25,7 +25,7 @@ const ConfirmHomeFacilityUpdateDialog = (props: ConfirmDialogProps) => {
     setDisable(true);
   };
   return (
-    <ConfirmDialogV2
+    <ConfirmDialog
       title={<span>Replace Home Facility</span>}
       show={true}
       action={"Replace"}
@@ -44,7 +44,7 @@ const ConfirmHomeFacilityUpdateDialog = (props: ConfirmDialogProps) => {
           <br />
         </div>
       </div>
-    </ConfirmDialogV2>
+    </ConfirmDialog>
   );
 };
 

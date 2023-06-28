@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { PrescriptionActions } from "../../Redux/actions";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import { Prescription } from "./models";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Success } from "../../Utils/Notifications";
@@ -23,7 +23,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
   const [notes, setNotes] = useState<string>("");
 
   return (
-    <ConfirmDialogV2
+    <ConfirmDialog
       action={
         <>
           <CareIcon className="care-l-syringe text-lg" />
@@ -71,6 +71,6 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
           disabled={isLoading}
         />
       </div>
-    </ConfirmDialogV2>
+    </ConfirmDialog>
   );
 }

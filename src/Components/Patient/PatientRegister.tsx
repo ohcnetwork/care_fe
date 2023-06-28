@@ -76,7 +76,7 @@ import { FieldError } from "../Form/FieldValidators";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import DialogModal from "../Common/Dialog";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -1145,7 +1145,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         </div>
         <>
           {showAlertMessage.show && (
-            <ConfirmDialogV2
+            <ConfirmDialog
               title={showAlertMessage.title}
               description={showAlertMessage.message}
               onConfirm={() => goBack()}

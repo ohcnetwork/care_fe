@@ -30,7 +30,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
 import Page from "../Common/components/Page";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import { FieldErrorText } from "../Form/FormFields/FormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -382,7 +382,7 @@ export const PatientHome = (props: any) => {
       }}
       backUrl={facilityId ? `/facility/${facilityId}/patients` : "/patients"}
     >
-      <ConfirmDialogV2
+      <ConfirmDialog
         title="Confirm send sample to collection centre"
         description="Are you sure you want to send the sample to Collection Centre?"
         show={showAlertMessage}
@@ -935,7 +935,7 @@ export const PatientHome = (props: any) => {
                             >
                               {t("transfer_to_receiving_facility")}
                             </ButtonV2>
-                            <ConfirmDialogV2
+                            <ConfirmDialog
                               title="Confirm Transfer Complete"
                               description="Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient"
                               show={modalFor === shift.external_id}
@@ -1422,7 +1422,7 @@ export const PatientHome = (props: any) => {
         </section>
       </div>
 
-      <ConfirmDialogV2
+      <ConfirmDialog
         title={`Assign a volunteer to ${patientData.name}`}
         show={openAssignVolunteerDialog}
         onClose={() => setOpenAssignVolunteerDialog(false)}

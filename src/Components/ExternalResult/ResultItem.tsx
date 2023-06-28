@@ -7,7 +7,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -63,7 +63,7 @@ export default function ResultItem(props: any) {
 
   return (
     <Page title={t("result_details")} backUrl="/external_results">
-      <ConfirmDialogV2
+      <ConfirmDialog
         title={t("confirm_delete")}
         description={t("are_you_sure_want_to_delete_this_record")}
         variant="danger"
