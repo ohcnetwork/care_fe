@@ -1469,11 +1469,11 @@ export const FileUpload = (props: FileUploadProps) => {
                 {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
-                  <div className="flex flex-col md:flex-row gap-2 items-center justify-start md:justify-end">
+                  <div className="flex flex-col xl:flex-row gap-2 items-center justify-start md:justify-end">
                     <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
                       {({ isAuthorized }) =>
                         isAuthorized ? (
-                          <label className="font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square button-primary-default">
+                          <label className="font-medium h-min w-full inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square button-primary-default">
                             <CareIcon className="care-l-file-upload-alt text-lg" />
                             {t("choose_file")}
                             <input
@@ -1488,7 +1488,10 @@ export const FileUpload = (props: FileUploadProps) => {
                         )
                       }
                     </AuthorizedChild>
-                    <ButtonV2 onClick={() => setModalOpenForCamera(true)}>
+                    <ButtonV2
+                      onClick={() => setModalOpenForCamera(true)}
+                      className="w-full"
+                    >
                       <CareIcon className="care-l-camera text-lg mr-2" />
                       Open Camera
                     </ButtonV2>
@@ -1496,6 +1499,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       authorizeFor={NonReadOnlyUsers}
                       disabled={!file || !uploadFileName || !isActive}
                       onClick={() => handleUpload({ status })}
+                      className="w-full"
                     >
                       <CareIcon className="care-l-cloud-upload text-lg" />
                       {t("upload")}
