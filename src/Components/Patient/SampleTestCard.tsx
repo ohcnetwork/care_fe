@@ -80,7 +80,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           : itemData.result === "NEGATIVE"
           ? "hover:border-primary-700 border-primary-500 bg-primary-100"
           : "bg-white hover:border-primary-500"
-      } block border rounded-lg bg-white shadow cursor-pointer text-black mt-4`}
+      } block border rounded-lg bg-white shadow cursor-pointer text-black mt-4 p-4`}
     >
       <div
         onClick={(_e) =>

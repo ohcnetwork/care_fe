@@ -73,7 +73,7 @@ import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
 import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
-import { FieldError } from "../Form/Fi1eldValidators";
+import { FieldError } from "../Form/FieldValidators";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import DialogModal from "../Common/Dialog";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";

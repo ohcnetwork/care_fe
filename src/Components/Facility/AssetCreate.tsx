@@ -585,6 +585,7 @@ const AssetCreate = (props: AssetProps) => {
                         data-testid="asset-class-input"
                       >
                         <SelectFormField
+                          disabled={!!(props.assetId && asset_class)}
                           name="asset_class"
                           label="Asset Class"
                           value={asset_class}
