@@ -61,8 +61,6 @@ import Form from "../Form/Form";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import Spinner from "../Common/Spinner";
-import Card from "../../CAREUI/display/Card";
-// const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -1015,6 +1013,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   defaults={initForm}
                   validate={validateForm}
                   onSubmit={handleSubmit}
+                  submitLabel={buttonText}
                   onCancel={() => navigate("/facility")}
                   className="bg-transparent px-1 md:px-2 py-2"
                   onDraftRestore={(newState) => {
@@ -1030,312 +1029,301 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 >
                   {(field) => (
                     <>
-                      <Card className="mb-8 rounded overflow-visible">
-                        <div className="p-4">
-                          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
-                            Personal Details
-                          </h1>
-                          <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                            <div
-                              data-testid="phone-number"
-                              id="phone_number-div"
-                            >
-                              <PhoneNumberFormField
-                                {...field("phone_number")}
-                                required
-                                label="Phone Number"
-                                onChange={(event) => {
-                                  duplicateCheck(event.value);
-                                  field("phone_number").onChange(event);
-                                }}
-                              />
-                            </div>
-                            <div
-                              data-testid="emergency-phone-number"
-                              id="emergency_phone_number-div"
-                            >
-                              <PhoneNumberFormField
-                                {...field("emergency_phone_number")}
-                                label="Emergency contact number"
-                                required
-                              />
-                            </div>
-                            <div data-testid="name" id="name-div">
-                              <TextFormField
-                                required
-                                {...field("name")}
-                                type="text"
-                                label={"Name"}
-                              />
-                            </div>
-                            <div
-                              data-testid="date-of-birth"
-                              id="date_of_birth-div"
-                            >
-                              <DateFormField
-                                {...field("date_of_birth")}
-                                label="Date of Birth"
-                                required
-                                position="LEFT"
-                                disableFuture
-                              />
-                            </div>
-                            <div data-testid="Gender" id="gender-div">
-                              <SelectFormField
-                                {...field("gender")}
-                                required
-                                label="Gender"
-                                options={genderTypes}
-                                optionLabel={(o: any) => o.text}
-                                optionValue={(o: any) => o.id}
-                              />
-                            </div>
-                            <CollapseV2
-                              opened={String(field("gender").value) === "2"}
-                            >
-                              {
-                                <div
-                                  id="is_antenatal-div"
-                                  className="col-span-2"
-                                >
-                                  <RadioFormField
-                                    {...field("is_antenatal")}
-                                    label="Is antenatal ?"
-                                    aria-label="is_antenatal"
-                                    options={[
-                                      { label: "Yes", value: "true" },
-                                      { label: "No", value: "false" },
-                                    ]}
-                                    optionDisplay={(option) => option.label}
-                                    optionValue={(option) => option.value}
-                                  />
-                                </div>
-                              }
-                            </CollapseV2>
-                            <div data-testid="current-address" id="address-div">
-                              <TextAreaFormField
-                                {...field("address")}
-                                label="Current Address"
-                                placeholder="Enter the current address"
-                              />
-                            </div>
-                            <div
-                              data-testid="permanent-address"
-                              id="permanent_address-div"
-                            >
-                              <TextAreaFormField
-                                {...field("permanent_address")}
-                                label="Permanent Address"
-                                rows={3}
-                                disabled={field("sameAddress").value}
-                                placeholder="Enter the permanent address"
-                                value={
-                                  field("sameAddress").value
-                                    ? field("address").value
-                                    : field("permanent_address").value
-                                }
-                              />
-                              <CheckBoxFormField
-                                {...field("sameAddress")}
-                                label="Same as Current Address"
-                                className="font-bold"
-                              />
-                            </div>
-
-                            <div data-testid="pincode" id="pincode-div">
-                              <TextFormField
-                                {...field("pincode")}
-                                required
-                                type="text"
-                                label={"Pincode"}
-                                onChange={(e) => {
-                                  field("pincode").onChange(e);
-                                  handlePincodeChange(
-                                    e,
-                                    field("pincode").onChange
-                                  );
-                                }}
-                              />
-                              {showAutoFilledPincode && (
-                                <div>
-                                  <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
-                                  <span className="text-primary-500 text-sm">
-                                    State and District auto-filled from Pincode
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                            <div id="village-div">
-                              <TextFormField
-                                {...field("village")}
-                                type="text"
-                                label="Village"
-                              />
-                            </div>
-                            <div id="nationality-div">
-                              <SelectFormField
-                                {...field("nationality")}
-                                label="Nationality"
-                                options={countryList}
-                                optionLabel={(o) => o}
-                                optionValue={(o) => o}
-                              />
-                            </div>
-                            {field("nationality").value === "India" ? (
-                              <>
-                                <div data-testid="state" id="state-div">
-                                  {isStateLoading ? (
-                                    <Spinner />
-                                  ) : (
-                                    <SelectFormField
-                                      {...field("state")}
-                                      label="State"
-                                      required
-                                      placeholder="Choose State"
-                                      options={states}
-                                      optionLabel={(o: any) => o.name}
-                                      optionValue={(o: any) => o.id}
-                                      onChange={(e: any) => {
-                                        field("state").onChange(e);
-                                        field("district").onChange({
-                                          name: "district",
-                                          value: undefined,
-                                        });
-                                        field("local_body").onChange({
-                                          name: "local_body",
-                                          value: undefined,
-                                        });
-                                        field("ward").onChange({
-                                          name: "ward",
-                                          value: undefined,
-                                        });
-                                        fetchDistricts(e.value);
-                                        fetchLocalBody("0");
-                                        fetchWards("0");
-                                      }}
-                                    />
-                                  )}
-                                </div>
-
-                                <div data-testid="district" id="district-div">
-                                  {isDistrictLoading ? (
-                                    <div className="w-full flex justify-center items-center">
-                                      <Spinner />
-                                    </div>
-                                  ) : (
-                                    <SelectFormField
-                                      {...field("district")}
-                                      label="District"
-                                      required
-                                      placeholder={
-                                        field("state").value
-                                          ? "Choose District"
-                                          : "Select State First"
-                                      }
-                                      disabled={!field("state").value}
-                                      options={districts}
-                                      optionLabel={(o: any) => o.name}
-                                      optionValue={(o: any) => o.id}
-                                      onChange={(e: any) => {
-                                        field("district").onChange(e);
-                                        field("local_body").onChange({
-                                          name: "local_body",
-                                          value: undefined,
-                                        });
-                                        field("ward").onChange({
-                                          name: "ward",
-                                          value: undefined,
-                                        });
-                                        fetchLocalBody(String(e.value));
-                                        fetchWards("0");
-                                      }}
-                                    />
-                                  )}
-                                </div>
-
-                                <div
-                                  data-testid="localbody"
-                                  id="local_body-div"
-                                >
-                                  {isLocalbodyLoading ? (
-                                    <div className="w-full flex justify-center items-center">
-                                      <Spinner />
-                                    </div>
-                                  ) : (
-                                    <SelectFormField
-                                      {...field("local_body")}
-                                      label="Localbody"
-                                      required
-                                      placeholder={
-                                        field("district").value
-                                          ? "Choose Localbody"
-                                          : "Select District First"
-                                      }
-                                      disabled={!field("district").value}
-                                      options={localBody}
-                                      optionLabel={(o: any) => o.name}
-                                      optionValue={(o: any) => o.id}
-                                      onChange={(e: any) => {
-                                        field("local_body").onChange(e);
-                                        field("ward").onChange({
-                                          name: "ward",
-                                          value: undefined,
-                                        });
-                                        fetchWards(String(e.value));
-                                      }}
-                                    />
-                                  )}
-                                </div>
-                                <div
-                                  data-testid="ward-respective-lsgi"
-                                  id="ward-div"
-                                >
-                                  {isWardLoading ? (
-                                    <div className="w-full flex justify-center items-center">
-                                      <Spinner />
-                                    </div>
-                                  ) : (
-                                    <SelectFormField
-                                      {...field("ward")}
-                                      label="Ward"
-                                      options={ward
-                                        .sort((a, b) => a.number - b.number)
-                                        .map((e) => {
-                                          return {
-                                            id: e.id,
-                                            name: e.number + ": " + e.name,
-                                          };
-                                        })}
-                                      placeholder={
-                                        field("local_body").value
-                                          ? "Choose Ward"
-                                          : "Select Localbody First"
-                                      }
-                                      disabled={!field("local_body").value}
-                                      optionLabel={(o: any) => o.name}
-                                      optionValue={(o: any) => o.id}
-                                      onChange={(e: any) => {
-                                        field("ward").onChange(e);
-                                      }}
-                                    />
-                                  )}
-                                </div>
-                              </>
-                            ) : (
-                              <div id="passport_no-div">
-                                <TextFormField
-                                  label="Passport Number"
-                                  {...field("passport_no")}
-                                  type="text"
+                      <div className="mb-8 rounded overflow-visible border border-gray-200 p-4">
+                        <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                          Personal Details
+                        </h1>
+                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                          <div data-testid="phone-number" id="phone_number-div">
+                            <PhoneNumberFormField
+                              {...field("phone_number")}
+                              required
+                              label="Phone Number"
+                              onChange={(event) => {
+                                duplicateCheck(event.value);
+                                field("phone_number").onChange(event);
+                              }}
+                            />
+                          </div>
+                          <div
+                            data-testid="emergency-phone-number"
+                            id="emergency_phone_number-div"
+                          >
+                            <PhoneNumberFormField
+                              {...field("emergency_phone_number")}
+                              label="Emergency contact number"
+                              required
+                            />
+                          </div>
+                          <div data-testid="name" id="name-div">
+                            <TextFormField
+                              required
+                              {...field("name")}
+                              type="text"
+                              label={"Name"}
+                            />
+                          </div>
+                          <div
+                            data-testid="date-of-birth"
+                            id="date_of_birth-div"
+                          >
+                            <DateFormField
+                              {...field("date_of_birth")}
+                              label="Date of Birth"
+                              required
+                              position="LEFT"
+                              disableFuture
+                            />
+                          </div>
+                          <div data-testid="Gender" id="gender-div">
+                            <SelectFormField
+                              {...field("gender")}
+                              required
+                              label="Gender"
+                              options={genderTypes}
+                              optionLabel={(o: any) => o.text}
+                              optionValue={(o: any) => o.id}
+                            />
+                          </div>
+                          <CollapseV2
+                            opened={String(field("gender").value) === "2"}
+                          >
+                            {
+                              <div id="is_antenatal-div" className="col-span-2">
+                                <RadioFormField
+                                  {...field("is_antenatal")}
+                                  label="Is antenatal ?"
+                                  aria-label="is_antenatal"
+                                  options={[
+                                    { label: "Yes", value: "true" },
+                                    { label: "No", value: "false" },
+                                  ]}
+                                  optionDisplay={(option) => option.label}
+                                  optionValue={(option) => option.value}
                                 />
+                              </div>
+                            }
+                          </CollapseV2>
+                          <div data-testid="current-address" id="address-div">
+                            <TextAreaFormField
+                              {...field("address")}
+                              label="Current Address"
+                              placeholder="Enter the current address"
+                            />
+                          </div>
+                          <div
+                            data-testid="permanent-address"
+                            id="permanent_address-div"
+                          >
+                            <TextAreaFormField
+                              {...field("permanent_address")}
+                              label="Permanent Address"
+                              rows={3}
+                              disabled={field("sameAddress").value}
+                              placeholder="Enter the permanent address"
+                              value={
+                                field("sameAddress").value
+                                  ? field("address").value
+                                  : field("permanent_address").value
+                              }
+                            />
+                            <CheckBoxFormField
+                              {...field("sameAddress")}
+                              label="Same as Current Address"
+                              className="font-bold"
+                            />
+                          </div>
+
+                          <div data-testid="pincode" id="pincode-div">
+                            <TextFormField
+                              {...field("pincode")}
+                              required
+                              type="text"
+                              label={"Pincode"}
+                              onChange={(e) => {
+                                field("pincode").onChange(e);
+                                handlePincodeChange(
+                                  e,
+                                  field("pincode").onChange
+                                );
+                              }}
+                            />
+                            {showAutoFilledPincode && (
+                              <div>
+                                <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
+                                <span className="text-primary-500 text-sm">
+                                  State and District auto-filled from Pincode
+                                </span>
                               </div>
                             )}
                           </div>
+                          <div id="village-div">
+                            <TextFormField
+                              {...field("village")}
+                              type="text"
+                              label="Village"
+                            />
+                          </div>
+                          <div id="nationality-div">
+                            <SelectFormField
+                              {...field("nationality")}
+                              label="Nationality"
+                              options={countryList}
+                              optionLabel={(o) => o}
+                              optionValue={(o) => o}
+                            />
+                          </div>
+                          {field("nationality").value === "India" ? (
+                            <>
+                              <div data-testid="state" id="state-div">
+                                {isStateLoading ? (
+                                  <Spinner />
+                                ) : (
+                                  <SelectFormField
+                                    {...field("state")}
+                                    label="State"
+                                    required
+                                    placeholder="Choose State"
+                                    options={states}
+                                    optionLabel={(o: any) => o.name}
+                                    optionValue={(o: any) => o.id}
+                                    onChange={(e: any) => {
+                                      field("state").onChange(e);
+                                      field("district").onChange({
+                                        name: "district",
+                                        value: undefined,
+                                      });
+                                      field("local_body").onChange({
+                                        name: "local_body",
+                                        value: undefined,
+                                      });
+                                      field("ward").onChange({
+                                        name: "ward",
+                                        value: undefined,
+                                      });
+                                      fetchDistricts(e.value);
+                                      fetchLocalBody("0");
+                                      fetchWards("0");
+                                    }}
+                                  />
+                                )}
+                              </div>
+
+                              <div data-testid="district" id="district-div">
+                                {isDistrictLoading ? (
+                                  <div className="w-full flex justify-center items-center">
+                                    <Spinner />
+                                  </div>
+                                ) : (
+                                  <SelectFormField
+                                    {...field("district")}
+                                    label="District"
+                                    required
+                                    placeholder={
+                                      field("state").value
+                                        ? "Choose District"
+                                        : "Select State First"
+                                    }
+                                    disabled={!field("state").value}
+                                    options={districts}
+                                    optionLabel={(o: any) => o.name}
+                                    optionValue={(o: any) => o.id}
+                                    onChange={(e: any) => {
+                                      field("district").onChange(e);
+                                      field("local_body").onChange({
+                                        name: "local_body",
+                                        value: undefined,
+                                      });
+                                      field("ward").onChange({
+                                        name: "ward",
+                                        value: undefined,
+                                      });
+                                      fetchLocalBody(String(e.value));
+                                      fetchWards("0");
+                                    }}
+                                  />
+                                )}
+                              </div>
+
+                              <div data-testid="localbody" id="local_body-div">
+                                {isLocalbodyLoading ? (
+                                  <div className="w-full flex justify-center items-center">
+                                    <Spinner />
+                                  </div>
+                                ) : (
+                                  <SelectFormField
+                                    {...field("local_body")}
+                                    label="Localbody"
+                                    required
+                                    placeholder={
+                                      field("district").value
+                                        ? "Choose Localbody"
+                                        : "Select District First"
+                                    }
+                                    disabled={!field("district").value}
+                                    options={localBody}
+                                    optionLabel={(o: any) => o.name}
+                                    optionValue={(o: any) => o.id}
+                                    onChange={(e: any) => {
+                                      field("local_body").onChange(e);
+                                      field("ward").onChange({
+                                        name: "ward",
+                                        value: undefined,
+                                      });
+                                      fetchWards(String(e.value));
+                                    }}
+                                  />
+                                )}
+                              </div>
+                              <div
+                                data-testid="ward-respective-lsgi"
+                                id="ward-div"
+                              >
+                                {isWardLoading ? (
+                                  <div className="w-full flex justify-center items-center">
+                                    <Spinner />
+                                  </div>
+                                ) : (
+                                  <SelectFormField
+                                    {...field("ward")}
+                                    label="Ward"
+                                    options={ward
+                                      .sort((a, b) => a.number - b.number)
+                                      .map((e) => {
+                                        return {
+                                          id: e.id,
+                                          name: e.number + ": " + e.name,
+                                        };
+                                      })}
+                                    placeholder={
+                                      field("local_body").value
+                                        ? "Choose Ward"
+                                        : "Select Localbody First"
+                                    }
+                                    disabled={!field("local_body").value}
+                                    optionLabel={(o: any) => o.name}
+                                    optionValue={(o: any) => o.id}
+                                    onChange={(e: any) => {
+                                      field("ward").onChange(e);
+                                    }}
+                                  />
+                                )}
+                              </div>
+                            </>
+                          ) : (
+                            <div id="passport_no-div">
+                              <TextFormField
+                                label="Passport Number"
+                                {...field("passport_no")}
+                                type="text"
+                              />
+                            </div>
+                          )}
                         </div>
-                      </Card>
-                      <Card className="mb-8 rounded">
+                      </div>
+                      <div className="mb-8 rounded border border-gray-200 p-4">
                         <AccordionV2
-                          className="mt-2 lg:mt-0 md:mt-0"
+                          className="mt-2 lg:mt-0 md:mt-0 shadow-none"
                           expandIcon={
                             <CareIcon className="care-l-angle-down text-2xl font-bold" />
                           }
@@ -1582,72 +1570,70 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             </div>
                           </div>
                         </AccordionV2>
-                      </Card>
-                      <Card className="mb-8 rounded overflow-visible">
-                        <div className="p-4">
-                          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
-                            Medical History
-                          </h1>
-                          <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                            <div id="present_health-div">
-                              <TextAreaFormField
-                                {...field("present_health")}
-                                label="Present Health Condition"
-                                rows={3}
-                                placeholder="Optional Information"
-                              />
-                            </div>
+                      </div>
+                      <div className="mb-8 rounded overflow-visible border p-4">
+                        <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                          Medical History
+                        </h1>
+                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                          <div id="present_health-div">
+                            <TextAreaFormField
+                              {...field("present_health")}
+                              label="Present Health Condition"
+                              rows={3}
+                              placeholder="Optional Information"
+                            />
+                          </div>
 
-                            <div id="ongoing_medication-div">
-                              <TextAreaFormField
-                                {...field("ongoing_medication")}
-                                label="Ongoing Medication"
-                                rows={3}
-                                placeholder="Optional Information"
-                              />
+                          <div id="ongoing_medication-div">
+                            <TextAreaFormField
+                              {...field("ongoing_medication")}
+                              label="Ongoing Medication"
+                              rows={3}
+                              placeholder="Optional Information"
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <FieldLabel id="med-history-label" required>
+                              Any medical history? (Comorbidities)
+                            </FieldLabel>
+                            <div className="flex flex-wrap gap-2">
+                              {MEDICAL_HISTORY_CHOICES.map((i) => {
+                                return renderMedicalHistory(
+                                  i.id,
+                                  i.text,
+                                  field
+                                );
+                              })}
                             </div>
-                            <div className="md:col-span-2">
-                              <FieldLabel id="med-history-label" required>
-                                Any medical history? (Comorbidities)
-                              </FieldLabel>
-                              <div className="flex flex-wrap gap-2">
-                                {MEDICAL_HISTORY_CHOICES.map((i) => {
-                                  return renderMedicalHistory(
-                                    i.id,
-                                    i.text,
-                                    field
-                                  );
-                                })}
-                              </div>
-                              <FieldErrorText
-                                error={state.errors.medical_history}
-                              />
-                            </div>
+                            <FieldErrorText
+                              error={state.errors.medical_history}
+                            />
+                          </div>
 
-                            <div id="allergies-div">
-                              <TextAreaFormField
-                                {...field("allergies")}
-                                label="Allergies"
-                                rows={1}
-                                placeholder="Optional Information"
-                              />
-                            </div>
+                          <div id="allergies-div">
+                            <TextAreaFormField
+                              {...field("allergies")}
+                              label="Allergies"
+                              rows={1}
+                              placeholder="Optional Information"
+                            />
+                          </div>
 
-                            <div data-testid="blood-group" id="blood_group-div">
-                              <SelectFormField
-                                {...field("blood_group")}
-                                position="above"
-                                label="Blood Group"
-                                required
-                                options={bloodGroups}
-                                optionLabel={(o: any) => o}
-                                optionValue={(o: any) => o}
-                              />
-                            </div>
+                          <div data-testid="blood-group" id="blood_group-div">
+                            <SelectFormField
+                              {...field("blood_group")}
+                              position="above"
+                              label="Blood Group"
+                              required
+                              options={bloodGroups}
+                              optionLabel={(o: any) => o}
+                              optionValue={(o: any) => o}
+                            />
                           </div>
                         </div>
-                      </Card>
-                      <div className="bg-white rounded flex flex-col gap-4 w-full p-4">
+                      </div>
+                      <div className="bg-white rounded flex flex-col gap-4 w-full p-4 border border-gray-200">
                         <div className="flex w-full items-center justify-between">
                           <h1 className="font-bold text-purple-500 text-left text-xl">
                             Insurance Details
@@ -1682,24 +1668,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           error={insuranceDetailsError}
                           gridView
                         />
-                      </div>
-                      <div className="flex items-center my-4 mx-4">
-                        <button
-                          className="btn btn-large btn-primary mr-4"
-                          type="submit"
-                          onClick={(e) => handleSubmit(e)}
-                          data-testid="submit-button"
-                        >
-                          {buttonText}
-                        </button>
-                        <button
-                          className="btn btn-default bg-gray-300 hover:bg-gray-400 btn-large   mr-4"
-                          type="button"
-                          onClick={() => goBack()}
-                        >
-                          {" "}
-                          Cancel{" "}
-                        </button>
                       </div>
                     </>
                   )}
