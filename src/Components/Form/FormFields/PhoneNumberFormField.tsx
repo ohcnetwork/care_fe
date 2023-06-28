@@ -65,7 +65,7 @@ export default function PhoneNumberFormField(props: Props) {
   };
 
   return (
-    <FormField field={{ ...field, error }}>
+    <FormField field={{ ...field, error: field.error || error }}>
       <div className="relative mt-2 rounded-md shadow-sm">
         <input
           type="tel"
