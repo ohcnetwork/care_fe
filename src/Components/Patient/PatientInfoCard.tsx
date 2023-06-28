@@ -145,7 +145,7 @@ export default function PatientInfoCard(props: {
                 {consultation?.facility_name}
               </Link>
 
-              {(consultation?.suggestion === "A" ?? op_no) && (
+              {(consultation?.suggestion === "A" || op_no) && (
                 <span className="md:col-span-2 capitalize pl-2">
                   <span className="badge badge-pill badge-primary">
                     {consultation?.suggestion !== "A"

@@ -100,7 +100,7 @@ const DischargeModal = ({
   useMessageListener((data) => {
     if (
       data.type === "MESSAGE" &&
-      (data.from === "claim/on_submit" ?? data.from === "preauth/on_submit") &&
+      (data.from === "claim/on_submit" || data.from === "preauth/on_submit") &&
       data.message === "success"
     ) {
       fetchLatestClaim();

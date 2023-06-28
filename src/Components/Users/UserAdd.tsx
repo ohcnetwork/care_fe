@@ -251,10 +251,10 @@ export const UserAdd = (props: UserProps) => {
   const headerText = !userId ? "Add User" : "Update User";
   const buttonText = !userId ? "Save User" : "Update Details";
   const showLocalbody = !(
-    state.form.user_type === "Pharmacist" ??
-    state.form.user_type === "Volunteer" ??
-    state.form.user_type === "Doctor" ??
-    state.form.user_type === "Staff" ??
+    state.form.user_type === "Pharmacist" ||
+    state.form.user_type === "Volunteer" ||
+    state.form.user_type === "Doctor" ||
+    state.form.user_type === "Staff" ||
     state.form.user_type === "StaffReadOnly"
   );
 
@@ -342,7 +342,7 @@ export const UserAdd = (props: UserProps) => {
   useAbortableEffect(
     (status: statusType) => {
       fetchStates(status);
-      if (userType === "Staff" ?? userType === "StaffReadOnly") {
+      if (userType === "Staff" || userType === "StaffReadOnly") {
         fetchFacilities(status);
       }
     },
@@ -397,8 +397,8 @@ export const UserAdd = (props: UserProps) => {
         case "facilities":
           if (
             state.form[field].length === 0 &&
-            (userType === "Staff" ?? userType === "StaffReadOnly") &&
-            (state.form["user_type"] === "Staff" ??
+            (userType === "Staff" || userType === "StaffReadOnly") &&
+            (state.form["user_type"] === "Staff" ||
               state.form["user_type"] === "StaffReadOnly")
           ) {
             errors[field] =
@@ -482,7 +482,7 @@ export const UserAdd = (props: UserProps) => {
           if (phoneNumber) {
             is_valid = phoneNumber.isValid();
           }
-          if (!state.form[field] ?? !is_valid) {
+          if (!state.form[field] || !is_valid) {
             errors[field] = "Please enter valid phone number";
             invalidForm = true;
           }
@@ -511,7 +511,7 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "email":
           if (
-            state.form[field].length === 0 ??
+            state.form[field].length === 0 ||
             !validateEmailAddress(state.form[field])
           ) {
             errors[field] = "Please enter a valid email address";
@@ -603,7 +603,7 @@ export const UserAdd = (props: UserProps) => {
       const res = await dispatchAction(addUser(data));
       if (
         res &&
-        (res.data ?? res.data === "") &&
+        (res.data || res.data === "") &&
         res.status >= 200 &&
         res.status < 300
       ) {
@@ -676,9 +676,7 @@ export const UserAdd = (props: UserProps) => {
               required
               label="User Type"
               options={userTypes}
-              optionLabel={(o) =>
-                o.role + ((o.readOnly && " (Read Only)") ?? "")
-              }
+              optionLabel={(o) => o.role + (o.readOnly ? " (Read Only)" : "")}
               optionValue={(o) => o.id}
             />
 
