@@ -149,7 +149,7 @@ export const LegacyDateTimeFiled = (props: DateInputFieldProps) => {
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <KeyboardDateTimePicker
-        margin={margin || "normal"}
+        margin={margin ?? "normal"}
         id="date-time-picker-dialog"
         label={label}
         value={value}
@@ -182,7 +182,7 @@ export const LegacyDateInputField = (props: DateInputFieldProps) => {
   return (
     <MuiPickersUtilsProvider utils={DateFnsUtils}>
       <KeyboardDatePicker
-        margin={margin || "normal"}
+        margin={margin ?? "normal"}
         id="date-picker-dialog"
         label={label}
         format="dd/MM/yyyy"
@@ -485,7 +485,7 @@ export const LegacyAutoCompleteAsyncField = (
             {...params}
             name={name}
             variant={variant}
-            margin={margin || "normal"}
+            margin={margin ?? "normal"}
             label={label}
             onChange={onSearch}
             placeholder={placeholder}

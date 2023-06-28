@@ -303,7 +303,7 @@ export const ConsultationForm = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
               ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
-                  ?.id || "Comfort"
+                  ?.id ?? "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             op_no: res.data.op_no ? res.data.op_no : "",
@@ -746,7 +746,7 @@ export const ConsultationForm = (props: any) => {
     const form: FormDetails = { ...state.form };
     if (selectedFacility?.id) {
       if (selectedFacility.id === -1) {
-        form.referred_to_external = selectedFacility.name || "";
+        form.referred_to_external = selectedFacility.name ?? "";
         delete form.referred_to;
       } else {
         form.referred_to = selectedFacility.id.toString() || "";

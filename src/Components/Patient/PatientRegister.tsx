@@ -1127,7 +1127,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         }}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
-          [id || "????"]: { name: patientName },
+          [id ?? "????"]: { name: patientName },
         }}
       />
       <div className="mt-4">
