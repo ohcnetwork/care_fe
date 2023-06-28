@@ -22,3 +22,22 @@ export interface VitalsWaveformBase extends VitalsDataBase {
   "data-high-limit": number;
   data: string;
 }
+
+export interface ChannelOptions {
+  /**
+   * The baseline value for this channel.
+   */
+  baseline: number;
+  /**
+   * The minimum value that can be displayed for this channel.
+   */
+  lowLimit: number;
+  /**
+   * The maximum value that can be displayed for this channel.
+   */
+  highLimit: number;
+  /**
+   * No. of data points expected to be received per second.
+   */
+  samplingRate: number;
+}
