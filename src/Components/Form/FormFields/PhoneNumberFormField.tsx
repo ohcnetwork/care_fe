@@ -1,9 +1,10 @@
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
 import { AsYouType } from "libphonenumber-js";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { classNames } from "../../../Utils/utils";
 import phoneCodesJson from "../../../Common/static/countryPhoneAndFlags.json";
+import { FieldError, PhoneNumberValidator } from "../FieldValidators";
 
 interface CountryData {
   flag: string;
@@ -21,6 +22,7 @@ interface Props extends FormFieldBaseProps<string> {
 
 export default function PhoneNumberFormField(props: Props) {
   const field = useFormFieldPropsResolver(props as any);
+  const [error, setError] = useState<FieldError>();
 
   const asYouType = useMemo(() => {
     const asYouType = new AsYouType();
@@ -41,10 +43,17 @@ export default function PhoneNumberFormField(props: Props) {
     asYouType.reset();
     asYouType.input(value);
     field.handleChange(value);
+
+    if (value === "") {
+      setError(undefined);
+      return;
+    }
+
+    setError(PhoneNumberValidator()(value));
   };
 
   return (
-    <FormField field={field}>
+    <FormField field={{ ...field, error }}>
       <div className="relative mt-2 rounded-md shadow-sm">
         <input
           type="tel"
