@@ -205,10 +205,12 @@ const UpdateStatusDialog = (props: Props) => {
             {uploadStarted ? (
               <LinearProgressWithLabel value={uploadPercent} />
             ) : (
-              <div className="flex flex-col md:flex-row justify-between gap-2 mt-3 mb-4">
-                <label className="font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square button-primary-default">
+              <div className="flex flex-wrap justify-between gap-2 mt-3 mb-4">
+                <label className="max-w-full font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square button-primary-default">
                   <CareIcon className="care-l-file-upload-alt text-lg" />
-                  {t("choose_file")}
+                  <span className="truncate max-w-full">
+                    {file ? file.name : t("choose_file")}
+                  </span>
                   <input
                     title="changeFile"
                     onChange={onFileChange}
