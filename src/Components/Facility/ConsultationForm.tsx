@@ -20,7 +20,6 @@ import {
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { BedModel, FacilityModel, ICD11DiagnosisModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
@@ -35,7 +34,7 @@ import ProcedureBuilder, {
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -1129,7 +1128,7 @@ export const ConsultationForm = (props: any) => {
                                 });
                               }}
                             />
-                            <LegacyErrorHelperText
+                            <FieldErrorText
                               error={state.errors.investigation}
                             />
                           </div>
@@ -1148,9 +1147,7 @@ export const ConsultationForm = (props: any) => {
                                 });
                               }}
                             />
-                            <LegacyErrorHelperText
-                              error={state.errors.procedure}
-                            />
+                            <FieldErrorText error={state.errors.procedure} />
                           </div>
                           <div
                             className="col-span-6"
