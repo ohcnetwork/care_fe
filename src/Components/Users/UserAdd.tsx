@@ -198,7 +198,7 @@ export const UserAdd = (props: UserProps) => {
     const usernameCheck = await dispatchAction(
       checkUsername({ username: username })
     );
-    if (usernameCheck === undefined ?? usernameCheck.status === 409)
+    if (usernameCheck === undefined || usernameCheck.status === 409)
       setUsernameExists(userExistsEnums.exists);
     else if (usernameCheck.status === 200)
       setUsernameExists(userExistsEnums.available);
