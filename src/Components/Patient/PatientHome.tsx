@@ -16,7 +16,6 @@ import {
   completeTransfer,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import AlertDialog from "../Common/AlertDialog";
 import Pagination from "../Common/Pagination";
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
@@ -71,11 +70,7 @@ export const PatientHome = (props: any) => {
     status: number;
     sample: any;
   }>({ status: 0, sample: null });
-  const [showAlertMessage, setAlertMessage] = useState({
-    show: false,
-    message: "",
-    title: "",
-  });
+  const [showAlertMessage, setShowAlertMessage] = useState(false);
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
@@ -265,21 +260,9 @@ export const PatientHome = (props: any) => {
     setSampleListOffset(offset);
   };
 
-  const dismissAlert = () => {
-    setAlertMessage({
-      show: false,
-      message: "",
-      title: "",
-    });
-  };
-
   const confirmApproval = (status: number, sample: any) => {
     setSelectedStatus({ status, sample });
-    setAlertMessage({
-      show: true,
-      message: "Are you sure you want to send the sample to Collection Centre?",
-      title: "Confirm",
-    });
+    setShowAlertMessage(true);
   };
 
   const handleApproval = async () => {
@@ -299,7 +282,7 @@ export const PatientHome = (props: any) => {
       callSampleList(!sampleFlag);
     }
 
-    dismissAlert();
+    setShowAlertMessage(false);
   };
 
   if (isLoading) {
@@ -399,14 +382,14 @@ export const PatientHome = (props: any) => {
       }}
       backUrl={facilityId ? `/facility/${facilityId}/patients` : "/patients"}
     >
-      {showAlertMessage.show && (
-        <AlertDialog
-          title={showAlertMessage.title}
-          message={showAlertMessage.message}
-          handleClose={() => handleApproval()}
-          handleCancel={() => dismissAlert()}
-        />
-      )}
+      <ConfirmDialogV2
+        title="Confirm send sample to collection centre"
+        description="Are you sure you want to send the sample to Collection Centre?"
+        show={showAlertMessage}
+        action="Approve"
+        onConfirm={() => handleApproval()}
+        onClose={() => setShowAlertMessage(false)}
+      />
 
       <div>
         <div className="relative mt-2">
