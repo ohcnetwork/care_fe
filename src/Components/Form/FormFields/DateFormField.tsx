@@ -36,9 +36,7 @@ const DateFormField = (props: Props) => {
         id={field.id}
         name={field.name}
         value={
-          field.value && typeof field.value === "string"
-            ? new Date(field.value)
-            : field.value
+          typeof field.value === "string" ? new Date(field.value) : field.value
         }
         onChange={field.handleChange}
         disabled={field.disabled}
