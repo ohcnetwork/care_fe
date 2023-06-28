@@ -177,7 +177,7 @@ export const dropdownOptionClassNames = ({
   selected,
 }: OptionRenderPropArg) => {
   return classNames(
-    "cursor-default select-none relative p-4 text-sm",
+    "group/option transition-colors duration-75 ease-in-out cursor-default select-none relative p-4 text-sm",
     active && "text-white bg-primary-500",
     !active && selected && "text-primary-500",
     !active && !selected && "text-gray-900",
