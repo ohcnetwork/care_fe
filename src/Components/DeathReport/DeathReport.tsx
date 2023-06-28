@@ -11,7 +11,6 @@ import moment from "moment";
 import { formatDate } from "../../Utils/utils";
 import Page from "../Common/components/Page";
 import Form from "../Form/Form";
-import { createFormContext } from "../Form/FormContext";
 import { useTranslation } from "react-i18next";
 import { navigate } from "raviger";
 
@@ -41,8 +40,6 @@ type DeathReport = {
   cause_of_death: string;
   facility: string;
 };
-
-const deathReportContext = createFormContext<DeathReport>();
 
 export default function PrintDeathReport(props: { id: string }) {
   const initialState = {
@@ -355,9 +352,8 @@ export default function PrintDeathReport(props: { id: string }) {
           backUrl={`/facility/${patientData.facility}/patient/${id}`}
           className="w-full"
         >
-          <Form
+          <Form<DeathReport>
             disabled={isPrintMode}
-            context={deathReportContext}
             defaults={patientData}
             asyncGetDefaults={async () => patientData}
             submitLabel="Preview"
