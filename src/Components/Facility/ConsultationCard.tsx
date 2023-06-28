@@ -104,6 +104,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
           <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
             Created:{" "}
             <RelativeDateUserMention
+              tooltipPosition="left"
               actionDate={itemData.created_date}
               user={itemData.created_by}
             />
@@ -112,6 +113,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
         <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
           Last Modified:{" "}
           <RelativeDateUserMention
+            tooltipPosition="left"
             actionDate={itemData.modified_date}
             user={itemData.last_edited_by}
           />
