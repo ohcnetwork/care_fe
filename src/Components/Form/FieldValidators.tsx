@@ -29,6 +29,19 @@ export const MultiValidator = <T,>(
   return validator;
 };
 
+export const AnyValidator = <T,>(
+  validators: FieldValidator<T>[]
+): FieldValidator<T> => {
+  const validator = (value: T) => {
+    for (const validate of validators) {
+      const error = validate(value);
+      if (!error) return;
+    }
+    return validators[0](value);
+  };
+  return validator;
+};
+
 export const RequiredFieldValidator = (message = "Field is required") => {
   return <T,>(value: T): FieldError => {
     if (!value) return message;
@@ -54,4 +67,12 @@ const PHONE_NUMBER_REGEX =
 
 export const PhoneNumberValidator = (message = "Invalid phone number") => {
   return RegexValidator(PHONE_NUMBER_REGEX, message);
+};
+
+const SUPPORT_PHONE_NUMBER_REGEX = /^1800[-]?\d{3}[-]?\d{3,4}$/;
+
+export const SupportPhoneNumberValidator = (
+  message = "Invalid support phone number"
+) => {
+  return RegexValidator(SUPPORT_PHONE_NUMBER_REGEX, message);
 };

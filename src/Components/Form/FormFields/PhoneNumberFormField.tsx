@@ -4,7 +4,12 @@ import { AsYouType } from "libphonenumber-js";
 import { useMemo, useState } from "react";
 import { classNames } from "../../../Utils/utils";
 import phoneCodesJson from "../../../Common/static/countryPhoneAndFlags.json";
-import { FieldError, PhoneNumberValidator } from "../FieldValidators";
+import {
+  AnyValidator,
+  FieldError,
+  PhoneNumberValidator,
+  SupportPhoneNumberValidator,
+} from "../FieldValidators";
 
 interface CountryData {
   flag: string;
@@ -18,6 +23,7 @@ interface Props extends FormFieldBaseProps<string> {
   placeholder?: string;
   autoComplete?: string;
   disableCountry?: boolean;
+  disableValidation?: boolean;
 }
 
 export default function PhoneNumberFormField(props: Props) {
@@ -49,7 +55,13 @@ export default function PhoneNumberFormField(props: Props) {
       return;
     }
 
-    setError(PhoneNumberValidator()(value));
+    if (!props.disableValidation) {
+      setError(
+        AnyValidator([PhoneNumberValidator(), SupportPhoneNumberValidator()])(
+          value
+        )
+      );
+    }
   };
 
   return (
