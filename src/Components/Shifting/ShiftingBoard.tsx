@@ -8,15 +8,13 @@ import {
 import { useDrag, useDrop } from "react-dnd";
 
 import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import CircularProgress from "../Common/components/CircularProgress";
 import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 import moment from "moment";
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import CSVLink from "../Common/CSVLink";
+import { ExportButton } from "../Common/Export";
 
 const limit = 14;
 
@@ -26,8 +24,6 @@ interface boardProps {
   filterProp: any;
   formatFilter: any;
 }
-
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 const reduceLoading = (action: string, current: any) => {
   switch (action) {
@@ -113,7 +109,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                 >
                   <i className="fas fa-plane-departure mr-2"></i>
                   <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
-                    {(shift.orgin_facility_object || {}).name}
+                    {(shift.origin_facility_object || {}).name}
                   </dd>
                 </dt>
               </div>
@@ -259,11 +255,9 @@ export default function ShiftingBoard({
 }: boardProps) {
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>([]);
-  const [downloadFile, setDownloadFile] = useState("");
   const [totalCount, setTotalCount] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState({ board: false, more: false });
-  const [downloadLoading, setDownloadLoading] = useState(false);
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "shift-card",
     drop: (item: any) => {
@@ -288,28 +282,13 @@ export default function ShiftingBoard({
     });
   };
 
-  const triggerDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const res = await dispatch(
-      downloadShiftRequests({
-        ...formatFilter({ ...filterProp, status: board }),
-        csv: 1,
-      })
-    );
-    // file ready to download
-    setDownloadLoading(false);
-    setDownloadFile(res.data);
-    document.getElementById(`shiftRequests-${board}`)?.click();
-  };
-
   useEffect(() => {
     fetchData();
   }, [
     board,
     dispatch,
     filterProp.facility,
-    filterProp.orgin_facility,
+    filterProp.origin_facility,
     filterProp.shifting_approving_facility,
     filterProp.assigned_facility,
     filterProp.emergency,
@@ -367,22 +346,15 @@ export default function ShiftingBoard({
         <div className="flex justify-between p-4 mx-2 rounded bg-white shadow items-center">
           <h3 className="text-xs flex items-center h-8">
             {title || board}{" "}
-            {downloadLoading ? (
-              <CircularProgress className="w-6 h-6 ml-2 text-black" />
-            ) : (
-              <ButtonV2
-                onClick={triggerDownload}
-                className="tooltip p-4"
-                variant="secondary"
-                ghost
-                circle
-              >
-                <CareIcon className="care-l-import text-lg font-bold" />
-                <span className="tooltip-text tooltip-bottom -translate-x-16">
-                  {t("download")}
-                </span>
-              </ButtonV2>
-            )}
+            <ExportButton
+              action={() =>
+                downloadShiftRequests({
+                  ...formatFilter({ ...filterProp, status: board }),
+                  csv: 1,
+                })
+              }
+              filenamePrefix={`shift_requests_${board}`}
+            />
           </h3>
           <span className="rounded-lg ml-2 bg-primary-500 text-white px-2">
             {totalCount || "0"}
@@ -424,11 +396,6 @@ export default function ShiftingBoard({
             </button>
           ))}
       </div>
-      <CSVLink
-        data={downloadFile}
-        filename={`shift-requests-${board}-${now}.csv`}
-        id={`shiftRequests-${board}`}
-      />
     </div>
   );
 }

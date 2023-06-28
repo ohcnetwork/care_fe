@@ -3,9 +3,10 @@ import HL7DeviceClient, {
   HL7MonitorData,
   HL7VitalsWaveformData,
 } from "./HL7DeviceClient";
-import HL7VitalsRenderer, { ChannelOptions } from "./HL7VitalsRenderer";
+import HL7VitalsRenderer from "./HL7VitalsRenderer";
 import useCanvas from "../../Common/hooks/useCanvas";
-import { VitalsValueBase as VitalsValue } from "./types";
+import { ChannelOptions, VitalsValueBase as VitalsValue } from "./types";
+import { getChannel } from "./utils";
 
 export const MONITOR_RATIO = {
   w: 13,
@@ -32,7 +33,9 @@ export default function useHL7VitalsMonitor() {
   const waveformBackgroundCanvas = useCanvas();
 
   // Non waveform data states.
+  const [isOnline, setIsOnline] = useState<boolean>(false);
   const [pulseRate, setPulseRate] = useState<VitalsValue>();
+  const [heartRate, setHeartRate] = useState<VitalsValue>();
   const [bp, setBp] = useState<VitalsBPValue>();
   const [spo2, setSpo2] = useState<VitalsValue>();
   const [respiratoryRate, setRespiratoryRate] = useState<VitalsValue>();
@@ -49,6 +52,7 @@ export default function useHL7VitalsMonitor() {
 
   const connect = useCallback(
     (socketUrl: string) => {
+      setIsOnline(false);
       device.current?.disconnect();
 
       device.current = new HL7DeviceClient(socketUrl);
@@ -61,6 +65,8 @@ export default function useHL7VitalsMonitor() {
           !spo2OptionsRef.current
         )
           return;
+
+        setIsOnline(true);
 
         renderer.current = new HL7VitalsRenderer({
           foregroundRenderContext: waveformForegroundCanvas.contextRef.current!,
@@ -79,7 +85,8 @@ export default function useHL7VitalsMonitor() {
 
         const hook = (set: (data: any) => void) => (d: HL7MonitorData) =>
           set(d);
-        device.current!.on("heart-rate", hook(setPulseRate));
+        device.current!.on("pulse-rate", hook(setPulseRate));
+        device.current!.on("heart-rate", hook(setHeartRate));
         device.current!.on("SpO2", hook(setSpo2));
         device.current!.on("respiratory-rate", hook(setRespiratoryRate));
         device.current!.on("body-temperature1", hook(setTemperature1));
@@ -120,6 +127,7 @@ export default function useHL7VitalsMonitor() {
     },
     data: {
       pulseRate,
+      heartRate,
       bp,
       spo2,
       respiratoryRate,
@@ -127,19 +135,9 @@ export default function useHL7VitalsMonitor() {
       temperature2,
     },
     device,
+    isOnline,
   };
 }
-
-const getChannel = (observation: HL7VitalsWaveformData): ChannelOptions => {
-  return {
-    samplingRate: parseInt(
-      observation["sampling rate"]?.replace("/sec", "") ?? "-1"
-    ),
-    baseline: observation["data-baseline"] ?? 0,
-    lowLimit: observation["data-low-limit"] ?? 0,
-    highLimit: observation["data-high-limit"] ?? 0,
-  };
-};
 
 const ingestTo = (
   vitalsRenderer: HL7VitalsRenderer,

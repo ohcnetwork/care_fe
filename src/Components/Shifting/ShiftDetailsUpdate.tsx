@@ -23,7 +23,6 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { UserSelect } from "../Common/UserSelect";
 import loadable from "@loadable/component";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -34,6 +33,8 @@ import CircularProgress from "../Common/components/CircularProgress.js";
 import Card from "../../CAREUI/display/Card";
 import RadioFormField from "../Form/FormFields/RadioFormField.js";
 import Page from "../Common/components/Page.js";
+import UserAutocompleteFormField from "../Common/UserAutocompleteFormField.js";
+import { UserModel } from "../Users/models.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -47,7 +48,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
   const dispatchAction: any = useDispatch();
   const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
-  const [assignedUser, SetAssignedUser] = useState(null);
+  const [assignedUser, SetAssignedUser] = useState<UserModel>();
   const [assignedUserLoading, setAssignedUserLoading] = useState(false);
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {} as ConsultationModel
@@ -158,7 +159,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
     return !isInvalidForm;
   };
 
-  const handleOnSelect = (user: any) => {
+  const handleAssignedUserSelect = (event: FieldChangeEvent<UserModel>) => {
+    const user = event.value;
     const form = { ...state.form };
     form["assigned_to"] = user?.id;
     SetAssignedUser(user);
@@ -197,7 +199,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
       setIsLoading(true);
 
       const data: any = {
-        orgin_facility: state.form.orgin_facility_object?.id,
+        origin_facility: state.form.origin_facility_object?.id,
         shifting_approving_facility:
           state.form?.shifting_approving_facility_object?.id,
         assigned_facility:
@@ -320,24 +322,19 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             className="bg-white w-full md:leading-5 mt-2 md:col-span-1"
           />
 
-          {wartime_shifting && (
-            <div>
-              <FieldLabel>{t("assigned_to")}</FieldLabel>
-              {assignedUserLoading ? (
-                <CircularProgress />
-              ) : (
-                <UserSelect
-                  multiple={false}
-                  selected={assignedUser}
-                  setSelected={handleOnSelect}
-                  errors={""}
-                  facilityId={
-                    state.form?.shifting_approving_facility_object?.id
-                  }
-                />
-              )}
-            </div>
-          )}
+          {wartime_shifting &&
+            (assignedUserLoading ? (
+              <CircularProgress />
+            ) : (
+              <UserAutocompleteFormField
+                name="assigned_to"
+                label={t("assigned_to")}
+                value={assignedUser}
+                onChange={handleAssignedUserSelect}
+                facilityId={state.form?.shifting_approving_facility_object?.id}
+                error={state.errors.assigned_to}
+              />
+            ))}
 
           {wartime_shifting && (
             <div>

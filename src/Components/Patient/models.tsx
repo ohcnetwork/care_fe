@@ -56,6 +56,7 @@ export interface PatientModel {
   tele_consultation_history?: Array<any>;
   last_consultation?: ConsultationModel;
   address?: string;
+  permanent_address?: string;
   village?: string;
   pincode?: number;
   contact_with_confirmed_carrier?: boolean;
@@ -142,7 +143,7 @@ export interface SampleTestModel {
   patient_has_sari?: boolean;
   patient_has_confirmed_contact?: boolean;
   patient_has_suspected_contact?: boolean;
-  patient_travel_history?: string;
+  patient_travel_history?: string[];
   facility?: number;
   facility_object?: {
     id: number;
@@ -260,7 +261,6 @@ export interface DailyRoundsModel {
   pulse?: number;
   resp?: number;
   temperature?: string;
-  temperatureUnit?: "C" | "F";
   temperature_measured_at?: string;
   physical_examination_info?: string;
   other_details?: string;

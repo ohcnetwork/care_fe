@@ -31,14 +31,14 @@ export default function BadgesList(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (!qParams.orgin_facility) return setOriginFacilityName("");
+      if (!qParams.origin_facility) return setOriginFacilityName("");
       const res = await dispatch(
-        getAnyFacility(qParams.orgin_facility, "orgin_facility")
+        getAnyFacility(qParams.origin_facility, "origin_facility")
       );
       setOriginFacilityName(res?.data?.name);
     }
     fetchData();
-  }, [dispatch, qParams.orgin_facility]);
+  }, [dispatch, qParams.origin_facility]);
 
   useEffect(() => {
     async function fetchData() {
@@ -102,7 +102,7 @@ export default function BadgesList(props: any) {
           "assigned_facility",
           assignedFacilityName
         ),
-        value(t("origin_facility"), "orgin_facility", originFacilityName),
+        value(t("origin_facility"), "origin_facility", originFacilityName),
         value(
           t("shifting_approval_facility"),
           "shifting_approving_facility",
