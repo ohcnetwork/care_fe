@@ -5,11 +5,11 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { externalResult, deleteExternalResult } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
-import AlertDialog from "../Common/AlertDialog";
 import { useTranslation } from "react-i18next";
+import Page from "../Common/components/Page";
+import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ResultItem(props: any) {
   const dispatch: any = useDispatch();
@@ -62,22 +62,16 @@ export default function ResultItem(props: any) {
   }
 
   return (
-    <div>
-      <PageTitle
-        title={t("result_details")}
-        backUrl="/external_results"
-        className="px-6 mb-2"
+    <Page title={t("result_details")} backUrl="/external_results">
+      <ConfirmDialogV2
+        title={t("confirm_delete")}
+        description={t("are_you_sure_want_to_delete_this_record")}
+        variant="danger"
+        action={t("delete")}
+        show={showDeleteAlert}
+        onConfirm={() => handleDelete()}
+        onClose={() => setShowDeleteAlert(false)}
       />
-      {showDeleteAlert && (
-        <AlertDialog
-          title={t("confirm_delete")}
-          message={t("are_you_sure_want_to_delete_this_record")}
-          primaryButton={{ text: t("delete"), color: "secondary" }}
-          handleClose={() => handleDelete()}
-          handleCancel={() => setShowDeleteAlert(false)}
-        />
-      )}
-
       <div className="mx-3 md:mx-8 mb-10 mt-4">
         <div className="flex flex-col md:flex-row gap-2 justify-end">
           <button
@@ -224,6 +218,6 @@ export default function ResultItem(props: any) {
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 }
