@@ -824,7 +824,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   };
 
   const handleMedicalCheckboxChange = (e: any, id: number, field: any) => {
-    const values = field("medical_history").value;
+    const values = field("medical_history").value ?? [];
     if (e.value) {
       values.push(id);
     } else {
@@ -878,13 +878,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       <div key={textField}>
         <div>
           <CheckBoxFormField
-            value={field("medical_history").value.includes(id)}
+            value={(field("medical_history").value ?? []).includes(id)}
             onChange={(e) => handleMedicalCheckboxChange(e, id, field)}
             name={checkboxField}
             label={id !== 1 ? title : "NONE"}
           />
         </div>
-        {id !== 1 && field("medical_history").value.includes(id) && (
+        {id !== 1 && (field("medical_history").value ?? []).includes(id) && (
           <div className="mx-4">
             <TextAreaFormField
               {...field(textField)}
@@ -1010,7 +1010,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   Import From External Results
                 </ButtonV2>
                 <Form<PatientModel>
-                  defaults={initForm}
+                  defaults={id ? state.form : initForm}
                   validate={validateForm}
                   onSubmit={handleSubmit}
                   submitLabel={buttonText}
@@ -1430,11 +1430,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 opened={
                                   JSON.parse(
                                     field("contact_with_confirmed_carrier")
-                                      .value
+                                      .value ?? "{}"
                                   ) ||
                                   JSON.parse(
                                     field("contact_with_suspected_carrier")
-                                      .value
+                                      .value ?? "{}"
                                   )
                                 }
                               >

@@ -115,6 +115,7 @@ const Form = <T extends FormDetails>({
                 label={props.cancelLabel ?? "Cancel"}
               />
               <Submit
+                data-testid="submit-button"
                 type="submit"
                 disabled={disabled}
                 label={props.submitLabel ?? "Submit"}
