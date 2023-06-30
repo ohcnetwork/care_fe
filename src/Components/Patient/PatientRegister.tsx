@@ -53,7 +53,7 @@ import DialogModal from "../Common/Dialog";
 import { DupPatientModel } from "../Facility/models";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { FieldError } from "../Form/FieldValidators.js";
+import { FieldError } from "../Form/FieldValidators";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";

@@ -33,10 +33,10 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
+import { FieldErrorText } from "../Form/FormFields/FormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { FormAction } from "../Form/Utils.js";
 import { ICD11DiagnosisModel } from "./models";
-import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -1137,7 +1137,7 @@ export const ConsultationForm = (props: any) => {
                                 });
                               }}
                             />
-                            <LegacyErrorHelperText
+                            <FieldErrorText
                               error={state.errors.investigation}
                             />
                           </div>
@@ -1156,9 +1156,7 @@ export const ConsultationForm = (props: any) => {
                                 });
                               }}
                             />
-                            <LegacyErrorHelperText
-                              error={state.errors.procedure}
-                            />
+                            <FieldErrorText error={state.errors.procedure} />
                           </div>
                           <div
                             className="col-span-6"
