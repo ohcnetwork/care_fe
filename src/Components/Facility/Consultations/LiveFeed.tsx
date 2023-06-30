@@ -21,7 +21,7 @@ import { BedModel } from "../models";
 import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import Page from "../../Common/components/Page";
-import ConfirmDialogV2 from "../../Common/ConfirmDialogV2";
+import ConfirmDialog from "../../Common/ConfirmDialog";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 
 const LiveFeed = (props: any) => {
@@ -287,7 +287,7 @@ const LiveFeed = (props: any) => {
   return (
     <Page title="Live Feed" hideBack>
       {toDelete && (
-        <ConfirmDialogV2
+        <ConfirmDialog
           show
           title="Are you sure you want to delete this preset?"
           description={
@@ -307,7 +307,7 @@ const LiveFeed = (props: any) => {
         />
       )}
       {toUpdate && (
-        <ConfirmDialogV2
+        <ConfirmDialog
           show
           title="Update Preset"
           description={"Preset: " + toUpdate.meta.preset_name}
@@ -328,7 +328,7 @@ const LiveFeed = (props: any) => {
               facility={cameraAsset.facility_id}
             />
           </div>
-        </ConfirmDialogV2>
+        </ConfirmDialog>
       )}
       <div className="mt-4 flex flex-col">
         <div className="flex flex-col lg:flex-row gap-4 mt-4 relative">
