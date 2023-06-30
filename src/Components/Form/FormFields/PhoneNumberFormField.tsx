@@ -49,19 +49,19 @@ export default function PhoneNumberFormField(props: Props) {
     asYouType.reset();
     asYouType.input(value);
     field.handleChange(value);
+  };
 
-    if (value === "") {
+  const validate = () => {
+    if (field.value === "" || props.disableValidation) {
       setError(undefined);
       return;
     }
 
-    if (!props.disableValidation) {
-      setError(
-        AnyValidator([PhoneNumberValidator(), SupportPhoneNumberValidator()])(
-          value
-        )
-      );
-    }
+    setError(
+      AnyValidator([PhoneNumberValidator(), SupportPhoneNumberValidator()])(
+        field.value
+      )
+    );
   };
 
   return (
@@ -82,6 +82,7 @@ export default function PhoneNumberFormField(props: Props) {
           value={field.value}
           onChange={(e) => setValue(e.target.value)}
           disabled={field.disabled}
+          onBlur={validate}
         />
         {!props.disableCountry && (
           <div className="absolute inset-y-0 right-0 flex items-center">
@@ -104,9 +105,9 @@ export default function PhoneNumberFormField(props: Props) {
                 setValue(conditionPhoneCode(phoneCodes[e.target.value].code));
               }}
             >
-              {Object.entries(phoneCodes).map(([country, { flag, code }]) => (
+              {Object.entries(phoneCodes).map(([country, { flag }]) => (
                 <option key={country} value={country}>
-                  {flag} {conditionPhoneCode(code)}
+                  {flag}
                 </option>
               ))}
               <option value="Other">Other</option>
