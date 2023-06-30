@@ -11,6 +11,10 @@ describe("Facility Creation", () => {
   });
 
   beforeEach(() => {
+    Cypress.automation("remote:debugger:protocol", {
+      command: "Network.setCacheDisabled",
+      params: { cacheDisabled: true },
+    });
     cy.restoreLocalStorage();
     cy.awaitUrl("/facility");
   });
