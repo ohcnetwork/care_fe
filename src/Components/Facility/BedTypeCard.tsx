@@ -9,7 +9,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import { useTranslation } from "react-i18next";
 
 interface BedTypeCardProps {
@@ -196,7 +196,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
           </p>
         </div>
       </div>
-      <ConfirmDialogV2
+      <ConfirmDialog
         show={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
         title={`Delete ${label}?`}

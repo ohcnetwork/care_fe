@@ -1,5 +1,5 @@
 import { useState } from "react";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 
 interface Props {
   skillName: string;
@@ -17,7 +17,7 @@ export default function UnlinkSkillDialog(props: Props) {
   };
 
   return (
-    <ConfirmDialogV2
+    <ConfirmDialog
       action="Unlink"
       title="Unlink Skill"
       variant="warning"
@@ -33,6 +33,6 @@ export default function UnlinkSkillDialog(props: Props) {
           associated anymore.
         </span>
       }
-    ></ConfirmDialogV2>
+    ></ConfirmDialog>
   );
 }

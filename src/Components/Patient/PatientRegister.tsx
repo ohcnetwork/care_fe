@@ -1,9 +1,5 @@
-import { navigate, useQueryParams } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import moment from "moment";
-import loadable from "@loadable/component";
-import { useCallback, useReducer, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import * as Notification from "../../Utils/Notifications.js";
+
 import {
   BLOOD_GROUPS,
   DISEASE_STATUS,
@@ -12,55 +8,62 @@ import {
   TEST_TYPE,
   VACCINES,
 } from "../../Common/constants";
-import countryList from "../../Common/static/countries.json";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import {
+  HCXActions,
   createPatient,
+  externalResult,
+  getAnyFacility,
   getDistrictByState,
   getLocalbodyByDistrict,
   getPatient,
   getStates,
+  getWardByLocalBody,
   searchPatient,
   updatePatient,
-  getWardByLocalBody,
-  externalResult,
-  getAnyFacility,
-  HCXActions,
 } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import AlertDialog from "../Common/AlertDialog";
-import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
-import { DupPatientModel } from "../Facility/models";
-import { PatientModel } from "./models";
-import TransferPatientDialog from "../Facility/TransferPatientDialog";
-import { validatePincode } from "../../Common/validation";
 import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
+import { navigate, useQueryParams } from "raviger";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useCallback, useEffect, useReducer, useState } from "react";
+
+import AccordionV2 from "../Common/components/AccordionV2";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import CollapseV2 from "../Common/components/CollapseV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
+import DateFormField from "../Form/FormFields/DateFormField";
+import DialogModal from "../Common/Dialog";
+import { DupPatientModel } from "../Facility/models";
+import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
+import Form from "../Form/Form";
+import { HCXPolicyModel } from "../HCX/models";
+import HCXPolicyValidator from "../HCX/validators";
+import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
+import { PatientModel } from "./models";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import RadioFormField from "../Form/FormFields/RadioFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import Spinner from "../Common/Spinner";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import TransferPatientDialog from "../Facility/TransferPatientDialog";
+import countryList from "../../Common/static/countries.json";
+import { debounce } from "lodash";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import { validatePincode } from "../../Common/validation";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
-import AccordionV2 from "../Common/components/AccordionV2";
-import CollapseV2 from "../Common/components/CollapseV2";
-import { debounce } from "lodash";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import DateFormField from "../Form/FormFields/DateFormField";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import useConfig from "../../Common/hooks/useConfig";
-import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
-import { HCXPolicyModel } from "../HCX/models";
-import HCXPolicyValidator from "../HCX/validators";
-import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import DialogModal from "../Common/Dialog";
-import Form from "../Form/Form";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import Spinner from "../Common/Spinner";
+// const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: number;
@@ -958,10 +961,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         </div>
         <>
           {showAlertMessage.show && (
-            <AlertDialog
-              handleClose={goBack}
-              message={showAlertMessage.message}
+            <ConfirmDialog
               title={showAlertMessage.title}
+              description={showAlertMessage.message}
+              onConfirm={() => goBack()}
+              onClose={() => goBack()}
+              variant="primary"
+              action="Ok"
+              show
             />
           )}
           {showImport ? (

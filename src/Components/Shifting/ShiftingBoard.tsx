@@ -8,7 +8,7 @@ import {
 import { useDrag, useDrop } from "react-dnd";
 
 import ButtonV2 from "../Common/components/ButtonV2";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import moment from "moment";
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
@@ -225,7 +225,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                 {t("transfer_to_receiving_facility")}
               </ButtonV2>
 
-              <ConfirmDialogV2
+              <ConfirmDialog
                 title={t("confirm_transfer_complete")}
                 description={t("mark_this_transfer_as_complete_question")}
                 show={modalFor === shift.external_id}
@@ -238,7 +238,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                 <p className="mt-2 text-sm text-yellow-600">
                   {t("redirected_to_create_consultation")}
                 </p>
-              </ConfirmDialogV2>
+              </ConfirmDialog>
             </div>
           )}
         </div>
