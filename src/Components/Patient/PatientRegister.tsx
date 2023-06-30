@@ -1007,7 +1007,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             <>
               <>
                 <ButtonV2
-                  className="mb-8 mx-4 flex gap-2 items-center"
+                  className="mb-8 sm:mx-4 flex gap-2 items-center"
                   onClick={(_) => {
                     setShowImport(true);
                     setQuery({ extId: "" }, { replace: true });
@@ -1341,8 +1341,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           }
                         >
                           <div>
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 w-full mt-5">
-                              <div id="is_vaccinated-div">
+                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 sm:grid-cols-3 w-full mt-5">
+                              <div>
                                 <RadioFormField
                                   label="Is patient Vaccinated against COVID?"
                                   aria-label="is_vaccinated"
@@ -1355,6 +1355,34 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   optionValue={(option) => option.value}
                                 />
                               </div>
+                              <div id="contact_with_confirmed_carrier-div">
+                                <RadioFormField
+                                  {...field("contact_with_confirmed_carrier")}
+                                  label="Contact with confirmed Covid patient?"
+                                  aria-label="contact_with_confirmed_carrier"
+                                  options={[
+                                    { label: "Yes", value: "true" },
+                                    { label: "No", value: "false" },
+                                  ]}
+                                  optionDisplay={(option) => option.label}
+                                  optionValue={(option) => option.value}
+                                />
+                              </div>
+                              <div id="contact_with_suspected_carrier-div">
+                                <RadioFormField
+                                  {...field("contact_with_suspected_carrier")}
+                                  label="Contact with Covid suspect?"
+                                  aria-label="contact_with_suspected_carrier"
+                                  options={[
+                                    { label: "Yes", value: "true" },
+                                    { label: "No", value: "false" },
+                                  ]}
+                                  optionDisplay={(option) => option.label}
+                                  optionValue={(option) => option.value}
+                                />
+                              </div>
+                            </div>
+                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 w-full mt-5">
                               <CollapseV2
                                 opened={
                                   String(field("is_vaccinated").value) ===
@@ -1407,32 +1435,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   </div>
                                 }
                               </CollapseV2>
-                              <div id="contact_with_confirmed_carrier-div">
-                                <RadioFormField
-                                  {...field("contact_with_confirmed_carrier")}
-                                  label="Contact with confirmed Covid patient?"
-                                  aria-label="contact_with_confirmed_carrier"
-                                  options={[
-                                    { label: "Yes", value: "true" },
-                                    { label: "No", value: "false" },
-                                  ]}
-                                  optionDisplay={(option) => option.label}
-                                  optionValue={(option) => option.value}
-                                />
-                              </div>
-                              <div id="contact_with_suspected_carrier-div">
-                                <RadioFormField
-                                  {...field("contact_with_suspected_carrier")}
-                                  label="Contact with Covid suspect?"
-                                  aria-label="contact_with_suspected_carrier"
-                                  options={[
-                                    { label: "Yes", value: "true" },
-                                    { label: "No", value: "false" },
-                                  ]}
-                                  optionDisplay={(option) => option.label}
-                                  optionValue={(option) => option.value}
-                                />
-                              </div>
                               <CollapseV2
                                 opened={
                                   JSON.parse(
@@ -1641,7 +1643,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         </div>
                       </div>
                       <div className="bg-white rounded flex flex-col gap-4 w-full p-4 border border-gray-200">
-                        <div className="flex w-full items-center justify-between">
+                        <div className="flex flex-col gap-4 w-full items-center justify-between sm:flex-row">
                           <h1 className="font-bold text-purple-500 text-left text-xl">
                             Insurance Details
                           </h1>
