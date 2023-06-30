@@ -1394,6 +1394,7 @@ export const FileUpload = (props: FileUploadProps) => {
                 <h4>Record and Upload Audio File</h4>
               </div>
               <TextFormField
+                className="mt-4"
                 name="consultation_audio_file"
                 type="text"
                 label="Enter Audio File Name (optional)"
@@ -1454,6 +1455,7 @@ export const FileUpload = (props: FileUploadProps) => {
               </div>
               <div>
                 <TextFormField
+                  className="mt-4"
                   name="consultation_file"
                   type="text"
                   label="Enter File Name"
