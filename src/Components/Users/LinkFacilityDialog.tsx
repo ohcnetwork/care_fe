@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 
 interface Props {
   username: string;
@@ -16,7 +16,7 @@ const LinkFacilityDialog = ({ username, handleOk, handleCancel }: Props) => {
   const [facility, setFacility] = useState<any>(null);
 
   return (
-    <ConfirmDialogV2
+    <ConfirmDialog
       show
       title={
         <span>
