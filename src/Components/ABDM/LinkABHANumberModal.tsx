@@ -2,11 +2,11 @@ import * as Notify from "../../Utils/Notifications";
 
 import Dropdown, { DropdownItem } from "../Common/components/Menu";
 import {
+  checkAndGenerateMobileOtp,
   confirmWithAadhaarOtp,
   confirmWithMobileOtp,
   createHealthId,
   generateAadhaarOtp,
-  checkAndGenerateMobileOtp,
   initiateAbdmAuthentication,
   linkViaQR,
   resentAadhaarOtp,
@@ -18,13 +18,13 @@ import { useEffect, useState } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import CircularProgress from "../Common/components/CircularProgress";
 import DialogModal from "../Common/Dialog";
 import OtpFormField from "../Form/FormFields/OtpFormField";
 import QRScanner from "../Common/QRScanner";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { classNames } from "../../Utils/utils";
 import { useDispatch } from "react-redux";
-import { CircularProgress } from "@material-ui/core";
 
 export const validateRule = (
   condition: boolean,
@@ -165,7 +165,7 @@ const ScanABHAQRSection = ({
     return (
       <div className="flex gap-2 items-center justify-center">
         <span className="text-3xl font-semibold text-gray-700">Loading</span>
-        <CircularProgress />
+        <CircularProgress className="text-green-500" />
       </div>
     );
   }
