@@ -2,7 +2,7 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import { CapacityModal, DoctorModal } from "./models";
-import Card from "../../CAREUI/display/Card.js";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
 import {
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
@@ -12,7 +12,8 @@ import {
   MultiSelectFormField,
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
-import React, { Fragment, useCallback, useReducer, useState } from "react";
+import { Popover, Transition } from "@headlessui/react";
+import React, { Fragment, useCallback, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
 import {
   createFacility,
@@ -36,13 +37,15 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
+import Card from "../../CAREUI/display/Card.js";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { DoctorCapacity } from "./DoctorCapacity";
 import DoctorsCountCard from "./DoctorsCountCard";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { FormAction } from "../Form/Utils.js";
 import GLocationPicker from "../Common/GLocationPicker";
+import Page from "../Common/components/Page.js";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { Dialog, Popover, Transition } from "@headlessui/react";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -53,11 +56,8 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
-import { FormAction } from "../Form/Utils.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
-import Page from "../Common/components/Page.js";
 
 interface FacilityProps {
   facilityId?: string;
@@ -950,62 +950,57 @@ export const FacilityCreate = (props: FacilityProps) => {
                   )}
                 </div>
 
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-3 items-center">
                   <TextFormField
-                    className="flex-1 px-2"
+                    className="flex-1"
                     {...field("latitude")}
                     label={t("location")}
                     placeholder="Latitude"
                   />
 
                   <div className="flex flex-col justify-center md:block">
-                    <Popover id="map-popover">
-                      {({open}) => (
-                        <>
-                          <Popover.Button>
-                            <ButtonV2
-                              circle
-                              type="button"
-                              id="facility-location-button"
-                              className="tooltip p-2"
-                            >
-                              <CareIcon className="care-l-map-marker text-xl" />
-                              <span className="tooltip-text tooltip-bottom">
-                                Select location from map
-                              </span>
-                            </ButtonV2>
-                          </Popover.Button>
-                          <Dialog open={open} onClose={() => null} className="flex h-fit justify-center items-center top-1/4" >
-                            <Transition
-                              as={Fragment}
-                              enter="transition ease-out duration-200"
-                              enterFrom="opacity-0 translate-y-1"
-                              enterTo="opacity-100 translate-y-0"
-                              leave="transition ease-in duration-150"
-                              leaveFrom="opacity-100 translate-y-0"
-                              leaveTo="opacity-0 translate-y-1"
-                            >
-                              <div>
-                                <Popover.Panel className="relative top-20">
-                                  <GLocationPicker
-                                    lat={Number(state.form.latitude)}
-                                    lng={Number(state.form.longitude)}
-                                    handleOnChange={handleLocationChange}
-                                    handleOnClose={() => null}
-                                    handleOnSelectCurrentLocation={
-                                      handleSelectCurrentLocation
-                                    }
-                                  />
-                                </Popover.Panel>
-                              </div>
-                            </Transition>
-                          </Dialog>
-                        </>
-                      )}
+                    <Popover id="map-popover" className="relative">
+                      <>
+                        <Popover.Button>
+                          <ButtonV2
+                            circle
+                            type="button"
+                            id="facility-location-button"
+                            className="tooltip p-2"
+                          >
+                            <CareIcon className="care-l-map-marker text-xl" />
+                            <span className="tooltip-text tooltip-bottom">
+                              Select location from map
+                            </span>
+                          </ButtonV2>
+                        </Popover.Button>
+
+                        <Transition
+                          as={Fragment}
+                          enter="transition ease-out duration-200"
+                          enterFrom="opacity-0 translate-y-1"
+                          enterTo="opacity-100 translate-y-0"
+                          leave="transition ease-in duration-150"
+                          leaveFrom="opacity-100 translate-y-0"
+                          leaveTo="opacity-0 translate-y-1"
+                        >
+                          <Popover.Panel className="absolute bottom-10 -right-40 sm:-right-48">
+                            <GLocationPicker
+                              lat={Number(state.form.latitude)}
+                              lng={Number(state.form.longitude)}
+                              handleOnChange={handleLocationChange}
+                              handleOnClose={() => null}
+                              handleOnSelectCurrentLocation={
+                                handleSelectCurrentLocation
+                              }
+                            />
+                          </Popover.Panel>
+                        </Transition>
+                      </>
                     </Popover>
                   </div>
                   <TextFormField
-                    className="flex-1 px-2"
+                    className="flex-1"
                     {...field("longitude")}
                     label={<br />}
                     placeholder="Longitude"
