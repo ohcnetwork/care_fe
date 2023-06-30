@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 import BadgesList from "./BadgesList";
 import ButtonV2 from "../Common/components/ButtonV2";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import { ExportButton } from "../Common/Export";
 import ListFilter from "./ListFilter";
 import Page from "../Common/components/Page";
@@ -260,7 +260,7 @@ export default function ListView() {
                 >
                   {t("transfer_to_receiving_facility")}
                 </ButtonV2>
-                <ConfirmDialogV2
+                <ConfirmDialog
                   title={t("confirm_transfer_complete")}
                   description={t("mark_transfer_complete_confirmation")}
                   action="Confirm"

@@ -7,7 +7,7 @@ import * as Notification from "../../Utils/Notifications";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 import { DoctorCapacity } from "./DoctorCapacity";
 import DialogModal from "../Common/Dialog";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
@@ -83,7 +83,7 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
             Delete
           </ButtonV2>
         </div>
-        <ConfirmDialogV2
+        <ConfirmDialog
           show={openDeleteDialog}
           onClose={handleDeleteClose}
           title={`Delete ${specialization?.text} doctors`}

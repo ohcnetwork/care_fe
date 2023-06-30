@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 
 interface ConfirmDialogProps {
   name: string;
@@ -18,7 +18,7 @@ const BedDeleteDialog = (props: ConfirmDialogProps) => {
     setDisable(true);
   };
   return (
-    <ConfirmDialogV2
+    <ConfirmDialog
       show={props.show}
       onClose={handleCancel}
       onConfirm={handleSubmit}
@@ -28,7 +28,7 @@ const BedDeleteDialog = (props: ConfirmDialogProps) => {
       description={`Are you sure you want to delete bed ${name}?`}
       title="Delete Bed?"
       className="w-auto"
-    ></ConfirmDialogV2>
+    ></ConfirmDialog>
   );
 };
 

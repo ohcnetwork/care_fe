@@ -40,7 +40,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -340,7 +340,7 @@ export const FacilityHome = (props: any) => {
       focusOnLoad={true}
       backUrl="/facility"
     >
-      <ConfirmDialogV2
+      <ConfirmDialog
         title={`Delete ${facilityData.name}`}
         description={
           <span>
