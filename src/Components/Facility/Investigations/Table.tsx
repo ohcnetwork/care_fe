@@ -63,7 +63,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
   };
 
   return (
-    <div className="p-4 m-4">
+    <div className="md:p-4 md:m-4">
       {title && <h1 className="text-3xl font-bold">{title}</h1>}
       <br />
       <TextFormField
@@ -75,7 +75,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
         onChange={(e) => setSearchFilter(e.value)}
       />
       <br />
-      <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+      <div className="shadow border-b border-gray-200 sm:rounded-lg overflow-x-scroll">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
