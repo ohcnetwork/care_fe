@@ -19,24 +19,31 @@ export default defineConfig({
       manifest: {
         name: "Care",
         short_name: "Care",
-        theme_color: "#33bb17",
-        background_color: "#2196f3",
+        theme_color: "#0e9f6e",
+        background_color: "#ffffff",
+        display: "standalone",
         icons: [
           {
-            src: "https://cdn.coronasafe.network/care-manifest/images/icons/icon-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-            purpose: "any maskable",
-          },
-          {
-            src: "https://cdn.coronasafe.network/care-manifest/images/icons/icon-192x192.png",
-            sizes: "192x192",
+            src: "images/icons/pwa-64x64.png",
+            sizes: "64x64",
             type: "image/png",
           },
           {
-            src: "https://cdn.coronasafe.network/care-manifest/images/icons/icon-512x512.png",
+            src: "images/icons/pwa-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            src: "images/icons/pwa-512x512.png",
             sizes: "512x512",
             type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "images/icons/maskable-icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
           },
         ],
       },
