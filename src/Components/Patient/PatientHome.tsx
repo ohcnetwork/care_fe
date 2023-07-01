@@ -16,7 +16,6 @@ import {
   completeTransfer,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import AlertDialog from "../Common/AlertDialog";
 import Pagination from "../Common/Pagination";
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
@@ -31,7 +30,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
 import Page from "../Common/components/Page";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import { FieldErrorText } from "../Form/FormFields/FormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -71,11 +70,7 @@ export const PatientHome = (props: any) => {
     status: number;
     sample: any;
   }>({ status: 0, sample: null });
-  const [showAlertMessage, setAlertMessage] = useState({
-    show: false,
-    message: "",
-    title: "",
-  });
+  const [showAlertMessage, setShowAlertMessage] = useState(false);
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
@@ -265,21 +260,9 @@ export const PatientHome = (props: any) => {
     setSampleListOffset(offset);
   };
 
-  const dismissAlert = () => {
-    setAlertMessage({
-      show: false,
-      message: "",
-      title: "",
-    });
-  };
-
   const confirmApproval = (status: number, sample: any) => {
     setSelectedStatus({ status, sample });
-    setAlertMessage({
-      show: true,
-      message: "Are you sure you want to send the sample to Collection Centre?",
-      title: "Confirm",
-    });
+    setShowAlertMessage(true);
   };
 
   const handleApproval = async () => {
@@ -299,7 +282,7 @@ export const PatientHome = (props: any) => {
       callSampleList(!sampleFlag);
     }
 
-    dismissAlert();
+    setShowAlertMessage(false);
   };
 
   if (isLoading) {
@@ -399,14 +382,14 @@ export const PatientHome = (props: any) => {
       }}
       backUrl={facilityId ? `/facility/${facilityId}/patients` : "/patients"}
     >
-      {showAlertMessage.show && (
-        <AlertDialog
-          title={showAlertMessage.title}
-          message={showAlertMessage.message}
-          handleClose={() => handleApproval()}
-          handleCancel={() => dismissAlert()}
-        />
-      )}
+      <ConfirmDialog
+        title="Confirm send sample to collection centre"
+        description="Are you sure you want to send the sample to Collection Centre?"
+        show={showAlertMessage}
+        action="Approve"
+        onConfirm={() => handleApproval()}
+        onClose={() => setShowAlertMessage(false)}
+      />
 
       <div>
         <div className="relative mt-2">
@@ -952,7 +935,7 @@ export const PatientHome = (props: any) => {
                             >
                               {t("transfer_to_receiving_facility")}
                             </ButtonV2>
-                            <ConfirmDialogV2
+                            <ConfirmDialog
                               title="Confirm Transfer Complete"
                               description="Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient"
                               show={modalFor === shift.external_id}
@@ -1439,7 +1422,7 @@ export const PatientHome = (props: any) => {
         </section>
       </div>
 
-      <ConfirmDialogV2
+      <ConfirmDialog
         title={`Assign a volunteer to ${patientData.name}`}
         show={openAssignVolunteerDialog}
         onClose={() => setOpenAssignVolunteerDialog(false)}

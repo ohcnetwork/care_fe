@@ -10,7 +10,7 @@ import CommentSection from "./CommentSection";
 import { formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function ResourceDetails(props: { id: string }) {
@@ -355,7 +355,7 @@ export default function ResourceDetails(props: { id: string }) {
                   Delete Record
                 </ButtonV2>
 
-                <ConfirmDialogV2
+                <ConfirmDialog
                   title="Authorize resource delete"
                   description="Are you sure you want to delete this record?"
                   action="Delete"

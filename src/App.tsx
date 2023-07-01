@@ -79,7 +79,7 @@ const App: React.FC = () => {
     if (darkThemeMq.matches) {
       favicon.href = "/favicon-light.ico";
     } else {
-      favicon.href = "/favicon-dark.ico";
+      favicon.href = "/favicon.ico";
     }
   }, []);
 

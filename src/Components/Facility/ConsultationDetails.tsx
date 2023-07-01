@@ -139,6 +139,14 @@ export const ConsultationDetails = (props: any) => {
           `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
         );
       }
+
+      if (
+        !(hl7Middleware && hl7Meta?.local_ip_address) &&
+        !(ventilatorMiddleware && ventilatorMeta?.local_ip_address)
+      ) {
+        setHL7SocketUrl(undefined);
+        setVentilatorSocketUrl(undefined);
+      }
     };
 
     fetchData();
