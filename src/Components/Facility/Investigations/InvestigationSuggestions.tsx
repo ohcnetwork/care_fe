@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { getConsultation } from "../../../Redux/actions";
-import { formatDate } from "../../../Utils/utils";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import { InvestigationType } from "../../Common/prescription-builder/InvestigationBuilder";
 import { InvestigationResponse } from "./Reports/types";
@@ -203,35 +202,117 @@ export default function ViewInvestigationSuggestions(props: {
       </table>
       <div className="flex flex-col gap-4 md:hidden">
         {Array.isArray(investigations) ? (
-          investigations.map((investigation, index) => (
-            <div key={index} className="bg-white shadow rounded-xl p-4">
-              <b>Investigations :</b>
-              <ul className="list-decimal ml-4">
-                {investigation.type?.map((type, index) => (
-                  <li key={index}>{type}</li>
-                ))}
-              </ul>
-              <br />
-              <b>
-                To be conducted&nbsp;
-                {investigation.repetitive ? (
-                  <>after every {investigation.frequency}</>
-                ) : (
-                  <>
-                    at{" "}
-                    {investigation.time
-                      ? formatDate(investigation.time)
-                      : "--:--"}
-                  </>
+          investigations.map((investigation, index) => {
+            let nextFurthestInvestigation: any = undefined;
+
+            return (
+              <div key={index} className="bg-white shadow rounded-xl p-4">
+                <b>Investigations :</b>
+                <ul className="list-decimal ml-4">
+                  {investigation.type?.map((type, index) => {
+                    const investigationType = type.includes(" (GROUP)")
+                      ? {
+                          isGroup: true,
+                          name: type.replace(" (GROUP)", ""),
+                        }
+                      : {
+                          isGroup: false,
+                          name: type.split(" -- ")[0],
+                          groups: type
+                            .split(" -- ")[1]
+                            .split(",")
+                            .map(
+                              (group) => group.split("( ")[1].split(" )")[0]
+                            ),
+                        };
+                    const investigated = previousInvestigations?.find(
+                      (previousInvestigation) =>
+                        previousInvestigation.investigation_object.name ===
+                        investigationType.name
+                    );
+                    const investigatedDate =
+                      investigated &&
+                      moment(investigated.session_object.session_created_date);
+                    const nextInvestigationTime =
+                      investigatedDate && investigation.frequency
+                        ? investigatedDate.add(
+                            moment.duration({
+                              hours:
+                                parseInt(
+                                  investigation.frequency.split(" ")[0]
+                                ) /
+                                (investigation.frequency
+                                  .split(" ")[1]
+                                  .includes("hr")
+                                  ? 1
+                                  : 60),
+                            })
+                          )
+                        : investigation.time
+                        ? moment(investigation.time)
+                        : undefined;
+
+                    if (
+                      !nextFurthestInvestigation ||
+                      (nextInvestigationTime &&
+                        nextFurthestInvestigation.isBefore(
+                          nextInvestigationTime
+                        ))
+                    ) {
+                      nextFurthestInvestigation = nextInvestigationTime;
+                    }
+
+                    return <li key={index}>{type}</li>;
+                  })}
+                </ul>
+                <br />
+                <b>
+                  To be conducted&nbsp;
+                  {investigation.repetitive && (
+                    <>after every {investigation.frequency}</>
+                  )}
+                  <div>
+                    {nextFurthestInvestigation ? (
+                      <div
+                        className={`${
+                          nextFurthestInvestigation.isBefore(moment())
+                            ? "text-red-500"
+                            : ""
+                        }`}
+                      >
+                        {investigation.frequency && "next"} at{" "}
+                        {nextFurthestInvestigation.format(
+                          "hh:mm A on DD/MM/YYYY"
+                        )}
+                      </div>
+                    ) : (
+                      "First investigation not recorded"
+                    )}
+                  </div>
+                </b>
+                <br />
+                <br />
+                <b>Notes :</b>
+                <br />
+                {investigation.notes || "none"}
+                <br />
+                <br />
+                {logUrl && (
+                  <ButtonV2
+                    className="w-full"
+                    href={
+                      logUrl +
+                      "?investigations=" +
+                      investigation.type?.join("_-_")
+                    }
+                  >
+                    <CareIcon className="care-l-plus" />
+                    <span>Log Report</span>
+                  </ButtonV2>
                 )}
-              </b>
-              <br />
-              <br />
-              <b>Notes :</b>
-              <br />
-              {investigation.notes || "none"}
-            </div>
-          ))
+              </div>
+            );
+          })
         ) : (
           <div className="bg-white shadow rounded-xl">
             No Investigation Suggestions
