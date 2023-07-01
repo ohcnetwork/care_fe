@@ -1,87 +1,27 @@
-import {
-  Paper,
-  TableCell,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableBody,
-  Theme,
-  Typography,
-  Box,
-  Button,
-  Grid,
-} from "@material-ui/core";
-import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
-import React from "react";
 import { getColorIndex, rowColor, transformData } from "./utils";
+
+import ButtonV2 from "../../../Common/components/ButtonV2";
 import { InvestigationResponse } from "./types";
+import React from "react";
 import { formatDate } from "../../../../Utils/utils";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const useStyle = makeStyles((theme: Theme) => ({
-  tableCell: {
-    fontSize: "1.1rem",
-    maxWidth: 150,
-    minWidth: 150,
-  },
-  inputField: {
-    borderRadius: 0,
-    borderLeft: "1px solid #ddd",
-    borderRight: "1px solid #ddd",
-    borderTop: "0 solid #ddd",
-    borderBottom: "0 solid #ddd",
-    fontSize: "1rem",
-    padding: "0.5rem",
-    maxWidth: 128,
-    height: "100%",
-    textAlign: "right",
-    "&:hover": {
-      borderTop: "1px #000 solid",
-      borderBottom: "1px #000 solid",
-    },
-    "&::placeholder": {
-      color: "#bababa",
-      textAlign: "center",
-    },
-  },
-}));
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const StyledTableRow = withStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      "&:nth-of-type(odd)": {
-        backgroundColor: "#f7f7f7",
-      },
-      "&:hover": {
-        backgroundColor: "#eeeeee",
-      },
-    },
-  })
-)(TableRow);
-
 const ReportRow = ({ data, name, min, max }: any) => {
-  const className = useStyle();
-
   return (
-    <StyledTableRow>
-      <TableCell className={className.tableCell} align="right" size="medium">
+    <tr className="bg-white even:bg-gray-50">
+      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
         {name}
-      </TableCell>
+      </td>
       {data.map((d: any) => {
         const color = getColorIndex({
           min: d?.min,
           max: d?.max,
           value: d?.value,
         });
+
         return (
-          <TableCell
+          <td
             key={d?.value}
-            className={className.tableCell}
-            align="center"
             style={{
-              wordBreak: "break-all",
               ...(color >= 0
                 ? {
                     backgroundColor: rowColor[color]?.color || "white",
@@ -89,21 +29,22 @@ const ReportRow = ({ data, name, min, max }: any) => {
                   }
                 : {}),
             }}
+            className={"text-center break-all"}
           >
             {d?.notes ||
               (d?.value &&
                 Math.round((d.value + Number.EPSILON) * 100) / 100) ||
               "---"}
-          </TableCell>
+          </td>
         );
       })}
-      <TableCell className={className.tableCell} align="center">
-        {min || "---"}
-      </TableCell>
-      <TableCell className={className.tableCell} align="center">
-        {max || "---"}
-      </TableCell>
-    </StyledTableRow>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+        {min}
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+        {max}
+      </td>
+    </tr>
   );
 };
 
@@ -124,47 +65,27 @@ const ReportTable: React.FC<ReportTableProps> = ({
   patientDetails,
   hidePrint = false,
 }) => {
-  const className = useStyle();
   const { data, sessions } = transformData(investigationData);
 
   return (
     <>
       {!hidePrint && (
-        <Box
-          display="flex"
-          flexDirection="row"
-          justifyContent="flex-end"
-          displayPrint="none"
-          margin="10px"
-          paddingTop="10px"
-        >
-          <Button
-            color="primary"
-            variant="contained"
-            size="small"
-            onClick={() => window.print()}
-          >
+        <div className="flex justify-end print:hidden m-2.5 pt-2.5">
+          <ButtonV2 variant="primary" onClick={window.print}>
             Print Report
-          </Button>
-        </Box>
+          </ButtonV2>
+        </div>
       )}
 
-      <Box padding="1rem" margin="1rem 0" id="section-to-print">
-        {title && (
-          <Typography component="h1" variant="h4">
-            {title}
-          </Typography>
-        )}
+      <div className=" p-4 my-4" id="section-to-print">
+        {title && <h1 className="text-xl text-gray-800 font-bold">{title}</h1>}
         <br />
         {patientDetails && (
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <p>Name: {patientDetails.name}</p>
-
-              <p>Age: {patientDetails.age}</p>
-              <p>Hospital: {patientDetails.hospitalName}</p>
-            </Grid>
-          </Grid>
+          <div className="flex flex-col gap-1 p-1">
+            <p>Name: {patientDetails.name}</p>
+            <p>Age: {patientDetails.age}</p>
+            <p>Hospital: {patientDetails.hospitalName}</p>
+          </div>
         )}
         <br />
         <div className="my-4">
@@ -180,47 +101,41 @@ const ReportTable: React.FC<ReportTableProps> = ({
             Above Ideal
           </span>
         </div>
-        {/* <InputLabel>Search Test</InputLabel>
-      <TextInputField
-        value={searchFilter}
-        placeholder="Search test"
-        errors=""
-        variant="outlined"
-        margin="dense"
-        onChange={(e) => setSearchFilter(e.target.value)}
-      />*/}
         <br />
-        <TableContainer component={Paper}>
-          <Table aria-label="simple table" stickyHeader>
-            <TableHead>
-              <TableRow>
-                <TableCell className={className.tableCell} align="right">
+        <div className="shadow overflow-x-scroll border-b border-gray-200 sm:rounded-lg">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-semibold text-gray-800 uppercase tracking-wider"
+                >
                   Name
-                </TableCell>
+                </th>
                 {sessions.map((session) => (
-                  <TableCell
-                    align="center"
+                  <th
+                    scope="col"
                     key={session.session_external_id}
-                    style={{
-                      backgroundColor: "#4B5563",
-                      color: "#F9FAFB",
-                    }}
-                    className={className.tableCell}
+                    className="px-6 py-3 text-center text-xs font-semibold text-[#F9FAFB] bg-[#4B5563]  uppercase tracking-wider"
                   >
                     {formatDate(session.session_created_date)}
-                  </TableCell>
+                  </th>
                 ))}
-                <TableCell align="center" className={className.tableCell}>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-semibold text-gray-800 uppercase tracking-wider"
+                >
                   Min
-                </TableCell>
-                <TableCell align="center" className={className.tableCell}>
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-semibold text-gray-800 uppercase tracking-wider"
+                >
                   Max
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {/* {filterTests.length > 0 ? (
-              filterTests */}
+                </th>
+              </tr>
+            </thead>
+            <tbody x-max="2">
               {data.length > 0 ? (
                 data.map((t: any) => {
                   return (
@@ -234,16 +149,12 @@ const ReportTable: React.FC<ReportTableProps> = ({
                   );
                 })
               ) : (
-                <TableRow>
-                  <TableCell component="th" scope="row">
-                    No test
-                  </TableCell>
-                </TableRow>
+                <tr className="text-center text-gray-500">No tests taken</tr>
               )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </>
   );
 };

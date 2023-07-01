@@ -258,7 +258,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
           No Vitals Monitor present in this location or facility.
         </div>
       ) : (
-        <div className="mt-1 grid grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3 gap-1">
+        <div className="mt-1 grid grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3 gap-1">
           {data.map((props) => (
             <HL7PatientVitalsMonitor
               key={props.patientAssetBed?.bed.id}

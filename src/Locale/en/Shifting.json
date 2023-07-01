@@ -44,7 +44,7 @@
   "patient_category": "Patient Category",
   "ambulance_driver_name": "Name of ambulance driver",
   "ambulance_phone_number": "Phone number of Ambulance",
-  "ambulance_number": "Ambulance No.",
+  "ambulance_number": "Ambulance No",
   "is_emergency": "Is emergency",
   "contact_person_at_the_facility": "Contact person at the current facility",
   "update_status_details": "Update Status/Details",
