@@ -1405,9 +1405,6 @@ export const FileUpload = (props: FileUploadProps) => {
                 }}
                 error={audioFileError}
               />
-              <div className="text-xs">
-                Please allow browser permission before you start speaking
-              </div>
               {audiouploadStarted ? (
                 <LinearProgressWithLabel value={uploadPercent} />
               ) : (
@@ -1431,6 +1428,12 @@ export const FileUpload = (props: FileUploadProps) => {
                     reset={resetRecording}
                     setResetRecording={setResetRecording}
                   />
+                  <div className="text-yellow-600 text-xs inline-block ml-1 mt-1 md:my-auto">
+                    <span>
+                      <CareIcon className="care-l-exclamation-triangle" />
+                      Please allow browser permission before you start speaking
+                    </span>
+                  </div>
                   {audioBlobExists && (
                     <div className="flex items-center w-full md:w-auto">
                       <ButtonV2
