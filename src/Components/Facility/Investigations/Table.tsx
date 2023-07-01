@@ -19,6 +19,7 @@ const TestRow = ({ data, value, onChange, i }: any) => {
             optionLabel={(o: string) => o}
             optionValue={(o: string) => o}
             onChange={onChange}
+            errorClassName="hidden"
           />
         ) : (
           <TextFormField
