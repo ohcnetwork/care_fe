@@ -10,7 +10,7 @@ const TestRow = ({ data, value, onChange, i }: any) => {
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
         {data.name}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
+      <td className="px-6 py-4 min-w-[200px] whitespace-nowrap text-sm text-gray-700 text-right">
         {data.investigation_type === "Choice" ? (
           <SelectFormField
             name={data.name}
@@ -99,7 +99,11 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
                     data={t}
                     i={i}
                     key={t.external_id}
-                    value={state[t.external_id] && state[t.external_id].value}
+                    value={
+                      state[t.external_id] && t.investigation_type === "Float"
+                        ? state[t.external_id].value
+                        : state[t.external_id].notes
+                    }
                     onChange={(e: FieldChangeEvent<string>) =>
                       handleValueChange(
                         t.investigation_type === "Float"
