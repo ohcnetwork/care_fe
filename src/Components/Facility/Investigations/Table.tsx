@@ -76,7 +76,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
         onChange={(e) => setSearchFilter(e.value)}
       />
       <br />
-      <div className="shadow border-b border-gray-200 sm:rounded-lg overflow-x-scroll">
+      <div className="shadow border-b border-gray-200 sm:rounded-lg overflow-x-scroll sm:overflow-x-visible">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
