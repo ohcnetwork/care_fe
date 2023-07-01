@@ -1,4 +1,4 @@
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import Card from "../../CAREUI/display/Card";
 import loadable from "@loadable/component";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -257,7 +257,7 @@ export const TriageForm = (props: triageFormProps) => {
         }}
         backUrl={`/facility/${facilityId}`}
       >
-        <ConfirmDialogV2
+        <ConfirmDialog
           title={
             <div className="flex gap-2">
               <CareIcon className="care-l-exclamation-triangle text-red-500 text-xl" />
