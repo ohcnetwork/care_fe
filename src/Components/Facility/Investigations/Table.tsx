@@ -101,9 +101,8 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
                     i={i}
                     key={t.external_id}
                     value={
-                      state[t.external_id] && t.investigation_type === "Float"
-                        ? state[t.external_id].value
-                        : state[t.external_id].notes
+                      state[t.external_id] &&
+                      (state[t.external_id].value ?? state[t.external_id].notes)
                     }
                     onChange={(e: FieldChangeEvent<string>) =>
                       handleValueChange(
