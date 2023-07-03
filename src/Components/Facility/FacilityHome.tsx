@@ -601,7 +601,7 @@ export const FacilityHome = (props: any) => {
               </DropdownMenu>
             </div>
             <div className="flex flex-col justify-end">
-              {/* <ButtonV2
+              <ButtonV2
                 variant="primary"
                 ghost
                 border
@@ -610,7 +610,7 @@ export const FacilityHome = (props: any) => {
               >
                 <CareIcon className="care-l-monitor-heart-rate text-lg" />
                 <span>Central Nursing Station</span>
-              </ButtonV2> */}
+              </ButtonV2>
               <ButtonV2
                 variant="primary"
                 ghost
