@@ -416,7 +416,7 @@ export default function ManageUsers() {
     <Page
       title="User Management"
       hideBack={true}
-      className="mx-5 px-2"
+      className=""
       breadcrumbs={false}
     >
       {expandSkillList && (
