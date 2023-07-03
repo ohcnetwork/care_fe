@@ -1390,11 +1390,8 @@ export const FileUpload = (props: FileUploadProps) => {
         <div className="md:grid grid-cols-2 gap-4">
           {audio ? (
             <div className="bg-white border rounded-lg shadow p-4">
-              <div>
-                <h4>Record and Upload Audio File</h4>
-              </div>
+              <h4 className="mb-4">Record and Upload Audio File</h4>
               <TextFormField
-                className="mt-4"
                 name="consultation_audio_file"
                 type="text"
                 label="Enter Audio File Name (optional)"
@@ -1408,7 +1405,7 @@ export const FileUpload = (props: FileUploadProps) => {
               {audiouploadStarted ? (
                 <LinearProgressWithLabel value={uploadPercent} />
               ) : (
-                <div className="flex flex-col lg:flex-row justify-between w-full">
+                <div className="flex flex-col gap-2 items-center lg:flex-row justify-between w-full">
                   {audioBlobExists && (
                     <div className="flex items-center w-full md:w-auto">
                       <ButtonV2
@@ -1422,17 +1419,20 @@ export const FileUpload = (props: FileUploadProps) => {
                       </ButtonV2>
                     </div>
                   )}
-                  <VoiceRecorder
-                    createAudioBlob={createAudioBlob}
-                    confirmAudioBlobExists={confirmAudioBlobExists}
-                    reset={resetRecording}
-                    setResetRecording={setResetRecording}
-                  />
-                  <div className="text-yellow-600 text-xs inline-block ml-1 mt-1 md:my-auto">
-                    <span>
-                      <CareIcon className="care-l-exclamation-triangle" />
-                      Please allow browser permission before you start speaking
-                    </span>
+                  <div className="flex items-center gap-4">
+                    <VoiceRecorder
+                      createAudioBlob={createAudioBlob}
+                      confirmAudioBlobExists={confirmAudioBlobExists}
+                      reset={resetRecording}
+                      setResetRecording={setResetRecording}
+                    />
+                    {!audioBlobExists && (
+                      <span className="text-sm text-warning-500 font-medium">
+                        <CareIcon className="care-l-exclamation-triangle text-base mr-1" />
+                        Please allow browser permission before you start
+                        speaking
+                      </span>
+                    )}
                   </div>
                   {audioBlobExists && (
                     <div className="flex items-center w-full md:w-auto">
@@ -1454,24 +1454,21 @@ export const FileUpload = (props: FileUploadProps) => {
           {unspecified ? (
             <div className="mt-4 md:mt-0 bg-white border rounded-lg shadow p-4 flex-wrap">
               <div>
-                <h4>Upload New File</h4>
+                <h4 className="mb-4">Upload New File</h4>
               </div>
+              <TextFormField
+                name="consultation_file"
+                type="text"
+                label="Enter File Name"
+                required
+                value={uploadFileName}
+                disabled={uploadStarted}
+                onChange={(e: any) => {
+                  setUploadFileName(e.value);
+                }}
+                error={uploadFileError}
+              />
               <div>
-                <TextFormField
-                  className="mt-4"
-                  name="consultation_file"
-                  type="text"
-                  label="Enter File Name"
-                  required
-                  value={uploadFileName}
-                  disabled={uploadStarted}
-                  onChange={(e: any) => {
-                    setUploadFileName(e.value);
-                  }}
-                  error={uploadFileError}
-                />
-              </div>
-              <div className="mt-4">
                 {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
