@@ -70,11 +70,11 @@ const AssetsList = () => {
         page: qParams.page,
         offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
         search_text: qParams.search || "",
-        facility: qParams.facility,
-        asset_type: qParams.asset_type,
-        asset_class: qParams.asset_class,
-        location: qParams.location,
-        status: qParams.status,
+        facility: qParams.facility || "",
+        asset_type: qParams.asset_type || "",
+        asset_class: qParams.asset_class || "",
+        location: qParams.facility ? qParams.location || "" : "",
+        status: qParams.status || "",
       };
       const { data } = await dispatch(listAssets(params));
       if (!status.aborted) {
@@ -149,7 +149,8 @@ const AssetsList = () => {
   );
   const fetchLocationName = useCallback(
     async (status: statusType) => {
-      if (!qParams.location) return setLocationName("");
+      if (!qParams.location || !qParams.facility)
+        return setLocationName(undefined);
       setIsLoading(true);
       const res = await dispatch(
         getFacilityAssetLocation(qParams.facility, qParams.location)
