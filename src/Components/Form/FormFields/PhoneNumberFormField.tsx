@@ -1,6 +1,10 @@
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
-import { AsYouType } from "libphonenumber-js";
+import {
+  AsYouType,
+  isValidPhoneNumber,
+  parsePhoneNumber,
+} from "libphonenumber-js";
 import { useMemo, useState } from "react";
 import { classNames } from "../../../Utils/utils";
 import phoneCodesJson from "../../../Common/static/countryPhoneAndFlags.json";
@@ -45,23 +49,36 @@ export default function PhoneNumberFormField(props: Props) {
     return asYouType;
   }, []);
 
+  const validate = useMemo(
+    () => (value: string, event: "blur" | "change") => {
+      if (value === "" || props.disableValidation) {
+        return;
+      }
+
+      const newError = AnyValidator([
+        PhoneNumberValidator(),
+        SupportPhoneNumberValidator(),
+      ])(value);
+
+      if (!newError) {
+        return;
+      } else if (event === "blur") {
+        return newError;
+      }
+    },
+    [props.disableValidation]
+  );
+
   const setValue = (value: string) => {
+    value = value.replaceAll(" ", "");
+
     asYouType.reset();
     asYouType.input(value);
+
+    const error = validate(value, "change");
     field.handleChange(value);
-  };
 
-  const validate = () => {
-    if (field.value === "" || props.disableValidation) {
-      setError(undefined);
-      return;
-    }
-
-    setError(
-      AnyValidator([PhoneNumberValidator(), SupportPhoneNumberValidator()])(
-        field.value
-      )
-    );
+    setError(error);
   };
 
   return (
@@ -79,10 +96,10 @@ export default function PhoneNumberFormField(props: Props) {
           )}
           maxLength={field.value?.startsWith("1800") ? 11 : 15}
           placeholder={props.placeholder}
-          value={field.value}
+          value={formatPhoneNumber(field.value, props.disableCountry)}
           onChange={(e) => setValue(e.target.value)}
           disabled={field.disabled}
-          onBlur={validate}
+          onBlur={() => setError(validate(field.value, "blur"))}
         />
         {!props.disableCountry && (
           <div className="absolute inset-y-0 right-0 flex items-center">
@@ -107,7 +124,7 @@ export default function PhoneNumberFormField(props: Props) {
             >
               {Object.entries(phoneCodes).map(([country, { flag }]) => (
                 <option key={country} value={country}>
-                  {flag}
+                  {flag} {country}
                 </option>
               ))}
               <option value="Other">Other</option>
@@ -123,4 +140,18 @@ export default function PhoneNumberFormField(props: Props) {
 const conditionPhoneCode = (code: string) => {
   code = code.split(" ")[0];
   return code.startsWith("+") ? code : "+" + code;
+};
+
+const formatPhoneNumber = (value: string, disableCountry?: boolean) => {
+  if (!isValidPhoneNumber(value)) {
+    return value;
+  }
+
+  const phoneNumber = parsePhoneNumber(value);
+
+  if (disableCountry) {
+    return phoneNumber.formatNational();
+  }
+
+  return phoneNumber.formatInternational();
 };
