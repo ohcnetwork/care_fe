@@ -3,7 +3,7 @@ name: Cypress Tests
 on:
   schedule:
     - cron: "30 22 * * *"
-  pull_request:
+  pull_request_target:
     branches:
       - develop
       - master
