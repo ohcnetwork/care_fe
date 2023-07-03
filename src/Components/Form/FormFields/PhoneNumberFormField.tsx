@@ -143,15 +143,10 @@ const conditionPhoneCode = (code: string) => {
 };
 
 const formatPhoneNumber = (value: string, disableCountry?: boolean) => {
-  if (!isValidPhoneNumber(value)) {
+  if (!isValidPhoneNumber(value) || disableCountry) {
     return value;
   }
 
   const phoneNumber = parsePhoneNumber(value);
-
-  if (disableCountry) {
-    return phoneNumber.formatNational();
-  }
-
   return phoneNumber.formatInternational();
 };
