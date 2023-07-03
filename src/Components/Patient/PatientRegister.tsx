@@ -1075,6 +1075,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             id="date_of_birth-div"
                           >
                             <DateFormField
+                              containerClassName="w-full"
                               {...field("date_of_birth")}
                               label="Date of Birth"
                               required
@@ -1606,7 +1607,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             <FieldLabel id="med-history-label" required>
                               Any medical history? (Comorbidities)
                             </FieldLabel>
-                            <div className="flex flex-wrap gap-2">
+                            <div className={"flex flex-wrap gap-2"}>
                               {MEDICAL_HISTORY_CHOICES.map((i) => {
                                 return renderMedicalHistory(
                                   i.id,
@@ -1616,7 +1617,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               })}
                             </div>
                             <FieldErrorText
-                              error={state.errors.medical_history}
+                              error={field("medical_history")["error"]}
                             />
                           </div>
 
