@@ -6,6 +6,7 @@ import { GENDER_TYPES } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import WaveformLabels from "./WaveformLabels";
 import { classNames } from "../../Utils/utils";
+import { VitalsValueBase } from "./types";
 
 interface Props {
   patientAssetBed?: PatientAssetBed;
@@ -102,20 +103,16 @@ export default function HL7PatientVitalsMonitor({
             />
           </div>
         </div>
-        <div className="z-10 bg-[#020617] grid grid-cols-3 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
+        <div className="z-10 bg-[#020617] grid gap-x-8 gap-y-4 md:gap-x-0 md:gap-y-0 grid-cols-2 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
           {/* Pulse Rate */}
-          <div className="flex justify-between items-center p-1">
-            <div className="flex flex-col h-full items-start text-sm text-primary-400 font-bold">
-              <span>ECG</span>
-              <span>{(data.pulseRate ?? data.heartRate)?.unit ?? "--"}</span>
-            </div>
-            <span className="text-4xl md:text-6xl font-black text-gray-300">
-              {(data.pulseRate ?? data.heartRate)?.value ?? "--"}
-            </span>
-            {(data.pulseRate ?? data.heartRate)?.value && (
+          <NonWaveformData
+            label="ECG"
+            attr={data.pulseRate ?? data.heartRate}
+            className="text-green-400"
+            suffix={
               <span className="text-red-500 animate-pulse font-sans">❤️</span>
-            )}
-          </div>
+            }
+          />
 
           {/* Blood Pressure */}
           <div className="flex flex-col p-1">
@@ -142,28 +139,18 @@ export default function HL7PatientVitalsMonitor({
           </div>
 
           {/* SpO2 */}
-          <div className="flex justify-between items-center p-1">
-            <div className="flex gap-2 items-start h-full text-yellow-300 font-bold">
-              <span className="text-sm">SpO2</span>
-              <span className="text-xs">{data.spo2?.unit ?? "--"}</span>
-            </div>
-            <span className="text-4xl md:text-6xl font-black text-yellow-300 mr-3">
-              {data.spo2?.value ?? "--"}
-            </span>
-          </div>
+          <NonWaveformData
+            label="SpO2"
+            attr={data.spo2}
+            className="text-yellow-300"
+          />
 
           {/* Respiratory Rate */}
-          <div className="flex justify-between items-center p-1">
-            <div className="flex flex-col items-start h-full text-sky-300 font-bold">
-              <span className="text-sm">RESP</span>
-              <span className="text-xs">
-                {data.respiratoryRate?.unit ?? "--"}
-              </span>
-            </div>
-            <span className="text-4xl md:text-6xl font-black text-sky-300 mr-3">
-              {data.respiratoryRate?.value ?? "---"}
-            </span>
-          </div>
+          <NonWaveformData
+            label="RESP"
+            attr={data.respiratoryRate}
+            className="text-sky-300"
+          />
 
           {/* Temperature */}
           <div className="flex flex-col p-1 col-span-2 md:col-span-1">
@@ -203,3 +190,32 @@ export default function HL7PatientVitalsMonitor({
     </div>
   );
 }
+
+interface NonWaveformDataProps {
+  label: string;
+  attr?: VitalsValueBase;
+  className?: string;
+  suffix?: JSX.Element;
+}
+
+const NonWaveformData = ({
+  label,
+  attr,
+  className,
+  suffix,
+}: NonWaveformDataProps) => {
+  return (
+    <div
+      className={classNames("flex justify-between items-center p-1", className)}
+    >
+      <div className="flex flex-col gap-1 items-start h-full font-bold">
+        <span className="text-sm">{label}</span>
+        <span className="text-xs">{attr?.unit ?? "--"}</span>
+      </div>
+      <span className="ml-4 text-4xl md:text-6xl font-black mr-3">
+        {attr?.value ?? "--"}
+      </span>
+      {attr?.value && suffix}
+    </div>
+  );
+};

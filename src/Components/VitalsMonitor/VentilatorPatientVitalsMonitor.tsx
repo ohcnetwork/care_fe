@@ -141,7 +141,7 @@ const NonWaveformData = ({ label, attr, className }: NonWaveformDataProps) => {
     <div
       className={classNames("flex justify-between items-center p-1", className)}
     >
-      <div className="flex gap-2 items-start h-full font-bold">
+      <div className="flex flex-col gap-1 items-start h-full font-bold">
         <span className="text-sm">{label}</span>
         <span className="text-xs">{attr?.unit ?? "--"}</span>
       </div>

@@ -260,10 +260,12 @@ export default function CentralNursingStation({ facilityId }: Props) {
       ) : (
         <div className="mt-1 grid grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3 gap-1">
           {data.map((props) => (
-            <HL7PatientVitalsMonitor
-              key={props.patientAssetBed?.bed.id}
-              {...props}
-            />
+            <div className="overflow-clip">
+              <HL7PatientVitalsMonitor
+                key={props.patientAssetBed?.bed.id}
+                {...props}
+              />
+            </div>
           ))}
         </div>
       )}
