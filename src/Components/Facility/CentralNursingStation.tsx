@@ -124,8 +124,8 @@ export default function CentralNursingStation({ facilityId }: Props) {
       noImplicitPadding
       breadcrumbs={false}
       options={
-        <div className="flex gap-4 items-center">
-          <Popover>
+        <div className="flex flex-row-reverse md:flex-row gap-4 items-center">
+          <Popover className="relative">
             <Popover.Button>
               <ButtonV2 variant="secondary" border>
                 <CareIcon className="care-l-setting text-lg" />
@@ -141,7 +141,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
             >
-              <Popover.Panel className="absolute z-30 mt-1 w-96 transform -translate-x-1/2 px-4 sm:px-0 lg:max-w-3xl">
+              <Popover.Panel className="absolute z-30 mt-1 md:w-96 w-80 transform -translate-x-1/3 md:-translate-x-1/2 px-4 sm:px-0 lg:max-w-3xl">
                 <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
                   <div className="rounded-t-lg bg-gray-100 px-6 py-4">
                     <div className="flow-root rounded-md">
@@ -167,7 +167,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
                           facilityId={facilityId}
                           errors=""
                           errorClassName="hidden"
-                          className="w-64"
                         />
                         {qParams.location && (
                           <ButtonV2
