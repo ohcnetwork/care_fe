@@ -65,7 +65,7 @@ export default function HL7PatientVitalsMonitor({
           )}
         </div>
       )}
-      <div className="flex flex-col md:flex-row md:justify-between divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2">
+      <div className="relative flex flex-col md:flex-row md:justify-between divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2">
         <div>
           <div
             className={classNames(
@@ -103,7 +103,7 @@ export default function HL7PatientVitalsMonitor({
             />
           </div>
         </div>
-        <div className="z-10 bg-[#020617] grid gap-x-8 gap-y-4 md:gap-x-0 md:gap-y-0 grid-cols-2 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
+        <div className="md:absolute md:right-0 md:inset-y-0 z-10 bg-[#020617] grid gap-x-8 gap-y-4 md:gap-x-0 md:gap-y-0 grid-cols-2 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
           {/* Pulse Rate */}
           <NonWaveformData
             label="ECG"
