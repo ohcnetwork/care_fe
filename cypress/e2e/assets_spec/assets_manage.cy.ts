@@ -1,14 +1,16 @@
 /// <reference types="cypress" />
 import { AssetPage } from "../../pageobject/Asset/AssetCreation";
 import { v4 as uuidv4 } from "uuid";
+import LoginPage from "../../pageobject/Login/LoginPage";
 
 describe("Asset", () => {
   const assetPage = new AssetPage();
+  const loginPage = new LoginPage();
   const phone_number = "9999999999";
   const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
 
   before(() => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    loginPage.loginAsDisctrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -49,7 +51,7 @@ describe("Asset", () => {
     assetPage.verifySuccessNotification("Asset created successfully");
   });
 
-  // Edit an exisit asset
+  // Edit an exisiting asset
 
   afterEach(() => {
     cy.saveLocalStorage();
