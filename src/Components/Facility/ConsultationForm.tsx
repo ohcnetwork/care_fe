@@ -1,4 +1,6 @@
-import loadable from "@loadable/component";
+import * as Notification from "../../Utils/Notifications.js";
+
+import { BedModel, FacilityModel } from "./models";
 import {
   Box,
   CardContent,
@@ -7,35 +9,15 @@ import {
   Radio,
   RadioGroup,
 } from "@material-ui/core";
-import { navigate } from "raviger";
-import moment from "moment";
-import React, {
-  ChangeEventHandler,
-  useCallback,
-  useEffect,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
-import { useDispatch } from "react-redux";
 import {
   CONSULTATION_SUGGESTION,
+  KASP_ENABLED,
+  KASP_STRING,
   PATIENT_CATEGORIES,
+  REVIEW_AT_CHOICES,
   SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
-  REVIEW_AT_CHOICES,
-  KASP_STRING,
-  KASP_ENABLED,
 } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  createConsultation,
-  getConsultation,
-  updateConsultation,
-  getPatient,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import { FacilitySelect } from "../Common/FacilitySelect";
 import {
   DateInputField,
   ErrorHelperText,
@@ -44,30 +26,51 @@ import {
   SelectField,
   TextInputField,
 } from "../Common/HelperInputFields";
-import { BedModel, FacilityModel } from "./models";
-import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
-import { UserModel } from "../Users/models";
-import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
-import { BedSelect } from "../Common/BedSelect";
-import Beds from "./Consultations/Beds";
-import PrescriptionBuilder, {
-  PrescriptionType,
-} from "../Common/prescription-builder/PrescriptionBuilder";
-import PRNPrescriptionBuilder, {
-  PRNPrescriptionType,
-} from "../Common/prescription-builder/PRNPrescriptionBuilder";
-import { DiagnosisSelect } from "../Common/DiagnosisSelect";
-import { goBack } from "../../Utils/utils";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
+import PRNPrescriptionBuilder, {
+  PRNPrescriptionType,
+} from "../Common/prescription-builder/PRNPrescriptionBuilder";
+import PrescriptionBuilder, {
+  PrescriptionType,
+} from "../Common/prescription-builder/PrescriptionBuilder";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
-import { ICD11DiagnosisModel } from "./models";
+import React, {
+  ChangeEventHandler,
+  useCallback,
+  useEffect,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
+import {
+  createConsultation,
+  discharge,
+  getConsultation,
+  getPatient,
+  updateConsultation,
+} from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import { BedSelect } from "../Common/BedSelect";
+import Beds from "./Consultations/Beds";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { DiagnosisSelect } from "../Common/DiagnosisSelect";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { ICD11DiagnosisModel } from "./models";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
+import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
+import { UserModel } from "../Users/models";
+import { goBack } from "../../Utils/utils";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { navigate } from "raviger";
+import { useDispatch } from "react-redux";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -215,7 +218,6 @@ export const ConsultationForm = (props: any) => {
     InvestigationType[]
   >([]);
   const [procedures, setProcedures] = useState<ProcedureType[]>([]);
-
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -422,6 +424,7 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "discharge_advice": {
+          return;
           let invalid = false;
           for (const f of dischargeAdvice) {
             if (
