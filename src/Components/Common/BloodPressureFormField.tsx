@@ -11,7 +11,7 @@ export interface BloodPressure {
   diastolic: number;
 }
 
-type Props = FormFieldBaseProps<BloodPressure>;
+type Props = FormFieldBaseProps<Partial<BloodPressure>>;
 
 export default function BloodPressureFormField(props: Props) {
   const field = useFormFieldPropsResolver(props as any);
@@ -20,15 +20,16 @@ export default function BloodPressureFormField(props: Props) {
     field.onChange({
       name: field.name,
       value: {
-        systolic: 0,
-        diastolic: 0,
         ...field.value,
         [event.name]: event.value,
       },
     });
   };
 
-  const map = !!field.value && meanArterialPressure(field.value);
+  const map =
+    !!props.value?.diastolic &&
+    !!props.value.systolic &&
+    meanArterialPressure(props.value as BloodPressure);
 
   return (
     <FormField
@@ -78,6 +79,9 @@ export default function BloodPressureFormField(props: Props) {
   );
 }
 
-const meanArterialPressure = ({ diastolic, systolic }: BloodPressure) => {
+export const meanArterialPressure = ({
+  diastolic,
+  systolic,
+}: BloodPressure) => {
   return (2 * diastolic + systolic) / 3;
 };
