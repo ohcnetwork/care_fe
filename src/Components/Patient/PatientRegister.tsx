@@ -38,7 +38,6 @@ import {
   HCXActions,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import AlertDialog from "../Common/AlertDialog";
 import {
   LegacyCheckboxField,
   LegacyDateInputField,
@@ -77,6 +76,7 @@ import { FieldError } from "../Form/FieldValidators";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import DialogModal from "../Common/Dialog";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
+import ConfirmDialog from "../Common/ConfirmDialog";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -1145,10 +1145,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         </div>
         <>
           {showAlertMessage.show && (
-            <AlertDialog
-              handleClose={goBack}
-              message={showAlertMessage.message}
+            <ConfirmDialog
               title={showAlertMessage.title}
+              description={showAlertMessage.message}
+              onConfirm={() => goBack()}
+              onClose={() => goBack()}
+              variant="primary"
+              action="Ok"
+              show
             />
           )}
           {showImport ? (
