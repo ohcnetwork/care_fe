@@ -31,7 +31,7 @@ export interface AbhaObject {
   email: string | null;
   first_name: string;
   date_of_birth: string;
-  gender: string;
+  gender: "M" | "F" | "O";
   address: string;
   district: string;
   state: string;

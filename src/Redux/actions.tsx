@@ -856,6 +856,12 @@ export const linkViaQR = (
   });
 };
 
-export const linkCareContext = (consultationId: string) => {
-  return fireRequest("linkCareContext", [], { consultation: consultationId });
+export const linkCareContext = (
+  consultationId: string,
+  data: { name?: string; gender?: "M" | "F" | "O"; dob?: string }
+) => {
+  return fireRequest("linkCareContext", [], {
+    consultation: consultationId,
+    ...data,
+  });
 };

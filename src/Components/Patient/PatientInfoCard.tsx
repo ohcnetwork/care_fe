@@ -1,18 +1,15 @@
-import * as Notification from "../../Utils/Notifications.js";
-
 import ABHAProfileModal from "../ABDM/ABHAProfileModal";
 import Beds from "../Facility/Consultations/Beds";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Link } from "raviger";
 import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
+import LinkCareContextModal from "../ABDM/LinkCareContextModal";
 import { Modal } from "@material-ui/core";
 import { PatientCategory } from "../Facility/models";
 import { PatientCategoryTailwindClass } from "../../Common/constants";
 import { PatientModel } from "./models";
 import { getDimensionOrDash } from "../../Common/utils";
-import { linkCareContext } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { useState } from "react";
 
 const PatientCategoryDisplayText: Record<PatientCategory, string> = {
@@ -35,9 +32,7 @@ export default function PatientInfoCard(props: {
   const [showABHAProfile, setShowABHAProfile] = useState(
     !!props.showAbhaProfile
   );
-  const [isLinkingCareContext, setIsLinkingCareContext] = useState(false);
-
-  const dispatch = useDispatch<any>();
+  const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
   const patient = props.patient;
   const ip_no = props.ip_no;
@@ -251,26 +246,7 @@ export default function PatientInfoCard(props: {
             </ButtonV2>
             <ButtonV2
               className="hover:text-white flex gap-3 justify-start font-semibold mt-0"
-              onClick={async () => {
-                setIsLinkingCareContext(true);
-                const res = await dispatch(
-                  linkCareContext(props.consultationId)
-                );
-
-                console.log(res);
-
-                if (res.status === 202) {
-                  Notification.Success({
-                    msg: "Care Context sucessfully linked!",
-                  });
-                } else {
-                  Notification.Error({
-                    msg: "Error in linking Care Context!",
-                  });
-                }
-                setIsLinkingCareContext(false);
-              }}
-              loading={isLinkingCareContext}
+              onClick={() => setShowLinkCareContext(true)}
             >
               <CareIcon className="care-l-link" />
               <p>Link Care Context</p>
@@ -279,6 +255,12 @@ export default function PatientInfoCard(props: {
               abha={patient.abha_number_object}
               show={showABHAProfile}
               onClose={() => setShowABHAProfile(false)}
+            />
+            <LinkCareContextModal
+              consultationId={props.consultationId}
+              patient={patient}
+              show={showLinkCareContext}
+              onClose={() => setShowLinkCareContext(false)}
             />
           </>
         ) : (
