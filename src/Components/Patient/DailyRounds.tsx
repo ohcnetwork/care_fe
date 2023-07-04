@@ -285,7 +285,7 @@ export const DailyRounds = (props: any) => {
                 : undefined,
             pulse: state.form.pulse,
             resp: Number(state.form.resp),
-            temperature: state.form.temperature,
+            temperature: state.form.temperature.toFixed(2),
             rhythm: Number(state.form.rhythm) || 0,
             rhythm_detail: state.form.rhythm_detail,
             ventilator_spo2: state.form.ventilator_spo2,
