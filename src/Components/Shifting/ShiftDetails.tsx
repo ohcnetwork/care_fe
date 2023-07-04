@@ -13,7 +13,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import CommentSection from "./CommentsSection";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog.js";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "../Common/components/Page";
 import QRCode from "qrcode.react";
@@ -794,7 +794,7 @@ export default function ShiftDetails(props: { id: string }) {
                 >
                   {t("delete_record")}
                 </ButtonV2>
-                <ConfirmDialogV2
+                <ConfirmDialog
                   title={t("authorize_shift_delete")}
                   description={t("record_delete_confirm")}
                   action="Confirm"

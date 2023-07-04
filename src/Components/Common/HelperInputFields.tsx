@@ -128,19 +128,6 @@ export const LegacyTextInputField = (props: TextFieldPropsExtended) => {
 };
 
 /**
- * Deprecated. Use `TextAreaFormField` instead.
- */
-export const LegacyMultilineInputField = (props: TextFieldPropsExtended) => {
-  const { errors } = props;
-  return (
-    <div>
-      <TextField {...props} multiline fullWidth />
-      <LegacyErrorHelperText error={errors} />
-    </div>
-  );
-};
-
-/**
  * Deprecated. Use `TextFormField` with `type="datetime-local"` instead.
  */
 export const LegacyDateTimeFiled = (props: DateInputFieldProps) => {

@@ -10,7 +10,7 @@ const TestRow = ({ data, value, onChange, i }: any) => {
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
         {data.name}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 text-right">
+      <td className="px-6 py-4 min-w-[200px] whitespace-nowrap text-sm text-gray-700 text-right">
         {data.investigation_type === "Choice" ? (
           <SelectFormField
             name={data.name}
@@ -19,6 +19,7 @@ const TestRow = ({ data, value, onChange, i }: any) => {
             optionLabel={(o: string) => o}
             optionValue={(o: string) => o}
             onChange={onChange}
+            errorClassName="hidden"
           />
         ) : (
           <TextFormField
@@ -63,7 +64,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
   };
 
   return (
-    <div className="p-4 m-4">
+    <div className="md:p-4 md:m-4">
       {title && <h1 className="text-3xl font-bold">{title}</h1>}
       <br />
       <TextFormField
@@ -75,7 +76,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
         onChange={(e) => setSearchFilter(e.value)}
       />
       <br />
-      <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+      <div className="shadow border-b border-gray-200 sm:rounded-lg overflow-x-scroll sm:overflow-x-visible">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -99,7 +100,10 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
                     data={t}
                     i={i}
                     key={t.external_id}
-                    value={state[t.external_id] && state[t.external_id].value}
+                    value={
+                      state[t.external_id] &&
+                      (state[t.external_id].value ?? state[t.external_id].notes)
+                    }
                     onChange={(e: FieldChangeEvent<string>) =>
                       handleValueChange(
                         t.investigation_type === "Float"

@@ -153,20 +153,20 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          {
-            <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
-              Created:{" "}
-              <RelativeDateUserMention
-                actionDate={itemData.created_date}
-                user={itemData.created_by}
-              />
-            </div>
-          }
-          <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
+          <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row justify-end">
+            Created:{" "}
+            <RelativeDateUserMention
+              actionDate={itemData.created_date}
+              user={itemData.created_by}
+              tooltipPosition="left"
+            />
+          </div>
+          <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row justify-end">
             Last Modified:{" "}
             <RelativeDateUserMention
               actionDate={itemData.modified_date}
               user={itemData.last_edited_by}
+              tooltipPosition="left"
             />
           </div>
         </div>
