@@ -207,7 +207,8 @@ export default function ListFilter(props: any) {
       emergency: emergency || "",
       is_up_shift: is_up_shift || "",
       patient_phone_number: patient_phone_number
-        ? parsePhoneNumberFromString(patient_phone_number)?.format("E.164")
+        ? parsePhoneNumberFromString(patient_phone_number)?.format("E.164") ??
+          ""
         : "",
       created_date_before:
         created_date_before && moment(created_date_before).isValid()

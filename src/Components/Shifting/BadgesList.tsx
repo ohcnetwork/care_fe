@@ -33,7 +33,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (!qParams.origin_facility) return setOriginFacilityName("");
       const res = await dispatch(
-        getAnyFacility(qParams.origin_facility, "origin_facility")
+        getAnyFacility(qParams.origin_facility, "origin_facility_name")
       );
       setOriginFacilityName(res?.data?.name);
     }
@@ -47,7 +47,7 @@ export default function BadgesList(props: any) {
       const res = await dispatch(
         getAnyFacility(
           qParams.shifting_approving_facility,
-          "shifting_approving_facility"
+          "shifting_approving_facility_name"
         )
       );
       setApprovingFacilityName(res?.data?.name);
@@ -59,7 +59,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (!qParams.assigned_facility) return setAssignedFacilityName("");
       const res = await dispatch(
-        getAnyFacility(qParams.assigned_facility, "assigned_facility")
+        getAnyFacility(qParams.assigned_facility, "assigned_facility_name")
       );
       setAssignedFacilityName(res?.data?.name);
     }
