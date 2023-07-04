@@ -7,7 +7,7 @@ import {
 } from "../../Common/constants";
 import { SampleTestModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
-import { createUpload } from "../../Redux/actions";
+import { createUpload, editUpload } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
 import { Submit } from "../Common/components/ButtonV2";
@@ -122,6 +122,14 @@ const UpdateStatusDialog = (props: Props) => {
       .then(() => {
         setUploadStarted(false);
         setUploadDone(true);
+        redux_dispatch(
+          editUpload(
+            { upload_completed: true },
+            response.data.id,
+            "SAMPLE_MANAGEMENT",
+            sample.id?.toString() ?? ""
+          )
+        );
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
