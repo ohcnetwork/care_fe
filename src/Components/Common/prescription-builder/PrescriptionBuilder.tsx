@@ -1,10 +1,9 @@
 import AutoCompleteAsync from "../../Form/AutoCompleteAsync";
-import SelectMenuV2 from "../../Form/SelectMenuV2";
-import { PrescriptionDropdown } from "./PrescriptionDropdown";
 import { PrescriptionBuilderProps } from "./PRNPrescriptionBuilder";
-
-import medicines_list from "./assets/medicines.json";
+import { PrescriptionDropdown } from "./PrescriptionDropdown";
+import SelectMenuV2 from "../../Form/SelectMenuV2";
 import ToolTip from "../utils/Tooltip";
+import medicines_list from "./assets/medicines.json";
 
 export const medicines = medicines_list;
 
@@ -56,217 +55,219 @@ export default function PrescriptionBuilder(
 
   return (
     <div className="mt-2">
-      {prescriptions.map((prescription, i) => {
-        const setMedicine = (medicine: string) => {
-          setItem(
-            {
-              ...prescription,
-              medicine,
-            },
-            i
-          );
-        };
+      {prescriptions.length &&
+        prescriptions?.map((prescription, i) => {
+          const setMedicine = (medicine: string) => {
+            setItem(
+              {
+                ...prescription,
+                medicine,
+              },
+              i
+            );
+          };
 
-        const setRoute = (route: string) => {
-          setItem(
-            {
-              ...prescription,
-              route,
-            },
-            i
-          );
-        };
+          const setRoute = (route: string) => {
+            setItem(
+              {
+                ...prescription,
+                route,
+              },
+              i
+            );
+          };
 
-        const setFrequency = (frequency: string) => {
-          setItem(
-            {
-              ...prescription,
-              dosage: frequency,
-            },
-            i
-          );
-        };
+          const setFrequency = (frequency: string) => {
+            setItem(
+              {
+                ...prescription,
+                dosage: frequency,
+              },
+              i
+            );
+          };
 
-        const setDosageUnit = (unit: string) => {
-          setItem(
-            {
-              ...prescription,
-              dosage_new: prescription.dosage_new
-                ? prescription.dosage_new.split(" ")[0] + " " + unit
-                : "0 mg",
-            },
-            i
-          );
-        };
+          const setDosageUnit = (unit: string) => {
+            setItem(
+              {
+                ...prescription,
+                dosage_new: prescription.dosage_new
+                  ? prescription.dosage_new.split(" ")[0] + " " + unit
+                  : "0 mg",
+              },
+              i
+            );
+          };
 
-        return (
-          <div
-            key={i}
-            className="border-b border-b-gray-500 border-dashed py-2 text-xs text-gray-600"
-          >
-            <div className="flex gap-2 flex-col md:flex-row">
-              <div className="w-full">
-                Medicine
-                <AutoCompleteAsync
-                  placeholder="Medicine"
-                  selected={prescription.medicine}
-                  fetchData={(search) => {
-                    return Promise.resolve(
-                      medicines.filter((medicine: string) =>
-                        medicine.toLowerCase().includes(search.toLowerCase())
-                      )
-                    );
-                  }}
-                  optionLabel={(option) => option}
-                  onChange={setMedicine}
-                  showNOptions={medicines.length}
-                />
-              </div>
-              <div className="flex gap-2">
-                <div>
-                  Route
-                  <SelectMenuV2
-                    placeholder="Route"
-                    options={routes}
-                    value={prescription.route}
-                    onChange={(route) => setRoute(route || "")}
+          return (
+            <div
+              key={i}
+              className="border-b border-b-gray-500 border-dashed py-2 text-xs text-gray-600"
+            >
+              <div className="flex gap-2 flex-col md:flex-row">
+                <div className="w-full">
+                  Medicine
+                  <AutoCompleteAsync
+                    placeholder="Medicine"
+                    selected={prescription.medicine}
+                    fetchData={(search) => {
+                      return Promise.resolve(
+                        medicines.filter((medicine: string) =>
+                          medicine.toLowerCase().includes(search.toLowerCase())
+                        )
+                      );
+                    }}
                     optionLabel={(option) => option}
-                    required={false}
-                    className="mt-[6px]"
+                    onChange={setMedicine}
+                    showNOptions={medicines.length}
                   />
                 </div>
-                <div>
-                  Frequency
-                  <SelectMenuV2
-                    placeholder="Frequency"
-                    options={frequency}
-                    value={prescription.dosage}
-                    onChange={(freq) => setFrequency(freq || "")}
-                    optionLabel={(option) => option}
-                    optionIcon={(option) => (
-                      <ToolTip
-                        className="-right-2 bottom-[calc(100%+1px)] max-w-[100px]"
-                        position="CUSTOM"
-                        text={
-                          <span>
+                <div className="flex gap-2">
+                  <div>
+                    Route
+                    <SelectMenuV2
+                      placeholder="Route"
+                      options={routes}
+                      value={prescription.route}
+                      onChange={(route) => setRoute(route || "")}
+                      optionLabel={(option) => option}
+                      required={false}
+                      className="mt-[6px]"
+                    />
+                  </div>
+                  <div>
+                    Frequency
+                    <SelectMenuV2
+                      placeholder="Frequency"
+                      options={frequency}
+                      value={prescription.dosage}
+                      onChange={(freq) => setFrequency(freq || "")}
+                      optionLabel={(option) => option}
+                      optionIcon={(option) => (
+                        <ToolTip
+                          className="-right-2 bottom-[calc(100%+1px)] max-w-[100px]"
+                          position="CUSTOM"
+                          text={
+                            <span>
+                              {
+                                frequencyTips[
+                                  option as keyof typeof frequencyTips
+                                ]
+                              }
+                            </span>
+                          }
+                        >
+                          <i className="fa-solid fa-circle-info"></i>
+                        </ToolTip>
+                      )}
+                      showIconWhenSelected={false}
+                      required={false}
+                      className="mt-[6px] w-[150px]"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-2 flex-col md:flex-row">
+                <div className="w-full md:w-[260px] flex gap-2 shrink-0">
+                  <div>
+                    Dosage
+                    <div className="flex gap-1">
+                      <input
+                        type="number"
+                        className="text-gray-700 bg-gray-200 w-full focus:border-primary-400 block border rounded px-4 text-sm"
+                        value={prescription.dosage_new?.split(" ")[0]}
+                        placeholder="Dosage"
+                        min={0}
+                        onChange={(e) => {
+                          let value = parseFloat(e.target.value);
+                          if (value < 0) {
+                            value = 0;
+                          }
+                          setItem(
                             {
-                              frequencyTips[
-                                option as keyof typeof frequencyTips
-                              ]
-                            }
-                          </span>
-                        }
-                      >
-                        <i className="fa-solid fa-circle-info"></i>
-                      </ToolTip>
-                    )}
-                    showIconWhenSelected={false}
-                    required={false}
-                    className="mt-[6px] w-[150px]"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-2 mt-2 flex-col md:flex-row">
-              <div className="w-full md:w-[260px] flex gap-2 shrink-0">
-                <div>
-                  Dosage
-                  <div className="flex gap-1">
+                              ...prescription,
+                              dosage_new:
+                                value +
+                                " " +
+                                (prescription.dosage_new?.split(" ")[1] ||
+                                  "mg"),
+                            },
+                            i
+                          );
+                        }}
+                        required
+                      />
+                      <div className="w-[80px] shrink-0">
+                        <PrescriptionDropdown
+                          placeholder="Unit"
+                          options={units}
+                          value={prescription.dosage_new?.split(" ")[1] || "mg"}
+                          setValue={setDosageUnit}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="w-[70px] shrink-0">
+                    Days
                     <input
                       type="number"
-                      className="text-gray-700 bg-gray-200 w-full focus:border-primary-400 block border rounded px-4 text-sm"
-                      value={prescription.dosage_new?.split(" ")[0]}
-                      placeholder="Dosage"
+                      className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
+                      value={prescription.days}
+                      placeholder="Days"
                       min={0}
                       onChange={(e) => {
-                        let value = parseFloat(e.target.value);
+                        let value = parseInt(e.target.value);
                         if (value < 0) {
                           value = 0;
                         }
                         setItem(
                           {
                             ...prescription,
-                            dosage_new:
-                              value +
-                              " " +
-                              (prescription.dosage_new?.split(" ")[1] || "mg"),
+                            days: value,
                           },
                           i
                         );
                       }}
                       required
                     />
-                    <div className="w-[80px] shrink-0">
-                      <PrescriptionDropdown
-                        placeholder="Unit"
-                        options={units}
-                        value={prescription.dosage_new?.split(" ")[1] || "mg"}
-                        setValue={setDosageUnit}
-                      />
-                    </div>
                   </div>
                 </div>
 
-                <div className="w-[70px] shrink-0">
-                  Days
+                <div className="w-full">
+                  Notes
                   <input
-                    type="number"
+                    type="text"
                     className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                    value={prescription.days}
-                    placeholder="Days"
-                    min={0}
+                    value={prescription.notes}
+                    placeholder="Notes"
                     onChange={(e) => {
-                      let value = parseInt(e.target.value);
-                      if (value < 0) {
-                        value = 0;
-                      }
                       setItem(
                         {
                           ...prescription,
-                          days: value,
+                          notes: e.target.value,
                         },
                         i
                       );
                     }}
-                    required
                   />
                 </div>
-              </div>
 
-              <div className="w-full">
-                Notes
-                <input
-                  type="text"
-                  className="border w-full focus:ring-primary-500 focus:border-primary-500 block border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                  value={prescription.notes}
-                  placeholder="Notes"
-                  onChange={(e) => {
-                    setItem(
-                      {
-                        ...prescription,
-                        notes: e.target.value,
-                      },
-                      i
+                <button
+                  type="button"
+                  className="text-gray-400 text-base transition hover:text-red-500"
+                  onClick={() => {
+                    setPrescriptions(
+                      prescriptions.filter((prescription, index) => i != index)
                     );
                   }}
-                />
+                >
+                  <i className="fas fa-trash" />
+                </button>
               </div>
-
-              <button
-                type="button"
-                className="text-gray-400 text-base transition hover:text-red-500"
-                onClick={() => {
-                  setPrescriptions(
-                    prescriptions.filter((prescription, index) => i != index)
-                  );
-                }}
-              >
-                <i className="fas fa-trash" />
-              </button>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
       <button
         type="button"
         onClick={() => {
