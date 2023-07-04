@@ -31,7 +31,9 @@ import PatientCategorySelect from "./PatientCategorySelect";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
-import BloodPressureFormField from "../Common/BloodPressureFormField";
+import BloodPressureFormField, {
+  meanArterialPressure,
+} from "../Common/BloodPressureFormField";
 import TemperatureFormField from "../Common/TemperatureFormField";
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -183,6 +185,7 @@ export const DailyRounds = (props: any) => {
                   (i) => i.text === res.data.patient_category
                 )?.id || "Comfort"
               : "Comfort",
+            temperature: parseFloat(res.data.temperature),
             clone_last: res.data.count > 0 ? true : false,
           },
         });
@@ -223,14 +226,6 @@ export const DailyRounds = (props: any) => {
     });
     dispatch({ type: "set_errors", errors });
     return !invalidForm;
-  };
-
-  const calculateMAP = (systolic: any, diastolic: any) => {
-    let map = 0;
-    if (systolic && diastolic) {
-      map = (Number(systolic) + 2 * Number(diastolic)) / 3.0;
-    }
-    return map.toFixed(2);
   };
 
   const handleSubmit = async (e: any) => {
@@ -275,17 +270,12 @@ export const DailyRounds = (props: any) => {
                 ? {
                     systolic: Number(state.form.bp.systolic),
                     diastolic: Number(state.form.bp.diastolic),
-                    mean: Number(
-                      calculateMAP(
-                        state.form.bp.systolic,
-                        state.form.bp.diastolic
-                      )
-                    ),
+                    mean: meanArterialPressure(state.form.bp).toFixed(2),
                   }
                 : undefined,
             pulse: state.form.pulse,
             resp: Number(state.form.resp),
-            temperature: state.form.temperature.toFixed(2),
+            temperature: state.form.temperature,
             rhythm: Number(state.form.rhythm) || 0,
             rhythm_detail: state.form.rhythm_detail,
             ventilator_spo2: state.form.ventilator_spo2,
@@ -469,12 +459,23 @@ export const DailyRounds = (props: any) => {
               className="md:col-span-2"
             />
 
+            {state.form.additional_symptoms?.includes(9) && (
+              <div className="md:col-span-2">
+                <TextAreaFormField
+                  {...field("other_symptoms")}
+                  required
+                  label="Other Symptoms Details"
+                  placeholder="Enter the other symptoms here"
+                />
+              </div>
+            )}
+
             <SelectFormField
               {...field("action")}
               label="Action"
               options={TELEMEDICINE_ACTIONS}
-              optionLabel={(option) => option.text}
-              optionValue={(option) => option.id}
+              optionLabel={(option) => option.desc}
+              optionValue={(option) => option.text}
             />
 
             <SelectFormField
