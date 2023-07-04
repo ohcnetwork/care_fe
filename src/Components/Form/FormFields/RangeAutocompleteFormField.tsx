@@ -80,9 +80,10 @@ export default function RangeAutocompleteFormField(props: Props) {
 }
 
 const generateOptions = (start: number, end: number, step: number) => {
+  const precision = step.toString().split(".")[1]?.length || 0;
   const res = [];
   for (let i = start; i <= end; i += step) {
-    res.push(i);
+    res.push(parseFloat(i.toFixed(precision)));
   }
   return res;
 };
