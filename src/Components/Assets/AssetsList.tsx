@@ -244,6 +244,7 @@ const AssetsList = () => {
           <Link
             href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
             className="text-inherit"
+            data-testid="created-asset-list"
           >
             <div
               key={asset.id}

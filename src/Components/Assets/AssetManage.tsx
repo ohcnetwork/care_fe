@@ -215,6 +215,9 @@ const AssetManage = (props: AssetManageProps) => {
     if (asset) {
       const response = await dispatch(deleteAsset(asset.id));
       if (response && response.status === 204) {
+        Notification.Success({
+          msg: "Asset deleted successfully",
+        });
         navigate("/assets");
       }
     }
@@ -325,6 +328,7 @@ const AssetManage = (props: AssetManageProps) => {
                   )
                 }
                 id="update-asset"
+                data-testid="asset-update-button"
                 authorizeFor={NonReadOnlyUsers}
               >
                 <CareIcon className="care-l-pen h-4 mr-1" />
@@ -349,6 +353,7 @@ const AssetManage = (props: AssetManageProps) => {
                   authorizeFor={NonReadOnlyUsers}
                   onClick={() => setShowDeleteDialog(true)}
                   variant="danger"
+                  data-testid="asset-delete-button"
                   className="inline-flex"
                 >
                   <CareIcon className="care-l-trash h-4" />

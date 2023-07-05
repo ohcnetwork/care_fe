@@ -80,4 +80,44 @@ export class AssetPage {
   verifySuccessNotification(message: string) {
     cy.verifyNotification(message);
   }
+
+  openCreatedAsset() {
+    cy.get("[data-testid=created-asset-list]").first().click();
+  }
+
+  editAssetDetails(
+    name: string,
+    description: string,
+    qrId: string,
+    manufacturer: string,
+    supportName: string,
+    vendorName: string,
+    notes: string
+  ) {
+    cy.get("[data-testid=asset-update-button]").click();
+    cy.get("[data-testid=asset-name-input] input").clear().type(name);
+    cy.get("[data-testid=asset-description-input] textarea")
+      .clear()
+      .type(description);
+    cy.get("[data-testid=asset-qr-id-input] input").clear().type(qrId);
+    cy.get("[data-testid=asset-manufacturer-input] input")
+      .clear()
+      .type(manufacturer);
+    cy.get("[data-testid=asset-support-name-input] input")
+      .clear()
+      .type(supportName);
+    cy.get("[data-testid=asset-vendor-name-input] input")
+      .clear()
+      .type(vendorName);
+    cy.get("[data-testid=asset-notes-input] textarea").clear().type(notes);
+  }
+
+  clickUpdateAsset() {
+    cy.get("#submit").contains("Update").click();
+  }
+
+  deleteAsset() {
+    cy.get("[data-testid=asset-delete-button]").click();
+    cy.get("#submit").contains("Confirm").click();
+  }
 }

@@ -51,7 +51,32 @@ describe("Asset", () => {
     assetPage.verifySuccessNotification("Asset created successfully");
   });
 
-  // Edit an exisiting asset
+  it("Edit an Asset", () => {
+    assetPage.openCreatedAsset();
+
+    const qr_id = uuidv4();
+
+    assetPage.editAssetDetails(
+      "New Test Asset Edited",
+      "Test Description Edited",
+      qr_id,
+      "Manufacturer's Name Edited",
+      "Customer Support's Name Edited",
+      "Vendor's Name Edited",
+      "Test note for asset creation edited!"
+    );
+
+    assetPage.clickUpdateAsset();
+
+    assetPage.verifySuccessNotification("Asset updated successfully");
+  });
+
+  it("Delete an Asset", () => {
+    assetPage.openCreatedAsset();
+    assetPage.deleteAsset();
+
+    assetPage.verifySuccessNotification("Asset deleted successfully");
+  });
 
   afterEach(() => {
     cy.saveLocalStorage();
