@@ -21,6 +21,7 @@ interface Props {
   id?: string;
   name?: string;
   className?: string;
+  containerClassName?: string;
   value: Date | undefined;
   min?: Date;
   max?: Date;
@@ -38,6 +39,7 @@ const DateInputV2: React.FC<Props> = ({
   id,
   name,
   className,
+  containerClassName,
   value,
   min,
   max,
@@ -200,7 +202,9 @@ const DateInputV2: React.FC<Props> = ({
 
   return (
     <div>
-      <div className="container mx-auto text-black">
+      <div
+        className={`${containerClassName ?? "container mx-auto text-black"}`}
+      >
         <Popover className="relative">
           {({ open, close }) => (
             <div
