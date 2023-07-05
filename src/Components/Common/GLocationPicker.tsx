@@ -211,7 +211,7 @@ const Map: React.FC<MapProps> = ({
             >
               <CareIcon className="care-l-times-circle text-2xl text-gray-800" />
             </div>
-        </Popover.Button>
+          </Popover.Button>
         )}
         {handleOnSelectCurrentLocation && (
           <div
