@@ -270,7 +270,9 @@ export const DailyRounds = (props: any) => {
                 ? {
                     systolic: Number(state.form.bp.systolic),
                     diastolic: Number(state.form.bp.diastolic),
-                    mean: meanArterialPressure(state.form.bp).toFixed(2),
+                    mean: parseFloat(
+                      meanArterialPressure(state.form.bp).toFixed(2)
+                    ),
                   }
                 : undefined,
             pulse: state.form.pulse,
