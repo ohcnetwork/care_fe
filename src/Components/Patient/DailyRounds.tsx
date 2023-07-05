@@ -270,7 +270,7 @@ export const DailyRounds = (props: any) => {
           consultation: consultationId,
           recommend_discharge: JSON.parse(state.form.recommend_discharge),
           action: prevAction,
-          review_interval: Number(prevReviewInterval) ?? -1,
+          review_interval: Number(prevReviewInterval),
         };
         if (state.form.rounds_type === "NORMAL") {
           data = {
@@ -497,6 +497,7 @@ export const DailyRounds = (props: any) => {
 
             <SelectFormField
               {...field("review_interval")}
+              required
               label="Review After"
               labelSuffix={getExpectedReviewTime()}
               options={REVIEW_AT_CHOICES}

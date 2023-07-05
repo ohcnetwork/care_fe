@@ -246,6 +246,7 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
 ];
 
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
+  { id: -1, text: "No Review" },
   { id: 10, text: "10 mins" },
   { id: 15, text: "15 mins" },
   { id: 30, text: "30 mins" },
