@@ -1,18 +1,20 @@
+import * as Notification from "../../../Utils/Notifications.js";
+
+import { BedModel, CurrentBed } from "../models";
+import { Button, InputLabel } from "@material-ui/core";
 import React, { Dispatch, SetStateAction, useCallback } from "react";
-import { useDispatch } from "react-redux";
 import {
   createConsultationBed,
   listConsultationBeds,
 } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
-import * as Notification from "../../../Utils/Notifications.js";
-import Loading from "../../Common/Loading";
-import { BedModel, CurrentBed } from "../models";
+
 import { BedSelect } from "../../Common/BedSelect";
-import { Button, InputLabel } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Loading from "../../Common/Loading";
 import { TextInputField } from "../../Common/HelperInputFields";
 import { formatDate } from "../../../Utils/utils";
+import { useDispatch } from "react-redux";
 
 const formatDateTime: () => string = () => {
   const current = new Date();
@@ -27,7 +29,7 @@ const formatDateTime: () => string = () => {
 
 interface BedsProps {
   facilityId: string;
-  patientId: number;
+  patientId: string;
   consultationId: number;
   smallLoader?: boolean;
   discharged?: boolean;

@@ -1,19 +1,44 @@
+import * as Notify from "../../Utils/Notifications";
+
 import { AbhaObject } from "../Patient/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
 import QRCode from "qrcode.react";
 import { formatDate } from "../../Utils/utils";
-import html2canvas from "html2canvas";
+import { getAbhaCard } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
 import { useRef } from "react";
 
 interface IProps {
+  patientId?: string;
   abha?: AbhaObject;
   show: boolean;
   onClose: () => void;
 }
 
-const ABHAProfileModal = ({ show, onClose, abha }: IProps) => {
+const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
   const printRef = useRef(null);
+  const dispatch = useDispatch<any>();
+
+  const downloadAbhaCard = async (type: "pdf" | "png") => {
+    if (!patientId) return;
+    const response = await dispatch(getAbhaCard(patientId, type));
+
+    if (response.status === 200 && response.data) {
+      if (type === "png") {
+        window.location.href =
+          "data:application/octet-stream;base64," + response.data;
+      } else {
+        const htmlPopup = `<embed width=100% height=100%" type='application/pdf' src='data:application/pdf;base64,${response.data}'></embed>`;
+
+        const printWindow = window.open("", "PDF");
+        printWindow?.document.write(htmlPopup);
+        printWindow?.print();
+      }
+    } else {
+      Notify.Error({ msg: "Download Failed..." });
+    }
+  };
 
   return (
     <DialogModal
@@ -21,27 +46,12 @@ const ABHAProfileModal = ({ show, onClose, abha }: IProps) => {
         <p className="flex items-center justify-between">
           <h4>ABHA Profile</h4>
           <div className="flex items-center gap-2">
-            <CareIcon onClick={print} className="care-l-print cursor-pointer" />
             <CareIcon
-              onClick={async () => {
-                const element = printRef.current;
-                if (!element) return;
-
-                const canvas = await html2canvas(element);
-                const data = canvas.toDataURL("image/jpg");
-                const link = document.createElement("a");
-
-                if (typeof link.download === "string") {
-                  link.href = data;
-                  link.download = `${abha?.name || "abha"}.jpg`;
-
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                } else {
-                  window.open(data);
-                }
-              }}
+              onClick={() => downloadAbhaCard("pdf")}
+              className="care-l-print cursor-pointer"
+            />
+            <CareIcon
+              onClick={() => downloadAbhaCard("png")}
               className="care-l-import cursor-pointer"
             />
           </div>

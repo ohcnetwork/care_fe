@@ -15,7 +15,7 @@
     "coronasafe Contributors"
   ],
   "homepage": "https://care.coronasafe.in",
-  "proxy": "https://careapi-m1.coronasafe.in",
+  "proxy": "http://192.168.1.7:9000",
   "main": "./src/index.tsx",
   "keywords": [
     "Coronasafe",
@@ -64,7 +64,6 @@
     "date-fns-tz": "^1.3.7",
     "echarts": "^5.4.0",
     "echarts-for-react": "^3.0.1",
-    "html2canvas": "^1.4.1",
     "i18next": "^22.0.6",
     "i18next-browser-languagedetector": "^7.0.0",
     "libphonenumber-js": "^1.10.13",

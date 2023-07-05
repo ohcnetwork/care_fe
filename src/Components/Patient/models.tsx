@@ -44,7 +44,7 @@ export interface AbhaObject {
 
 export interface PatientModel {
   test_id?: string;
-  id?: number;
+  id?: string;
   name?: string;
   age?: number;
   allow_transfer?: boolean;

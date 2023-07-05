@@ -865,3 +865,10 @@ export const linkCareContext = (
     ...data,
   });
 };
+
+export const getAbhaCard = (patient: string, type: "pdf" | "png") => {
+  return fireRequest("getAbhaCard", [], {
+    patient,
+    type,
+  });
+};
