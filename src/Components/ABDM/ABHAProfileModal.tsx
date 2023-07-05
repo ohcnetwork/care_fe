@@ -82,8 +82,8 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
             {abha?.health_id && (
               <div className="flex items-center gap-1 font-bold">
                 <span>{abha.health_id.split("@")[0]}</span>
-                <span className="text-gray-700 text-sm">@</span>
-                <span>{abha.health_id.split("@")[1] || "care"}</span>
+                {/* <span className="text-gray-700 text-sm">@</span>
+                <span>{abha.health_id.split("@")[1] || "care"}</span> */}
               </div>
             )}
             <div className="flex flex-col mt-2">
