@@ -488,6 +488,11 @@ export const DailyRounds = (props: any) => {
               options={TELEMEDICINE_ACTIONS}
               optionLabel={(option) => option.desc}
               optionValue={(option) => option.text}
+              value={prevAction}
+              onChange={(event) => {
+                handleFormFieldChange(event);
+                setPreviousAction(event.value);
+              }}
             />
 
             <SelectFormField
@@ -497,6 +502,7 @@ export const DailyRounds = (props: any) => {
               options={REVIEW_AT_CHOICES}
               optionLabel={(option) => option.text}
               optionValue={(option) => option.id}
+              value={prevReviewInterval}
               onChange={(event) => {
                 handleFormFieldChange(event);
                 setPreviousReviewInterval(Number(event.value));
