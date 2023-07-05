@@ -270,7 +270,7 @@ export const DailyRounds = (props: any) => {
           consultation: consultationId,
           recommend_discharge: JSON.parse(state.form.recommend_discharge),
           action: prevAction,
-          review_interval: Number(prevReviewInterval),
+          review_interval: Number(prevReviewInterval) ?? -1,
         };
         if (state.form.rounds_type === "NORMAL") {
           data = {
