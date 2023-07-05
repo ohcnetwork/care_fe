@@ -38,7 +38,6 @@ import TemperatureFormField from "../Common/TemperatureFormField";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initForm: any = {
-  otherSymptom: false,
   additional_symptoms: [],
   other_symptoms: "",
   physical_examination_info: "",
@@ -199,7 +198,10 @@ export const DailyRounds = (props: any) => {
     Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "other_symptoms":
-          if (state.form.otherSymptom && !state.form[field]) {
+          if (
+            state.form.additional_symptoms?.includes(9) &&
+            !state.form[field]
+          ) {
             errors[field] = "Please enter the other symptom details";
             invalidForm = true;
           }
@@ -248,7 +250,7 @@ export const DailyRounds = (props: any) => {
         data = {
           ...baseData,
           additional_symptoms: state.form.additional_symptoms,
-          other_symptoms: state.form.otherSymptom
+          other_symptoms: state.form.additional_symptoms?.includes(9)
             ? state.form.other_symptoms
             : undefined,
           admitted_to:
