@@ -156,11 +156,12 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
               autoComplete="off"
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-gray-900">
+              <div className="pb-2 absolute h-full top-1 right-0 flex gap-1 items-center mr-2 text-lg text-gray-900">
+                <span>{value?.icon}</span>
                 {props.isLoading ? (
                   <CareIcon className="care-l-spinner animate-spin" />
                 ) : (
-                  <CareIcon className="care-l-angle-down -mb-1.5" />
+                  <CareIcon className="care-l-angle-down" />
                 )}
               </div>
             </Combobox.Button>
