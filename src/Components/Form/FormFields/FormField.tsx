@@ -56,15 +56,20 @@ const FormField = ({
 }) => {
   return (
     <div className={field.className}>
-      {field.label && (
-        <FieldLabel
-          htmlFor={field.id}
-          required={field.required}
-          className={field.labelClassName}
-        >
-          {field.label}
-        </FieldLabel>
-      )}
+      <div className="flex items-center justify-between">
+        {field.label && (
+          <FieldLabel
+            htmlFor={field.id}
+            required={field.required}
+            className={field.labelClassName}
+          >
+            {field.label}
+          </FieldLabel>
+        )}
+        {field.labelSuffix && (
+          <span className="text-xs mb-2">{field.labelSuffix}</span>
+        )}
+      </div>
       <div className={field.className}>{children}</div>
       <FieldErrorText error={field.error} className={field.errorClassName} />
     </div>

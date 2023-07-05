@@ -23,6 +23,7 @@ export type FormFieldBaseProps<
   Form extends FormDetails | undefined = undefined
 > = {
   label?: React.ReactNode;
+  labelSuffix?: React.ReactNode;
   disabled?: boolean;
   className?: string;
   required?: boolean;
