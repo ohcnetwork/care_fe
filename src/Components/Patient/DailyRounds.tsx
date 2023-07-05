@@ -150,6 +150,10 @@ export const DailyRounds = (props: any) => {
                   (i) => i.text === res.data.patient_category
                 )?.id || "Comfort"
               : "Comfort",
+            rhythm:
+              (res.data.rhythm &&
+                RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
+              "0",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
           };
           dispatch({ type: "set_form", form: data });
@@ -184,6 +188,10 @@ export const DailyRounds = (props: any) => {
                   (i) => i.text === res.data.patient_category
                 )?.id || "Comfort"
               : "Comfort",
+            rhythm:
+              (res.data.rhythm &&
+                RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
+              "0",
             temperature: parseFloat(res.data.temperature),
             clone_last: res.data.count > 0 ? true : false,
           },
@@ -599,7 +607,7 @@ export const DailyRounds = (props: any) => {
                   required
                   label="Rhythm"
                   options={RHYTHM_CHOICES}
-                  optionLabel={(option) => option.text}
+                  optionLabel={(option) => option.desc}
                   optionValue={(option) => option.id}
                 />
 

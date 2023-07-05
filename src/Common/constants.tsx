@@ -697,9 +697,9 @@ export const CONSULTATION_TABS: Array<OptionsType> = [
 ];
 
 export const RHYTHM_CHOICES: Array<OptionsType> = [
-  { id: 0, text: "Unknown" },
-  { id: 5, text: "Regular" },
-  { id: 10, text: "Irregular" },
+  { id: 0, text: "UNKNOWN", desc: "Unknown" },
+  { id: 5, text: "REGULAR", desc: "Regular" },
+  { id: 10, text: "IRREGULAR", desc: "Irregular" },
 ];
 
 export const LOCATION_BED_TYPES: Array<any> = [
