@@ -593,7 +593,6 @@ export default function PatientFilter(props: any) {
               selected={filterState.facility_ref}
               showAll
               setSelected={(obj) => setFacility(obj, "facility")}
-              className="shifting-page-filter-dropdown"
             />
           </div>
 
@@ -640,7 +639,6 @@ export default function PatientFilter(props: any) {
               name="district"
               selected={filterState.district_ref}
               setSelected={(obj: any) => setFacility(obj, "district")}
-              className="shifting-page-filter-dropdown"
               errors={""}
             />
           </div>

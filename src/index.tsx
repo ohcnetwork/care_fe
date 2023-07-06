@@ -1,6 +1,5 @@
 import { createRoot } from "react-dom/client";
 import reducer from "../src/Redux/Reducer";
-import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import App from "./App";
 import "./i18n";
 import { applyMiddleware, createStore } from "redux";
@@ -22,19 +21,9 @@ if (import.meta.env.PROD) {
   });
 }
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#0e9f6e",
-    },
-  },
-});
-
 const root = createRoot(document.getElementById("root") as HTMLElement);
 root.render(
   <Provider store={store}>
-    <ThemeProvider theme={theme}>
-      <App />
-    </ThemeProvider>
+    <App />
   </Provider>
 );
