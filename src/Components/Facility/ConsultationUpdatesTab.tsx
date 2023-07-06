@@ -10,18 +10,76 @@ import moment from "moment";
 import ReadMore from "../Common/components/Readmore";
 import { formatDate } from "../../Utils/utils";
 import { DailyRoundsList } from "./Consultations/DailyRoundsList";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { getPermittedFacility, listAssetBeds } from "../../Redux/actions";
+import { FacilityModel } from "./models";
+import { AssetBedModel, AssetClass } from "../Assets/AssetTypes";
 
 export default function ConsultationUpdatesTab({
   consultationData,
-  hl7SocketUrl,
-  ventilatorSocketUrl,
   patientData,
   facilityId,
   patientId,
   consultationId,
 }: ConsultationTabProps) {
   const [showAutomatedRounds, setShowAutomatedRounds] = useState(true);
+  const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
+  const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
+  const dispatch: any = useDispatch();
+  useEffect(() => {
+    if (
+      !consultationData.facility ||
+      !consultationData.current_bed?.bed_object.id
+    )
+      return;
+
+    const fetchData = async () => {
+      const [facilityRes, assetBedRes] = await Promise.all([
+        dispatch(getPermittedFacility(consultationData.facility as any)),
+        dispatch(
+          listAssetBeds({
+            facility: consultationData.facility as any,
+            bed: consultationData.current_bed?.bed_object.id,
+          })
+        ),
+      ]);
+
+      const { middleware_address } = facilityRes.data as FacilityModel;
+      const assetBeds = assetBedRes.data.results as AssetBedModel[];
+
+      const hl7Meta = assetBeds.find(
+        (i) => i.asset_object.asset_class === AssetClass.HL7MONITOR
+      )?.asset_object?.meta;
+      const hl7Middleware = hl7Meta?.middleware_hostname || middleware_address;
+      if (hl7Middleware && hl7Meta?.local_ip_address) {
+        setHL7SocketUrl(
+          `wss://${hl7Middleware}/observations/${hl7Meta.local_ip_address}`
+        );
+      }
+
+      const ventilatorMeta = assetBeds.find(
+        (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
+      )?.asset_object?.meta;
+      const ventilatorMiddleware =
+        ventilatorMeta?.middleware_hostname || middleware_address;
+      if (ventilatorMiddleware && ventilatorMeta?.local_ip_address) {
+        setVentilatorSocketUrl(
+          `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
+        );
+      }
+
+      if (
+        !(hl7Middleware && hl7Meta?.local_ip_address) &&
+        !(ventilatorMiddleware && ventilatorMeta?.local_ip_address)
+      ) {
+        setHL7SocketUrl(undefined);
+        setVentilatorSocketUrl(undefined);
+      }
+    };
+
+    fetchData();
+  }, [consultationData]);
   return (
     <>
       <div className="flex flex-col gap-2">

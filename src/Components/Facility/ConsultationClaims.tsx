@@ -58,18 +58,16 @@ export default function ConsultationClaims({
   });
 
   return (
-    <div className="pb-2 relative flex flex-col">
-      <PageTitle
-        title="Claims"
-        className="pl-6 flex-grow-0"
-        onBackClick={() => {
-          navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
-          );
-          return false;
-        }}
-      />
-
+    <PageTitle
+      className="pb-2 relative flex flex-col"
+      title="Claims"
+      onBackClick={() => {
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+        );
+        return false;
+      }}
+    >
       <div className="flex flex-col justify-center gap-16 w-full max-w-5xl mx-auto">
         <div className="p-8 bg-white rounded-lg">
           <CreateClaimCard
@@ -88,6 +86,6 @@ export default function ConsultationClaims({
           ))}
         </div>
       </div>
-    </div>
+    </PageTitle>
   );
 }

@@ -7,18 +7,17 @@ export default function ConsultationFeedTab({
   consultationId,
 }: ConsultationTabProps) {
   return (
-    <div>
-      <PageTitle
-        title="Camera Feed"
-        breadcrumbs={false}
-        hideBack={true}
-        focusOnLoad={true}
-      />
+    <PageTitle
+      title="Camera Feed"
+      breadcrumbs={false}
+      hideBack={true}
+      focusOnLoad={true}
+    >
       <Feed
         facilityId={facilityId}
         patientId={patientId}
         consultationId={consultationId}
       />
-    </div>
+    </PageTitle>
   );
 }

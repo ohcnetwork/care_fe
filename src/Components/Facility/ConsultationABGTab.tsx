@@ -7,17 +7,12 @@ export default function ConsultationABGTab({
   consultationId,
 }: ConsultationTabProps) {
   return (
-    <div>
-      <PageTitle
-        title="ABG Analysis Plot"
-        hideBack={true}
-        breadcrumbs={false}
-      />
+    <PageTitle title="ABG Analysis Plot" hideBack={true} breadcrumbs={false}>
       <ABGPlots
         facilityId={facilityId}
         patientId={patientId}
         consultationId={consultationId}
       ></ABGPlots>
-    </div>
+    </PageTitle>
   );
 }

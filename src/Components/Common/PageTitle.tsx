@@ -3,8 +3,10 @@ import Breadcrumbs from "./Breadcrumbs";
 import PageHeadTitle from "./PageHeadTitle";
 import { classNames } from "../../Utils/utils";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import { ReactNode } from "react";
 
 export interface PageTitleProps {
+  children?: ReactNode;
   title: string;
   hideBack?: boolean;
   backUrl?: string;
@@ -28,6 +30,7 @@ export interface PageTitleProps {
 }
 
 export default function PageTitle({
+  children,
   title,
   hideBack = false,
   backUrl,
@@ -77,6 +80,7 @@ export default function PageTitle({
       <div className={hideBack ? "my-2" : "ml-8 my-2"}>
         {breadcrumbs && <Breadcrumbs replacements={crumbsReplacements} />}
       </div>
+      {children}
     </div>
   );
 }

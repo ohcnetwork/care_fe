@@ -7,13 +7,12 @@ export default function ConsultationNutritionTab({
   consultationId,
 }: ConsultationTabProps) {
   return (
-    <div>
-      <PageTitle title="Nutrition" hideBack={true} breadcrumbs={false} />
+    <PageTitle title="Nutrition" hideBack={true} breadcrumbs={false}>
       <NutritionPlots
         facilityId={facilityId}
         patientId={patientId}
         consultationId={consultationId}
       ></NutritionPlots>
-    </div>
+    </PageTitle>
   );
 }

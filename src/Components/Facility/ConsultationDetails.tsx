@@ -1,23 +1,13 @@
-import { AssetBedModel, AssetClass } from "../Assets/AssetTypes";
 import {
   CONSULTATION_TABS,
   GENDER_TYPES,
   OptionsType,
   SYMPTOM_CHOICES,
 } from "../../Common/constants";
-import {
-  ConsultationModel,
-  FacilityModel,
-  ICD11DiagnosisModel,
-} from "./models";
-import {
-  getConsultation,
-  getPatient,
-  getPermittedFacility,
-  listAssetBeds,
-} from "../../Redux/actions";
+import { ConsultationModel, ICD11DiagnosisModel } from "./models";
+import { getConsultation, getPatient } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -85,9 +75,6 @@ export const ConsultationDetails = (props: any) => {
     }
   };
 
-  const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
-  const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
-
   const CONSULTATION_TAB: {
     [key: string]: (props: ConsultationTabProps) => JSX.Element;
   } = {
@@ -109,67 +96,11 @@ export const ConsultationDetails = (props: any) => {
 
   const consultationProps: ConsultationTabProps = {
     consultationData: consultationData,
-    hl7SocketUrl: hl7SocketUrl,
-    ventilatorSocketUrl: ventilatorSocketUrl,
     patientData: patientData,
     facilityId: facilityId,
     patientId: patientId,
     consultationId: consultationId,
   };
-
-  useEffect(() => {
-    if (
-      !consultationData.facility ||
-      !consultationData.current_bed?.bed_object.id
-    )
-      return;
-
-    const fetchData = async () => {
-      const [facilityRes, assetBedRes] = await Promise.all([
-        dispatch(getPermittedFacility(consultationData.facility as any)),
-        dispatch(
-          listAssetBeds({
-            facility: consultationData.facility as any,
-            bed: consultationData.current_bed?.bed_object.id,
-          })
-        ),
-      ]);
-
-      const { middleware_address } = facilityRes.data as FacilityModel;
-      const assetBeds = assetBedRes.data.results as AssetBedModel[];
-
-      const hl7Meta = assetBeds.find(
-        (i) => i.asset_object.asset_class === AssetClass.HL7MONITOR
-      )?.asset_object?.meta;
-      const hl7Middleware = hl7Meta?.middleware_hostname || middleware_address;
-      if (hl7Middleware && hl7Meta?.local_ip_address) {
-        setHL7SocketUrl(
-          `wss://${hl7Middleware}/observations/${hl7Meta.local_ip_address}`
-        );
-      }
-
-      const ventilatorMeta = assetBeds.find(
-        (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
-      )?.asset_object?.meta;
-      const ventilatorMiddleware =
-        ventilatorMeta?.middleware_hostname || middleware_address;
-      if (ventilatorMiddleware && ventilatorMeta?.local_ip_address) {
-        setVentilatorSocketUrl(
-          `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
-        );
-      }
-
-      if (
-        !(hl7Middleware && hl7Meta?.local_ip_address) &&
-        !(ventilatorMiddleware && ventilatorMeta?.local_ip_address)
-      ) {
-        setHL7SocketUrl(undefined);
-        setVentilatorSocketUrl(undefined);
-      }
-    };
-
-    fetchData();
-  }, [consultationData]);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -306,52 +237,53 @@ export const ConsultationDetails = (props: any) => {
             }}
             breadcrumbs={true}
             backUrl="/patients"
-          />
-          <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
-            {!consultationData.discharge_date && (
-              <div className="w-full flex flex-col sm:flex-row px-2">
-                <ButtonV2
-                  onClick={() =>
-                    navigate(
-                      `/facility/${patientData.facility}/patient/${patientData.id}/shift/new`
-                    )
-                  }
-                  className="w-full btn m-1 btn-primary hover:text-white"
-                >
-                  <CareIcon className="care-l-ambulance w-5 h-5" />
-                  Shift Patient
-                </ButtonV2>
-                <button
-                  onClick={() => setShowDoctors(true)}
-                  className="w-full btn m-1 btn-primary hover:text-white"
-                >
-                  Doctor Connect
-                </button>
-                {patientData.last_consultation?.id && (
-                  <Link
-                    href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+          >
+            <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
+              {!consultationData.discharge_date && (
+                <div className="w-full flex flex-col sm:flex-row px-2">
+                  <ButtonV2
+                    onClick={() =>
+                      navigate(
+                        `/facility/${patientData.facility}/patient/${patientData.id}/shift/new`
+                      )
+                    }
                     className="w-full btn m-1 btn-primary hover:text-white"
                   >
-                    Camera Feed
-                  </Link>
-                )}
+                    <CareIcon className="care-l-ambulance w-5 h-5" />
+                    Shift Patient
+                  </ButtonV2>
+                  <button
+                    onClick={() => setShowDoctors(true)}
+                    className="w-full btn m-1 btn-primary hover:text-white"
+                  >
+                    Doctor Connect
+                  </button>
+                  {patientData.last_consultation?.id && (
+                    <Link
+                      href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+                      className="w-full btn m-1 btn-primary hover:text-white"
+                    >
+                      Camera Feed
+                    </Link>
+                  )}
+                </div>
+              )}
+              <div className="w-full flex flex-col sm:flex-row px-2">
+                <Link
+                  href={`/facility/${patientData.facility}/patient/${patientData.id}`}
+                  className="w-full btn m-1 btn-primary hover:text-white"
+                >
+                  Patient Details
+                </Link>
+                <Link
+                  href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
+                  className="w-full btn m-1 btn-primary hover:text-white"
+                >
+                  Doctor&apos;s Notes
+                </Link>
               </div>
-            )}
-            <div className="w-full flex flex-col sm:flex-row px-2">
-              <Link
-                href={`/facility/${patientData.facility}/patient/${patientData.id}`}
-                className="w-full btn m-1 btn-primary hover:text-white"
-              >
-                Patient Details
-              </Link>
-              <Link
-                href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
-                className="w-full btn m-1 btn-primary hover:text-white"
-              >
-                Doctor&apos;s Notes
-              </Link>
             </div>
-          </div>
+          </PageTitle>
         </nav>
         <div className="flex md:flex-row flex-col w-full mt-2">
           <div className="border rounded-lg bg-white shadow h-full text-black w-full">

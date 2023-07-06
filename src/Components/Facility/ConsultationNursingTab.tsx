@@ -8,13 +8,12 @@ export default function ConsultationNursingTab({
   consultationId,
 }: ConsultationTabProps) {
   return (
-    <div>
-      <PageTitle title="Nursing Analysis" hideBack={true} breadcrumbs={false} />
+    <PageTitle title="Nursing Analysis" hideBack={true} breadcrumbs={false}>
       <NursingPlot
         facilityId={facilityId}
         patientId={patientId}
         consultationId={consultationId}
       ></NursingPlot>
-    </div>
+    </PageTitle>
   );
 }

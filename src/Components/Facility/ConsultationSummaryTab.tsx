@@ -7,17 +7,18 @@ export default function ConsultationSummaryTab({
   consultationId,
 }: ConsultationTabProps) {
   return (
-    <div className="mt-4">
-      <PageTitle
-        title="Primary Parameters Plot"
-        hideBack={true}
-        breadcrumbs={false}
-      />
+    <PageTitle
+      className="mt-4"
+      title="Primary Parameters Plot"
+      hideBack={true}
+      breadcrumbs={false}
+    >
+      {" "}
       <PrimaryParametersPlot
         facilityId={facilityId}
         patientId={patientId}
         consultationId={consultationId}
       ></PrimaryParametersPlot>
-    </div>
+    </PageTitle>
   );
 }

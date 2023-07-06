@@ -29,8 +29,6 @@ export interface OptionsType {
 export interface ConsultationTabProps {
   // necessary props received for each tab
   consultationData: ConsultationModel;
-  hl7SocketUrl?: string;
-  ventilatorSocketUrl?: string;
   patientData: PatientModel;
   facilityId: any;
   patientId: any;

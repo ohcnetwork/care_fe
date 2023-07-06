@@ -6,9 +6,13 @@ export default function ConsultationPressureSoreTab({
   consultationId,
 }: ConsultationTabProps) {
   return (
-    <div className="mt-4">
-      <PageTitle title="Pressure Sore" hideBack={true} breadcrumbs={false} />
+    <PageTitle
+      className="mt-4"
+      title="Pressure Sore"
+      hideBack={true}
+      breadcrumbs={false}
+    >
       <PressureSoreDiagrams consultationId={consultationId} />
-    </div>
+    </PageTitle>
   );
 }
