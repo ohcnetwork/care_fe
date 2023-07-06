@@ -5,6 +5,7 @@ import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
 
 type Props = FormFieldBaseProps<Date> & {
+  containerClassName?: string;
   placeholder?: string;
   max?: Date;
   min?: Date;
@@ -33,6 +34,7 @@ const DateFormField = (props: Props) => {
     <FormField field={field}>
       <DateInputV2
         className={classNames(field.error && "border-red-500")}
+        containerClassName={props.containerClassName}
         id={field.id}
         name={field.name}
         value={

@@ -139,6 +139,14 @@ export const ConsultationDetails = (props: any) => {
           `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
         );
       }
+
+      if (
+        !(hl7Middleware && hl7Meta?.local_ip_address) &&
+        !(ventilatorMiddleware && ventilatorMeta?.local_ip_address)
+      ) {
+        setHL7SocketUrl(undefined);
+        setVentilatorSocketUrl(undefined);
+      }
     };
 
     fetchData();
@@ -495,8 +503,8 @@ export const ConsultationDetails = (props: any) => {
             {!consultationData.discharge_date &&
               hl7SocketUrl &&
               ventilatorSocketUrl && (
-                <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
-                  <div className="flex flex-col lg:flex-row bg-slate-800 gap-1 justify-between rounded mx-auto">
+                <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-auto">
+                  <div className="w-full lg:w-auto lg:min-w-[1280px] flex flex-col lg:flex-row bg-slate-800 gap-1 justify-between rounded mx-auto">
                     <div className="flex-1 min-h-[400px]">
                       <HL7PatientVitalsMonitor socketUrl={hl7SocketUrl} />
                     </div>
@@ -517,7 +525,7 @@ export const ConsultationDetails = (props: any) => {
                       (!hl7SocketUrl && ventilatorSocketUrl)) && (
                       <section className="lg:col-span-2 bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
                         {(hl7SocketUrl || ventilatorSocketUrl) && (
-                          <div className="flex flex-col lg:flex-row bg-slate-800 gap-1 justify-between rounded mx-auto">
+                          <div className="w-full lg:w-auto lg:min-w-[640px] flex flex-col lg:flex-row bg-slate-800 gap-1 justify-between rounded mx-auto">
                             {hl7SocketUrl && (
                               <div className="flex-1 min-h-[400px]">
                                 <HL7PatientVitalsMonitor

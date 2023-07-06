@@ -27,7 +27,7 @@ export default function useExport() {
     if (res.status === 200) {
       const a = document.createElement("a");
       const blob = new Blob([parse(res.data)], {
-        type: "text/css",
+        type: "text/csv",
       });
       a.href = URL.createObjectURL(blob);
       a.download = filename;
