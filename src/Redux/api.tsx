@@ -735,7 +735,7 @@ const routes: Routes = {
   },
   // Medibase
   listMedibaseMedicines: {
-    path: "/api/v1/medibase/",
+    path: "/api/v1/medicine/",
   },
 
   // Resource

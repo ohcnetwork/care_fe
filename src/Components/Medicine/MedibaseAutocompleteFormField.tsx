@@ -13,7 +13,9 @@ export default function MedibaseAutocompleteFormField(
 ) {
   const field = useFormFieldPropsResolver(props);
   const { isLoading, options, fetchOptions } =
-    useAsyncOptions<MedibaseMedicine>("id");
+    useAsyncOptions<MedibaseMedicine>("id", {
+      queryResponseExtractor: (data) => data.results,
+    });
 
   return (
     <FormField field={field}>
@@ -61,9 +63,9 @@ const OptionDescription = ({ medicine }: { medicine: MedibaseMedicine }) => {
 
 const OptionChip = (props: { name?: string; value: string }) => {
   return (
-    <div className="px-2 mt-1 sm:mt-0 uppercase text-center bg-secondary-100 h-fit max-w-fit rounded-full text-xs border border-secondary-400">
+    <div className="flex gap-1 px-2 mt-1 sm:mt-0 uppercase text-center bg-secondary-100 h-fit max-w-fit rounded-full text-xs border border-secondary-400">
       <span className="text-gray-800 font-normal">
-        {props.name && props.name + ": "}
+        {props.name && props.name + ":"}
       </span>
       <span className="text-gray-900 font-medium">{props.value}</span>
     </div>
