@@ -14,7 +14,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (!appliedFilters.origin_facility) return setOrginFacilityName("");
       const res = await dispatch(
-        getAnyFacility(appliedFilters.origin_facility, "origin_facility")
+        getAnyFacility(appliedFilters.origin_facility, "origin_facility_name")
       );
       setOrginFacilityName(res?.data?.name);
     }
@@ -26,7 +26,10 @@ export default function BadgesList(props: any) {
       if (!appliedFilters.approving_facility)
         return setApprovingFacilityName("");
       const res = await dispatch(
-        getAnyFacility(appliedFilters.approving_facility, "approving_facility")
+        getAnyFacility(
+          appliedFilters.approving_facility,
+          "approving_facility_name"
+        )
       );
       setApprovingFacilityName(res?.data?.name);
     }
@@ -37,7 +40,10 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (!appliedFilters.assigned_facility) return setAssignedFacilityName("");
       const res = await dispatch(
-        getAnyFacility(appliedFilters.assigned_facility, "assigned_facility")
+        getAnyFacility(
+          appliedFilters.assigned_facility,
+          "assigned_facility_name"
+        )
       );
       setAssignedFacilityName(res?.data?.name);
     }

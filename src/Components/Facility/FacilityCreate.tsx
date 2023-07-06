@@ -2,7 +2,7 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import { CapacityModal, DoctorModal } from "./models";
-import { Card, CardContent } from "@material-ui/core";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
 import {
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
@@ -12,7 +12,8 @@ import {
   MultiSelectFormField,
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
-import React, { useCallback, useState } from "react";
+import { Popover, Transition } from "@headlessui/react";
+import React, { Fragment, useCallback, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
 import {
   createFacility,
@@ -36,13 +37,15 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
+import Card from "../../CAREUI/display/Card.js";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { DoctorCapacity } from "./DoctorCapacity";
 import DoctorsCountCard from "./DoctorsCountCard";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { FormAction } from "../Form/Utils.js";
 import GLocationPicker from "../Common/GLocationPicker";
+import Page from "../Common/components/Page.js";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import Popover from "@material-ui/core/Popover";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -53,11 +56,8 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
-import { FormAction } from "../Form/Utils.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface FacilityProps {
   facilityId?: string;
@@ -170,11 +170,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [bedCapacityKey, setBedCapacityKey] = useState(0);
   const [docCapacityKey, setDocCapacityKey] = useState(0);
   const { goBack } = useAppHistory();
-
-  const [anchorEl, setAnchorEl] = React.useState<
-    (EventTarget & Element) | null
-  >(null);
-
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
 
@@ -408,10 +403,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     }
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const validateForm = () => {
     const errors = { ...initError };
     let invalidForm = false;
@@ -560,9 +551,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     return <Loading />;
   }
 
-  const open = Boolean(anchorEl);
-  const id = open ? "map-popover" : undefined;
-
   let capacityList: any = null;
   let totalBedCount = 0;
   let totalOccupiedBedCount = 0;
@@ -680,13 +668,12 @@ export const FacilityCreate = (props: FacilityProps) => {
   switch (currentStep) {
     case 3:
       return (
-        <div className="px-2 pb-2">
-          <PageTitle
-            title={headerText}
-            crumbsReplacements={{
-              [createdFacilityId || "????"]: { name: state.form.name },
-            }}
-          />
+        <Page
+          title={headerText}
+          crumbsReplacements={{
+            [createdFacilityId || "????"]: { name: state.form.name },
+          }}
+        >
           <Steps steps={getSteps()} />
           <div className="mt-3">
             <DoctorCapacity
@@ -712,17 +699,16 @@ export const FacilityCreate = (props: FacilityProps) => {
             </div>
             <div className="mt-4">{doctorList}</div>
           </div>
-        </div>
+        </Page>
       );
     case 2:
       return (
-        <div className="px-2 pb-2">
-          <PageTitle
-            title={headerText}
-            crumbsReplacements={{
-              [createdFacilityId || "????"]: { name: state.form.name },
-            }}
-          />
+        <Page
+          title={headerText}
+          crumbsReplacements={{
+            [createdFacilityId || "????"]: { name: state.form.name },
+          }}
+        >
           <Steps steps={getSteps()} />
           <div className="mt-3">
             <BedCapacity
@@ -750,21 +736,20 @@ export const FacilityCreate = (props: FacilityProps) => {
             </div>
             <div>{capacityList}</div>
           </div>
-        </div>
+        </Page>
       );
     case 1:
     default:
       return (
-        <div className="px-2 pb-2">
-          <PageTitle
-            title={headerText}
-            crumbsReplacements={{
-              [facilityId || "????"]: { name: state.form.name },
-            }}
-          />
+        <Page
+          title={headerText}
+          crumbsReplacements={{
+            [facilityId || "????"]: { name: state.form.name },
+          }}
+        >
           {!facilityId && <Steps steps={getSteps()} />}
           <Card className="mt-4">
-            <CardContent>
+            <div className="md:p-4">
               <form onSubmit={(e) => handleSubmit(e)}>
                 <DraftSection
                   handleDraftSelect={(newState: any) => {
@@ -965,54 +950,57 @@ export const FacilityCreate = (props: FacilityProps) => {
                   )}
                 </div>
 
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-3 items-center">
                   <TextFormField
-                    className="flex-1 px-2"
+                    className="flex-1"
                     {...field("latitude")}
                     label={t("location")}
                     placeholder="Latitude"
                   />
 
                   <div className="flex flex-col justify-center md:block">
-                    <ButtonV2
-                      circle
-                      type="button"
-                      id="facility-location-button"
-                      onClick={(event) => setAnchorEl(event.currentTarget)}
-                      className="tooltip p-2"
-                    >
-                      <CareIcon className="care-l-map-marker text-xl" />
-                      <span className="tooltip-text tooltip-bottom">
-                        Select location from map
-                      </span>
-                    </ButtonV2>
-                    <Popover
-                      id={id}
-                      open={open}
-                      anchorEl={anchorEl}
-                      onClose={handleClose}
-                      anchorOrigin={{
-                        vertical: "top",
-                        horizontal: "left",
-                      }}
-                      transformOrigin={{
-                        vertical: "top",
-                        horizontal: "left",
-                      }}
-                    >
-                      <GLocationPicker
-                        lat={Number(state.form.latitude)}
-                        lng={Number(state.form.longitude)}
-                        handleOnChange={handleLocationChange}
-                        handleOnClose={handleClose}
-                        handleOnSelectCurrentLocation={
-                          handleSelectCurrentLocation
-                        }
-                      />
+                    <Popover id="map-popover" className="relative">
+                      <>
+                        <Popover.Button>
+                          <ButtonV2
+                            circle
+                            type="button"
+                            id="facility-location-button"
+                            className="tooltip p-2"
+                          >
+                            <CareIcon className="care-l-map-marker text-xl" />
+                            <span className="tooltip-text tooltip-bottom">
+                              Select location from map
+                            </span>
+                          </ButtonV2>
+                        </Popover.Button>
+
+                        <Transition
+                          as={Fragment}
+                          enter="transition ease-out duration-200"
+                          enterFrom="opacity-0 translate-y-1"
+                          enterTo="opacity-100 translate-y-0"
+                          leave="transition ease-in duration-150"
+                          leaveFrom="opacity-100 translate-y-0"
+                          leaveTo="opacity-0 translate-y-1"
+                        >
+                          <Popover.Panel className="absolute bottom-10 -right-40 sm:-right-48">
+                            <GLocationPicker
+                              lat={Number(state.form.latitude)}
+                              lng={Number(state.form.longitude)}
+                              handleOnChange={handleLocationChange}
+                              handleOnClose={() => null}
+                              handleOnSelectCurrentLocation={
+                                handleSelectCurrentLocation
+                              }
+                            />
+                          </Popover.Panel>
+                        </Transition>
+                      </>
                     </Popover>
                   </div>
                   <TextFormField
-                    className="flex-1 px-2"
+                    className="flex-1"
                     {...field("longitude")}
                     label={<br />}
                     placeholder="Longitude"
@@ -1020,12 +1008,16 @@ export const FacilityCreate = (props: FacilityProps) => {
                 </div>
                 <div className="mt-12 flex flex-col-reverse sm:flex-row gap-3 justify-end">
                   <Cancel onClick={() => goBack()} />
-                  <Submit onClick={handleSubmit} label={buttonText} />
+                  <Submit
+                    type="button"
+                    onClick={handleSubmit}
+                    label={buttonText}
+                  />
                 </div>
               </form>
-            </CardContent>
+            </div>
           </Card>
-        </div>
+        </Page>
       );
   }
 };

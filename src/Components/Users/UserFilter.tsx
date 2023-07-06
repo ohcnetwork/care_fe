@@ -129,7 +129,6 @@ export default function UserFilter(props: any) {
           name="district"
           selected={filterState.district_ref}
           setSelected={setDistrict}
-          className="shifting-page-filter-dropdown"
           errors={""}
         />
       </div>

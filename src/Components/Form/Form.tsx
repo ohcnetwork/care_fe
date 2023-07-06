@@ -20,6 +20,7 @@ type Props<T extends FormDetails> = {
   disabled?: boolean;
   submitLabel?: string;
   cancelLabel?: string;
+  onDraftRestore?: (newState: FormState<T>) => void;
   children: (props: FormContextValue<T>) => React.ReactNode;
 };
 
@@ -79,6 +80,7 @@ const Form = <T extends FormDetails>({
       <DraftSection
         handleDraftSelect={(newState: FormState<T>) => {
           dispatch({ type: "set_state", state: newState });
+          props.onDraftRestore?.(newState);
         }}
         formData={state.form}
       />
@@ -113,6 +115,7 @@ const Form = <T extends FormDetails>({
                 label={props.cancelLabel ?? "Cancel"}
               />
               <Submit
+                data-testid="submit-button"
                 type="submit"
                 disabled={disabled}
                 label={props.submitLabel ?? "Submit"}

@@ -19,7 +19,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { UserRole, USER_TYPES } from "../../Common/constants";
 import moment from "moment";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -233,7 +233,7 @@ const AssetManage = (props: AssetManageProps) => {
         }}
         backUrl="/assets"
       />
-      <ConfirmDialogV2
+      <ConfirmDialog
         title="Delete Asset"
         description="Are you sure you want to delete this asset?"
         action="Confirm"

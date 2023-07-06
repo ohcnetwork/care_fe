@@ -57,6 +57,7 @@ export interface PatientModel {
   last_consultation?: ConsultationModel;
   address?: string;
   permanent_address?: string;
+  sameAddress?: boolean;
   village?: string;
   pincode?: number;
   contact_with_confirmed_carrier?: boolean;

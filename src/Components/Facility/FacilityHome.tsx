@@ -40,7 +40,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -340,7 +340,7 @@ export const FacilityHome = (props: any) => {
       focusOnLoad={true}
       backUrl="/facility"
     >
-      <ConfirmDialogV2
+      <ConfirmDialog
         title={`Delete ${facilityData.name}`}
         description={
           <span>
@@ -601,7 +601,7 @@ export const FacilityHome = (props: any) => {
               </DropdownMenu>
             </div>
             <div className="flex flex-col justify-end">
-              {/* <ButtonV2
+              <ButtonV2
                 variant="primary"
                 ghost
                 border
@@ -610,7 +610,7 @@ export const FacilityHome = (props: any) => {
               >
                 <CareIcon className="care-l-monitor-heart-rate text-lg" />
                 <span>Central Nursing Station</span>
-              </ButtonV2> */}
+              </ButtonV2>
               <ButtonV2
                 variant="primary"
                 ghost

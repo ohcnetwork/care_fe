@@ -7,12 +7,12 @@ import {
 } from "../../Common/constants";
 import { SampleTestModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
-import { createUpload } from "../../Redux/actions";
+import { createUpload, editUpload } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
 import { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -122,6 +122,14 @@ const UpdateStatusDialog = (props: Props) => {
       .then(() => {
         setUploadStarted(false);
         setUploadDone(true);
+        redux_dispatch(
+          editUpload(
+            { upload_completed: true },
+            response.data.id,
+            "SAMPLE_MANAGEMENT",
+            sample.id?.toString() ?? ""
+          )
+        );
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
@@ -163,7 +171,7 @@ const UpdateStatusDialog = (props: Props) => {
   };
 
   return (
-    <ConfirmDialogV2
+    <ConfirmDialog
       title="Update Sample Test Status"
       show
       onClose={cancelClicked}
@@ -237,7 +245,7 @@ const UpdateStatusDialog = (props: Props) => {
           onChange={handleChange}
         />
       </div>
-    </ConfirmDialogV2>
+    </ConfirmDialog>
   );
 };
 
