@@ -44,7 +44,7 @@ import ShowInvestigation from "../Components/Facility/Investigations/ShowInvesti
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import AssetCreate from "../Components/Facility/AssetCreate";
 import DeathReport from "../Components/DeathReport/DeathReport";
-import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
+import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.bs";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";

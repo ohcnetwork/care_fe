@@ -33,7 +33,7 @@ import { Feed } from "./Consultations/Feed";
 import { FileUpload } from "../Patient/FileUpload";
 import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import InvestigationTab from "./Investigations/investigationsTab";
-import { make as Link } from "../Common/components/Link.gen";
+import { make as Link } from "../Common/components/Link.bs";
 import MedicineAdministrationsTable from "../Medicine/MedicineAdministrationsTable";
 import { NeurologicalTable } from "./Consultations/NeurologicalTables";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
