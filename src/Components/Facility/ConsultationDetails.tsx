@@ -1,4 +1,4 @@
-import { AssetBedModel, AssetClass } from "../Assets/AssetTypes";
+import { AssetBedModel, AssetClass, AssetData } from "../Assets/AssetTypes";
 import {
   CONSULTATION_TABS,
   DISCHARGE_REASONS,
@@ -97,6 +97,8 @@ export const ConsultationDetails = (props: any) => {
 
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
+  const [monitorAssetData, setMonitorAssetData] = useState<AssetData>();
+  const [ventilatorAssetData, setVentilatorAssetData] = useState<AssetData>();
 
   useEffect(() => {
     if (
@@ -119,9 +121,11 @@ export const ConsultationDetails = (props: any) => {
       const { middleware_address } = facilityRes.data as FacilityModel;
       const assetBeds = assetBedRes.data.results as AssetBedModel[];
 
-      const hl7Meta = assetBeds.find(
+      const assetDataForMonitor = assetBeds.find(
         (i) => i.asset_object.asset_class === AssetClass.HL7MONITOR
-      )?.asset_object?.meta;
+      )?.asset_object;
+      setMonitorAssetData(assetDataForMonitor);
+      const hl7Meta = assetDataForMonitor?.meta;
       const hl7Middleware = hl7Meta?.middleware_hostname || middleware_address;
       if (hl7Middleware && hl7Meta?.local_ip_address) {
         setHL7SocketUrl(
@@ -129,9 +133,11 @@ export const ConsultationDetails = (props: any) => {
         );
       }
 
-      const ventilatorMeta = assetBeds.find(
+      const assetDataForVentilator = assetBeds.find(
         (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
-      )?.asset_object?.meta;
+      )?.asset_object;
+      setVentilatorAssetData(assetDataForVentilator);
+      const ventilatorMeta = assetDataForVentilator?.meta;
       const ventilatorMiddleware =
         ventilatorMeta?.middleware_hostname || middleware_address;
       if (ventilatorMiddleware && ventilatorMeta?.local_ip_address) {
@@ -254,6 +260,28 @@ export const ConsultationDetails = (props: any) => {
       </div>
     ) : null;
   };
+
+  const monitorAssetLink = (
+    <Link href={`/facility/${facilityId}/assets/${monitorAssetData?.id}`}>
+      <p className="text-xl flex font-medium capitalize break-words p-2">
+        <span className="mr-2 text-white">
+          <CareIcon className="care-l-monitor-heart-rate text-2xl" />
+        </span>
+        <p className="truncate w-48 text-white">{monitorAssetData?.name}</p>
+      </p>
+    </Link>
+  );
+
+  const ventilatorAssetLink = (
+    <Link href={`/facility/${facilityId}/assets/${ventilatorAssetData?.id}`}>
+      <p className="text-xl flex font-medium capitalize break-words p-2">
+        <span className="mr-2 text-white">
+          <CareIcon className="care-l-lungs text-2xl" />
+        </span>
+        <p className="truncate w-48 text-white">{ventilatorAssetData?.name}</p>
+      </p>
+    </Link>
+  );
 
   return (
     <div>
@@ -504,11 +532,13 @@ export const ConsultationDetails = (props: any) => {
               hl7SocketUrl &&
               ventilatorSocketUrl && (
                 <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-auto">
-                  <div className="w-full lg:w-auto lg:min-w-[1280px] flex flex-col lg:flex-row bg-slate-800 gap-1 justify-between rounded mx-auto">
+                  <div className="w-full lg:w-auto lg:min-w-[1280px] flex flex-col lg:flex-row bg-[#020617] gap-1 justify-between rounded mx-auto">
                     <div className="flex-1 min-h-[400px]">
+                      {monitorAssetLink}
                       <HL7PatientVitalsMonitor socketUrl={hl7SocketUrl} />
                     </div>
                     <div className="flex-1 min-h-[400px]">
+                      {ventilatorAssetLink}
                       <VentilatorPatientVitalsMonitor
                         socketUrl={ventilatorSocketUrl}
                       />
@@ -525,9 +555,10 @@ export const ConsultationDetails = (props: any) => {
                       (!hl7SocketUrl && ventilatorSocketUrl)) && (
                       <section className="lg:col-span-2 bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
                         {(hl7SocketUrl || ventilatorSocketUrl) && (
-                          <div className="w-full lg:w-auto lg:min-w-[640px] flex flex-col lg:flex-row bg-slate-800 gap-1 justify-between rounded mx-auto">
+                          <div className="w-full lg:w-auto lg:min-w-[640px] flex flex-col lg:flex-row bg-[#020617] gap-1 justify-between rounded mx-auto">
                             {hl7SocketUrl && (
                               <div className="flex-1 min-h-[400px]">
+                                {monitorAssetLink}
                                 <HL7PatientVitalsMonitor
                                   socketUrl={hl7SocketUrl}
                                 />
@@ -535,6 +566,7 @@ export const ConsultationDetails = (props: any) => {
                             )}
                             {ventilatorSocketUrl && (
                               <div className="flex-1 min-h-[400px]">
+                                {ventilatorAssetLink}
                                 <VentilatorPatientVitalsMonitor
                                   socketUrl={ventilatorSocketUrl}
                                 />
