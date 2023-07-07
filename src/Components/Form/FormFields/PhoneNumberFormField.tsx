@@ -50,8 +50,8 @@ export default function PhoneNumberFormField(props: Props) {
   }, []);
 
   const validate = useMemo(
-    () => (value: string, event: "blur" | "change") => {
-      if (value === "" || props.disableValidation) {
+    () => (value: string | undefined, event: "blur" | "change") => {
+      if (!value || props.disableValidation) {
         return;
       }
 
@@ -83,7 +83,7 @@ export default function PhoneNumberFormField(props: Props) {
 
   return (
     <FormField field={{ ...field, error: field.error || error }}>
-      <div className="relative mt-2 rounded-md shadow-sm">
+      <div className="relative rounded-md shadow-sm">
         <input
           type="tel"
           id={field.id}
@@ -145,6 +145,10 @@ const conditionPhoneCode = (code: string) => {
 };
 
 const formatPhoneNumber = (value: string, disableCountry?: boolean) => {
+  if (!value) {
+    return disableCountry ? "" : "+91 ";
+  }
+
   if (!isValidPhoneNumber(value) || disableCountry) {
     return value;
   }
