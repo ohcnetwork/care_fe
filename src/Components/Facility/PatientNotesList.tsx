@@ -79,7 +79,7 @@ const PatientNotesList = (props: PatientNotesProps) => {
 
   if (isLoading && !state.notes.length) {
     return (
-      <div className="flex items-center justify-center w-full h-[400px]">
+      <div className=" bg-white flex items-center justify-center w-full h-[400px]">
         <CircularProgress />
       </div>
     );
@@ -94,7 +94,7 @@ const PatientNotesList = (props: PatientNotesProps) => {
         <InfiniteScroll
           next={handleNext}
           hasMore={state.cPage < state.totalPages}
-          height={385}
+          height={380}
           loader={
             <div className="flex items-center justify-center">
               <CircularProgress />
