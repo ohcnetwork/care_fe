@@ -53,6 +53,7 @@ import moment from "moment";
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
+import PatientNotesSlideover from "./PatientNotesSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -1236,6 +1237,8 @@ export const ConsultationDetails = (props: any) => {
         show={showDoctors}
         setShow={setShowDoctors}
       />
+
+      <PatientNotesSlideover patientId={patientId} facilityId={facilityId} />
     </div>
   );
 };
