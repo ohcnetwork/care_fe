@@ -145,7 +145,7 @@ const conditionPhoneCode = (code: string) => {
 };
 
 const formatPhoneNumber = (value: string, disableCountry?: boolean) => {
-  if (!value) {
+  if (value === undefined) {
     return disableCountry ? "" : "+91 ";
   }
 
