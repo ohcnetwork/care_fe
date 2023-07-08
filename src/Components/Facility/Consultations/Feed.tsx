@@ -54,6 +54,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [bed, setBed] = useState<any>();
   const [precision, setPrecision] = useState(1);
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
+  const [boundaryPreset, setBoundaryPreset] = useState<any>();
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -95,7 +96,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatch(getConsultation(consultationId));
-      if (!status.aborted && res.data) {
+      if (!status.aborted && res?.data) {
         const consultation = res.data as ConsultationModel;
         const consultationBedId = consultation.current_bed?.bed_object?.id;
         if (consultationBedId) {
@@ -118,18 +119,23 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           };
 
           if (bedAssets?.data?.results?.length) {
-            const { camera_access_key } =
-              bedAssets.data.results[0].asset_object.meta;
-            const config = camera_access_key.split(":");
-            setCameraAsset({
-              id: bedAssets.data.results[0].asset_object.id,
-              accessKey: config[2] || "",
-            });
-            setCameraConfig(bedAssets.data.results[0].meta);
-            setCameraState({
-              ...bedAssets.data.results[0].meta.position,
-              precision: 1,
-            });
+            bedAssets.data.results = bedAssets.data.results.filter(
+              (bedAsset: any) => bedAsset.meta.type !== "boundary"
+            );
+            if (bedAssets?.data?.results?.length) {
+              const { camera_access_key } =
+                bedAssets.data.results[0].asset_object.meta;
+              const config = camera_access_key.split(":");
+              setCameraAsset({
+                id: bedAssets.data.results[0].asset_object.id,
+                accessKey: config[2] || "",
+              });
+              setCameraConfig(bedAssets.data.results[0].meta);
+              setCameraState({
+                ...bedAssets.data.results[0].meta.position,
+                precision: 1,
+              });
+            }
           }
         }
 
@@ -197,6 +203,18 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const getBedPresets = async (asset: any) => {
     if (asset.id && bed) {
       const bedAssets = await dispatch(listAssetBeds({ asset: asset.id, bed }));
+      if (bedAssets?.data?.results?.length) {
+        bedAssets.data.results = bedAssets.data.results.filter(
+          (bedAsset: any) => {
+            if (bedAsset.meta.type === "boundary") {
+              setBoundaryPreset(bedAsset);
+              return false;
+            } else {
+              return true;
+            }
+          }
+        );
+      }
       setBedPresets(bedAssets?.data?.results);
     }
   };
@@ -338,9 +356,68 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     },
     other: (option, value) => {
       setLoading(option.loadingLabel);
-      relativeMove(getPTZPayload(option.action, precision, value), {
+      const payLoad = getPTZPayload(option.action, precision, value);
+      if (boundaryPreset?.meta?.range && cameraState) {
+        console.log("inside check", cameraState);
+
+        const range = boundaryPreset.meta.range;
+        if (option.action == "up" && cameraState.y + payLoad.y > range.max_y) {
+          Notification.Error({ msg: "Cannot move beyond boundary" });
+          setLoading(CAMERA_STATES.IDLE);
+          return;
+        } else if (
+          option.action == "down" &&
+          cameraState.y + payLoad.y < range.min_y
+        ) {
+          Notification.Error({ msg: "Cannot move beyond boundary" });
+          setLoading(CAMERA_STATES.IDLE);
+          return;
+        } else if (
+          option.action == "left" &&
+          cameraState.x + payLoad.x < range.min_x
+        ) {
+          Notification.Error({ msg: "Cannot move beyond boundary" });
+          setLoading(CAMERA_STATES.IDLE);
+          return;
+        } else if (
+          option.action == "right" &&
+          cameraState.x + payLoad.x > range.max_x
+        ) {
+          Notification.Error({ msg: "Cannot move beyond boundary" });
+          setLoading(CAMERA_STATES.IDLE);
+          return;
+        }
+      }
+      relativeMove(payLoad, {
         onSuccess: () => setLoading(CAMERA_STATES.IDLE),
+        onError: () => setLoading(CAMERA_STATES.IDLE),
       });
+      if (cameraState) {
+        let x = cameraState.x;
+        let y = cameraState.y;
+        switch (option.action) {
+          case "left":
+            x += -0.1 / cameraState.precision;
+            break;
+
+          case "right":
+            x += 0.1 / cameraState.precision;
+            break;
+
+          case "down":
+            y += -0.1 / cameraState.precision;
+            break;
+
+          case "up":
+            y += 0.1 / cameraState.precision;
+            break;
+
+          default:
+            break;
+        }
+
+        setCameraState({ ...cameraState, x: x, y: y });
+      }
     },
   };
 
@@ -532,32 +609,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                   styleType="BUTTON"
                   clickAction={() => {
                     button.callback();
-                    if (cameraState) {
-                      let x = cameraState.x;
-                      let y = cameraState.y;
-                      switch (button.action) {
-                        case "left":
-                          x += -0.1 / cameraState.precision;
-                          break;
-
-                        case "right":
-                          x += 0.1 / cameraState.precision;
-                          break;
-
-                        case "down":
-                          y += -0.1 / cameraState.precision;
-                          break;
-
-                        case "up":
-                          y += 0.1 / cameraState.precision;
-                          break;
-
-                        default:
-                          break;
-                      }
-
-                      setCameraState({ ...cameraState, x: x, y: y });
-                    }
                   }}
                 />
               );

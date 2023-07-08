@@ -5,6 +5,7 @@ import {
   partialUpdateAsset,
   createAssetBed,
   getPermittedFacility,
+  listAssetBeds,
 } from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
 import { BedModel } from "../../Facility/models";
@@ -42,8 +43,10 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [refreshPresetsHash, setRefreshPresetsHash] = useState(
     Number(new Date())
   );
+  const [boundayPresetExists, setBoundaryPresetExists] =
+    useState<boolean>(false);
   const dispatch = useDispatch<any>();
-
+  const boundaryBuffer = 2;
   useEffect(() => {
     const fetchFacility = async () => {
       const res = await dispatch(getPermittedFacility(facilityId));
@@ -68,6 +71,31 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     }
     setIsLoading(false);
   }, [asset]);
+
+  // checking if boundary preset exists
+  // no need to delete
+  useEffect(() => {
+    const getBoundaryBedPreset = async () => {
+      const res = await dispatch(listAssetBeds({ bed: bed.id }));
+      // console.log("res in onvif camera",res);
+      if (res && res.status === 200 && res.data) {
+        const bedAssets = res.data.results;
+
+        if (bedAssets.length > 0) {
+          const boundaryPreset = bedAssets.find(
+            (bedAsset: any) => bedAsset.meta.type === "boundary"
+          );
+          // console.log("Boundary preset in onvif camera",boundaryPreset);
+          if (boundaryPreset) {
+            setBoundaryPresetExists(true);
+          } else {
+            setBoundaryPresetExists(false);
+          }
+        }
+      }
+    };
+    if (bed?.id) getBoundaryBedPreset();
+  }, [bed]);
 
   const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -99,6 +127,55 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     } else {
       setIpAddress_error("Please Enter a Valid Camera address !!");
     }
+  };
+
+  // adding boundary preset
+  // no need to delete
+
+  const addBoundaryPreset = async (e: SyntheticEvent) => {
+    e.preventDefault();
+    const config = getCameraConfig(asset as AssetData);
+    try {
+      setLoadingAddPreset(true);
+      const presetData = await axios.get(
+        `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
+      );
+      const meta = {
+        type: "boundary",
+        preset_name: `${bed.name}-boundary`,
+        bed_id: bed.id,
+        error: presetData.data.error,
+        utcTime: presetData.data.utcTime,
+        range: {
+          max_x: boundaryBuffer,
+          min_x: -boundaryBuffer,
+          max_y: boundaryBuffer,
+          min_y: -boundaryBuffer,
+        },
+      };
+      const res = await Promise.resolve(
+        dispatch(createAssetBed({ meta: meta }, assetId, bed?.id as string))
+      );
+      console.log("res", res);
+      if (res?.status === 201) {
+        Notification.Success({
+          msg: "Boundary Preset Added Successfully",
+        });
+        setBed({});
+        setNewPreset("");
+        setRefreshPresetsHash(Number(new Date()));
+        setBoundaryPresetExists(true);
+      } else {
+        Notification.Error({
+          msg: "Failed to add Boundary Preset",
+        });
+      }
+    } catch (e) {
+      Notification.Error({
+        msg: "Something went wrong..!",
+      });
+    }
+    setLoadingAddPreset(false);
   };
 
   const addPreset = async (e: SyntheticEvent) => {
@@ -209,6 +286,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           isLoading={loadingAddPreset}
           refreshPresetsHash={refreshPresetsHash}
           facilityMiddlewareHostname={facilityMiddlewareHostname}
+          addBoundaryPreset={addBoundaryPreset}
+          boundaryPresetExists={boundayPresetExists}
         />
       ) : null}
     </div>
