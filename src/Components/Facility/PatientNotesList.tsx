@@ -87,20 +87,19 @@ const PatientNotesList = (props: PatientNotesProps) => {
 
   return (
     <div
-      className="flex flex-col-reverse h-[390px] overflow-auto m-2 bg-white"
+      className="flex flex-col-reverse grow h-[390px] overflow-auto m-2 bg-white"
       id="patient-notes-list"
     >
       {state.notes.length ? (
         <InfiniteScroll
           next={handleNext}
           hasMore={state.cPage < state.totalPages}
-          height={380}
           loader={
             <div className="flex items-center justify-center">
               <CircularProgress />
             </div>
           }
-          className="flex flex-col-reverse p-2"
+          className="flex flex-col-reverse p-2 h-full"
           inverse={true}
           dataLength={state.notes.length}
           scrollableTarget="patient-notes-list"

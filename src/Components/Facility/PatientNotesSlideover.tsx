@@ -56,8 +56,10 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   return (
     <div
       className={classNames(
-        "fixed right-0 sm:right-20 bottom-0",
-        show ? "w-[400px]" : "w-[250px]"
+        "fixed sm:right-20 bottom-0 z-20",
+        show
+          ? "w-screen h-screen sm:h-fit sm:w-[400px] right-0"
+          : "w-[250px] right-10"
       )}
     >
       {!show ? (
@@ -74,7 +76,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-t-md w-full h-[500px] flex flex-col border-2 border-b-0 pb-3 border-primary-800 transition-all overflow-clip -translate-y-0 ">
+        <div className="bg-white sm:rounded-t-md w-full h-screen sm:h-[500px] flex flex-col border-2 border-b-0 pb-3 border-primary-800 transition-all overflow-clip -translate-y-0 ">
           {/* Doctor Notes Header */}
           <div className="flex justify-between items-center w-full p-2 px-4 bg-primary-800 text-white">
             <span className="font-semibold">Doctor&apos;s Notes</span>
