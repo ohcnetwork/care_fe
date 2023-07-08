@@ -26,10 +26,10 @@ import FeedButton from "./FeedButton";
 import Loading from "../../Common/Loading";
 import ReactPlayer from "react-player";
 import { classNames } from "../../../Utils/utils";
-import screenfull from "screenfull";
 import { useDispatch } from "react-redux";
 import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import useKeyboardShortcut from "use-keyboard-shortcut";
+import useFullscreen from "../../../Common/hooks/useFullscreen.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -54,6 +54,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [bed, setBed] = useState<any>();
   const [precision, setPrecision] = useState(1);
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
+  const [isFullscreen, setFullscreen] = useFullscreen();
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -299,14 +300,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       });
     },
     fullScreen: () => {
-      if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
-      !screenfull.isFullscreen
-        ? screenfull.request(
-            videoWrapper.current
-              ? videoWrapper.current
-              : (liveFeedPlayerRef.current as HTMLElement)
-          )
-        : screenfull.exit();
+      if (!liveFeedPlayerRef.current) return;
+      setFullscreen(
+        !isFullscreen,
+        videoWrapper.current
+          ? videoWrapper.current
+          : (liveFeedPlayerRef.current as HTMLElement)
+      );
     },
     updatePreset: (option) => {
       getCameraStatus({
@@ -576,7 +576,7 @@ export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
   return (
     <button
       key="option.action"
-      className="tooltip rounded text-2xl text-white/40"
+      className="tooltip rounded text-2xl text-gray-600"
     >
       <CareIcon className="care-l-question-circle" />
 
