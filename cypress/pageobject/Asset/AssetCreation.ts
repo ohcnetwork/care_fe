@@ -77,6 +77,10 @@ export class AssetPage {
     cy.get("#submit").contains("Create Asset").click();
   }
 
+  clickCreateAddMore() {
+    cy.get("[data-testid=create-asset-add-more-button]").click();
+  }
+
   verifySuccessNotification(message: string) {
     cy.verifyNotification(message);
   }
@@ -119,5 +123,40 @@ export class AssetPage {
   deleteAsset() {
     cy.get("[data-testid=asset-delete-button]").click();
     cy.get("#submit").contains("Confirm").click();
+  }
+
+  verifyEmptyAssetNameError() {
+    cy.get("[data-testid=asset-name-input] span").should(
+      "contain",
+      "Asset name can't be empty"
+    );
+  }
+
+  verifyEmptyLocationError() {
+    cy.get("[data-testid=asset-location-input] span").should(
+      "contain",
+      "Select a location"
+    );
+  }
+
+  verifyEmptyAssetTypeError() {
+    cy.get("[data-testid=asset-type-input] span").should(
+      "contain",
+      "Select an asset type"
+    );
+  }
+
+  verifyEmptyStatusError() {
+    cy.get("[data-testid=asset-working-status-input] span").should(
+      "contain",
+      "Field is required"
+    );
+  }
+
+  verifyEmptyPhoneError() {
+    cy.get("#customer-support-phone-div span").should(
+      "contain",
+      "Please enter valid phone number"
+    );
   }
 }

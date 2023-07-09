@@ -263,7 +263,12 @@ const AssetsList = () => {
                       } text-2xl`}
                     />
                   </span>
-                  <p className="truncate w-48">{asset.name}</p>
+                  <p
+                    className="truncate w-48"
+                    data-testid="created-asset-list-name"
+                  >
+                    {asset.name}
+                  </p>
                 </p>
               </div>
               <p className="font-normal text-sm">
