@@ -66,7 +66,7 @@ export default function VentilatorPatientVitalsMonitor({
           )}
         </div>
       )}
-      <div className="flex flex-col md:flex-row md:justify-between divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2">
+      <div className="relative flex flex-col md:flex-row md:justify-between divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2">
         <div>
           <div
             className={classNames(
@@ -103,7 +103,7 @@ export default function VentilatorPatientVitalsMonitor({
             />
           </div>
         </div>
-        <div className="z-10 bg-[#020617] grid grid-cols-3 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
+        <div className="md:absolute md:right-0 md:inset-y-0 z-10 bg-[#020617] grid grid-cols-3 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
           <NonWaveformData
             label="PEEP"
             attr={data.peep}
@@ -141,7 +141,7 @@ const NonWaveformData = ({ label, attr, className }: NonWaveformDataProps) => {
     <div
       className={classNames("flex justify-between items-center p-1", className)}
     >
-      <div className="flex gap-2 items-start h-full font-bold">
+      <div className="flex flex-col gap-1 items-start h-full font-bold">
         <span className="text-sm">{label}</span>
         <span className="text-xs">{attr?.unit ?? "--"}</span>
       </div>

@@ -279,7 +279,6 @@ export default function ListFilter(props: any) {
               name="origin_facility"
               selected={filterState.origin_facility_ref}
               setSelected={(obj) => setFacility(obj, "origin_facility")}
-              className="shifting-page-filter-dropdown"
               errors={""}
             />
           )}
@@ -300,7 +299,6 @@ export default function ListFilter(props: any) {
                 setSelected={(obj) =>
                   setFacility(obj, "shifting_approving_facility")
                 }
-                className="shifting-page-filter-dropdown"
                 errors={""}
               />
             )}
@@ -319,7 +317,6 @@ export default function ListFilter(props: any) {
               name="assigned_facility"
               selected={filterState.assigned_facility_ref}
               setSelected={(obj) => setFacility(obj, "assigned_facility")}
-              className="shifting-page-filter-dropdown"
               errors={""}
             />
           )}

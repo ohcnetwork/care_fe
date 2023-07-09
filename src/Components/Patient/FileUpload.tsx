@@ -1,5 +1,5 @@
 import axios from "axios";
-import { CircularProgress, InputLabel } from "@material-ui/core";
+import CircularProgress from "../Common/components/CircularProgress";
 import loadable from "@loadable/component";
 import React, { useCallback, useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,13 +12,8 @@ import {
   editUpload,
 } from "../../Redux/actions";
 import { FileUploadModel } from "./models";
-import { LegacyTextInputField } from "../Common/HelperInputFields";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import Typography from "@material-ui/core/Typography";
-import Box from "@material-ui/core/Box";
 import * as Notification from "../../Utils/Notifications.js";
 import { VoiceRecorder } from "../../Utils/VoiceRecorder";
-import Modal from "@material-ui/core/Modal";
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
@@ -35,9 +30,10 @@ import Webcam from "react-webcam";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
+import Page from "../Common/components/Page";
+import FilePreviewDialog from "../Common/FilePreviewDialog";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const header_content_type: URLS = {
   pdf: "application/pdf",
@@ -73,16 +69,19 @@ const ExtImage: string[] = [
 
 export const LinearProgressWithLabel = (props: any) => {
   return (
-    <Box display="flex" alignItems="center">
-      <Box width="100%" mr={1}>
-        <LinearProgress variant="determinate" {...props} />
-      </Box>
-      <Box minWidth={35}>
-        <Typography variant="body2" color="textSecondary">{`${Math.round(
-          props.value
-        )}%`}</Typography>
-      </Box>
-    </Box>
+    <div className="flex align-middle">
+      <div className="w-full mr-2 my-auto">
+        <div className="w-full bg-primary-200 rounded-full h-1.5 mr-2">
+          <div
+            className="bg-primary-500 h-1.5 rounded-full"
+            style={{ width: `${props.value}%` }}
+          />
+        </div>
+      </div>
+      <div className="min-w-[35]">
+        <p className="text-slate-600">{`${Math.round(props.value)}%`}</p>
+      </div>
+    </div>
   );
 };
 
@@ -110,7 +109,7 @@ interface ModalDetails {
   archiveTime?: any;
 }
 
-interface StateInterface {
+export interface StateInterface {
   open: boolean;
   isImage: boolean;
   name: string;
@@ -251,38 +250,6 @@ export const FileUpload = (props: FileUploadProps) => {
     const offset = (page - 1) * limit;
     setCurrentPage(page);
     setOffset(offset);
-  };
-
-  const zoom_values = [
-    "h-1/6 w-1/6 my-40",
-    "h-2/6 w-2/6 my-32",
-    "h-3/6 w-3/6 my-24",
-    "h-4/6 w-4/6 my-20",
-    "h-5/6 w-5/6 my-16",
-    "h-full w-full my-12",
-  ];
-
-  const handleZoomIn = () => {
-    const checkFull = file_state.zoom === zoom_values.length;
-    setFileState({
-      ...file_state,
-      zoom: !checkFull ? file_state.zoom + 1 : file_state.zoom,
-    });
-  };
-
-  const handleZoomOut = () => {
-    const checkFull = file_state.zoom === 1;
-    setFileState({
-      ...file_state,
-      zoom: !checkFull ? file_state.zoom - 1 : file_state.zoom,
-    });
-  };
-
-  const handleRotate = (rotation: number) => {
-    setFileState((prev) => ({
-      ...prev,
-      rotation: prev.rotation + rotation,
-    }));
   };
 
   const UPLOAD_HEADING: { [index: string]: string } = {
@@ -1115,104 +1082,16 @@ export const FileUpload = (props: FileUploadProps) => {
 
   return (
     <div className={hideBack ? "py-2" : "p-4"}>
-      <Modal
-        open={file_state.open}
+      <FilePreviewDialog
+        show={file_state.open}
+        fileUrl={fileUrl}
+        file_state={file_state}
+        setFileState={setFileState}
+        downloadURL={downloadURL}
         onClose={handleClose}
-        aria-labelledby="simple-modal-title"
-        aria-describedby="simple-modal-description"
-      >
-        {fileUrl && fileUrl.length > 0 ? (
-          <>
-            <div className="flex absolute h-full sm:h-auto sm:inset-x-4 sm:top-4 p-4 sm:p-0 justify-between flex-col sm:flex-row">
-              <div className="flex gap-3">
-                {file_state.isImage && (
-                  <>
-                    {[
-                      [
-                        t("Zoom In"),
-                        "magnifying-glass-plus",
-                        handleZoomIn,
-                        file_state.zoom === zoom_values.length,
-                      ],
-                      [
-                        t("Zoom Out"),
-                        "magnifying-glass-minus",
-                        handleZoomOut,
-                        file_state.zoom === 1,
-                      ],
-                      [
-                        t("Rotate Left"),
-                        "rotate-left",
-                        () => handleRotate(-90),
-                        false,
-                      ],
-                      [
-                        t("Rotate Right"),
-                        "rotate-right",
-                        () => handleRotate(90),
-                        false,
-                      ],
-                    ].map((button, index) => (
-                      <button
-                        key={index}
-                        onClick={button[2] as () => void}
-                        className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70 z-50"
-                        disabled={button[3] as boolean}
-                      >
-                        <i className={`fas fa-${button[1]} mr-2`} />
-                        {button[0] as string}
-                      </button>
-                    ))}
-                  </>
-                )}
-              </div>
-              <div className="flex gap-3">
-                {downloadURL && downloadURL.length > 0 && (
-                  <a
-                    href={downloadURL}
-                    download={`${file_state.name}.${file_state.extension}`}
-                    className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
-                  >
-                    <i className="fas fa-download mr-2" />
-                    Download
-                  </a>
-                )}
-                <button
-                  onClick={handleClose}
-                  className="bg-white/60 text-black backdrop-blur rounded px-4 py-2 transition hover:bg-white/70"
-                >
-                  <i className="fas fa-times mr-2" />
-                  Close
-                </button>
-              </div>
-            </div>
-            {file_state.isImage ? (
-              <img
-                src={fileUrl}
-                alt="file"
-                className={
-                  "object-contain mx-auto " + zoom_values[file_state.zoom]
-                }
-                style={{
-                  transform: `rotate(${file_state.rotation}deg)`,
-                }}
-              />
-            ) : (
-              <iframe
-                title="Source Files"
-                src={fileUrl}
-                className="border-2 border-black bg-white w-4/6 h-5/6 mx-auto my-6"
-              />
-            )}
-          </>
-        ) : (
-          <div className="flex h-screen justify-center items-center">
-            <div className="text-center">
-              <CircularProgress />
-            </div>
-          </div>
-        )}
-      </Modal>
+        fixedWidth={false}
+        className="w-full h-[80vh] md:h-screen"
+      />
       <DialogModal
         show={modalOpenForCamera}
         title={
@@ -1494,7 +1373,7 @@ export const FileUpload = (props: FileUploadProps) => {
           </div>
         </div>
       </DialogModal>
-      <PageTitle
+      <Page
         title={`${UPLOAD_HEADING[type]}`}
         hideBack={hideBack}
         breadcrumbs={false}
@@ -1507,57 +1386,62 @@ export const FileUpload = (props: FileUploadProps) => {
             ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
             : `/facility/${facilityId}/patient/${patientId}`
         }
-      />
-      <div className="mt-4">
+      >
         <div className="md:grid grid-cols-2 gap-4">
           {audio ? (
             <div className="bg-white border rounded-lg shadow p-4">
-              <div>
-                <h4>Record and Upload Audio File</h4>
-              </div>
-              <InputLabel id="spo2-label">
-                Enter Audio File Name (optional)
-              </InputLabel>
-              <LegacyTextInputField
+              <h4 className="mb-4">Record and Upload Audio File</h4>
+              <TextFormField
                 name="consultation_audio_file"
-                variant="outlined"
-                margin="dense"
                 type="text"
-                InputLabelProps={{ shrink: !!audioName }}
+                label="Enter Audio File Name (optional)"
                 value={audioName}
                 disabled={uploadStarted}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  setAudioName(e.target.value);
+                onChange={(e: any) => {
+                  setAudioName(e.value);
                 }}
-                errors={audioFileError}
+                error={audioFileError}
               />
-              <div className="text-xs">
-                Please allow browser permission before you start speaking
-              </div>
               {audiouploadStarted ? (
-                <LinearProgress variant="determinate" value={uploadPercent} />
+                <LinearProgressWithLabel value={uploadPercent} />
               ) : (
-                <div className="flex flex-col lg:flex-row justify-between w-full">
+                <div className="flex flex-col gap-2 items-center lg:flex-row justify-between w-full">
                   {audioBlobExists && (
                     <div className="flex items-center w-full md:w-auto">
                       <ButtonV2
                         variant="danger"
                         className="w-full"
-                        onClick={deleteAudioBlob}
+                        onClick={() => {
+                          deleteAudioBlob();
+                        }}
                       >
                         <CareIcon className="care-l-trash h-4" /> Delete
                       </ButtonV2>
                     </div>
                   )}
-                  <VoiceRecorder
-                    createAudioBlob={createAudioBlob}
-                    confirmAudioBlobExists={confirmAudioBlobExists}
-                    reset={resetRecording}
-                    setResetRecording={setResetRecording}
-                  />
+                  <div className="flex items-center gap-4">
+                    <VoiceRecorder
+                      createAudioBlob={createAudioBlob}
+                      confirmAudioBlobExists={confirmAudioBlobExists}
+                      reset={resetRecording}
+                      setResetRecording={setResetRecording}
+                    />
+                    {!audioBlobExists && (
+                      <span className="text-sm text-warning-500 font-medium">
+                        <CareIcon className="care-l-exclamation-triangle text-base mr-1" />
+                        Please allow browser permission before you start
+                        speaking
+                      </span>
+                    )}
+                  </div>
                   {audioBlobExists && (
                     <div className="flex items-center w-full md:w-auto">
-                      <ButtonV2 onClick={handleAudioUpload} className="w-full">
+                      <ButtonV2
+                        onClick={() => {
+                          handleAudioUpload();
+                        }}
+                        className="w-full"
+                      >
                         <CareIcon className={"care-l-cloud-upload text-xl"} />
                         Save
                       </ButtonV2>
@@ -1568,35 +1452,31 @@ export const FileUpload = (props: FileUploadProps) => {
             </div>
           ) : null}
           {unspecified ? (
-            <div className="mt-4 md:mt-0 bg-white border rounded-lg shadow p-4">
+            <div className="mt-4 md:mt-0 bg-white border rounded-lg shadow p-4 flex-wrap">
               <div>
-                <h4>Upload New File</h4>
+                <h4 className="mb-4">Upload New File</h4>
               </div>
+              <TextFormField
+                name="consultation_file"
+                type="text"
+                label="Enter File Name"
+                required
+                value={uploadFileName}
+                disabled={uploadStarted}
+                onChange={(e: any) => {
+                  setUploadFileName(e.value);
+                }}
+                error={uploadFileError}
+              />
               <div>
-                <InputLabel id="spo2-label">Enter File Name*</InputLabel>
-                <LegacyTextInputField
-                  name="consultation_file"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  InputLabelProps={{ shrink: !!uploadFileName }}
-                  value={uploadFileName}
-                  disabled={uploadStarted}
-                  onChange={(e: any) => {
-                    setUploadFileName(e.target.value);
-                  }}
-                  errors={uploadFileError}
-                />
-              </div>
-              <div className="mt-4">
                 {uploadStarted ? (
                   <LinearProgressWithLabel value={uploadPercent} />
                 ) : (
-                  <div className="flex flex-col md:flex-row gap-2 justify-start md:justify-end w-full">
+                  <div className="flex flex-col xl:flex-row gap-2 items-center justify-start md:justify-end">
                     <AuthorizedChild authorizeFor={NonReadOnlyUsers}>
                       {({ isAuthorized }) =>
                         isAuthorized ? (
-                          <label className="font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square button-primary-default">
+                          <label className="font-medium h-min w-full inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1 button-size-default justify-center button-shape-square button-primary-default">
                             <CareIcon className="care-l-file-upload-alt text-lg" />
                             {t("choose_file")}
                             <input
@@ -1611,27 +1491,22 @@ export const FileUpload = (props: FileUploadProps) => {
                         )
                       }
                     </AuthorizedChild>
-                    <div>
-                      <ButtonV2
-                        className="w-full md:w-fit"
-                        onClick={() => setModalOpenForCamera(true)}
-                      >
-                        <CareIcon className="care-l-camera text-lg mr-2" />
-                        Open Camera
-                      </ButtonV2>
-                    </div>
-
-                    <div>
-                      <ButtonV2
-                        className="w-full md:w-fit"
-                        authorizeFor={NonReadOnlyUsers}
-                        disabled={!file || !uploadFileName || !isActive}
-                        onClick={() => handleUpload({ status })}
-                      >
-                        <CareIcon className="care-l-cloud-upload text-lg" />
-                        {t("upload")}
-                      </ButtonV2>
-                    </div>
+                    <ButtonV2
+                      onClick={() => setModalOpenForCamera(true)}
+                      className="w-full"
+                    >
+                      <CareIcon className="care-l-camera text-lg mr-2" />
+                      Open Camera
+                    </ButtonV2>
+                    <ButtonV2
+                      authorizeFor={NonReadOnlyUsers}
+                      disabled={!file || !uploadFileName || !isActive}
+                      onClick={() => handleUpload({ status })}
+                      className="w-full"
+                    >
+                      <CareIcon className="care-l-cloud-upload text-lg" />
+                      {t("upload")}
+                    </ButtonV2>
                   </div>
                 )}
                 {file && (
@@ -1651,20 +1526,14 @@ export const FileUpload = (props: FileUploadProps) => {
             </div>
           ) : null}
         </div>
-      </div>
+      </Page>
 
-      <PageTitle
-        title={`${VIEW_HEADING[type]}`}
-        hideBack={true}
-        breadcrumbs={false}
-      />
-      <HeadedTabs
-        tabs={tabs}
-        handleChange={handleTabChange}
-        currentTabState={sortFileState}
-      />
-
-      <div>
+      <Page title={`${VIEW_HEADING[type]}`} hideBack={true} breadcrumbs={false}>
+        <HeadedTabs
+          tabs={tabs}
+          handleChange={handleTabChange}
+          currentTabState={sortFileState}
+        />
         {sortFileState === "UNARCHIVED" ? (
           // First it would check the filtered array contains any files or not else it would state the message
           <>
@@ -1716,7 +1585,7 @@ export const FileUpload = (props: FileUploadProps) => {
             )}
           </>
         )}
-      </div>
+      </Page>
     </div>
   );
 };
