@@ -1,43 +1,43 @@
-import { useCallback, useEffect, useState } from "react";
-import loadable from "@loadable/component";
-import { useDispatch, useSelector } from "react-redux";
-import moment from "moment";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import * as Notification from "../../Utils/Notifications.js";
 import {
   addUserFacility,
+  clearHomeFacility,
+  deleteUser,
   deleteUserFacility,
+  getDistrict,
   getUserList,
   getUserListFacility,
-  deleteUser,
-  getDistrict,
   partialUpdateUser,
-  clearHomeFacility,
 } from "../../Redux/actions";
-import { navigate } from "raviger";
-import { USER_TYPES } from "../../Common/constants";
-import { FacilityModel } from "../Facility/models";
-import { CircularProgress, Button } from "@material-ui/core";
-import LinkFacilityDialog from "./LinkFacilityDialog";
-import UserDeleteDialog from "./UserDeleteDialog";
-import * as Notification from "../../Utils/Notifications.js";
-import UserFilter from "./UserFilter";
-import UserDetails from "../Common/UserDetails";
-import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
-import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
-import SearchInput from "../Form/SearchInput";
-import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
-import useFilters from "../../Common/hooks/useFilters";
-import { classNames } from "../../Utils/utils";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import SkillsSlideOver from "./SkillsSlideOver";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import CountBlock from "../../CAREUI/display/Count";
 import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import CountBlock from "../../CAREUI/display/Count";
+import { FacilityModel } from "../Facility/models";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import SearchInput from "../Form/SearchInput";
+import SkillsSlideOver from "./SkillsSlideOver";
+import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
+import { USER_TYPES } from "../../Common/constants";
+import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
+import UserDeleteDialog from "./UserDeleteDialog";
+import UserDetails from "../Common/UserDetails";
+import UserFilter from "./UserFilter";
+import { classNames } from "../../Utils/utils";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { navigate } from "raviger";
+import useFilters from "../../Common/hooks/useFilters";
+import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
+import CircularProgress from "../Common/components/CircularProgress.js";
+import Page from "../Common/components/Page.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ManageUsers() {
   const { width } = useWindowDimensions();
@@ -169,22 +169,14 @@ export default function ManageUsers() {
   };
 
   const showDelete = (user: any) => {
-    const STATE_ADMIN_LEVEL = USER_TYPES.indexOf("StateAdmin");
-    const STATE_READ_ONLY_ADMIN_LEVEL =
-      USER_TYPES.indexOf("StateReadOnlyAdmin");
-    const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
-    const level = USER_TYPES.indexOf(user.user_type);
-    const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
     if (user.is_superuser) return true;
 
-    if (currentUserLevel >= STATE_ADMIN_LEVEL)
-      return user.state_object?.id === currentUser?.data?.state;
     if (
-      currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL &&
-      currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
-      currentUserLevel > level
+      USER_TYPES.indexOf(currentUser.data.user_type) >=
+      USER_TYPES.indexOf("StateAdmin")
     )
-      return user?.district_object?.id === currentUser?.data?.district;
+      return user.state_object?.id === currentUser?.data?.state;
+
     return false;
   };
 
@@ -251,13 +243,14 @@ export default function ManageUsers() {
                     ></i>
                   ) : null}
                   {showDelete(user) && (
-                    <button
-                      type="button"
-                      className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-white hover:bg-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                    <ButtonV2
+                      variant="danger"
+                      ghost
+                      border
                       onClick={() => handleDelete(user)}
                     >
                       Delete
-                    </button>
+                    </ButtonV2>
                   )}
                 </div>
 
@@ -420,7 +413,12 @@ export default function ManageUsers() {
   }
 
   return (
-    <div>
+    <Page
+      title="User Management"
+      hideBack={true}
+      className="mx-5 px-2"
+      breadcrumbs={false}
+    >
       {expandSkillList && (
         <SkillsSlideOver
           show={expandSkillList}
@@ -428,12 +426,6 @@ export default function ManageUsers() {
           username={selectedUser}
         />
       )}
-      <PageTitle
-        title="User Management"
-        hideBack={true}
-        className="mx-5 px-2"
-        breadcrumbs={false}
-      />
       <SlideOverCustom
         open={expandFacilityList}
         setOpen={setExpandFacilityList}
@@ -498,7 +490,7 @@ export default function ManageUsers() {
           handleOk={handleSubmit}
         />
       )}
-    </div>
+    </Page>
   );
 }
 
@@ -535,11 +527,6 @@ function UserFacilities(props: { user: any }) {
       newFacility: undefined,
     });
   };
-
-  const [linkFacility, setLinkFacility] = useState<{
-    show: boolean;
-    username: string;
-  }>({ show: false, username: "" });
   const hideUnlinkFacilityModal = () => {
     setUnlinkFacilityData({
       show: false,
@@ -588,15 +575,7 @@ function UserFacilities(props: { user: any }) {
     hideUnlinkFacilityModal();
   };
 
-  const hideLinkFacilityModal = () => {
-    setLinkFacility({
-      show: false,
-      username: "",
-    });
-  };
-
   const addFacility = async (username: string, facility: any) => {
-    hideLinkFacilityModal();
     setIsLoading(true);
     const res = await dispatch(addUserFacility(username, String(facility.id)));
     if (res?.status !== 201) {
@@ -615,13 +594,6 @@ function UserFacilities(props: { user: any }) {
 
   return (
     <div className="h-full">
-      {linkFacility.show && (
-        <LinkFacilityDialog
-          username={linkFacility.username}
-          handleOk={addFacility}
-          handleCancel={hideLinkFacilityModal}
-        />
-      )}
       {unlinkFacilityData.show && (
         <UnlinkFacilityDialog
           facilityName={unlinkFacilityData.facility?.name || ""}
@@ -642,19 +614,18 @@ function UserFacilities(props: { user: any }) {
           errors=""
           className="z-40"
         />
-        <Button
-          color="primary"
+        <ButtonV2
+          id="link-facility"
           disabled={!facility}
           className="mt-1"
           onClick={() => addFacility(username, facility)}
-          autoFocus
         >
           Add
-        </Button>
+        </ButtonV2>
       </div>
       {isLoading ? (
         <div className="flex justify-center items-center">
-          <CircularProgress className="text-primary-500" />
+          <CircularProgress />
         </div>
       ) : (
         <div className="flex flex-col">
@@ -664,7 +635,7 @@ function UserFacilities(props: { user: any }) {
               <div className="text-lg font-bold mb-2 ml-2">Home Facility</div>
               <div className="relative p-2 hover:bg-gray-200 focus:bg-gray-200 transition rounded md:rounded-lg cursor-pointer">
                 <div className="flex justify-between items-center">
-                  <div className="">{user?.home_facility_object?.name}</div>
+                  <span>{user?.home_facility_object?.name}</span>
                   <div className="flex items-center gap-2">
                     <button
                       className="tooltip text-lg text-red-600"
@@ -703,13 +674,14 @@ function UserFacilities(props: { user: any }) {
                   }
                   return (
                     <div
+                      id={`facility_${i}`}
                       key={`facility_${i}`}
                       className={classNames(
                         "relative p-2 hover:bg-gray-200 focus:bg-gray-200 transition rounded md:rounded-lg cursor-pointer"
                       )}
                     >
                       <div className="flex justify-between items-center">
-                        <div className="">{facility.name}</div>
+                        <span>{facility.name}</span>
                         <div className="flex items-center gap-2">
                           <button
                             className="tooltip text-lg hover:text-primary-500"

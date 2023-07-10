@@ -1,7 +1,8 @@
-import { classNames } from "../../../Utils/utils";
 import DateInputV2, { DatePickerPosition } from "../../Common/DateInputV2";
-import FormField from "./FormField";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+
+import FormField from "./FormField";
+import { classNames } from "../../../Utils/utils";
 
 type Props = FormFieldBaseProps<Date> & {
   placeholder?: string;
@@ -33,7 +34,12 @@ const DateFormField = (props: Props) => {
       <DateInputV2
         className={classNames(field.error && "border-red-500")}
         id={field.id}
-        value={field.value}
+        name={field.name}
+        value={
+          field.value && typeof field.value === "string"
+            ? new Date(field.value)
+            : field.value
+        }
         onChange={field.handleChange}
         disabled={field.disabled}
         max={props.max || (props.disableFuture ? new Date() : undefined)}

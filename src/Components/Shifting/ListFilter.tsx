@@ -3,22 +3,21 @@ import {
   DISEASE_STATUS,
   SHIFTING_FILTER_ORDER,
 } from "../../Common/constants";
-import { DateRangePicker, getDate } from "../Common/DateRangePicker";
+import { DateRange } from "../Common/DateRangeInputV2";
 import React, { useEffect, useState } from "react";
 import {
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
 } from "../../Common/constants";
 import { getAnyFacility, getUserList } from "../../Redux/actions";
-
-import { CircularProgress } from "@material-ui/core";
+import CircularProgress from "../Common/components/CircularProgress";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
-import { LegacySelectField } from "../Common/HelperInputFields";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { UserSelect } from "../Common/UserSelect2";
 import moment from "moment";
 import { navigate } from "raviger";
 import parsePhoneNumberFromString from "libphonenumber-js";
@@ -26,6 +25,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import useMergeState from "../../Common/hooks/useMergeState";
 import { useTranslation } from "react-i18next";
+import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 
 const clearFilterState = {
   orgin_facility: "",
@@ -51,13 +51,15 @@ const clearFilterState = {
   breathlessness_level: "",
 };
 
+const getDate = (value: any) =>
+  value && moment(value).isValid() && moment(value).toDate();
+
 export default function ListFilter(props: any) {
   const { kasp_enabled, kasp_string, wartime_shifting } = useConfig();
   const { filter, onChange, closeFilter } = props;
   const [isOriginLoading, setOriginLoading] = useState(false);
   const [isShiftingLoading, setShiftingLoading] = useState(false);
   const [isAssignedLoading, setAssignedLoading] = useState(false);
-  const [isAssignedUserLoading, setAssignedUserLoading] = useState(false);
   const { t } = useTranslation();
 
   const shiftStatusOptions = (
@@ -71,20 +73,20 @@ export default function ListFilter(props: any) {
     shifting_approving_facility_ref: null,
     assigned_facility: filter.assigned_facility || "",
     assigned_facility_ref: null,
-    emergency: filter.emergency || "--",
-    is_up_shift: filter.is_up_shift || "--",
+    emergency: filter.emergency || "",
+    is_up_shift: filter.is_up_shift || "",
     created_date_before: filter.created_date_before || null,
     created_date_after: filter.created_date_after || null,
     modified_date_before: filter.modified_date_before || null,
     modified_date_after: filter.modified_date_after || null,
     patient_phone_number: filter.patient_phone_number || "",
     ordering: filter.ordering || null,
-    is_kasp: filter.is_kasp || "--",
+    is_kasp: filter.is_kasp || "",
     status: filter.status || null,
     assigned_user_ref: null,
     assigned_to: filter.assigned_to || "",
     disease_status: filter.disease_status || "",
-    is_antenatal: filter.is_antenatal || "--",
+    is_antenatal: filter.is_antenatal || "",
     breathlessness_level: filter.breathlessness_level || "",
   });
   const dispatch: any = useDispatch();
@@ -143,16 +145,13 @@ export default function ListFilter(props: any) {
   useEffect(() => {
     async function fetchData() {
       if (filter.assigned_to) {
-        setAssignedUserLoading(true);
         const res = await dispatch(getUserList({ id: filter.assigned_to }));
-
         if (res && res.data && res.data.count) {
           setFilterState({
             ...filterState,
             assigned_user_ref: res.data.results[0],
           });
         }
-        setAssignedUserLoading(false);
       }
     }
     fetchData();
@@ -174,23 +173,10 @@ export default function ListFilter(props: any) {
     setFilterState(filterData);
   };
 
-  const handleChange = (event: any) => {
-    const { name } = event.target;
-    let { value } = event.target;
-
-    if (value === "--") {
-      value = "";
-    }
-    const filterData: any = { ...filterState };
-    filterData[name] = value;
-
-    setFilterState(filterData);
-  };
-
   const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
     setFilterState({
       ...filterState,
-      [event.name]: event.value === "--" ? "" : event.value,
+      [event.name]: event.value,
     });
   };
 
@@ -250,15 +236,10 @@ export default function ListFilter(props: any) {
     onChange(data);
   };
 
-  const handleDateRangeChange = (
-    startDateId: string,
-    endDateId: string,
-    { startDate, endDate }: any
-  ) => {
+  const handleDateRangeChange = (event: FieldChangeEvent<DateRange>) => {
     const filterData: any = { ...filterState };
-    filterData[startDateId] = startDate?.toString();
-    filterData[endDateId] = endDate?.toString();
-
+    filterData[`${event.name}_after`] = event.value.start?.toString();
+    filterData[`${event.name}_before`] = event.value.end?.toString();
     setFilterState(filterData);
   };
 
@@ -273,25 +254,24 @@ export default function ListFilter(props: any) {
       }}
     >
       {props.showShiftingStatus && (
-        <div>
-          <FieldLabel>{t("status")}</FieldLabel>
-          <LegacySelectField
-            name="status"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
-            value={filterState.status}
-            options={["--", ...shiftStatusOptions]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
+        <SelectFormField
+          name="status"
+          id="status"
+          label={t("status")}
+          placeholder="Show all"
+          value={filterState.status}
+          options={shiftStatusOptions}
+          optionLabel={(option) => option}
+          optionValue={(option) => option}
+          onChange={(option) => handleFormFieldChange(option)}
+          errorClassName="hidden"
+        />
       )}
       <div>
         <FieldLabel>{t("origin_facility")}</FieldLabel>
         <div className="">
           {isOriginLoading ? (
-            <CircularProgress size={20} />
+            <CircularProgress className="h-5 w-5" />
           ) : (
             <FacilitySelect
               multiple={false}
@@ -310,7 +290,7 @@ export default function ListFilter(props: any) {
           <FieldLabel>{t("shifting_approving_facility")}</FieldLabel>
           <div className="">
             {isShiftingLoading ? (
-              <CircularProgress size={20} />
+              <CircularProgress className="h-5 w-5" />
             ) : (
               <FacilitySelect
                 multiple={false}
@@ -331,7 +311,7 @@ export default function ListFilter(props: any) {
         <FieldLabel>{t("assigned_facility")}</FieldLabel>
         <div className="">
           {isAssignedLoading ? (
-            <CircularProgress size={20} />
+            <CircularProgress className="h-5 w-5" />
           ) : (
             <FacilitySelect
               multiple={false}
@@ -345,122 +325,115 @@ export default function ListFilter(props: any) {
         </div>
       </div>
 
-      <div>
-        <FieldLabel>{t("assigned_to")}</FieldLabel>
-        {isAssignedUserLoading ? (
-          <CircularProgress size={20} />
-        ) : (
-          <UserSelect
-            name="assigned_to"
-            multiple={false}
-            selected={filterState.assigned_user_ref}
-            setSelected={(obj) => setAssignedUser(obj)}
-            className="shifting-page-filter-dropdown"
-            errors={""}
-          />
-        )}
-      </div>
-
-      <div className="-mt-6">
-        <FieldLabel>{t("ordering")}</FieldLabel>
-        <LegacySelectField
-          name="ordering"
-          variant="outlined"
-          margin="dense"
-          optionKey="text"
-          optionValue="desc"
-          value={filterState.ordering}
-          options={SHIFTING_FILTER_ORDER}
-          onChange={handleChange}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+      {isAssignedLoading ? (
+        <CircularProgress className="h-5 w-5" />
+      ) : (
+        <UserAutocompleteFormField
+          label={t("assigned_to")}
+          name="assigned_to"
+          id="assigned-to"
+          value={filterState.assigned_user_ref}
+          onChange={({ value }) => setAssignedUser(value)}
+          errorClassName="hidden"
         />
-      </div>
-
-      <div>
-        <FieldLabel>{t("is_emergency_case")}</FieldLabel>
-        <LegacySelectField
-          name="emergency"
-          variant="outlined"
-          margin="dense"
-          optionArray={true}
-          value={filterState.emergency}
-          options={["--", "yes", "no"]}
-          onChange={handleChange}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
-
-      {kasp_enabled && (
-        <div>
-          <FieldLabel>{`${t("is")} ${kasp_string}`}</FieldLabel>
-          <LegacySelectField
-            name="is_kasp"
-            variant="outlined"
-            margin="dense"
-            optionArray={true}
-            value={filterState.is_kasp}
-            options={["--", "yes", "no"]}
-            onChange={handleChange}
-            className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-          />
-        </div>
       )}
 
-      <div>
-        <FieldLabel>{t("is_upshift_case")}</FieldLabel>
-        <LegacySelectField
-          name="is_up_shift"
-          variant="outlined"
-          margin="dense"
-          optionArray={true}
-          value={filterState.is_up_shift}
-          options={["--", "yes", "no"]}
-          onChange={handleChange}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
+      <SelectFormField
+        name="ordering"
+        id="ordering"
+        label={t("ordering")}
+        placeholder="No ordering"
+        value={filterState.ordering}
+        options={SHIFTING_FILTER_ORDER}
+        optionLabel={(option) => option.label}
+        optionDescription={(option) => option.desc}
+        optionValue={(option) => option.text}
+        optionSelectedLabel={(option) => option.desc}
+        onChange={(option) => {
+          handleFormFieldChange(option);
+        }}
+        errorClassName="hidden"
+      />
 
-      <div>
-        <FieldLabel>{t("disease_status")}</FieldLabel>
-        <LegacySelectField
-          name="disease_status"
-          variant="outlined"
-          margin="dense"
-          optionArray={true}
-          value={filterState.disease_status}
-          options={["--", ...DISEASE_STATUS]}
-          onChange={handleChange}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
+      <SelectFormField
+        name="emergency"
+        id="emergency"
+        placeholder="Show all"
+        label={t("is_emergency_case")}
+        value={filterState.emergency}
+        options={["yes", "no"]}
+        optionLabel={(option) => option}
+        optionValue={(option) => option}
+        onChange={(option) => handleFormFieldChange(option)}
+        errorClassName="hidden"
+      />
 
-      <div>
-        <FieldLabel>{t("is_antenatal")}</FieldLabel>
-        <LegacySelectField
-          name="is_antenatal"
-          variant="outlined"
-          margin="dense"
-          optionArray={true}
-          value={filterState.is_antenatal}
-          options={["--", "yes", "no"]}
-          onChange={handleChange}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+      {kasp_enabled && (
+        <SelectFormField
+          name="is_kasp"
+          id="is-kasp"
+          placeholder="Show all"
+          label={`${t("is")} ${kasp_string}`}
+          value={filterState.is_kasp}
+          options={["yes", "no"]}
+          optionLabel={(option) => option}
+          optionValue={(option) => option}
+          onChange={(option) => handleFormFieldChange(option)}
+          errorClassName="hidden"
         />
-      </div>
+      )}
 
-      <div>
-        <FieldLabel>{t("breathlessness_level")}</FieldLabel>
-        <LegacySelectField
-          name="breathlessness_level"
-          variant="outlined"
-          margin="dense"
-          optionArray={true}
-          value={filterState.breathlessness_level}
-          options={["--", ...BREATHLESSNESS_LEVEL]}
-          onChange={handleChange}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
-        />
-      </div>
+      <SelectFormField
+        name="is_up_shift"
+        id="is-up-shift"
+        placeholder="Show all"
+        label={t("is_upshift_case")}
+        value={filterState.is_up_shift}
+        options={["yes", "no"]}
+        optionLabel={(option) => option}
+        optionValue={(option) => option}
+        onChange={(option) => handleFormFieldChange(option)}
+        errorClassName="hidden"
+      />
+
+      <SelectFormField
+        name="disease_status"
+        id="disease-status"
+        placeholder="Show all"
+        label={t("disease_status")}
+        value={filterState.disease_status}
+        options={DISEASE_STATUS}
+        optionLabel={(option) => option}
+        optionValue={(option) => option}
+        onChange={(option) => handleFormFieldChange(option)}
+        errorClassName="hidden"
+      />
+
+      <SelectFormField
+        name="is_antenatal"
+        id="is-antenatal"
+        placeholder="Show all"
+        label={t("is_antenatal")}
+        value={filterState.is_antenatal}
+        options={["yes", "no"]}
+        optionLabel={(option) => option}
+        optionValue={(option) => option}
+        onChange={(option) => handleFormFieldChange(option)}
+        errorClassName="hidden"
+      />
+
+      <SelectFormField
+        name="breathlessness_level"
+        id="breathlessness-level"
+        placeholder="Show all"
+        label={t("breathlessness_level")}
+        value={filterState.breathlessness_level}
+        options={BREATHLESSNESS_LEVEL}
+        optionLabel={(option) => option}
+        optionValue={(option) => option}
+        onChange={(option) => handleFormFieldChange(option)}
+        errorClassName="hidden"
+      />
 
       <PhoneNumberFormField
         label={t("patient_phone_number")}
@@ -469,32 +442,29 @@ export default function ListFilter(props: any) {
         onChange={handleFormFieldChange}
         errorClassName="hidden"
       />
-
-      <DateRangePicker
-        startDate={getDate(filterState.created_date_after)}
-        endDate={getDate(filterState.created_date_before)}
-        onChange={(e) =>
-          handleDateRangeChange("created_date_after", "created_date_before", e)
-        }
-        endDateId={"created_date_before"}
-        startDateId={"created_date_after"}
+      <DateRangeFormField
+        labelClassName="text-sm"
+        name="created_date"
+        id="created-date"
         label={t("created_date")}
-        size="small"
+        value={{
+          start: getDate(filterState.created_date_after),
+          end: getDate(filterState.created_date_before),
+        }}
+        onChange={handleDateRangeChange}
+        errorClassName="hidden"
       />
-      <DateRangePicker
-        startDate={getDate(filterState.modified_date_after)}
-        endDate={getDate(filterState.modified_date_before)}
-        onChange={(e) =>
-          handleDateRangeChange(
-            "modified_date_after",
-            "modified_date_before",
-            e
-          )
-        }
-        endDateId={"modified_date_before"}
-        startDateId={"modified_date_after"}
+      <DateRangeFormField
+        labelClassName="text-sm"
+        name="modified_date"
+        id="modified-date"
         label={t("modified_date")}
-        size="small"
+        value={{
+          start: getDate(filterState.modified_date_after),
+          end: getDate(filterState.modified_date_before),
+        }}
+        onChange={handleDateRangeChange}
+        errorClassName="hidden"
       />
     </FiltersSlideover>
   );

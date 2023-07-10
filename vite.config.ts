@@ -57,6 +57,7 @@ export default defineConfig({
       // workaround for react-phone-input-2 https://github.com/vitejs/vite/issues/2139#issuecomment-1405624744
       defaultIsModuleExports(id) {
         try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
           const module = require(id);
           if (module?.default) {
             return false;
@@ -73,7 +74,16 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: "https://carehcx-preview.ohc.network",
+        target: "https://careapi.ohc.network",
+        changeOrigin: true,
+      },
+    },
+  },
+  preview: {
+    port: 4000,
+    proxy: {
+      "/api": {
+        target: "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },

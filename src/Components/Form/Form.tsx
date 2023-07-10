@@ -1,14 +1,14 @@
 import { isEmpty, omitBy } from "lodash";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { classNames } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { FieldValidator } from "./FieldValidators";
-import { FormContext, FormContextValue } from "./FormContext";
+import { FormContextValue, createFormContext } from "./FormContext";
 import { FieldChangeEvent } from "./FormFields/Utils";
-import { FormDetails, FormErrors, formReducer, FormReducer } from "./Utils";
+import { FormDetails, FormErrors, FormState, formReducer } from "./Utils";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 
 type Props<T extends FormDetails> = {
-  context: FormContext<T>;
   className?: string;
   defaults: T;
   asyncGetDefaults?: (() => Promise<T>) | false;
@@ -30,7 +30,7 @@ const Form = <T extends FormDetails>({
 }: Props<T>) => {
   const initial = { form: props.defaults, errors: {} };
   const [isLoading, setIsLoading] = useState(!!asyncGetDefaults);
-  const [state, dispatch] = useReducer<FormReducer<T>>(formReducer, initial);
+  const [state, dispatch] = useAutoSaveReducer<T>(formReducer, initial);
 
   useEffect(() => {
     if (!asyncGetDefaults) return;
@@ -43,6 +43,7 @@ const Form = <T extends FormDetails>({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    event.stopPropagation();
 
     if (validate) {
       const errors = omitBy(validate(state.form), isEmpty) as FormErrors<T>;
@@ -62,19 +63,25 @@ const Form = <T extends FormDetails>({
     }
   };
 
-  const { Provider, Consumer } = props.context;
+  const { Provider, Consumer } = useMemo(() => createFormContext<T>(), []);
   const disabled = isLoading || props.disabled;
 
   return (
     <form
       onSubmit={handleSubmit}
       className={classNames(
-        "bg-white rounded w-full max-w-3xl mx-auto",
+        "bg-white rounded w-full mx-auto",
         !props.noPadding && "px-8 md:px-16 py-5 md:py-11",
         props.className
       )}
       noValidate
     >
+      <DraftSection
+        handleDraftSelect={(newState: FormState<T>) => {
+          dispatch({ type: "set_state", state: newState });
+        }}
+        formData={state.form}
+      />
       <Provider
         value={(name: keyof T, validate?: FieldValidator<T[keyof T]>) => {
           return {
@@ -85,7 +92,7 @@ const Form = <T extends FormDetails>({
                 type: "set_field",
                 name,
                 value,
-                error: validate && validate(value),
+                error: validate?.(value),
               }),
             value: state.form[name],
             error: state.errors[name],
@@ -97,7 +104,7 @@ const Form = <T extends FormDetails>({
           <Consumer>{props.children}</Consumer>
         ) : (
           <>
-            <div className="my-6 flex flex-col gap-4">
+            <div className="my-6">
               <Consumer>{props.children}</Consumer>
             </div>
             <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">

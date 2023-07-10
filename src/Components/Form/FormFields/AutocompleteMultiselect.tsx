@@ -8,6 +8,7 @@ import {
   dropdownOptionClassNames,
   MultiSelectOptionChip,
 } from "../MultiSelectMenuV2";
+import { classNames } from "../../../Utils/utils";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -50,6 +51,7 @@ type AutocompleteMutliSelectProps<T, V = T> = {
   onChange: OptionCallback<V[], void>;
   onQuery?: (query: string) => void;
   isLoading?: boolean;
+  error?: string;
 };
 
 /**
@@ -92,13 +94,17 @@ export const AutocompleteMutliSelect = <T, V>(
           <div className="flex">
             <Combobox.Input
               multiple
-              className="cui-input-base pr-16 truncate"
+              className={classNames(
+                "cui-input-base pr-16 truncate",
+                props.error && "border-danger-500"
+              )}
               placeholder={
                 value.length
                   ? `${value.length} item(s) selected`
                   : props.placeholder || "Select"
               }
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
+              autoComplete="off"
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
               <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-gray-900">

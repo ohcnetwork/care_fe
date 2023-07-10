@@ -1,59 +1,61 @@
+import * as Notification from "../../Utils/Notifications.js";
+
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import { CapacityModal, DoctorModal } from "./models";
 import { Card, CardContent } from "@material-ui/core";
-import Popover from "@material-ui/core/Popover";
-import { navigate } from "raviger";
-import loadable from "@loadable/component";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import React, { useCallback, useReducer, useState } from "react";
-import { useDispatch } from "react-redux";
 import {
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
   getBedTypes,
 } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  phonePreg,
-  validatePincode,
-  validateLatitude,
-  validateLongitude,
-} from "../../Common/validation";
-import {
-  createFacility,
-  getDistrictByState,
-  getPermittedFacility,
-  getLocalbodyByDistrict,
-  getStates,
-  updateFacility,
-  getWardByLocalBody,
-  listCapacity,
-  listDoctor,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import GLocationPicker from "../Common/GLocationPicker";
-import {
-  includesIgnoreCase as includesIgnoreCase,
-  getPincodeDetails,
-} from "../../Utils/utils";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import TextFormField from "../Form/FormFields/TextFormField";
-import Steps, { Step } from "../Common/Steps";
-import { BedCapacity } from "./BedCapacity";
-import { DoctorCapacity } from "./DoctorCapacity";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import useConfig from "../../Common/hooks/useConfig";
-import { CapacityModal, DoctorModal } from "./models";
-import BedTypeCard from "./BedTypeCard";
-import DoctorsCountCard from "./DoctorsCountCard";
 import {
   MultiSelectFormField,
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
-import RadioFormField from "../Form/FormFields/RadioFormField";
+import React, { useCallback, useState } from "react";
+import Steps, { Step } from "../Common/Steps";
+import {
+  createFacility,
+  getDistrictByState,
+  getLocalbodyByDistrict,
+  getPermittedFacility,
+  getStates,
+  getWardByLocalBody,
+  listCapacity,
+  listDoctor,
+  updateFacility,
+} from "../../Redux/actions";
+import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
+import {
+  phonePreg,
+  validateLatitude,
+  validateLongitude,
+  validatePincode,
+} from "../../Common/validation";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import { BedCapacity } from "./BedCapacity";
+import BedTypeCard from "./BedTypeCard";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useTranslation } from "react-i18next";
+import { DoctorCapacity } from "./DoctorCapacity";
+import DoctorsCountCard from "./DoctorsCountCard";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import GLocationPicker from "../Common/GLocationPicker";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import Popover from "@material-ui/core/Popover";
+import RadioFormField from "../Form/FormFields/RadioFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import loadable from "@loadable/component";
+import { navigate } from "raviger";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
+import { FormAction } from "../Form/Utils.js";
+
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
@@ -128,22 +130,16 @@ const initialState = {
   errors: { ...initError },
 };
 
-type SetFormAction = { type: "set_form"; form: FacilityForm };
-type SetErrorAction = {
-  type: "set_error";
-  errors: Record<keyof FacilityForm, string>;
-};
-type FacilityCreateFormAction = SetFormAction | SetErrorAction;
-
-const facilityCreateReducer = (
-  state = initialState,
-  action: FacilityCreateFormAction
-) => {
+const facilityCreateReducer = (state = initialState, action: FormAction) => {
   switch (action.type) {
     case "set_form":
       return { ...state, form: action.form };
-    case "set_error":
+    case "set_errors":
       return { ...state, errors: action.errors };
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
+    }
   }
 };
 
@@ -153,7 +149,10 @@ export const FacilityCreate = (props: FacilityProps) => {
   const dispatchAction: any = useDispatch();
   const { facilityId } = props;
 
-  const [state, dispatch] = useReducer(facilityCreateReducer, initialState);
+  const [state, dispatch] = useAutoSaveReducer<FacilityForm>(
+    facilityCreateReducer,
+    initialState
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
@@ -472,10 +471,10 @@ export const FacilityCreate = (props: FacilityProps) => {
       }
     });
     if (invalidForm) {
-      dispatch({ type: "set_error", errors });
+      dispatch({ type: "set_errors", errors });
       return false;
     }
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return true;
   };
 
@@ -767,6 +766,17 @@ export const FacilityCreate = (props: FacilityProps) => {
           <Card className="mt-4">
             <CardContent>
               <form onSubmit={(e) => handleSubmit(e)}>
+                <DraftSection
+                  handleDraftSelect={(newState: any) => {
+                    dispatch({ type: "set_state", state: newState });
+                    Promise.all([
+                      fetchDistricts(newState.form.state),
+                      fetchLocalBody(newState.form.district),
+                      fetchWards(newState.form.local_body),
+                    ]);
+                  }}
+                  formData={state.form}
+                />
                 <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                   <SelectFormField
                     {...field("facility_type")}
@@ -869,7 +879,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     {...field("phone_number")}
                     label={t("emergency_contact_number")}
                     required
-                    onlyIndia
+                    disableCountry
                   />
                   <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 py-4">
                     <TextFormField

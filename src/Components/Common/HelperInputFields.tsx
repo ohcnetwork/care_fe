@@ -1,4 +1,3 @@
-import DateFnsUtils from "@date-io/date-fns";
 import {
   Checkbox,
   Chip,
@@ -14,23 +13,21 @@ import {
   TextField,
   TextFieldProps,
 } from "@material-ui/core";
-import Box from "@material-ui/core/Box";
-import FormControl from "@material-ui/core/FormControl";
-import { NativeSelectInputProps } from "@material-ui/core/NativeSelect/NativeSelectInput";
-import { SelectProps } from "@material-ui/core/Select";
-import Autocomplete from "@material-ui/lab/Autocomplete";
 import {
   DatePickerProps,
   KeyboardDatePicker,
   KeyboardDateTimePicker,
   MuiPickersUtilsProvider,
 } from "@material-ui/pickers";
+import React from "react";
+
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import Box from "@material-ui/core/Box";
+import DateFnsUtils from "@date-io/date-fns";
+import FormControl from "@material-ui/core/FormControl";
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
-import React, { ChangeEvent, useEffect, useState } from "react";
-import PhoneInput, { ICountryData } from "react-phone-input-2";
-import "react-phone-input-2/lib/high-res.css";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "./components/ButtonV2";
+import { NativeSelectInputProps } from "@material-ui/core/NativeSelect/NativeSelectInput";
+import { SelectProps } from "@material-ui/core/Select";
 
 export interface DefaultSelectInputProps extends Omit<SelectProps, "onChange"> {
   options: Array<any>;
@@ -72,10 +69,6 @@ export interface DefaultNativeSelectInputProps extends NativeSelectInputProps {
 
 // Type Declarations
 type TextFieldPropsExtended = TextFieldProps & { errors: string };
-type ActionTextFieldProps = TextFieldPropsExtended & {
-  actionIcon?: React.ReactElement;
-  action?: () => void;
-};
 
 interface DateInputFieldProps extends DatePickerProps {
   value: string;
@@ -129,54 +122,6 @@ export const LegacyTextInputField = (props: TextFieldPropsExtended) => {
         onChange={handleChange}
         onKeyDown={handleKeyDown}
       />
-      <LegacyErrorHelperText error={errors} />
-    </div>
-  );
-};
-
-/**
- * Deprecated. Use `TextFormField` instead.
- */
-export const LegacyActionTextInputField = (props: ActionTextFieldProps) => {
-  const { onChange, type, errors, onKeyDown } = props;
-  const inputType = type === "number" || type === "float" ? "text" : type;
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (typeof onChange !== "function") {
-      return;
-    }
-    if (type === "number" && event.target.value) {
-      event.target.value = event.target.value.replace(/\D/, "");
-    }
-    if (type === "float" && event.target.value) {
-      event.target.value = event.target.value.replace(/(?!\.)\D/, "");
-    }
-    onChange(event);
-  };
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (typeof onKeyDown !== "function") {
-      return;
-    }
-    onKeyDown(event);
-  };
-  return (
-    <div>
-      <div className="flex gap-2 items-center">
-        <TextField
-          {...props}
-          fullWidth
-          type={inputType}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-        />
-        {props.actionIcon && (
-          <div
-            className="flex items-center ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
-            onClick={props.action ?? undefined}
-          >
-            {props.actionIcon}
-          </div>
-        )}
-      </div>
       <LegacyErrorHelperText error={errors} />
     </div>
   );
@@ -559,188 +504,6 @@ export const LegacyAutoCompleteAsyncField = (
         )}
       />
       <LegacyErrorHelperText error={errors} />
-    </>
-  );
-};
-
-/**
- * Deprecated. Use `PhoneNumberFormField` instead.
- */
-export const LegacyPhoneNumberField = (props: any) => {
-  const {
-    label,
-    placeholder,
-    errors,
-    onChange,
-    onlyIndia,
-    value,
-    turnOffAutoFormat,
-    disabled,
-    countryCodeEditable = false,
-    className,
-    name,
-    requiredError = false,
-  } = props;
-  const [maxLength, setMaxLength] = useState(15);
-  const [enableTollFree, setEnableTollFree] = useState(
-    value.startsWith("1800")
-  );
-  const countryRestriction = onlyIndia ? { onlyCountries: ["in"] } : {};
-  const [randId, setRandId] = useState<string>("");
-
-  useEffect(() => {
-    if (value.startsWith("1800")) {
-      setEnableTollFree(true);
-    } else {
-      setEnableTollFree(false);
-    }
-  }, [value]);
-
-  useEffect(() => {
-    setRandId(
-      Math.random()
-        .toString(36)
-        .replace(/[^a-z]+/g, "a")
-    );
-  }, []);
-
-  const setFocus = () => {
-    setTimeout(() => {
-      const input = document.querySelector(`div#${randId} > div.visible input`);
-      if (input instanceof HTMLElement) {
-        input.focus();
-      }
-    }, 10);
-  };
-
-  useEffect(() => {
-    if (enableTollFree) {
-      if (value.startsWith("1800")) {
-        setMaxLength(11);
-      } else {
-        setMaxLength(15);
-      }
-    } else {
-      setMaxLength(15);
-    }
-  }, [value]);
-
-  const handleChange = (
-    value: string,
-    data: Partial<ICountryData>,
-    event: ChangeEvent<HTMLInputElement>,
-    formattedValue: string
-  ) => {
-    let phone = value;
-    if (phone.startsWith("91")) {
-      phone = phone.replace("91", "");
-    }
-    if (phone.startsWith("1800")) {
-      setEnableTollFree(true);
-      setFocus();
-      onChange(phone);
-    } else {
-      if (!value.startsWith("91") && !value.startsWith("1800")) {
-        onChange(`91${formattedValue}`);
-      } else {
-        onChange(formattedValue);
-      }
-      if (!value.startsWith("1800")) {
-        setEnableTollFree(false);
-        setFocus();
-      }
-    }
-    setFocus();
-  };
-
-  return (
-    <>
-      {label && <InputLabel>{label}</InputLabel>}
-      <div
-        id={randId}
-        className={`${
-          requiredError && "border border-red-500 rounded"
-        } relative flex flex-col`}
-      >
-        <div
-          className={`flex flex-row ${enableTollFree ? "visible" : "hidden"}`}
-        >
-          <div className="h-full w-[67px] items-center flex justify-center rounded-md border-gray-500 border py-2">
-            <CareIcon className="care-l-phone w-5 h-5" />
-          </div>
-          <PhoneInput
-            inputClass="cui-input-base pl-4 pr-10 py-5 tracking-widest"
-            containerClass={className}
-            value={value}
-            onChange={handleChange}
-            disableCountryGuess
-            disableCountryCode
-            disableInitialCountryGuess
-            disableSearchIcon
-            disableDropdown
-            placeholder="(1800)... / 91 ..."
-            alwaysDefaultMask
-            country={undefined}
-            enableLongNumbers={true}
-            buttonClass="hidden"
-            inputProps={{
-              name,
-              maxLength,
-            }}
-          />
-          <ButtonV2
-            className="mt-[2px]"
-            variant="secondary"
-            type="button"
-            ghost
-            disabled={disabled}
-            onClick={() => {
-              onChange("+91");
-              setEnableTollFree(false);
-              setFocus();
-            }}
-          >
-            {" "}
-            <CareIcon className="care-l-multiply" />
-          </ButtonV2>
-        </div>
-        <div
-          className={`flex flex-row ${enableTollFree ? "hidden" : "visible"}`}
-        >
-          <PhoneInput
-            inputClass="cui-input-base pl-14 pr-10 py-5 tracking-widest"
-            containerClass={className}
-            countryCodeEditable={countryCodeEditable}
-            value={value}
-            placeholder={placeholder}
-            onChange={handleChange}
-            country="in"
-            disabled={disabled}
-            autoFormat={!turnOffAutoFormat}
-            enableLongNumbers={true}
-            inputProps={{
-              name,
-              maxLength,
-            }}
-            {...countryRestriction}
-          />
-          <ButtonV2
-            className="mt-[2px]"
-            variant="secondary"
-            type="button"
-            ghost
-            disabled={disabled}
-            onClick={() => {
-              onChange("+91");
-              setEnableTollFree(false);
-              setFocus();
-            }}
-          >
-            <CareIcon className="care-l-multiply" />
-          </ButtonV2>
-        </div>
-      </div>
-      {errors && <LegacyErrorHelperText error={errors} />}
     </>
   );
 };

@@ -1,4 +1,4 @@
-import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 
 describe("Shifting Page", () => {
   before(() => {
@@ -12,7 +12,7 @@ describe("Shifting Page", () => {
   });
 
   it("checks if all download button works", () => {
-    cy.get("svg.MuiSvgIcon-root.cursor-pointer").each(($button) => {
+    cy.get("svg.care-svg-icon__baseline.care-l-export").each(($button) => {
       cy.intercept(/\/api\/v1\/shift/).as("shifting_download");
       cy.wrap($button).click({ force: true });
       cy.wait("@shifting_download");
@@ -29,15 +29,15 @@ describe("Shifting Page", () => {
     cy.url().should("include", "Akhil");
   });
 
-  it("switch between active/completed", () => {
+  it("switch between active/archived", () => {
     cy.intercept(/\/api\/v1\/shift/).as("shifting");
-    cy.contains("Completed").click().wait("@shifting");
-    cy.contains("Active").should("have.class", "bg-gray-200");
-    cy.contains("Completed").should("have.class", "bg-white");
+    cy.contains("Archived").click().wait("@shifting");
+    cy.contains("Active").should("have.class", "text-primary-500");
+    cy.contains("Archived").should("have.class", "text-white");
     cy.intercept(/\/api\/v1\/shift/).as("shifting");
     cy.contains("Active").click().wait("@shifting");
-    cy.contains("Active").should("have.class", "bg-white");
-    cy.contains("Completed").should("have.class", "bg-gray-200");
+    cy.contains("Active").should("have.class", "text-white");
+    cy.contains("Archived").should("have.class", "text-primary-500");
   });
 
   afterEach(() => {

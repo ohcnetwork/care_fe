@@ -12,7 +12,7 @@ import { navigate, useQueryParams } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import moment from "moment";
 import loadable from "@loadable/component";
-import { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   BLOOD_GROUPS,
@@ -73,9 +73,10 @@ import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
 import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
-import { FieldError } from "../Form/FieldValidators";
+import { FieldError } from "../Form/Fi1eldValidators";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import DialogModal from "../Common/Dialog";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
@@ -105,8 +106,8 @@ const initForm: any = {
   name: "",
   age: "",
   gender: "",
-  phone_number: "",
-  emergency_phone_number: "",
+  phone_number: "+91",
+  emergency_phone_number: null,
   blood_group: "",
   disease_status: diseaseStatus[2],
   is_declared_positive: "false",
@@ -121,6 +122,7 @@ const initForm: any = {
   ward: "",
   address: "",
   permanent_address: "",
+  sameAddress: true,
   village: "",
   allergies: "",
   pincode: "",
@@ -170,11 +172,15 @@ const patientFormReducer = (state = initialState, action: any) => {
         form: action.form,
       };
     }
-    case "set_error": {
+    case "set_errors": {
       return {
         ...state,
         errors: action.errors,
       };
+    }
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
     }
     default:
       return state;
@@ -194,7 +200,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const { gov_data_api_key, enable_hcx } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
-  const [state, dispatch] = useReducer(patientFormReducer, initialState);
+  const [state, dispatch] = useAutoSaveReducer<any>(
+    patientFormReducer,
+    initialState
+  );
   const [showAlertMessage, setAlertMessage] = useState({
     show: false,
     message: "",
@@ -216,7 +225,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     transfer?: boolean;
     patientList: Array<DupPatientModel>;
   }>({ patientList: [] });
-  const [sameAddress, setSameAddress] = useState(true);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [{ extId }, setQuery] = useQueryParams();
@@ -362,7 +370,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         fetchDistricts(res.data.district_object.state),
         fetchLocalBody(res.data.district),
         fetchWards(res.data.local_body),
-        duplicateCheck("+91" + res.data.mobile_number),
+        duplicateCheck(res.data.mobile_number),
       ]);
 
       setShowImport(false);
@@ -437,7 +445,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               : null,
           };
           if (res.data.address !== res.data.permanent_address) {
-            setSameAddress(false);
+            formData["sameAddress"] = false;
           }
           res.data.medical_history.forEach((i: any) => {
             const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
@@ -548,7 +556,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "permanent_address":
-          if (!sameAddress) {
+          if (!state.form.sameAddress) {
             if (!state.form[field]) {
               errors[field] = "Field is required";
               if (!error_div) error_div = field;
@@ -722,7 +730,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
     });
 
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return [!invalidForm, error_div];
   };
 
@@ -844,7 +852,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ward: state.form.ward,
         village: state.form.village,
         address: state.form.address ? state.form.address : undefined,
-        permanent_address: sameAddress
+        permanent_address: state.form.sameAddress
           ? state.form.address
           : state.form.permanent_address
           ? state.form.permanent_address
@@ -1159,7 +1167,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                     required
                     value={careExtId}
                     onChange={(e) => setCareExtId(e.target.value)}
-                    errors={state.errors.name}
+                    errors={state.errors.name as string}
                   />
                 </div>
                 <button
@@ -1191,6 +1199,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   Import From External Results
                 </ButtonV2>
                 <form onSubmit={(e) => handleSubmit(e)}>
+                  <DraftSection
+                    handleDraftSelect={(newState) => {
+                      dispatch({ type: "set_state", state: newState });
+                      Promise.all([
+                        fetchDistricts(newState.form.state),
+                        fetchLocalBody(newState.form.district),
+                        fetchWards(newState.form.local_body),
+                        duplicateCheck(newState.form.mobile_number),
+                      ]);
+                    }}
+                    formData={state.form}
+                  />
                   <Card elevation={0} className="mb-8 rounded overflow-visible">
                     <CardContent>
                       <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
@@ -1327,10 +1347,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             rows={3}
                             id="permanent_address"
                             name="permanent_address"
-                            disabled={sameAddress}
+                            disabled={state.form.sameAddress}
                             placeholder="Enter the permanent address"
                             value={
-                              sameAddress
+                              state.form.sameAddress
                                 ? state.form.address
                                 : state.form.permanent_address
                             }
@@ -1339,8 +1359,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           />
 
                           <LegacyCheckboxField
-                            checked={sameAddress}
-                            onChange={() => setSameAddress(!sameAddress)}
+                            checked={state.form.sameAddress}
+                            onChange={(e: any) => {
+                              handleChange({
+                                target: {
+                                  name: "sameAddress",
+                                  value: e.target.checked,
+                                },
+                              });
+                            }}
                             label="Same as Current Address"
                             className="font-bold"
                           />
@@ -1382,7 +1409,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             type="text"
                             value={state.form.village}
                             onChange={handleChange}
-                            errors={state.errors.village}
+                            errors={state.errors.village as string}
                           />
                         </div>
                         <div id="nationality-div">
@@ -1401,7 +1428,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             value={state.form.nationality}
                             options={countryList}
                             onChange={handleChange}
-                            errors={state.errors.nationality}
+                            errors={state.errors.nationality as string}
                           />
                         </div>
                         {state.form.nationality === "India" ? (
@@ -1533,7 +1560,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               margin="dense"
                               value={state.form.passport_no}
                               onChange={handleChange}
-                              errors={state.errors.passport_no}
+                              errors={state.errors.passport_no as string}
                             />
                           </div>
                         )}
@@ -1603,7 +1630,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     type="text"
                                     value={state.form.covin_id}
                                     onChange={handleChange}
-                                    errors={state.errors.covin_id}
+                                    errors={state.errors.covin_id as string}
                                   />
                                 </div>
                                 <div id="number_of_doses-div">
@@ -1681,7 +1708,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                         "last_vaccinated_date"
                                       )
                                     }
-                                    errors={state.errors.last_vaccinated_date}
+                                    errors={
+                                      state.errors
+                                        .last_vaccinated_date as string
+                                    }
                                     inputVariant="outlined"
                                     margin="dense"
                                     openTo="year"
@@ -1772,7 +1802,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       "estimated_contact_date"
                                     )
                                   }
-                                  errors={state.errors.estimated_contact_date}
+                                  errors={
+                                    state.errors
+                                      .estimated_contact_date as string
+                                  }
                                   inputVariant="outlined"
                                   margin="dense"
                                   disableFuture={true}
@@ -1796,7 +1829,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   placeholder="Name / Cluster of Contact"
                                   value={state.form.cluster_name}
                                   onChange={handleChange}
-                                  errors={state.errors.cluster_name}
+                                  errors={state.errors.cluster_name as string}
                                 />
                               </div>
                             </div>
@@ -1821,7 +1854,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               value={state.form.disease_status}
                               options={diseaseStatus}
                               onChange={handleChange}
-                              errors={state.errors.disease_status}
+                              errors={state.errors.disease_status as string}
                             />
                           </div>
                           <div id="test_type-div">
@@ -1856,7 +1889,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               type="text"
                               value={state.form.srf_id}
                               onChange={handleChange}
-                              errors={state.errors.srf_id}
+                              errors={state.errors.srf_id as string}
                             />
                           </div>
                           <div id="is_declared_positive-div">
@@ -1907,7 +1940,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                       "date_declared_positive"
                                     )
                                   }
-                                  errors={state.errors.date_declared_positive}
+                                  errors={
+                                    state.errors
+                                      .date_declared_positive as string
+                                  }
                                   inputVariant="outlined"
                                   margin="dense"
                                   disableFuture={true}
@@ -1927,7 +1963,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               type="number"
                               value={state.form.test_id}
                               onChange={handleChange}
-                              errors={state.errors.test_id}
+                              errors={state.errors.test_id as string}
                             />
                           </div>
 
@@ -1945,7 +1981,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onChange={(date) =>
                                 handleDateChange(date, "date_of_test")
                               }
-                              errors={state.errors.date_of_test}
+                              errors={state.errors.date_of_test as string}
                               inputVariant="outlined"
                               margin="dense"
                               disableFuture={true}
@@ -1965,7 +2001,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               onChange={(date) =>
                                 handleDateChange(date, "date_of_result")
                               }
-                              errors={state.errors.date_of_result}
+                              errors={state.errors.date_of_result as string}
                               inputVariant="outlined"
                               margin="dense"
                               disableFuture={true}
@@ -1987,7 +2023,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               type="number"
                               value={state.form.number_of_primary_contacts}
                               onChange={handleChange}
-                              errors={state.errors.number_of_primary_contacts}
+                              errors={
+                                state.errors
+                                  .number_of_primary_contacts as string
+                              }
                             />
                           </div>
                           <div id="number_of_secondary_contacts-div">
@@ -2005,7 +2044,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               type="number"
                               value={state.form.number_of_secondary_contacts}
                               onChange={handleChange}
-                              errors={state.errors.number_of_secondary_contacts}
+                              errors={
+                                state.errors
+                                  .number_of_secondary_contacts as string
+                              }
                             />
                           </div>
                         </div>
@@ -2032,7 +2074,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             placeholder="Optional Information"
                             value={state.form.present_health}
                             onChange={handleFormFieldChange}
-                            error={state.errors.present_health}
+                            error={state.errors.present_health as string}
                           />
                         </div>
 
@@ -2120,6 +2162,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             },
                           ])
                         }
+                        data-testid="add-insurance-button"
                       >
                         <CareIcon className="care-l-plus text-lg" />
                         <span>Add Insurance Details</span>

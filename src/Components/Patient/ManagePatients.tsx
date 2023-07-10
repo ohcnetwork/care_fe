@@ -1,51 +1,51 @@
-import loadable from "@loadable/component";
-import { Link, navigate } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import moment from "moment";
-import React, { useEffect, useState, useCallback } from "react";
-import { useDispatch } from "react-redux";
-import SwipeableViews from "react-swipeable-views";
-import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import { Tooltip } from "@material-ui/core";
+import * as Notification from "../../Utils/Notifications.js";
 
-import {
-  getAllPatient,
-  getDistrict,
-  getLocalBody,
-  getAnyFacility,
-} from "../../Redux/actions";
-import NavTabs from "../Common/NavTabs";
 import {
   ADMITTED_TO,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
-  RESPIRATORY_SUPPORT,
   PATIENT_SORT_OPTIONS,
+  RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
-import PatientFilter from "./PatientFilter";
-import { parseOptionId } from "../../Common/utils";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import Chip from "../../CAREUI/display/Chip";
 import { FacilityModel, PatientCategory } from "../Facility/models";
-import SearchInput from "../Form/SearchInput";
-import useFilters from "../../Common/hooks/useFilters";
-import FilterBadge from "../../CAREUI/display/FilterBadge";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { ExportMenu } from "../Common/Export";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
-import CountBlock from "../../CAREUI/display/Count";
-import { useTranslation } from "react-i18next";
-import * as Notification from "../../Utils/Notifications.js";
+import { Link, navigate } from "raviger";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  getAllPatient,
+  getAnyFacility,
+  getDistrict,
+  getLocalBody,
+} from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import Chip from "../../CAREUI/display/Chip";
+import CountBlock from "../../CAREUI/display/Count";
+import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
+import { ExportMenu } from "../Common/Export";
+import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import FilterBadge from "../../CAREUI/display/FilterBadge";
+import PatientFilter from "./PatientFilter";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
+import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
+import SwitchTabs from "../Common/components/SwitchTabs";
+import SwipeableViews from "react-swipeable-views";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { parseOptionId } from "../../Common/utils";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { useDispatch } from "react-redux";
+import useFilters from "../../Common/hooks/useFilters";
+import { useTranslation } from "react-i18next";
+import Page from "../Common/components/Page.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -110,7 +110,7 @@ export const PatientManager = () => {
 
   const setPhoneNum = (phone_number: string) => {
     setPhoneNumber(phone_number);
-    if (phone_number.length === 15) {
+    if (phone_number.length >= 13) {
       setPhoneNumberError("");
       updateQuery({ phone_number });
       return;
@@ -127,7 +127,7 @@ export const PatientManager = () => {
 
   const setEmergencyPhoneNum = (emergency_phone_number: string) => {
     setEmergencyPhoneNumber(emergency_phone_number);
-    if (emergency_phone_number.length === 15) {
+    if (emergency_phone_number.length >= 13) {
       setEmergencyPhoneNumberError("");
       updateQuery({ emergency_phone_number });
       return;
@@ -254,6 +254,58 @@ export const PatientManager = () => {
     const filters = { ...params, csv: true, facility: qParams.facility };
     if (!isFiltered) delete filters.is_active;
     return () => getAllPatient(filters, "downloadPatients");
+  };
+
+  const preventDuplicatePatientsDuetoPolicyId = (data: any) => {
+    // Generate a array which contains imforamation of duplicate patient IDs and there respective linenumbers
+    const lines = data.split("\n"); // Split the data into individual lines
+    const idsMap = new Map(); // To store indices of lines with the same patient ID
+
+    lines.map((line: any, i: number) => {
+      const patientId = line.split(",")[0]; // Extract the patient ID from each line
+      if (idsMap.has(patientId)) {
+        idsMap.get(patientId).push(i); // Add the index to the existing array
+      } else {
+        idsMap.set(patientId, [i]); // Create a new array with the current index
+      }
+    });
+
+    const linesWithSameId = Array.from(idsMap.entries())
+      .filter(([_, indices]) => indices.length > 1)
+      .map(([patientId, indices]) => ({
+        patientId,
+        indexSame: indices,
+      }));
+
+    // after getting the array of duplicate patient IDs and there respective linenumbers we will merge the policy IDs of the duplicate patients
+
+    linesWithSameId.map((lineInfo) => {
+      const indexes = lineInfo.indexSame;
+      //get policyid of all the duplicate patients and merge them by seperating them with a semicolon
+      const mergedPolicyId = `${indexes.map((currentIndex: number) => {
+        return `${lines[currentIndex].split(",")[5]};`;
+      })}`.replace(/,/g, "");
+      // replace the policy ID of the first patient with the merged policy ID
+      const arrayOfCurrentLine = lines[indexes[0]].split(",");
+      arrayOfCurrentLine[5] = mergedPolicyId;
+      const lineAfterMerge = arrayOfCurrentLine.join(",");
+      lines[indexes[0]] = `${lineAfterMerge}`;
+    });
+
+    // after merging the policy IDs of the duplicate patients we will remove the duplicate patients from the data
+    const uniqueLines = [];
+    const ids = new Set(); // To keep track of unique patient IDs
+
+    for (const line of lines) {
+      const patientId = line.split(",")[0]; // Extract the patient ID from each line
+      if (!ids.has(patientId)) {
+        uniqueLines.push(line);
+        ids.add(patientId);
+      }
+    }
+
+    const cleanedData = uniqueLines.join("\n"); // Join the unique lines back together
+    return cleanedData;
   };
 
   useEffect(() => {
@@ -440,6 +492,7 @@ export const PatientManager = () => {
       return (
         <Link
           key={`usr_${patient.id}`}
+          data-cy="patient"
           href={patientUrl}
           className={`relative w-full cursor-pointer p-4 pl-5 hover:pl-5 rounded-lg bg-white shadow text-black ring-2 ring-opacity-0 hover:ring-opacity-100 transition-all duration-200 ease-in-out group ${categoryClass}-ring overflow-hidden`}
         >
@@ -456,28 +509,27 @@ export const PatientManager = () => {
               patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="flex flex-col items-center justify-center h-full">
-                  <Tooltip
-                    title={
+                  <span className="text-gray-900 text-sm text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full tooltip">
+                    {
                       patient?.last_consultation?.current_bed?.bed_object
                         ?.location_object?.name
                     }
-                  >
-                    <p className="text-gray-900 text-sm text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
+                    <span className="tooltip-text tooltip-bottom">
                       {
                         patient?.last_consultation?.current_bed?.bed_object
                           ?.location_object?.name
                       }
-                    </p>
-                  </Tooltip>
-                  <Tooltip
-                    title={
-                      patient?.last_consultation?.current_bed?.bed_object?.name
-                    }
-                  >
-                    <p className="text-base font-bold text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
-                      {patient?.last_consultation?.current_bed?.bed_object.name}
-                    </p>
-                  </Tooltip>
+                    </span>
+                  </span>
+                  <span className="text-base font-bold text-center text-ellipsis overflow-hidden px-1 whitespace-nowrap w-full">
+                    {patient?.last_consultation?.current_bed?.bed_object.name}
+                    <span className="tooltip-text tooltip-bottom">
+                      {
+                        patient?.last_consultation?.current_bed?.bed_object
+                          ?.name
+                      }
+                    </span>
+                  </span>
                 </div>
               ) : (
                 <div className="flex items-center justify-center min-h-[5rem]">
@@ -663,7 +715,105 @@ export const PatientManager = () => {
   };
 
   return (
-    <div className="px-6">
+    <Page
+      title={t("Patients")}
+      hideBack={true}
+      breadcrumbs={false}
+      options={
+        <div className="flex flex-col lg:flex-row justify-between items-center w-full">
+          <div className="flex flex-col lg:flex-row lg:gap-5 items-center mb-2 lg:mb-0 w-full lg:w-fit">
+            <ButtonV2
+              onClick={() => {
+                qParams.facility
+                  ? navigate(`/facility/${qParams.facility}/patient`)
+                  : setShowDialog(true);
+              }}
+              className="w-full lg:w-fit"
+            >
+              <CareIcon className="care-l-plus text-lg" />
+              <p id="add-patient-div" className="lg:my-[2px]">
+                Add Patient Details
+              </p>
+            </ButtonV2>
+          </div>
+          <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end w-full lg:w-fit">
+            <SwitchTabs
+              Tab1="Live"
+              Tab2="Discharged"
+              onClickTab1={() => updateQuery({ is_active: "True" })}
+              onClickTab2={() => updateQuery({ is_active: "False" })}
+              activeTab={tabValue ? true : false}
+            />
+            {showDoctorConnect && (
+              <ButtonV2
+                onClick={() => {
+                  setShowDoctors(true);
+                }}
+              >
+                <CareIcon className="care-l-phone text-lg" />
+                <p className="lg:my-[2px]">Doctor Connect</p>
+              </ButtonV2>
+            )}
+
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
+            <SortDropdownMenu
+              options={PATIENT_SORT_OPTIONS}
+              selected={qParams.ordering}
+              onSelect={updateQuery}
+            />
+            <div className="tooltip">
+              {!isExportAllowed ? (
+                <ButtonV2
+                  onClick={() => {
+                    advancedFilter.setShow(true);
+                    setTimeout(() => {
+                      const element =
+                        document.getElementById("bed-type-select");
+                      if (element)
+                        element.scrollIntoView({ behavior: "smooth" });
+                      Notification.Warn({
+                        msg: "Please select a seven day period.",
+                      });
+                    }, 500);
+                  }}
+                  className="lg:w-fit w-full mr-5"
+                >
+                  <CareIcon className="care-l-import" />
+                  <span className="lg:my-[3px]">Export</span>
+                </ButtonV2>
+              ) : (
+                <ExportMenu
+                  disabled={!isExportAllowed}
+                  exportItems={[
+                    {
+                      label:
+                        tabValue === 0
+                          ? "Live patients"
+                          : "Discharged patients",
+                      action: exportPatients(true),
+                      parse: preventDuplicatePatientsDuetoPolicyId,
+                    },
+                    {
+                      label: "All patients",
+                      action: exportPatients(false),
+                      parse: preventDuplicatePatientsDuetoPolicyId,
+                    },
+                  ]}
+                />
+              )}
+
+              {!isExportAllowed && (
+                <span className="tooltip-text tooltip-bottom -translate-x-1/2">
+                  Select a seven day period
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      }
+    >
       <FacilitiesSelectDialogue
         show={showDialog}
         setSelected={(e) => setSelectedFacility(e)}
@@ -674,78 +824,7 @@ export const PatientManager = () => {
           setSelectedFacility({ name: "" });
         }}
       />
-      <div className="flex flex-col lg:flex-row justify-between items-center">
-        <PageTitle title="Patients" hideBack={true} breadcrumbs={false} />
-        <div className="flex flex-col gap-2 lg:gap-3 lg:flex-row justify-end w-full lg:w-fit">
-          {showDoctorConnect && (
-            <ButtonV2
-              onClick={() => {
-                setShowDoctors(true);
-              }}
-            >
-              <CareIcon className="care-l-phone text-lg" />
-              <p className="lg:my-[2px]">Doctor Connect</p>
-            </ButtonV2>
-          )}
-          <ButtonV2
-            onClick={() => {
-              qParams.facility
-                ? navigate(`/facility/${qParams.facility}/patient`)
-                : setShowDialog(true);
-            }}
-          >
-            <CareIcon className="care-l-plus text-lg" />
-            <p className="lg:my-[2px]">Add Patient Details</p>
-          </ButtonV2>
-          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
-          <SortDropdownMenu
-            options={PATIENT_SORT_OPTIONS}
-            selected={qParams.ordering}
-            onSelect={updateQuery}
-          />
-          <div className="tooltip">
-            {!isExportAllowed ? (
-              <ButtonV2
-                onClick={() => {
-                  advancedFilter.setShow(true);
-                  setTimeout(() => {
-                    const element = document.getElementById("bed-type-select");
-                    if (element) element.scrollIntoView({ behavior: "smooth" });
-                    Notification.Warn({
-                      msg: "Please select a seven day period.",
-                    });
-                  }, 500);
-                }}
-                className="lg:w-fit w-full mr-5"
-              >
-                <CareIcon className="care-l-import" />
-                <span className="lg:my-[3px]">Export</span>
-              </ButtonV2>
-            ) : (
-              <ExportMenu
-                disabled={!isExportAllowed}
-                exportItems={[
-                  {
-                    label:
-                      tabValue === 0 ? "Live patients" : "Discharged patients",
-                    action: exportPatients(true),
-                  },
-                  {
-                    label: "All patients",
-                    action: exportPatients(false),
-                  },
-                ]}
-              />
-            )}
 
-            {!isExportAllowed && (
-              <span className="tooltip-text tooltip-bottom -translate-x-1/2">
-                Select a seven day period
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
       <div className="mt-5 manualGrid grid-cols-1 gap-3 sm:grid-cols-4 my-4 px-2 md:px-0 mb-[-12px]">
         <div className="flex flex-col xl:flex-row mt-2 h-full gap-3">
           <div className="flex-1">
@@ -754,30 +833,9 @@ export const PatientManager = () => {
               count={totalCount}
               loading={isLoading}
               icon={"user-injured"}
-              containerClass="pb-8"
+              containerClass="pb-10"
             />
           </div>
-          {/*<div className="bg-white overflow-hidden shadow rounded-lg flex-1">
-              <div className="p-4">
-                <dl>
-                  <div className="flex items-center justify-center rounded-lg text-xl w-10 h-10 bg-yellow-100">
-                    <CareIcon className="care-l-accessible-icon-alt text-yellow-600" />
-                  </div>
-                  <dt className="text-sm font-semibold text-gray-800 truncate mt-2">
-                    Discharged Patients
-                  </dt>
-                  {isLoading ? (
-                    <dd className=" text-5xl leading-9">
-                      <CircularProgress className="text-primary-500" />
-                    </dd>
-                  ) : (
-                    <dd className="text-4xl leading-9 font-bold">
-                      {totalCount}
-                    </dd>
-                  )}
-                </dl>
-              </div>
-            </div>*/}
         </div>
         <div className="w-full col-span-3">
           <div className="col-span-2 mt-2">
@@ -883,14 +941,6 @@ export const PatientManager = () => {
       </div>
       <div>
         <PatientFilter {...advancedFilter} key={window.location.search} />
-        <NavTabs
-          onChange={(tab) => updateQuery({ is_active: tab ? "False" : "True" })}
-          options={[
-            { value: 0, label: "Live" },
-            { value: 1, label: "Discharged" },
-          ]}
-          active={tabValue}
-        />
         <SwipeableViews index={tabValue}>
           <TabPanel value={tabValue} index={0}>
             <div className="mb-4">{managePatients}</div>
@@ -905,6 +955,6 @@ export const PatientManager = () => {
           setShow={setShowDoctors}
         />
       </div>
-    </div>
+    </Page>
   );
 };
