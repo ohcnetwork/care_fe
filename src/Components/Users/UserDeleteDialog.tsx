@@ -1,4 +1,4 @@
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 
 interface ConfirmDialogProps {
   name: string;
@@ -8,7 +8,7 @@ interface ConfirmDialogProps {
 
 const UserDeleteDialog = (props: ConfirmDialogProps) => {
   return (
-    <ConfirmDialogV2
+    <ConfirmDialog
       title="Delete User"
       description={
         <span>

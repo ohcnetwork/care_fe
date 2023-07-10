@@ -2,6 +2,7 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import {
   ADMITTED_TO,
+  DISCHARGE_REASONS,
   GENDER_TYPES,
   PATIENT_CATEGORIES,
   PATIENT_SORT_OPTIONS,
@@ -142,14 +143,19 @@ export const PatientManager = () => {
     setEmergencyPhoneNumberError("Enter a valid number");
   };
 
-  const tabValue = qParams.is_active === "False" ? 1 : 0;
+  const tabValue =
+    qParams.last_consultation_discharge_reason || qParams.is_active === "False"
+      ? 1
+      : 0;
 
   const params = {
     page: qParams.page || 1,
     limit: resultsPerPage,
     name: qParams.name || undefined,
     ip_no: qParams.ip_no || undefined,
-    is_active: qParams.is_active || "True",
+    is_active:
+      !qParams.last_consultation_discharge_reason &&
+      (qParams.is_active || "True"),
     disease_status: qParams.disease_status || undefined,
     phone_number: qParams.phone_number
       ? parsePhoneNumberFromString(qParams.phone_number)?.format("E.164")
@@ -189,6 +195,8 @@ export const PatientManager = () => {
       qParams.last_consultation_discharge_date_after || undefined,
     last_consultation_admitted_bed_type_list:
       qParams.last_consultation_admitted_bed_type_list || undefined,
+    last_consultation_discharge_reason:
+      qParams.last_consultation_discharge_reason || undefined,
     srf_id: qParams.srf_id || undefined,
     number_of_doses: qParams.number_of_doses || undefined,
     covin_id: qParams.covin_id || undefined,
@@ -332,6 +340,7 @@ export const PatientManager = () => {
     qParams.age_max,
     qParams.age_min,
     qParams.last_consultation_admitted_bed_type_list,
+    qParams.last_consultation_discharge_reason,
     qParams.facility,
     qParams.facility_type,
     qParams.district,
@@ -932,6 +941,14 @@ export const PatientManager = () => {
               name: "Telemedicine",
               paramKey: "last_consultation_is_telemedicine",
             },
+            value(
+              "Discharge Reason",
+              "last_consultation_discharge_reason",
+              parseOptionId(
+                DISCHARGE_REASONS,
+                qParams.last_consultation_discharge_reason
+              ) || ""
+            ),
           ]}
           children={
             qParams.last_consultation_admitted_bed_type_list &&

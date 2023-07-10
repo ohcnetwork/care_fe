@@ -186,7 +186,7 @@ export default function ResourceCreate(props: resourceProps) {
         status: "PENDING",
         category: state.form.category,
         sub_category: state.form.sub_category,
-        orgin_facility: props.facilityId,
+        origin_facility: props.facilityId,
         approving_facility: (state.form.approving_facility || {}).id,
         assigned_facility: (state.form.assigned_facility || {}).id,
         emergency: state.form.emergency === "true",

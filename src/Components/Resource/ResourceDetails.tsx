@@ -10,7 +10,7 @@ import CommentSection from "./CommentSection";
 import { formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function ResourceDetails(props: { id: string }) {
@@ -118,18 +118,18 @@ export default function ResourceDetails(props: { id: string }) {
           </div>
           <div className="mt-2">
             <div className="p-4 pt-0">
-              <div>{data.orgin_facility_object?.name || "--"}</div>
+              <div>{data.origin_facility_object?.name || "--"}</div>
               <div>
-                {data.orgin_facility_object?.facility_type?.name || "--"}
+                {data.origin_facility_object?.facility_type?.name || "--"}
               </div>
               <div>
-                {data.orgin_facility_object?.district_object?.name || "--"}
+                {data.origin_facility_object?.district_object?.name || "--"}
               </div>
               <div>
-                {data.orgin_facility_object?.local_body_object?.name || "--"}
+                {data.origin_facility_object?.local_body_object?.name || "--"}
               </div>
               <div>
-                {data.orgin_facility_object?.state_object?.name || "--"}
+                {data.origin_facility_object?.state_object?.name || "--"}
               </div>
             </div>
             {data.status === "REJECTED" ||
@@ -355,7 +355,7 @@ export default function ResourceDetails(props: { id: string }) {
                   Delete Record
                 </ButtonV2>
 
-                <ConfirmDialogV2
+                <ConfirmDialog
                   title="Authorize resource delete"
                   description="Are you sure you want to delete this record?"
                   action="Delete"
@@ -410,7 +410,7 @@ export default function ResourceDetails(props: { id: string }) {
             <div>
               <h4>Origin Facility</h4>
 
-              {showFacilityCard(data.orgin_facility_object)}
+              {showFacilityCard(data.origin_facility_object)}
             </div>
             <div>
               <h4>Resource Approving Facility</h4>

@@ -28,8 +28,8 @@ import { useTranslation } from "react-i18next";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 
 const clearFilterState = {
-  orgin_facility: "",
-  orgin_facility_ref: "",
+  origin_facility: "",
+  origin_facility_ref: "",
   shifting_approving_facility: "",
   shifting_approving_facility_ref: "",
   assigned_facility: "",
@@ -67,8 +67,8 @@ export default function ListFilter(props: any) {
   ).map((option) => option.text);
 
   const [filterState, setFilterState] = useMergeState({
-    orgin_facility: filter.orgin_facility || "",
-    orgin_facility_ref: null,
+    origin_facility: filter.origin_facility || "",
+    origin_facility_ref: null,
     shifting_approving_facility: filter.shifting_approving_facility || "",
     shifting_approving_facility_ref: null,
     assigned_facility: filter.assigned_facility || "",
@@ -93,13 +93,13 @@ export default function ListFilter(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (filter.orgin_facility) {
+      if (filter.origin_facility) {
         setOriginLoading(true);
         const res = await dispatch(
-          getAnyFacility(filter.orgin_facility, "orgin_facility")
+          getAnyFacility(filter.origin_facility, "origin_facility")
         );
         if (res && res.data) {
-          setFilterState({ orgin_facility_ref: res.data });
+          setFilterState({ origin_facility_ref: res.data });
         }
         setOriginLoading(false);
       }
@@ -182,7 +182,7 @@ export default function ListFilter(props: any) {
 
   const applyFilter = () => {
     const {
-      orgin_facility,
+      origin_facility,
       shifting_approving_facility,
       assigned_facility,
       emergency,
@@ -201,13 +201,14 @@ export default function ListFilter(props: any) {
       breathlessness_level,
     } = filterState;
     const data = {
-      orgin_facility: orgin_facility || "",
+      origin_facility: origin_facility || "",
       shifting_approving_facility: shifting_approving_facility || "",
       assigned_facility: assigned_facility || "",
       emergency: emergency || "",
       is_up_shift: is_up_shift || "",
       patient_phone_number: patient_phone_number
-        ? parsePhoneNumberFromString(patient_phone_number)?.format("E.164")
+        ? parsePhoneNumberFromString(patient_phone_number)?.format("E.164") ??
+          ""
         : "",
       created_date_before:
         created_date_before && moment(created_date_before).isValid()
@@ -275,10 +276,9 @@ export default function ListFilter(props: any) {
           ) : (
             <FacilitySelect
               multiple={false}
-              name="orgin_facility"
-              selected={filterState.orgin_facility_ref}
-              setSelected={(obj) => setFacility(obj, "orgin_facility")}
-              className="shifting-page-filter-dropdown"
+              name="origin_facility"
+              selected={filterState.origin_facility_ref}
+              setSelected={(obj) => setFacility(obj, "origin_facility")}
               errors={""}
             />
           )}
@@ -299,7 +299,6 @@ export default function ListFilter(props: any) {
                 setSelected={(obj) =>
                   setFacility(obj, "shifting_approving_facility")
                 }
-                className="shifting-page-filter-dropdown"
                 errors={""}
               />
             )}
@@ -318,7 +317,6 @@ export default function ListFilter(props: any) {
               name="assigned_facility"
               selected={filterState.assigned_facility_ref}
               setSelected={(obj) => setFacility(obj, "assigned_facility")}
-              className="shifting-page-filter-dropdown"
               errors={""}
             />
           )}

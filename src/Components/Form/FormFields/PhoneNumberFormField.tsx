@@ -39,12 +39,13 @@ export default function PhoneNumberFormField(props: Props) {
 
   const setValue = (value: string) => {
     asYouType.reset();
-    field.handleChange(asYouType.input(value));
+    asYouType.input(value);
+    field.handleChange(value);
   };
 
   return (
     <FormField field={field}>
-      <div className="relative mt-2 rounded-md shadow-sm">
+      <div className="relative rounded-md shadow-sm">
         <input
           type="tel"
           id={field.id}
