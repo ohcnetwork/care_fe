@@ -90,19 +90,18 @@ type AutocompleteProps<T, V = T> = {
 export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
   const [query, setQuery] = useState(""); // Ensure lower case
   useEffect(() => {
-    props.onQuery && props.onQuery(query);
+    props.onQuery?.(query);
   }, [query]);
 
   const mappedOptions = props.options.map((option) => {
     const label = props.optionLabel(option);
-    const description =
-      props.optionDescription && props.optionDescription(option);
+    const description = props.optionDescription?.(option);
     return {
       label,
       description,
       search:
         label.toLowerCase() + (description ? description.toLowerCase() : ""),
-      icon: props.optionIcon && props.optionIcon(option),
+      icon: props.optionIcon?.(option),
       value: props.optionValue ? props.optionValue(option) : option,
     };
   });
@@ -143,15 +142,15 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
     >
       <Combobox
         disabled={props.disabled}
-        value={value}
+        value={value ?? props.placeholder ?? "Select"}
         onChange={(selection: any) => props.onChange(selection.value)}
       >
         <div className="relative">
           <div className="flex">
             <Combobox.Input
               className="cui-input-base pr-16 truncate"
-              placeholder={props.placeholder || "Select"}
-              displayValue={(value: any) => value?.label}
+              placeholder={props.placeholder ?? "Select"}
+              displayValue={(value: any) => value?.label || ""}
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
               autoComplete="off"
             />
@@ -164,6 +163,18 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   <CareIcon className="care-l-angle-down" />
                 )}
               </div>
+              {value && (
+                <div
+                  className="pb-2 absolute h-full top-1 right-0 flex gap-1 items-center mr-7 text-lg text-gray-900 hover:text-gray-500"
+                  onClick={() => {
+                    if (!props.required) props.onChange(undefined);
+                  }}
+                >
+                  {!props.isLoading && (
+                    <CareIcon className="w-4 h-4 care-l-times-circle" />
+                  )}
+                </div>
+              )}
             </Combobox.Button>
           </div>
 
