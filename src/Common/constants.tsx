@@ -15,7 +15,7 @@ export const LocalStorageKeys = {
   refreshToken: "care_refresh_token",
 };
 export interface OptionsType {
-  id: number;
+  id: number | string;
   text: string;
   label?: string;
   desc?: string;
