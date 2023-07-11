@@ -102,11 +102,11 @@ export const AddBedForm = (props: BedFormProps) => {
         numberOfBeds: "Please enter a number larger than 0.",
       }));
 
-      if (data.number_of_beds > 25) {
+      if (data.number_of_beds > 100) {
         isValid = false;
         setErrors((prev) => ({
           ...prev,
-          numberOfBeds: "Please enter a number smaller than 25.",
+          numberOfBeds: "Please enter a number smaller than or equal to 100.",
         }));
       }
     }
@@ -250,7 +250,7 @@ export const AddBedForm = (props: BedFormProps) => {
                         type="number"
                         value={numberOfBeds.toString()}
                         min={1}
-                        max={25}
+                        max={100}
                         onChange={(e) => setNumberOfBeds(Number(e.value))}
                       />
                     </div>
