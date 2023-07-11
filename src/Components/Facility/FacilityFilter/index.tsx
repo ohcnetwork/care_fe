@@ -1,20 +1,14 @@
-import React, { useCallback, useState } from "react";
 import { navigate } from "raviger";
-import { LegacySelectField } from "../../Common/HelperInputFields";
-import { CircularProgress } from "@material-ui/core";
 import { FACILITY_TYPES } from "../../../Common/constants";
-import { getStates, getDistrictByState } from "../../../Redux/actions";
-import { useDispatch } from "react-redux";
-import { useAbortableEffect, statusType } from "../../../Common/utils";
-import LocalBodySelect from "./LocalBodySelect";
 import useMergeState from "../../../Common/hooks/useMergeState";
 import useConfig from "../../../Common/hooks/useConfig";
 import FiltersSlideover from "../../../CAREUI/interactive/FiltersSlideover";
 import { useTranslation } from "react-i18next";
-
-const initialStates = [{ id: 0, name: "Choose State *" }];
-const initialDistricts = [{ id: 0, name: "Choose District" }];
-const selectStates = [{ id: 0, name: "Please select your state" }];
+import StateAutocompleteFormField from "../../Common/StateAutocompleteFormField";
+import { FieldChangeEvent } from "../../Form/FormFields/Utils";
+import DistrictAutocompleteFormField from "../../Common/DistrictAutocompleteFormField";
+import LocalBodyAutocompleteFormField from "../../Common/LocalBodyAutocompleteFormField";
+import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 
 const clearFilterState = {
   state: "",
@@ -28,12 +22,6 @@ function FacilityFilter(props: any) {
   const { t } = useTranslation();
   const { filter, onChange, closeFilter } = props;
   const { kasp_string } = useConfig();
-  const dispatchAction: any = useDispatch();
-
-  const [isStateLoading, setIsStateLoading] = useState(false);
-  const [isDistrictLoading, setIsDistrictLoading] = useState(false);
-  const [states, setStates] = useState(initialStates);
-  const [districts, setDistricts] = useState(selectStates);
   const [filterState, setFilterState] = useMergeState({
     state: filter.state || "",
     district: filter.district || "",
@@ -41,49 +29,6 @@ function FacilityFilter(props: any) {
     facility_type: filter.facility_type || "",
     kasp_empanelled: filter.kasp_empanelled || "",
   });
-
-  const fetchStates = useCallback(
-    async (status: any) => {
-      setIsStateLoading(true);
-      const res = await dispatchAction(getStates());
-      if (!status.aborted) {
-        if (res && res.data) {
-          setStates([...initialStates, ...res.data.results]);
-        }
-        setIsStateLoading(false);
-      }
-    },
-    [dispatchAction]
-  );
-
-  useAbortableEffect((status: statusType) => {
-    fetchStates(status);
-  }, []);
-
-  const fetchDistricts = useCallback(
-    async (status: any) => {
-      setIsDistrictLoading(true);
-      const res =
-        Number(filterState.state) &&
-        (await dispatchAction(getDistrictByState({ id: filterState.state })));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setDistricts([...initialDistricts, ...res.data]);
-        } else {
-          setDistricts(selectStates);
-        }
-        setIsDistrictLoading(false);
-      }
-    },
-    [dispatchAction, filterState.state]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDistricts(status);
-    },
-    [filterState.state]
-  );
 
   const applyFilter = () => {
     const data = {
@@ -96,24 +41,29 @@ function FacilityFilter(props: any) {
     onChange(data);
   };
 
-  const handleChange = (event: any) => {
-    const { name, value } = event.target;
-    const filterData: any = { ...filterState };
+  const handleChange = ({ name, value }: FieldChangeEvent<unknown>) => {
+    const filterData = { ...filterState };
+
     if (name === "state") {
       filterData["district"] = 0;
       filterData["local_body"] = 0;
     }
+
     if (name === "district") {
       filterData["local_body"] = 0;
     }
+
     filterData[name] = value;
 
     setFilterState(filterData);
   };
 
-  const handleLocalBodyChange = (local_body_id: string) => {
-    handleChange({ target: { name: "local_body", value: local_body_id } });
-  };
+  const field = (name: string) => ({
+    name,
+    label: t(name),
+    value: filterState[name],
+    onChange: handleChange,
+  });
 
   return (
     <FiltersSlideover
@@ -126,83 +76,32 @@ function FacilityFilter(props: any) {
       }}
     >
       <div className="w-full flex-none">
-        <span className="text-sm font-semibold">{t("state")}</span>
-        <div>
-          {isStateLoading ? (
-            <CircularProgress size={20} />
-          ) : (
-            <LegacySelectField
-              name="state"
-              variant="outlined"
-              margin="dense"
-              value={filterState.state}
-              options={states}
-              optionValue="name"
-              onChange={handleChange}
-            />
-          )}
-        </div>
-      </div>
-
-      <div className="w-full flex-none">
-        <span className="text-sm font-semibold">{t("district")}</span>
-        <div>
-          {isDistrictLoading ? (
-            <CircularProgress size={20} />
-          ) : (
-            <LegacySelectField
-              name="district"
-              variant="outlined"
-              margin="dense"
-              value={filterState.district}
-              options={districts}
-              optionValue="name"
-              onChange={handleChange}
-            />
-          )}
-        </div>
-      </div>
-
-      <div className="w-full flex-none">
-        <span className="text-sm font-semibold">{t("local_body")}</span>
-        <div>
-          <LocalBodySelect
-            name="local_body"
-            district={filterState.district}
-            selected={filterState.local_body}
-            setSelected={handleLocalBodyChange}
-            margin="dense"
-          />
-        </div>
-      </div>
-
-      <div className="w-full flex-none">
-        <span className="text-sm font-semibold">{t("facility_type")}</span>
-        <LegacySelectField
-          name="facility_type"
-          variant="outlined"
-          margin="dense"
-          value={filterState.facility_type}
-          options={[{ id: "", text: t("show_all") }, ...FACILITY_TYPES]}
-          onChange={handleChange}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+        <StateAutocompleteFormField {...field("state")} />
+        <DistrictAutocompleteFormField
+          {...field("district")}
+          state={filterState.state}
         />
-      </div>
-
-      <div className="w-full flex-none">
-        <span className="text-sm font-semibold">{kasp_string} Empanelled</span>
-        <LegacySelectField
-          name="kasp_empanelled"
-          variant="outlined"
-          margin="dense"
-          value={filterState.kasp_empanelled}
+        <LocalBodyAutocompleteFormField
+          {...field("local_body")}
+          district={filterState.district}
+        />
+        <SelectFormField
+          {...field("facility_type")}
+          options={FACILITY_TYPES}
+          optionLabel={(option) => option.text}
+          optionValue={(option) => option.id}
+          placeholder={t("show_all")}
+        />
+        <SelectFormField
+          {...field("kasp_empanelled")}
+          label={`${kasp_string} Empanelled`}
           options={[
-            { id: "", text: t("show_all") },
-            { id: true, text: t("yes") },
-            { id: false, text: t("no") },
+            { id: "true", text: t("yes") },
+            { id: "false", text: t("no") },
           ]}
-          onChange={handleChange}
-          className="bg-white h-10 shadow-sm md:text-sm md:leading-5 md:h-9"
+          optionLabel={(option) => option.text}
+          optionValue={(option) => option.id}
+          placeholder={t("show_all")}
         />
       </div>
     </FiltersSlideover>

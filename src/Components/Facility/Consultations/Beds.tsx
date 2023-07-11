@@ -9,13 +9,13 @@ import * as Notification from "../../../Utils/Notifications.js";
 import Loading from "../../Common/Loading";
 import { BedModel, CurrentBed } from "../models";
 import { BedSelect } from "../../Common/BedSelect";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import { formatDate } from "../../../Utils/utils";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import moment from "moment";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import TextFormField from "../../Form/FormFields/TextFormField";
+import CircularProgress from "../../Common/components/CircularProgress";
 
 const formatDateTime: () => string = () => {
   const current = new Date();
@@ -48,6 +48,8 @@ const Beds = (props: BedsProps) => {
     []
   );
   const [isLoading, setIsLoading] = React.useState(false);
+  const [key, setKey] = React.useState(0);
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -71,7 +73,7 @@ const Beds = (props: BedsProps) => {
     (status: statusType) => {
       fetchData(status);
     },
-    [dispatch, fetchData]
+    [dispatch, fetchData, key]
   );
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
@@ -92,6 +94,7 @@ const Beds = (props: BedsProps) => {
       });
       if (props.fetchPatientData) props.fetchPatientData({ aborted: false });
       if (props.setState) props.setState(false);
+      setKey(key + 1);
     }
   };
 

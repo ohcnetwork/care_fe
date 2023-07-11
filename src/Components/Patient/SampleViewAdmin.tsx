@@ -26,8 +26,8 @@ import { ExportButton } from "../Common/Export";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function SampleViewAdmin() {
   const {
@@ -329,7 +329,18 @@ export default function SampleViewAdmin() {
   }
 
   return (
-    <div className="px-6">
+    <Page
+      title="Sample Management System"
+      hideBack={true}
+      breadcrumbs={false}
+      componentRight={
+        <ExportButton
+          action={() => downloadSampleTests({ ...qParams })}
+          parse={parseExportData}
+          filenamePrefix="samples"
+        />
+      }
+    >
       {statusDialog.show && (
         <UpdateStatusDialog
           sample={statusDialog.sample}
@@ -338,18 +349,6 @@ export default function SampleViewAdmin() {
           userType={userType}
         />
       )}
-      <PageTitle
-        title="Sample Management System"
-        hideBack={true}
-        breadcrumbs={false}
-        componentRight={
-          <ExportButton
-            action={() => downloadSampleTests({ ...qParams })}
-            parse={parseExportData}
-            filenamePrefix="samples"
-          />
-        }
-      />
       <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
         <div className="flex flex-col lg:flex-row gap-6 justify-between">
           <div className="w-full">
@@ -401,7 +400,7 @@ export default function SampleViewAdmin() {
               "Sample Test Type",
               "sample_type",
               SAMPLE_TYPE_CHOICES.find(
-                (type) => type.id.toString() === qParams.sample_type
+                (type) => type.id === qParams.sample_type
               )?.text || ""
             ),
             value("Facility", "facility", facilityName),
@@ -411,6 +410,6 @@ export default function SampleViewAdmin() {
       <div className="md:px-2">
         <div className="flex flex-wrap md:-mx-2 lg:-mx-6">{manageSamples}</div>
       </div>
-    </div>
+    </Page>
   );
 }

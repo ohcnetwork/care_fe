@@ -15,7 +15,7 @@ export const LocalStorageKeys = {
   refreshToken: "care_refresh_token",
 };
 export interface OptionsType {
-  id: number;
+  id: number | string;
   text: string;
   label?: string;
   desc?: string;
@@ -246,6 +246,7 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
 ];
 
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
+  { id: -1, text: "No Review" },
   { id: 10, text: "10 mins" },
   { id: 15, text: "15 mins" },
   { id: 30, text: "30 mins" },
@@ -465,16 +466,16 @@ export const BLOOD_GROUPS = [
 ];
 
 export const SAMPLE_TYPE_CHOICES = [
-  { id: 0, text: "UNKNOWN" },
-  { id: 1, text: "BA/ETA" },
-  { id: 2, text: "TS/NPS/NS" },
-  { id: 3, text: "Blood in EDTA" },
-  { id: 4, text: "Acute Sera" },
-  { id: 5, text: "Covalescent sera" },
-  { id: 6, text: "Biopsy" },
-  { id: 7, text: "AMR" },
-  { id: 8, text: "Communicable Diseases" },
-  { id: 9, text: "OTHER TYPE" },
+  { id: "0", text: "UNKNOWN" },
+  { id: "1", text: "BA/ETA" },
+  { id: "2", text: "TS/NPS/NS" },
+  { id: "3", text: "Blood in EDTA" },
+  { id: "4", text: "Acute Sera" },
+  { id: "5", text: "Covalescent sera" },
+  { id: "6", text: "Biopsy" },
+  { id: "7", text: "AMR" },
+  { id: "8", text: "Communicable Diseases" },
+  { id: "9", text: "OTHER TYPE" },
 ];
 
 export const ICMR_CATEGORY = [
@@ -697,9 +698,9 @@ export const CONSULTATION_TABS: Array<OptionsType> = [
 ];
 
 export const RHYTHM_CHOICES: Array<OptionsType> = [
-  { id: 0, text: "Unknown" },
-  { id: 5, text: "Regular" },
-  { id: 10, text: "Irregular" },
+  { id: 0, text: "UNKNOWN", desc: "Unknown" },
+  { id: 5, text: "REGULAR", desc: "Regular" },
+  { id: 10, text: "IRREGULAR", desc: "Irregular" },
 ];
 
 export const LOCATION_BED_TYPES: Array<any> = [
@@ -757,28 +758,28 @@ export const CAMERA_STATES = {
 
 export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
   {
-    icon: "chevron-up",
+    icon: "l-angle-up",
     label: "Move Up",
     action: "up",
     loadingLabel: CAMERA_STATES.MOVING.UP,
     shortcutKey: ["Control", "Shift", "ArrowUp"],
   },
   {
-    icon: "chevron-down",
+    icon: "l-angle-down",
     label: "Move Down",
     action: "down",
     loadingLabel: CAMERA_STATES.MOVING.DOWN,
     shortcutKey: ["Control", "Shift", "ArrowDown"],
   },
   {
-    icon: "chevron-left",
+    icon: "l-angle-left",
     label: "Move Left",
     action: "left",
     loadingLabel: CAMERA_STATES.MOVING.LEFT,
     shortcutKey: ["Control", "Shift", "ArrowLeft"],
   },
   {
-    icon: "chevron-right",
+    icon: "l-angle-right",
     label: "Move Right",
     action: "right",
     loadingLabel: CAMERA_STATES.MOVING.RIGHT,
@@ -792,34 +793,34 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
     shortcutKey: ["Shift", "P"],
   },
   {
-    icon: "search-plus",
+    icon: "l-search-plus",
     label: "Zoom In",
     action: "zoomIn",
     loadingLabel: CAMERA_STATES.ZOOMING.IN,
     shortcutKey: ["Shift", "I"],
   },
   {
-    icon: "search-minus",
+    icon: "l-search-minus",
     label: "Zoom Out",
     action: "zoomOut",
     loadingLabel: CAMERA_STATES.ZOOMING.OUT,
     shortcutKey: ["Shift", "O"],
   },
   {
-    icon: "save",
+    icon: "l-save",
     label: "Update Preset",
     action: "updatePreset",
     loadingLabel: CAMERA_STATES.UPDATING_PRESET,
     shortcutKey: ["Shift", "S"],
   },
   {
-    icon: "undo",
+    icon: "l-redo",
     label: "Reset",
     action: "reset",
     shortcutKey: ["Shift", "R"],
   },
   {
-    icon: "expand",
+    icon: "l-expand-arrows-alt",
     label: "Full Screen",
     action: "fullScreen",
     shortcutKey: ["F"],

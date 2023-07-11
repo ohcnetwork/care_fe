@@ -4,7 +4,8 @@ import { FormDetails } from "./Utils";
 
 export type FormContextValue<T extends FormDetails> = (
   name: keyof T,
-  validate?: FieldValidator<T[keyof T]>
+  validate?: FieldValidator<T[keyof T]>,
+  excludeFromDraft?: boolean
 ) => {
   id: keyof T;
   name: keyof T;

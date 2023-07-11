@@ -30,21 +30,21 @@ describe("Edit Profile Testing", () => {
 
   it("Search by phone number", () => {
     cy.intercept(/\/api\/v1\/external_result/).as("external_result");
-    cy.get("[placeholder='Search by Phone Number']").type("4738743424");
+    cy.get("[placeholder='Search by Phone Number']").type("7387434255");
     cy.wait("@external_result").then((interception) => {
       expect(interception.response.statusCode).to.equal(200);
     });
-    cy.url().should("include", "%2B914738743424");
+    cy.url().should("include", "%2B917387434255");
   });
 
   it("import", () => {
     cy.intercept("POST", "/api/v1/external_result/bulk_upsert").as("import");
-    cy.get("div").contains("Import/Export").click({ force: true });
-    cy.get("div").contains("Import Results").click({ force: true });
+    cy.get("div").contains("Import/Export").click();
+    cy.get("div").contains("Import Results").click();
     cy.get("[id=result-upload]")
-      .selectFile("cypress/fixtures/external-result_sample.csv")
+      .selectFile("cypress/fixtures/externalresultsample.csv")
       .wait(100);
-    cy.get("button").contains("Save").click({ force: true });
+    cy.get("button").contains("Save").click();
     cy.wait("@import").then((interception) => {
       expect(interception.response.statusCode).to.equal(202);
     });

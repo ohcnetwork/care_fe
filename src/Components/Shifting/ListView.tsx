@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 import BadgesList from "./BadgesList";
 import ButtonV2 from "../Common/components/ButtonV2";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import { ExportButton } from "../Common/Export";
 import ListFilter from "./ListFilter";
 import Page from "../Common/components/Page";
@@ -21,6 +21,8 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch, useSelector } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -85,7 +87,7 @@ export default function ListView() {
   }, [
     qParams.status,
     qParams.facility,
-    qParams.orgin_facility,
+    qParams.origin_facility,
     qParams.shifting_approving_facility,
     qParams.assigned_facility,
     qParams.emergency,
@@ -168,7 +170,7 @@ export default function ListView() {
                   >
                     <i className="fas fa-plane-departure mr-2"></i>
                     <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {(shift.orgin_facility_object || {}).name}
+                      {(shift.origin_facility_object || {}).name}
                     </dd>
                   </dt>
                 </div>
@@ -258,7 +260,7 @@ export default function ListView() {
                 >
                   {t("transfer_to_receiving_facility")}
                 </ButtonV2>
-                <ConfirmDialogV2
+                <ConfirmDialog
                   title={t("confirm_transfer_complete")}
                   description={t("mark_transfer_complete_confirmation")}
                   action="Confirm"
@@ -302,30 +304,20 @@ export default function ListView() {
           <div className="w-32">
             {/* dummy div to align space as per board view */}
           </div>
-          <div className="flex md:flex-row flex-col justify-center items-center md:gap-6">
-            <div className="my-2 md:my-0">
-              <button
-                className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 md:w-40 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-                onClick={() =>
-                  navigate("/shifting/board-view", { query: qParams })
-                }
-              >
-                <i
-                  className="fa fa-list mr-1 transform rotate-90"
-                  aria-hidden="true"
-                ></i>
-                {t("board_view")}
-              </button>
-            </div>
-            <div className="flex items-start gap-2">
-              <button
-                className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-                onClick={() => advancedFilter.setShow(true)}
-              >
-                <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-                <span>{t("filters")}</span>
-              </button>
-            </div>
+          <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 w-full lg:w-fit">
+            <ButtonV2
+              className="py-[11px]"
+              onClick={() =>
+                navigate("/shifting/board-view", { query: qParams })
+              }
+            >
+              <CareIcon className="care-l-list-ul transform rotate-90" />
+              {t("board_view")}
+            </ButtonV2>
+
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
           </div>
         </>
       }

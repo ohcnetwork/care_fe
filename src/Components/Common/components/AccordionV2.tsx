@@ -60,11 +60,9 @@ export default function AccordionV2(props: {
         style={
           toggle
             ? {
-                maxHeight: contentEl.current
-                  ? `${contentEl.current.scrollHeight}px`
-                  : "0px",
+                overflow: "visible",
               }
-            : { maxHeight: "0px", overflow: "hidden" }
+            : { height: "0px", overflow: "hidden" }
         }
       >
         {props.children}

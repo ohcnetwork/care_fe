@@ -1,4 +1,4 @@
-import { Card, CardContent } from "@material-ui/core";
+import Card from "../../CAREUI/display/Card";
 import loadable from "@loadable/component";
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -12,14 +12,14 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { LegacySelectField } from "../Common/HelperInputFields";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface BedFormProps {
   facilityId: string;
@@ -159,7 +159,7 @@ export const AddBedForm = (props: BedFormProps) => {
 
   return (
     <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle
+      <Page
         title={headerText}
         backUrl={`/facility/${facilityId}/location/${locationId}/beds`}
         crumbsReplacements={{
@@ -261,10 +261,10 @@ export const AddBedForm = (props: BedFormProps) => {
                   <Submit onClick={handleSubmit} label={buttonText} />
                 </div>
               </div>
-            </CardContent>
-          </form>
-        </Card>
-      </div>
+            </form>
+          </Card>
+        </div>
+      </Page>
     </div>
   );
 };

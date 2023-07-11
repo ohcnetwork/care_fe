@@ -1,9 +1,8 @@
-import { Card, CardContent, CircularProgress } from "@material-ui/core";
 import loadable from "@loadable/component";
 import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import moment from "moment";
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   GENDER_TYPES,
@@ -39,9 +38,12 @@ import Checkbox from "../Common/components/CheckBox";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import Page from "../Common/components/Page";
+import Card from "../../CAREUI/display/Card";
+import CircularProgress from "../Common/components/CircularProgress";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 interface UserProps {
   userId?: number;
@@ -65,6 +67,7 @@ type UserForm = {
   email: string;
   phone_number: string;
   alt_phone_number: string;
+  phone_number_is_whatsapp: boolean;
   age: number;
   date_of_birth: Date | null;
   state: number;
@@ -86,8 +89,9 @@ const initForm: UserForm = {
   first_name: "",
   last_name: "",
   email: "",
-  phone_number: "",
-  alt_phone_number: "",
+  phone_number: "+91",
+  alt_phone_number: "+91",
+  phone_number_is_whatsapp: true,
   age: 0,
   date_of_birth: null,
   state: 0,
@@ -122,6 +126,10 @@ const user_create_reducer = (state = initialState, action: any) => {
         errors: action.errors,
       };
     }
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
+    }
     default:
       return state;
   }
@@ -130,12 +138,35 @@ const user_create_reducer = (state = initialState, action: any) => {
 const getDate = (value: any) =>
   value && moment(value).isValid() && moment(value).toDate();
 
+export const validateRule = (
+  condition: boolean,
+  content: JSX.Element | string
+) => {
+  return (
+    <div>
+      {condition ? (
+        <i className="fas fa-circle-check text-green-500" />
+      ) : (
+        <i className="fas fa-circle-xmark text-red-500" />
+      )}{" "}
+      <span
+        className={classNames(condition ? "text-primary-500" : "text-red-500")}
+      >
+        {content}
+      </span>
+    </div>
+  );
+};
+
 export const UserAdd = (props: UserProps) => {
   const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const { userId } = props;
 
-  const [state, dispatch] = useReducer(user_create_reducer, initialState);
+  const [state, dispatch] = useAutoSaveReducer(
+    user_create_reducer,
+    initialState
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
@@ -147,7 +178,6 @@ export const UserAdd = (props: UserProps) => {
   const [districts, setDistricts] = useState<StateObj[]>([]);
   const [localBodies, setLocalBodies] = useState<StateObj[]>([]);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel[]>([]);
-  const [phoneIsWhatsApp, setPhoneIsWhatsApp] = useState(true);
   const [usernameInputInFocus, setUsernameInputInFocus] = useState(false);
   const [passwordInputInFocus, setPasswordInputInFocus] = useState(false);
   const [confirmPasswordInputInFocus, setConfirmPasswordInputInFocus] =
@@ -342,18 +372,13 @@ export const UserAdd = (props: UserProps) => {
   };
 
   useAbortableEffect(() => {
-    if (phoneIsWhatsApp) {
+    if (state.form.phone_number_is_whatsapp) {
       handleFieldChange({
         name: "alt_phone_number",
         value: state.form.phone_number,
       });
-    } else {
-      handleFieldChange({
-        name: "alt_phone_number",
-        value: "+91",
-      });
     }
-  }, [phoneIsWhatsApp, state.form.phone_number]);
+  }, [state.form.phone_number_is_whatsapp, state.form.phone_number]);
 
   const setFacility = (selected: FacilityModel | FacilityModel[] | null) => {
     setSelectedFacility(selected as FacilityModel[]);
@@ -530,25 +555,6 @@ export const UserAdd = (props: UserProps) => {
     return true;
   };
 
-  const validateRule = (condition: boolean, content: JSX.Element | string) => {
-    return (
-      <div>
-        {condition ? (
-          <i className="fas fa-circle-check text-green-500" />
-        ) : (
-          <i className="fas fa-circle-xmark text-red-500" />
-        )}{" "}
-        <span
-          className={classNames(
-            condition ? "text-primary-500" : "text-red-500"
-          )}
-        >
-          {content}
-        </span>
-      </div>
-    );
-  };
-
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const validated = validateForm();
@@ -571,9 +577,11 @@ export const UserAdd = (props: UserProps) => {
           state.form.phone_number
         )?.format("E.164"),
         alt_phone_number:
-          parsePhoneNumberFromString(state.form.alt_phone_number)?.format(
-            "E.164"
-          ) || "",
+          parsePhoneNumberFromString(
+            state.form.phone_number_is_whatsapp
+              ? state.form.phone_number
+              : state.form.alt_phone_number
+          )?.format("E.164") || "",
         date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
         age: Number(moment().diff(state.form.date_of_birth, "years", false)),
         doctor_qualification:
@@ -632,322 +640,326 @@ export const UserAdd = (props: UserProps) => {
   };
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={headerText}
-        componentRight={
-          <Link
-            href="https://school.coronasafe.network/targets/12953"
-            className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
-            target="_blank"
-          >
-            <i className="fas fa-info-circle" /> &nbsp;Need Help?
-          </Link>
-        }
-        justifyContents="justify-between"
-        backUrl="/users"
-      />
-
-      <Card className="mt-4">
-        <CardContent>
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-              <div className="md:col-span-2">
-                <FieldLabel>Facilities</FieldLabel>
-                <FacilitySelect
-                  multiple={true}
-                  name="facilities"
-                  selected={selectedFacility}
-                  setSelected={setFacility}
-                  errors={state.errors.facilities}
-                  showAll={false}
-                />
-              </div>
-              <SelectFormField
-                {...field("user_type")}
-                required
-                label="User Type"
-                options={userTypes}
-                optionLabel={(o) =>
-                  o.role + ((o.readOnly && " (Read Only)") || "")
-                }
-                optionValue={(o) => o.id}
+    <Page
+      title={headerText}
+      options={
+        <Link
+          href="https://school.coronasafe.network/targets/12953"
+          className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
+          target="_blank"
+        >
+          <i className="fas fa-info-circle" /> &nbsp;Need Help?
+        </Link>
+      }
+      backUrl="/users"
+    >
+      <Card>
+        <form onSubmit={(e) => handleSubmit(e)}>
+          <DraftSection
+            handleDraftSelect={(newState) => {
+              dispatch({ type: "set_state", state: newState });
+            }}
+            formData={state.form}
+          />
+          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <FieldLabel>Facilities</FieldLabel>
+              <FacilitySelect
+                multiple={true}
+                name="facilities"
+                selected={selectedFacility}
+                setSelected={setFacility}
+                errors={state.errors.facilities}
+                showAll={false}
               />
+            </div>
+            <SelectFormField
+              {...field("user_type")}
+              required
+              label="User Type"
+              options={userTypes}
+              optionLabel={(o) =>
+                o.role + ((o.readOnly && " (Read Only)") || "")
+              }
+              optionValue={(o) => o.id}
+            />
 
-              {state.form.user_type === "Doctor" && (
-                <>
-                  <TextFormField
-                    {...field("doctor_qualification")}
-                    required
-                    label="Qualification"
-                    placeholder="Qualification of the Doctor"
-                  />
-
-                  <TextFormField
-                    {...field("doctor_experience_commenced_on")}
-                    required
-                    min={0}
-                    type="number"
-                    label="Years of experience"
-                    placeholder="Years of experience of the Doctor"
-                  />
-
-                  <TextFormField
-                    {...field("doctor_medical_council_registration")}
-                    required
-                    label="Medical Council Registration"
-                    placeholder="Doctor's medical council registration number"
-                  />
-                </>
-              )}
-
-              <SelectFormField
-                {...field("home_facility")}
-                label="Home facility"
-                options={selectedFacility || []}
-                optionLabel={(option) => option.name}
-                optionValue={(option) => option.id}
-                onChange={handleFieldChange}
-              />
-
-              <div>
-                <PhoneNumberFormField
-                  {...field("phone_number")}
-                  placeholder="Phone Number"
-                  label="Phone Number"
+            {state.form.user_type === "Doctor" && (
+              <>
+                <TextFormField
+                  {...field("doctor_qualification")}
                   required
-                  onlyIndia
+                  label="Qualification"
+                  placeholder="Qualification of the Doctor"
                 />
-                <Checkbox
-                  checked={phoneIsWhatsApp}
-                  onCheck={setPhoneIsWhatsApp}
-                  label="Is the phone number a WhatsApp number?"
-                />
-              </div>
 
+                <TextFormField
+                  {...field("doctor_experience_commenced_on")}
+                  required
+                  min={0}
+                  type="number"
+                  label="Years of experience"
+                  placeholder="Years of experience of the Doctor"
+                />
+
+                <TextFormField
+                  {...field("doctor_medical_council_registration")}
+                  required
+                  label="Medical Council Registration"
+                  placeholder="Doctor's medical council registration number"
+                />
+              </>
+            )}
+
+            <SelectFormField
+              {...field("home_facility")}
+              label="Home facility"
+              options={selectedFacility || []}
+              optionLabel={(option) => option.name}
+              optionValue={(option) => option.id}
+              onChange={handleFieldChange}
+            />
+
+            <div>
               <PhoneNumberFormField
-                {...field("alt_phone_number")}
-                placeholder="WhatsApp Phone Number"
-                label="Whatsapp Number"
-                disabled={phoneIsWhatsApp}
-                onlyIndia
-              />
-
-              <div>
-                <TextFormField
-                  {...field("username")}
-                  label="Username"
-                  placeholder="Username"
-                  required
-                  autoComplete="new-username"
-                  value={usernameInput}
-                  onChange={(e) => {
-                    handleFieldChange(e);
-                    setUsernameInput(e.value);
-                  }}
-                  onFocus={() => setUsernameInputInFocus(true)}
-                  onBlur={() => {
-                    setUsernameInputInFocus(false);
-                  }}
-                />
-                {usernameInputInFocus && (
-                  <div className="pl-2 text-small text-gray-500">
-                    <div>
-                      {usernameExists !== userExistsEnums.idle && (
-                        <>
-                          {usernameExists === userExistsEnums.checking ? (
-                            <span>
-                              <i className="fas fa-circle-dot" /> checking...
-                            </span>
-                          ) : (
-                            <>
-                              {usernameExists === userExistsEnums.exists ? (
-                                <div>
-                                  <i className="fas fa-circle-xmark text-red-500" />{" "}
-                                  <span className="text-red-500">
-                                    Username is not available
-                                  </span>
-                                </div>
-                              ) : (
-                                <div>
-                                  <i className="fas fa-circle-check text-green-500" />{" "}
-                                  <span className="text-primary-500">
-                                    Username is available
-                                  </span>
-                                </div>
-                              )}
-                            </>
-                          )}
-                        </>
-                      )}
-                    </div>
-                    <div>
-                      {validateRule(
-                        state.form.username?.length >= 2,
-                        "Username should be atleast 2 characters long"
-                      )}
-                    </div>
-                    <div>
-                      {validateRule(
-                        /[^.@+_-]/.test(
-                          state.form.username[state.form.username?.length - 1]
-                        ),
-                        "Username can't end with ^ . @ + _ -"
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <DateFormField
-                {...field("date_of_birth")}
-                label="Date of Birth"
+                {...field("phone_number")}
+                placeholder="Phone Number"
+                label="Phone Number"
                 required
-                value={getDate(state.form.date_of_birth)}
-                onChange={handleDateChange}
-                position="LEFT"
-                disableFuture
+                disableCountry
               />
+              <Checkbox
+                checked={state.form.phone_number_is_whatsapp}
+                onCheck={(checked) => {
+                  handleFieldChange({
+                    name: "phone_number_is_whatsapp",
+                    value: checked,
+                  });
+                }}
+                label="Is the phone number a WhatsApp number?"
+              />
+            </div>
 
-              <div>
-                <TextFormField
-                  {...field("password")}
-                  label="Password"
-                  placeholder="Password"
-                  required
-                  autoComplete="new-password"
-                  type="password"
-                  onFocus={() => setPasswordInputInFocus(true)}
-                  onBlur={() => setPasswordInputInFocus(false)}
-                />
-                {passwordInputInFocus && (
-                  <div className="pl-2 text-small text-gray-500">
-                    {validateRule(
-                      state.form.password?.length >= 8,
-                      "Password should be atleast 8 characters long"
-                    )}
-                    {validateRule(
-                      state.form.password !== state.form.password.toUpperCase(),
-                      "Password should contain at least 1 lowercase letter"
-                    )}
-                    {validateRule(
-                      state.form.password !== state.form.password.toLowerCase(),
-                      "Password should contain at least 1 uppercase letter"
-                    )}
-                    {validateRule(
-                      /\d/.test(state.form.password),
-                      "Password should contain at least 1 number"
+            <PhoneNumberFormField
+              {...field("alt_phone_number")}
+              placeholder="WhatsApp Phone Number"
+              label="Whatsapp Number"
+              disabled={state.form.phone_number_is_whatsapp}
+              disableCountry
+            />
+
+            <div>
+              <TextFormField
+                {...field("username")}
+                label="Username"
+                placeholder="Username"
+                required
+                autoComplete="new-username"
+                value={usernameInput}
+                onChange={(e) => {
+                  handleFieldChange(e);
+                  setUsernameInput(e.value);
+                }}
+                onFocus={() => setUsernameInputInFocus(true)}
+                onBlur={() => {
+                  setUsernameInputInFocus(false);
+                }}
+              />
+              {usernameInputInFocus && (
+                <div className="pl-2 text-small text-gray-500">
+                  <div>
+                    {usernameExists !== userExistsEnums.idle && (
+                      <>
+                        {usernameExists === userExistsEnums.checking ? (
+                          <span>
+                            <i className="fas fa-circle-dot" /> checking...
+                          </span>
+                        ) : (
+                          <>
+                            {usernameExists === userExistsEnums.exists ? (
+                              <div>
+                                <i className="fas fa-circle-xmark text-red-500" />{" "}
+                                <span className="text-red-500">
+                                  Username is not available
+                                </span>
+                              </div>
+                            ) : (
+                              <div>
+                                <i className="fas fa-circle-check text-green-500" />{" "}
+                                <span className="text-primary-500">
+                                  Username is available
+                                </span>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </>
                     )}
                   </div>
-                )}
-              </div>
-              <div>
-                <TextFormField
-                  {...field("c_password")}
-                  label="Confirm Password"
-                  placeholder="Confirm Password"
-                  required
-                  type="password"
-                  autoComplete="off"
-                  onFocus={() => setConfirmPasswordInputInFocus(true)}
-                  onBlur={() => setConfirmPasswordInputInFocus(false)}
-                />
-                {confirmPasswordInputInFocus &&
-                  state.form.c_password.length > 0 &&
-                  validateRule(
-                    state.form.c_password === state.form.password,
-                    "Confirm password should match the entered password"
+                  <div>
+                    {validateRule(
+                      state.form.username?.length >= 2,
+                      "Username should be atleast 2 characters long"
+                    )}
+                  </div>
+                  <div>
+                    {validateRule(
+                      /[^.@+_-]/.test(
+                        state.form.username[state.form.username?.length - 1]
+                      ),
+                      "Username can't end with ^ . @ + _ -"
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <DateFormField
+              {...field("date_of_birth")}
+              label="Date of Birth"
+              required
+              value={getDate(state.form.date_of_birth)}
+              onChange={handleDateChange}
+              position="LEFT"
+              disableFuture
+            />
+
+            <div>
+              <TextFormField
+                {...field("password")}
+                label="Password"
+                placeholder="Password"
+                required
+                autoComplete="new-password"
+                type="password"
+                onFocus={() => setPasswordInputInFocus(true)}
+                onBlur={() => setPasswordInputInFocus(false)}
+              />
+              {passwordInputInFocus && (
+                <div className="pl-2 text-small text-gray-500">
+                  {validateRule(
+                    state.form.password?.length >= 8,
+                    "Password should be atleast 8 characters long"
                   )}
-              </div>
+                  {validateRule(
+                    state.form.password !== state.form.password.toUpperCase(),
+                    "Password should contain at least 1 lowercase letter"
+                  )}
+                  {validateRule(
+                    state.form.password !== state.form.password.toLowerCase(),
+                    "Password should contain at least 1 uppercase letter"
+                  )}
+                  {validateRule(
+                    /\d/.test(state.form.password),
+                    "Password should contain at least 1 number"
+                  )}
+                </div>
+              )}
+            </div>
+            <div>
               <TextFormField
-                {...field("first_name")}
-                label="First name"
-                placeholder="First name"
+                {...field("c_password")}
+                label="Confirm Password"
+                placeholder="Confirm Password"
                 required
+                type="password"
+                autoComplete="off"
+                onFocus={() => setConfirmPasswordInputInFocus(true)}
+                onBlur={() => setConfirmPasswordInputInFocus(false)}
               />
-              <TextFormField
-                {...field("last_name")}
-                label="Last name"
-                placeholder="Last name"
-                required
-              />
-              <TextFormField
-                {...field("email")}
-                label="Email"
-                placeholder="Email"
-                required
-              />
+              {confirmPasswordInputInFocus &&
+                state.form.c_password.length > 0 &&
+                validateRule(
+                  state.form.c_password === state.form.password,
+                  "Confirm password should match the entered password"
+                )}
+            </div>
+            <TextFormField
+              {...field("first_name")}
+              label="First name"
+              placeholder="First name"
+              required
+            />
+            <TextFormField
+              {...field("last_name")}
+              label="Last name"
+              placeholder="Last name"
+              required
+            />
+            <TextFormField
+              {...field("email")}
+              label="Email"
+              placeholder="Email"
+              required
+            />
+            <SelectFormField
+              {...field("gender")}
+              label="Gender"
+              required
+              value={state.form.gender}
+              options={GENDER_TYPES}
+              optionLabel={(o) => o.text}
+              optionValue={(o) => o.text}
+            />
+
+            {isStateLoading ? (
+              <CircularProgress />
+            ) : (
               <SelectFormField
-                {...field("gender")}
-                label="Gender"
+                {...field("state")}
+                label="State"
                 required
-                value={state.form.gender}
-                options={GENDER_TYPES}
-                optionLabel={(o) => o.text}
-                optionValue={(o) => o.text}
+                placeholder="Choose State"
+                options={states}
+                optionLabel={(o) => o.name}
+                optionValue={(o) => o.id}
+                onChange={(e) => {
+                  handleFieldChange(e);
+                  if (e) fetchDistricts(e.value);
+                }}
               />
+            )}
 
-              {isStateLoading ? (
-                <CircularProgress size={20} />
+            {isDistrictLoading ? (
+              <CircularProgress />
+            ) : (
+              <SelectFormField
+                {...field("district")}
+                label="District"
+                required
+                placeholder="Choose District"
+                options={districts}
+                optionLabel={(o) => o.name}
+                optionValue={(o) => o.id}
+                onChange={(e) => {
+                  handleFieldChange(e);
+                  if (e) fetchLocalBody(e.value);
+                }}
+              />
+            )}
+
+            {showLocalbody &&
+              (isLocalbodyLoading ? (
+                <CircularProgress />
               ) : (
                 <SelectFormField
-                  {...field("state")}
-                  label="State"
+                  {...field("local_body")}
+                  label="Local Body"
                   required
-                  placeholder="Choose State"
-                  options={states}
+                  position="above"
+                  placeholder="Choose Local Body"
+                  options={localBodies}
                   optionLabel={(o) => o.name}
                   optionValue={(o) => o.id}
-                  onChange={(e) => {
-                    handleFieldChange(e);
-                    if (e) fetchDistricts(e.value);
-                  }}
                 />
-              )}
-
-              {isDistrictLoading ? (
-                <CircularProgress size={20} />
-              ) : (
-                <SelectFormField
-                  {...field("district")}
-                  label="District"
-                  required
-                  placeholder="Choose District"
-                  options={districts}
-                  optionLabel={(o) => o.name}
-                  optionValue={(o) => o.id}
-                  onChange={(e) => {
-                    handleFieldChange(e);
-                    if (e) fetchLocalBody(e.value);
-                  }}
-                />
-              )}
-
-              {showLocalbody &&
-                (isLocalbodyLoading ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <>
-                    <SelectFormField
-                      {...field("local_body")}
-                      label="Local Body"
-                      required
-                      position="above"
-                      placeholder="Choose Local Body"
-                      options={localBodies}
-                      optionLabel={(o) => o.name}
-                      optionValue={(o) => o.id}
-                    />
-                  </>
-                ))}
-            </div>
-            <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
-              <Cancel onClick={() => goBack()} />
-              <Submit onClick={handleSubmit} label={buttonText} />
-            </div>
-          </form>
-        </CardContent>
+              ))}
+          </div>
+          <div className="flex flex-col md:flex-row gap-2 justify-end mt-4">
+            <Cancel onClick={() => goBack()} />
+            <Submit onClick={handleSubmit} label={buttonText} />
+          </div>
+        </form>
       </Card>
-    </div>
+    </Page>
   );
 };

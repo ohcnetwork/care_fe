@@ -10,7 +10,7 @@ import {
 import { assetClassProps, AssetData } from "./AssetTypes";
 import { getAsset } from "../../Redux/actions";
 import { useState, useCallback, useEffect } from "react";
-import { navigate } from "raviger";
+import { Link, navigate } from "raviger";
 import loadable from "@loadable/component";
 import AssetFilter from "./AssetFilter";
 import { parseQueryParams } from "../../Utils/primitives";
@@ -70,11 +70,11 @@ const AssetsList = () => {
         page: qParams.page,
         offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
         search_text: qParams.search || "",
-        facility: qParams.facility,
-        asset_type: qParams.asset_type,
-        asset_class: qParams.asset_class,
-        location: qParams.location,
-        status: qParams.status,
+        facility: qParams.facility || "",
+        asset_type: qParams.asset_type || "",
+        asset_class: qParams.asset_class || "",
+        location: qParams.facility ? qParams.location || "" : "",
+        status: qParams.status || "",
       };
       const { data } = await dispatch(listAssets(params));
       if (!status.aborted) {
@@ -149,7 +149,8 @@ const AssetsList = () => {
   );
   const fetchLocationName = useCallback(
     async (status: statusType) => {
-      if (!qParams.location) return setLocationName("");
+      if (!qParams.location || !qParams.facility)
+        return setLocationName(undefined);
       setIsLoading(true);
       const res = await dispatch(
         getFacilityAssetLocation(qParams.facility, qParams.location)
@@ -240,50 +241,50 @@ const AssetsList = () => {
     manageAssets = (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:-mx-8 gap-2">
         {assets.map((asset: AssetData) => (
-          <div
-            key={asset.id}
-            className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
-            onClick={() =>
-              navigate(
-                `facility/${asset?.location_object.facility.id}/assets/${asset.id}`
-              )
-            }
+          <Link
+            href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
+            className="text-inherit"
           >
-            <div className="md:flex">
-              <p className="text-xl flex font-medium capitalize break-words">
-                <span className="mr-2 text-primary-500">
-                  <CareIcon
-                    className={`care-l-${
-                      (
-                        (asset.asset_class &&
-                          assetClassProps[asset.asset_class]) ||
-                        assetClassProps.NONE
-                      ).icon
-                    } text-2xl`}
-                  />
+            <div
+              key={asset.id}
+              className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
+            >
+              <div className="md:flex">
+                <p className="text-xl flex font-medium capitalize break-words">
+                  <span className="mr-2 text-primary-500">
+                    <CareIcon
+                      className={`care-l-${
+                        (
+                          (asset.asset_class &&
+                            assetClassProps[asset.asset_class]) ||
+                          assetClassProps.NONE
+                        ).icon
+                      } text-2xl`}
+                    />
+                  </span>
+                  <p className="truncate w-48">{asset.name}</p>
+                </p>
+              </div>
+              <p className="font-normal text-sm">
+                <span className="text-sm font-medium">
+                  <CareIcon className="care-l-location-point mr-1 text-primary-500" />
+                  {asset?.location_object?.name}
                 </span>
-                <p className="truncate w-48">{asset.name}</p>
+                <span className="text-sm font-medium ml-2">
+                  <CareIcon className="care-l-hospital mr-1 text-primary-500" />
+                  {asset?.location_object?.facility?.name}
+                </span>
               </p>
-            </div>
-            <p className="font-normal text-sm">
-              <span className="text-sm font-medium">
-                <CareIcon className="care-l-location-point mr-1 text-primary-500" />
-                {asset?.location_object?.name}
-              </span>
-              <span className="text-sm font-medium ml-2">
-                <CareIcon className="care-l-hospital mr-1 text-primary-500" />
-                {asset?.location_object?.facility?.name}
-              </span>
-            </p>
 
-            <div className="flex flex-wrap gap-2 mt-2">
-              {asset.is_working ? (
-                <Chip color="green" startIcon="cog" text="Working" />
-              ) : (
-                <Chip color="red" startIcon="cog" text="Not Working" />
-              )}
+              <div className="flex flex-wrap gap-2 mt-2">
+                {asset.is_working ? (
+                  <Chip color="green" startIcon="cog" text="Working" />
+                ) : (
+                  <Chip color="red" startIcon="cog" text="Not Working" />
+                )}
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     );
@@ -360,13 +361,16 @@ const AssetsList = () => {
               />
             </div>
             <ButtonV2
-              className="w-full"
+              className="w-full py-[11px]"
               onClick={() => setIsScannerActive(true)}
             >
               <i className="fas fa-search mr-1"></i> Scan Asset QR
             </ButtonV2>
           </div>
-          <div className="flex flex-col md:flex-row w-full">
+          <div
+            className="flex flex-col md:flex-row w-full"
+            data-testid="create-asset-buttom"
+          >
             <ButtonV2
               authorizeFor={NonReadOnlyUsers}
               className="w-full inline-flex items-center justify-center"

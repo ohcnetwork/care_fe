@@ -11,6 +11,7 @@ interface ExportItem {
   type?: "csv" | "json";
   filePrefix?: string;
   label: string;
+  parse?: (data: string) => string;
   action?: any;
 }
 
@@ -35,11 +36,10 @@ export const ExportMenu = ({
   disabled,
   exportItems,
 }: ExportMenuProps) => {
-  const { isExporting, exportFile, _CSVLink } = useExport();
+  const { isExporting, exportFile } = useExport();
 
   return (
     <div key="export-menu">
-      <_CSVLink />
       <DropdownMenu
         disabled={isExporting || disabled}
         title={isExporting ? "Exporting..." : label}
@@ -48,7 +48,9 @@ export const ExportMenu = ({
       >
         {exportItems.map((item) => (
           <DropdownItem
-            onClick={() => exportFile(item.action, item.filePrefix, item.type)}
+            onClick={() =>
+              exportFile(item.action, item.filePrefix, item.type, item.parse)
+            }
             {...item.options}
           >
             {item.label}
@@ -65,11 +67,10 @@ export const ExportButton = ({
   parse,
   ...props
 }: ExportButtonProps) => {
-  const { isExporting, exportFile, _CSVLink } = useExport();
+  const { isExporting, exportFile } = useExport();
 
   return (
     <>
-      <_CSVLink />
       <ButtonV2
         disabled={isExporting || props.disabled}
         onClick={() =>

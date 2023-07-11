@@ -7,6 +7,7 @@ export type DateRange = {
 };
 
 type Props = {
+  name?: string;
   value?: DateRange;
   onChange: (value: DateRange) => void;
   className?: string;
@@ -23,6 +24,7 @@ const DateRangeInputV2 = ({ value, onChange, ...props }: Props) => {
     <div className="flex gap-2">
       <div className="flex-auto">
         <DateInputV2
+          name={props.name + "_start"}
           className={props.className}
           value={start}
           onChange={(start) => {
@@ -38,6 +40,7 @@ const DateRangeInputV2 = ({ value, onChange, ...props }: Props) => {
       </div>
       <div className="flex-auto">
         <DateInputV2
+          name={props.name + "_end"}
           className={props.className}
           value={end}
           onChange={(end) => onChange({ start, end })}
