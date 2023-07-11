@@ -20,7 +20,7 @@ import useFilters from "../../Common/hooks/useFilters";
 import { FacilityModel } from "../Facility/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
-import AuthorizeFor from "../../Utils/AuthorizeFor";
+import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import ButtonV2 from "../Common/components/ButtonV2";
 import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
 import ExportMenu from "../Common/Export";
@@ -28,10 +28,12 @@ import CountBlock from "../../CAREUI/display/Count";
 import AssetImportModal from "./AssetImportModal";
 import Page from "../Common/components/Page";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
 const AssetsList = () => {
+  const { t } = useTranslation();
   const {
     qParams,
     updateQuery,
@@ -48,6 +50,7 @@ const AssetsList = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [facility, setFacility] = useState<FacilityModel>();
   const [asset_type, setAssetType] = useState<string>();
+  const [status, setStatus] = useState<string>();
   const [facilityName, setFacilityName] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
@@ -108,6 +111,10 @@ const AssetsList = () => {
   useEffect(() => {
     setAssetType(qParams.asset_type);
   }, [qParams.asset_type]);
+
+  useEffect(() => {
+    setStatus(qParams.status);
+  }, [qParams.status]);
 
   useEffect(() => {
     setAssetClass(qParams.asset_class);
@@ -361,6 +368,7 @@ const AssetsList = () => {
           </div>
           <div className="flex flex-col md:flex-row w-full">
             <ButtonV2
+              authorizeFor={NonReadOnlyUsers}
               className="w-full inline-flex items-center justify-center"
               onClick={() => {
                 if (qParams.facility) {
@@ -371,7 +379,7 @@ const AssetsList = () => {
               }}
             >
               <CareIcon className="care-l-plus-circle text-lg" />
-              <span>Create Asset</span>
+              <span>{t("create_asset")}</span>
             </ButtonV2>
           </div>
         </div>
@@ -387,7 +395,7 @@ const AssetsList = () => {
               badge("Name/Serial No./QR ID", "search"),
               value("Asset Type", "asset_type", asset_type || ""),
               value("Asset Class", "asset_class", asset_class || ""),
-              badge("Status", "status"),
+              value("Status", "status", status?.replace(/_/g, " ") || ""),
               value("Location", "location", locationName || ""),
             ]}
           />

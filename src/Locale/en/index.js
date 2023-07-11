@@ -1,4 +1,5 @@
 import Auth from "./Auth.json";
+import Asset from "./Asset.json";
 import Common from "./Common.json";
 import Consultation from "./Consultation.json";
 import Entities from "./Entities.json";
@@ -9,10 +10,12 @@ import Shifting from "./Shifting.json";
 import Notifications from "./Notifications.json";
 import ExternalResult from "./ExternalResult.json";
 import CoverImageEdit from "./CoverImageEdit.json";
+import Resource from "./Resource.json";
 import SortOptions from "./SortOptions.json";
 
 export default {
   ...Auth,
+  ...Asset,
   ...Common,
   ...Consultation,
   ...CoverImageEdit,
@@ -22,6 +25,7 @@ export default {
   ...Facility,
   ...Hub,
   ...Notifications,
+  ...Resource,
   ...Shifting,
   SortOptions,
 };
