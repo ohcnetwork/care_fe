@@ -6,11 +6,10 @@ import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 type direction = "left" | "right" | "up" | "down";
 
 interface CameraBoundaryConfigureProps {
-  boundaryPreset: any;
   addBoundaryPreset(e: any): void;
-  modifyBoundaryPreset(e: any): void;
+  updateBoundaryPreset(e: any): void;
   deleteBoundaryPreset(e: any): void;
-  boundaryPresetExists: boolean;
+  boundaryPreset: any;
   bed: BedModel;
   direction: direction;
   setDirection(direction: direction): void;
@@ -21,9 +20,9 @@ export default function CameraBoundaryConfigure(
 ) {
   const {
     addBoundaryPreset,
-    modifyBoundaryPreset,
+    updateBoundaryPreset,
     deleteBoundaryPreset,
-    boundaryPresetExists,
+    boundaryPreset,
     bed,
     direction,
     setDirection,
@@ -31,8 +30,8 @@ export default function CameraBoundaryConfigure(
   const [toUpdate, setToUpdate] = useState<boolean>(false);
   return (
     <div className="mb-5">
-      <Card className="mt-4">
-        {!boundaryPresetExists && bed?.id && (
+      {!boundaryPreset && bed?.id && (
+        <Card className="mt-4">
           <form onSubmit={addBoundaryPreset} className="">
             <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
               <div>
@@ -44,8 +43,10 @@ export default function CameraBoundaryConfigure(
               </div>
             </div>
           </form>
-        )}
-        {boundaryPresetExists && bed?.id && (
+        </Card>
+      )}
+      {boundaryPreset && bed?.id && (
+        <Card className="mt-4">
           <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
             {toUpdate ? (
               <div>
@@ -61,7 +62,7 @@ export default function CameraBoundaryConfigure(
                 />
                 <ButtonV2
                   variant="primary"
-                  onClick={modifyBoundaryPreset}
+                  onClick={updateBoundaryPreset}
                   id="confirm-update-boundary-preset"
                 >
                   Confirm
@@ -97,8 +98,8 @@ export default function CameraBoundaryConfigure(
               </div>
             )}
           </div>
-        )}
-      </Card>
+        </Card>
+      )}
     </div>
   );
 }

@@ -14,7 +14,6 @@ import { BedModel } from "../../Facility/models";
 import axios from "axios";
 import { getCameraConfig } from "../../../Utils/transformUtils";
 import CameraConfigure from "../configure/CameraConfigure";
-import CameraBoundaryConfigure from "../configure/CameraBoundayConfigure";
 import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
 import TextFormField from "../../Form/FormFields/TextFormField";
@@ -49,8 +48,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [refreshPresetsHash, setRefreshPresetsHash] = useState(
     Number(new Date())
   );
-  const [boundayPresetExists, setBoundaryPresetExists] =
-    useState<boolean>(false);
   const [boundaryPreset, setBoundaryPreset] = useState<any>(null);
   const dispatch = useDispatch<any>();
   const boundaryBuffer = 2;
@@ -79,8 +76,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     setIsLoading(false);
   }, [asset]);
 
-  // checking if boundary preset exists
-  // no need to delete
   useEffect(() => {
     const getBoundaryBedPreset = async () => {
       const res = await dispatch(listAssetBeds({ bed: bed.id }));
@@ -92,10 +87,9 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             (bedAsset: any) => bedAsset.meta.type === "boundary"
           );
           if (boundaryPreset) {
-            setBoundaryPresetExists(true);
             setBoundaryPreset(boundaryPreset);
           } else {
-            setBoundaryPresetExists(false);
+            setBoundaryPreset(null);
           }
         }
       }
@@ -135,25 +129,22 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     }
   };
 
-  // adding boundary preset
-  // no need to delete
-
   const addBoundaryPreset = async (e: SyntheticEvent) => {
     e.preventDefault();
-    // const config = getCameraConfig(asset as AssetData);
+    const config = getCameraConfig(asset as AssetData);
     try {
       setLoadingAddPreset(true);
 
       //delete this
-      const presetData = {
-        data: {
-          error: "no error",
-          utcTime: "2021-09-09T09:09:09.000Z",
-        },
-      };
-      // const presetData = await axios.get(
-      //   `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
-      // );
+      // const presetData = {
+      //   data: {
+      //     error: "no error",
+      //     utcTime: "2021-09-09T09:09:09.000Z",
+      //   },
+      // };
+      const presetData = await axios.get(
+        `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
+      );
       const meta = {
         type: "boundary",
         preset_name: `${bed.name}-boundary`,
@@ -177,7 +168,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         setBed({});
         setNewPreset("");
         setRefreshPresetsHash(Number(new Date()));
-        setBoundaryPresetExists(true);
+        setBoundaryPreset(null);
       } else {
         Notification.Error({
           msg: "Failed to add Boundary Preset",
@@ -191,7 +182,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     setLoadingAddPreset(false);
   };
 
-  const modifyBoundaryPreset = async () => {
+  const updateBoundaryPreset = async () => {
     const config = getCameraConfig(asset as AssetData);
     if (boundaryPreset) {
       try {
@@ -200,6 +191,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         );
         const cameraPosition = presetData.data.position;
         const boundaryRange = boundaryPreset.meta.range;
+        console.log("boundary range", boundaryRange);
+        console.log("camera position", cameraPosition);
         let range;
         if (direction == "left") {
           if (cameraPosition?.x > boundaryRange?.max_x) {
@@ -218,7 +211,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           }
           range = { ...boundaryRange, max_x: cameraPosition?.x };
         } else if (direction == "up") {
-          if (cameraPosition?.y > boundaryRange?.min_y) {
+          if (cameraPosition?.y < boundaryRange?.min_y) {
             Notification.Error({
               msg: "Cannot exceeed bottom boundary",
             });
@@ -235,7 +228,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           range = { ...boundaryRange, max_y: cameraPosition?.y };
         }
         const data = {
-          ...boundaryPreset,
+          asset: boundaryPreset.asset_object.id,
+          bed: boundaryPreset.bed_object.id,
           meta: { ...boundaryPreset.meta, range: range },
         };
         const res = await Promise.resolve(
@@ -248,6 +242,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           setBed({});
           setNewPreset("");
           setRefreshPresetsHash(Number(new Date()));
+          setBoundaryPreset(null);
         } else {
           Notification.Error({
             msg: "Failed to modify Boundary Preset",
@@ -273,7 +268,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           setBed({});
           setNewPreset("");
           setRefreshPresetsHash(Number(new Date()));
-          setBoundaryPresetExists(false);
+          setBoundaryPreset(null);
         } else {
           Notification.Error({
             msg: "Failed to delete Boundary Preset",
@@ -396,16 +391,12 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             isLoading={loadingAddPreset}
             refreshPresetsHash={refreshPresetsHash}
             facilityMiddlewareHostname={facilityMiddlewareHostname}
-          />
-          <CameraBoundaryConfigure
             boundaryPreset={boundaryPreset}
-            addBoundaryPreset={addBoundaryPreset}
-            modifyBoundaryPreset={modifyBoundaryPreset}
-            deleteBoundaryPreset={deleteBoundaryPreset}
-            boundaryPresetExists={boundayPresetExists}
             direction={direction}
             setDirection={setDirection}
-            bed={bed}
+            addBoundaryPreset={addBoundaryPreset}
+            updateBoundaryPreset={updateBoundaryPreset}
+            deleteBoundaryPreset={deleteBoundaryPreset}
           />
         </>
       ) : null}

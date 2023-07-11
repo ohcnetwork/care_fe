@@ -446,8 +446,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     useKeyboardShortcut(option.shortcutKey, option.callback);
   }
 
-  console.log("boundary-preset", boundaryPreset);
-
   if (isLoading) return <Loading />;
 
   return (

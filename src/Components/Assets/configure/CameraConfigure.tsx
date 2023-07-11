@@ -7,7 +7,8 @@ import { getCameraConfig } from "../../../Utils/transformUtils";
 import { Submit } from "../../Common/components/ButtonV2";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import Card from "../../../CAREUI/display/Card";
-
+import CameraBoundaryConfigure from "./CameraBoundayConfigure";
+type direction = "left" | "right" | "up" | "down";
 interface CameraConfigureProps {
   asset: AssetData;
   addPreset(e: React.SyntheticEvent): void;
@@ -18,6 +19,12 @@ interface CameraConfigureProps {
   refreshPresetsHash: number;
   facilityMiddlewareHostname: string;
   isLoading: boolean;
+  boundaryPreset: any;
+  direction: direction;
+  setDirection(direction: direction): void;
+  addBoundaryPreset(e: any): void;
+  updateBoundaryPreset(e: any): void;
+  deleteBoundaryPreset(e: any): void;
 }
 export default function CameraConfigure(props: CameraConfigureProps) {
   const {
@@ -30,6 +37,12 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     setNewPreset,
     refreshPresetsHash,
     facilityMiddlewareHostname,
+    boundaryPreset,
+    direction,
+    setDirection,
+    addBoundaryPreset,
+    updateBoundaryPreset,
+    deleteBoundaryPreset,
   } = props;
 
   return (
@@ -68,6 +81,15 @@ export default function CameraConfigure(props: CameraConfigureProps) {
           </div>
         </form>
       </Card>
+      <CameraBoundaryConfigure
+        addBoundaryPreset={addBoundaryPreset}
+        updateBoundaryPreset={updateBoundaryPreset}
+        deleteBoundaryPreset={deleteBoundaryPreset}
+        boundaryPreset={boundaryPreset}
+        direction={direction}
+        setDirection={setDirection}
+        bed={bed}
+      />
       <Card className="mt-4">
         <LiveFeed
           middlewareHostname={facilityMiddlewareHostname}
