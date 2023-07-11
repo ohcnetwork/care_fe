@@ -8,6 +8,8 @@ interface PTZPayload {
   x: number;
   y: number;
   zoom: number;
+  id?: string | null;
+  camera_state?: PTZState | null;
 }
 
 export interface PTZState {

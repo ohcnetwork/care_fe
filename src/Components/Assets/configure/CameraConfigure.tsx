@@ -18,8 +18,6 @@ interface CameraConfigureProps {
   refreshPresetsHash: number;
   facilityMiddlewareHostname: string;
   isLoading: boolean;
-  addBoundaryPreset(e: React.SyntheticEvent): void;
-  boundaryPresetExists: boolean;
 }
 export default function CameraConfigure(props: CameraConfigureProps) {
   const {
@@ -32,8 +30,6 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     setNewPreset,
     refreshPresetsHash,
     facilityMiddlewareHostname,
-    addBoundaryPreset,
-    boundaryPresetExists,
   } = props;
 
   return (
@@ -71,11 +67,6 @@ export default function CameraConfigure(props: CameraConfigureProps) {
             <Submit disabled={isLoading} label="Add Preset" />
           </div>
         </form>
-        {!boundaryPresetExists && bed.id && (
-          <form onSubmit={addBoundaryPreset} className="mt-4">
-            <Submit disabled={isLoading} label="Add boundary preset" />
-          </form>
-        )}
       </Card>
       <Card className="mt-4">
         <LiveFeed

@@ -356,7 +356,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     },
     other: (option, value) => {
       setLoading(option.loadingLabel);
-      const payLoad = getPTZPayload(option.action, precision, value);
+      let payLoad = getPTZPayload(option.action, precision, value);
       if (boundaryPreset?.meta?.range && cameraState) {
         console.log("inside check", cameraState);
 
@@ -388,6 +388,15 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           return;
         }
       }
+      //insert boundaryPreset.id in payload
+      if (boundaryPreset?.id) {
+        payLoad = {
+          ...payLoad,
+          id: boundaryPreset.id,
+          camera_state: cameraState,
+        };
+      }
+
       relativeMove(payLoad, {
         onSuccess: () => setLoading(CAMERA_STATES.IDLE),
         onError: () => setLoading(CAMERA_STATES.IDLE),
@@ -436,6 +445,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKeyboardShortcut(option.shortcutKey, option.callback);
   }
+
+  console.log("boundary-preset", boundaryPreset);
 
   if (isLoading) return <Loading />;
 
