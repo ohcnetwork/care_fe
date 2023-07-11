@@ -94,9 +94,7 @@ export default function PhoneNumberFormField(props: Props) {
             field.error && "border-danger-500",
             field.className
           )}
-          maxLength={
-            field.value?.startsWith("1800") || props.disableCountry ? 11 : 15
-          }
+          maxLength={field.value?.startsWith("1800") ? 11 : 15}
           placeholder={props.placeholder}
           value={formatPhoneNumber(field.value, props.disableCountry)}
           onChange={(e) => setValue(e.target.value)}
@@ -145,7 +143,7 @@ const conditionPhoneCode = (code: string) => {
 };
 
 const formatPhoneNumber = (value: string, disableCountry?: boolean) => {
-  if (value === undefined) {
+  if (value === undefined || value === null) {
     return disableCountry ? "" : "+91 ";
   }
 
