@@ -57,13 +57,8 @@ Cypress.Commands.add("fetchRefreshToken", (username, password) => {
 Cypress.Commands.add("loginByApi", (username, password) => {
   cy.readFile(TOKEN_JSON_PATH).then((tokens) => {
     if (tokens && tokens.username === username) {
-      cy.fetchAccessToken(username, password).then((accessToken) => {
-        if (accessToken) {
-          tokens.access = accessToken;
-          cy.writeFile(TOKEN_JSON_PATH, tokens);
-          cy.setLocalStorage("care_access_token", accessToken);
-        }
-      });
+      cy.setLocalStorage("care_access_token", tokens.access);
+      cy.setLocalStorage("care_refresh_token", tokens.refresh);
     } else {
       cy.fetchAccessToken(username, password).then((accessToken) => {
         if (accessToken) {
