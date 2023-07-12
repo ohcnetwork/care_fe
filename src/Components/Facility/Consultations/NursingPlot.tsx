@@ -1,23 +1,23 @@
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { NURSING_CARE_FIELDS } from "../../../Common/constants";
+import {
+  NURSING_CARE_FIELDS,
+  PAGINATION_LIMIT,
+} from "../../../Common/constants";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import Pagination from "../../Common/Pagination";
-import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDate } from "../../../Utils/utils";
 
 export const NursingPlot = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<any>({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
@@ -28,11 +28,10 @@ export const NursingPlot = (props: any) => {
         )
       );
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setResults(res.data.results);
           setTotalCount(res.data.count);
         }
-        setIsLoading(false);
       }
     },
     [consultationId, dispatch, currentPage]
@@ -74,8 +73,8 @@ export const NursingPlot = (props: any) => {
 
   const areFieldsEmpty = () => {
     let emptyFieldCount = 0;
-    for (let i = 0; i < NURSING_CARE_FIELDS.length; i++) {
-      if (!filterEmpty(NURSING_CARE_FIELDS[i])) emptyFieldCount++;
+    for (const field of NURSING_CARE_FIELDS) {
+      if (!filterEmpty(field)) emptyFieldCount++;
     }
     if (emptyFieldCount === NURSING_CARE_FIELDS.length) return true;
     else return false;
