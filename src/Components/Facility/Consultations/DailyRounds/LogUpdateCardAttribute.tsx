@@ -48,7 +48,7 @@ const LogUpdateCardAttribute = <T extends keyof DailyRoundsModel>({
           <AttributeLabel attributeKey={attributeKey} />
           <span className="flex gap-x-2 gap-y-1 flex-wrap text-sm text-gray-700">
             {attributeValue.map((output: any) => (
-              <span className="font-semibold">
+              <span className="font-semibold" key={output.name}>
                 {output.name}: {output.quantity}
               </span>
             ))}

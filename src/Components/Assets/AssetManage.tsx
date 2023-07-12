@@ -63,7 +63,7 @@ const AssetManage = (props: AssetManageProps) => {
       const assetData = await dispatch(getAsset(assetId));
       if (!status.aborted) {
         setIsLoading(false);
-        if (assetData && assetData.data) {
+        if (assetData?.data) {
           setAsset(assetData.data);
 
           const transactionFilter = assetData.qr_code_id
@@ -77,7 +77,7 @@ const AssetManage = (props: AssetManageProps) => {
               offset,
             })
           );
-          if (transactionsData && transactionsData.data) {
+          if (transactionsData?.data) {
             setTransactions(transactionsData.data.results);
             setTotalCount(transactionsData.data.count);
           } else {
@@ -124,7 +124,7 @@ const AssetManage = (props: AssetManageProps) => {
       </div>
       <h2 className="text-center">Print Preview</h2>
       <div id="section-to-print" className="print flex justify-center">
-        <QRCode size={200} value={asset?.id || ""} />
+        <QRCode size={200} value={asset?.id ?? ""} />
       </div>
     </div>
   );
