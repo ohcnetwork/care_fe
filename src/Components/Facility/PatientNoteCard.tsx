@@ -18,9 +18,11 @@ const PatientNoteCard = ({
           {note.created_by_object?.last_name}
         </span>
         <span className="text-gray-700 text-sm">
-          {note.created_by_object.id === facilityId
-            ? "Remote Specialist"
-            : "Local Doctor"}
+          {note.created_by_object.user_type === "Doctor"
+            ? note.created_by_object.home_facility !== facilityId
+              ? "Remote Specialist"
+              : ""
+            : note.created_by_object.user_type}
         </span>
       </div>
       <span className="whitespace-pre-wrap break-words">{note.note}</span>
