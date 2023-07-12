@@ -1,8 +1,8 @@
 import { useState } from "react";
-import Card from "../../../CAREUI/display/Card";
 import { BedModel } from "../../Facility/models";
 import ButtonV2, { Submit } from "../../Common/components/ButtonV2";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
+import TextFormField from "../../Form/FormFields/TextFormField";
 type direction = "left" | "right" | "up" | "down";
 
 interface CameraBoundaryConfigureProps {
@@ -29,77 +29,101 @@ export default function CameraBoundaryConfigure(
   } = props;
   const [toUpdate, setToUpdate] = useState<boolean>(false);
   return (
-    <div className="mb-5">
+    <>
       {!boundaryPreset && bed?.id && (
-        <Card className="mt-4">
-          <form onSubmit={addBoundaryPreset} className="">
-            <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-              <div>
-                <label id="asset-type">Boundary Preset Name</label>
-                {`${bed?.name} boundary-preset`}
-              </div>
-              <div>
-                <Submit label="Add Boundary Preset" />
-              </div>
+        <div className="flex flex-col justify-between">
+          <div className="text-lg font-semibold">Add Boundary Preset</div>
+          <form onSubmit={addBoundaryPreset} className="mt-2">
+            <label id="asset-type">Name</label>
+            <TextFormField
+              name="boundary_preset_name"
+              id="boundary-preset-name"
+              value={"hello"}
+              onChange={(e) => console.log(e)}
+              className=""
+              error=""
+            />
+            <div className="flex justify-start mt-4">
+              <Submit label="Add Boundary" />
             </div>
           </form>
-        </Card>
+        </div>
       )}
       {boundaryPreset && bed?.id && (
-        <Card className="mt-4">
-          <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-            {toUpdate ? (
-              <div>
-                <SelectFormField
-                  name="direction"
-                  id="direction"
-                  label="Direction"
-                  options={["left", "right", "up", "down"]}
-                  optionLabel={(option) => option}
-                  value={direction}
-                  onChange={(option) => setDirection(option.value)}
-                  error=""
-                />
-                <ButtonV2
-                  variant="primary"
-                  onClick={updateBoundaryPreset}
-                  id="confirm-update-boundary-preset"
-                >
-                  Confirm
-                </ButtonV2>
-                <ButtonV2
-                  variant="danger"
-                  onClick={() => {
-                    setToUpdate(false);
-                  }}
-                  id="cancel-modify-boundary-preset"
-                >
-                  Cancel
-                </ButtonV2>
-              </div>
-            ) : (
-              <div className="">
-                <ButtonV2
-                  variant="primary"
-                  onClick={() => {
-                    setToUpdate(true);
-                  }}
-                  id="update-boundary-preset"
-                >
-                  Update Boundary Preset
-                </ButtonV2>
-                <ButtonV2
-                  variant="danger"
-                  onClick={deleteBoundaryPreset}
-                  id="delete-boundary-preset"
-                >
-                  Delete Boundary Preset
-                </ButtonV2>
-              </div>
-            )}
+        <div className="flex flex-col justify-between">
+          <div>
+            <div className="text-lg font-semibold">Boundary Preset</div>
+            <div className="mt-2">
+              <label id="asset-name">Name</label>
+              <div className="text-lg">{boundaryPreset.meta.preset_name}</div>
+            </div>
           </div>
-        </Card>
+          {toUpdate ? (
+            <div>
+              <SelectFormField
+                className="mt-2"
+                name="direction"
+                id="direction"
+                label="Direction"
+                required={true}
+                options={["left", "right", "up", "down"]}
+                optionLabel={(option) => option}
+                value={direction}
+                onChange={(option) => setDirection(option.value)}
+                error=""
+              />
+              <div className="flex justify-start gap-4 mt-2">
+                <div>
+                  <ButtonV2
+                    variant="primary"
+                    onClick={updateBoundaryPreset}
+                    id="confirm-update-boundary-preset"
+                  >
+                    Confirm
+                  </ButtonV2>
+                </div>
+                <div>
+                  <ButtonV2
+                    variant="secondary"
+                    border={true}
+                    onClick={() => {
+                      setToUpdate(false);
+                    }}
+                    id="cancel-modify-boundary-preset"
+                  >
+                    Cancel
+                  </ButtonV2>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-start mt-4 gap-4">
+                <div>
+                  <ButtonV2
+                    variant="primary"
+                    onClick={() => {
+                      setToUpdate(true);
+                    }}
+                    id="update-boundary-preset"
+                  >
+                    Update
+                  </ButtonV2>
+                </div>
+                <div>
+                  <ButtonV2
+                    variant="danger"
+                    onClick={deleteBoundaryPreset}
+                    id="delete-boundary-preset"
+                  >
+                    Delete
+                  </ButtonV2>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 }
