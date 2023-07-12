@@ -1,9 +1,19 @@
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
-import { AsYouType } from "libphonenumber-js";
-import { useMemo } from "react";
+import {
+  AsYouType,
+  isValidPhoneNumber,
+  parsePhoneNumber,
+} from "libphonenumber-js";
+import { useMemo, useState } from "react";
 import { classNames } from "../../../Utils/utils";
 import phoneCodesJson from "../../../Common/static/countryPhoneAndFlags.json";
+import {
+  AnyValidator,
+  FieldError,
+  PhoneNumberValidator,
+  SupportPhoneNumberValidator,
+} from "../FieldValidators";
 
 interface CountryData {
   flag: string;
@@ -17,10 +27,12 @@ interface Props extends FormFieldBaseProps<string> {
   placeholder?: string;
   autoComplete?: string;
   disableCountry?: boolean;
+  disableValidation?: boolean;
 }
 
 export default function PhoneNumberFormField(props: Props) {
   const field = useFormFieldPropsResolver(props as any);
+  const [error, setError] = useState<FieldError>();
 
   const asYouType = useMemo(() => {
     const asYouType = new AsYouType();
@@ -37,14 +49,40 @@ export default function PhoneNumberFormField(props: Props) {
     return asYouType;
   }, []);
 
+  const validate = useMemo(
+    () => (value: string | undefined, event: "blur" | "change") => {
+      if (!value || props.disableValidation) {
+        return;
+      }
+
+      const newError = AnyValidator([
+        PhoneNumberValidator(),
+        SupportPhoneNumberValidator(),
+      ])(value);
+
+      if (!newError) {
+        return;
+      } else if (event === "blur") {
+        return newError;
+      }
+    },
+    [props.disableValidation]
+  );
+
   const setValue = (value: string) => {
+    value = value.replaceAll(" ", "");
+
     asYouType.reset();
     asYouType.input(value);
+
+    const error = validate(value, "change");
     field.handleChange(value);
+
+    setError(error);
   };
 
   return (
-    <FormField field={field}>
+    <FormField field={{ ...field, error: field.error || error }}>
       <div className="relative rounded-md shadow-sm">
         <input
           type="tel"
@@ -52,15 +90,16 @@ export default function PhoneNumberFormField(props: Props) {
           name={field.name}
           autoComplete={props.autoComplete ?? "tel"}
           className={classNames(
-            "cui-input-base pr-24 md:pr-28 sm:leading-6 tracking-widest",
+            "cui-input-base pr-24 tracking-widest sm:leading-6 md:pr-28",
             field.error && "border-danger-500",
             field.className
           )}
           maxLength={field.value?.startsWith("1800") ? 11 : 15}
           placeholder={props.placeholder}
-          value={field.value}
+          value={formatPhoneNumber(field.value, props.disableCountry)}
           onChange={(e) => setValue(e.target.value)}
           disabled={field.disabled}
+          onBlur={() => setError(validate(field.value, "blur"))}
         />
         {!props.disableCountry && (
           <div className="absolute inset-y-0 right-0 flex items-center">
@@ -72,7 +111,7 @@ export default function PhoneNumberFormField(props: Props) {
               id={field.id + "__country"}
               name="country"
               autoComplete="country"
-              className="cui-input-base h-full border-0 bg-transparent pl-2 pr-8 text-gray-700 focus:ring-2 focus:ring-inset text-end tracking-wider font-medium"
+              className="cui-input-base h-full border-0 bg-transparent pl-2 pr-8 text-end font-medium tracking-wider text-gray-700 focus:ring-2 focus:ring-inset"
               value={
                 asYouType.getCountry() ??
                 (field.value?.startsWith("1800") ? "1800" : "Other")
@@ -83,9 +122,9 @@ export default function PhoneNumberFormField(props: Props) {
                 setValue(conditionPhoneCode(phoneCodes[e.target.value].code));
               }}
             >
-              {Object.entries(phoneCodes).map(([country, { flag, code }]) => (
+              {Object.entries(phoneCodes).map(([country, { flag }]) => (
                 <option key={country} value={country}>
-                  {flag} {conditionPhoneCode(code)}
+                  {flag} {country}
                 </option>
               ))}
               <option value="Other">Other</option>
@@ -101,4 +140,17 @@ export default function PhoneNumberFormField(props: Props) {
 const conditionPhoneCode = (code: string) => {
   code = code.split(" ")[0];
   return code.startsWith("+") ? code : "+" + code;
+};
+
+const formatPhoneNumber = (value: string, disableCountry?: boolean) => {
+  if (value === undefined || value === null) {
+    return disableCountry ? "" : "+91 ";
+  }
+
+  if (!isValidPhoneNumber(value) || disableCountry) {
+    return value;
+  }
+
+  const phoneNumber = parsePhoneNumber(value);
+  return phoneNumber.formatInternational();
 };

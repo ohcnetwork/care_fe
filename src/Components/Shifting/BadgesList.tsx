@@ -22,8 +22,10 @@ export default function BadgesList(props: any) {
   useEffect(() => {
     async function fetchData() {
       if (!qParams.assigned_to) return setAssignedUsername("");
-      const res = await dispatch(getUserList({ id: qParams.assigned_to }));
-      const { first_name, last_name } = res?.data?.results[0];
+      const res = await dispatch(
+        getUserList({ id: qParams.assigned_to }, "assigned_user_name")
+      );
+      const { first_name, last_name } = res?.data?.results[0] || {};
       setAssignedUsername(`${first_name} ${last_name}`);
     }
     fetchData();
@@ -77,19 +79,12 @@ export default function BadgesList(props: any) {
 
   return (
     <FilterBadges
-      badges={({
-        badge,
-        boolean,
-        phoneNumber,
-        dateRange,
-        kasp,
-        value,
-      }: any) => [
+      badges={({ badge, phoneNumber, dateRange, kasp, value }: any) => [
         badge(t("status"), "status"),
-        boolean(t("emergency"), "emergency", booleanFilterOptions),
+        badge(t("emergency"), "emergency", booleanFilterOptions),
         kasp(),
-        boolean(t("up_shift"), "is_up_shift", booleanFilterOptions),
-        boolean(t("antenatal"), "is_antenatal", booleanFilterOptions),
+        badge(t("up_shift"), "is_up_shift", booleanFilterOptions),
+        badge(t("antenatal"), "is_antenatal", booleanFilterOptions),
         phoneNumber(t("phone_no"), "patient_phone_number"),
         badge(t("patient_name"), "patient_name"),
         ...dateRange(t("created"), "created_date"),
