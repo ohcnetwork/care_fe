@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
-import screenfull from "screenfull";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import {
   listAssetBeds,
@@ -23,6 +22,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import Page from "../../Common/components/Page";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import { FieldLabel } from "../../Form/FormFields/FormField";
+import useFullscreen from "../../../Common/hooks/useFullscreen";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -47,6 +47,8 @@ const LiveFeed = (props: any) => {
   });
   const [toDelete, setToDelete] = useState<any>(null);
   const [toUpdate, setToUpdate] = useState<any>(null);
+  const [_isFullscreen, setFullscreen] = useFullscreen();
+
   const { width } = useWindowDimensions();
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
@@ -227,8 +229,8 @@ const LiveFeed = (props: any) => {
       });
     },
     fullScreen: () => {
-      if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
-      screenfull.request(liveFeedPlayerRef.current);
+      if (!liveFeedPlayerRef.current) return;
+      setFullscreen(true, liveFeedPlayerRef.current);
     },
     updatePreset: (option) => {
       getCameraStatus({
