@@ -49,8 +49,85 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     Number(new Date())
   );
   const [boundaryPreset, setBoundaryPreset] = useState<any>(null);
+  const [presets, setPresets] = useState<any[]>([]);
   const dispatch = useDispatch<any>();
-  const boundaryBuffer = 2;
+
+  const calcBoundary = (presets: any[]) => {
+    const INT_MAX = 3;
+
+    const bufferArray: number[] = [0.5, 0.25, 0.125, 0.0625];
+    const boundary: any = {
+      max_x: -INT_MAX,
+      min_x: INT_MAX,
+      max_y: -INT_MAX,
+      min_y: INT_MAX,
+    };
+    const edgePresetsZoom: any = {
+      max_x: 0,
+      min_x: 0,
+      max_y: 0,
+      min_y: 0,
+    };
+
+    presets.forEach((preset: any) => {
+      if (preset?.meta?.position) {
+        const position = preset.meta.position;
+        if (position.x > boundary.max_x) {
+          boundary.max_x = position.x;
+          edgePresetsZoom.max_x = position.zoom;
+        }
+        if (position.x < boundary.min_x) {
+          boundary.min_x = position.x;
+          edgePresetsZoom.min_x = position.zoom;
+        }
+        if (position.y > boundary.max_y) {
+          boundary.max_y = position.y;
+          edgePresetsZoom.max_y = position.zoom;
+        }
+        if (position.y < boundary.min_y) {
+          boundary.min_y = position.y;
+          edgePresetsZoom.min_y = position.zoom;
+        }
+      }
+    });
+    Object.keys(edgePresetsZoom).forEach((key: string) => {
+      const zoom = edgePresetsZoom[key];
+      if (zoom < 0.3) {
+        if (key == "max_x" || key == "max_y") {
+          boundary[key] = boundary[key] + bufferArray[0];
+        } else {
+          boundary[key] = boundary[key] - bufferArray[0];
+        }
+      } else if (zoom >= 0.3 && zoom < 0.4) {
+        if (key == "max_x" || key == "max_y") {
+          boundary[key] = boundary[key] + bufferArray[1];
+        } else {
+          boundary[key] = boundary[key] - bufferArray[1];
+        }
+      } else if (zoom >= 0.4 && zoom < 0.5) {
+        if (key == "max_x" || key == "max_y") {
+          boundary[key] = boundary[key] + bufferArray[2];
+        } else {
+          boundary[key] = boundary[key] - bufferArray[2];
+        }
+      } else if (zoom >= 0.5) {
+        if (key == "max_x" || key == "max_y") {
+          boundary[key] = boundary[key] + bufferArray[3];
+        } else {
+          boundary[key] = boundary[key] - bufferArray[3];
+        }
+      }
+    });
+    if (boundary.max_x <= boundary.min_x || boundary.max_y <= boundary.min_y) {
+      return {
+        max_x: INT_MAX,
+        min_x: -INT_MAX,
+        max_y: INT_MAX,
+        min_y: -INT_MAX,
+      };
+    }
+    return boundary;
+  };
   useEffect(() => {
     const fetchFacility = async () => {
       const res = await dispatch(getPermittedFacility(facilityId));
@@ -80,17 +157,27 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     const getBoundaryBedPreset = async () => {
       const res = await dispatch(listAssetBeds({ bed: bed.id }));
       if (res && res.status === 200 && res.data) {
-        const bedAssets = res.data.results;
+        let bedAssets: any[] = res.data.results;
 
         if (bedAssets.length > 0) {
-          const boundaryPreset = bedAssets.find(
-            (bedAsset: any) => bedAsset.meta.type === "boundary"
-          );
+          let boundaryPreset = null;
+          bedAssets = bedAssets.filter((bedAsset: any) => {
+            if (bedAsset?.asset_object?.meta?.asset_type != "CAMERA") {
+              return false;
+            } else if (bedAsset?.meta?.type == "boundary") {
+              boundaryPreset = bedAsset;
+              return false;
+            } else if (bedAsset?.meta?.position) {
+              return true;
+            }
+            return false;
+          });
           if (boundaryPreset) {
             setBoundaryPreset(boundaryPreset);
           } else {
             setBoundaryPreset(null);
           }
+          setPresets(bedAssets);
         }
       }
     };
@@ -145,18 +232,14 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       const presetData = await axios.get(
         `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
       );
+      const range = calcBoundary(presets);
       const meta = {
         type: "boundary",
         preset_name: `${bed.name}-boundary`,
         bed_id: bed.id,
         error: presetData.data.error,
         utcTime: presetData.data.utcTime,
-        range: {
-          max_x: boundaryBuffer,
-          min_x: -boundaryBuffer,
-          max_y: boundaryBuffer,
-          min_y: -boundaryBuffer,
-        },
+        range: range,
       };
       const res = await Promise.resolve(
         dispatch(createAssetBed({ meta: meta }, assetId, bed?.id as string))

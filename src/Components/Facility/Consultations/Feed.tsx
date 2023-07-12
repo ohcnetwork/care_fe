@@ -386,6 +386,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           Notification.Error({ msg: "Cannot move beyond boundary" });
           setLoading(CAMERA_STATES.IDLE);
           return;
+        } else if (
+          option.action == "zoomOut" &&
+          cameraState.zoom + payLoad.zoom < 0
+        ) {
+          Notification.Error({ msg: "Cannot zoom out" });
+          setLoading(CAMERA_STATES.IDLE);
+          return;
         }
       }
       //insert boundaryPreset.id in payload
@@ -404,6 +411,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       if (cameraState) {
         let x = cameraState.x;
         let y = cameraState.y;
+        let zoom = cameraState.zoom;
         switch (option.action) {
           case "left":
             x += -0.1 / cameraState.precision;
@@ -421,11 +429,17 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             y += 0.1 / cameraState.precision;
             break;
 
+          case "zoomIn":
+            zoom += 0.1 / cameraState.precision;
+            break;
+          case "zoomOut":
+            zoom += -0.1 / cameraState.precision;
+            break;
           default:
             break;
         }
 
-        setCameraState({ ...cameraState, x: x, y: y });
+        setCameraState({ ...cameraState, x: x, y: y, zoom: zoom });
       }
     },
   };
