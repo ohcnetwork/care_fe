@@ -190,11 +190,11 @@ describe("Patient Creation with consultation", () => {
     cy.contains("button", "Add Prescription Medication")
       .should("be.visible")
       .click();
-    cy.get("div#medicine input[placeholder='Select'][role='combobox']")
+    cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
       .click()
-      .type("paracet");
-    cy.get("div#medicine [role='option']")
-      .contains("PARACETAMOL TAB IP ,500 mg.")
+      .type("dolo");
+    cy.get("div#medicine_object [role='option']")
+      .contains("DOLO")
       .should("be.visible")
       .click();
     cy.get("#dosage").click().type("3");
