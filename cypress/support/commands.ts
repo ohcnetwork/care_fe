@@ -1,6 +1,7 @@
 import "cypress-localstorage-commands";
+import { cy, Cypress } from "local-cypress";
 
-import { Cypress, cy } from "local-cypress";
+const TOKEN_JSON_PATH = "cypress/fixtures/token.json";
 
 Cypress.Commands.add("login", (username: string, password: string) => {
   cy.log(`Logging in the user: ${username}:${password}`);
@@ -11,59 +12,77 @@ Cypress.Commands.add("login", (username: string, password: string) => {
   return cy.url().should("include", "/facility");
 });
 
-Cypress.Commands.add("refreshApiLogin", (username, password) => {
-  cy.request({
-    method: "POST",
-    url: "/api/v1/auth/login/",
-    body: {
-      username,
-      password,
-    },
-    failOnStatusCode: false,
-  }).then((response) => {
-    if (response.status === 200) {
-      cy.writeFile("cypress/fixtures/token.json", {
-        username: username,
-        access: response.body.access,
-        refresh: response.body.refresh,
-      });
-      cy.setLocalStorage("care_access_token", response.body.access);
-      cy.setLocalStorage("care_refresh_token", response.body.refresh);
-    } else {
-      cy.log("An error occurred while logging in");
-    }
-  });
+Cypress.Commands.add("fetchAccessToken", (username, password) => {
+  return cy
+    .request({
+      method: "POST",
+      url: "/api/v1/auth/login/",
+      body: {
+        username,
+        password,
+      },
+      failOnStatusCode: false,
+    })
+    .then((response) => {
+      if (response.status === 200) {
+        return response.body.access;
+      } else {
+        cy.log("An error occurred while fetching the access token");
+        return null;
+      }
+    });
+});
+
+Cypress.Commands.add("fetchRefreshToken", (username, password) => {
+  return cy
+    .request({
+      method: "POST",
+      url: "/api/v1/auth/login/",
+      body: {
+        username,
+        password,
+      },
+      failOnStatusCode: false,
+    })
+    .then((response) => {
+      if (response.status === 200) {
+        return response.body.refresh;
+      } else {
+        cy.log("An error occurred while fetching the refresh token");
+        return null;
+      }
+    });
 });
 
 Cypress.Commands.add("loginByApi", (username, password) => {
-  cy.log(`Logging in the user: ${username}:${password}`);
-  cy.task("readFileMaybe", "cypress/fixtures/token.json").then(
-    (tkn: string) => {
-      const token = JSON.parse(tkn);
-      if (tkn && token.access && token.username === username) {
-        cy.request({
-          method: "POST",
-          url: "/api/v1/auth/token/verify/",
-          body: {
-            token: token.access,
-          },
-          headers: {
-            "Content-Type": "application/json",
-          },
-          failOnStatusCode: false,
-        }).then((response) => {
-          if (response.status === 200) {
-            cy.setLocalStorage("care_access_token", token.access);
-            cy.setLocalStorage("care_refresh_token", token.refresh);
-          } else {
-            cy.refreshApiLogin(username, password);
-          }
-        });
-      } else {
-        cy.refreshApiLogin(username, password);
-      }
+  cy.readFile(TOKEN_JSON_PATH).then((tokens) => {
+    if (tokens && tokens.username === username) {
+      cy.fetchAccessToken(username, password).then((accessToken) => {
+        if (accessToken) {
+          tokens.access = accessToken;
+          cy.writeFile(TOKEN_JSON_PATH, tokens);
+          cy.setLocalStorage("care_access_token", accessToken);
+        }
+      });
+    } else {
+      cy.fetchAccessToken(username, password).then((accessToken) => {
+        if (accessToken) {
+          cy.fetchRefreshToken(username, password).then((refreshToken) => {
+            if (refreshToken) {
+              const newTokens = {
+                username: username,
+                access: accessToken,
+                refresh: refreshToken,
+              };
+              cy.writeFile(TOKEN_JSON_PATH, newTokens);
+              cy.setLocalStorage("care_access_token", accessToken);
+              cy.setLocalStorage("care_refresh_token", refreshToken);
+            }
+          });
+        }
+      });
     }
-  );
+  });
 });
 
 Cypress.Commands.add(
@@ -81,7 +100,7 @@ Cypress.Commands.add(
 
 Cypress.Commands.add("verifyNotification", (text) => {
   cy.get(".pnotify-container").should("exist").contains(text);
-  return cy.get(".pnotify-container").click({ force: true });
+  return cy.get(".pnotify-container").click();
 });
 
 Cypress.on("uncaught:exception", () => {
@@ -90,13 +109,6 @@ Cypress.on("uncaught:exception", () => {
   return false;
 });
 
-/**
- * getAttached(selector)
- * getAttached(selectorFn)
- *
- * Waits until the selector finds an attached element, then yields it (wrapped).
- * selectorFn, if provided, is passed $(document). Don't use cy methods inside selectorFn.
- */
 Cypress.Commands.add("getAttached", (selector) => {
   const getElement =
     typeof selector === "function" ? selector : ($d) => $d.find(selector);
