@@ -65,8 +65,8 @@ export const deleteFacility = (id: string) => {
 export const deleteFacilityCoverImage = (id: string) => {
   return fireRequest("deleteFacilityCoverImage", [], {}, { id });
 };
-export const getUserList = (params: object) => {
-  return fireRequest("userList", [], params);
+export const getUserList = (params: object, key?: string) => {
+  return fireRequest("userList", [], params, null, key);
 };
 
 export const getUserListSkills = (pathParam: object) => {
