@@ -397,11 +397,11 @@ export const DailyRounds = (props: any) => {
           ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
           : `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
       }
-      className="max-w-4xl mx-auto"
+      className="mx-auto max-w-4xl"
     >
       <form
         onSubmit={(e) => handleSubmit(e)}
-        className="bg-white rounded-lg shadow md:m-4 w-full max-w-4xl px-8 md:px-16 py-5 md:py-11"
+        className="w-full max-w-4xl rounded-lg bg-white px-8 py-5 shadow md:m-4 md:px-16 md:py-11"
       >
         <DraftSection
           handleDraftSelect={(newState) => {
@@ -409,7 +409,7 @@ export const DailyRounds = (props: any) => {
           }}
           formData={state.form}
         />
-        <div className="flex flex-col md:flex-row gap-6">
+        <div className="flex flex-col gap-6 md:flex-row">
           <div className="w-full md:w-1/3">
             <TextFormField
               {...field("taken_at")}
@@ -454,7 +454,7 @@ export const DailyRounds = (props: any) => {
         )}
 
         {(state.form.clone_last === false || id) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+          <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
             <TextAreaFormField
               {...field("physical_examination_info")}
               label="Physical Examination Info"
@@ -518,7 +518,7 @@ export const DailyRounds = (props: any) => {
 
             {state.form.rounds_type === "NORMAL" && (
               <>
-                <h3 className="md:col-span-2 mb-6">Vitals</h3>
+                <h3 className="mb-6 md:col-span-2">Vitals</h3>
 
                 <BloodPressureFormField
                   {...field("bp")}
@@ -629,7 +629,7 @@ export const DailyRounds = (props: any) => {
           </div>
         )}
 
-        <div className="mt-4 flex flex-col-reverse md:flex-row gap-2 justify-end">
+        <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
           <Cancel onClick={() => goBack()} />
           <Submit onClick={(e) => handleSubmit(e)} label={buttonText} />
         </div>

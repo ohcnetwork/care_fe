@@ -17,8 +17,8 @@ export default function PatientCategorySelect(
       optionValue={(option) => option.id}
       optionLabel={(option) => option.text}
       optionSelectedLabel={(option) => (
-        <span className="flex gap-3 items-center">
-          <div className={`h-2 w-2 rounded-full bg-${option.twClass}`} />
+        <span className="flex items-center gap-3">
+          <div className={`bg-${option.twClass} h-2 w-2 rounded-full`} />
           <p>{option.text}</p>
         </span>
       )}

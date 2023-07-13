@@ -159,7 +159,7 @@ export const FacilityHome = (props: any) => {
   let totalOccupiedBedCount = 0;
   if (!capacityData || !capacityData.length) {
     capacityList = (
-      <h5 className="mt-4 text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
         No Bed Types Found
       </h5>
     );
@@ -170,7 +170,7 @@ export const FacilityHome = (props: any) => {
     });
 
     capacityList = (
-      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-7 w-full">
+      <div className="mt-4 grid w-full gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <BedTypeCard
           label="Total Beds"
           used={totalOccupiedBedCount}
@@ -223,25 +223,25 @@ export const FacilityHome = (props: any) => {
   let doctorList: any = null;
   if (!doctorData || !doctorData.length) {
     doctorList = (
-      <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+      <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
         No Doctors Found
       </h5>
     );
   } else {
     doctorList = (
-      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-6">
+      <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {/* Total Doctors Count Card */}
         <div className="w-full">
-          <div className="shadow-sm rounded-sm h-full border border-primary-500 bg-primary-100 flex flex-col">
-            <div className="flex justify-start items-center gap-3 px-4 py-6 flex-1">
-              <div className="rounded-full p-4 bg-primary-500">
-                <DoctorIcon className="fill-current text-white w-5 h-5" />
+          <div className="flex h-full flex-col rounded-sm border border-primary-500 bg-primary-100 shadow-sm">
+            <div className="flex flex-1 items-center justify-start gap-3 px-4 py-6">
+              <div className="rounded-full bg-primary-500 p-4">
+                <DoctorIcon className="h-5 w-5 fill-current text-white" />
               </div>
               <div>
-                <div className="font-medium text-sm text-[#808080]">
+                <div className="text-sm font-medium text-[#808080]">
                   Total Doctors
                 </div>
-                <h2 className="font-bold text-xl mt-2">{totalDoctors}</h2>
+                <h2 className="mt-2 text-xl font-bold">{totalDoctors}</h2>
               </div>
             </div>
           </div>
@@ -319,7 +319,7 @@ export const FacilityHome = (props: any) => {
       StaffUserTypeIndex;
 
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
-    <div className="transition-[opacity] flex flex-col justify-center items-center bg-black opacity-0 h-48 md:h-[88px] w-full absolute top-0 right-0 hover:opacity-60 z-10 text-gray-300 text-sm">
+    <div className="absolute right-0 top-0 z-10 flex h-48 w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]">
       <i className="fa-solid fa-pen" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
     </div>
@@ -329,7 +329,7 @@ export const FacilityHome = (props: any) => {
     <img
       src={`${facilityData.read_cover_image_url}?imgKey=${imageKey}`}
       alt={facilityData.name}
-      className="w-full h-full object-cover"
+      className="h-full w-full object-cover"
     />
   );
 
@@ -366,7 +366,7 @@ export const FacilityHome = (props: any) => {
       />
       {hasCoverImage ? (
         <div
-          className={`group relative overflow-clip w-full rounded-t bg-gray-200 h-48 md:h-0 opacity-100 md:opacity-0 transition-all duration-200 ease-in-out ${
+          className={`group relative h-48 w-full text-clip rounded-t bg-gray-200 opacity-100 transition-all duration-200 ease-in-out md:h-0 md:opacity-0 ${
             hasPermissionToEditCoverImage && "cursor-pointer"
           }`}
           onClick={() =>
@@ -378,7 +378,7 @@ export const FacilityHome = (props: any) => {
         </div>
       ) : (
         <div
-          className={`group md:hidden flex w-full self-stretch shrink-0 bg-gray-300 items-center justify-center relative z-0 ${
+          className={`group relative z-0 flex w-full shrink-0 items-center justify-center self-stretch bg-gray-300 md:hidden ${
             hasPermissionToEditCoverImage && "cursor-pointer"
           }`}
           onClick={() =>
@@ -386,7 +386,7 @@ export const FacilityHome = (props: any) => {
           }
         >
           <i
-            className="fas fa-hospital text-4xl block text-gray-500 p-10"
+            className="fas fa-hospital block p-10 text-4xl text-gray-500"
             aria-hidden="true"
           ></i>
           {editCoverImageTooltip}
@@ -395,14 +395,14 @@ export const FacilityHome = (props: any) => {
       <div
         className={`bg-white ${
           hasCoverImage ? "rounded-b lg:rounded-t" : "rounded"
-        } p-3 md:p-6 shadow-sm transition-all duration-200 ease-in-out`}
+        } p-3 shadow-sm transition-all duration-200 ease-in-out md:p-6`}
       >
-        <div className="lg:flex justify-between gap-2">
-          <div className="md:flex flex-col justify-between">
-            <div className="flex flex-col flex-1 gap-10">
-              <div className="flex gap-4 items-center">
+        <div className="justify-between gap-2 lg:flex">
+          <div className="flex-col justify-between md:flex">
+            <div className="flex flex-1 flex-col gap-10">
+              <div className="flex items-center gap-4">
                 <div
-                  className={`group relative h-[88px] w-[88px] hidden md:flex transition-all duration-200 ease-in-out rounded overflow-clip ${
+                  className={`group relative hidden h-[88px] w-[88px] text-clip rounded transition-all duration-200 ease-in-out md:flex ${
                     hasPermissionToEditCoverImage && "cursor-pointer"
                   }`}
                   onClick={() =>
@@ -412,9 +412,9 @@ export const FacilityHome = (props: any) => {
                   {hasCoverImage ? (
                     <CoverImage />
                   ) : (
-                    <div className="h-[88px] w-full bg-gray-200 text-gray-700 flex items-center justify-center font-medium">
+                    <div className="flex h-[88px] w-full items-center justify-center bg-gray-200 font-medium text-gray-700">
                       <svg
-                        className="w-8 h-8 fill-current text-gray-500"
+                        className="h-8 w-8 fill-current text-gray-500"
                         viewBox="0 0 40 32"
                         xmlns="http://www.w3.org/2000/svg"
                       >
@@ -435,14 +435,14 @@ export const FacilityHome = (props: any) => {
                   )}
                 </div>
               </div>
-              <div className="flex items-center flex-1">
-                <div className="grid grid-cols-1  lg:grid-cols-2 gap-4 mb-6 md:mb-0 w-full">
-                  <div className="md:flex flex-col justify-between lg:flex-1 ">
+              <div className="flex flex-1 items-center">
+                <div className="mb-6 grid  w-full grid-cols-1 gap-4 md:mb-0 lg:grid-cols-2">
+                  <div className="flex-col justify-between md:flex lg:flex-1 ">
                     <div className="mb-10">
-                      <h1 className="font-semibold text-[#B9B9B9] text-base">
+                      <h1 className="text-base font-semibold text-[#B9B9B9]">
                         Address
                       </h1>
-                      <p className="font-medium text-base">
+                      <p className="text-base font-medium">
                         {facilityData.address}
                       </p>
                     </div>
@@ -456,16 +456,16 @@ export const FacilityHome = (props: any) => {
                       </div>
                     </div>
                   </div>
-                  <div className="lg:flex-1 min-w-[300px] md:flex flex-col">
+                  <div className="min-w-[300px] flex-col md:flex lg:flex-1">
                     <div className="mb-10">
                       <h1 className="text-base font-semibold text-[#B9B9B9]">
                         Local Body
                       </h1>
-                      <p className="text-base font-medium w-2/3 md:w-full">
+                      <p className="w-2/3 text-base font-medium md:w-full">
                         {facilityData?.local_body_object?.name}
                       </p>
                     </div>
-                    <div className="flex flex-col md:flex-row gap-10">
+                    <div className="flex flex-col gap-10 md:flex-row">
                       <div>
                         <h1 className="text-base font-semibold text-[#B9B9B9]">
                           Ward
@@ -489,14 +489,14 @@ export const FacilityHome = (props: any) => {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3 mt-10">
+            <div className="mt-10 flex items-center gap-3">
               <div>
                 {facilityData.features?.some((feature) =>
                   FACILITY_FEATURE_TYPES.some((f) => f.id === feature)
                 ) && (
                   <h1 className="text-lg font-semibold">Available features</h1>
                 )}
-                <div className="flex gap-2 flex-wrap mt-5">
+                <div className="mt-5 flex flex-wrap gap-2">
                   {facilityData.features?.map(
                     (feature: number, i: number) =>
                       FACILITY_FEATURE_TYPES.some((f) => f.id === feature) && (
@@ -521,7 +521,7 @@ export const FacilityHome = (props: any) => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col justify-between mt-4">
+          <div className="mt-4 flex flex-col justify-between">
             <div className="w-full md:w-auto">
               <DropdownMenu
                 id="manage-facility-dropdown"
@@ -592,7 +592,7 @@ export const FacilityHome = (props: any) => {
                 <DropdownItem
                   variant="danger"
                   onClick={() => setOpenDeleteDialog(true)}
-                  className="flex gap-3 items-center"
+                  className="flex items-center gap-3"
                   icon={<CareIcon className="care-l-trash-alt text-lg" />}
                   authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
                 >
@@ -605,7 +605,7 @@ export const FacilityHome = (props: any) => {
                 variant="primary"
                 ghost
                 border
-                className="w-full md:w-auto flex flex-row mt-2 justify-center"
+                className="mt-2 flex w-full flex-row justify-center md:w-auto"
                 onClick={() => navigate(`/facility/${facilityId}/cns`)}
               >
                 <CareIcon className="care-l-monitor-heart-rate text-lg" />
@@ -615,7 +615,7 @@ export const FacilityHome = (props: any) => {
                 variant="primary"
                 ghost
                 border
-                className="w-full md:w-auto flex flex-row mt-2 justify-center"
+                className="mt-2 flex w-full flex-row justify-center md:w-auto"
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
                 authorizeFor={NonReadOnlyUsers}
               >
@@ -626,7 +626,7 @@ export const FacilityHome = (props: any) => {
                 variant="primary"
                 ghost
                 border
-                className="w-full md:w-auto flex flex-row mt-2 justify-center"
+                className="mt-2 flex w-full flex-row justify-center md:w-auto"
                 onClick={() => navigate(`/patients?facility=${facilityId}`)}
               >
                 <CareIcon className="care-l-user-injured text-lg" />
@@ -637,8 +637,8 @@ export const FacilityHome = (props: any) => {
         </div>
       </div>
 
-      <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
-        <h1 className="text-xl font-bold mb-6">Oxygen Information</h1>
+      <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
+        <h1 className="mb-6 text-xl font-bold">Oxygen Information</h1>
         <div className="overflow-x-auto overflow-y-hidden">
           <Table
             headings={[
@@ -667,45 +667,45 @@ export const FacilityHome = (props: any) => {
           />
         </div>
       </div>
-      <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
-        <div className="md:flex justify-between  md:border-b md:pb-2">
-          <div className="font-semibold text-xl mb-2">Bed Capacity</div>
+      <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
+        <div className="justify-between md:flex  md:border-b md:pb-2">
+          <div className="mb-2 text-xl font-semibold">Bed Capacity</div>
           <ButtonV2
             className="w-full md:w-auto"
             onClick={() => setBedCapacityModalOpen(true)}
             authorizeFor={NonReadOnlyUsers}
           >
-            <i className="fas fa-bed text-white mr-2" />
+            <i className="fas fa-bed mr-2 text-white" />
             Add More Bed Types
           </ButtonV2>
         </div>
         <div>{capacityList}</div>
       </div>
-      <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
-        <div className="md:flex justify-between md:pb-2">
-          <div className="font-bold text-xl mb-2">Doctors List</div>
+      <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
+        <div className="justify-between md:flex md:pb-2">
+          <div className="mb-2 text-xl font-bold">Doctors List</div>
           <ButtonV2
             className="w-full md:w-auto"
             onClick={() => setDoctorCapacityModalOpen(true)}
             disabled={doctorList.length === DOCTOR_SPECIALIZATION.length}
             authorizeFor={NonReadOnlyUsers}
           >
-            <i className="fas fa-user-md text-white mr-2" />
+            <i className="fas fa-user-md mr-2 text-white" />
             Add Doctor Types
           </ButtonV2>
         </div>
         <div className="mt-4">{doctorList}</div>
       </div>
-      <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
+      <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
         <div className="-my-2 py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          <div className="md:flex justify-between md:pb-2">
-            <div className="text-xl font-bold mb-2">Corona Triage</div>
+          <div className="justify-between md:flex md:pb-2">
+            <div className="mb-2 text-xl font-bold">Corona Triage</div>
             <ButtonV2
               className="w-full md:w-auto"
               onClick={() => navigate(`/facility/${facilityId}/triage`)}
               authorizeFor={NonReadOnlyUsers}
             >
-              <i className="fas fa-notes-medical text-white mr-2" />
+              <i className="fas fa-notes-medical mr-2 text-white" />
               Add Triage
             </ButtonV2>
           </div>
@@ -725,7 +725,7 @@ export const FacilityHome = (props: any) => {
             {stats.length === 0 && (
               <div>
                 <hr />
-                <div className="p-4 text-xl text-gray-600 border rounded-sm border-[#D2D6DC] mt-3 font-bold flex justify-center items-center">
+                <div className="mt-3 flex items-center justify-center rounded-sm border border-[#D2D6DC] p-4 text-xl font-bold text-gray-600">
                   No Data Found
                 </div>
               </div>

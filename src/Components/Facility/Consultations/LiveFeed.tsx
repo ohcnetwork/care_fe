@@ -347,7 +347,7 @@ const LiveFeed = (props: any) => {
               ></video>
 
               {loading && (
-                <div className="absolute bottom-0 right-0 rounded-tl bg-white bg-opacity-75 p-4">
+                <div className="absolute bottom-0 right-0 rounded-tl bg-white/75 p-4">
                   <div className="flex items-center gap-2">
                     <div className="an h-4 w-4 animate-spin rounded-full border-2 border-b-0 border-primary-500" />
                     <p className="text-base font-bold">{loading}</p>

@@ -421,7 +421,7 @@ const InvestigationReports = ({ id }: any) => {
                   <ButtonV2
                     disabled={loadMoreDisabled}
                     onClick={handleLoadMore}
-                    className="w-full my-2.5"
+                    className="my-2.5 w-full"
                     variant="primary"
                   >
                     Load More

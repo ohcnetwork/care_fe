@@ -34,7 +34,7 @@ export default function SwitchV2<T>(props: SwitchProps<T>) {
           return (
             <li
               tabIndex={0}
-              className={`cursor-pointer px-4 p-2 first:rounded-l-lg last:rounded-r-lg shadow-sm focus:ring-1 border transition-all duration-200 ease-in-out outline-none ${additionalClassNames}`}
+              className={`cursor-pointer border p-2 px-4 shadow-sm outline-none transition-all duration-200 ease-in-out first:rounded-l-lg last:rounded-r-lg focus:ring-1 ${additionalClassNames}`}
               key={index}
               onClick={() => props.onChange(option)}
             >

@@ -6,7 +6,7 @@ const TopBar = () => {
   const { static_black_logo } = useConfig();
   return (
     <div className="bg-white shadow-md">
-      <div className="max-w-6xl mx-auto py-4 px-2 flex items-center justify-between">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-2 py-4">
         <div>
           <a href={"/"}>
             <img

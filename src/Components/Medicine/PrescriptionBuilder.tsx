@@ -48,7 +48,7 @@ export default function PrescriptionBuilder({
       {showDiscontinueFor && (
         <DiscontinuePrescription
           prescription={showDiscontinueFor}
-          actions={actions.prescription(showDiscontinueFor.id!)}
+          actions={actions.prescription(showDiscontinueFor?.id ?? "")}
           onClose={(success) => {
             setShowDiscontinueFor(undefined);
             if (success) fetchPrescriptions();
@@ -59,7 +59,7 @@ export default function PrescriptionBuilder({
       {showAdministerFor && (
         <AdministerMedicine
           prescription={showAdministerFor}
-          actions={actions.prescription(showAdministerFor.id!)}
+          actions={actions.prescription(showAdministerFor?.id ?? "")}
           onClose={(success) => {
             setShowAdministerFor(undefined);
             if (success) fetchPrescriptions();
@@ -72,7 +72,7 @@ export default function PrescriptionBuilder({
           <PrescriptionDetailCard
             key={index}
             prescription={obj}
-            actions={actions.prescription(obj.id!)}
+            actions={actions.prescription(obj?.id ?? "")}
             onDiscontinueClick={() => setShowDiscontinueFor(obj)}
             onAdministerClick={() => setShowAdministerFor(obj)}
             readonly={disabled}
@@ -83,7 +83,7 @@ export default function PrescriptionBuilder({
         type="button"
         onClick={() => setShowCreate(true)}
         variant="secondary"
-        className="mt-4 bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900 w-full focus:bg-gray-100 focus:text-gray-900"
+        className="mt-4 w-full bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900"
         align="start"
         disabled={disabled}
       >
@@ -100,12 +100,12 @@ export default function PrescriptionBuilder({
             is_prn ? "add_prn_prescription" : "add_prescription_medication"
           )}
           description={
-            <div className="flex gap-2 w-full justify-end mt-2 text-warning-500">
+            <div className="mt-2 flex w-full justify-end gap-2 text-warning-500">
               <CareIcon className="care-l-exclamation-triangle text-base" />
               <span>{t("modification_caution_note")}</span>
             </div>
           }
-          className="max-w-3xl w-full"
+          className="w-full max-w-3xl"
         >
           <CreatePrescriptionForm
             prescription={

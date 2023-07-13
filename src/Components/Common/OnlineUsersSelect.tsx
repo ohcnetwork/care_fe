@@ -87,7 +87,7 @@ export const OnlineUsersSelect = (props: Props) => {
         <FieldLabel>Assigned to</FieldLabel>
         <div className="relative">
           <div className="relative flex-1">
-            <span className="flex w-full rounded-md flex-col md:flex-row">
+            <span className="flex w-full flex-col rounded-md md:flex-row">
               <button
                 onClick={(_) => {
                   setDropdownExpand(true);
@@ -97,10 +97,10 @@ export const OnlineUsersSelect = (props: Props) => {
                 aria-expanded="true"
                 aria-labelledby="listbox-label"
                 className={classNames(
-                  "border border-gray-400 cursor-default relative w-full rounded-md pl-3 pr-10 text-left transition ease-in-out duration-150 sm:text-sm sm:leading-5",
+                  "relative w-full cursor-default rounded-md border border-gray-400 pl-3 pr-10 text-left transition duration-150 ease-in-out sm:text-sm sm:leading-5",
                   (isDropdownExpanded &&
                     outline &&
-                    "ring-primary-500 border-primary-500 py-0.5") ||
+                    "border-primary-500 py-0.5 ring-primary-500") ||
                     "py-3"
                 )}
               >
@@ -110,7 +110,7 @@ export const OnlineUsersSelect = (props: Props) => {
                   type="text"
                   placeholder="Search by name or username"
                   className={classNames(
-                    "pl-3 w-full focus:outline-none border-0 focus:ring-0",
+                    "w-full border-0 pl-3 focus:outline-none focus:ring-0",
                     !isDropdownExpanded && "hidden"
                   )}
                   value={searchTerm}
@@ -128,11 +128,11 @@ export const OnlineUsersSelect = (props: Props) => {
                     isDropdownExpanded && "hidden"
                   )}
                 >
-                  <div className="space-x-3 flex items-center overflow-hidden">
+                  <div className="flex items-center space-x-3 overflow-hidden">
                     <span
                       aria-label="Online"
                       className={
-                        "shrink-0 inline-block h-2 w-2 rounded-full " +
+                        "inline-block h-2 w-2 shrink-0 rounded-full " +
                         (selectedUser
                           ? moment()
                               .subtract(5, "minutes")
@@ -153,7 +153,7 @@ export const OnlineUsersSelect = (props: Props) => {
                     </span>
                   </div>
                 </div>
-                <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                   <svg
                     className="h-5 w-5 text-gray-400"
                     viewBox="0 0 20 20"
@@ -175,7 +175,7 @@ export const OnlineUsersSelect = (props: Props) => {
                 role="listbox"
                 aria-labelledby="listbox-label"
                 aria-activedescendant="listbox-item-3"
-                className="multiselect-dropdown__search-dropdown w-full border border-gray-400 bg-white mt-1 rounded-lg shadow-lg px-4 py-2 z-50"
+                className="multiselect-dropdown__search-dropdown z-50 mt-1 w-full rounded-lg border border-gray-400 bg-white px-4 py-2 shadow-lg"
               >
                 {!loading ? (
                   users.map((user: UserModel) => {
@@ -192,13 +192,13 @@ export const OnlineUsersSelect = (props: Props) => {
                         }}
                         id="listbox-item-0"
                         role="option"
-                        className="flex text-xs py-1 items-center justify-between w-full hover:bg-gray-200 focus:outline-none focus:bg-gray-200"
+                        className="flex w-full items-center justify-between py-1 text-xs hover:bg-gray-200 focus:bg-gray-200 focus:outline-none"
                       >
                         <div className="flex items-center space-x-3">
                           <span
                             aria-label="Online"
                             className={
-                              "shrink-0 inline-block h-2 w-2 rounded-full " +
+                              "inline-block h-2 w-2 shrink-0 rounded-full " +
                               (moment()
                                 .subtract(5, "minutes")
                                 .isBefore(user.last_login)
@@ -206,10 +206,10 @@ export const OnlineUsersSelect = (props: Props) => {
                                 : "bg-gray-300")
                             }
                           ></span>
-                          <span className="font-normal block truncate">
+                          <span className="block truncate font-normal">
                             {user.first_name} {user.last_name}{" "}
                             {user.home_facility_object?.name && (
-                              <span className="text-gray-700 ml-2">
+                              <span className="ml-2 text-gray-700">
                                 {user.home_facility_object?.name}
                               </span>
                             )}
@@ -235,7 +235,7 @@ export const OnlineUsersSelect = (props: Props) => {
                     );
                   })
                 ) : (
-                  <div className="w-1/12 mx-auto">
+                  <div className="mx-auto w-1/12">
                     <CircularProgress />
                   </div>
                 )}
@@ -247,7 +247,7 @@ export const OnlineUsersSelect = (props: Props) => {
             variant="secondary"
             ghost
             circle
-            className={`p-1 absolute right-8 top-1/2 -translate-y-1/2 ${
+            className={`absolute right-8 top-1/2 -translate-y-1/2 p-1 ${
               isDropdownExpanded && "hidden"
             }`}
             onClick={(_) => {

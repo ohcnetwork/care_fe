@@ -141,14 +141,14 @@ const TransferPatientDialog = (props: Props) => {
   return (
     <div>
       <div>
-        <div className="grid gap-4 grid-cols-1">
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <p className="leading-relaxed">
               Note: Date of birth must match the patient to process the transfer
               request.
             </p>
           </div>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <FieldLabel required className="text-sm">
                 Patient
@@ -182,7 +182,7 @@ const TransferPatientDialog = (props: Props) => {
           </div>
         </div>
       </div>
-      <div className="justify-between flex flex-col md:flex-row gap-2 pt-4">
+      <div className="flex flex-col justify-between gap-2 pt-4 md:flex-row">
         <Cancel onClick={handleCancel} disabled={isLoading} />
         <Submit
           disabled={isLoading}

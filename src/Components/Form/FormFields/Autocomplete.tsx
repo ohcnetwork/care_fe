@@ -139,7 +139,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
     <div
       className={
         props.requiredError || props.error
-          ? "border rounded border-red-500 " + props.className
+          ? "rounded border border-red-500 " + props.className
           : props.className
       }
       id={props.id}
@@ -152,14 +152,14 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
         <div className="relative">
           <div className="flex">
             <Combobox.Input
-              className="cui-input-base pr-16 truncate"
+              className="cui-input-base truncate pr-16"
               placeholder={props.placeholder || "Select"}
               displayValue={(value: any) => value?.label}
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
               autoComplete="off"
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <div className="pb-2 absolute h-full top-1 right-0 flex gap-1 items-center mr-2 text-lg text-gray-900">
+              <div className="absolute right-0 top-1 mr-2 flex h-full items-center gap-1 pb-2 text-lg text-gray-900">
                 <span>{value?.icon}</span>
                 {props.isLoading ? (
                   <CareIcon className="care-l-spinner animate-spin" />
@@ -171,7 +171,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
           </div>
 
           <DropdownTransition>
-            <Combobox.Options className="origin-top-right absolute z-10 mt-0.5 cui-dropdown-base">
+            <Combobox.Options className="cui-dropdown-base absolute z-10 mt-0.5 origin-top-right">
               {filteredOptions.length === 0 && (
                 <div className="p-2 text-sm text-gray-500">
                   No options found
