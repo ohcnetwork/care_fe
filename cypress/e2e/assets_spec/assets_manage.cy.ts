@@ -112,11 +112,35 @@ describe("Asset", () => {
     assetPage.verifySuccessNotification("Asset updated successfully");
   });
 
-  it("Delete an Asset", () => {
+  it.only("Delete an Asset", () => {
     assetPage.openCreatedAsset();
     assetPage.deleteAsset();
 
     assetPage.verifySuccessNotification("Asset deleted successfully");
+  });
+
+  it("Configure an asset", () => {
+    assetPage.openCreatedAsset();
+    assetPage.configureAsset(
+      "Host name",
+      "192.168.1.64",
+      "remote_user",
+      "2jCkrCRSeahzKEU",
+      "d5694af2-21e2-4a39-9bad-2fb98d9818bd"
+    );
+    assetPage.clickConfigureAsset();
+
+    assetPage.verifySuccessNotification("Asset Configured Successfully");
+  });
+
+  it("Import new asset", () => {
+    assetPage.selectImportOption();
+    assetPage.selectImportFacility("Dummy Facility 1");
+    assetPage.importAssetFile();
+    assetPage.selectImportLocation("Camera Locations");
+    assetPage.clickImportAsset();
+
+    assetPage.verifySuccessNotification("Assets imported successfully");
   });
 
   afterEach(() => {

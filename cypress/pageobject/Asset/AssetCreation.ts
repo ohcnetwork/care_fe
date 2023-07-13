@@ -116,6 +116,25 @@ export class AssetPage {
     cy.get("[data-testid=asset-notes-input] textarea").clear().type(notes);
   }
 
+  configureAsset(
+    hostName: string,
+    localIp: string,
+    userName: string,
+    password: string,
+    streamUuid: string
+  ) {
+    cy.get("[data-testid=asset-configure-button]").click();
+    cy.get("[name=middleware_hostname]").type(hostName);
+    cy.get("[name=camera_address]").type(localIp);
+    cy.get("[name=username]").type(userName);
+    cy.get("[name=password]").type(password);
+    cy.get("[name=stream_uuid]").type(streamUuid);
+  }
+
+  clickConfigureAsset() {
+    cy.get("#submit").contains("Set Configuration").click();
+  }
+
   clickUpdateAsset() {
     cy.get("#submit").contains("Update").click();
   }
@@ -158,5 +177,33 @@ export class AssetPage {
       "contain",
       "Please enter valid phone number"
     );
+  }
+
+  selectImportFacility(facilityName: string) {
+    cy.get("input[name='facilities']")
+      .type(facilityName)
+      .then(() => {
+        cy.get("[role='option']").contains(facilityName).click();
+      });
+  }
+
+  selectImportOption() {
+    cy.get("[data-testid=import-asset-button]").click();
+    cy.get(".import-assets-button").click();
+  }
+
+  importAssetFile() {
+    cy.get("[data-testid=import-asset-file]")
+      .selectFile("cypress/fixtures/sampleAsset.xlsx", { force: true })
+      .wait(100);
+  }
+
+  selectImportLocation(locationName: string) {
+    cy.get("[data-testid=select-import-location]").click();
+    cy.get("li[role=option]").contains(locationName).click();
+  }
+
+  clickImportAsset() {
+    cy.get("#submit").contains("Import").click();
   }
 }

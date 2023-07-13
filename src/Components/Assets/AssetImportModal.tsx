@@ -211,7 +211,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                 <label htmlFor="asset-location">
                   Select location for import *
                 </label>
-                <div className="mt-2">
+                <div className="mt-2" data-testid="select-import-location">
                   <SelectMenuV2
                     required
                     options={[
@@ -308,6 +308,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
               <label className="rounded-lg bg-white py-2 px-4 text-primary-500 font-medium border border-primary-500 hover:text-primary-400 hover:border-primary-400 text-sm flex gap-1 items-center justify-center cursor-pointer transition-all">
                 <i className="fas fa-cloud-upload-alt mr-2"></i>Upload a file
                 <input
+                  data-testid="import-asset-file"
                   title="changeFile"
                   type="file"
                   accept=".json, .xlsx, .csv"

@@ -311,14 +311,16 @@ const AssetsList = () => {
       options={
         <>
           {authorizedForImportExport && (
-            <div className="tooltip">
+            <div className="tooltip" data-testid="import-asset-button">
               <ExportMenu
                 label={importAssetModalOpen ? "Importing..." : "Import/Export"}
                 exportItems={[
                   {
                     label: "Import Assets",
                     options: {
-                      icon: <CareIcon className="care-l-import" />,
+                      icon: (
+                        <CareIcon className="care-l-import import-assets-button" />
+                      ),
                       onClick: () => setImportAssetModalOpen(true),
                     },
                   },
