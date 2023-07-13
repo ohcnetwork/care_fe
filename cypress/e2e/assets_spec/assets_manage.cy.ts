@@ -112,7 +112,7 @@ describe("Asset", () => {
     assetPage.verifySuccessNotification("Asset updated successfully");
   });
 
-  it.only("Delete an Asset", () => {
+  it("Delete an Asset", () => {
     assetPage.openCreatedAsset();
     assetPage.deleteAsset();
 
