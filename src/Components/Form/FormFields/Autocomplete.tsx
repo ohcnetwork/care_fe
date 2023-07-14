@@ -5,6 +5,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
+import { classNames } from "../../../Utils/utils";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -62,7 +63,7 @@ type AutocompleteProps<T, V = T> = {
   optionLabel: OptionCallback<T, string>;
   optionIcon?: OptionCallback<T, React.ReactNode>;
   optionValue?: OptionCallback<T, V>;
-  optionDescription?: OptionCallback<T, string>;
+  optionDescription?: OptionCallback<T, React.ReactNode>;
   className?: string;
   onQuery?: (query: string) => void;
   requiredError?: boolean;
@@ -100,8 +101,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
     return {
       label,
       description,
-      search:
-        label.toLowerCase() + (description ? description.toLowerCase() : ""),
+      search: label.toLowerCase(),
       icon: props.optionIcon && props.optionIcon(option),
       value: props.optionValue ? props.optionValue(option) : option,
     };
@@ -130,7 +130,10 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
   const options = props.allowRawInput ? getOptions() : mappedOptions;
 
   const value = options.find((o) => props.value == o.value);
-  const filteredOptions = options.filter((o) => o.search.includes(query));
+  const filteredOptions =
+    props.onQuery === undefined
+      ? options.filter((o) => o.search.includes(query))
+      : options;
 
   return (
     <div
@@ -181,17 +184,24 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                   className={dropdownOptionClassNames}
                   value={option}
                 >
-                  <div className="flex flex-col">
-                    <div className="flex justify-between">
-                      {option.label}
-                      {option.icon}
-                    </div>
-                    {option.description && (
-                      <div className="text-sm text-gray-500">
-                        {option.description}
+                  {({ active }) => (
+                    <div className="flex flex-col">
+                      <div className="flex justify-between">
+                        <span>{option.label}</span>
+                        <span>{option.icon}</span>
                       </div>
-                    )}
-                  </div>
+                      {option.description && (
+                        <div
+                          className={classNames(
+                            "text-sm",
+                            active ? "text-primary-200" : "text-gray-700"
+                          )}
+                        >
+                          {option.description}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </Combobox.Option>
               ))}
             </Combobox.Options>

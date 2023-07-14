@@ -227,7 +227,7 @@ const DateInputV2: React.FC<Props> = ({
                   readOnly
                   disabled={disabled}
                   className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
-                  placeholder={placeholder || "Select date"}
+                  placeholder={placeholder ?? "Select date"}
                   value={value && format(value, "yyyy-MM-dd")}
                 />
                 <div className="absolute top-1/2 right-0 p-2 -translate-y-1/2">

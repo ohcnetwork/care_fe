@@ -1,12 +1,15 @@
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { getPatient, getInvestigation } from "../../Redux/actions";
+import {
+  getPatient,
+  getInvestigation,
+  getConsultation,
+} from "../../Redux/actions";
 import { ConsultationModel } from "./models";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { PatientModel } from "../Patient/models";
 import loadable from "@loadable/component";
 import moment from "moment";
-import { getConsultation } from "../../Redux/actions";
 import { GENDER_TYPES } from "../../Common/constants";
 import { formatDate } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
@@ -28,7 +31,7 @@ const TreatmentSummary = (props: any) => {
       setIsLoading(true);
       const res = await dispatch(getPatient({ id: patientId }));
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setPatientData(res.data);
         } else {
           setPatientData({});
@@ -45,7 +48,7 @@ const TreatmentSummary = (props: any) => {
       const res = await dispatch(getInvestigation({}, consultationId));
 
       if (!status.aborted) {
-        if (res && res?.data?.results) {
+        if (res?.data?.results) {
           const valueMap = res.data.results.reduce(
             (acc: any, cur: { id: any }) => ({ ...acc, [cur.id]: cur }),
             {}
@@ -67,7 +70,7 @@ const TreatmentSummary = (props: any) => {
         dispatch(getConsultation(consultationId)),
       ]);
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setConsultationData(res.data);
           if (res.data.last_daily_round) {
             setDailyRounds(res.data.last_daily_round);
@@ -255,8 +258,7 @@ const TreatmentSummary = (props: any) => {
 
               <div className="border-b-2 border-gray-800 px-5 py-2">
                 <b>General Instructions :</b>
-                {patientData.last_consultation &&
-                patientData.last_consultation.consultation_notes ? (
+                {patientData?.last_consultation?.consultation_notes ? (
                   <div className="mx-5">
                     {patientData.last_consultation.consultation_notes}
                   </div>
