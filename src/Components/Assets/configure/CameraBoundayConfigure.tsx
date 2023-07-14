@@ -3,6 +3,7 @@ import { BedModel } from "../../Facility/models";
 import ButtonV2, { Submit } from "../../Common/components/ButtonV2";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
+import Card from "../../../CAREUI/display/Card";
 type direction = "left" | "right" | "up" | "down";
 
 interface CameraBoundaryConfigureProps {
@@ -15,6 +16,9 @@ interface CameraBoundaryConfigureProps {
   setDirection(direction: direction): void;
 }
 
+// interface UpdateCameraBoundaryConfigureProps {
+//   placeholder: any;
+// }
 export default function CameraBoundaryConfigure(
   props: CameraBoundaryConfigureProps
 ) {
@@ -125,5 +129,22 @@ export default function CameraBoundaryConfigure(
         </div>
       )}
     </>
+  );
+}
+
+export function UpdateCameraBoundaryConfigure() {
+  // props: UpdateCameraBoundaryConfigureProps,
+  return (
+    <Card>
+      <div className="gid gap-2 grid-cols-1">
+        <div>Boundary preset name</div>
+        <div className="grid gap-2 grid-cols-3">
+          <div>direction buttons</div>
+          <div>precision, zoom in and out</div>
+          <div>expand and contract</div>
+        </div>
+        <div>confirm/cancel</div>
+      </div>
+    </Card>
   );
 }

@@ -23,6 +23,7 @@ import Page from "../../Common/components/Page";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import useFullscreen from "../../../Common/hooks/useFullscreen";
+import { UpdateCameraBoundaryConfigure } from "../../Assets/configure/CameraBoundayConfigure";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -429,6 +430,7 @@ const LiveFeed = (props: any) => {
                 <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
               </div>
             </div>
+            <UpdateCameraBoundaryConfigure />
           </div>
 
           <div className="flex flex-col mx-4 max-w-sm">
