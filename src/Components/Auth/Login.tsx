@@ -221,12 +221,9 @@ export const Login = (props: { forgot?: boolean }) => {
             <h1 className="text-4xl lg:text-5xl font-black text-white leading-tight tracking-wider">
               {t("care")}
             </h1>
-            <div className="text-base md:text-lg lg:text-xl font-semibold py-6 max-w-xl text-gray-400 pl-1">
-              {t("goal")}
-            </div>
-            {custom_description && (
-              <>
-                <ReactMarkdown className="max-w-xl text-gray-400 pl-1">
+            {custom_description ? (
+              <div className="py-6">
+                <ReactMarkdown className="max-w-xl text-gray-400">
                   {custom_description}
                 </ReactMarkdown>
                 <div className="mx-auto mt-2">
@@ -239,7 +236,11 @@ export const Login = (props: { forgot?: boolean }) => {
                     {custom_site_link}
                   </a>
                 </div>
-              </>
+              </div>
+            ) : (
+              <div className="text-base md:text-lg lg:text-xl font-semibold py-6 max-w-xl text-gray-400 pl-1">
+                {t("goal")}
+              </div>
             )}
           </div>
         </div>
