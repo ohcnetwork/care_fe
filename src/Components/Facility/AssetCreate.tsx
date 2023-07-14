@@ -914,6 +914,7 @@ const AssetCreate = (props: AssetProps) => {
                     />
                     {!assetId && (
                       <Submit
+                        data-testid="create-asset-add-more-button"
                         onClick={(e) => handleSubmit(e, true)}
                         label="Create & Add More"
                       />

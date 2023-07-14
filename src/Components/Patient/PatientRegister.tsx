@@ -285,7 +285,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (!careExtId) return;
     const res = await dispatchAction(externalResult({ id: careExtId }));
 
-    if (res && res.data) {
+    if (res?.data) {
       const form = { ...state.form };
       form["name"] = res.data.name ? res.data.name : state.form.name;
       form["address"] = res.data.address
@@ -451,7 +451,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const res = await dispatchAction(
         HCXActions.policies.list({ patient: id })
       );
-      if (res && res.data) {
+      if (res?.data) {
         setInsuranceDetails(res.data.results);
       }
     };
@@ -846,7 +846,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           phone_number: parsePhoneNumberFromString(phoneNo)?.format("E.164"),
         };
         const res = await dispatchAction(searchPatient(query));
-        if (res && res.data && res.data.results) {
+        if (res?.data?.results) {
           const duplicateList = !id
             ? res.data.results
             : res.data.results.filter(

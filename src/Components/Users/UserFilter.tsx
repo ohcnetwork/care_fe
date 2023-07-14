@@ -14,7 +14,9 @@ import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";
-  return parsePhoneNumberFromString(phoneNumber)?.format("E.164") || "";
+  if (phoneNumber.startsWith("+"))
+    return parsePhoneNumberFromString(phoneNumber)?.format("E.164") || "";
+  return phoneNumber;
 };
 
 export default function UserFilter(props: any) {

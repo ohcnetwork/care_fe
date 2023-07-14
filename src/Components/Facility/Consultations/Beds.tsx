@@ -31,7 +31,7 @@ const formatDateTime: () => string = () => {
 interface BedsProps {
   facilityId: string;
   patientId: number;
-  consultationId: number;
+  consultationId: string;
   smallLoader?: boolean;
   discharged?: boolean;
   setState?: Dispatch<SetStateAction<boolean>>;

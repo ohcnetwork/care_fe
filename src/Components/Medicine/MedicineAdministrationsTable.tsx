@@ -59,7 +59,9 @@ export default function MedicineAdministrationsTable({
               list={
                 items?.map((obj) => ({
                   ...obj,
-                  medicine: obj.prescription?.medicine,
+                  medicine:
+                    obj.prescription?.medicine_object?.name ??
+                    obj.prescription?.medicine_old,
                   created_date__pretty: (
                     <span className="flex gap-1">
                       <RecordMeta time={obj.created_date} /> by{" "}
