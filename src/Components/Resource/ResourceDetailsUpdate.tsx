@@ -217,12 +217,11 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   }
 
   return (
-
-    <Page 
-    title="Update Resource Request"
-    backUrl={`/resource/${props.id}`}
-    crumbsReplacements={{ [props.id]: { name: requestTitle } }}>
-    
+    <Page
+      title="Update Resource Request"
+      backUrl={`/resource/${props.id}`}
+      crumbsReplacements={{ [props.id]: { name: requestTitle } }}
+    >
       <div className="mt-4">
         <Card className="w-full flex flex-col">
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
@@ -242,12 +241,12 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                   <CircularProgress />
                 ) : (
                   <UserAutocompleteFormField
-                      label="Assigned To"
-                      value = {assignedUser===null?undefined:assignedUser}
-                      onChange={handleOnSelect}
-                      error=""
-                      name="assigned_to"
-                      />
+                    label="Assigned To"
+                    value={assignedUser === null ? undefined : assignedUser}
+                    onChange={handleOnSelect}
+                    error=""
+                    name="assigned_to"
+                  />
                 )}
               </div>
             </div>
@@ -332,10 +331,9 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 options={[true, false]}
                 optionDisplay={(o) => (o ? "Yes" : "No")}
                 optionValue={(o) => String(o)}
-                value={state.form.emergency}
+                value={String(state.form.emergency)}
                 error={state.errors.emergency}
               />
-
             </div>
 
             <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">

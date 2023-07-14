@@ -3,7 +3,9 @@
   "reason": {
     "react-jsx": 3
   },
-  "bsc-flags": ["-bs-super-errors"],
+  "bsc-flags": [
+    "-bs-super-errors"
+  ],
   "sources": [
     {
       "dir": "src",
@@ -20,8 +22,7 @@
   "bs-dependencies": [
     "@rescript/react",
     "@glennsl/bs-json",
-    "rescript-webapi",
-    "rescript-material-ui"
+    "rescript-webapi"
   ],
   "ppx-flags": [],
   "refmt": 3,

@@ -59,7 +59,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
 
   const showChevronIcon = props.showChevronIcon ?? true;
 
-  const placeholder = props.placeholder || "Select";
+  const placeholder = props.placeholder ?? "Select";
   const defaultOption = {
     label: placeholder,
     selectedLabel: <p className="font-normal text-gray-600">{placeholder}</p>,
@@ -72,7 +72,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
     ? valueOptions
     : [defaultOption, ...valueOptions];
 
-  const value = options.find((o) => props.value == o.value) || defaultOption;
+  const value = options.find((o) => props.value == o.value) ?? defaultOption;
 
   return (
     <div className={props.className} id={props.id}>

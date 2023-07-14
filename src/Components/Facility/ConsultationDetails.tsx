@@ -63,11 +63,7 @@ export const ConsultationDetails = (props: any) => {
     `${patientData.address},\n${patientData.ward_object?.name},\n${patientData.local_body_object?.name},\n${patientData.district_object?.name},\n${patientData.state_object?.name}`;
 
   const getPatientComorbidities = (patientData: any) => {
-    if (
-      patientData &&
-      patientData.medical_history &&
-      patientData.medical_history.length
-    ) {
+    if (patientData?.medical_history?.length) {
       const medHis = patientData.medical_history;
       return medHis.map((item: any) => item.disease).join(", ");
     } else {
@@ -107,12 +103,12 @@ export const ConsultationDetails = (props: any) => {
       setIsLoading(true);
       const res = await dispatch(getConsultation(consultationId));
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           const data: ConsultationModel = {
             ...res.data,
             symptoms_text: "",
           };
-          if (res.data.symptoms && res.data.symptoms.length) {
+          if (res.data.symptoms?.length) {
             const symptoms = res.data.symptoms
               .filter((symptom: number) => symptom !== 9)
               .map((symptom: number) => {
@@ -124,7 +120,7 @@ export const ConsultationDetails = (props: any) => {
           setConsultationData(data);
           const id = res.data.patient;
           const patientRes = await dispatch(getPatient({ id }));
-          if (patientRes && patientRes.data) {
+          if (patientRes?.data) {
             const patientGender = getPatientGender(patientRes.data);
             const patientAddress = getPatientAddress(patientRes.data);
             const patientComorbidities = getPatientComorbidities(
@@ -305,7 +301,7 @@ export const ConsultationDetails = (props: any) => {
                       {consultationData.admitted_to}
                     </span>
                   </div>
-                  {(consultationData.admission_date ||
+                  {(consultationData.admission_date ??
                     consultationData.discharge_date) && (
                     <div className="text-3xl font-bold">
                       {moment(
@@ -352,7 +348,7 @@ export const ConsultationDetails = (props: any) => {
                           },
                         ]
                       : []),
-                    ...(consultationData?.icd11_diagnoses_object || []),
+                    ...(consultationData?.icd11_diagnoses_object ?? []),
                   ]}
                   label="Diagnosis (as per ICD-11 recommended by WHO)"
                 />
@@ -427,7 +423,7 @@ export const ConsultationDetails = (props: any) => {
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
                     if (
-                      !consultationData?.current_bed?.bed_object?.id ||
+                      !consultationData?.current_bed?.bed_object?.id ??
                       consultationData?.discharge_date !== null
                     )
                       return null;
@@ -447,7 +443,8 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </div>
         <SelectedTab {...consultationProps} />
-      </div>
+        </div>
+   
 
       <DoctorVideoSlideover
         facilityId={facilityId}

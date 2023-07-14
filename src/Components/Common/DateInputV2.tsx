@@ -21,6 +21,7 @@ interface Props {
   id?: string;
   name?: string;
   className?: string;
+  containerClassName?: string;
   value: Date | undefined;
   min?: Date;
   max?: Date;
@@ -38,6 +39,7 @@ const DateInputV2: React.FC<Props> = ({
   id,
   name,
   className,
+  containerClassName,
   value,
   min,
   max,
@@ -200,7 +202,9 @@ const DateInputV2: React.FC<Props> = ({
 
   return (
     <div>
-      <div className="container mx-auto text-black">
+      <div
+        className={`${containerClassName ?? "container mx-auto text-black"}`}
+      >
         <Popover className="relative">
           {({ open, close }) => (
             <div
@@ -223,7 +227,7 @@ const DateInputV2: React.FC<Props> = ({
                   readOnly
                   disabled={disabled}
                   className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
-                  placeholder={placeholder || "Select date"}
+                  placeholder={placeholder ?? "Select date"}
                   value={value && format(value, "yyyy-MM-dd")}
                 />
                 <div className="absolute top-1/2 right-0 p-2 -translate-y-1/2">
