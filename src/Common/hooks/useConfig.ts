@@ -18,6 +18,14 @@ export interface IConfig {
   static_dpg_white_logo: string;
   static_coronasafe_logo: string;
   /**
+   * Logo, description and site link for custom deployment.
+   */
+  static_custom_logo: string;
+  static_custom_logo_alt: string;
+  static_custom_logo_white: string;
+  custom_description: string;
+  custom_site_link: string;
+  /**
    * The API key for the Google Maps API used for location picker.
    */
   gmaps_api_key: string;
