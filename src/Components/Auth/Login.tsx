@@ -12,6 +12,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { classNames } from "../../Utils/utils";
 import CircularProgress from "../Common/components/CircularProgress";
 import { LocalStorageKeys } from "../../Common/constants";
+import ReactMarkdown from "react-markdown";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
@@ -25,6 +26,11 @@ export const Login = (props: { forgot?: boolean }) => {
     dpg_url,
     state_logo,
     state_logo_white,
+    static_custom_logo,
+    static_custom_logo_alt,
+    static_custom_logo_white,
+    custom_description,
+    custom_site_link,
   } = useConfig();
   const dispatch: any = useDispatch();
   const initForm: any = {
@@ -184,13 +190,14 @@ export const Login = (props: { forgot?: boolean }) => {
         <div></div>
         <div className="mt-4 md:mt-12 rounded-lg py-4 flex flex-col items-start">
           <div className="hidden md:flex items-center gap-6 mb-4">
-            {state_logo && (
+            {(static_custom_logo || state_logo) && (
               <>
                 <img
-                  src={state_logo}
+                  src={static_custom_logo || state_logo}
                   className={classNames(
                     "rounded-lg p-3 h-24",
-                    state_logo_white && "invert brightness-0"
+                    (state_logo_white || static_custom_logo_white) &&
+                      "invert brightness-0"
                   )}
                   alt="state logo"
                 />
@@ -204,19 +211,37 @@ export const Login = (props: { forgot?: boolean }) => {
               rel="noopener noreferrer"
             >
               <img
-                src={static_light_logo}
+                src={static_custom_logo_alt || static_light_logo}
                 className="h-8"
                 alt="coronasafe logo"
               />
             </a>
           </div>
           <div className="max-w-lg">
-            <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight tracking-wider">
+            <h1 className="text-4xl lg:text-5xl font-black text-white leading-tight tracking-wider">
               {t("care")}
             </h1>
-            <div className="text-base md:text-lg lg:text-xl font-semibold py-6 max-w-xl text-gray-400 pl-1">
-              {t("goal")}
-            </div>
+            {custom_description ? (
+              <div className="py-6">
+                <ReactMarkdown className="max-w-xl text-gray-400">
+                  {custom_description}
+                </ReactMarkdown>
+                <div className="mx-auto mt-2">
+                  <a
+                    href={custom_site_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-400 hover:text-primary-500"
+                  >
+                    {custom_site_link}
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div className="text-base md:text-lg lg:text-xl font-semibold py-6 max-w-xl text-gray-400 pl-1">
+                {t("goal")}
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center mb-6">
@@ -275,10 +300,10 @@ export const Login = (props: { forgot?: boolean }) => {
             }
           >
             <div className="flex items-center gap-1">
-              {state_logo && (
+              {(static_custom_logo || state_logo) && (
                 <>
                   <img
-                    src={state_logo}
+                    src={static_custom_logo || state_logo}
                     className={classNames(
                       "rounded-lg p-3 h-24 md:hidden",
                       state_logo_white && "invert brightness-0"
@@ -289,7 +314,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 </>
               )}
               <img
-                src={static_black_logo}
+                src={static_custom_logo_alt || static_black_logo}
                 className="h-8 w-auto md:hidden brightness-0 contrast-[0%]"
                 alt="care logo"
               />
