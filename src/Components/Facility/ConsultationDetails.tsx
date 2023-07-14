@@ -83,11 +83,7 @@ export const ConsultationDetails = (props: any) => {
     `${patientData.address},\n${patientData.ward_object?.name},\n${patientData.local_body_object?.name},\n${patientData.district_object?.name},\n${patientData.state_object?.name}`;
 
   const getPatientComorbidities = (patientData: any) => {
-    if (
-      patientData &&
-      patientData.medical_history &&
-      patientData.medical_history.length
-    ) {
+    if (patientData?.medical_history?.length) {
       const medHis = patientData.medical_history;
       return medHis.map((item: any) => item.disease).join(", ");
     } else {
@@ -157,12 +153,12 @@ export const ConsultationDetails = (props: any) => {
       setIsLoading(true);
       const res = await dispatch(getConsultation(consultationId));
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           const data: ConsultationModel = {
             ...res.data,
             symptoms_text: "",
           };
-          if (res.data.symptoms && res.data.symptoms.length) {
+          if (res.data.symptoms?.length) {
             const symptoms = res.data.symptoms
               .filter((symptom: number) => symptom !== 9)
               .map((symptom: number) => {
@@ -174,7 +170,7 @@ export const ConsultationDetails = (props: any) => {
           setConsultationData(data);
           const id = res.data.patient;
           const patientRes = await dispatch(getPatient({ id }));
-          if (patientRes && patientRes.data) {
+          if (patientRes?.data) {
             const patientGender = getPatientGender(patientRes.data);
             const patientAddress = getPatientAddress(patientRes.data);
             const patientComorbidities = getPatientComorbidities(
@@ -354,7 +350,7 @@ export const ConsultationDetails = (props: any) => {
                       {consultationData.admitted_to}
                     </span>
                   </div>
-                  {(consultationData.admission_date ||
+                  {(consultationData.admission_date ??
                     consultationData.discharge_date) && (
                     <div className="text-3xl font-bold">
                       {moment(
@@ -403,7 +399,7 @@ export const ConsultationDetails = (props: any) => {
                           },
                         ]
                       : []),
-                    ...(consultationData?.icd11_diagnoses_object || []),
+                    ...(consultationData?.icd11_diagnoses_object ?? []),
                   ]}
                   label="Diagnosis (as per ICD-11 recommended by WHO)"
                 />
@@ -479,7 +475,7 @@ export const ConsultationDetails = (props: any) => {
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
                     if (
-                      !consultationData?.current_bed?.bed_object?.id ||
+                      !consultationData?.current_bed?.bed_object?.id ??
                       consultationData?.discharge_date !== null
                     )
                       return null;
@@ -503,8 +499,8 @@ export const ConsultationDetails = (props: any) => {
             {!consultationData.discharge_date &&
               hl7SocketUrl &&
               ventilatorSocketUrl && (
-                <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
-                  <div className="flex flex-col lg:flex-row bg-slate-800 gap-1 justify-between rounded mx-auto">
+                <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-auto">
+                  <div className="w-full lg:w-auto lg:min-w-[1280px] flex flex-col lg:flex-row bg-slate-800 gap-1 justify-between rounded mx-auto">
                     <div className="flex-1 min-h-[400px]">
                       <HL7PatientVitalsMonitor socketUrl={hl7SocketUrl} />
                     </div>
@@ -525,7 +521,7 @@ export const ConsultationDetails = (props: any) => {
                       (!hl7SocketUrl && ventilatorSocketUrl)) && (
                       <section className="lg:col-span-2 bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
                         {(hl7SocketUrl || ventilatorSocketUrl) && (
-                          <div className="flex flex-col lg:flex-row bg-slate-800 gap-1 justify-between rounded mx-auto">
+                          <div className="w-full lg:w-auto lg:min-w-[640px] flex flex-col lg:flex-row bg-slate-800 gap-1 justify-between rounded mx-auto">
                             {hl7SocketUrl && (
                               <div className="flex-1 min-h-[400px]">
                                 <HL7PatientVitalsMonitor
@@ -562,7 +558,7 @@ export const ConsultationDetails = (props: any) => {
                               {DISCHARGE_REASONS.find(
                                 (d) =>
                                   d.id === consultationData.discharge_reason
-                              )?.text || "--"}
+                              )?.text ?? "--"}
                             </span>
                           </div>
                           {consultationData.discharge_reason === "REC" && (
@@ -581,12 +577,12 @@ export const ConsultationDetails = (props: any) => {
                               <div>
                                 Advice {" - "}
                                 <span className="font-semibold">
-                                  {consultationData.discharge_notes || "--"}
+                                  {consultationData.discharge_notes ?? "--"}
                                 </span>
                               </div>
                               <div className="overflow-x-auto overflow-y-hidden">
                                 <PrescriptionsTable
-                                  consultation_id={consultationData.id}
+                                  consultation_id={consultationData.id ?? ""}
                                   is_prn={false}
                                   readonly
                                   prescription_type="DISCHARGE"
@@ -595,7 +591,7 @@ export const ConsultationDetails = (props: any) => {
                               <hr className="border border-gray-300 my-2"></hr>
                               <div className="overflow-x-auto overflow-y-hidden">
                                 <PrescriptionsTable
-                                  consultation_id={consultationData.id}
+                                  consultation_id={consultationData.id ?? ""}
                                   is_prn
                                   readonly
                                   prescription_type="DISCHARGE"
@@ -618,20 +614,20 @@ export const ConsultationDetails = (props: any) => {
                               <div>
                                 Cause of death {" - "}
                                 <span className="font-semibold">
-                                  {consultationData.discharge_notes || "--"}
+                                  {consultationData.discharge_notes ?? "--"}
                                 </span>
                               </div>
                               <div>
                                 Confirmed By {" - "}
                                 <span className="font-semibold">
-                                  {consultationData.death_confirmed_doctor ||
+                                  {consultationData.death_confirmed_doctor ??
                                     "--"}
                                 </span>
                               </div>
                             </div>
                           )}
                           {["REF", "LAMA"].includes(
-                            consultationData.discharge_reason || ""
+                            consultationData.discharge_reason ?? ""
                           ) && (
                             <div className="grid gap-4">
                               <div>
@@ -648,7 +644,7 @@ export const ConsultationDetails = (props: any) => {
                               <div>
                                 Notes {" - "}
                                 <span className="font-semibold">
-                                  {consultationData.discharge_notes || "--"}
+                                  {consultationData.discharge_notes ?? "--"}
                                 </span>
                               </div>
                             </div>
@@ -678,7 +674,7 @@ export const ConsultationDetails = (props: any) => {
                                       text={
                                         SYMPTOM_CHOICES.find(
                                           (choice) => choice.id === symptom
-                                        )?.text || "Err. Unknown"
+                                        )?.text ?? "Err. Unknown"
                                       }
                                       color={"primary"}
                                       size={"small"}
@@ -718,7 +714,7 @@ export const ConsultationDetails = (props: any) => {
                                   text={
                                     SYMPTOM_CHOICES.find(
                                       (choice) => choice.id === symptom
-                                    )?.text || "Err. Unknown"
+                                    )?.text ?? "Err. Unknown"
                                   }
                                   color={"primary"}
                                   size={"small"}
@@ -809,7 +805,7 @@ export const ConsultationDetails = (props: any) => {
                     </div>
                   )}
 
-                  {(consultationData.operation ||
+                  {(consultationData.operation ??
                     consultationData.special_instruction) && (
                     <div className="bg-white overflow-hidden shadow rounded-lg">
                       <div className="px-4 py-5 sm:p-6">
@@ -970,25 +966,25 @@ export const ConsultationDetails = (props: any) => {
                       <div>
                         Gender {" - "}
                         <span className="font-semibold">
-                          {patientData.gender || "-"}
+                          {patientData.gender ?? "-"}
                         </span>
                       </div>
                       <div>
                         Age {" - "}
                         <span className="font-semibold">
-                          {patientData.age || "-"}
+                          {patientData.age ?? "-"}
                         </span>
                       </div>
                       <div>
                         Weight {" - "}
                         <span className="font-semibold">
-                          {consultationData.weight || "-"} Kg
+                          {consultationData.weight ?? "-"} Kg
                         </span>
                       </div>
                       <div>
                         Height {" - "}
                         <span className="font-semibold">
-                          {consultationData.height || "-"} cm
+                          {consultationData.height ?? "-"} cm
                         </span>
                       </div>
                       <div>
@@ -1005,7 +1001,7 @@ export const ConsultationDetails = (props: any) => {
                       <div>
                         Blood Group {" - "}
                         <span className="font-semibold">
-                          {patientData.blood_group || "-"}
+                          {patientData.blood_group ?? "-"}
                         </span>
                       </div>
                     </div>

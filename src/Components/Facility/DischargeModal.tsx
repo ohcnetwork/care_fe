@@ -172,7 +172,7 @@ const DischargeModal = ({
     });
   };
 
-  const prescriptionActions = PrescriptionActions(consultationData.id);
+  const prescriptionActions = PrescriptionActions(consultationData.id ?? "");
 
   const handleFacilitySelect = (selected: FacilityModel) => {
     setFacility(selected ? selected : facility);
@@ -260,7 +260,7 @@ const DischargeModal = ({
               name="discharge_date"
               value={moment(preDischargeForm?.discharge_date).toDate()}
               min={moment(
-                consultationData?.admission_date ||
+                consultationData?.admission_date ??
                   consultationData?.created_date
               ).toDate()}
               disableFuture={true}
@@ -293,7 +293,7 @@ const DischargeModal = ({
               <input
                 type="datetime-local"
                 className="w-[calc(100%-5px)] focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                value={preDischargeForm.death_datetime || ""}
+                value={preDischargeForm.death_datetime ?? ""}
                 required
                 min={consultationData?.admission_date?.substring(0, 16)}
                 max={moment(new Date()).format("YYYY-MM-DDThh:mm")}
@@ -310,7 +310,7 @@ const DischargeModal = ({
             <TextFormField
               name="death_confirmed_by"
               label="Confirmed By"
-              value={preDischargeForm.death_confirmed_doctor || ""}
+              value={preDischargeForm.death_confirmed_doctor ?? ""}
               onChange={(e) => {
                 setPreDischargeForm((form) => {
                   return {
@@ -331,7 +331,7 @@ const DischargeModal = ({
               name="discharge_date"
               value={moment(preDischargeForm.discharge_date).toDate()}
               min={moment(
-                consultationData?.admission_date ||
+                consultationData?.admission_date ??
                   consultationData?.created_date
               ).toDate()}
               disableFuture={true}
@@ -350,8 +350,8 @@ const DischargeModal = ({
             <ClaimDetailCard claim={latestClaim} />
           ) : (
             <CreateClaimCard
-              consultationId={consultationData.id}
-              patientId={consultationData.patient}
+              consultationId={consultationData.id ?? ""}
+              patientId={consultationData.patient ?? ""}
               use="claim"
               isCreating={isCreateClaimLoading}
               setIsCreating={setIsCreateClaimLoading}
