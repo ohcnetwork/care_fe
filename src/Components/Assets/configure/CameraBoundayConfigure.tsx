@@ -1,24 +1,26 @@
 import { useState } from "react";
 import { BedModel } from "../../Facility/models";
 import ButtonV2, { Submit } from "../../Common/components/ButtonV2";
-import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import Card from "../../../CAREUI/display/Card";
-type direction = "left" | "right" | "up" | "down";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+type direction = "left" | "right" | "up" | "down" | null;
 
 interface CameraBoundaryConfigureProps {
   addBoundaryPreset(e: any): void;
-  updateBoundaryPreset(e: any): void;
+  updateBoundaryPreset(action: any): void;
   deleteBoundaryPreset(e: any): void;
   boundaryPreset: any;
   bed: BedModel;
-  direction: direction;
-  setDirection(direction: direction): void;
 }
 
-// interface UpdateCameraBoundaryConfigureProps {
-//   placeholder: any;
-// }
+interface UpdateCameraBoundaryConfigureProps {
+  cameraPTZ: any;
+  direction: direction;
+  setDirection(direction: direction): void;
+  changeDirectionalBoundary(action: "expand" | "shrink"): void;
+  updateBoundaryPreset(e: any): void;
+}
 export default function CameraBoundaryConfigure(
   props: CameraBoundaryConfigureProps
 ) {
@@ -28,8 +30,6 @@ export default function CameraBoundaryConfigure(
     deleteBoundaryPreset,
     boundaryPreset,
     bed,
-    direction,
-    setDirection,
   } = props;
   const [toUpdate, setToUpdate] = useState<boolean>(false);
   return (
@@ -64,23 +64,13 @@ export default function CameraBoundaryConfigure(
           </div>
           {toUpdate ? (
             <div>
-              <SelectFormField
-                className="mt-2"
-                name="direction"
-                id="direction"
-                label="Direction"
-                required={true}
-                options={["left", "right", "up", "down"]}
-                optionLabel={(option) => option}
-                value={direction}
-                onChange={(option) => setDirection(option.value)}
-                error=""
-              />
               <div className="flex justify-start gap-4 mt-2">
                 <div>
                   <ButtonV2
                     variant="primary"
-                    onClick={updateBoundaryPreset}
+                    onClick={() => {
+                      updateBoundaryPreset("confirm");
+                    }}
                     id="confirm-update-boundary-preset"
                   >
                     Confirm
@@ -91,6 +81,7 @@ export default function CameraBoundaryConfigure(
                     variant="secondary"
                     border={true}
                     onClick={() => {
+                      updateBoundaryPreset("cancel");
                       setToUpdate(false);
                     }}
                     id="cancel-modify-boundary-preset"
@@ -132,19 +123,156 @@ export default function CameraBoundaryConfigure(
   );
 }
 
-export function UpdateCameraBoundaryConfigure() {
-  // props: UpdateCameraBoundaryConfigureProps,
+export function UpdateCameraBoundaryConfigure(
+  props: UpdateCameraBoundaryConfigureProps
+) {
+  const {
+    cameraPTZ,
+    direction,
+    setDirection,
+    changeDirectionalBoundary,
+    updateBoundaryPreset,
+  } = props;
+
   return (
-    <Card>
-      <div className="gid gap-2 grid-cols-1">
-        <div>Boundary preset name</div>
-        <div className="grid gap-2 grid-cols-3">
-          <div>direction buttons</div>
-          <div>precision, zoom in and out</div>
-          <div>expand and contract</div>
+    <div className="mt-4 max-w-lg">
+      <Card>
+        <div className="flex flex-col space-y-4">
+          <div>
+            <label id="asset-name">Name</label>
+            <div className="text-lg font-semibold">Boundary Preset</div>
+          </div>
+          <div className="grid gap-2 grid-cols-3">
+            <div className="grid grid-cols-3">
+              {[
+                false,
+                "up",
+                false,
+                "left",
+                false,
+                "right",
+                false,
+                "down",
+                false,
+              ].map((button, index) => {
+                let out = <div className="w-[20px] h-[20px]" key={index}></div>;
+                if (button) {
+                  out = (
+                    <ButtonV2
+                      size="small"
+                      circle={true}
+                      variant={direction === button ? "primary" : "secondary"}
+                      border={true}
+                      key={index}
+                      onClick={() => {
+                        if (direction === button) {
+                          setDirection(null);
+                        } else {
+                          setDirection(button as direction);
+                        }
+                      }}
+                    >
+                      {button}
+                    </ButtonV2>
+                  );
+                }
+                return out;
+              })}
+            </div>
+            <div className="flex flex-col justify-end gap-2">
+              {[cameraPTZ[4], cameraPTZ[5], cameraPTZ[6]].map(
+                (option, index) => {
+                  const shortcutKeyDescription =
+                    option.shortcutKey &&
+                    option.shortcutKey
+                      .join(" + ")
+                      .replace("Control", "Ctrl")
+                      .replace("ArrowUp", "↑")
+                      .replace("ArrowDown", "↓")
+                      .replace("ArrowLeft", "←")
+                      .replace("ArrowRight", "→");
+
+                  return (
+                    <div key={index}>
+                      <button
+                        className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 tooltip"
+                        onClick={option.callback}
+                      >
+                        {/* <span className="sr-only">{option.label}</span> */}
+                        {option.icon ? (
+                          <CareIcon className={`care-${option.icon}`} />
+                        ) : (
+                          <span className="px-2 font-bold h-full w-8 flex items-center justify-center ">
+                            {option.value}x
+                          </span>
+                        )}
+                        <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">{`${option.label}  (${shortcutKeyDescription})`}</span>
+                      </button>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+            <div className="flex flex-col justify-center gap-2">
+              <div>
+                <ButtonV2
+                  size="small"
+                  variant="primary"
+                  onClick={() => {
+                    changeDirectionalBoundary("expand");
+                  }}
+                >
+                  Expand
+                </ButtonV2>
+              </div>
+              <div>
+                <ButtonV2
+                  size="small"
+                  variant="primary"
+                  onClick={() => {
+                    changeDirectionalBoundary("shrink");
+                  }}
+                >
+                  Shrink
+                </ButtonV2>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-row justify-center gap-2">
+            <ButtonV2
+              variant="primary"
+              size="small"
+              onClick={() => {
+                console.log("preview");
+              }}
+              id="preview-update-boundary-preset"
+            >
+              Preview
+            </ButtonV2>
+            <ButtonV2
+              variant="primary"
+              size="small"
+              onClick={() => {
+                updateBoundaryPreset("confirm");
+              }}
+              id="confirm-update-boundary-preset"
+            >
+              Confirm
+            </ButtonV2>
+            <ButtonV2
+              variant="secondary"
+              size="small"
+              border={true}
+              onClick={() => {
+                updateBoundaryPreset("cancel");
+              }}
+              id="cancel-modify-boundary-preset"
+            >
+              Cancel
+            </ButtonV2>
+          </div>
         </div>
-        <div>confirm/cancel</div>
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 }

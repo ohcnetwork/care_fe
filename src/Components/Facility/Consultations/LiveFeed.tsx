@@ -25,6 +25,7 @@ import { FieldLabel } from "../../Form/FormFields/FormField";
 import useFullscreen from "../../../Common/hooks/useFullscreen";
 import { UpdateCameraBoundaryConfigure } from "../../Assets/configure/CameraBoundayConfigure";
 
+type direction = "left" | "right" | "up" | "down" | null;
 const LiveFeed = (props: any) => {
   const middlewareHostname =
     props.middlewareHostname || "dev_middleware.coronasafe.live";
@@ -48,8 +49,11 @@ const LiveFeed = (props: any) => {
   });
   const [toDelete, setToDelete] = useState<any>(null);
   const [toUpdate, setToUpdate] = useState<any>(null);
+  const [direction, setDirection] = useState<direction>(null);
   const [_isFullscreen, setFullscreen] = useFullscreen();
-
+  const boundaryPreset = props.boundaryPreset;
+  const setBoundaryPreset = props.setBoundaryPreset;
+  const updateBoundaryPreset = props.updateBoundaryPreset;
   const { width } = useWindowDimensions();
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
@@ -164,6 +168,68 @@ const LiveFeed = (props: any) => {
     });
   };
 
+  const gotoDirectionalBoundary = () => {
+    if (!boundaryPreset?.meta?.range || !direction) {
+      Notification.Error({ msg: "Select a Direction to expand" });
+      return;
+    }
+    const { max_x, max_y, min_x, min_y } = boundaryPreset?.meta?.range;
+    const position = {
+      x: 0,
+      y: 0,
+      zoom: 0.2,
+    };
+    if (direction == "left") {
+      position.x = min_x;
+      position.y = (min_y + max_y) / 2;
+    }
+    if (direction == "right") {
+      position.x = max_x;
+      position.y = (min_y + max_y) / 2;
+    }
+    if (direction == "up") {
+      position.x = (min_x + max_x) / 2;
+      position.y = min_y;
+    }
+    if (direction == "down") {
+      position.x = (min_x + max_x) / 2;
+      position.y = max_y;
+    }
+    absoluteMove(position, {
+      onSuccess: () => setLoading(undefined),
+    });
+  };
+
+  const changeDirectionalBoundary = (action: "expand" | "shrink") => {
+    const { max_x, max_y, min_x, min_y } = boundaryPreset?.meta?.range;
+    const range = {
+      max_x: max_x,
+      max_y: max_y,
+      min_x: min_x,
+      min_y: min_y,
+    };
+    const delta = 0.1 / Math.max(1, precision);
+    if (direction == "left") {
+      range.min_x = action == "expand" ? min_x - delta : min_x + delta;
+    }
+    if (direction == "right") {
+      range.max_x = action == "expand" ? max_x + delta : max_x - delta;
+    }
+    if (direction == "up") {
+      range.min_y = action == "expand" ? min_y - delta : min_y + delta;
+    }
+    if (direction == "down") {
+      range.max_y = action == "expand" ? max_y + delta : max_y - delta;
+    }
+    setBoundaryPreset({
+      ...boundaryPreset,
+      meta: {
+        ...boundaryPreset.meta,
+        range: range,
+      },
+    });
+  };
+
   useEffect(() => {
     if (cameraAsset?.hostname) {
       fetchCameraPresets();
@@ -182,6 +248,15 @@ const LiveFeed = (props: any) => {
     }
   }, [page.offset, cameraAsset.id, refreshPresetsHash]);
 
+  useEffect(() => {
+    if (boundaryPreset?.meta?.range && direction) {
+      try {
+        gotoDirectionalBoundary();
+      } catch (e) {
+        Notification.Error({ msg: "Something Went Wrong" });
+      }
+    }
+  }, [direction, boundaryPreset]);
   const viewOptions = (page: number) => {
     return presets
       ? Object.entries(presets)
@@ -430,7 +505,13 @@ const LiveFeed = (props: any) => {
                 <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
               </div>
             </div>
-            <UpdateCameraBoundaryConfigure />
+            <UpdateCameraBoundaryConfigure
+              cameraPTZ={cameraPTZ}
+              direction={direction}
+              setDirection={setDirection}
+              changeDirectionalBoundary={changeDirectionalBoundary}
+              updateBoundaryPreset={updateBoundaryPreset}
+            />
           </div>
 
           <div className="flex flex-col mx-4 max-w-sm">

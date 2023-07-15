@@ -8,7 +8,7 @@ import { Submit } from "../../Common/components/ButtonV2";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import Card from "../../../CAREUI/display/Card";
 import CameraBoundaryConfigure from "./CameraBoundayConfigure";
-type direction = "left" | "right" | "up" | "down";
+
 interface CameraConfigureProps {
   asset: AssetData;
   addPreset(e: React.SyntheticEvent): void;
@@ -20,8 +20,7 @@ interface CameraConfigureProps {
   facilityMiddlewareHostname: string;
   isLoading: boolean;
   boundaryPreset: any;
-  direction: direction;
-  setDirection(direction: direction): void;
+  setBoundaryPreset: (preset: any) => void;
   addBoundaryPreset(e: any): void;
   updateBoundaryPreset(e: any): void;
   deleteBoundaryPreset(e: any): void;
@@ -38,8 +37,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     refreshPresetsHash,
     facilityMiddlewareHostname,
     boundaryPreset,
-    direction,
-    setDirection,
+    setBoundaryPreset,
     addBoundaryPreset,
     updateBoundaryPreset,
     deleteBoundaryPreset,
@@ -88,8 +86,6 @@ export default function CameraConfigure(props: CameraConfigureProps) {
             updateBoundaryPreset={updateBoundaryPreset}
             deleteBoundaryPreset={deleteBoundaryPreset}
             boundaryPreset={boundaryPreset}
-            direction={direction}
-            setDirection={setDirection}
             bed={bed}
           />
         </div>
@@ -100,6 +96,9 @@ export default function CameraConfigure(props: CameraConfigureProps) {
           asset={getCameraConfig(asset)}
           showRefreshButton={true}
           refreshPresetsHash={refreshPresetsHash}
+          boundaryPreset={boundaryPreset}
+          setBoundaryPreset={setBoundaryPreset}
+          updateBoundaryPreset={updateBoundaryPreset}
         />
       </Card>
     </div>

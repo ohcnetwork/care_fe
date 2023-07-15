@@ -26,8 +26,6 @@ interface ONVIFCameraProps {
   asset: any;
 }
 
-type direction = "left" | "right" | "up" | "down";
-
 const ONVIFCamera = (props: ONVIFCameraProps) => {
   const { assetId, facilityId, asset } = props;
   const [isLoading, setIsLoading] = useState(true);
@@ -44,11 +42,11 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [newPreset, setNewPreset] = useState("");
   const [loadingAddPreset, setLoadingAddPreset] = useState(false);
   const [loadingSetConfiguration, setLoadingSetConfiguration] = useState(false);
-  const [direction, setDirection] = useState<direction>("left");
   const [refreshPresetsHash, setRefreshPresetsHash] = useState(
     Number(new Date())
   );
   const [boundaryPreset, setBoundaryPreset] = useState<any>(null);
+  const [refBoundaryPreset, setRefBoundaryPreset] = useState<any>(null); // to reference in case modification of boundary preset is cancelled.
   const [presets, setPresets] = useState<any[]>([]);
   const dispatch = useDispatch<any>();
 
@@ -174,8 +172,10 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           });
           if (boundaryPreset) {
             setBoundaryPreset(boundaryPreset);
+            setRefBoundaryPreset(boundaryPreset);
           } else {
             setBoundaryPreset(null);
+            setRefBoundaryPreset(null);
           }
           setPresets(bedAssets);
         }
@@ -265,55 +265,17 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     setLoadingAddPreset(false);
   };
 
-  const updateBoundaryPreset = async () => {
-    const config = getCameraConfig(asset as AssetData);
+  const updateBoundaryPreset = async (action: any) => {
     if (boundaryPreset) {
       try {
-        const presetData = await axios.get(
-          `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
-        );
-        const cameraPosition = presetData.data.position;
-        const boundaryRange = boundaryPreset.meta.range;
-        console.log("boundary range", boundaryRange);
-        console.log("camera position", cameraPosition);
-        let range;
-        if (direction == "left") {
-          if (cameraPosition?.x > boundaryRange?.max_x) {
-            Notification.Error({
-              msg: "Cannot exceeed right boundary",
-            });
-            return;
-          }
-          range = { ...boundaryRange, min_x: cameraPosition?.x };
-        } else if (direction == "right") {
-          if (cameraPosition?.x < boundaryRange?.min_x) {
-            Notification.Error({
-              msg: "Cannot exceeed left boundary",
-            });
-            return;
-          }
-          range = { ...boundaryRange, max_x: cameraPosition?.x };
-        } else if (direction == "up") {
-          if (cameraPosition?.y < boundaryRange?.min_y) {
-            Notification.Error({
-              msg: "Cannot exceeed bottom boundary",
-            });
-            return;
-          }
-          range = { ...boundaryRange, min_y: cameraPosition?.y };
-        } else if (direction == "down") {
-          if (cameraPosition?.y > boundaryRange?.max_y) {
-            Notification.Error({
-              msg: "Cannot exceeed top boundary",
-            });
-            return;
-          }
-          range = { ...boundaryRange, max_y: cameraPosition?.y };
+        if (action == "cancel") {
+          setBoundaryPreset(refBoundaryPreset);
+          return;
         }
         const data = {
           asset: boundaryPreset.asset_object.id,
           bed: boundaryPreset.bed_object.id,
-          meta: { ...boundaryPreset.meta, range: range },
+          meta: boundaryPreset.meta,
         };
         const res = await Promise.resolve(
           dispatch(partialUpdateAssetBed(data, boundaryPreset.id as string))
@@ -475,8 +437,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             refreshPresetsHash={refreshPresetsHash}
             facilityMiddlewareHostname={facilityMiddlewareHostname}
             boundaryPreset={boundaryPreset}
-            direction={direction}
-            setDirection={setDirection}
+            setBoundaryPreset={setBoundaryPreset}
             addBoundaryPreset={addBoundaryPreset}
             updateBoundaryPreset={updateBoundaryPreset}
             deleteBoundaryPreset={deleteBoundaryPreset}
