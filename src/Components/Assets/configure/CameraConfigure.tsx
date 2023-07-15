@@ -24,6 +24,8 @@ interface CameraConfigureProps {
   addBoundaryPreset(e: any): void;
   updateBoundaryPreset(e: any): void;
   deleteBoundaryPreset(e: any): void;
+  toUpdateBoundary: boolean;
+  setToUpdateBoundary(toUpdate: boolean): void;
 }
 export default function CameraConfigure(props: CameraConfigureProps) {
   const {
@@ -41,8 +43,9 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     addBoundaryPreset,
     updateBoundaryPreset,
     deleteBoundaryPreset,
+    toUpdateBoundary,
+    setToUpdateBoundary,
   } = props;
-
   return (
     <div className="mb-5">
       <Card className="mt-4">
@@ -86,6 +89,8 @@ export default function CameraConfigure(props: CameraConfigureProps) {
             updateBoundaryPreset={updateBoundaryPreset}
             deleteBoundaryPreset={deleteBoundaryPreset}
             boundaryPreset={boundaryPreset}
+            toUpdateBoundary={toUpdateBoundary}
+            setToUpdateBoundary={setToUpdateBoundary}
             bed={bed}
           />
         </div>
@@ -99,6 +104,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
           boundaryPreset={boundaryPreset}
           setBoundaryPreset={setBoundaryPreset}
           updateBoundaryPreset={updateBoundaryPreset}
+          toUpdateBoundary={toUpdateBoundary}
         />
       </Card>
     </div>

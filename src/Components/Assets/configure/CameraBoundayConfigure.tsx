@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { BedModel } from "../../Facility/models";
 import ButtonV2, { Submit } from "../../Common/components/ButtonV2";
 import TextFormField from "../../Form/FormFields/TextFormField";
@@ -12,6 +11,8 @@ interface CameraBoundaryConfigureProps {
   deleteBoundaryPreset(e: any): void;
   boundaryPreset: any;
   bed: BedModel;
+  toUpdateBoundary: boolean;
+  setToUpdateBoundary(toUpdate: boolean): void;
 }
 
 interface UpdateCameraBoundaryConfigureProps {
@@ -26,12 +27,12 @@ export default function CameraBoundaryConfigure(
 ) {
   const {
     addBoundaryPreset,
-    updateBoundaryPreset,
     deleteBoundaryPreset,
     boundaryPreset,
     bed,
+    toUpdateBoundary,
+    setToUpdateBoundary,
   } = props;
-  const [toUpdate, setToUpdate] = useState<boolean>(false);
   return (
     <>
       {!boundaryPreset && bed?.id && (
@@ -62,9 +63,9 @@ export default function CameraBoundaryConfigure(
               <div className="text-lg">{boundaryPreset.meta.preset_name}</div>
             </div>
           </div>
-          {toUpdate ? (
+          {toUpdateBoundary ? (
             <div>
-              <div className="flex justify-start gap-4 mt-2">
+              {/* <div className="flex justify-start gap-4 mt-2">
                 <div>
                   <ButtonV2
                     variant="primary"
@@ -89,7 +90,7 @@ export default function CameraBoundaryConfigure(
                     Cancel
                   </ButtonV2>
                 </div>
-              </div>
+              </div> */}
             </div>
           ) : (
             <>
@@ -98,7 +99,7 @@ export default function CameraBoundaryConfigure(
                   <ButtonV2
                     variant="primary"
                     onClick={() => {
-                      setToUpdate(true);
+                      setToUpdateBoundary(true);
                     }}
                     id="update-boundary-preset"
                   >

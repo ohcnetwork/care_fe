@@ -47,6 +47,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   );
   const [boundaryPreset, setBoundaryPreset] = useState<any>(null);
   const [refBoundaryPreset, setRefBoundaryPreset] = useState<any>(null); // to reference in case modification of boundary preset is cancelled.
+  const [toUpdateBoundary, setToUpdateBoundary] = useState<boolean>(false);
   const [presets, setPresets] = useState<any[]>([]);
   const dispatch = useDispatch<any>();
 
@@ -179,7 +180,12 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           }
           setPresets(bedAssets);
         }
+      } else {
+        setPresets([]);
+        setBoundaryPreset(null);
+        setRefBoundaryPreset(null);
       }
+      setToUpdateBoundary(false);
     };
     if (bed?.id) getBoundaryBedPreset();
   }, [bed]);
@@ -270,6 +276,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       try {
         if (action == "cancel") {
           setBoundaryPreset(refBoundaryPreset);
+          setToUpdateBoundary(false);
           return;
         }
         const data = {
@@ -288,6 +295,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           setNewPreset("");
           setRefreshPresetsHash(Number(new Date()));
           setBoundaryPreset(null);
+          setToUpdateBoundary(false);
         } else {
           Notification.Error({
             msg: "Failed to modify Boundary Preset",
@@ -441,6 +449,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             addBoundaryPreset={addBoundaryPreset}
             updateBoundaryPreset={updateBoundaryPreset}
             deleteBoundaryPreset={deleteBoundaryPreset}
+            toUpdateBoundary={toUpdateBoundary}
+            setToUpdateBoundary={setToUpdateBoundary}
           />
         </>
       ) : null}

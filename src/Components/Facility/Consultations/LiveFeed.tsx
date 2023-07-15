@@ -54,6 +54,7 @@ const LiveFeed = (props: any) => {
   const boundaryPreset = props.boundaryPreset;
   const setBoundaryPreset = props.setBoundaryPreset;
   const updateBoundaryPreset = props.updateBoundaryPreset;
+  const toUpdateBoundary = props.toUpdateBoundary;
   const { width } = useWindowDimensions();
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
@@ -421,7 +422,6 @@ const LiveFeed = (props: any) => {
                 className="h-full w-full z-10"
                 ref={liveFeedPlayerRef}
               ></video>
-
               {loading && (
                 <div className="absolute right-0 bottom-0 p-4 bg-white bg-opacity-75 rounded-tl">
                   <div className="flex items-center gap-2">
@@ -505,13 +505,15 @@ const LiveFeed = (props: any) => {
                 <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
               </div>
             </div>
-            <UpdateCameraBoundaryConfigure
-              cameraPTZ={cameraPTZ}
-              direction={direction}
-              setDirection={setDirection}
-              changeDirectionalBoundary={changeDirectionalBoundary}
-              updateBoundaryPreset={updateBoundaryPreset}
-            />
+            {toUpdateBoundary && boundaryPreset && (
+              <UpdateCameraBoundaryConfigure
+                cameraPTZ={cameraPTZ}
+                direction={direction}
+                setDirection={setDirection}
+                changeDirectionalBoundary={changeDirectionalBoundary}
+                updateBoundaryPreset={updateBoundaryPreset}
+              />
+            )}
           </div>
 
           <div className="flex flex-col mx-4 max-w-sm">
