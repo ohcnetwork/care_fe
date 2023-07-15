@@ -13,6 +13,8 @@ export type SlideOverProps = {
   dialogClass?: string;
   title?: React.ReactNode;
   onlyChild?: boolean;
+  backdropBlur?: boolean;
+  closeOnBackdropClick?: boolean;
   onCloseClick?: () => void;
 };
 
@@ -24,6 +26,8 @@ export default function SlideOver({
   dialogClass,
   title,
   onlyChild = false,
+  backdropBlur = true,
+  closeOnBackdropClick = true,
   onCloseClick,
 }: SlideOverProps) {
   const directionClasses = {
@@ -55,7 +59,12 @@ export default function SlideOver({
 
   return (
     <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={setOpen}>
+      <Dialog
+        as="div"
+        className="relative z-10"
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        onClose={closeOnBackdropClick ? setOpen : () => {}}
+      >
         <Transition.Child
           as={Fragment}
           enter="ease-in-out duration-500"
@@ -65,7 +74,12 @@ export default function SlideOver({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-all" />
+          <div
+            className={classNames(
+              "fixed transition-all",
+              backdropBlur && "bg-black/75 backdrop-blur-sm inset-0"
+            )}
+          />
         </Transition.Child>
         <Transition.Child
           as={Fragment}

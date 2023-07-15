@@ -57,7 +57,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
                 id="location"
                 type="text"
                 value={newPreset}
-                className="mt-2"
+                className="mt-1"
                 onChange={(e) => setNewPreset(e.value)}
                 error=""
               />

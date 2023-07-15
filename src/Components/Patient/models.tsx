@@ -57,6 +57,7 @@ export interface PatientModel {
   last_consultation?: ConsultationModel;
   address?: string;
   permanent_address?: string;
+  sameAddress?: boolean;
   village?: string;
   pincode?: number;
   contact_with_confirmed_carrier?: boolean;
@@ -248,6 +249,11 @@ export interface SampleListModel {
   fast_track?: string;
 }
 
+export interface DailyRoundsOutput {
+  name: string;
+  quantity: number;
+}
+
 export interface DailyRoundsModel {
   ventilator_spo2?: number;
   spo2?: string;
@@ -273,6 +279,7 @@ export interface DailyRoundsModel {
   other_symptoms?: string;
   admitted_to?: string;
   patient_category?: PatientCategory;
+  output?: DailyRoundsOutput;
   recommend_discharge?: boolean;
   created_date?: string;
   modified_date?: string;
