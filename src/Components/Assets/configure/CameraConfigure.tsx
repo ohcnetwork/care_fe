@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { AssetData } from "../AssetTypes";
 import LiveFeed from "../../Facility/Consultations/LiveFeed";
 import { BedSelect } from "../../Common/BedSelect";
@@ -46,6 +46,16 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     toUpdateBoundary,
     setToUpdateBoundary,
   } = props;
+
+  const updateBoundaryRef = useRef<any>(null);
+
+  const scrollToUpdateBoundary = () => {
+    if (updateBoundaryRef.current)
+      updateBoundaryRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      } as ScrollIntoViewOptions);
+  };
   return (
     <div className="mb-5">
       <Card className="mt-4">
@@ -92,6 +102,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
             toUpdateBoundary={toUpdateBoundary}
             setToUpdateBoundary={setToUpdateBoundary}
             bed={bed}
+            scrollToUpdateBoundary={scrollToUpdateBoundary}
           />
         </div>
       </Card>
@@ -105,6 +116,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
           setBoundaryPreset={setBoundaryPreset}
           updateBoundaryPreset={updateBoundaryPreset}
           toUpdateBoundary={toUpdateBoundary}
+          updateBoundaryRef={updateBoundaryRef}
         />
       </Card>
     </div>

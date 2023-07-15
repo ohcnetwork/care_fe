@@ -1,4 +1,5 @@
 import { BedModel } from "../../Facility/models";
+import { flushSync } from "react-dom";
 import ButtonV2, { Submit } from "../../Common/components/ButtonV2";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import Card from "../../../CAREUI/display/Card";
@@ -13,6 +14,7 @@ interface CameraBoundaryConfigureProps {
   bed: BedModel;
   toUpdateBoundary: boolean;
   setToUpdateBoundary(toUpdate: boolean): void;
+  scrollToUpdateBoundary(): void;
 }
 
 interface UpdateCameraBoundaryConfigureProps {
@@ -21,6 +23,7 @@ interface UpdateCameraBoundaryConfigureProps {
   setDirection(direction: direction): void;
   changeDirectionalBoundary(action: "expand" | "shrink"): void;
   updateBoundaryPreset(e: any): void;
+  updateBoundaryRef: any;
 }
 export default function CameraBoundaryConfigure(
   props: CameraBoundaryConfigureProps
@@ -32,6 +35,7 @@ export default function CameraBoundaryConfigure(
     bed,
     toUpdateBoundary,
     setToUpdateBoundary,
+    scrollToUpdateBoundary,
   } = props;
   return (
     <>
@@ -99,7 +103,10 @@ export default function CameraBoundaryConfigure(
                   <ButtonV2
                     variant="primary"
                     onClick={() => {
-                      setToUpdateBoundary(true);
+                      flushSync(() => {
+                        setToUpdateBoundary(true);
+                      });
+                      scrollToUpdateBoundary();
                     }}
                     id="update-boundary-preset"
                   >
@@ -133,10 +140,11 @@ export function UpdateCameraBoundaryConfigure(
     setDirection,
     changeDirectionalBoundary,
     updateBoundaryPreset,
+    updateBoundaryRef,
   } = props;
 
   return (
-    <div className="mt-4 max-w-lg">
+    <div className="mt-4 max-w-lg" ref={updateBoundaryRef}>
       <Card>
         <div className="flex flex-col space-y-4">
           <div>

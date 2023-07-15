@@ -55,6 +55,7 @@ const LiveFeed = (props: any) => {
   const setBoundaryPreset = props.setBoundaryPreset;
   const updateBoundaryPreset = props.updateBoundaryPreset;
   const toUpdateBoundary = props.toUpdateBoundary;
+  const updateBoundaryRef = props.updateBoundaryRef;
   const { width } = useWindowDimensions();
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
@@ -512,6 +513,7 @@ const LiveFeed = (props: any) => {
                 setDirection={setDirection}
                 changeDirectionalBoundary={changeDirectionalBoundary}
                 updateBoundaryPreset={updateBoundaryPreset}
+                updateBoundaryRef={updateBoundaryRef}
               />
             )}
           </div>
