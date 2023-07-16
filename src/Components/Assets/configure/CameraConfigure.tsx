@@ -21,9 +21,9 @@ interface CameraConfigureProps {
   isLoading: boolean;
   boundaryPreset: any;
   setBoundaryPreset: (preset: any) => void;
-  addBoundaryPreset(e: any): void;
-  updateBoundaryPreset(e: any): void;
-  deleteBoundaryPreset(e: any): void;
+  addBoundaryPreset: (e: any) => void;
+  updateBoundaryPreset: (e: any) => void;
+  deleteBoundaryPreset: () => void;
   toUpdateBoundary: boolean;
   setToUpdateBoundary(toUpdate: boolean): void;
 }

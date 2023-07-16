@@ -1,15 +1,17 @@
+import { useState } from "react";
 import { BedModel } from "../../Facility/models";
 import { flushSync } from "react-dom";
 import ButtonV2, { Submit } from "../../Common/components/ButtonV2";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import Card from "../../../CAREUI/display/Card";
+import ConfirmDialog from "../../Common/ConfirmDialog";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 type direction = "left" | "right" | "up" | "down" | null;
 
 interface CameraBoundaryConfigureProps {
   addBoundaryPreset(e: any): void;
   updateBoundaryPreset(action: any): void;
-  deleteBoundaryPreset(e: any): void;
+  deleteBoundaryPreset(): void;
   boundaryPreset: any;
   bed: BedModel;
   toUpdateBoundary: boolean;
@@ -24,6 +26,7 @@ interface UpdateCameraBoundaryConfigureProps {
   changeDirectionalBoundary(action: "expand" | "shrink"): void;
   updateBoundaryPreset(e: any): void;
   updateBoundaryRef: any;
+  previewBoundary: () => void;
 }
 export default function CameraBoundaryConfigure(
   props: CameraBoundaryConfigureProps
@@ -37,8 +40,33 @@ export default function CameraBoundaryConfigure(
     setToUpdateBoundary,
     scrollToUpdateBoundary,
   } = props;
+  const [toDeleteBoundary, setToDeleteBoundary] = useState<any>(null);
   return (
     <>
+      {toDeleteBoundary && (
+        <ConfirmDialog
+          show
+          title="Are you sure you want to delete the boundary preset?"
+          description={
+            <span>
+              <p>
+                Boundary preset:{" "}
+                <strong>{toDeleteBoundary.meta.preset_name}</strong>
+              </p>
+              <p>
+                Bed: <strong>{toDeleteBoundary.bed_object.name}</strong>
+              </p>
+            </span>
+          }
+          action="Delete"
+          variant="danger"
+          onClose={() => setToDeleteBoundary(null)}
+          onConfirm={() => {
+            deleteBoundaryPreset();
+            setToDeleteBoundary(null);
+          }}
+        />
+      )}
       {!boundaryPreset && bed?.id && (
         <div className="flex flex-col justify-between">
           <div className="text-lg font-semibold">Add Boundary Preset</div>
@@ -116,7 +144,9 @@ export default function CameraBoundaryConfigure(
                 <div>
                   <ButtonV2
                     variant="danger"
-                    onClick={deleteBoundaryPreset}
+                    onClick={() => {
+                      setToDeleteBoundary(boundaryPreset);
+                    }}
                     id="delete-boundary-preset"
                   >
                     Delete
@@ -141,6 +171,7 @@ export function UpdateCameraBoundaryConfigure(
     changeDirectionalBoundary,
     updateBoundaryPreset,
     updateBoundaryRef,
+    previewBoundary,
   } = props;
 
   return (
@@ -252,7 +283,7 @@ export function UpdateCameraBoundaryConfigure(
               variant="primary"
               size="small"
               onClick={() => {
-                console.log("preview");
+                previewBoundary();
               }}
               id="preview-update-boundary-preset"
             >

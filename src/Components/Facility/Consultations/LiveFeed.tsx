@@ -232,6 +232,34 @@ const LiveFeed = (props: any) => {
     });
   };
 
+  const runFunctionWithDelay = (func: () => any, delay: number) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(func());
+      }, delay);
+    });
+  };
+  const previewBoundary = async () => {
+    if (boundaryPreset?.meta?.range) {
+      const { max_x, max_y, min_x, min_y } = boundaryPreset?.meta?.range;
+      const edegs: any[] = [
+        { x: max_x, y: (max_y + min_y) / 2, zoom: 0.2 },
+        { x: (max_x + min_x) / 2, y: max_y, zoom: 0.2 },
+        { x: min_x, y: (max_y + min_y) / 2, zoom: 0.2 },
+        { x: (max_x + min_x) / 2, y: min_y, zoom: 0.2 },
+      ];
+      for (const edge of edegs) {
+        await runFunctionWithDelay(
+          () =>
+            absoluteMove(edge, {
+              onSuccess: () => setLoading(undefined),
+            }),
+          3000
+        );
+      }
+    }
+  };
+
   useEffect(() => {
     if (cameraAsset?.hostname) {
       fetchCameraPresets();
@@ -514,6 +542,7 @@ const LiveFeed = (props: any) => {
                 changeDirectionalBoundary={changeDirectionalBoundary}
                 updateBoundaryPreset={updateBoundaryPreset}
                 updateBoundaryRef={updateBoundaryRef}
+                previewBoundary={previewBoundary}
               />
             )}
           </div>
