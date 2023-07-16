@@ -551,6 +551,7 @@ const LiveFeed = (props: any) => {
                 updateBoundaryRef={updateBoundaryRef}
                 previewBoundary={previewBoundary}
                 isPreview={isPreview}
+                boundaryPreset={boundaryPreset}
               />
             )}
           </div>

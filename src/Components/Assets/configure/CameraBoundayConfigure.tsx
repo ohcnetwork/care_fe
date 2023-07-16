@@ -28,6 +28,7 @@ interface UpdateCameraBoundaryConfigureProps {
   updateBoundaryRef: any;
   previewBoundary: () => void;
   isPreview: boolean;
+  boundaryPreset: any;
 }
 export default function CameraBoundaryConfigure(
   props: CameraBoundaryConfigureProps
@@ -140,18 +141,21 @@ export function UpdateCameraBoundaryConfigure(
     updateBoundaryRef,
     previewBoundary,
     isPreview,
+    boundaryPreset,
   } = props;
 
   return (
-    <div className="mt-4 max-w-lg" ref={updateBoundaryRef}>
-      <Card>
+    <div className="mt-4 flex" ref={updateBoundaryRef}>
+      <Card className="flex-initial">
         <div className="flex flex-col space-y-4">
           <div>
             <label id="asset-name">Name</label>
-            <div className="text-lg font-semibold">Boundary Preset</div>
+            <div className="text-lg font-semibold">
+              {boundaryPreset?.meta?.preset_name}
+            </div>
           </div>
-          <div className="grid gap-2 grid-cols-3">
-            <div className="grid grid-cols-3">
+          <div className="flex space-x-8">
+            <div className="flex-initial grid grid-cols-3">
               {[
                 false,
                 "up",
@@ -187,7 +191,8 @@ export function UpdateCameraBoundaryConfigure(
                 return out;
               })}
             </div>
-            <div className="flex flex-col justify-end gap-2">
+            <div className="flex-initial flex flex-col justify-center space-y-2 items-center">
+              {" "}
               {[cameraPTZ[4], cameraPTZ[5], cameraPTZ[6]].map(
                 (option, index) => {
                   const shortcutKeyDescription =
@@ -210,7 +215,7 @@ export function UpdateCameraBoundaryConfigure(
                         {option.icon ? (
                           <CareIcon className={`care-${option.icon}`} />
                         ) : (
-                          <span className="px-2 font-bold h-full w-8 flex items-center justify-center ">
+                          <span className="font-bold flex items-center justify-center ">
                             {option.value}x
                           </span>
                         )}
@@ -221,31 +226,30 @@ export function UpdateCameraBoundaryConfigure(
                 }
               )}
             </div>
-            <div className="flex flex-col justify-center gap-2">
-              <div>
-                <ButtonV2
-                  size="small"
-                  variant="primary"
-                  onClick={() => {
-                    changeDirectionalBoundary("expand");
-                  }}
-                  disabled={isPreview}
-                >
-                  Expand
-                </ButtonV2>
-              </div>
-              <div>
-                <ButtonV2
-                  size="small"
-                  variant="primary"
-                  onClick={() => {
-                    changeDirectionalBoundary("shrink");
-                  }}
-                  disabled={isPreview}
-                >
-                  Shrink
-                </ButtonV2>
-              </div>
+            <div className="flex-initial flex flex-col justify-center space-y-2 items-center">
+              <ButtonV2
+                size="small"
+                variant="primary"
+                onClick={() => {
+                  changeDirectionalBoundary("expand");
+                }}
+                disabled={isPreview}
+                className="w-full"
+              >
+                Expand
+              </ButtonV2>
+
+              <ButtonV2
+                size="small"
+                variant="primary"
+                onClick={() => {
+                  changeDirectionalBoundary("shrink");
+                }}
+                disabled={isPreview}
+                className="w-full"
+              >
+                Shrink
+              </ButtonV2>
             </div>
           </div>
           <div className="flex flex-row justify-center gap-2">
