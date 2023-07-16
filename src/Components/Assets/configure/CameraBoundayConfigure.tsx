@@ -2,7 +2,6 @@ import { useState } from "react";
 import { BedModel } from "../../Facility/models";
 import { flushSync } from "react-dom";
 import ButtonV2, { Submit } from "../../Common/components/ButtonV2";
-import TextFormField from "../../Form/FormFields/TextFormField";
 import Card from "../../../CAREUI/display/Card";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
@@ -67,92 +66,54 @@ export default function CameraBoundaryConfigure(
           }}
         />
       )}
-      {!boundaryPreset && bed?.id && (
-        <div className="flex flex-col justify-between">
-          <div className="text-lg font-semibold">Add Boundary Preset</div>
-          <form onSubmit={addBoundaryPreset} className="mt-2">
-            <label id="asset-type">Name</label>
-            <TextFormField
-              name="boundary_preset_name"
-              id="boundary-preset-name"
-              value={"hello"}
-              onChange={(e) => console.log(e)}
-              className=""
-              error=""
-            />
-            <div className="flex justify-start mt-4">
-              <Submit label="Add Boundary" />
-            </div>
-          </form>
-        </div>
-      )}
-      {boundaryPreset && bed?.id && (
+      {bed?.id && (
         <div className="flex flex-col justify-between">
           <div>
-            <div className="text-lg font-semibold">Boundary Preset</div>
+            <div className="text-lg font-semibold">
+              {`${!boundaryPreset ? "Add" : ""}`} Boundary Preset
+            </div>
             <div className="mt-2">
               <label id="asset-name">Name</label>
-              <div className="text-lg">{boundaryPreset.meta.preset_name}</div>
+              <div className="text-lg">{`${bed?.name} boundary`}</div>
             </div>
           </div>
-          {toUpdateBoundary ? (
+          {!boundaryPreset ? (
             <div>
-              {/* <div className="flex justify-start gap-4 mt-2">
-                <div>
-                  <ButtonV2
-                    variant="primary"
-                    onClick={() => {
-                      updateBoundaryPreset("confirm");
-                    }}
-                    id="confirm-update-boundary-preset"
-                  >
-                    Confirm
-                  </ButtonV2>
-                </div>
-                <div>
-                  <ButtonV2
-                    variant="secondary"
-                    border={true}
-                    onClick={() => {
-                      updateBoundaryPreset("cancel");
-                      setToUpdate(false);
-                    }}
-                    id="cancel-modify-boundary-preset"
-                  >
-                    Cancel
-                  </ButtonV2>
-                </div>
-              </div> */}
+              <form onSubmit={addBoundaryPreset} className="mt-2">
+                <Submit label="Add Boundary" />
+              </form>
             </div>
           ) : (
             <>
-              <div className="flex justify-start mt-4 gap-4">
-                <div>
-                  <ButtonV2
-                    variant="primary"
-                    onClick={() => {
-                      flushSync(() => {
-                        setToUpdateBoundary(true);
-                      });
-                      scrollToUpdateBoundary();
-                    }}
-                    id="update-boundary-preset"
-                  >
-                    Update
-                  </ButtonV2>
+              {!toUpdateBoundary && (
+                <div className="flex justify-start mt-4 gap-4">
+                  <div>
+                    <ButtonV2
+                      variant="primary"
+                      onClick={() => {
+                        flushSync(() => {
+                          setToUpdateBoundary(true);
+                        });
+                        scrollToUpdateBoundary();
+                      }}
+                      id="update-boundary-preset"
+                    >
+                      Update
+                    </ButtonV2>
+                  </div>
+                  <div>
+                    <ButtonV2
+                      variant="danger"
+                      onClick={() => {
+                        setToDeleteBoundary(boundaryPreset);
+                      }}
+                      id="delete-boundary-preset"
+                    >
+                      Delete
+                    </ButtonV2>
+                  </div>
                 </div>
-                <div>
-                  <ButtonV2
-                    variant="danger"
-                    onClick={() => {
-                      setToDeleteBoundary(boundaryPreset);
-                    }}
-                    id="delete-boundary-preset"
-                  >
-                    Delete
-                  </ButtonV2>
-                </div>
-              </div>
+              )}
             </>
           )}
         </div>

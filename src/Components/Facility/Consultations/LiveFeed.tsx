@@ -605,44 +605,47 @@ const LiveFeed = (props: any) => {
                   </>
                 ) : (
                   <>
-                    {bedPresets?.map((preset: any, index: number) => (
-                      <div className="flex flex-col">
-                        <button
-                          key={preset.id}
-                          className="flex flex-col bg-green-100 border border-white rounded-t-md p-2 text-black  hover:bg-green-500 hover:text-white truncate"
-                          onClick={() => {
-                            setLoading("Moving");
-                            gotoBedPreset(preset);
-                            setCurrentPreset(preset);
-                            getBedPresets(cameraAsset?.id);
-                            fetchCameraPresets();
-                          }}
-                        >
-                          <span className="justify-start text-xs font-semibold">
-                            {preset.bed_object.name}
-                          </span>
-                          <span className="mx-auto">
-                            {preset.meta.preset_name
-                              ? preset.meta.preset_name
-                              : `Unnamed Preset ${index + 1}`}
-                          </span>
-                        </button>
-                        <div className="flex">
-                          <button
-                            onClick={() => setToUpdate(preset)}
-                            className="text-green-800 text-sm py-1 bg-green-200 w-1/2 justify-center items-center gap-2 flex hover:bg-green-800 hover:text-green-200 "
-                          >
-                            <i className="fa-solid fa-pencil"></i>
-                          </button>
-                          <button
-                            onClick={() => setToDelete(preset)}
-                            className="text-red-800 text-sm py-1 bg-red-200 w-1/2 justify-center items-center gap-2 flex hover:bg-red-800 hover:text-red-200 "
-                          >
-                            <i className="fa-solid fa-trash-can"></i>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                    {bedPresets?.map(
+                      (preset: any, index: number) =>
+                        preset?.meta?.type != "boundary" && (
+                          <div className="flex flex-col">
+                            <button
+                              key={preset.id}
+                              className="flex flex-col bg-green-100 border border-white rounded-t-md p-2 text-black  hover:bg-green-500 hover:text-white truncate"
+                              onClick={() => {
+                                setLoading("Moving");
+                                gotoBedPreset(preset);
+                                setCurrentPreset(preset);
+                                getBedPresets(cameraAsset?.id);
+                                fetchCameraPresets();
+                              }}
+                            >
+                              <span className="justify-start text-xs font-semibold">
+                                {preset.bed_object.name}
+                              </span>
+                              <span className="mx-auto">
+                                {preset.meta.preset_name
+                                  ? preset.meta.preset_name
+                                  : `Unnamed Preset ${index + 1}`}
+                              </span>
+                            </button>
+                            <div className="flex">
+                              <button
+                                onClick={() => setToUpdate(preset)}
+                                className="text-green-800 text-sm py-1 bg-green-200 w-1/2 justify-center items-center gap-2 flex hover:bg-green-800 hover:text-green-200 "
+                              >
+                                <i className="fa-solid fa-pencil"></i>
+                              </button>
+                              <button
+                                onClick={() => setToDelete(preset)}
+                                className="text-red-800 text-sm py-1 bg-red-200 w-1/2 justify-center items-center gap-2 flex hover:bg-red-800 hover:text-red-200 "
+                              >
+                                <i className="fa-solid fa-trash-can"></i>
+                              </button>
+                            </div>
+                          </div>
+                        )
+                    )}
                   </>
                 )}
               </div>

@@ -241,7 +241,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       const range = calcBoundary(presets);
       const meta = {
         type: "boundary",
-        preset_name: `${bed.name}-boundary`,
+        preset_name: `${bed.name} boundary`,
         bed_id: bed.id,
         error: presetData.data.error,
         utcTime: presetData.data.utcTime,
