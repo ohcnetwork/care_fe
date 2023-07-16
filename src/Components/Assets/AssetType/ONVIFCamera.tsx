@@ -48,6 +48,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [boundaryPreset, setBoundaryPreset] = useState<any>(null);
   const [refBoundaryPreset, setRefBoundaryPreset] = useState<any>(null); // to reference in case modification of boundary preset is cancelled.
   const [toUpdateBoundary, setToUpdateBoundary] = useState<boolean>(false);
+  const [loadingAddBoundaryPreset, setLoadingAddBoundaryPreset] =
+    useState<boolean>(false);
   const [presets, setPresets] = useState<any[]>([]);
   const dispatch = useDispatch<any>();
 
@@ -226,7 +228,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     e.preventDefault();
     const config = getCameraConfig(asset as AssetData);
     try {
-      setLoadingAddPreset(true);
+      setLoadingAddBoundaryPreset(true);
 
       //delete this
       // const presetData = {
@@ -268,7 +270,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         msg: "Something went wrong..!",
       });
     }
-    setLoadingAddPreset(false);
+    setLoadingAddBoundaryPreset(false);
   };
 
   const updateBoundaryPreset = async (action: any) => {
@@ -451,6 +453,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             deleteBoundaryPreset={deleteBoundaryPreset}
             toUpdateBoundary={toUpdateBoundary}
             setToUpdateBoundary={setToUpdateBoundary}
+            loadingAddBoundaryPreset={loadingAddBoundaryPreset}
           />
         </>
       ) : null}

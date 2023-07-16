@@ -26,6 +26,7 @@ interface CameraConfigureProps {
   deleteBoundaryPreset: () => void;
   toUpdateBoundary: boolean;
   setToUpdateBoundary(toUpdate: boolean): void;
+  loadingAddBoundaryPreset: boolean;
 }
 export default function CameraConfigure(props: CameraConfigureProps) {
   const {
@@ -45,6 +46,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     deleteBoundaryPreset,
     toUpdateBoundary,
     setToUpdateBoundary,
+    loadingAddBoundaryPreset,
   } = props;
 
   const updateBoundaryRef = useRef<any>(null);
@@ -103,6 +105,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
             setToUpdateBoundary={setToUpdateBoundary}
             bed={bed}
             scrollToUpdateBoundary={scrollToUpdateBoundary}
+            loadingAddBoundaryPreset={loadingAddBoundaryPreset}
           />
         </div>
       </Card>

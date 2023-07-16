@@ -16,6 +16,7 @@ interface CameraBoundaryConfigureProps {
   toUpdateBoundary: boolean;
   setToUpdateBoundary(toUpdate: boolean): void;
   scrollToUpdateBoundary(): void;
+  loadingAddBoundaryPreset: boolean;
 }
 
 interface UpdateCameraBoundaryConfigureProps {
@@ -26,6 +27,7 @@ interface UpdateCameraBoundaryConfigureProps {
   updateBoundaryPreset(e: any): void;
   updateBoundaryRef: any;
   previewBoundary: () => void;
+  isPreview: boolean;
 }
 export default function CameraBoundaryConfigure(
   props: CameraBoundaryConfigureProps
@@ -38,6 +40,7 @@ export default function CameraBoundaryConfigure(
     toUpdateBoundary,
     setToUpdateBoundary,
     scrollToUpdateBoundary,
+    loadingAddBoundaryPreset,
   } = props;
   const [toDeleteBoundary, setToDeleteBoundary] = useState<any>(null);
   return (
@@ -80,7 +83,10 @@ export default function CameraBoundaryConfigure(
           {!boundaryPreset ? (
             <div>
               <form onSubmit={addBoundaryPreset} className="mt-2">
-                <Submit label="Add Boundary" />
+                <Submit
+                  label="Add Boundary"
+                  disabled={loadingAddBoundaryPreset}
+                />
               </form>
             </div>
           ) : (
@@ -133,6 +139,7 @@ export function UpdateCameraBoundaryConfigure(
     updateBoundaryPreset,
     updateBoundaryRef,
     previewBoundary,
+    isPreview,
   } = props;
 
   return (
@@ -199,7 +206,7 @@ export function UpdateCameraBoundaryConfigure(
                         className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 tooltip"
                         onClick={option.callback}
                       >
-                        {/* <span className="sr-only">{option.label}</span> */}
+                        <span className="sr-only">{option.label}</span>
                         {option.icon ? (
                           <CareIcon className={`care-${option.icon}`} />
                         ) : (
@@ -222,6 +229,7 @@ export function UpdateCameraBoundaryConfigure(
                   onClick={() => {
                     changeDirectionalBoundary("expand");
                   }}
+                  disabled={isPreview}
                 >
                   Expand
                 </ButtonV2>
@@ -233,6 +241,7 @@ export function UpdateCameraBoundaryConfigure(
                   onClick={() => {
                     changeDirectionalBoundary("shrink");
                   }}
+                  disabled={isPreview}
                 >
                   Shrink
                 </ButtonV2>
@@ -247,6 +256,7 @@ export function UpdateCameraBoundaryConfigure(
                 previewBoundary();
               }}
               id="preview-update-boundary-preset"
+              disabled={isPreview}
             >
               Preview
             </ButtonV2>
@@ -257,6 +267,7 @@ export function UpdateCameraBoundaryConfigure(
                 updateBoundaryPreset("confirm");
               }}
               id="confirm-update-boundary-preset"
+              disabled={isPreview}
             >
               Confirm
             </ButtonV2>
@@ -268,6 +279,7 @@ export function UpdateCameraBoundaryConfigure(
                 updateBoundaryPreset("cancel");
               }}
               id="cancel-modify-boundary-preset"
+              disabled={isPreview}
             >
               Cancel
             </ButtonV2>

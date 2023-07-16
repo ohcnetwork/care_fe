@@ -49,6 +49,7 @@ const LiveFeed = (props: any) => {
   });
   const [toDelete, setToDelete] = useState<any>(null);
   const [toUpdate, setToUpdate] = useState<any>(null);
+  const [isPreview, setIsPreview] = useState<boolean>(false);
   const [direction, setDirection] = useState<direction>(null);
   const [_isFullscreen, setFullscreen] = useFullscreen();
   const boundaryPreset = props.boundaryPreset;
@@ -184,18 +185,22 @@ const LiveFeed = (props: any) => {
     if (direction == "left") {
       position.x = min_x;
       position.y = (min_y + max_y) / 2;
+      setLoading("Moving to Left Boundary");
     }
     if (direction == "right") {
       position.x = max_x;
       position.y = (min_y + max_y) / 2;
+      setLoading("Moving to Right Boundary");
     }
     if (direction == "up") {
       position.x = (min_x + max_x) / 2;
       position.y = min_y;
+      setLoading("Moving to Top Boundary");
     }
     if (direction == "down") {
       position.x = (min_x + max_x) / 2;
       position.y = max_y;
+      setLoading("Moving to Bottom Boundary");
     }
     absoluteMove(position, {
       onSuccess: () => setLoading(undefined),
@@ -213,14 +218,11 @@ const LiveFeed = (props: any) => {
     const delta = 0.1 / Math.max(1, precision);
     if (direction == "left") {
       range.min_x = action == "expand" ? min_x - delta : min_x + delta;
-    }
-    if (direction == "right") {
+    } else if (direction == "right") {
       range.max_x = action == "expand" ? max_x + delta : max_x - delta;
-    }
-    if (direction == "up") {
+    } else if (direction == "up") {
       range.min_y = action == "expand" ? min_y - delta : min_y + delta;
-    }
-    if (direction == "down") {
+    } else if (direction == "down") {
       range.max_y = action == "expand" ? max_y + delta : max_y - delta;
     }
     setBoundaryPreset({
@@ -230,6 +232,7 @@ const LiveFeed = (props: any) => {
         range: range,
       },
     });
+    setLoading(undefined);
   };
 
   const runFunctionWithDelay = (func: () => any, delay: number) => {
@@ -241,6 +244,8 @@ const LiveFeed = (props: any) => {
   };
   const previewBoundary = async () => {
     if (boundaryPreset?.meta?.range) {
+      setIsPreview(true);
+      setLoading("Previewing Boundary");
       const { max_x, max_y, min_x, min_y } = boundaryPreset?.meta?.range;
       const edegs: any[] = [
         { x: max_x, y: (max_y + min_y) / 2, zoom: 0.2 },
@@ -257,6 +262,8 @@ const LiveFeed = (props: any) => {
           3000
         );
       }
+      setIsPreview(false);
+      setLoading(undefined);
     }
   };
 
@@ -543,6 +550,7 @@ const LiveFeed = (props: any) => {
                 updateBoundaryPreset={updateBoundaryPreset}
                 updateBoundaryRef={updateBoundaryRef}
                 previewBoundary={previewBoundary}
+                isPreview={isPreview}
               />
             )}
           </div>
