@@ -123,7 +123,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             bedAssets.data.results = bedAssets.data.results.filter(
               (bedAsset: any) => bedAsset.meta.type !== "boundary"
             );
-            if (bedAssets?.data?.results?.length) {
+            if (bedAssets.data?.results?.length) {
               const { camera_access_key } =
                 bedAssets.data.results[0].asset_object.meta;
               const config = camera_access_key.split(":");

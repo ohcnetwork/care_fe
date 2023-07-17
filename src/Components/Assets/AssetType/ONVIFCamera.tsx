@@ -236,32 +236,38 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       //     utcTime: "2021-09-09T09:09:09.000Z",
       //   },
       // };
-      const presetData = await axios.get(
-        `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
-      );
-      const range = calcBoundary(presets);
-      const meta = {
-        type: "boundary",
-        preset_name: `${bed.name} boundary`,
-        bed_id: bed.id,
-        error: presetData.data.error,
-        utcTime: presetData.data.utcTime,
-        range: range,
-      };
-      const res = await Promise.resolve(
-        dispatch(createAssetBed({ meta: meta }, assetId, bed?.id as string))
-      );
-      if (res?.status === 201) {
-        Notification.Success({
-          msg: "Boundary Preset Added Successfully",
-        });
-        setBed({});
-        setNewPreset("");
-        setRefreshPresetsHash(Number(new Date()));
-        setBoundaryPreset(null);
+      if (bed?.id) {
+        const presetData = await axios.get(
+          `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
+        );
+        const range = calcBoundary(presets);
+        const meta = {
+          type: "boundary",
+          preset_name: `${bed?.name} boundary`,
+          bed_id: bed?.id,
+          error: presetData.data.error,
+          utcTime: presetData.data.utcTime,
+          range: range,
+        };
+        const res = await Promise.resolve(
+          dispatch(createAssetBed({ meta: meta }, assetId, bed?.id as string))
+        );
+        if (res?.status === 201) {
+          Notification.Success({
+            msg: "Boundary Preset Added Successfully",
+          });
+          setBed({});
+          setNewPreset("");
+          setRefreshPresetsHash(Number(new Date()));
+          setBoundaryPreset(null);
+        } else {
+          Notification.Error({
+            msg: "Failed to add Boundary Preset",
+          });
+        }
       } else {
         Notification.Error({
-          msg: "Failed to add Boundary Preset",
+          msg: "Please select a bed to add Boundary Preset",
         });
       }
     } catch (e) {
