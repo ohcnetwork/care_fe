@@ -358,8 +358,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       setLoading(option.loadingLabel);
       let payLoad = getPTZPayload(option.action, precision, value);
       if (boundaryPreset?.meta?.range && cameraState) {
-        console.log("inside check", cameraState);
-
         const range = boundaryPreset.meta.range;
         if (option.action == "up" && cameraState.y + payLoad.y > range.max_y) {
           Notification.Error({ msg: "Cannot move beyond boundary" });

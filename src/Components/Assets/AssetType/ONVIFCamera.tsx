@@ -53,16 +53,33 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [presets, setPresets] = useState<any[]>([]);
   const dispatch = useDispatch<any>();
 
+  const mapZoomToBuffer = (zoom: number) => {
+    interface bufferAtZoom {
+      [key: string]: number;
+    }
+    const bufferAtMaxZoom: bufferAtZoom = {
+      "0.3": 0.5,
+      "0.4": 0.25,
+      "0.5": 0.125,
+    };
+    let buffer = 0;
+    Object.keys(bufferAtMaxZoom).forEach((key: string) => {
+      if (zoom <= Number(key)) {
+        buffer = bufferAtMaxZoom[key];
+      }
+    });
+    return buffer !== 0 ? buffer : 0.0625;
+  };
+
   const calcBoundary = (presets: any[]) => {
     const INT_MAX = 3;
-
-    const bufferArray: number[] = [0.5, 0.25, 0.125, 0.0625];
     const boundary: any = {
       max_x: -INT_MAX,
       min_x: INT_MAX,
       max_y: -INT_MAX,
       min_y: INT_MAX,
     };
+
     const edgePresetsZoom: any = {
       max_x: 0,
       min_x: 0,
@@ -93,30 +110,12 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     });
     Object.keys(edgePresetsZoom).forEach((key: string) => {
       const zoom = edgePresetsZoom[key];
-      if (zoom < 0.3) {
-        if (key == "max_x" || key == "max_y") {
-          boundary[key] = boundary[key] + bufferArray[0];
-        } else {
-          boundary[key] = boundary[key] - bufferArray[0];
-        }
-      } else if (zoom >= 0.3 && zoom < 0.4) {
-        if (key == "max_x" || key == "max_y") {
-          boundary[key] = boundary[key] + bufferArray[1];
-        } else {
-          boundary[key] = boundary[key] - bufferArray[1];
-        }
-      } else if (zoom >= 0.4 && zoom < 0.5) {
-        if (key == "max_x" || key == "max_y") {
-          boundary[key] = boundary[key] + bufferArray[2];
-        } else {
-          boundary[key] = boundary[key] - bufferArray[2];
-        }
-      } else if (zoom >= 0.5) {
-        if (key == "max_x" || key == "max_y") {
-          boundary[key] = boundary[key] + bufferArray[3];
-        } else {
-          boundary[key] = boundary[key] - bufferArray[3];
-        }
+      const buffer = mapZoomToBuffer(zoom);
+
+      if (key == "max_x" || key == "max_y") {
+        boundary[key] = boundary[key] + buffer;
+      } else {
+        boundary[key] = boundary[key] - buffer;
       }
     });
     if (boundary.max_x <= boundary.min_x || boundary.max_y <= boundary.min_y) {
