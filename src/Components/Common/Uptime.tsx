@@ -137,10 +137,15 @@ export default function Uptime(props: { assetId: string }) {
   useEffect(() => {
     handleResize();
     fetchData();
+    setSummary([1, 2, 3]);
   }, [props.assetId, fetchData]);
 
   if (loading) {
-    return <p>Loading status...</p>;
+    return (
+      <div className="mt-8 flex flex-col bg-white w-full sm:rounded-lg shadow-sm p-4">
+        <p>Loading status...</p>
+      </div>
+    );
   } else if (summary) {
     return (
       <div className="mt-8 flex flex-col bg-white w-full sm:rounded-lg shadow-sm p-4">
@@ -217,6 +222,10 @@ export default function Uptime(props: { assetId: string }) {
       </div>
     );
   } else {
-    return <p>No status information available.</p>;
+    return (
+      <div className="mt-8 flex flex-col bg-white w-full sm:rounded-lg shadow-sm p-4">
+        <p>No status information available.</p>
+      </div>
+    );
   }
 }
