@@ -172,67 +172,73 @@ const LiveFeed = (props: any) => {
   };
 
   const gotoDirectionalBoundary = () => {
-    if (!boundaryPreset?.meta?.range || !direction) {
-      Notification.Error({ msg: "Select a Direction to expand" });
-      return;
+    if (boundaryPreset?.meta?.range && direction) {
+      const { max_x, max_y, min_x, min_y } = boundaryPreset.meta.range;
+      const position = {
+        x: 0,
+        y: 0,
+        zoom: 0.2,
+      };
+      if (direction == "left") {
+        position.x = min_x;
+        position.y = (min_y + max_y) / 2;
+        setLoading("Moving to Left Boundary");
+      }
+      if (direction == "right") {
+        position.x = max_x;
+        position.y = (min_y + max_y) / 2;
+        setLoading("Moving to Right Boundary");
+      }
+      if (direction == "up") {
+        position.x = (min_x + max_x) / 2;
+        position.y = min_y;
+        setLoading("Moving to Top Boundary");
+      }
+      if (direction == "down") {
+        position.x = (min_x + max_x) / 2;
+        position.y = max_y;
+        setLoading("Moving to Bottom Boundary");
+      }
+      absoluteMove(position, {
+        onSuccess: () => setLoading(undefined),
+      });
+    } else if (boundaryPreset?.meta?.range && !direction) {
+      Notification.Error({ msg: "Please select a direction" });
+    } else if (!boundaryPreset?.meta?.range && direction) {
+      Notification.Error({ msg: "Please set boundary" });
+    } else {
+      Notification.Error({ msg: "Something went wrong" });
     }
-    const { max_x, max_y, min_x, min_y } = boundaryPreset?.meta?.range;
-    const position = {
-      x: 0,
-      y: 0,
-      zoom: 0.2,
-    };
-    if (direction == "left") {
-      position.x = min_x;
-      position.y = (min_y + max_y) / 2;
-      setLoading("Moving to Left Boundary");
-    }
-    if (direction == "right") {
-      position.x = max_x;
-      position.y = (min_y + max_y) / 2;
-      setLoading("Moving to Right Boundary");
-    }
-    if (direction == "up") {
-      position.x = (min_x + max_x) / 2;
-      position.y = min_y;
-      setLoading("Moving to Top Boundary");
-    }
-    if (direction == "down") {
-      position.x = (min_x + max_x) / 2;
-      position.y = max_y;
-      setLoading("Moving to Bottom Boundary");
-    }
-    absoluteMove(position, {
-      onSuccess: () => setLoading(undefined),
-    });
   };
 
   const changeDirectionalBoundary = (action: "expand" | "shrink") => {
-    const { max_x, max_y, min_x, min_y } = boundaryPreset?.meta?.range;
-    const range = {
-      max_x: max_x,
-      max_y: max_y,
-      min_x: min_x,
-      min_y: min_y,
-    };
-    const delta = 0.1 / Math.max(1, precision);
-    if (direction == "left") {
-      range.min_x = action == "expand" ? min_x - delta : min_x + delta;
-    } else if (direction == "right") {
-      range.max_x = action == "expand" ? max_x + delta : max_x - delta;
-    } else if (direction == "up") {
-      range.min_y = action == "expand" ? min_y - delta : min_y + delta;
-    } else if (direction == "down") {
-      range.max_y = action == "expand" ? max_y + delta : max_y - delta;
+    if (boundaryPreset?.meta?.range) {
+      const { max_x, max_y, min_x, min_y } = boundaryPreset.meta.range;
+      const range = {
+        max_x: max_x,
+        max_y: max_y,
+        min_x: min_x,
+        min_y: min_y,
+      };
+      const delta = 0.1 / Math.max(1, precision);
+      if (direction == "left") {
+        range.min_x = action == "expand" ? min_x - delta : min_x + delta;
+      } else if (direction == "right") {
+        range.max_x = action == "expand" ? max_x + delta : max_x - delta;
+      } else if (direction == "up") {
+        range.min_y = action == "expand" ? min_y - delta : min_y + delta;
+      } else if (direction == "down") {
+        range.max_y = action == "expand" ? max_y + delta : max_y - delta;
+      }
+      setBoundaryPreset({
+        ...boundaryPreset,
+        meta: {
+          ...boundaryPreset.meta,
+          range: range,
+        },
+      });
+      setLoading(undefined);
     }
-    setBoundaryPreset({
-      ...boundaryPreset,
-      meta: {
-        ...boundaryPreset.meta,
-        range: range,
-      },
-    });
-    setLoading(undefined);
   };
 
   const runFunctionWithDelay = (func: () => any, delay: number) => {
@@ -246,7 +252,7 @@ const LiveFeed = (props: any) => {
     if (boundaryPreset?.meta?.range) {
       setIsPreview(true);
       setLoading("Previewing Boundary");
-      const { max_x, max_y, min_x, min_y } = boundaryPreset?.meta?.range;
+      const { max_x, max_y, min_x, min_y } = boundaryPreset.meta.range;
       const edegs: any[] = [
         { x: max_x, y: (max_y + min_y) / 2, zoom: 0.2 },
         { x: (max_x + min_x) / 2, y: max_y, zoom: 0.2 },
