@@ -504,43 +504,45 @@ const LiveFeed = (props: any) => {
                 )}
               </div>
             </div>
-            <div
-              className={`${
-                isExtremeSmallScreen ? " flex flex-wrap " : " md:flex "
-              } max-w-lg mt-4`}
-            >
-              {cameraPTZ.map((option) => {
-                const shortcutKeyDescription =
-                  option.shortcutKey &&
-                  option.shortcutKey
-                    .join(" + ")
-                    .replace("Control", "Ctrl")
-                    .replace("ArrowUp", "↑")
-                    .replace("ArrowDown", "↓")
-                    .replace("ArrowLeft", "←")
-                    .replace("ArrowRight", "→");
+            {!toUpdateBoundary && (
+              <div
+                className={`${
+                  isExtremeSmallScreen ? " flex flex-wrap " : " md:flex "
+                } max-w-lg mt-4`}
+              >
+                {cameraPTZ.map((option) => {
+                  const shortcutKeyDescription =
+                    option.shortcutKey &&
+                    option.shortcutKey
+                      .join(" + ")
+                      .replace("Control", "Ctrl")
+                      .replace("ArrowUp", "↑")
+                      .replace("ArrowDown", "↓")
+                      .replace("ArrowLeft", "←")
+                      .replace("ArrowRight", "→");
 
-                return (
-                  <button
-                    className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1 tooltip"
-                    onClick={option.callback}
-                  >
-                    <span className="sr-only">{option.label}</span>
-                    {option.icon ? (
-                      <CareIcon className={`care-${option.icon}`} />
-                    ) : (
-                      <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
-                        {option.value}x
-                      </span>
-                    )}
-                    <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">{`${option.label}  (${shortcutKeyDescription})`}</span>
-                  </button>
-                );
-              })}
-              <div className="pl-3 hideonmobilescreen">
-                <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
+                  return (
+                    <button
+                      className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 flex-1 tooltip"
+                      onClick={option.callback}
+                    >
+                      <span className="sr-only">{option.label}</span>
+                      {option.icon ? (
+                        <CareIcon className={`care-${option.icon}`} />
+                      ) : (
+                        <span className="px-2 font-bold h-full w-8 flex items-center justify-center">
+                          {option.value}x
+                        </span>
+                      )}
+                      <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">{`${option.label}  (${shortcutKeyDescription})`}</span>
+                    </button>
+                  );
+                })}
+                <div className="pl-3 hideonmobilescreen">
+                  <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
+                </div>
               </div>
-            </div>
+            )}
             {toUpdateBoundary && boundaryPreset && (
               <UpdateCameraBoundaryConfigure
                 cameraPTZ={cameraPTZ}
