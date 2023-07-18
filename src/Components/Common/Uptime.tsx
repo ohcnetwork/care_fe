@@ -14,16 +14,131 @@ const STATUS_COLORS = {
 };
 
 const STATUS_COLORS_TEXT = {
-  operational: "text-green-500",
-  not_monitored: "text-gray-400",
-  down: "text-red-500",
-  maintenance: "text-blue-500",
+  Operational: "text-green-500",
+  "Not Monitored": "text-gray-400",
+  Down: "text-red-500",
+  "Under Maintenance": "text-blue-500",
 };
 
 const now = moment();
 const formatDateBeforeDays = Array.from({ length: 100 }, (_, index) =>
   now.clone().subtract(index, "days").format("Do MMMM YYYY")
 );
+
+function StatusPopover({
+  records,
+  day,
+  date,
+  numDays,
+}: {
+  records: AssetUptimeRecord[];
+  day: number;
+  date: string;
+  numDays: number;
+}) {
+  const incidents =
+    records?.filter(
+      (record) =>
+        record.status !== AssetStatus.operational &&
+        record.status !== AssetStatus.not_monitored
+    ) || [];
+
+  return (
+    <Popover className="mt-10 relative">
+      <Popover.Panel
+        className={`absolute z-50 w-80 transform px-4 sm:px-0 ${
+          day > numDays - 7
+            ? "-translate-x-6"
+            : day < 4
+            ? "-translate-x-full"
+            : "-translate-x-1/2"
+        }`}
+        static
+      >
+        <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
+          <div className="rounded-lg bg-white px-6 py-4">
+            <div className="flow-root rounded-md">
+              <div className="block text-sm text-gray-800 text-center">
+                <span className="font-bold ">{date}</span>
+                <div className="border-t border-gray-200 my-2"></div>
+                {incidents.length === 0 ? (
+                  <span>No incidents for the day</span>
+                ) : (
+                  <>
+                    <span className="font-bold ">Incidents</span>
+                    {incidents.map((incident, index) => {
+                      const nextIncident = incidents[index + 1];
+                      let endTimestamp;
+                      let ongoing = false;
+
+                      if (nextIncident) {
+                        endTimestamp = moment(nextIncident.timestamp).format(
+                          "h:mmA"
+                        );
+                      } else if (
+                        moment(incident.timestamp).isSame(now, "day")
+                      ) {
+                        endTimestamp = moment().format("h:mmA");
+                        ongoing = true;
+                      } else {
+                        endTimestamp = moment(incident.timestamp)
+                          .add(1, "day")
+                          .format("h:mmA");
+                      }
+                      const duration = !ongoing
+                        ? moment
+                            .duration(
+                              moment(endTimestamp).diff(
+                                moment(incident.timestamp)
+                              )
+                            )
+                            .humanize()
+                        : "Ongoing";
+
+                      return (
+                        <div className="flex justify-between" key={index}>
+                          <span
+                            className={`capitalize ${
+                              STATUS_COLORS_TEXT[incident.status]
+                            }`}
+                          >
+                            {incident.status}
+                          </span>
+                          <span>
+                            {moment(incident.timestamp).format("h:mmA")} -{" "}
+                            {endTimestamp}
+                          </span>
+                          <span>{duration}</span>
+                        </div>
+                      );
+                    })}
+                    <div className="border-t border-gray-200 my-2"></div>
+                    <div className="flex justify-between mt-1">
+                      <span className="font-bold">Total</span>
+                      <span>
+                        {incidents.length > 0 &&
+                          moment
+                            .duration(
+                              incidents.reduce(
+                                (totalDuration, incident) =>
+                                  totalDuration +
+                                  moment().diff(moment(incident.timestamp)),
+                                0
+                              )
+                            )
+                            .humanize()}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Popover.Panel>
+    </Popover>
+  );
+}
 
 export default function Uptime(props: { assetId: string }) {
   const [summary, setSummary] = useState<{
@@ -36,112 +151,6 @@ export default function Uptime(props: { assetId: string }) {
   );
   const [hoveredDay, setHoveredDay] = useState(-1);
   const dispatch = useDispatch<any>();
-
-  function StatusPopover({
-    records,
-    day,
-    date,
-    numDays,
-  }: {
-    records: AssetUptimeRecord[];
-    day: number;
-    date: string;
-    numDays: number;
-  }) {
-    const incidents =
-      records?.filter(
-        (record) =>
-          record.status !== AssetStatus.operational &&
-          record.status !== AssetStatus.not_monitored
-      ) || [];
-
-    return (
-      <Popover className="mt-10 relative">
-        <Popover.Panel
-          className={`absolute z-50 w-80 transform px-4 sm:px-0 ${
-            day > numDays - 7
-              ? "-translate-x-6"
-              : day < 4
-              ? "-translate-x-full"
-              : "-translate-x-1/2"
-          }`}
-          static
-        >
-          <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
-            <div className="rounded-lg bg-white px-6 py-4">
-              <div className="flow-root rounded-md">
-                <div className="block text-sm text-gray-800 text-center">
-                  <span className="font-bold ">{date}</span>
-                  <div className="border-t border-gray-200 my-2"></div>
-                  {incidents.length === 0 ? (
-                    <span>No incidents for the day</span>
-                  ) : (
-                    <>
-                      <span className="font-bold ">Incidents</span>
-                      {incidents.map((incident, index) => {
-                        const nextIncident = incidents[index + 1];
-                        const endTimestamp = nextIncident
-                          ? moment(nextIncident.timestamp).format("h:mmA")
-                          : moment().format("h:mmA");
-                        const duration = nextIncident
-                          ? moment
-                              .duration(
-                                moment(endTimestamp).diff(
-                                  moment(incident.timestamp)
-                                )
-                              )
-                              .humanize()
-                          : "Ongoing";
-
-                        return (
-                          <div className="flex justify-between" key={index}>
-                            <span
-                              className={`capitalize ${
-                                STATUS_COLORS_TEXT[
-                                  AssetStatus[
-                                    incident.status
-                                  ] as keyof typeof STATUS_COLORS_TEXT
-                                ]
-                              }`}
-                            >
-                              {AssetStatus[incident.status]}
-                            </span>
-                            <span>
-                              {moment(incident.timestamp).format("h:mmA")} -{" "}
-                              {endTimestamp}
-                            </span>
-                            <span>{duration}</span>
-                          </div>
-                        );
-                      })}
-                      <div className="border-t border-gray-200 my-2"></div>
-                      <div className="flex justify-between mt-1">
-                        <span className="font-bold">Total</span>
-                        <span>
-                          {incidents.length === 0
-                            ? "Ongoing"
-                            : moment
-                                .duration(
-                                  incidents.reduce(
-                                    (totalDuration, incident) =>
-                                      totalDuration +
-                                      moment().diff(moment(incident.timestamp)),
-                                    0
-                                  )
-                                )
-                                .humanize()}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </Popover.Panel>
-      </Popover>
-    );
-  }
 
   const handleResize = () => {
     const containerWidth = graphElem.current?.clientWidth ?? window.innerWidth;
@@ -229,19 +238,19 @@ export default function Uptime(props: { assetId: string }) {
         );
         if (
           recordsInPeriod.some(
-            (record) => AssetStatus[record.status] === "down"
+            (record) => record.status === AssetStatus["down"]
           )
         ) {
           statusColors.push(STATUS_COLORS["down"]);
         } else if (
           recordsInPeriod.some(
-            (record) => AssetStatus[record.status] === "maintenance"
+            (record) => record.status === AssetStatus["maintenance"]
           )
         ) {
           statusColors.push(STATUS_COLORS["maintenance"]);
         } else if (
           recordsInPeriod.some(
-            (record) => AssetStatus[record.status] === "operational"
+            (record) => record.status === AssetStatus["operational"]
           )
         ) {
           statusColors.push(STATUS_COLORS["operational"]);
