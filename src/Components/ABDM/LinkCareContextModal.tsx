@@ -22,7 +22,6 @@ const LinkCareContextModal = ({
   show,
   onClose,
 }: IProps) => {
-  const [dob, setDob] = useState<Date | undefined>();
   const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(false);
   const [isLinkingCareContext, setIsLinkingCareContext] = useState(false);
 
@@ -55,8 +54,13 @@ const LinkCareContextModal = ({
       <DateFormField
         name="dob"
         label="Date of Birth"
-        value={dob}
-        onChange={(e) => setDob(e.value)}
+        value={
+          patient?.abha_number_object?.date_of_birth
+            ? new Date(patient?.abha_number_object?.date_of_birth)
+            : undefined
+        }
+        onChange={() => null}
+        disabled
         required
       />
 
@@ -83,7 +87,7 @@ const LinkCareContextModal = ({
               linkCareContext(consultationId, {
                 name: patient?.abha_number_object?.name,
                 gender: patient?.abha_number_object?.gender,
-                dob: dob?.toISOString().slice(0, 10),
+                dob: patient?.abha_number_object?.date_of_birth,
               })
             );
 
@@ -99,7 +103,7 @@ const LinkCareContextModal = ({
             setIsLinkingCareContext(false);
             onClose();
           }}
-          disabled={!dob || !acceptedDisclaimer}
+          disabled={!acceptedDisclaimer}
           loading={isLinkingCareContext}
         >
           Link Care Context

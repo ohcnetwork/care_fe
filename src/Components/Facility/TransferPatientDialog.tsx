@@ -64,7 +64,7 @@ const TransferPatientDialog = (props: Props) => {
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
   const patientOptions: Array<OptionsType> = patientList.map((patient) => {
     return {
-      id: patient.patient_id,
+      id: patient.patient_id as unknown as number,
       text: `${patient.name} (${patient.gender})`,
     };
   });

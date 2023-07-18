@@ -11,12 +11,12 @@ import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { BedSelect } from "../../Common/BedSelect";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import CircularProgress from "../../Common/components/CircularProgress";
 import { FieldLabel } from "../../Form/FormFields/FormField";
-import Loading from "../../Common/Loading";
 import TextFormField from "../../Form/FormFields/TextFormField";
-import { formatDate } from "../../../Utils/utils";
 import moment from "moment";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Loading from "../../Common/Loading";
+import { formatDate } from "../../../Utils/utils";
 import { useDispatch } from "react-redux";
 
 const formatDateTime: () => string = () => {
@@ -32,7 +32,7 @@ const formatDateTime: () => string = () => {
 
 interface BedsProps {
   facilityId: string;
-  patientId: number;
+  patientId: string;
   consultationId: string;
   smallLoader?: boolean;
   discharged?: boolean;

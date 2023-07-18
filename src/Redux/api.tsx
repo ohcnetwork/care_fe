@@ -879,6 +879,12 @@ const routes: Routes = {
     path: "/api/v1/abdm/healthid/add_care_context/",
     method: "POST",
   },
+
+  getAbhaCard: {
+    path: "/api/v1/abdm/healthid/get_abha_card/",
+    method: "POST",
+  },
+
   // Prescription endpoints
 
   listPrescriptions: {

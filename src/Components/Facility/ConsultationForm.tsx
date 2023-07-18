@@ -1,5 +1,4 @@
 import * as Notification from "../../Utils/Notifications.js";
-
 import { BedModel, FacilityModel } from "./models";
 import {
   CONSULTATION_STATUS,
@@ -17,6 +16,7 @@ import { LegacyRef, createRef, useCallback, useEffect, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
+
 import {
   createConsultation,
   getConsultation,
@@ -207,7 +207,6 @@ export const ConsultationForm = (props: any) => {
     initialState
   );
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);

@@ -384,6 +384,7 @@ export default function PatientInfoCard(props: {
                 <p>Link Care Context</p>
               </ButtonV2>
               <ABHAProfileModal
+                patientId={patient.id}
                 abha={patient.abha_number_object}
                 show={showABHAProfile}
                 onClose={() => setShowABHAProfile(false)}
