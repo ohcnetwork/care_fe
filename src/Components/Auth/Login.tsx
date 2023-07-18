@@ -212,7 +212,7 @@ export const Login = (props: { forgot?: boolean }) => {
             >
               <img
                 src={static_custom_logo_alt || static_light_logo}
-                className="h-8"
+                className="h-14"
                 alt="coronasafe logo"
               />
             </a>
