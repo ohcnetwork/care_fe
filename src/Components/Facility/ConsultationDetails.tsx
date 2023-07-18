@@ -274,11 +274,12 @@ export const ConsultationDetails = (props: any) => {
               [facilityId]: { name: patientData?.facility_object?.name },
               [patientId]: { name: patientData?.name },
               [consultationId]: {
-                name: `Admitted on ${formatDate(
-                  consultationData.admission_date
-                    ? consultationData.admission_date
-                    : "00:00"
-                )}`,
+                name:
+                  consultationData.suggestion === "HI"
+                    ? "Recommended Home Isolation"
+                    : `Admitted on ${formatDate(
+                        consultationData.admission_date!
+                      )}`,
               },
             }}
             breadcrumbs={true}
