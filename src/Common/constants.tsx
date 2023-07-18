@@ -1,8 +1,12 @@
 import { IConfig } from "./hooks/useConfig";
-import { PatientCategory } from "../Components/Facility/models";
+import {
+  ConsultationModel,
+  PatientCategory,
+} from "../Components/Facility/models";
 import { SortOption } from "../Components/Common/SortDropdown";
 import moment from "moment";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { PatientModel } from "../Components/Patient/models";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -14,6 +18,16 @@ export const LocalStorageKeys = {
   accessToken: "care_access_token",
   refreshToken: "care_refresh_token",
 };
+
+export interface ConsultationTabProps {
+  // necessary props received for each tab
+  consultationData: ConsultationModel;
+  patientData: PatientModel;
+  facilityId: any;
+  patientId: any;
+  consultationId: any;
+}
+
 export interface OptionsType {
   id: number;
   text: string;
