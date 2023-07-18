@@ -12,10 +12,6 @@
         "light":"https://cdn.coronasafe.network/light-logo.svg",
         "dark":"https://cdn.coronasafe.network/black-logo.svg"
     },
-    "state_logo": {
-        "light":"https://cdn.coronasafe.network/ohc_logo_light.png",
-        "dark":"https://i.imgur.com/Yq3fCmk.png"
-    },
     "gmaps_api_key": "AIzaSyDsBAc3y7deI5ZO3NtK5GuzKwtUzQNJNUk",
     "gov_data_api_key": "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b",
     "recaptcha_site_key": "6LdvxuQUAAAAADDWVflgBqyHGfq-xmvNJaToM0pN",
