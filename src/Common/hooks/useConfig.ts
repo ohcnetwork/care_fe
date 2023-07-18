@@ -22,7 +22,7 @@ export interface IConfig {
    */
   static_custom_logo: string;
   static_custom_logo_alt: string;
-  static_custom_logo_white: string;
+  static_custom_logo_white: boolean;
   custom_description: string;
   custom_site_link: string;
   /**
