@@ -52,7 +52,7 @@ export default function CreateClaimCard({
         ).find((o) => o.outcome === "Processing Complete");
         if (latestApprovedPreAuth) {
           setPolicy(latestApprovedPreAuth.policy_object);
-          setItems(latestApprovedPreAuth.items || []);
+          setItems(latestApprovedPreAuth.items ?? []);
           return;
         }
       }
@@ -174,7 +174,7 @@ export default function CreateClaimCard({
             ghost={items?.length !== 0}
             disabled={items === undefined || !policy}
             onClick={() =>
-              setItems([...(items || []), { name: "", id: "", price: 0 }])
+              setItems([...(items ?? []), { name: "", id: "", price: 0 }])
             }
           >
             <CareIcon className="care-l-plus text-lg" />
@@ -219,9 +219,7 @@ export default function CreateClaimCard({
             { id: "claim", label: "Claim" },
           ]}
           value={use_}
-          onChange={({ value }) =>
-            setUse_(value as "preauthorization" | "claim")
-          }
+          onChange={({ value }) => setUse_(value)}
           position="below"
           optionLabel={(value) => value.label}
           optionValue={(value) => value.id as "preauthorization" | "claim"}
