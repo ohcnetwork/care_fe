@@ -19,7 +19,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { UserRole, USER_TYPES } from "../../Common/constants";
 import moment from "moment";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -63,7 +63,7 @@ const AssetManage = (props: AssetManageProps) => {
       const assetData = await dispatch(getAsset(assetId));
       if (!status.aborted) {
         setIsLoading(false);
-        if (assetData && assetData.data) {
+        if (assetData?.data) {
           setAsset(assetData.data);
 
           const transactionFilter = assetData.qr_code_id
@@ -77,7 +77,7 @@ const AssetManage = (props: AssetManageProps) => {
               offset,
             })
           );
-          if (transactionsData && transactionsData.data) {
+          if (transactionsData?.data) {
             setTransactions(transactionsData.data.results);
             setTotalCount(transactionsData.data.count);
           } else {
@@ -124,7 +124,7 @@ const AssetManage = (props: AssetManageProps) => {
       </div>
       <h2 className="text-center">Print Preview</h2>
       <div id="section-to-print" className="print flex justify-center">
-        <QRCode size={200} value={asset?.id || ""} />
+        <QRCode size={200} value={asset?.id ?? ""} />
       </div>
     </div>
   );
@@ -215,6 +215,9 @@ const AssetManage = (props: AssetManageProps) => {
     if (asset) {
       const response = await dispatch(deleteAsset(asset.id));
       if (response && response.status === 204) {
+        Notification.Success({
+          msg: "Asset deleted successfully",
+        });
         navigate("/assets");
       }
     }
@@ -233,7 +236,7 @@ const AssetManage = (props: AssetManageProps) => {
         }}
         backUrl="/assets"
       />
-      <ConfirmDialogV2
+      <ConfirmDialog
         title="Delete Asset"
         description="Are you sure you want to delete this asset?"
         action="Confirm"
@@ -325,6 +328,7 @@ const AssetManage = (props: AssetManageProps) => {
                   )
                 }
                 id="update-asset"
+                data-testid="asset-update-button"
                 authorizeFor={NonReadOnlyUsers}
               >
                 <CareIcon className="care-l-pen h-4 mr-1" />
@@ -349,6 +353,7 @@ const AssetManage = (props: AssetManageProps) => {
                   authorizeFor={NonReadOnlyUsers}
                   onClick={() => setShowDeleteDialog(true)}
                   variant="danger"
+                  data-testid="asset-delete-button"
                   className="inline-flex"
                 >
                   <CareIcon className="care-l-trash h-4" />

@@ -330,7 +330,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
                 options={[true, false]}
                 optionDisplay={(o) => (o ? "Yes" : "No")}
                 optionValue={(o) => String(o)}
-                value={state.form.emergency}
+                value={String(state.form.emergency)}
                 error={state.errors.emergency}
               />
             </div>

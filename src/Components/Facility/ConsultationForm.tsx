@@ -1,4 +1,5 @@
 import * as Notification from "../../Utils/Notifications.js";
+
 import { BedModel, FacilityModel } from "./models";
 import {
   CONSULTATION_STATUS,
@@ -9,6 +10,7 @@ import {
 } from "../../Common/constants";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
@@ -16,7 +18,6 @@ import { LegacyRef, createRef, useCallback, useEffect, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
-
 import {
   createConsultation,
   getConsultation,
@@ -31,11 +32,9 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
-import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilitySelect } from "../Common/FacilitySelect.js";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
-import { FieldErrorText } from "../Form/FormFields/FormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import { FormAction } from "../Form/Utils.js";
+import { FormAction } from "../Form/Utils";
 import { ICD11DiagnosisModel } from "./models";
 import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
@@ -298,7 +297,7 @@ export const ConsultationForm = (props: any) => {
         else setSelectedFacility(res.data.referred_to_object);
       }
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           const formData = {
             ...res.data,
             symptoms_onset_date: isoStringToDate(res.data.symptoms_onset_date),
@@ -307,7 +306,7 @@ export const ConsultationForm = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
               ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
-                  ?.id || "Comfort"
+                  ?.id ?? "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             op_no: res.data.op_no ? res.data.op_no : "",
@@ -340,11 +339,7 @@ export const ConsultationForm = (props: any) => {
 
   useAbortableEffect(
     (status: statusType) => {
-      if (id && patientId && patientName) {
-        fetchData(status);
-      } else if (id && !patientId) {
-        fetchData(status);
-      }
+      if (id && ((patientId && patientName) || !patientId)) fetchData(status);
     },
     [fetchData, id, patientId, patientName]
   );
@@ -637,7 +632,7 @@ export const ConsultationForm = (props: any) => {
         id ? updateConsultation(id, data) : createConsultation(data)
       );
       setIsLoading(false);
-      if (res && res.data && res.status !== 400) {
+      if (res?.data && res.status !== 400) {
         dispatch({ type: "set_form", form: initForm });
 
         if (data.suggestion === "DD") {
@@ -752,9 +747,9 @@ export const ConsultationForm = (props: any) => {
     const selectedFacility = selected as FacilityModel;
     setSelectedFacility(selectedFacility);
     const form: FormDetails = { ...state.form };
-    if (selectedFacility && selectedFacility.id) {
+    if (selectedFacility?.id) {
       if (selectedFacility.id === -1) {
-        form.referred_to_external = selectedFacility.name || "";
+        form.referred_to_external = selectedFacility.name ?? "";
         delete form.referred_to;
       } else {
         form.referred_to = selectedFacility.id.toString() || "";

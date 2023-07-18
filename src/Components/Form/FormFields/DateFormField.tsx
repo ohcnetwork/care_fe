@@ -5,6 +5,7 @@ import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
 
 type Props = FormFieldBaseProps<Date> & {
+  containerClassName?: string;
   placeholder?: string;
   max?: Date;
   min?: Date;
@@ -33,6 +34,7 @@ const DateFormField = (props: Props) => {
     <FormField field={field}>
       <DateInputV2
         className={classNames(field.error && "border-red-500")}
+        containerClassName={props.containerClassName}
         id={field.id}
         name={field.name}
         value={
@@ -42,9 +44,9 @@ const DateFormField = (props: Props) => {
         }
         onChange={field.handleChange}
         disabled={field.disabled}
-        max={props.max || (props.disableFuture ? new Date() : undefined)}
-        min={props.min || (props.disablePast ? yesterday() : undefined)}
-        position={props.position || "RIGHT"}
+        max={props.max ?? (props.disableFuture ? new Date() : undefined)}
+        min={props.min ?? (props.disablePast ? yesterday() : undefined)}
+        position={props.position ?? "RIGHT"}
         placeholder={props.placeholder}
       />
     </FormField>

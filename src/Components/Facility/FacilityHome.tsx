@@ -30,7 +30,7 @@ import BedTypeCard from "./BedTypeCard";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Chip from "../../CAREUI/display/Chip";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import ContactLink from "../Common/components/ContactLink";
 import CoverImageEditModal from "./CoverImageEditModal";
 import DialogModal from "../Common/Dialog";
@@ -45,6 +45,7 @@ import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { useTranslation } from "react-i18next";
+
 const Loading = loadable(() => import("../Common/Loading"));
 
 export const getFacilityFeatureIcon = (featureId: number) => {
@@ -345,7 +346,7 @@ export const FacilityHome = (props: any) => {
       focusOnLoad={true}
       backUrl="/facility"
     >
-      <ConfirmDialogV2
+      <ConfirmDialog
         title={`Delete ${facilityData.name}`}
         description={
           <span>
@@ -606,7 +607,7 @@ export const FacilityHome = (props: any) => {
               </DropdownMenu>
             </div>
             <div className="flex flex-col justify-end">
-              {/* <ButtonV2
+              <ButtonV2
                 variant="primary"
                 ghost
                 border
@@ -615,7 +616,7 @@ export const FacilityHome = (props: any) => {
               >
                 <CareIcon className="care-l-monitor-heart-rate text-lg" />
                 <span>Central Nursing Station</span>
-              </ButtonV2> */}
+              </ButtonV2>
               <ButtonV2
                 variant="primary"
                 ghost

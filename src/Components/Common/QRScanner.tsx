@@ -1,9 +1,9 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import { ActionTextInputField } from "./HelperInputFields";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "./Dialog";
 import QrReader from "react-qr-reader";
+import TextFormField from "../Form/FormFields/TextFormField.js";
 import { useState } from "react";
 
 interface IQRScannerModalProps {
@@ -70,20 +70,21 @@ const QRScanner = ({
 
   return (
     <div className={className}>
-      <label htmlFor="asset-qr-id">{label}</label>
-      <ActionTextInputField
+      <TextFormField
+        trailing={
+          <CareIcon
+            onClick={() => setShowScanner(true)}
+            className="care-l-focus text-black cursor-pointer z-50"
+          />
+        }
+        error={error}
+        disabled={disabled}
+        label={label}
         id="qr_code_id"
-        fullWidth
         name="qr_code_id"
         placeholder=""
-        variant="outlined"
-        margin="dense"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        actionIcon={<CareIcon className="care-l-focus text-black" />}
-        action={() => setShowScanner(true)}
-        errors={error}
-        disabled={disabled}
+        onChange={(e) => onChange(e.value)}
       />
 
       <QRScannerModal

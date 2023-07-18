@@ -83,30 +83,30 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
   if (hasIcon) {
     const _leading =
       leading === leadingFocused ? (
-        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-3">
           {leading}
         </div>
       ) : (
         <>
-          <div className="opacity-100 peer-focus:opacity-0 translate-y-0 peer-focus:translate-y-1 pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 transition-all duration-500 delay-300 ease-in-out">
+          <div className="opacity-100 peer-focus:opacity-0 translate-y-0 peer-focus:translate-y-1 absolute inset-y-0 left-0 flex items-center pl-3 transition-all duration-500 delay-300 ease-in-out">
             {leading}
           </div>
-          <div className="opacity-0 peer-focus:opacity-100 -translate-y-1 peer-focus:translate-y-0 pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 transition-all duration-500 delay-300 ease-in-out">
+          <div className="opacity-0 peer-focus:opacity-100 -translate-y-1 peer-focus:translate-y-0 absolute inset-y-0 left-0 flex items-center pl-3 transition-all duration-500 delay-300 ease-in-out">
             {leadingFocused}
           </div>
         </>
       );
     const _trailing =
       trailing === trailingFocused ? (
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
           {trailing}
         </div>
       ) : (
         <>
-          <div className="opacity-100 peer-focus:opacity-0 translate-y-0 peer-focus:translate-y-1 pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 transition-all duration-500 delay-300 ease-in-out">
+          <div className="opacity-100 peer-focus:opacity-0 translate-y-0 peer-focus:translate-y-1 absolute inset-y-0 right-0 flex items-center pr-3 transition-all duration-500 delay-300 ease-in-out">
             {trailing}
           </div>
-          <div className="opacity-0 peer-focus:opacity-100 -translate-y-1 peer-focus:translate-y-0 pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 transition-all duration-500 delay-300 ease-in-out">
+          <div className="opacity-0 peer-focus:opacity-100 -translate-y-1 peer-focus:translate-y-0 absolute inset-y-0 right-0 flex items-center pr-3 transition-all duration-500 delay-300 ease-in-out">
             {trailingFocused}
           </div>
         </>

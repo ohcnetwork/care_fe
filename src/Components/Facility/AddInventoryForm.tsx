@@ -23,7 +23,7 @@ const initForm = {
   id: "",
   quantity: "",
   unit: "",
-  isIncoming: false,
+  isIncoming: undefined,
 };
 
 const initError = Object.assign(
@@ -77,10 +77,6 @@ export const AddInventoryForm = (props: any) => {
       if (!status.aborted) {
         if (res && res.data) {
           setData(res.data.results);
-          dispatch({
-            type: "set_form",
-            form: { ...state.form, id: res.data.results[0]?.id },
-          });
         }
         setIsLoading(false);
       }

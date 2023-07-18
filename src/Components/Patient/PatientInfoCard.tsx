@@ -68,7 +68,7 @@ export default function PatientInfoCard(props: {
             facilityId={patient?.facility}
             patientId={patient?.id}
             discharged={!!consultation?.discharge_date}
-            consultationId={consultation?.id}
+            consultationId={consultation?.id ?? ""}
             setState={setOpen}
             fetchPatientData={props.fetchPatientData}
             smallLoader
@@ -85,8 +85,7 @@ export default function PatientInfoCard(props: {
             <div
               className={`w-24 h-24 min-w-[5rem] bg-gray-200 ${categoryClass}-profile`}
             >
-              {consultation &&
-              consultation?.current_bed &&
+              {consultation?.current_bed &&
               consultation?.discharge_date === null ? (
                 <div
                   className="flex flex-col items-center justify-center h-full"
@@ -196,7 +195,7 @@ export default function PatientInfoCard(props: {
                     (resp) =>
                       resp.text ===
                       consultation?.last_daily_round?.ventilator_interface
-                  )?.id || "UNKNOWN",
+                  )?.id ?? "UNKNOWN",
                   consultation?.last_daily_round?.ventilator_interface,
                 ],
               ].map((stat, i) => {
@@ -290,7 +289,7 @@ export default function PatientInfoCard(props: {
                 !consultation?.discharge_date,
               [
                 !(consultation?.facility !== patient.facility) &&
-                  !(consultation?.discharge_date || !patient.is_active) &&
+                  !(consultation?.discharge_date ?? !patient.is_active) &&
                   moment(consultation?.modified_date).isBefore(
                     new Date().getTime() - 24 * 60 * 60 * 1000
                   ),
@@ -331,7 +330,7 @@ export default function PatientInfoCard(props: {
                   <div className="relative" key={i}>
                     <ButtonV2
                       key={i}
-                      variant={action[4] && action[4][0] ? "danger" : "primary"}
+                      variant={action?.[4]?.[0] ? "danger" : "primary"}
                       href={
                         consultation?.admitted &&
                         !consultation?.current_bed &&

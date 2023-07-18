@@ -1,7 +1,7 @@
-import React from "react";
-import { Listbox } from "@headlessui/react";
-import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { DropdownTransition } from "../Common/components/HelperComponents";
+import { Listbox } from "@headlessui/react";
+import React from "react";
 import { classNames } from "../../Utils/utils";
 
 type OptionCallback<T, R = void> = (option: T) => R;
@@ -177,7 +177,7 @@ export const dropdownOptionClassNames = ({
   selected,
 }: OptionRenderPropArg) => {
   return classNames(
-    "cursor-default select-none relative p-4 text-sm",
+    "group/option transition-colors duration-75 ease-in-out cursor-default select-none relative p-4 text-sm w-full",
     active && "text-white bg-primary-500",
     !active && selected && "text-primary-500",
     !active && !selected && "text-gray-900",

@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
-import screenfull from "screenfull";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import {
   listAssetBeds,
@@ -21,8 +20,9 @@ import { BedModel } from "../models";
 import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import Page from "../../Common/components/Page";
-import ConfirmDialogV2 from "../../Common/ConfirmDialogV2";
+import ConfirmDialog from "../../Common/ConfirmDialog";
 import { FieldLabel } from "../../Form/FormFields/FormField";
+import useFullscreen from "../../../Common/hooks/useFullscreen";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -47,6 +47,8 @@ const LiveFeed = (props: any) => {
   });
   const [toDelete, setToDelete] = useState<any>(null);
   const [toUpdate, setToUpdate] = useState<any>(null);
+  const [_isFullscreen, setFullscreen] = useFullscreen();
+
   const { width } = useWindowDimensions();
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
@@ -227,8 +229,8 @@ const LiveFeed = (props: any) => {
       });
     },
     fullScreen: () => {
-      if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
-      screenfull.request(liveFeedPlayerRef.current);
+      if (!liveFeedPlayerRef.current) return;
+      setFullscreen(true, liveFeedPlayerRef.current);
     },
     updatePreset: (option) => {
       getCameraStatus({
@@ -287,7 +289,7 @@ const LiveFeed = (props: any) => {
   return (
     <Page title="Live Feed" hideBack>
       {toDelete && (
-        <ConfirmDialogV2
+        <ConfirmDialog
           show
           title="Are you sure you want to delete this preset?"
           description={
@@ -307,7 +309,7 @@ const LiveFeed = (props: any) => {
         />
       )}
       {toUpdate && (
-        <ConfirmDialogV2
+        <ConfirmDialog
           show
           title="Update Preset"
           description={"Preset: " + toUpdate.meta.preset_name}
@@ -328,7 +330,7 @@ const LiveFeed = (props: any) => {
               facility={cameraAsset.facility_id}
             />
           </div>
-        </ConfirmDialogV2>
+        </ConfirmDialog>
       )}
       <div className="mt-4 flex flex-col">
         <div className="flex flex-col lg:flex-row gap-4 mt-4 relative">

@@ -67,8 +67,8 @@ export const deleteFacility = (id: string) => {
 export const deleteFacilityCoverImage = (id: string) => {
   return fireRequest("deleteFacilityCoverImage", [], {}, { id });
 };
-export const getUserList = (params: object) => {
-  return fireRequest("userList", [], params);
+export const getUserList = (params: object, key?: string) => {
+  return fireRequest("userList", [], params, null, key);
 };
 
 export const getUserListSkills = (pathParam: object) => {
@@ -801,6 +801,10 @@ export const editInvestigation = (
 // ICD11
 export const listICD11Diagnosis = (params: object, key: string) => {
   return fireRequest("listICD11Diagnosis", [], params, null, key);
+};
+// Medibase
+export const listMedibaseMedicines = (query: string) => {
+  return fireRequest("listMedibaseMedicines", [], { query });
 };
 
 // Resource

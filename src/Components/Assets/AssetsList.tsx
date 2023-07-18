@@ -6,9 +6,9 @@ import {
   getAnyFacility,
   listAssets,
   getFacilityAssetLocation,
+  getAsset,
 } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
-import { getAsset } from "../../Redux/actions";
 import { useState, useCallback, useEffect } from "react";
 import { Link, navigate } from "raviger";
 import loadable from "@loadable/component";
@@ -70,11 +70,11 @@ const AssetsList = () => {
         page: qParams.page,
         offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
         search_text: qParams.search || "",
-        facility: qParams.facility,
-        asset_type: qParams.asset_type,
-        asset_class: qParams.asset_class,
-        location: qParams.location,
-        status: qParams.status,
+        facility: qParams.facility || "",
+        asset_type: qParams.asset_type || "",
+        asset_class: qParams.asset_class || "",
+        location: qParams.facility ? qParams.location || "" : "",
+        status: qParams.status || "",
       };
       const { data } = await dispatch(listAssets(params));
       if (!status.aborted) {
@@ -149,7 +149,8 @@ const AssetsList = () => {
   );
   const fetchLocationName = useCallback(
     async (status: statusType) => {
-      if (!qParams.location) return setLocationName("");
+      if (!qParams.location || !qParams.facility)
+        return setLocationName(undefined);
       setIsLoading(true);
       const res = await dispatch(
         getFacilityAssetLocation(qParams.facility, qParams.location)
@@ -241,8 +242,10 @@ const AssetsList = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:-mx-8 gap-2">
         {assets.map((asset: AssetData) => (
           <Link
+            key={asset.id}
             href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
             className="text-inherit"
+            data-testid="created-asset-list"
           >
             <div
               key={asset.id}
@@ -261,7 +264,12 @@ const AssetsList = () => {
                       } text-2xl`}
                     />
                   </span>
-                  <p className="truncate w-48">{asset.name}</p>
+                  <p
+                    className="truncate w-48"
+                    data-testid="created-asset-list-name"
+                  >
+                    {asset.name}
+                  </p>
                 </p>
               </div>
               <p className="font-normal text-sm">
@@ -394,12 +402,12 @@ const AssetsList = () => {
         <>
           <FilterBadges
             badges={({ badge, value }) => [
-              value("Facility", "facility", facilityName || ""),
+              value("Facility", "facility", facilityName ?? ""),
               badge("Name/Serial No./QR ID", "search"),
-              value("Asset Type", "asset_type", asset_type || ""),
-              value("Asset Class", "asset_class", asset_class || ""),
-              value("Status", "status", status?.replace(/_/g, " ") || ""),
-              value("Location", "location", locationName || ""),
+              value("Asset Type", "asset_type", asset_type ?? ""),
+              value("Asset Class", "asset_class", asset_class ?? ""),
+              value("Status", "status", status?.replace(/_/g, " ") ?? ""),
+              value("Location", "location", locationName ?? ""),
             ]}
           />
           <div className="grow">

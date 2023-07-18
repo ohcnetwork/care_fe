@@ -733,6 +733,10 @@ const routes: Routes = {
   listICD11Diagnosis: {
     path: "/api/v1/icd/",
   },
+  // Medibase
+  listMedibaseMedicines: {
+    path: "/api/v1/medibase/",
+  },
 
   // Resource
   createResource: {
