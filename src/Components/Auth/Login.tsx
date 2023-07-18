@@ -221,10 +221,10 @@ export const Login = (props: { forgot?: boolean }) => {
             <h1 className="text-4xl lg:text-5xl font-black text-white leading-tight tracking-wider">
               {t("care")}
             </h1>
-            {custom_description ? (
+            {custom_description || custom_site_link ? (
               <div className="py-6">
                 <ReactMarkdown className="max-w-xl text-gray-400">
-                  {custom_description}
+                  {custom_description || t("goal")}
                 </ReactMarkdown>
                 <div className="mx-auto mt-2">
                   <a
@@ -233,7 +233,7 @@ export const Login = (props: { forgot?: boolean }) => {
                     rel="noopener noreferrer"
                     className="text-primary-400 hover:text-primary-500"
                   >
-                    {custom_site_link}
+                    {custom_site_link.replace(/(^\w+:|^)\/\//, "")}
                   </a>
                 </div>
               </div>
