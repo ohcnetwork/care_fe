@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import {
@@ -24,8 +24,9 @@ import ConfirmDialog from "../../Common/ConfirmDialog";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import useFullscreen from "../../../Common/hooks/useFullscreen";
 import { UpdateCameraBoundaryConfigure } from "../../Assets/configure/CameraBoundayConfigure";
+import { BoundaryRange } from "../../Assets/AssetType/ONVIFCamera";
 
-type direction = "left" | "right" | "up" | "down" | null;
+export type direction = "left" | "right" | "up" | "down" | null;
 const LiveFeed = (props: any) => {
   const middlewareHostname =
     props.middlewareHostname || "dev_middleware.coronasafe.live";
@@ -52,11 +53,13 @@ const LiveFeed = (props: any) => {
   const [isPreview, setIsPreview] = useState<boolean>(false);
   const [direction, setDirection] = useState<direction>(null);
   const [_isFullscreen, setFullscreen] = useFullscreen();
-  const boundaryPreset = props.boundaryPreset;
-  const setBoundaryPreset = props.setBoundaryPreset;
-  const updateBoundaryPreset = props.updateBoundaryPreset;
-  const toUpdateBoundary = props.toUpdateBoundary;
-  const updateBoundaryRef = props.updateBoundaryRef;
+  const boundaryPreset: any = props.boundaryPreset;
+  const setBoundaryPreset: (preset: any) => void = props.setBoundaryPreset;
+  const updateBoundaryPreset: (action: "confirm" | "cancel") => void =
+    props.updateBoundaryPreset;
+  const toUpdateBoundary: boolean = props.toUpdateBoundary;
+  const updateBoundaryRef: React.MutableRefObject<any> =
+    props.updateBoundaryRef;
   const { width } = useWindowDimensions();
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
@@ -171,9 +174,10 @@ const LiveFeed = (props: any) => {
     });
   };
 
-  const gotoDirectionalBoundary = () => {
+  const gotoDirectionalBoundary = (): void => {
     if (boundaryPreset?.meta?.range && direction) {
-      const { max_x, max_y, min_x, min_y } = boundaryPreset.meta.range;
+      const { max_x, max_y, min_x, min_y }: BoundaryRange =
+        boundaryPreset.meta.range;
       const position = {
         x: 0,
         y: 0,
@@ -191,12 +195,12 @@ const LiveFeed = (props: any) => {
       }
       if (direction == "up") {
         position.x = (min_x + max_x) / 2;
-        position.y = min_y;
+        position.y = max_y;
         setLoading("Moving to Top Boundary");
       }
       if (direction == "down") {
         position.x = (min_x + max_x) / 2;
-        position.y = max_y;
+        position.y = min_y;
         setLoading("Moving to Bottom Boundary");
       }
       absoluteMove(position, {
@@ -213,8 +217,9 @@ const LiveFeed = (props: any) => {
 
   const changeDirectionalBoundary = (action: "expand" | "shrink") => {
     if (boundaryPreset?.meta?.range) {
-      const { max_x, max_y, min_x, min_y } = boundaryPreset.meta.range;
-      const range = {
+      const { max_x, max_y, min_x, min_y }: BoundaryRange =
+        boundaryPreset.meta.range;
+      const range: BoundaryRange = {
         max_x: max_x,
         max_y: max_y,
         min_x: min_x,
@@ -226,9 +231,9 @@ const LiveFeed = (props: any) => {
       } else if (direction == "right") {
         range.max_x = action == "expand" ? max_x + delta : max_x - delta;
       } else if (direction == "up") {
-        range.min_y = action == "expand" ? min_y - delta : min_y + delta;
-      } else if (direction == "down") {
         range.max_y = action == "expand" ? max_y + delta : max_y - delta;
+      } else if (direction == "down") {
+        range.min_y = action == "expand" ? min_y - delta : min_y + delta;
       }
       setBoundaryPreset({
         ...boundaryPreset,
@@ -252,7 +257,8 @@ const LiveFeed = (props: any) => {
     if (boundaryPreset?.meta?.range) {
       setIsPreview(true);
       setLoading("Previewing Boundary");
-      const { max_x, max_y, min_x, min_y } = boundaryPreset.meta.range;
+      const { max_x, max_y, min_x, min_y }: BoundaryRange =
+        boundaryPreset.meta.range;
       const edegs: any[] = [
         { x: max_x, y: (max_y + min_y) / 2, zoom: 0.2 },
         { x: (max_x + min_x) / 2, y: max_y, zoom: 0.2 },

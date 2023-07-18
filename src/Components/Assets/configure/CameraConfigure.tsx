@@ -21,12 +21,12 @@ interface CameraConfigureProps {
   isLoading: boolean;
   boundaryPreset: any;
   setBoundaryPreset: (preset: any) => void;
-  addBoundaryPreset: (e: any) => void;
-  updateBoundaryPreset: (e: any) => void;
+  addBoundaryPreset: (e: React.SyntheticEvent) => void;
+  updateBoundaryPreset: (action: "confirm" | "cancel") => void;
   deleteBoundaryPreset: () => void;
   toUpdateBoundary: boolean;
-  setToUpdateBoundary(toUpdate: boolean): void;
-  loadingAddBoundaryPreset: boolean;
+  setToUpdateBoundary: (toUpdate: boolean) => void;
+  loadingAddBoundaryPreset?: boolean;
 }
 export default function CameraConfigure(props: CameraConfigureProps) {
   const {
@@ -51,7 +51,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
 
   const updateBoundaryRef = useRef<any>(null);
 
-  const scrollToUpdateBoundary = () => {
+  const scrollToUpdateBoundary = (): void => {
     if (updateBoundaryRef.current)
       updateBoundaryRef.current.scrollIntoView({
         behavior: "smooth",
@@ -98,7 +98,6 @@ export default function CameraConfigure(props: CameraConfigureProps) {
 
           <CameraBoundaryConfigure
             addBoundaryPreset={addBoundaryPreset}
-            updateBoundaryPreset={updateBoundaryPreset}
             deleteBoundaryPreset={deleteBoundaryPreset}
             boundaryPreset={boundaryPreset}
             toUpdateBoundary={toUpdateBoundary}

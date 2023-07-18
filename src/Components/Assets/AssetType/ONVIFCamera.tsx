@@ -26,6 +26,13 @@ interface ONVIFCameraProps {
   asset: any;
 }
 
+export interface BoundaryRange {
+  max_x: number;
+  min_x: number;
+  max_y: number;
+  min_y: number;
+}
+
 const ONVIFCamera = (props: ONVIFCameraProps) => {
   const { assetId, facilityId, asset } = props;
   const [isLoading, setIsLoading] = useState(true);
@@ -53,7 +60,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [presets, setPresets] = useState<any[]>([]);
   const dispatch = useDispatch<any>();
 
-  const mapZoomToBuffer = (zoom: number) => {
+  const mapZoomToBuffer = (zoom: number): number => {
     interface bufferAtZoom {
       [key: string]: number;
     }
@@ -71,16 +78,16 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     return buffer !== 0 ? buffer : 0.0625;
   };
 
-  const calcBoundary = (presets: any[]) => {
+  const calcBoundary = (presets: any[]): BoundaryRange => {
     const INT_MAX = 3;
-    const boundary: any = {
+    const boundary: BoundaryRange = {
       max_x: -INT_MAX,
       min_x: INT_MAX,
       max_y: -INT_MAX,
       min_y: INT_MAX,
     };
 
-    const edgePresetsZoom: any = {
+    const edgePresetsZoom: BoundaryRange = {
       max_x: 0,
       min_x: 0,
       max_y: 0,
@@ -108,14 +115,16 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         }
       }
     });
-    Object.keys(edgePresetsZoom).forEach((key: string) => {
-      const zoom = edgePresetsZoom[key];
+
+    Object.keys(edgePresetsZoom).forEach((key) => {
+      const zoom = edgePresetsZoom[key as keyof BoundaryRange];
       const buffer = mapZoomToBuffer(zoom);
 
       if (key == "max_x" || key == "max_y") {
         boundary[key] = boundary[key] + buffer;
       } else {
-        boundary[key] = boundary[key] - buffer;
+        boundary[key as keyof BoundaryRange] =
+          boundary[key as keyof BoundaryRange] - buffer;
       }
     });
     if (boundary.max_x <= boundary.min_x || boundary.max_y <= boundary.min_y) {
@@ -186,7 +195,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         setBoundaryPreset(null);
         setRefBoundaryPreset(null);
       }
-      setToUpdateBoundary(false);
     };
     if (bed?.id) getBoundaryBedPreset();
   }, [bed]);
@@ -229,13 +237,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     try {
       setLoadingAddBoundaryPreset(true);
 
-      //delete this
-      // const presetData = {
-      //   data: {
-      //     error: "no error",
-      //     utcTime: "2021-09-09T09:09:09.000Z",
-      //   },
-      // };
       if (bed?.id) {
         const presetData = await axios.get(
           `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
@@ -279,11 +280,20 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   };
 
   const updateBoundaryPreset = async (action: any) => {
-    if (boundaryPreset) {
+    if (boundaryPreset && bed?.id) {
       try {
         if (action == "cancel") {
           setBoundaryPreset(refBoundaryPreset);
           setToUpdateBoundary(false);
+          return;
+        }
+        if (
+          !boundaryPreset?.asset_object?.id ||
+          !boundaryPreset?.bed_object?.id
+        ) {
+          Notification.Error({
+            msg: "Something went wrong..!",
+          });
           return;
         }
         const data = {
@@ -329,6 +339,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           setNewPreset("");
           setRefreshPresetsHash(Number(new Date()));
           setBoundaryPreset(null);
+          setRefBoundaryPreset(null);
         } else {
           Notification.Error({
             msg: "Failed to delete Boundary Preset",

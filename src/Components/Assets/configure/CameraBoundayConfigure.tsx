@@ -1,22 +1,21 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { BedModel } from "../../Facility/models";
 import { flushSync } from "react-dom";
 import ButtonV2, { Submit } from "../../Common/components/ButtonV2";
 import Card from "../../../CAREUI/display/Card";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-type direction = "left" | "right" | "up" | "down" | null;
+import { direction } from "../../Facility/Consultations/LiveFeed";
 
 interface CameraBoundaryConfigureProps {
-  addBoundaryPreset(e: any): void;
-  updateBoundaryPreset(action: any): void;
-  deleteBoundaryPreset(): void;
+  addBoundaryPreset: (e: React.SyntheticEvent) => void;
+  deleteBoundaryPreset: () => void;
   boundaryPreset: any;
   bed: BedModel;
   toUpdateBoundary: boolean;
-  setToUpdateBoundary(toUpdate: boolean): void;
-  scrollToUpdateBoundary(): void;
-  loadingAddBoundaryPreset: boolean;
+  setToUpdateBoundary: (toUpdate: boolean) => void;
+  scrollToUpdateBoundary: () => void;
+  loadingAddBoundaryPreset?: boolean;
 }
 
 interface UpdateCameraBoundaryConfigureProps {
@@ -24,7 +23,7 @@ interface UpdateCameraBoundaryConfigureProps {
   direction: direction;
   setDirection(direction: direction): void;
   changeDirectionalBoundary(action: "expand" | "shrink"): void;
-  updateBoundaryPreset(e: any): void;
+  updateBoundaryPreset(action: "confirm" | "cancel"): void;
   updateBoundaryRef: any;
   previewBoundary: () => void;
   isPreview: boolean;
@@ -78,7 +77,9 @@ export default function CameraBoundaryConfigure(
             </div>
             <div className="mt-2">
               <label id="asset-name">Name</label>
-              <div className="text-lg">{`${bed?.name} boundary`}</div>
+              <div className="text-lg">{`${
+                !boundaryPreset ? bed?.name : boundaryPreset?.meta?.preset_name
+              } boundary`}</div>
             </div>
           </div>
           {!boundaryPreset ? (
@@ -99,6 +100,7 @@ export default function CameraBoundaryConfigure(
                       variant="primary"
                       onClick={() => {
                         flushSync(() => {
+                          // check if setToUpdateBoundary is defined
                           setToUpdateBoundary(true);
                         });
                         scrollToUpdateBoundary();
@@ -157,15 +159,15 @@ export function UpdateCameraBoundaryConfigure(
           <div className="flex space-x-8">
             <div className="flex-initial grid grid-cols-3">
               {[
-                false,
+                null,
                 "up",
-                false,
+                null,
                 "left",
-                false,
+                null,
                 "right",
-                false,
+                null,
                 "down",
-                false,
+                null,
               ].map((button, index) => {
                 let out = <div className="w-[20px] h-[20px]" key={index}></div>;
                 if (button) {
@@ -233,7 +235,7 @@ export function UpdateCameraBoundaryConfigure(
                 onClick={() => {
                   changeDirectionalBoundary("expand");
                 }}
-                disabled={isPreview}
+                disabled={isPreview || !direction}
                 className="w-full"
               >
                 Expand
@@ -245,7 +247,7 @@ export function UpdateCameraBoundaryConfigure(
                 onClick={() => {
                   changeDirectionalBoundary("shrink");
                 }}
-                disabled={isPreview}
+                disabled={isPreview || !direction}
                 className="w-full"
               >
                 Shrink
@@ -269,6 +271,7 @@ export function UpdateCameraBoundaryConfigure(
               size="small"
               onClick={() => {
                 updateBoundaryPreset("confirm");
+                setDirection(null);
               }}
               id="confirm-update-boundary-preset"
               disabled={isPreview}
@@ -281,6 +284,7 @@ export function UpdateCameraBoundaryConfigure(
               border={true}
               onClick={() => {
                 updateBoundaryPreset("cancel");
+                setDirection(null);
               }}
               id="cancel-modify-boundary-preset"
               disabled={isPreview}
