@@ -2,8 +2,9 @@ import DropdownMenu, {
   DropdownItem,
   DropdownItemProps,
 } from "../../Components/Common/components/Menu";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+
 import ButtonV2 from "../../Components/Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 import useExport from "../../Common/hooks/useExport";
 
 interface ExportItem {
@@ -47,9 +48,9 @@ export const ExportMenu = ({
         icon={<CareIcon className="care-l-import" />}
         className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500 tooltip"
       >
-        {exportItems.map((item, index) => (
+        {exportItems.map((item) => (
           <DropdownItem
-            key={index}
+            key={item.label}
             onClick={() =>
               exportFile(item.action, item.filePrefix, item.type, item.parse)
             }
