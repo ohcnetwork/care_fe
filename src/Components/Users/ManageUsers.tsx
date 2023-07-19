@@ -413,11 +413,7 @@ export default function ManageUsers() {
   }
 
   return (
-    <Page
-      title="User Management"
-      hideBack={true}
-      breadcrumbs={false}
-    >
+    <Page title="User Management" hideBack={true} breadcrumbs={false}>
       {expandSkillList && (
         <SkillsSlideOver
           show={expandSkillList}
