@@ -262,7 +262,7 @@ export default function Uptime(props: { assetId: string }) {
             moment(record.timestamp).hour() < end
         );
         if (recordsInPeriod.length === 0) {
-          if (moment().set("hour", end).isBefore(moment())) {
+          if (moment().hour(end).minute(0).second(0).isBefore(moment())) {
             statusColors.push(
               statusColors[statusColors.length - 1] ??
                 STATUS_COLORS["not_monitored"]
