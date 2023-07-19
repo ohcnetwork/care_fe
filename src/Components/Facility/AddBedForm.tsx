@@ -10,7 +10,6 @@ import {
   updateFacilityBed,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { LegacySelectField } from "../Common/HelperInputFields";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
@@ -175,11 +174,10 @@ export const AddBedForm = (props: BedFormProps) => {
             },
           }),
         }}
-      />
-      <div className="mt-10">
-        <Card>
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <CardContent>
+      >
+        <div className="mt-10">
+          <Card>
+            <form onSubmit={(e) => handleSubmit(e)}>
               <div className="mt-2 grid gap-4 grid-cols-1">
                 <div>
                   <TextFormField
@@ -204,57 +202,39 @@ export const AddBedForm = (props: BedFormProps) => {
                   />
                 </div>
 
-                <div>
-                  <FieldLabel required id="bedType">
-                    Bed Type
-                  </FieldLabel>
-                  <LegacySelectField
-                    id="bed-type"
-                    fullWidth
-                    name="bed_type"
-                    placeholder=""
-                    variant="outlined"
-                    margin="dense"
-                    options={[
-                      {
-                        id: "",
-                        name: "Select",
-                      },
-                      ...LOCATION_BED_TYPES,
-                    ]}
-                    optionValue="name"
-                    value={bedType}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setBedType(e.target.value)
-                    }
-                    errors={errors.bedType}
-                  />
-                </div>
+                <SelectFormField
+                  id="bed-type"
+                  className="w-full"
+                  name="bed_type"
+                  options={LOCATION_BED_TYPES}
+                  optionLabel={(option) => option.name}
+                  optionValue={(option) => option.id}
+                  value={bedType}
+                  onChange={(e) => setBedType(e.value)}
+                  error={errors.bedType}
+                />
+
                 {!bedId && (
-                  <div>
-                    <div>
-                      <CheckBoxFormField
-                        label="Do you want to make multiple beds?"
-                        onChange={() => {
-                          setMultipleBeds(!multipleBeds);
-                          if (!multipleBeds) setNumberOfBeds(1);
-                        }}
-                        name={"multipleBeds"}
-                      />
-                    </div>
-                    <div className="mt-2">
-                      <TextFormField
-                        name="number_of_beds"
-                        disabled={!multipleBeds}
-                        label="Number of beds"
-                        type="number"
-                        value={numberOfBeds.toString()}
-                        min={1}
-                        max={100}
-                        onChange={(e) => setNumberOfBeds(Number(e.value))}
-                      />
-                    </div>
-                  </div>
+                  <>
+                    <CheckBoxFormField
+                      label="Do you want to make multiple beds?"
+                      onChange={() => {
+                        setMultipleBeds(!multipleBeds);
+                        if (!multipleBeds) setNumberOfBeds(1);
+                      }}
+                      name={"multipleBeds"}
+                    />
+                    <TextFormField
+                      name="number_of_beds"
+                      disabled={!multipleBeds}
+                      label="Number of beds"
+                      type="number"
+                      value={numberOfBeds.toString()}
+                      min={1}
+                      max={100}
+                      onChange={(e) => setNumberOfBeds(Number(e.value))}
+                    />
+                  </>
                 )}
                 <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
                   <Cancel onClick={handleCancel} />
