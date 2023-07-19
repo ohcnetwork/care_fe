@@ -899,15 +899,10 @@ export const confirmWithMobileOtp = (
   patientId?: string
 ) => fireRequest("confirmWithMobileOtp", [], { txnId, otp, patientId });
 
-export const linkViaQR = (
-  abha_details: any,
-  facilityId: string,
-  patientId?: string
-) => {
+export const linkViaQR = (abha_details: any, patientId?: string) => {
   return fireRequest("linkViaQR", [], {
     ...abha_details,
-    facilityId,
-    patientId: patientId ?? null,
+    patientId,
   });
 };
 

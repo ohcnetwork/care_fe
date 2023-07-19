@@ -46,7 +46,6 @@ export const validateRule = (
   );
 };
 interface Props {
-  facilityId: string;
   patientId?: string;
   patientMobile?: string | undefined;
   onSuccess?: (abha: any) => void;
@@ -62,7 +61,6 @@ type Step =
 
 export default function LinkABHANumberModal({
   patientId,
-  facilityId,
   patientMobile,
   onSuccess,
   ...props
@@ -82,14 +80,13 @@ export default function LinkABHANumberModal({
   );
 
   return (
-    <DialogModal title={title} {...props}>
+    <DialogModal className="!sm:max-w-lg" title={title} {...props}>
       <div className="p-4">
         {currentStep === "ScanExistingQR" && (
           <ScanABHAQRSection
             onSignup={() => {
               setCurrentStep("AadhaarVerification");
             }}
-            facilityId={facilityId}
             patientId={patientId}
             onSuccess={onSuccess}
             closeModal={props.onClose}
@@ -137,7 +134,6 @@ export default function LinkABHANumberModal({
 interface ScanABHAQRSectionProps {
   onSignup: () => void;
   patientId?: string;
-  facilityId: string;
   onSuccess?: (abha: any) => void;
   closeModal: () => void;
 }
@@ -145,7 +141,6 @@ interface ScanABHAQRSectionProps {
 const ScanABHAQRSection = ({
   onSignup,
   patientId,
-  facilityId,
   onSuccess,
   closeModal,
 }: ScanABHAQRSectionProps) => {
@@ -192,12 +187,25 @@ const ScanABHAQRSection = ({
 
           try {
             const abha = JSON.parse(value);
-            console.log(abha);
-            const res = await dispatch(linkViaQR(abha, facilityId, patientId));
+            const res = await dispatch(linkViaQR(abha, patientId));
 
             if (res?.status === 200 || res?.status === 202) {
               Notify.Success({ msg: "Request sent successfully" });
-              onSuccess?.(res.data);
+              onSuccess?.({
+                ...res.data,
+                abha_profile: {
+                  ...res.data?.abha_profile,
+                  healthIdNumber: res.data?.abha_profile?.abha_number,
+                  healthId: res.data?.abha_profile?.health_id,
+                  mobile: abha?.mobile,
+                  monthOfBirth:
+                    res.data?.abha_profile?.date_of_birth?.split("-")[1],
+                  dayOfBirth:
+                    res.data?.abha_profile?.date_of_birth?.split("-")[2],
+                  yearOfBirth:
+                    res.data?.abha_profile?.date_of_birth?.split("-")[0],
+                },
+              });
             } else {
               Notify.Error({ msg: "Linking Failed" });
             }
