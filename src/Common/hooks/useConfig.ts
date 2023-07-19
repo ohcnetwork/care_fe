@@ -1,30 +1,26 @@
 import { useSelector } from "react-redux";
 
+interface ILogo {
+  light: string;
+  dark: string;
+}
 export interface IConfig {
   dashboard_url: string;
   github_url: string;
   coronasafe_url: string;
-  dpg_url: string;
   site_url: string;
   analytics_server_url: string;
-  static_header_logo: string;
-  static_ohc_light_logo: string;
-  static_ohc_green_logo: string;
-  static_light_logo: string;
-  static_black_logo: string;
+
+  header_logo: ILogo;
+  main_logo: ILogo;
+
   /**
-   * White logo of Digital Public Goods.
+   * Logo and description for custom deployment. (This overrides the state logo)
    */
-  static_dpg_white_logo: string;
-  static_coronasafe_logo: string;
-  /**
-   * Logo, description and site link for custom deployment.
-   */
-  static_custom_logo: string;
-  static_custom_logo_alt: string;
-  static_custom_logo_white: boolean;
-  custom_description: string;
-  custom_site_link: string;
+  custom_logo?: ILogo;
+  custom_logo_alt?: ILogo;
+  custom_description?: string;
+
   /**
    * The API key for the Google Maps API used for location picker.
    */
@@ -48,11 +44,7 @@ export interface IConfig {
   /**
    * If present, the image will be displayed in the login page.
    */
-  state_logo?: string;
-  /**
-   * If true, the state logo will be white by applying "invert brightness-0" classes.
-   */
-  state_logo_white?: boolean;
+  state_logo?: ILogo;
   /**
    * URL of the sample format for asset import.
    */
