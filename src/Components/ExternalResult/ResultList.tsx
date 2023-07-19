@@ -39,6 +39,26 @@ export default function ResultList() {
   const [resultId, setResultId] = useState(-1);
   const [dataList, setDataList] = useState({ lsgList: [], wardList: [] });
 
+  const [phone_number, setPhoneNumber] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+
+  const setPhoneNum = (mobile_number: string) => {
+    setPhoneNumber(mobile_number);
+    if (mobile_number.length >= 13) {
+      setPhoneNumberError("");
+      updateQuery({ mobile_number });
+      return;
+    }
+
+    if (mobile_number === "+91" || mobile_number === "") {
+      setPhoneNumberError("");
+      updateQuery({ mobile_number: "" });
+      return;
+    }
+
+    setPhoneNumberError("Enter a valid number");
+  };
+
   let manageResults: any = null;
   useEffect(() => {
     setIsLoading(true);
@@ -279,8 +299,9 @@ export default function ResultList() {
               <PhoneNumberFormField
                 name="mobile_number"
                 labelClassName="hidden"
-                value={qParams.mobile_number || "+91"}
-                onChange={(event) => updateQuery({ [event.name]: event.value })}
+                value={phone_number}
+                onChange={(e) => setPhoneNum(e.value)}
+                error={phoneNumberError}
                 placeholder="Search by Phone Number"
               />
             </div>
