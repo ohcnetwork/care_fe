@@ -65,7 +65,7 @@ export default function LinkABHANumberModal({
   onSuccess,
   ...props
 }: Props) {
-  const [currentStep, setCurrentStep] = useState<Step>("MobileVerification");
+  const [currentStep, setCurrentStep] = useState<Step>("AadhaarVerification");
   const [transactionId, setTransactionId] = useState<string>("sds");
 
   const title = (
