@@ -37,11 +37,10 @@ function StatusPopover({
   numDays: number;
 }) {
   const incidents =
-    records?.filter(
-      (record) =>
-        record.status !== AssetStatus.operational &&
-        record.status !== AssetStatus.not_monitored
-    ) || [];
+    records?.filter((record) => record.status !== AssetStatus.not_monitored) ||
+    [];
+
+  let totalMinutes = 0;
 
   return (
     <Popover className="mt-10 relative">
@@ -49,7 +48,7 @@ function StatusPopover({
         className={`absolute z-50 w-80 transform px-4 sm:px-0 ${
           day > numDays - 7
             ? "-translate-x-6"
-            : day < 4
+            : day < 7
             ? "-translate-x-full"
             : "-translate-x-1/2"
         }`}
@@ -62,28 +61,28 @@ function StatusPopover({
                 <span className="font-bold ">{date}</span>
                 <div className="border-t border-gray-200 my-2"></div>
                 {incidents.length === 0 ? (
-                  <span>No incidents for the day</span>
+                  <>
+                    <span>No status for the day</span>
+                  </>
                 ) : (
                   <>
-                    <span className="font-bold ">Incidents</span>
+                    <span className="font-bold my-2 block">Status Updates</span>
                     {incidents.map((incident, index) => {
                       const nextIncident = incidents[index + 1];
                       let endTimestamp;
                       let ongoing = false;
 
-                      if (nextIncident) {
-                        endTimestamp = moment(nextIncident.timestamp).format(
-                          "h:mmA"
-                        );
+                      if (nextIncident?.id) {
+                        endTimestamp = moment(nextIncident.timestamp);
                       } else if (
                         moment(incident.timestamp).isSame(now, "day")
                       ) {
-                        endTimestamp = moment().format("h:mmA");
+                        endTimestamp = moment();
                         ongoing = true;
                       } else {
                         endTimestamp = moment(incident.timestamp)
                           .add(1, "day")
-                          .format("h:mmA");
+                          .startOf("day");
                       }
                       const duration = !ongoing
                         ? moment
@@ -94,6 +93,14 @@ function StatusPopover({
                             )
                             .humanize()
                         : "Ongoing";
+                      if (
+                        incident.status === AssetStatus.down ||
+                        incident.status === AssetStatus.maintenance
+                      )
+                        totalMinutes += moment(endTimestamp).diff(
+                          moment(incident.timestamp),
+                          "minutes"
+                        );
 
                       return (
                         <div className="flex justify-between" key={index}>
@@ -108,7 +115,7 @@ function StatusPopover({
                           </span>
                           <span>
                             {moment(incident.timestamp).format("h:mmA")} -{" "}
-                            {endTimestamp}
+                            {moment(endTimestamp).format("h:mmA")}
                           </span>
                           <span>{duration}</span>
                         </div>
@@ -116,19 +123,12 @@ function StatusPopover({
                     })}
                     <div className="border-t border-gray-200 my-2"></div>
                     <div className="flex justify-between mt-1">
-                      <span className="font-bold">Total</span>
+                      <span className="font-bold">Total downtime</span>
                       <span>
                         {incidents.length > 0 &&
-                          moment
-                            .duration(
-                              incidents.reduce(
-                                (totalDuration, incident) =>
-                                  totalDuration +
-                                  moment().diff(moment(incident.timestamp)),
-                                0
-                              )
-                            )
-                            .humanize()}
+                          `${Math.round(totalMinutes / 60)} hrs ${
+                            totalMinutes % 60
+                          } mins`}
                       </span>
                     </div>
                   </>
@@ -157,21 +157,45 @@ export default function Uptime(props: { assetId: string }) {
   const handleResize = () => {
     const containerWidth = graphElem.current?.clientWidth ?? window.innerWidth;
     const newNumDays = Math.floor(containerWidth / 20);
-    setNumDays(newNumDays);
+    setNumDays(Math.min(newNumDays, 100));
   };
 
   const setUptimeRecord = (records: AssetUptimeRecord[]): void => {
     const recordsByDayBefore: { [key: number]: AssetUptimeRecord[] } = {};
+
     records.forEach((record) => {
       const timestamp = moment(record.timestamp).startOf("day");
       const today = moment().startOf("day");
       const diffDays = today.diff(timestamp, "days");
-      if (diffDays < 100) {
-        recordsByDayBefore[diffDays] = recordsByDayBefore[diffDays]
-          ? [...recordsByDayBefore[diffDays], record]
-          : [record];
+      if (diffDays <= 100) {
+        const recordsForDay = recordsByDayBefore[diffDays] || [];
+        recordsForDay.push(record);
+        recordsByDayBefore[diffDays] = recordsForDay;
       }
     });
+
+    // Carry over status for days with no records
+    let statusToCarryOver = AssetStatus.not_monitored;
+    for (let i = 100; i >= 0; i--) {
+      if (!recordsByDayBefore[i]) {
+        recordsByDayBefore[i] = [];
+        if (statusToCarryOver) {
+          recordsByDayBefore[i].push({
+            id: "",
+            asset: { id: "", name: "" },
+            created_date: "",
+            modified_date: "",
+            status: statusToCarryOver,
+            timestamp: moment()
+              .subtract(i, "days")
+              .startOf("day")
+              .toISOString(),
+          });
+        }
+      } else {
+        statusToCarryOver = recordsByDayBefore[i][0].status;
+      }
+    }
 
     setSummary(recordsByDayBefore);
   };
@@ -227,7 +251,8 @@ export default function Uptime(props: { assetId: string }) {
   const getStatusColor = (day: number) => {
     if (summary[day]) {
       const dayRecords = summary[day];
-      const statusColors = [];
+      const statusColors: (typeof STATUS_COLORS)[keyof typeof STATUS_COLORS][] =
+        [];
       for (let i = 0; i < 3; i++) {
         const start = i * 8;
         const end = (i + 1) * 8;
@@ -236,7 +261,16 @@ export default function Uptime(props: { assetId: string }) {
             moment(record.timestamp).hour() >= start &&
             moment(record.timestamp).hour() < end
         );
-        if (
+        if (recordsInPeriod.length === 0) {
+          if (moment().set("hour", end).isBefore(moment())) {
+            statusColors.push(
+              statusColors[statusColors.length - 1] ??
+                STATUS_COLORS["not_monitored"]
+            );
+          } else {
+            statusColors.push(STATUS_COLORS["not_monitored"]);
+          }
+        } else if (
           recordsInPeriod.some(
             (record) => record.status === AssetStatus["down"]
           )
