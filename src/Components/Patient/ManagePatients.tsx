@@ -575,7 +575,10 @@ export const PatientManager = () => {
                       prefix={
                         <span className="text-gray-600">{t("updated")}</span>
                       }
-                      time={patient.modified_date}
+                      time={
+                        patient.last_consultation?.modified_date ??
+                        patient.modified_date
+                      }
                     />
                   </div>
                 </div>
