@@ -26,8 +26,11 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
 
     if (response.status === 200 && response.data) {
       if (type === "png") {
-        window.location.href =
+        const downloadLink = document.createElement("a");
+        downloadLink.href =
           "data:application/octet-stream;base64," + response.data;
+        downloadLink.download = "abha.png";
+        downloadLink.click();
       } else {
         const htmlPopup = `<embed width=100% height=100%" type='application/pdf' src='data:application/pdf;base64,${response.data}'></embed>`;
 
@@ -43,7 +46,7 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
   return (
     <DialogModal
       title={
-        <p className="flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <h4>ABHA Profile</h4>
           <div className="flex items-center gap-2">
             <CareIcon
@@ -55,7 +58,7 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
               className="care-l-import cursor-pointer"
             />
           </div>
-        </p>
+        </div>
       }
       show={show}
       onClose={onClose}
