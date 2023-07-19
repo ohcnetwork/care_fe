@@ -99,7 +99,9 @@ function StatusPopover({
                         <div className="flex justify-between" key={index}>
                           <span
                             className={`capitalize ${
-                              STATUS_COLORS_TEXT[incident.status]
+                              STATUS_COLORS_TEXT[
+                                incident.status as keyof typeof STATUS_COLORS_TEXT
+                              ]
                             }`}
                           >
                             {incident.status}
@@ -161,8 +163,8 @@ export default function Uptime(props: { assetId: string }) {
   const setUptimeRecord = (records: AssetUptimeRecord[]): void => {
     const recordsByDayBefore: { [key: number]: AssetUptimeRecord[] } = {};
     records.forEach((record) => {
-      const timestamp = moment(record.timestamp);
-      const today = moment();
+      const timestamp = moment(record.timestamp).startOf("day");
+      const today = moment().startOf("day");
       const diffDays = today.diff(timestamp, "days");
       if (diffDays < 100) {
         recordsByDayBefore[diffDays] = recordsByDayBefore[diffDays]
@@ -227,14 +229,12 @@ export default function Uptime(props: { assetId: string }) {
       const dayRecords = summary[day];
       const statusColors = [];
       for (let i = 0; i < 3; i++) {
-        const start = moment()
-          .startOf("day")
-          .add(i * 8, "hours");
-        const end = moment()
-          .startOf("day")
-          .add((i + 1) * 8, "hours");
-        const recordsInPeriod = dayRecords.filter((record) =>
-          moment(record.timestamp).isBetween(start, end)
+        const start = i * 8;
+        const end = (i + 1) * 8;
+        const recordsInPeriod = dayRecords.filter(
+          (record) =>
+            moment(record.timestamp).hour() >= start &&
+            moment(record.timestamp).hour() < end
         );
         if (
           recordsInPeriod.some(
