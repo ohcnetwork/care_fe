@@ -679,7 +679,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
     });
     const data = {
-      abha_number: formData.abha_number,
+      abha_number: state.form.abha_number,
       phone_number: parsePhoneNumberFromString(formData.phone_number)?.format(
         "E.164"
       ),
@@ -832,45 +832,63 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     setIsLoading(false);
   };
 
-  const handleAbhaLinking = ({
-    id,
-    abha_profile: {
-      healthIdNumber,
-      healthId,
-      name,
-      mobile,
-      gender,
-      monthOfBirth,
-      dayOfBirth,
-      yearOfBirth,
-      pincode,
-    },
-  }: any) => {
+  const handleAbhaLinking = (
+    {
+      id,
+      abha_profile: {
+        healthIdNumber,
+        healthId,
+        name,
+        mobile,
+        gender,
+        monthOfBirth,
+        dayOfBirth,
+        yearOfBirth,
+        pincode,
+      },
+    }: any,
+    field: any
+  ) => {
     const values: any = {};
     if (id) values["abha_number"] = id;
     if (healthIdNumber) values["health_id_number"] = healthIdNumber;
     if (healthId) values["health_id"] = healthId;
-    if (name) values["name"] = name;
+
+    if (name)
+      field("name").onChange({
+        name: "name",
+        value: name,
+      });
+
     if (mobile) {
-      values["phone_number"] = parsePhoneNumberFromString(mobile, "IN")?.format(
-        "E.164"
-      );
-      values["emergency_phone_number"] = parsePhoneNumberFromString(
-        mobile,
-        "IN"
-      )?.format("E.164");
+      field("phone_number").onChange({
+        name: "phone_number",
+        value: parsePhoneNumberFromString(mobile, "IN")?.format("E.164"),
+      });
+
+      field("emergency_phone_number").onChange({
+        name: "emergency_phone_number",
+        value: parsePhoneNumberFromString(mobile, "IN")?.format("E.164"),
+      });
     }
+
     if (gender)
-      values["gender"] = gender === "M" ? "1" : gender === "F" ? "2" : "3";
+      field("gender").onChange({
+        name: "gender",
+        value: gender === "M" ? "1" : gender === "F" ? "2" : "3",
+      });
+
     if (monthOfBirth && dayOfBirth && yearOfBirth)
-      values["date_of_birth"] = new Date(
-        `${monthOfBirth}-${dayOfBirth}-${yearOfBirth}`
-      );
-    if (pincode) {
-      values["pincode"] = pincode;
-    } else {
-      // handle state and district using stateName and districtName
-    }
+      field("date_of_birth").onChange({
+        name: "date_of_birth",
+        value: new Date(`${monthOfBirth}-${dayOfBirth}-${yearOfBirth}`),
+      });
+
+    if (pincode)
+      field("pincode").onChange({
+        name: "pincode",
+        value: pincode,
+      });
 
     dispatch({ type: "set_form", form: { ...state.form, ...values } });
     setShowLinkAbhaNumberModal(false);
@@ -956,24 +974,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   return (
     <div className="px-2 pb-2">
-      {showLinkAbhaNumberModal && (
-        <LinkABHANumberModal
-          facilityId={facilityId}
-          show={showLinkAbhaNumberModal}
-          onClose={() => setShowLinkAbhaNumberModal(false)}
-          onSuccess={(data: any) => {
-            if (data.facility) {
-              // if patient object
-              navigate(
-                `/facility/${data.facility}/patient/${data.id}/consultation`
-              );
-              return;
-            }
-
-            handleAbhaLinking(data);
-          }}
-        />
-      )}
       {statusDialog.show && (
         <DuplicatePatientDialog
           patientList={statusDialog.patientList}
@@ -1108,6 +1108,24 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
                           ABHA Details
                         </h1>
+                        {showLinkAbhaNumberModal && (
+                          <LinkABHANumberModal
+                            facilityId={facilityId}
+                            show={showLinkAbhaNumberModal}
+                            onClose={() => setShowLinkAbhaNumberModal(false)}
+                            onSuccess={(data: any) => {
+                              if (data.facility) {
+                                // if patient object
+                                navigate(
+                                  `/facility/${data.facility}/patient/${data.id}/consultation`
+                                );
+                                return;
+                              }
+
+                              handleAbhaLinking(data, field);
+                            }}
+                          />
+                        )}
                         {!state.form.abha_number ? (
                           <button
                             className="btn btn-primary my-4"
