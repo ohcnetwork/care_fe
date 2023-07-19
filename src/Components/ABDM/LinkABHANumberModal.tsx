@@ -65,7 +65,7 @@ export default function LinkABHANumberModal({
   onSuccess,
   ...props
 }: Props) {
-  const [currentStep, setCurrentStep] = useState<Step>("AadhaarVerification");
+  const [currentStep, setCurrentStep] = useState<Step>("MobileVerification");
   const [transactionId, setTransactionId] = useState<string>("sds");
 
   const title = (
@@ -80,7 +80,7 @@ export default function LinkABHANumberModal({
   );
 
   return (
-    <DialogModal className="!sm:max-w-lg" title={title} {...props}>
+    <DialogModal className="max-w-lg" title={title} {...props}>
       <div className="p-4">
         {currentStep === "ScanExistingQR" && (
           <ScanABHAQRSection
@@ -299,9 +299,8 @@ const ScanABHAQRSection = ({
                       setTxnId(response.data.txnId);
                     }
                   }}
-                  className=""
                 >
-                  {method}
+                  {method.replace(/_/g, " ")}
                 </DropdownItem>
               ))}
             </Dropdown>
@@ -670,7 +669,7 @@ const VerifyMobileSection = ({
         error={mobileError}
       />
 
-      {otpDispatched && (
+      {otpDispatched ? (
         <OtpFormField
           name="otp"
           label="Enter 6-digit OTP sent to the registered mobile"
@@ -679,6 +678,12 @@ const VerifyMobileSection = ({
           onChange={(value) => setOtp(value as string)}
           error={otpError}
         />
+      ) : (
+        <p className="-mt-4 text-warning-600 text-sm">
+          <CareIcon className="w-4 h-4 care-l-exclamation-octagon" /> Mobile
+          Number will be automatically linked if it is linked with the given
+          Aadhaar number.
+        </p>
       )}
 
       <div className="flex gap-2 items-center justify-end mt-4">
@@ -746,8 +751,14 @@ const CreateHealthIDSection = ({
         onFocus={() => setIsHealthIdInputInFocus(true)}
         onBlur={() => setIsHealthIdInputInFocus(false)}
       />
+
+      <p className="-mt-4 text-warning-600 text-sm">
+        <CareIcon className="w-4 h-4 care-l-exclamation-octagon" /> Existing
+        ABHA Address is used if ABHA Number already exists.
+      </p>
+
       {isHealthIdInputInFocus && (
-        <div className="pl-2 text-small text-gray-500 mb-2">
+        <div className="pl-2 text-sm text-gray-500 mb-2">
           {validateRule(
             healthId.length >= 4,
             "Should be atleast 4 character long"
