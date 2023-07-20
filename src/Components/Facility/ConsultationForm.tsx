@@ -253,7 +253,6 @@ export const ConsultationForm = (props: any) => {
         setIsLoading(true);
         const res = await dispatchAction(getPatient({ id: patientId }));
         if (res.data) {
-          // setAbhaNumber(res.data.abha_number_object?.abha_number ?? "");
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
           if (isUpdate) {

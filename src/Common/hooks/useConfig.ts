@@ -58,6 +58,10 @@ export interface IConfig {
    */
   enable_hcx: boolean;
   /**
+   * Env to enable ABDM features
+   */
+  enable_abdm: boolean;
+  /**
    * Env to toggle peacetime and wartime shifting
    */
   wartime_shifting: boolean;

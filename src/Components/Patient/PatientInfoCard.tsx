@@ -35,7 +35,7 @@ export default function PatientInfoCard(props: {
     !!props.showAbhaProfile
   );
 
-  const { enable_hcx } = useConfig();
+  const { enable_hcx, enable_abdm } = useConfig();
   const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
   const patient = props.patient;
@@ -366,55 +366,55 @@ export default function PatientInfoCard(props: {
                   </div>
                 )
             )}
-          {patient.abha_number ? (
-            <>
-              <ButtonV2
-                className="hover:text-white flex gap-3 justify-start font-semibold"
-                onClick={() => setShowABHAProfile(true)}
-              >
-                <CareIcon className="care-l-user-square" />
-                <p>Show ABHA Profile</p>
-              </ButtonV2>
-              <ButtonV2
-                className="hover:text-white flex gap-3 justify-start font-semibold mt-0"
-                onClick={() => setShowLinkCareContext(true)}
-              >
-                <CareIcon className="care-l-link" />
-                <p>Link Care Context</p>
-              </ButtonV2>
-              <ABHAProfileModal
-                patientId={patient.id}
-                abha={patient.abha_number_object}
-                show={showABHAProfile}
-                onClose={() => setShowABHAProfile(false)}
-              />
-              <LinkCareContextModal
-                consultationId={props.consultationId}
-                patient={patient}
-                show={showLinkCareContext}
-                onClose={() => setShowLinkCareContext(false)}
-              />
-            </>
-          ) : (
-            <>
-              <ButtonV2
-                className="hover:text-white flex gap-3 justify-start font-semibold"
-                onClick={() => setShowLinkABHANumber(true)}
-              >
-                <CareIcon className="care-l-link" />
-                <p>Link ABHA Number</p>
-              </ButtonV2>
-              <LinkABHANumberModal
-                show={showLinkABHANumber}
-                onClose={() => setShowLinkABHANumber(false)}
-                facilityId={patient.facility as string}
-                patientId={patient.id as any}
-                onSuccess={(_) => {
-                  window.location.href += "?show-abha-profile=true";
-                }}
-              />
-            </>
-          )}
+          {enable_abdm &&
+            (patient.abha_number ? (
+              <>
+                <ButtonV2
+                  className="hover:text-white flex gap-3 justify-start font-semibold"
+                  onClick={() => setShowABHAProfile(true)}
+                >
+                  <CareIcon className="care-l-user-square" />
+                  <p>Show ABHA Profile</p>
+                </ButtonV2>
+                <ButtonV2
+                  className="hover:text-white flex gap-3 justify-start font-semibold mt-0"
+                  onClick={() => setShowLinkCareContext(true)}
+                >
+                  <CareIcon className="care-l-link" />
+                  <p>Link Care Context</p>
+                </ButtonV2>
+                <ABHAProfileModal
+                  patientId={patient.id}
+                  abha={patient.abha_number_object}
+                  show={showABHAProfile}
+                  onClose={() => setShowABHAProfile(false)}
+                />
+                <LinkCareContextModal
+                  consultationId={props.consultationId}
+                  patient={patient}
+                  show={showLinkCareContext}
+                  onClose={() => setShowLinkCareContext(false)}
+                />
+              </>
+            ) : (
+              <>
+                <ButtonV2
+                  className="hover:text-white flex gap-3 justify-start font-semibold"
+                  onClick={() => setShowLinkABHANumber(true)}
+                >
+                  <CareIcon className="care-l-link" />
+                  <p>Link ABHA Number</p>
+                </ButtonV2>
+                <LinkABHANumberModal
+                  show={showLinkABHANumber}
+                  onClose={() => setShowLinkABHANumber(false)}
+                  patientId={patient.id as any}
+                  onSuccess={(_) => {
+                    window.location.href += "?show-abha-profile=true";
+                  }}
+                />
+              </>
+            ))}
         </div>
       </section>
     </>

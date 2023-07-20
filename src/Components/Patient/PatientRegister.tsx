@@ -180,7 +180,7 @@ const scrollTo = (id: string | boolean) => {
 
 export const PatientRegister = (props: PatientRegisterProps) => {
   const { goBack } = useAppHistory();
-  const { gov_data_api_key, enable_hcx } = useConfig();
+  const { gov_data_api_key, enable_hcx, enable_abdm } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
@@ -1104,74 +1104,76 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 >
                   {(field) => (
                     <>
-                      <div className="mb-8 rounded overflow-visible border border-gray-200 p-4">
-                        <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
-                          ABHA Details
-                        </h1>
-                        {showLinkAbhaNumberModal && (
-                          <LinkABHANumberModal
-                            facilityId={facilityId}
-                            show={showLinkAbhaNumberModal}
-                            onClose={() => setShowLinkAbhaNumberModal(false)}
-                            onSuccess={(data: any) => {
-                              if (data.facility) {
-                                // if patient object
-                                navigate(
-                                  `/facility/${data.facility}/patient/${data.id}/consultation`
-                                );
-                                return;
-                              }
+                      {enable_abdm && (
+                        <div className="mb-8 rounded overflow-visible border border-gray-200 p-4">
+                          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                            ABHA Details
+                          </h1>
+                          {showLinkAbhaNumberModal && (
+                            <LinkABHANumberModal
+                              facilityId={facilityId}
+                              show={showLinkAbhaNumberModal}
+                              onClose={() => setShowLinkAbhaNumberModal(false)}
+                              onSuccess={(data: any) => {
+                                if (data.facility) {
+                                  // if patient object
+                                  navigate(
+                                    `/facility/${data.facility}/patient/${data.id}/consultation`
+                                  );
+                                  return;
+                                }
 
-                              handleAbhaLinking(data, field);
-                            }}
-                          />
-                        )}
-                        {!state.form.abha_number ? (
-                          <button
-                            className="btn btn-primary my-4"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setShowLinkAbhaNumberModal(true);
-                            }}
-                          >
-                            Link Abha Number
-                          </button>
-                        ) : (
-                          <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                            <div id="abha-number">
-                              <TextFormField
-                                id="abha-number"
-                                name="abha-number"
-                                label="ABHA Number"
-                                type="text"
-                                value={state.form.health_id_number}
-                                onChange={() => null}
-                                disabled={true}
-                                error=""
-                              />
-                            </div>
-                            <div id="health-id">
-                              {state.form.health_id ? (
+                                handleAbhaLinking(data, field);
+                              }}
+                            />
+                          )}
+                          {!state.form.abha_number ? (
+                            <button
+                              className="btn btn-primary my-4"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setShowLinkAbhaNumberModal(true);
+                              }}
+                            >
+                              Link Abha Number
+                            </button>
+                          ) : (
+                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                              <div id="abha-number">
                                 <TextFormField
-                                  id="health-id"
-                                  name="health-id"
-                                  label="Abha Address"
+                                  id="abha-number"
+                                  name="abha-number"
+                                  label="ABHA Number"
                                   type="text"
-                                  value={state.form.health_id}
+                                  value={state.form.health_id_number}
                                   onChange={() => null}
                                   disabled={true}
                                   error=""
                                 />
-                              ) : (
-                                <div className="text-sm text-gray-500 mt-4">
-                                  No Abha Address Associated with this ABHA
-                                  Number
-                                </div>
-                              )}
+                              </div>
+                              <div id="health-id">
+                                {state.form.health_id ? (
+                                  <TextFormField
+                                    id="health-id"
+                                    name="health-id"
+                                    label="Abha Address"
+                                    type="text"
+                                    value={state.form.health_id}
+                                    onChange={() => null}
+                                    disabled={true}
+                                    error=""
+                                  />
+                                ) : (
+                                  <div className="text-sm text-gray-500 mt-4">
+                                    No Abha Address Associated with this ABHA
+                                    Number
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </div>
+                          )}
+                        </div>
+                      )}
                       <div className="mb-8 rounded overflow-visible border border-gray-200 p-4">
                         <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
                           Personal Details
