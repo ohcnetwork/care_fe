@@ -680,9 +680,9 @@ const VerifyMobileSection = ({
         />
       ) : (
         <p className="-mt-4 text-warning-600 text-sm">
-          <CareIcon className="w-4 h-4 care-l-exclamation-octagon" /> Mobile
-          Number will be automatically linked if it is linked with the given
-          Aadhaar number.
+          <CareIcon className="w-4 h-4 care-l-exclamation-triangle" /> OTP is
+          generated if the above phone number is not linked with given Aadhaar
+          number.
         </p>
       )}
 
@@ -753,7 +753,7 @@ const CreateHealthIDSection = ({
       />
 
       <p className="-mt-4 text-warning-600 text-sm">
-        <CareIcon className="w-4 h-4 care-l-exclamation-octagon" /> Existing
+        <CareIcon className="w-4 h-4 care-l-exclamation-triangle" /> Existing
         ABHA Address is used if ABHA Number already exists.
       </p>
 
