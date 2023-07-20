@@ -45,6 +45,8 @@ import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
+import { maxDateString } from "../../Utils/utils.js";
+import { PatientModel } from "./models.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -477,7 +479,7 @@ export const PatientManager = () => {
 
   let patientList: React.ReactNode[] = [];
   if (data && data.length) {
-    patientList = data.map((patient: any) => {
+    patientList = data.map((patient: PatientModel) => {
       let patientUrl = "";
       if (
         patient.last_consultation &&
@@ -575,10 +577,12 @@ export const PatientManager = () => {
                       prefix={
                         <span className="text-gray-600">{t("updated")}</span>
                       }
-                      time={
-                        patient.last_consultation?.modified_date ??
+                      time={maxDateString(
+                        patient.last_consultation?.modified_date,
+                        patient.last_consultation?.last_daily_round
+                          ?.modified_date,
                         patient.modified_date
-                      }
+                      )}
                     />
                   </div>
                 </div>

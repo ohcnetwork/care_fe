@@ -224,3 +224,19 @@ export const formatCurrency = (price: number) =>
     style: "currency",
     currency: "INR",
   });
+
+export const minDate = (...dates: Date[]) =>
+  new Date(Math.min(...dates.map((date) => date.getTime())));
+
+export const maxDate = (...dates: Date[]) =>
+  new Date(Math.max(...dates.map((date) => date.getTime())));
+
+export const minDateString = (...dates: (Date | string | undefined)[]) =>
+  minDate(
+    ...dates.filter(Boolean).map((date) => new Date(date!))
+  ).toISOString();
+
+export const maxDateString = (...dates: (Date | string | undefined)[]) =>
+  maxDate(
+    ...dates.filter(Boolean).map((date) => new Date(date!))
+  ).toISOString();

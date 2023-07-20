@@ -55,6 +55,7 @@ export interface PatientModel {
   state_object?: { id: number; name: string };
   tele_consultation_history?: Array<any>;
   last_consultation?: ConsultationModel;
+  action: number;
   address?: string;
   permanent_address?: string;
   sameAddress?: boolean;
