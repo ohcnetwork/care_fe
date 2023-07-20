@@ -49,7 +49,7 @@ const StatelessSidebar = ({
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
-  const { static_light_logo } = useConfig();
+  const { main_logo } = useConfig();
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
   const { dashboard_url } = useConfig();
@@ -130,7 +130,7 @@ const StatelessSidebar = ({
           className={`${
             shrinked ? "mx-auto" : "ml-5"
           } h-5 md:h-8 self-start transition mb-2 md:mb-5`}
-          src={shrinked ? LOGO_COLLAPSE : static_light_logo}
+          src={shrinked ? LOGO_COLLAPSE : main_logo.light}
         />
       </Link>
       <div className="h-3" /> {/* flexible spacing */}

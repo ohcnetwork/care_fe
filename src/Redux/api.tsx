@@ -888,6 +888,16 @@ const routes: Routes = {
     path: "/api/v1/abdm/healthid/get_abha_card/",
     method: "POST",
   },
+  // Asset Availability endpoints
+
+  listAssetAvailability: {
+    path: "/api/v1/asset_availability/",
+    method: "GET",
+  },
+  getAssetAvailability: {
+    path: "/api/v1/asset_availability/{id}",
+    method: "GET",
+  },
 
   // Prescription endpoints
 

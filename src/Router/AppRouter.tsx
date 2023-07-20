@@ -76,7 +76,7 @@ import ManagePrescriptions from "../Components/Medicine/ManagePrescriptions";
 import CentralNursingStation from "../Components/Facility/CentralNursingStation";
 
 export default function AppRouter() {
-  const { static_black_logo, enable_hcx } = useConfig();
+  const { main_logo, enable_hcx } = useConfig();
 
   const routes = {
     "/hub": () => <HubDashboard />,
@@ -486,7 +486,7 @@ export default function AppRouter() {
             >
               <img
                 className="h-6 w-auto"
-                src={static_black_logo}
+                src={main_logo.dark}
                 alt="care logo"
               />
             </a>
