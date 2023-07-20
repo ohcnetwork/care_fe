@@ -93,6 +93,10 @@ export default function ResultList() {
       .catch(() => {
         setIsLoading(false);
       });
+
+    if (!params.mobile_number) {
+      setPhoneNum("+91");
+    }
   }, [
     dispatch,
     qParams.name,
