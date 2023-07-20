@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { BedModel } from "../../Facility/models";
-import { flushSync } from "react-dom";
 import ButtonV2, { Submit } from "../../Common/components/ButtonV2";
 import Card from "../../../CAREUI/display/Card";
 import ConfirmDialog from "../../Common/ConfirmDialog";
@@ -14,8 +13,7 @@ interface CameraBoundaryConfigureProps {
   bed: BedModel;
   toUpdateBoundary: boolean;
   setToUpdateBoundary: (toUpdate: boolean) => void;
-  scrollToUpdateBoundary: () => void;
-  loadingAddBoundaryPreset?: boolean;
+  loadingAddBoundaryPreset: boolean;
 }
 
 interface UpdateCameraBoundaryConfigureProps {
@@ -24,7 +22,6 @@ interface UpdateCameraBoundaryConfigureProps {
   setDirection(direction: direction): void;
   changeDirectionalBoundary(action: "expand" | "shrink"): void;
   updateBoundaryPreset(action: "confirm" | "cancel"): void;
-  updateBoundaryRef: any;
   previewBoundary: () => void;
   isPreview: boolean;
   boundaryPreset: any;
@@ -39,7 +36,6 @@ export default function CameraBoundaryConfigure(
     bed,
     toUpdateBoundary,
     setToUpdateBoundary,
-    scrollToUpdateBoundary,
     loadingAddBoundaryPreset,
   } = props;
   const [toDeleteBoundary, setToDeleteBoundary] = useState<any>(null);
@@ -79,7 +75,7 @@ export default function CameraBoundaryConfigure(
               <label id="asset-name">Name</label>
               <div className="text-lg">{`${
                 !boundaryPreset ? bed?.name : boundaryPreset?.meta?.preset_name
-              } boundary`}</div>
+              } ${!boundaryPreset ? "boundary" : ""}`}</div>
             </div>
           </div>
           {!boundaryPreset ? (
@@ -99,11 +95,7 @@ export default function CameraBoundaryConfigure(
                     <ButtonV2
                       variant="primary"
                       onClick={() => {
-                        flushSync(() => {
-                          // check if setToUpdateBoundary is defined
-                          setToUpdateBoundary(true);
-                        });
-                        scrollToUpdateBoundary();
+                        setToUpdateBoundary(true);
                       }}
                       id="update-boundary-preset"
                     >
@@ -140,14 +132,13 @@ export function UpdateCameraBoundaryConfigure(
     setDirection,
     changeDirectionalBoundary,
     updateBoundaryPreset,
-    updateBoundaryRef,
     previewBoundary,
     isPreview,
     boundaryPreset,
   } = props;
 
   return (
-    <div className="mt-4 flex" ref={updateBoundaryRef}>
+    <div className="mt-4 flex">
       <Card className="flex-initial">
         <div className="flex flex-col space-y-4">
           <div>

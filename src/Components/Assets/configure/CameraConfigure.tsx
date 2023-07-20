@@ -1,63 +1,23 @@
-import React, { useRef } from "react";
-import { AssetData } from "../AssetTypes";
-import LiveFeed from "../../Facility/Consultations/LiveFeed";
+import React from "react";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
-import { getCameraConfig } from "../../../Utils/transformUtils";
 import { Submit } from "../../Common/components/ButtonV2";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import Card from "../../../CAREUI/display/Card";
-import CameraBoundaryConfigure from "./CameraBoundayConfigure";
 
 interface CameraConfigureProps {
-  asset: AssetData;
-  addPreset(e: React.SyntheticEvent): void;
+  asset: any;
+  addPreset: (e: React.SyntheticEvent) => void;
   setBed(bed: BedModel): void;
   bed: BedModel;
   newPreset: string;
   setNewPreset(preset: string): void;
-  refreshPresetsHash: number;
-  facilityMiddlewareHostname: string;
   isLoading: boolean;
-  boundaryPreset: any;
-  setBoundaryPreset: (preset: any) => void;
-  addBoundaryPreset: (e: React.SyntheticEvent) => void;
-  updateBoundaryPreset: (action: "confirm" | "cancel") => void;
-  deleteBoundaryPreset: () => void;
-  toUpdateBoundary: boolean;
-  setToUpdateBoundary: (toUpdate: boolean) => void;
-  loadingAddBoundaryPreset?: boolean;
 }
 export default function CameraConfigure(props: CameraConfigureProps) {
-  const {
-    asset,
-    addPreset,
-    setBed,
-    bed,
-    isLoading,
-    newPreset,
-    setNewPreset,
-    refreshPresetsHash,
-    facilityMiddlewareHostname,
-    boundaryPreset,
-    setBoundaryPreset,
-    addBoundaryPreset,
-    updateBoundaryPreset,
-    deleteBoundaryPreset,
-    toUpdateBoundary,
-    setToUpdateBoundary,
-    loadingAddBoundaryPreset,
-  } = props;
+  const { asset, addPreset, setBed, bed, isLoading, newPreset, setNewPreset } =
+    props;
 
-  const updateBoundaryRef = useRef<any>(null);
-
-  const scrollToUpdateBoundary = (): void => {
-    if (updateBoundaryRef.current)
-      updateBoundaryRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-      } as ScrollIntoViewOptions);
-  };
   return (
     <div className="mb-5">
       <Card className="mt-4">
@@ -71,8 +31,8 @@ export default function CameraConfigure(props: CameraConfigureProps) {
               selected={bed}
               error=""
               multiple={false}
-              location={asset?.location_object?.id}
-              facility={asset?.location_object?.facility?.id}
+              location={asset?.location_id}
+              facility={asset?.facility_id}
             />
           </div>
         </div>
@@ -95,20 +55,9 @@ export default function CameraConfigure(props: CameraConfigureProps) {
               </div>
             </form>
           </div>
-
-          <CameraBoundaryConfigure
-            addBoundaryPreset={addBoundaryPreset}
-            deleteBoundaryPreset={deleteBoundaryPreset}
-            boundaryPreset={boundaryPreset}
-            toUpdateBoundary={toUpdateBoundary}
-            setToUpdateBoundary={setToUpdateBoundary}
-            bed={bed}
-            scrollToUpdateBoundary={scrollToUpdateBoundary}
-            loadingAddBoundaryPreset={loadingAddBoundaryPreset}
-          />
         </div>
       </Card>
-      <Card className="mt-4">
+      {/* <Card className="mt-4">
         <LiveFeed
           middlewareHostname={facilityMiddlewareHostname}
           asset={getCameraConfig(asset)}
@@ -120,7 +69,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
           toUpdateBoundary={toUpdateBoundary}
           updateBoundaryRef={updateBoundaryRef}
         />
-      </Card>
+      </Card> */}
     </div>
   );
 }

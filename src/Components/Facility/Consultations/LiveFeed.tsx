@@ -25,6 +25,8 @@ import { FieldLabel } from "../../Form/FormFields/FormField";
 import useFullscreen from "../../../Common/hooks/useFullscreen";
 import { UpdateCameraBoundaryConfigure } from "../../Assets/configure/CameraBoundayConfigure";
 import { BoundaryRange } from "../../Assets/AssetType/ONVIFCamera";
+import CameraConfigure from "../../Assets/configure/CameraConfigure";
+import CameraBoundaryConfigure from "../../Assets/configure/CameraBoundayConfigure";
 
 export type direction = "left" | "right" | "up" | "down" | null;
 const LiveFeed = (props: any) => {
@@ -39,8 +41,8 @@ const LiveFeed = (props: any) => {
   const [streamStatus, setStreamStatus] = useState<StreamStatus>(
     StreamStatus.Offline
   );
-  const [bed, setBed] = useState<BedModel>({});
-  const [preset, setNewPreset] = useState<string>("");
+  const [bedTransfer, setBedTransfer] = useState<BedModel>({});
+  const [newPresetName, setNewPresetName] = useState<string>("");
   const [loading, setLoading] = useState<string | undefined>();
   const dispatch: any = useDispatch();
   const [page, setPage] = useState({
@@ -53,13 +55,27 @@ const LiveFeed = (props: any) => {
   const [isPreview, setIsPreview] = useState<boolean>(false);
   const [direction, setDirection] = useState<direction>(null);
   const [_isFullscreen, setFullscreen] = useFullscreen();
+
+  const asset: any = props.asset;
+  const addPreset: (e: React.SyntheticEvent) => void = props.addPreset;
+  const bed: BedModel = props.bed;
+  const setBed: (bed: BedModel) => void = props.setBed;
+  const loadingAddPreset: boolean = props.loadingAddPreset;
+  const newPreset: string = props.newPreset;
+  const setNewPreset: (preset: string) => void = props.setNewPreset;
+
   const boundaryPreset: any = props.boundaryPreset;
+  const addBoundaryPreset: (e: React.SyntheticEvent) => void =
+    props.addBoundaryPreset;
+  const deleteBoundaryPreset: () => void = props.deleteBoundaryPreset;
   const setBoundaryPreset: (preset: any) => void = props.setBoundaryPreset;
+  const fetchBoundaryBedPreset: () => void = props.fetchBoundaryBedPreset;
   const updateBoundaryPreset: (action: "confirm" | "cancel") => void =
     props.updateBoundaryPreset;
+  const setToUpdateBoundary: (toUpdate: boolean) => void =
+    props.setToUpdateBoundary;
+  const loadingAddBoundaryPreset: boolean = props.loadingAddBoundaryPreset;
   const toUpdateBoundary: boolean = props.toUpdateBoundary;
-  const updateBoundaryRef: React.MutableRefObject<any> =
-    props.updateBoundaryRef;
   const { width } = useWindowDimensions();
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
@@ -112,18 +128,30 @@ const LiveFeed = (props: any) => {
     });
 
   const getBedPresets = async (id: any) => {
-    const bedAssets = await dispatch(
-      listAssetBeds({
-        asset: id,
-        limit: page.limit,
-        offset: page.offset,
-      })
-    );
+    const bedAssets = bed.id
+      ? await dispatch(
+          listAssetBeds({
+            asset: id,
+            bed: bed.id,
+            limit: page.limit,
+            offset: page.offset,
+          })
+        )
+      : await dispatch(
+          listAssetBeds({
+            asset: id,
+            limit: page.limit,
+            offset: page.offset,
+          })
+        );
     setBedPresets(bedAssets?.data?.results);
     setPage({
       ...page,
       count: bedAssets?.data?.count,
     });
+    if (bed?.id) {
+      fetchBoundaryBedPreset();
+    }
   };
 
   const deletePreset = async (id: any) => {
@@ -141,14 +169,14 @@ const LiveFeed = (props: any) => {
 
   const updatePreset = async (currentPreset: any) => {
     const data = {
-      bed_id: bed.id,
-      preset_name: preset,
+      bed_id: bedTransfer.id,
+      preset_name: newPresetName,
     };
     const response = await dispatch(
       partialUpdateAssetBed(
         {
           asset: currentPreset.asset_object.id,
-          bed: bed.id,
+          bed: bedTransfer.id,
           meta: {
             ...currentPreset.meta,
             ...data,
@@ -286,8 +314,8 @@ const LiveFeed = (props: any) => {
   }, []);
 
   useEffect(() => {
-    setNewPreset(toUpdate?.meta?.preset_name);
-    setBed(toUpdate?.bed_object);
+    setNewPresetName(toUpdate?.meta?.preset_name);
+    setBedTransfer(toUpdate?.bed_object);
   }, [toUpdate]);
 
   useEffect(() => {
@@ -295,7 +323,7 @@ const LiveFeed = (props: any) => {
     if (bedPresets?.[0]?.position) {
       absoluteMove(bedPresets[0]?.position, {});
     }
-  }, [page.offset, cameraAsset.id, refreshPresetsHash]);
+  }, [page.offset, cameraAsset.id, refreshPresetsHash, bed]);
 
   useEffect(() => {
     if (boundaryPreset?.meta?.range && direction) {
@@ -447,8 +475,8 @@ const LiveFeed = (props: any) => {
             <FieldLabel required>Bed</FieldLabel>
             <BedSelect
               name="bed"
-              setSelected={(selected) => setBed(selected as BedModel)}
-              selected={bed}
+              setSelected={(selected) => setBedTransfer(selected as BedModel)}
+              selected={bedTransfer}
               error=""
               multiple={false}
               location={cameraAsset.location_id}
@@ -555,6 +583,24 @@ const LiveFeed = (props: any) => {
                 </div>
               </div>
             )}
+            <CameraConfigure
+              asset={asset}
+              addPreset={addPreset}
+              setBed={setBed}
+              bed={bed}
+              isLoading={loadingAddPreset}
+              newPreset={newPreset}
+              setNewPreset={setNewPreset}
+            />
+            <CameraBoundaryConfigure
+              addBoundaryPreset={addBoundaryPreset}
+              deleteBoundaryPreset={deleteBoundaryPreset}
+              boundaryPreset={boundaryPreset}
+              bed={bed}
+              toUpdateBoundary={toUpdateBoundary}
+              setToUpdateBoundary={setToUpdateBoundary}
+              loadingAddBoundaryPreset={loadingAddBoundaryPreset}
+            />
             {toUpdateBoundary && boundaryPreset && (
               <UpdateCameraBoundaryConfigure
                 cameraPTZ={cameraPTZ}
@@ -562,7 +608,6 @@ const LiveFeed = (props: any) => {
                 setDirection={setDirection}
                 changeDirectionalBoundary={changeDirectionalBoundary}
                 updateBoundaryPreset={updateBoundaryPreset}
-                updateBoundaryRef={updateBoundaryRef}
                 previewBoundary={previewBoundary}
                 isPreview={isPreview}
                 boundaryPreset={boundaryPreset}
