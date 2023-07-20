@@ -26,6 +26,8 @@ const formatDateBeforeDays = Array.from({ length: 100 }, (_, index) =>
   now.clone().subtract(index, "days").format("Do MMMM YYYY")
 );
 
+const uptimeScore: number[] = Array.from({ length: 100 }, () => 0);
+
 const formatDurationMins = (mins: number) => {
   const hours = Math.floor(mins / 60);
   const minutes = Math.floor(mins % 60);
@@ -156,6 +158,9 @@ export default function Uptime(props: { assetId: string }) {
   const [summary, setSummary] = useState<{
     [key: number]: AssetUptimeRecord[];
   }>([]);
+  const [availabilityData, setAvailabilityData] = useState<AssetUptimeRecord[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const graphElem = useRef<HTMLDivElement>(null);
   const [numDays, setNumDays] = useState(
@@ -210,21 +215,26 @@ export default function Uptime(props: { assetId: string }) {
     setSummary(recordsByDayBefore);
   };
 
-  function getUptimePercent(totalDays: number) {
+  function getUptimePercent(displayDays: number) {
     let upStatus = 0;
 
-    for (let i = 0; i < totalDays; i++) {
-      const index = numDays - i - 1;
-      const dayRecords = summary[index];
-      if (
-        dayRecords &&
-        dayRecords[dayRecords.length - 1].status === AssetStatus.operational
-      ) {
-        upStatus++;
-      }
+    const oldestRecord = availabilityData[0];
+    const daysAvailable = moment().diff(
+      moment(oldestRecord?.timestamp)
+        .set("hour", 0)
+        .set("minute", 0)
+        .set("second", 0),
+      "days"
+    );
+
+    const days = Math.max(1, Math.min(daysAvailable, displayDays));
+
+    for (let i = 0; i < days; i++) {
+      const index = days - i - 1;
+      upStatus += uptimeScore[index];
     }
 
-    return Math.round((upStatus / totalDays) * 100);
+    return Math.round((upStatus / (days * 3)) * 100);
   }
 
   const fetchData = useCallback(async () => {
@@ -237,7 +247,8 @@ export default function Uptime(props: { assetId: string }) {
       })
     );
     if (availabilityData?.data) {
-      setUptimeRecord(availabilityData.data.results.reverse());
+      setAvailabilityData(availabilityData.data.results);
+      setUptimeRecord(reverse(availabilityData.data.results));
     } else {
       Notification.Error({
         msg: "Error fetching availability history",
@@ -263,6 +274,7 @@ export default function Uptime(props: { assetId: string }) {
       const dayRecords = summary[day];
       const statusColors: (typeof STATUS_COLORS)[keyof typeof STATUS_COLORS][] =
         [];
+      let dayUptimeScore = 0;
       for (let i = 0; i < 3; i++) {
         const start = i * 8;
         const end = (i + 1) * 8;
@@ -279,6 +291,12 @@ export default function Uptime(props: { assetId: string }) {
               .second(0)
               .isBefore(moment())
           ) {
+            if (
+              statusColors[statusColors.length - 1] ===
+              STATUS_COLORS["operational"]
+            ) {
+              dayUptimeScore += 1;
+            }
             statusColors.push(
               statusColors[statusColors.length - 1] ??
                 STATUS_COLORS["not_monitored"]
@@ -304,12 +322,15 @@ export default function Uptime(props: { assetId: string }) {
           )
         ) {
           statusColors.push(STATUS_COLORS["operational"]);
+          dayUptimeScore += 1;
         } else {
           statusColors.push(STATUS_COLORS["not_monitored"]);
         }
       }
+      uptimeScore[day] = dayUptimeScore;
       return statusColors;
     } else {
+      uptimeScore[day] = 0;
       return [
         STATUS_COLORS["not_monitored"],
         STATUS_COLORS["not_monitored"],
