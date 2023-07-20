@@ -5,6 +5,7 @@ import { listAssetAvailability } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import { AssetStatus, AssetUptimeRecord } from "../Assets/AssetTypes";
+import { reverse } from "lodash";
 
 const STATUS_COLORS = {
   operational: "bg-green-500",
@@ -24,6 +25,12 @@ const now = moment();
 const formatDateBeforeDays = Array.from({ length: 100 }, (_, index) =>
   now.clone().subtract(index, "days").format("Do MMMM YYYY")
 );
+
+const formatDurationMins = (mins: number) => {
+  const hours = Math.floor(mins / 60);
+  const minutes = Math.floor(mins % 60);
+  return `${hours}h ${minutes}m`;
+};
 
 function StatusPopover({
   records,
@@ -45,10 +52,10 @@ function StatusPopover({
   return (
     <Popover className="mt-10 relative">
       <Popover.Panel
-        className={`absolute z-50 w-80 transform px-4 sm:px-0 ${
-          day > numDays - 7
+        className={`absolute z-50 w-96 transform px-4 sm:px-0 ${
+          day > numDays - 10
             ? "-translate-x-6"
-            : day < 7
+            : day < 10
             ? "-translate-x-full"
             : "-translate-x-1/2"
         }`}
@@ -67,68 +74,71 @@ function StatusPopover({
                 ) : (
                   <>
                     <span className="font-bold my-2 block">Status Updates</span>
-                    {incidents.map((incident, index) => {
-                      const nextIncident = incidents[index + 1];
-                      let endTimestamp;
-                      let ongoing = false;
+                    <div className="grid grid-cols-4 gap-1">
+                      {reverse(incidents)?.map((incident, index) => {
+                        const prevIncident = incidents[index - 1];
+                        let endTimestamp;
+                        let ongoing = false;
 
-                      if (nextIncident?.id) {
-                        endTimestamp = moment(nextIncident.timestamp);
-                      } else if (
-                        moment(incident.timestamp).isSame(now, "day")
-                      ) {
-                        endTimestamp = moment();
-                        ongoing = true;
-                      } else {
-                        endTimestamp = moment(incident.timestamp)
-                          .add(1, "day")
-                          .startOf("day");
-                      }
-                      const duration = !ongoing
-                        ? moment
-                            .duration(
-                              moment(endTimestamp).diff(
-                                moment(incident.timestamp)
-                              )
+                        if (prevIncident?.id) {
+                          endTimestamp = moment(prevIncident.timestamp);
+                        } else if (
+                          moment(incident.timestamp).isSame(now, "day")
+                        ) {
+                          endTimestamp = moment();
+                          ongoing = true;
+                        } else {
+                          endTimestamp = moment(incident.timestamp)
+                            .set("hour", 23)
+                            .set("minute", 59)
+                            .set("second", 59);
+                        }
+                        const duration = !ongoing
+                          ? formatDurationMins(
+                              moment
+                                .duration(
+                                  moment(endTimestamp).diff(
+                                    moment(incident.timestamp)
+                                  )
+                                )
+                                .asMinutes()
                             )
-                            .humanize()
-                        : "Ongoing";
-                      if (
-                        incident.status === AssetStatus.down ||
-                        incident.status === AssetStatus.maintenance
-                      )
-                        totalMinutes += moment(endTimestamp).diff(
-                          moment(incident.timestamp),
-                          "minutes"
-                        );
+                          : "Ongoing";
+                        if (
+                          incident.status === AssetStatus.down ||
+                          incident.status === AssetStatus.maintenance
+                        )
+                          totalMinutes += moment(endTimestamp).diff(
+                            moment(incident.timestamp),
+                            "minutes"
+                          );
 
-                      return (
-                        <div className="flex justify-between" key={index}>
-                          <span
-                            className={`capitalize ${
-                              STATUS_COLORS_TEXT[
-                                incident.status as keyof typeof STATUS_COLORS_TEXT
-                              ]
-                            }`}
-                          >
-                            {incident.status}
-                          </span>
-                          <span>
-                            {moment(incident.timestamp).format("h:mmA")} -{" "}
-                            {moment(endTimestamp).format("h:mmA")}
-                          </span>
-                          <span>{duration}</span>
-                        </div>
-                      );
-                    })}
+                        return (
+                          <>
+                            <span
+                              className={`capitalize ${
+                                STATUS_COLORS_TEXT[
+                                  incident.status as keyof typeof STATUS_COLORS_TEXT
+                                ]
+                              }`}
+                            >
+                              {incident.status}
+                            </span>
+                            <span className="col-span-2">
+                              {moment(incident.timestamp).format("h:mmA")} -{" "}
+                              {moment(endTimestamp).format("h:mmA")}
+                            </span>
+                            <span>{duration}</span>
+                          </>
+                        );
+                      })}
+                    </div>
                     <div className="border-t border-gray-200 my-2"></div>
                     <div className="flex justify-between mt-1">
                       <span className="font-bold">Total downtime</span>
                       <span>
                         {incidents.length > 0 &&
-                          `${Math.round(totalMinutes / 60)} hrs ${
-                            totalMinutes % 60
-                          } mins`}
+                          formatDurationMins(totalMinutes)}
                       </span>
                     </div>
                   </>
@@ -227,7 +237,7 @@ export default function Uptime(props: { assetId: string }) {
       })
     );
     if (availabilityData?.data) {
-      setUptimeRecord(availabilityData.data.results);
+      setUptimeRecord(availabilityData.data.results.reverse());
     } else {
       Notification.Error({
         msg: "Error fetching availability history",
@@ -262,7 +272,13 @@ export default function Uptime(props: { assetId: string }) {
             moment(record.timestamp).hour() < end
         );
         if (recordsInPeriod.length === 0) {
-          if (moment().hour(end).minute(0).second(0).isBefore(moment())) {
+          if (
+            moment(dayRecords[0].timestamp)
+              .hour(end)
+              .minute(0)
+              .second(0)
+              .isBefore(moment())
+          ) {
             statusColors.push(
               statusColors[statusColors.length - 1] ??
                 STATUS_COLORS["not_monitored"]
