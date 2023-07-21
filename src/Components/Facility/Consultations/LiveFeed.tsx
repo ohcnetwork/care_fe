@@ -318,11 +318,11 @@ const LiveFeed = (props: any) => {
     setBedTransfer(toUpdate?.bed_object);
   }, [toUpdate]);
 
+  //change this function
   useEffect(() => {
     getBedPresets(cameraAsset.id);
-    if (bedPresets?.[0]?.position) {
-      absoluteMove(bedPresets[0]?.position, {});
-    }
+
+    absoluteMove(bedPresets[0]?.meta?.position, {});
   }, [page.offset, cameraAsset.id, refreshPresetsHash, bed]);
 
   useEffect(() => {
