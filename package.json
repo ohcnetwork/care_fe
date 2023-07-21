@@ -57,7 +57,7 @@
     "@loadable/component": "^5.15.0",
     "@pnotify/core": "^5.2.0",
     "@pnotify/mobile": "^5.2.0",
-    "@react-spring/web": "^9.6.1",
+    "@react-spring/web": "^9.7.3",
     "@rescript/react": "^0.10.3",
     "@sentry/browser": "^7.22.0",
     "@storybook/builder-vite": "^7.0.0-rc.8",
