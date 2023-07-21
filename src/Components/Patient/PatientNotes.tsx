@@ -246,7 +246,11 @@ const PatientNotes = (props: PatientNotesProps) => {
                   ) : (
                     <>
                       {patientActive &&
-                        moment() <= moment(note.editable_until) && (
+                        moment() <=
+                          moment(note.created_date).add(
+                            note.edit_window_seconds,
+                            "seconds"
+                          ) && (
                           <ButtonV2
                             className="flex gap-2 ml-auto py-2 px-3 w-full md:w-fit"
                             onClick={() =>
