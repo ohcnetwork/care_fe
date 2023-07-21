@@ -1,54 +1,55 @@
-import loadable from "@loadable/component";
-import { navigate } from "raviger";
-import moment from "moment";
-import { createRef, LegacyRef, useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import * as Notification from "../../Utils/Notifications.js";
+
+import { BedModel, FacilityModel, ICD11DiagnosisModel } from "./models";
 import {
+  CONSULTATION_STATUS,
   CONSULTATION_SUGGESTION,
   PATIENT_CATEGORIES,
-  TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
-  CONSULTATION_STATUS,
+  TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  createConsultation,
-  getConsultation,
-  updateConsultation,
-  getPatient,
-  dischargePatient,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { BedModel, FacilityModel, ICD11DiagnosisModel } from "./models";
-import { UserModel } from "../Users/models";
-import { BedSelect } from "../Common/BedSelect";
-import Beds from "./Consultations/Beds";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
+import { LegacyRef, createRef, useCallback, useEffect, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import PatientCategorySelect from "../Patient/PatientCategorySelect";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
-import { SymptomsSelect } from "../Common/SymptomsSelect";
-import DateFormField from "../Form/FormFields/DateFormField";
-import useConfig from "../../Common/hooks/useConfig";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import useVisibility from "../../Utils/useVisibility";
+import {
+  createConsultation,
+  getConsultation,
+  getPatient,
+  updateConsultation,
+} from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import { BedSelect } from "../Common/BedSelect";
+import Beds from "./Consultations/Beds";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
+import DateFormField from "../Form/FormFields/DateFormField";
+import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FormAction } from "../Form/Utils";
+import PatientCategorySelect from "../Patient/PatientCategorySelect";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { SymptomsSelect } from "../Common/SymptomsSelect";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
-
+import { UserModel } from "../Users/models";
+import { dischargePatient } from "../../Redux/actions";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { navigate } from "raviger";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import useVisibility from "../../Utils/useVisibility";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -204,7 +205,6 @@ export const ConsultationForm = (props: any) => {
     initialState
   );
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
