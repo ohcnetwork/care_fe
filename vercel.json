@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://careapi-m1.coronasafe.in/api/$1"
+      "destination": "https://careapi.ohc.network/api/$1"
     },
     {
       "source": "/(.*)",
