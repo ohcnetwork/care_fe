@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { addPatientNote, getPatient } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import PageTitle from "../Common/PageTitle";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import PatientNotesList from "../Facility/PatientNotesList";
+import Page from "../Common/components/Page";
 
 interface PatientNotesProps {
   patientId: any;
@@ -57,18 +57,16 @@ const PatientNotes = (props: PatientNotesProps) => {
   }, [dispatch, patientId]);
 
   return (
-    <div className="w-full flex flex-col">
-      <PageTitle
-        title="Patient Notes"
-        className="mb-5"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [patientId]: { name: patientName },
-        }}
-        backUrl={`/facility/${facilityId}/patient/${patientId}`}
-      />
-
-      <div className="mx-3 my-2 px-2 py-2 sm:mx-10 sm:my-5 bg-white sm:px-5 sm:py-5 rounded-lg grow">
+    <Page
+      title="Patient Notes"
+      className="h-screen flex flex-col"
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [patientId]: { name: patientName },
+      }}
+      backUrl={`/facility/${facilityId}/patient/${patientId}`}
+    >
+      <div className="mx-3 my-2 px-2 py-2 sm:mx-10 sm:my-5 bg-white sm:px-5 sm:py-5 rounded-lg grow flex flex-col">
         <PatientNotesList
           patientId={patientId}
           facilityId={facilityId}
@@ -100,7 +98,7 @@ const PatientNotes = (props: PatientNotesProps) => {
           </ButtonV2>
         </div>
       </div>
-    </div>
+    </Page>
   );
 };
 
