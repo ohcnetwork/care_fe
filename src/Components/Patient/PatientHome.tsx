@@ -466,11 +466,11 @@ export const PatientHome = (props: any) => {
           <div className="lg:w-2/3 mx-2">
             <div className="bg-white rounded-lg shadow flex flex-col justify-between pt-11 pb-5 pl-9 h-full">
               <div>
-                <div className="flex flex-row">
+                <div className="flex flex-row gap-4">
                   <h1 className="font-bold text-2xl pb-3 flex flex-row">
                     {patientData.name} - {patientData.age}
                   </h1>
-                  <div className="flex flex-wrap gap-2 ml-auto mr-9">
+                  <div className="flex flex-wrap gap-3 ml-auto mr-9">
                     {patientData.is_vaccinated ? (
                       <Chip
                         color="blue"
