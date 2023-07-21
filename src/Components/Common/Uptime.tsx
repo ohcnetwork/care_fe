@@ -215,10 +215,27 @@ export default function Uptime(props: { assetId: string }) {
             timestamp: moment()
               .subtract(i, "days")
               .startOf("day")
-              .toISOString(),
+              .format("YYYY-MM-DDTHH:mm:ss.SSSSSSZ"),
           });
         }
       } else {
+        if (
+          recordsByDayBefore[i].filter(
+            (r) => moment(r.timestamp).get("hour") < 8
+          ).length === 0
+        ) {
+          recordsByDayBefore[i].unshift({
+            id: "",
+            asset: { id: "", name: "" },
+            created_date: "",
+            modified_date: "",
+            status: statusToCarryOver,
+            timestamp: moment()
+              .subtract(i, "days")
+              .startOf("day")
+              .format("YYYY-MM-DDTHH:mm:ss.SSSSSSZ"),
+          });
+        }
         statusToCarryOver =
           recordsByDayBefore[i][recordsByDayBefore[i].length - 1].status;
       }
@@ -299,7 +316,9 @@ export default function Uptime(props: { assetId: string }) {
         recordsInPeriodCache[i] = recordsInPeriod;
         if (recordsInPeriod.length === 0) {
           const previousLatestRecord =
-            recordsInPeriodCache[i - 1]?.[dayRecords.length - 1];
+            recordsInPeriodCache[i - 1]?.[
+              recordsInPeriodCache[i - 1]?.length - 1
+            ];
           if (
             moment(previousLatestRecord?.timestamp)
               .hour(end)
