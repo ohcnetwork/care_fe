@@ -21,7 +21,6 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { BedModel, FacilityModel, ICD11DiagnosisModel } from "./models";
-import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import { UserModel } from "../Users/models";
 import { BedSelect } from "../Common/BedSelect";
 import Beds from "./Consultations/Beds";
@@ -48,6 +47,8 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import { FormAction } from "../Form/Utils";
+import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -1238,12 +1239,16 @@ export const ConsultationForm = (props: any) => {
                               className="flex-[2] col-span-6"
                               ref={fieldRef["assigned_to"]}
                             >
-                              <OnlineUsersSelect
-                                userId={state.form.assigned_to}
-                                selectedUser={state.form.assigned_to_object}
-                                onSelect={handleDoctorSelect}
-                                user_type="Doctor"
-                                outline
+                              <UserAutocompleteFormField
+                                showActiveStatus
+                                value={
+                                  state.form.assigned_to_object ?? undefined
+                                }
+                                onChange={(option) =>
+                                  handleDoctorSelect(option.value)
+                                }
+                                userType={"Doctor"}
+                                name={"assigned_to"}
                               />
                             </div>
                           )}
