@@ -817,6 +817,17 @@ const routes: Routes = {
     method: "GET",
   },
 
+  // Asset Availability endpoints
+
+  listAssetAvailability: {
+    path: "/api/v1/asset_availability/",
+    method: "GET",
+  },
+  getAssetAvailability: {
+    path: "/api/v1/asset_availability/{id}",
+    method: "GET",
+  },
+
   // Prescription endpoints
 
   listPrescriptions: {
