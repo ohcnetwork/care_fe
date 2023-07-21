@@ -7,6 +7,7 @@ import {
   DISEASE_STATUS,
   PATIENT_FILTER_CATEGORIES,
   ADMITTED_TO,
+  DISCHARGE_REASONS,
 } from "../../Common/constants";
 import moment from "moment";
 import {
@@ -75,6 +76,8 @@ export default function PatientFilter(props: any) {
       filter.last_consultation_admitted_bed_type_list
         ? filter.last_consultation_admitted_bed_type_list.split(",")
         : [],
+    last_consultation_discharge_reason:
+      filter.last_consultation_discharge_reason || null,
     srf_id: filter.srf_id || null,
     number_of_doses: filter.number_of_doses || null,
     covin_id: filter.covin_id || null,
@@ -230,6 +233,7 @@ export default function PatientFilter(props: any) {
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_bed_type_list,
+      last_consultation_discharge_reason,
       number_of_doses,
       covin_id,
       srf_id,
@@ -314,6 +318,8 @@ export default function PatientFilter(props: any) {
       age_max: age_max || "",
       last_consultation_admitted_bed_type_list:
         last_consultation_admitted_bed_type_list || [],
+      last_consultation_discharge_reason:
+        last_consultation_discharge_reason || "",
       srf_id: srf_id || "",
       number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
@@ -448,6 +454,23 @@ export default function PatientFilter(props: any) {
                 setFilterState({
                   ...filterState,
                   last_consultation_admitted_bed_type_list: o,
+                })
+              }
+            />
+          </div>
+          <div className="w-full flex-none" id="discharge-reason-select">
+            <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
+            <SelectMenuV2
+              id="last_consultation_discharge_reason"
+              placeholder="Select discharge reason"
+              options={DISCHARGE_REASONS}
+              value={filterState.last_consultation_discharge_reason}
+              optionValue={(o) => o.id}
+              optionLabel={(o) => o.text}
+              onChange={(o) =>
+                setFilterState({
+                  ...filterState,
+                  last_consultation_discharge_reason: o,
                 })
               }
             />
@@ -593,7 +616,6 @@ export default function PatientFilter(props: any) {
               selected={filterState.facility_ref}
               showAll
               setSelected={(obj) => setFacility(obj, "facility")}
-              className="shifting-page-filter-dropdown"
             />
           </div>
 
@@ -640,7 +662,6 @@ export default function PatientFilter(props: any) {
               name="district"
               selected={filterState.district_ref}
               setSelected={(obj: any) => setFacility(obj, "district")}
-              className="shifting-page-filter-dropdown"
               errors={""}
             />
           </div>

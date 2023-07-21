@@ -23,6 +23,7 @@ export type FormFieldBaseProps<
   Form extends FormDetails | undefined = undefined
 > = {
   label?: React.ReactNode;
+  labelSuffix?: React.ReactNode;
   disabled?: boolean;
   className?: string;
   required?: boolean;
@@ -86,7 +87,7 @@ export const useFormFieldPropsResolver = <
 
   return {
     ...props,
-    id: props.id,
+    id: props.id ?? props.name,
     name: props.name,
     onChange: props.onChange,
     value: props.value,

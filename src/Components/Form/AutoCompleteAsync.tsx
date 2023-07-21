@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Combobox } from "@headlessui/react";
 import { debounce } from "lodash";
 import { DropdownTransition } from "../Common/components/HelperComponents";
@@ -11,6 +11,7 @@ interface Props {
   fetchData: (search: string) => Promise<any> | undefined;
   onChange: (selected: any) => void;
   optionLabel?: (option: any) => string;
+  optionLabelChip?: (option: any) => string;
   showNOptions?: number;
   multiple?: boolean;
   compareBy?: string;
@@ -30,6 +31,7 @@ const AutoCompleteAsync = (props: Props) => {
     fetchData,
     onChange,
     optionLabel = (option: any) => option.label,
+    optionLabelChip = (option: any) => option.label,
     showNOptions = 10,
     multiple = false,
     compareBy,
@@ -87,7 +89,11 @@ const AutoCompleteAsync = (props: Props) => {
               }
               onChange={({ target }) => setQuery(target.value)}
               onFocus={props.onFocus}
-              onBlur={props.onBlur}
+              onBlur={() => {
+                setQuery("");
+                props.onBlur?.();
+              }}
+              autoComplete="off"
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
               <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-secondary-900">
@@ -115,8 +121,15 @@ const AutoCompleteAsync = (props: Props) => {
                     value={item}
                   >
                     {({ selected }) => (
-                      <div className="flex justify-between">
-                        {optionLabel(item)}
+                      <div className="flex justify-between items-center">
+                        <div className="flex gap-2 items-center">
+                          {optionLabel(item)}
+                          {optionLabelChip(item) && (
+                            <div className="px-2 mt-1 sm:mt-0 text-center bg-secondary-100 h-fit max-w-fit rounded-full text-xs text-gray-900 border border-secondary-400">
+                              {optionLabelChip(item)}
+                            </div>
+                          )}
+                        </div>
                         {selected && (
                           <CareIcon className="care-l-check text-lg" />
                         )}

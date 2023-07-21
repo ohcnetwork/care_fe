@@ -2,6 +2,13 @@
     "no_consultation_updates": "No consultation updates",
     "consultation_updates": "Consultation updates",
     "update_log": "Update Log",
+    "log_lab_results": "Log Lab Results",
     "no_log_update_delta": "No changes since previous log update",
-    "virtual_nursing_assistant": "Virtual Nursing Assistant"
+    "virtual_nursing_assistant": "Virtual Nursing Assistant",
+    "discharge": "Discharge",
+    "generating_discharge_summary": "Generating discharge summary",
+    "discharge_summary_not_ready": "Discharge summary is not ready yet.",
+    "download_discharge_summary": "Download discharge summary",
+    "email_discharge_summary_description": "Enter your valid email address to receive the discharge summary",
+    "generated_summary_caution": "This is a computer generated summary using the information captured in the CARE system."
 }

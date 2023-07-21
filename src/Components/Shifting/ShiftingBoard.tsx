@@ -1,30 +1,29 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import React, { useEffect, useState } from "react";
+import { classNames, formatDate } from "../../Utils/utils";
 import {
-  listShiftRequests,
   completeTransfer,
   downloadShiftRequests,
+  listShiftRequests,
 } from "../../Redux/actions";
-import { navigate } from "raviger";
-import moment from "moment";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
-import { CSVLink } from "react-csv";
-import CircularProgress from "../Common/components/CircularProgress";
 import { useDrag, useDrop } from "react-dnd";
-import { classNames, formatDate } from "../../Utils/utils";
+
 import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import ConfirmDialog from "../Common/ConfirmDialog";
+import moment from "moment";
+import { navigate } from "raviger";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { ExportButton } from "../Common/Export";
 
 const limit = 14;
 
 interface boardProps {
   board: string;
+  title?: string;
   filterProp: any;
   formatFilter: any;
 }
-
-const now = moment().format("DD-MM-YYYY:hh:mm:ss");
 
 const reduceLoading = (action: string, current: any) => {
   switch (action) {
@@ -39,6 +38,7 @@ const reduceLoading = (action: string, current: any) => {
 
 const ShiftCard = ({ shift, filter }: any) => {
   const dispatch: any = useDispatch();
+  const { wartime_shifting } = useConfig();
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
@@ -48,6 +48,10 @@ const ShiftCard = ({ shift, filter }: any) => {
     item: shift,
     collect: (monitor) => ({ isDragging: !!monitor.isDragging() }),
   }));
+  const rootState: any = useSelector((rootState) => rootState);
+  const { currentUser } = rootState;
+  const userHomeFacilityId = currentUser.data.home_facility;
+  const userType = currentUser.data.user_type;
   const { t } = useTranslation();
 
   const handleTransferComplete = (shift: any) => {
@@ -105,21 +109,23 @@ const ShiftCard = ({ shift, filter }: any) => {
                 >
                   <i className="fas fa-plane-departure mr-2"></i>
                   <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
-                    {(shift.orgin_facility_object || {}).name}
+                    {(shift.origin_facility_object || {}).name}
                   </dd>
                 </dt>
               </div>
-              <div className="sm:col-span-1">
-                <dt
-                  title={t("shifting_approving_facility")}
-                  className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                >
-                  <i className="fas fa-user-check mr-2"></i>
-                  <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
-                    {(shift.shifting_approving_facility_object || {}).name}
-                  </dd>
-                </dt>
-              </div>
+              {wartime_shifting && (
+                <div className="sm:col-span-1">
+                  <dt
+                    title={t("shifting_approving_facility")}
+                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                  >
+                    <i className="fas fa-user-check mr-2"></i>
+                    <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
+                      {(shift.shifting_approving_facility_object || {}).name}
+                    </dd>
+                  </dt>
+                </div>
+              )}
               <div className="sm:col-span-1">
                 <dt
                   title={t("assigned_facility")}
@@ -128,7 +134,8 @@ const ShiftCard = ({ shift, filter }: any) => {
                   <i className="fas fa-plane-arrival mr-2"></i>
 
                   <dd className="font-bold text-sm leading-5 text-gray-900 break-normal">
-                    {(shift.assigned_facility_object || {}).name ||
+                    {shift.assigned_facility_external ||
+                      shift.assigned_facility_object?.name ||
                       t("yet_to_be_decided")}
                   </dd>
                 </dt>
@@ -201,18 +208,24 @@ const ShiftCard = ({ shift, filter }: any) => {
               <i className="fas fa-eye mr-2" /> {t("all_details")}
             </button>
           </div>
-          {filter === "TRANSFER IN PROGRESS" && shift.assigned_facility && (
+          {filter === "COMPLETED" && shift.assigned_facility && (
             <div className="mt-2">
               <ButtonV2
                 variant="secondary"
-                border
-                className="w-full"
+                className="w-full sm:whitespace-normal"
+                disabled={
+                  !shift.patient_object.allow_transfer ||
+                  !(
+                    ["DistrictAdmin", "StateAdmin"].includes(userType) ||
+                    userHomeFacilityId === shift.assigned_facility
+                  )
+                }
                 onClick={() => setModalFor(shift.external_id)}
               >
                 {t("transfer_to_receiving_facility")}
               </ButtonV2>
 
-              <ConfirmDialogV2
+              <ConfirmDialog
                 title={t("confirm_transfer_complete")}
                 description={t("mark_this_transfer_as_complete_question")}
                 show={modalFor === shift.external_id}
@@ -225,7 +238,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                 <p className="mt-2 text-sm text-yellow-600">
                   {t("redirected_to_create_consultation")}
                 </p>
-              </ConfirmDialogV2>
+              </ConfirmDialog>
             </div>
           )}
         </div>
@@ -236,16 +249,15 @@ const ShiftCard = ({ shift, filter }: any) => {
 
 export default function ShiftingBoard({
   board,
+  title,
   filterProp,
   formatFilter,
 }: boardProps) {
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>([]);
-  const [downloadFile, setDownloadFile] = useState("");
   const [totalCount, setTotalCount] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState({ board: false, more: false });
-  const [downloadLoading, setDownloadLoading] = useState(false);
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "shift-card",
     drop: (item: any) => {
@@ -270,28 +282,13 @@ export default function ShiftingBoard({
     });
   };
 
-  const triggerDownload = async () => {
-    // while is getting ready
-    setDownloadLoading(true);
-    const res = await dispatch(
-      downloadShiftRequests({
-        ...formatFilter({ ...filterProp, status: board }),
-        csv: 1,
-      })
-    );
-    // file ready to download
-    setDownloadLoading(false);
-    setDownloadFile(res.data);
-    document.getElementById(`shiftRequests-${board}`)?.click();
-  };
-
   useEffect(() => {
     fetchData();
   }, [
     board,
     dispatch,
     filterProp.facility,
-    filterProp.orgin_facility,
+    filterProp.origin_facility,
     filterProp.shifting_approving_facility,
     filterProp.assigned_facility,
     filterProp.emergency,
@@ -337,9 +334,6 @@ export default function ShiftingBoard({
       ));
   };
 
-  const renderBoardTitle = (board: string) =>
-    board === "APPROVED" ? t("awaiting_destination_approval") : board;
-
   return (
     <div
       ref={drop}
@@ -351,23 +345,16 @@ export default function ShiftingBoard({
       <div className="sticky top-0 pt-2 bg-gray-200 rounded z-10">
         <div className="flex justify-between p-4 mx-2 rounded bg-white shadow items-center">
           <h3 className="text-xs flex items-center h-8">
-            {renderBoardTitle(board)}{" "}
-            {downloadLoading ? (
-              <CircularProgress className="w-6 h-6 ml-2 text-black" />
-            ) : (
-              <ButtonV2
-                onClick={triggerDownload}
-                className="tooltip p-4"
-                variant="secondary"
-                ghost
-                circle
-              >
-                <CareIcon className="care-l-import text-lg font-bold" />
-                <span className="tooltip-text tooltip-bottom -translate-x-16">
-                  {t("download")}
-                </span>
-              </ButtonV2>
-            )}
+            {title || board}{" "}
+            <ExportButton
+              action={() =>
+                downloadShiftRequests({
+                  ...formatFilter({ ...filterProp, status: board }),
+                  csv: 1,
+                })
+              }
+              filenamePrefix={`shift_requests_${board}`}
+            />
           </h3>
           <span className="rounded-lg ml-2 bg-primary-500 text-white px-2">
             {totalCount || "0"}
@@ -409,13 +396,6 @@ export default function ShiftingBoard({
             </button>
           ))}
       </div>
-      <CSVLink
-        data={downloadFile}
-        filename={`shift-requests-${board}-${now}.csv`}
-        target="_blank"
-        className="hidden"
-        id={`shiftRequests-${board}`}
-      />
     </div>
   );
 }

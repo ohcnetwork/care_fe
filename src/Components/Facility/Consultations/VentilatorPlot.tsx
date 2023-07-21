@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
@@ -6,7 +6,9 @@ import { LinePlot } from "./components/LinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDate } from "../../../Utils/utils";
+import BinaryChronologicalChart from "./components/BinaryChronologicalChart";
 
+/*
 interface ModalityType {
   id: number;
   type: string;
@@ -24,18 +26,17 @@ const modality: Array<ModalityType> = [
     normal_rate_high: 15,
   },
 ];
+*/
 
 export const VentilatorPlot = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
@@ -50,6 +51,7 @@ export const VentilatorPlot = (props: any) => {
               "ventilator_fi02",
               "ventilator_spo2",
               "etco2",
+              "bilateral_air_entry",
               "ventilator_oxygen_modality_oxygen_rate",
               "ventilator_oxygen_modality_flow_rate",
             ],
@@ -59,10 +61,10 @@ export const VentilatorPlot = (props: any) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
+          console.log(res);
           setResults(res.data.results);
           setTotalCount(res.data.count);
         }
-        setIsLoading(false);
       }
     },
     [consultationId, dispatch, currentPage]
@@ -75,7 +77,7 @@ export const VentilatorPlot = (props: any) => {
     [currentPage]
   );
 
-  const handlePagination = (page: number, limit: number) => {
+  const handlePagination = (page: number) => {
     setCurrentPage(page);
   };
 
@@ -88,6 +90,19 @@ export const VentilatorPlot = (props: any) => {
       .map((p: any) => p[name])
       .reverse();
   };
+
+  const bilateral = Object.values(results)
+    .map((p: any, i) => {
+      return {
+        value: p.bilateral_air_entry,
+        timestamp: Object.keys(results)[i],
+      };
+    })
+    .filter((p) => p.value !== null);
+
+  useEffect(() => {
+    console.log(bilateral);
+  }, [bilateral]);
 
   return (
     <div>
@@ -178,6 +193,14 @@ export const VentilatorPlot = (props: any) => {
             yData={yAxisData("etco2")}
             low={35}
             high={45}
+          />
+        </div>
+        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+          <BinaryChronologicalChart
+            title="Bilateral Air Entry"
+            data={bilateral}
+            trueName="Yes"
+            falseName="No"
           />
         </div>
         <div className="pt-4 px-4 bg-white border rounded-lg shadow">

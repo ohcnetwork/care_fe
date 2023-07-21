@@ -1,8 +1,8 @@
-import { PatientCategory } from "../Components/Facility/models";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import moment from "moment";
 import { IConfig } from "./hooks/useConfig";
+import { PatientCategory } from "../Components/Facility/models";
 import { SortOption } from "../Components/Common/SortDropdown";
+import moment from "moment";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -15,8 +15,9 @@ export const LocalStorageKeys = {
   refreshToken: "care_refresh_token",
 };
 export interface OptionsType {
-  id: number;
+  id: number | string;
   text: string;
+  label?: string;
   desc?: string;
   disabled?: boolean;
 }
@@ -135,8 +136,8 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   // { id: 1600, text: "District War Room" },
 ];
 
-export const SHIFTING_CHOICES: Array<OptionsType> = [
-  { id: 10, text: "PENDING" },
+export const SHIFTING_CHOICES_WARTIME: Array<OptionsType> = [
+  { id: 10, text: "PENDING", label: "SHIFTING APPROVAL PENDING" },
   { id: 15, text: "ON HOLD" },
   { id: 20, text: "APPROVED" },
   { id: 30, text: "REJECTED" },
@@ -146,6 +147,19 @@ export const SHIFTING_CHOICES: Array<OptionsType> = [
   { id: 60, text: "PATIENT TO BE PICKED UP" },
   { id: 70, text: "TRANSFER IN PROGRESS" },
   { id: 80, text: "COMPLETED" },
+  { id: 90, text: "PATIENT EXPIRED" },
+  { id: 100, text: "CANCELLED" },
+];
+
+export const SHIFTING_CHOICES_PEACETIME: Array<OptionsType> = [
+  { id: 20, text: "APPROVED", label: "PATIENTS TO BE SHIFTED" },
+  { id: 40, text: "DESTINATION APPROVED" },
+  // { id: 50, text: "DESTINATION REJECTED" },
+  { id: 60, text: "PATIENT TO BE PICKED UP", label: "TRANSPORTATION ARRANGED" },
+  { id: 70, text: "TRANSFER IN PROGRESS" },
+  { id: 80, text: "COMPLETED" },
+  { id: 90, text: "PATIENT EXPIRED" },
+  { id: 100, text: "CANCELLED" },
 ];
 
 export const SHIFTING_VEHICLE_CHOICES: Array<OptionsType> = [
@@ -232,6 +246,7 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
 ];
 
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
+  { id: -1, text: "No Review" },
   { id: 10, text: "10 mins" },
   { id: 15, text: "15 mins" },
   { id: 30, text: "30 mins" },
@@ -451,16 +466,16 @@ export const BLOOD_GROUPS = [
 ];
 
 export const SAMPLE_TYPE_CHOICES = [
-  { id: 0, text: "UNKNOWN" },
-  { id: 1, text: "BA/ETA" },
-  { id: 2, text: "TS/NPS/NS" },
-  { id: 3, text: "Blood in EDTA" },
-  { id: 4, text: "Acute Sera" },
-  { id: 5, text: "Covalescent sera" },
-  { id: 6, text: "Biopsy" },
-  { id: 7, text: "AMR" },
-  { id: 8, text: "Communicable Diseases" },
-  { id: 9, text: "OTHER TYPE" },
+  { id: "0", text: "UNKNOWN" },
+  { id: "1", text: "BA/ETA" },
+  { id: "2", text: "TS/NPS/NS" },
+  { id: "3", text: "Blood in EDTA" },
+  { id: "4", text: "Acute Sera" },
+  { id: "5", text: "Covalescent sera" },
+  { id: "6", text: "Biopsy" },
+  { id: "7", text: "AMR" },
+  { id: "8", text: "Communicable Diseases" },
+  { id: "9", text: "OTHER TYPE" },
 ];
 
 export const ICMR_CATEGORY = [
@@ -474,7 +489,8 @@ export const ICMR_CATEGORY = [
 ];
 
 export const TELEMEDICINE_ACTIONS = [
-  { id: 10, text: "PENDING", desc: "Pending" },
+  { id: 10, text: "NO_ACTION", desc: "No Action" },
+  { id: 20, text: "PENDING", desc: "Pending" },
   { id: 30, text: "SPECIALIST_REQUIRED", desc: "Specialist Required" },
   { id: 40, text: "PLAN_FOR_HOME_CARE", desc: "Plan for Home Care" },
   { id: 50, text: "FOLLOW_UP_NOT_REQUIRED", desc: "Follow Up Not Required" },
@@ -675,16 +691,16 @@ export const CONSULTATION_TABS: Array<OptionsType> = [
   { id: 6, text: "ABG", desc: "ABG" },
   { id: 7, text: "NURSING", desc: "Nursing" },
   { id: 8, text: "NEUROLOGICAL_MONITORING", desc: "Neurological Monitoring" },
-  { id: 9, text: "VENTILATOR", desc: "Ventilator" },
+  { id: 9, text: "VENTILATOR", desc: "Respiratory Support" },
   { id: 10, text: "NUTRITION", desc: "Nutrition" },
   { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
   { id: 12, text: "DIALYSIS", desc: "Dialysis" },
 ];
 
 export const RHYTHM_CHOICES: Array<OptionsType> = [
-  { id: 0, text: "Unknown" },
-  { id: 5, text: "Regular" },
-  { id: 10, text: "Irregular" },
+  { id: 0, text: "UNKNOWN", desc: "Unknown" },
+  { id: 5, text: "REGULAR", desc: "Regular" },
+  { id: 10, text: "IRREGULAR", desc: "Irregular" },
 ];
 
 export const LOCATION_BED_TYPES: Array<any> = [
@@ -742,28 +758,28 @@ export const CAMERA_STATES = {
 
 export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
   {
-    icon: "chevron-up",
+    icon: "l-angle-up",
     label: "Move Up",
     action: "up",
     loadingLabel: CAMERA_STATES.MOVING.UP,
     shortcutKey: ["Control", "Shift", "ArrowUp"],
   },
   {
-    icon: "chevron-down",
+    icon: "l-angle-down",
     label: "Move Down",
     action: "down",
     loadingLabel: CAMERA_STATES.MOVING.DOWN,
     shortcutKey: ["Control", "Shift", "ArrowDown"],
   },
   {
-    icon: "chevron-left",
+    icon: "l-angle-left",
     label: "Move Left",
     action: "left",
     loadingLabel: CAMERA_STATES.MOVING.LEFT,
     shortcutKey: ["Control", "Shift", "ArrowLeft"],
   },
   {
-    icon: "chevron-right",
+    icon: "l-angle-right",
     label: "Move Right",
     action: "right",
     loadingLabel: CAMERA_STATES.MOVING.RIGHT,
@@ -777,34 +793,34 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
     shortcutKey: ["Shift", "P"],
   },
   {
-    icon: "search-plus",
+    icon: "l-search-plus",
     label: "Zoom In",
     action: "zoomIn",
     loadingLabel: CAMERA_STATES.ZOOMING.IN,
     shortcutKey: ["Shift", "I"],
   },
   {
-    icon: "search-minus",
+    icon: "l-search-minus",
     label: "Zoom Out",
     action: "zoomOut",
     loadingLabel: CAMERA_STATES.ZOOMING.OUT,
     shortcutKey: ["Shift", "O"],
   },
   {
-    icon: "save",
+    icon: "l-save",
     label: "Update Preset",
     action: "updatePreset",
     loadingLabel: CAMERA_STATES.UPDATING_PRESET,
     shortcutKey: ["Shift", "S"],
   },
   {
-    icon: "undo",
+    icon: "l-redo",
     label: "Reset",
     action: "reset",
     shortcutKey: ["Shift", "R"],
   },
   {
-    icon: "expand",
+    icon: "l-expand-arrows-alt",
     label: "Full Screen",
     action: "fullScreen",
     shortcutKey: ["F"],

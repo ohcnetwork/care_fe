@@ -1,14 +1,7 @@
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import moment from "moment";
-import {
-  createRef,
-  LegacyRef,
-  useCallback,
-  useEffect,
-  useReducer,
-  useState,
-} from "react";
+import { createRef, LegacyRef, useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   CONSULTATION_SUGGESTION,
@@ -23,33 +16,24 @@ import {
   getConsultation,
   updateConsultation,
   getPatient,
+  dischargePatient,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { LegacyErrorHelperText } from "../Common/HelperInputFields";
-import { BedModel, FacilityModel } from "./models";
-import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
+import { BedModel, FacilityModel, ICD11DiagnosisModel } from "./models";
 import { UserModel } from "../Users/models";
 import { BedSelect } from "../Common/BedSelect";
-import { dischargePatient } from "../../Redux/actions";
 import Beds from "./Consultations/Beds";
-import PrescriptionBuilder, {
-  PrescriptionType,
-} from "../Common/prescription-builder/PrescriptionBuilder";
-import PRNPrescriptionBuilder, {
-  PRNPrescriptionType,
-} from "../Common/prescription-builder/PRNPrescriptionBuilder";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
-import { ICD11DiagnosisModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -61,6 +45,9 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useVisibility from "../../Utils/useVisibility";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
+import { FormAction } from "../Form/Utils";
+import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -94,8 +81,6 @@ type FormDetails = {
   ip_no: string;
   op_no: string;
   procedure: ProcedureType[];
-  discharge_advice: PrescriptionType[];
-  prn_prescription: PRNPrescriptionType[];
   investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
   action?: string;
@@ -110,12 +95,9 @@ type FormDetails = {
   cause_of_death: string;
   death_datetime: string;
   death_confirmed_doctor: string;
+  InvestigationAdvice: InvestigationType[];
+  procedures: ProcedureType[];
 };
-
-type Action =
-  | { type: "set_form"; form: FormDetails }
-  | { type: "set_error"; errors: FormDetails }
-  | { type: "set_form_field"; field: keyof FormDetails; value: any };
 
 const initForm: FormDetails = {
   symptoms: [],
@@ -144,11 +126,9 @@ const initForm: FormDetails = {
   ip_no: "",
   op_no: "",
   procedure: [],
-  discharge_advice: [],
-  prn_prescription: [],
   investigation: [],
   is_telemedicine: "false",
-  action: undefined,
+  action: "NO_ACTION",
   assigned_to: "",
   assigned_to_object: null,
   special_instruction: "",
@@ -160,6 +140,8 @@ const initForm: FormDetails = {
   cause_of_death: "",
   death_datetime: "",
   death_confirmed_doctor: "",
+  InvestigationAdvice: [],
+  procedures: [],
 };
 
 const initError = Object.assign(
@@ -185,7 +167,7 @@ const fieldRef = formErrorKeys.reduce(
   {}
 );
 
-const consultationFormReducer = (state = initialState, action: Action) => {
+const consultationFormReducer = (state = initialState, action: FormAction) => {
   switch (action.type) {
     case "set_form": {
       return {
@@ -193,20 +175,15 @@ const consultationFormReducer = (state = initialState, action: Action) => {
         form: { ...state.form, ...action.form },
       };
     }
-    case "set_error": {
+    case "set_errors": {
       return {
         ...state,
         errors: action.errors,
       };
     }
-    case "set_form_field": {
-      return {
-        ...state,
-        form: {
-          ...state.form,
-          [action.field]: action.value,
-        },
-      };
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
     }
   }
 };
@@ -221,16 +198,11 @@ export const ConsultationForm = (props: any) => {
   const { kasp_enabled, kasp_string } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, id } = props;
-  const [state, dispatch] = useReducer(consultationFormReducer, initialState);
-  const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-  const [dischargeAdvice, setDischargeAdvice] = useState<PrescriptionType[]>(
-    []
+  const [state, dispatch] = useAutoSaveReducer<FormDetails>(
+    consultationFormReducer,
+    initialState
   );
-  const [PRNAdvice, setPRNAdvice] = useState<PRNPrescriptionType[]>([]);
-  const [InvestigationAdvice, setInvestigationAdvice] = useState<
-    InvestigationType[]
-  >([]);
-  const [procedures, setProcedures] = useState<ProcedureType[]>([]);
+  const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
 
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
@@ -276,23 +248,24 @@ export const ConsultationForm = (props: any) => {
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
+        setIsLoading(true);
         const res = await dispatchAction(getPatient({ id: patientId }));
         if (res.data) {
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);
           if (isUpdate) {
-            dispatch({
-              type: "set_form_field",
-              field: "action",
-              value: TELEMEDICINE_ACTIONS.find((a) => a.id === res.data.action)
-                ?.text,
-            });
+            const form = { ...state.form };
+            form.action = TELEMEDICINE_ACTIONS.find(
+              (a) => a.id === res.data.action
+            )?.text;
+            dispatch({ type: "set_form", form });
           }
         }
       } else {
         setPatientName("");
         setFacilityName("");
       }
+      if (!id) setIsLoading(false);
     }
     fetchPatientName();
   }, [dispatchAction, patientId]);
@@ -303,27 +276,25 @@ export const ConsultationForm = (props: any) => {
 
   const fetchData = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
+      if (!patientId) setIsLoading(true);
       const res = await dispatchAction(getConsultation(id));
-      setDischargeAdvice(res && res.data && res.data.discharge_advice);
-      setPRNAdvice(
-        !Array.isArray(res.data.prn_prescription)
+      handleFormFieldChange({
+        name: "InvestigationAdvice",
+        value: !Array.isArray(res.data.investigation)
           ? []
-          : res.data.prn_prescription
-      );
-      setInvestigationAdvice(
-        !Array.isArray(res.data.investigation) ? [] : res.data.investigation
-      );
-      setProcedures(
-        !Array.isArray(res.data.procedure) ? [] : res.data.procedure
-      );
+          : res.data.investigation,
+      });
+      handleFormFieldChange({
+        name: "procedures",
+        value: !Array.isArray(res.data.procedure) ? [] : res.data.procedure,
+      });
       if (res.data.suggestion === "R") {
         if (res.data.referred_to_external)
           setSelectedFacility({ id: -1, name: res.data.referred_to_external });
         else setSelectedFacility(res.data.referred_to_object);
       }
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           const formData = {
             ...res.data,
             symptoms_onset_date: isoStringToDate(res.data.symptoms_onset_date),
@@ -332,7 +303,7 @@ export const ConsultationForm = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
               ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
-                  ?.id || "Comfort"
+                  ?.id ?? "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             op_no: res.data.op_no ? res.data.op_no : "",
@@ -341,6 +312,7 @@ export const ConsultationForm = (props: any) => {
             is_telemedicine: `${res.data.is_telemedicine}`,
             is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
+            assigned_to_object: res.data.assigned_to_object,
             ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
@@ -364,11 +336,9 @@ export const ConsultationForm = (props: any) => {
 
   useAbortableEffect(
     (status: statusType) => {
-      if (id) {
-        fetchData(status);
-      }
+      if (id && ((patientId && patientName) || !patientId)) fetchData(status);
     },
-    [dispatch, fetchData]
+    [fetchData, id, patientId, patientName]
   );
 
   if (isLoading) return <Loading />;
@@ -489,29 +459,8 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "discharge_advice": {
-          let invalid = false;
-          let errorMsg = "";
-          for (const f of dischargeAdvice) {
-            if (!f.medicine?.replace(/\s/g, "").length) {
-              invalid = true;
-              errorMsg = "Prescription Medicine field can not be empty";
-              break;
-            }
-            if (!f.dosage?.replace(/\s/g, "").length) {
-              invalid = true;
-              errorMsg = "Prescription Frequency field can not be empty";
-              break;
-            }
-          }
-          if (invalid) {
-            errors[field] = errorMsg;
-            invalidForm = true;
-          }
-          return;
-        }
         case "procedure": {
-          for (const p of procedures) {
+          for (const p of state.form.procedures) {
             if (!p.procedure?.replace(/\s/g, "").length) {
               errors[field] = "Procedure field can not be empty";
               invalidForm = true;
@@ -530,24 +479,9 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         }
-        case "prn_prescription": {
-          for (const f of PRNAdvice) {
-            if (!f.medicine?.replace(/\s/g, "").length) {
-              errors[field] = "Medicine field can not be empty";
-              invalidForm = true;
-              break;
-            }
-            if (!f.indicator?.replace(/\s/g, "").length) {
-              errors[field] = "Indicator field can not be empty";
-              invalidForm = true;
-              break;
-            }
-          }
-          return;
-        }
 
         case "investigation": {
-          for (const i of InvestigationAdvice) {
+          for (const i of state.form.InvestigationAdvice) {
             if (!i.type?.length) {
               errors[field] = "Investigation field can not be empty";
               invalidForm = true;
@@ -590,7 +524,7 @@ export const ConsultationForm = (props: any) => {
       }
     });
     if (invalidForm) {
-      dispatch({ type: "set_error", errors });
+      dispatch({ type: "set_errors", errors });
       const firstError = Object.keys(errors).find((key) => errors[key]);
       if (firstError) {
         fieldRef[firstError].current?.scrollIntoView({
@@ -600,7 +534,7 @@ export const ConsultationForm = (props: any) => {
       }
       return false;
     }
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return true;
   };
 
@@ -617,7 +551,7 @@ export const ConsultationForm = (props: any) => {
           death_datetime: death_datetime,
           death_confirmed_doctor: death_confirmed_doctor,
         },
-        { id: patientId }
+        { id }
       )
     );
 
@@ -657,14 +591,16 @@ export const ConsultationForm = (props: any) => {
         discharge_date: state.form.discharge_date,
         ip_no: state.form.ip_no,
         op_no: state.form.op_no,
-        icd11_diagnoses: state.form.icd11_diagnoses_object.map((o) => o.id),
+        icd11_diagnoses: state.form.icd11_diagnoses_object.map(
+          (o: ICD11DiagnosisModel) => o.id
+        ),
         icd11_provisional_diagnoses:
-          state.form.icd11_provisional_diagnoses_object.map((o) => o.id),
+          state.form.icd11_provisional_diagnoses_object.map(
+            (o: ICD11DiagnosisModel) => o.id
+          ),
         verified_by: state.form.verified_by,
-        discharge_advice: dischargeAdvice,
-        prn_prescription: PRNAdvice,
-        investigation: InvestigationAdvice,
-        procedure: procedures,
+        investigation: state.form.InvestigationAdvice,
+        procedure: state.form.procedures,
         patient: patientId,
         facility: facilityId,
         referred_to:
@@ -680,7 +616,9 @@ export const ConsultationForm = (props: any) => {
         action: state.form.action,
         review_interval: state.form.review_interval,
         assigned_to:
-          state.form.is_telemedicine === "true" ? state.form.assigned_to : "",
+          state.form.is_telemedicine.toString() === "true"
+            ? state.form.assigned_to
+            : "",
         special_instruction: state.form.special_instruction,
         weight: Number(state.form.weight),
         height: Number(state.form.height),
@@ -691,8 +629,9 @@ export const ConsultationForm = (props: any) => {
         id ? updateConsultation(id, data) : createConsultation(data)
       );
       setIsLoading(false);
-      if (res && res.data && res.status !== 400) {
+      if (res?.data && res.status !== 400) {
         dispatch({ type: "set_form", form: initForm });
+
         if (data.suggestion === "DD") {
           await declareThePatientDead(
             state.form.cause_of_death,
@@ -700,19 +639,23 @@ export const ConsultationForm = (props: any) => {
             state.form.death_confirmed_doctor
           );
         }
-        if (id) {
-          Notification.Success({
-            msg: "Consultation updated successfully",
-          });
+
+        Notification.Success({
+          msg: res.data.discharge_date
+            ? "Patient discharged successfully"
+            : `Consultation ${id ? "updated" : "created"} successfully`,
+        });
+
+        navigate(
+          `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
+        );
+
+        if (data.suggestion === "R") {
+          navigate(`/facility/${facilityId}/patient/${patientId}/shift/new`);
+          return;
+        } else if (!id && data.suggestion === "A") {
           navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${id}`
-          );
-        } else {
-          Notification.Success({
-            msg: "Consultation created successfully",
-          });
-          navigate(
-            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}`
+            `/facility/${facilityId}/patient/${patientId}/consultation/${res.data.id}/prescriptions`
           );
         }
       }
@@ -801,9 +744,9 @@ export const ConsultationForm = (props: any) => {
     const selectedFacility = selected as FacilityModel;
     setSelectedFacility(selectedFacility);
     const form: FormDetails = { ...state.form };
-    if (selectedFacility && selectedFacility.id) {
+    if (selectedFacility?.id) {
       if (selectedFacility.id === -1) {
-        form.referred_to_external = selectedFacility.name || "";
+        form.referred_to_external = selectedFacility.name ?? "";
         delete form.referred_to;
       } else {
         form.referred_to = selectedFacility.id.toString() || "";
@@ -818,7 +761,7 @@ export const ConsultationForm = (props: any) => {
       id: name,
       name,
       value: (state.form as any)[name],
-      error: state.errors[name],
+      error: (state.errors as any)[name],
       onChange: handleFormFieldChange,
     };
   };
@@ -876,11 +819,17 @@ export const ConsultationForm = (props: any) => {
           })}
         </div>
         <div className="w-full h-full flex overflow-auto xl:ml-72">
-          <div className="w-full max-w-4xl 2xl:max-w-4xl">
+          <div className="w-full max-w-4xl">
             <form
               onSubmit={handleSubmit}
               className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
             >
+              <DraftSection
+                handleDraftSelect={(newState: any) => {
+                  dispatch({ type: "set_state", state: newState });
+                }}
+                formData={state.form}
+              />
               <div className="grid grid-cols-1 gap-x-12 items-start">
                 <div className="grid grid-cols-6 gap-x-6">
                   {sectionTitle("Consultation Details")}
@@ -1093,6 +1042,7 @@ export const ConsultationForm = (props: any) => {
                         <DateFormField
                           {...field("admission_date")}
                           required
+                          disableFuture
                           label="Admission date"
                           position="LEFT"
                         />
@@ -1170,44 +1120,18 @@ export const ConsultationForm = (props: any) => {
                           >
                             <FieldLabel>Investigations Suggestions</FieldLabel>
                             <InvestigationBuilder
-                              investigations={InvestigationAdvice}
-                              setInvestigations={setInvestigationAdvice}
+                              investigations={state.form.InvestigationAdvice}
+                              setInvestigations={(investigations) => {
+                                handleFormFieldChange({
+                                  name: "InvestigationAdvice",
+                                  value: investigations,
+                                });
+                              }}
                             />
-                            <LegacyErrorHelperText
+                            <FieldErrorText
                               error={state.errors.investigation}
                             />
                           </div>
-
-                          <div
-                            id="discharge_advice"
-                            className="col-span-6"
-                            ref={fieldRef["discharge_advice"]}
-                          >
-                            <FieldLabel>Prescription Medication</FieldLabel>
-                            <PrescriptionBuilder
-                              prescriptions={dischargeAdvice}
-                              setPrescriptions={setDischargeAdvice}
-                            />
-                            <LegacyErrorHelperText
-                              error={state.errors.discharge_advice}
-                            />
-                          </div>
-
-                          <div
-                            id="prn_prescription"
-                            className="col-span-6"
-                            ref={fieldRef["prn_prescription"]}
-                          >
-                            <FieldLabel>PRN Prescription</FieldLabel>
-                            <PRNPrescriptionBuilder
-                              prescriptions={PRNAdvice}
-                              setPrescriptions={setPRNAdvice}
-                            />
-                            <LegacyErrorHelperText
-                              error={state.errors.prn_prescription}
-                            />
-                          </div>
-
                           <div
                             id="procedure"
                             className="col-span-6"
@@ -1215,12 +1139,15 @@ export const ConsultationForm = (props: any) => {
                           >
                             <FieldLabel>Procedures</FieldLabel>
                             <ProcedureBuilder
-                              procedures={procedures}
-                              setProcedures={setProcedures}
+                              procedures={state.form.procedures}
+                              setProcedures={(procedures) => {
+                                handleFormFieldChange({
+                                  name: "procedures",
+                                  value: procedures,
+                                });
+                              }}
                             />
-                            <LegacyErrorHelperText
-                              error={state.errors.procedure}
-                            />
+                            <FieldErrorText error={state.errors.procedure} />
                           </div>
                           <div
                             className="col-span-6"
@@ -1302,8 +1229,8 @@ export const ConsultationForm = (props: any) => {
                           <CheckBoxFormField
                             className="col-span-6"
                             {...field("is_telemedicine")}
+                            value={JSON.parse(state.form.is_telemedicine)}
                             label="Is Telemedicine required for the patient?"
-                            onChange={handleFormFieldChange}
                           />
 
                           {JSON.parse(state.form.is_telemedicine) && (
@@ -1311,12 +1238,16 @@ export const ConsultationForm = (props: any) => {
                               className="flex-[2] col-span-6"
                               ref={fieldRef["assigned_to"]}
                             >
-                              <OnlineUsersSelect
-                                userId={state.form.assigned_to}
-                                selectedUser={state.form.assigned_to_object}
-                                onSelect={handleDoctorSelect}
-                                user_type="Doctor"
-                                outline
+                              <UserAutocompleteFormField
+                                showActiveStatus
+                                value={
+                                  state.form.assigned_to_object ?? undefined
+                                }
+                                onChange={(option) =>
+                                  handleDoctorSelect(option.value)
+                                }
+                                userType={"Doctor"}
+                                name={"assigned_to"}
                               />
                             </div>
                           )}
@@ -1343,7 +1274,7 @@ export const ConsultationForm = (props: any) => {
             </form>
             {isUpdate && (
               <>
-                <div className="mt-4 bg-white rounded max-w-3xl px-11 py-8 mx-auto">
+                <div className="mt-4 bg-white rounded max-w-4xl px-11 py-8 mx-auto">
                   <h4>Update Bed</h4>
                   <Beds
                     facilityId={facilityId}

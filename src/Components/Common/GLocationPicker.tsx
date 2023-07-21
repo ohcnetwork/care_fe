@@ -5,6 +5,7 @@ import { isLatLngLiteral } from "@googlemaps/typescript-guards";
 import Spinner from "./Spinner";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useConfig from "../../Common/hooks/useConfig";
+import { Popover } from "@headlessui/react";
 
 const render = (status: Status) => {
   if (status === "LOADING") {
@@ -201,14 +202,16 @@ const Map: React.FC<MapProps> = ({
           placeholder="Start typing to search"
         />
         {handleOnClose && (
-          <div
-            id="map-close"
-            className="bg-white m-[10px] p-2 rounded cursor-pointer"
-            ref={mapCloseRef}
-            onClick={handleOnClose}
-          >
-            <CareIcon className="care-l-times-circle text-2xl text-gray-800" />
-          </div>
+          <Popover.Button>
+            <div
+              id="map-close"
+              className="bg-white m-[10px] p-2 rounded cursor-pointer"
+              ref={mapCloseRef}
+              onClick={handleOnClose}
+            >
+              <CareIcon className="care-l-times-circle text-2xl text-gray-800" />
+            </div>
+          </Popover.Button>
         )}
         {handleOnSelectCurrentLocation && (
           <div

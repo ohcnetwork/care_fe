@@ -1,21 +1,23 @@
-import { Link } from "raviger";
-import { getDimensionOrDash } from "../../Common/utils";
-import { PatientModel } from "./models";
-import DialogModal from "../Common/Dialog";
-import Beds from "../Facility/Consultations/Beds";
-import { useState } from "react";
-import { ConsultationModel, PatientCategory } from "../Facility/models";
+import * as Notification from "../../Utils/Notifications.js";
+
 import {
   CONSULTATION_SUGGESTION,
   DISCHARGE_REASONS,
   PATIENT_CATEGORIES,
   RESPIRATORY_SUPPORT,
 } from "../../Common/constants";
-import moment from "moment";
+import { ConsultationModel, PatientCategory } from "../Facility/models";
+
+import Beds from "../Facility/Consultations/Beds";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import * as Notification from "../../Utils/Notifications.js";
+import DialogModal from "../Common/Dialog";
+import { Link } from "raviger";
+import { PatientModel } from "./models";
+import { getDimensionOrDash } from "../../Common/utils";
+import moment from "moment";
 import useConfig from "../../Common/hooks/useConfig";
+import { useState } from "react";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -36,7 +38,7 @@ export default function PatientInfoCard(props: {
     ? PATIENT_CATEGORIES.find((c) => c.text === category)?.twClass
     : "patient-unknown";
 
-  const bedDialogTitle = !patient.is_active
+  const bedDialogTitle = consultation?.discharge_date
     ? "Bed History"
     : !consultation?.current_bed
     ? "Assign Bed"
@@ -48,14 +50,14 @@ export default function PatientInfoCard(props: {
         title={bedDialogTitle}
         show={open}
         onClose={() => setOpen(false)}
-        className="w-full max-w-2xl"
+        className="md:max-w-3xl"
       >
         {patient?.facility && patient?.id && consultation?.id ? (
           <Beds
             facilityId={patient?.facility}
             patientId={patient?.id}
-            discharged={!patient.is_active}
-            consultationId={consultation?.id}
+            discharged={!!consultation?.discharge_date}
+            consultationId={consultation?.id ?? ""}
             setState={setOpen}
             fetchPatientData={props.fetchPatientData}
             smallLoader
@@ -72,8 +74,7 @@ export default function PatientInfoCard(props: {
             <div
               className={`w-24 h-24 min-w-[5rem] bg-gray-200 ${categoryClass}-profile`}
             >
-              {consultation &&
-              consultation?.current_bed &&
+              {consultation?.current_bed &&
               consultation?.discharge_date === null ? (
                 <div
                   className="flex flex-col items-center justify-center h-full"
@@ -134,14 +135,14 @@ export default function PatientInfoCard(props: {
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-1 lg:mb-2">
               <Link
-                href={`/facility/${patient.facility_object?.id}`}
+                href={`/facility/${consultation?.facility}`}
                 className="font-semibold text-black hover:text-primary-600"
               >
                 <i
                   className="text-primary-400 fas fa-hospital mr-1"
                   aria-hidden="true"
                 ></i>
-                {patient.facility_object?.name}
+                {consultation?.facility_name}
               </Link>
 
               {(consultation?.suggestion === "A" || op_no) && (
@@ -154,7 +155,7 @@ export default function PatientInfoCard(props: {
                 </span>
               )}
             </div>
-            {!patient.is_active && (
+            {!!consultation?.discharge_date && (
               <p className="bg-red-100 text-red-600 inline-block rounded-lg px-2 py-1 my-1 text-sm">
                 Discharged from CARE
               </p>
@@ -183,7 +184,7 @@ export default function PatientInfoCard(props: {
                     (resp) =>
                       resp.text ===
                       consultation?.last_daily_round?.ventilator_interface
-                  )?.id || "UNKNOWN",
+                  )?.id ?? "UNKNOWN",
                   consultation?.last_daily_round?.ventilator_interface,
                 ],
               ].map((stat, i) => {
@@ -199,7 +200,7 @@ export default function PatientInfoCard(props: {
                 );
               })}
             </div>
-            {patient.is_active === false && (
+            {!!consultation?.discharge_date && (
               <div className="flex gap-4 text-sm mt-3 px-3 py-1 font-medium bg-cyan-300">
                 <div>
                   <span>
@@ -241,7 +242,7 @@ export default function PatientInfoCard(props: {
         </div>
 
         <div className="w-full lg:w-fit flex gap-2 flex-col px-4 py-1 lg:p-6">
-          {patient.is_active === false && (
+          {!!consultation?.discharge_date && (
             <div className="flex flex-col justify-center items-center">
               <div className="text-sm leading-5 font-normal text-gray-500">
                 Discharge Reason
@@ -264,16 +265,20 @@ export default function PatientInfoCard(props: {
               `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/update`,
               "Edit Consultation Details",
               "pen",
-              patient.is_active && consultation?.id,
+              patient.is_active &&
+                consultation?.id &&
+                !consultation?.discharge_date,
             ],
             [
               `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/daily-rounds`,
               "Log Update",
               "plus",
-              patient.is_active && consultation?.id,
+              patient.is_active &&
+                consultation?.id &&
+                !consultation?.discharge_date,
               [
                 !(consultation?.facility !== patient.facility) &&
-                  !(consultation?.discharge_date || !patient.is_active) &&
+                  !(consultation?.discharge_date ?? !patient.is_active) &&
                   moment(consultation?.modified_date).isBefore(
                     new Date().getTime() - 24 * 60 * 60 * 1000
                   ),
@@ -314,7 +319,7 @@ export default function PatientInfoCard(props: {
                   <div className="relative" key={i}>
                     <ButtonV2
                       key={i}
-                      variant={action[4] && action[4][0] ? "danger" : "primary"}
+                      variant={action?.[4]?.[0] ? "danger" : "primary"}
                       href={
                         consultation?.admitted &&
                         !consultation?.current_bed &&

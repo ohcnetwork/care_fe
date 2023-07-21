@@ -29,11 +29,16 @@ export default function FiltersSlideover({
         <div className="flex items-center justify-between">
           <span className="font-bold text-lg">{t("advanced_filters")}</span>
           <div className="flex items-center justify-end gap-1 mr-2">
-            <ButtonV2 variant="danger" ghost onClick={onClear}>
+            <ButtonV2
+              variant="danger"
+              ghost
+              onClick={onClear}
+              id="clear-filter"
+            >
               <CareIcon className="care-l-filter-slash text-lg" />
               <span>{t("clear")}</span>
             </ButtonV2>
-            <ButtonV2 ghost onClick={onApply}>
+            <ButtonV2 ghost onClick={onApply} id="apply-filter">
               {t("apply")}
             </ButtonV2>
           </div>
@@ -54,9 +59,10 @@ export const AdvancedFilterButton = ({ onClick }: { onClick: () => void }) => {
       border
       className="bg-white w-full sm:w-auto"
       onClick={onClick}
+      id="advanced-filter"
     >
-      <CareIcon className="care-l-list-ul text-lg" />
-      <span>{t("advanced_filters")}</span>
+      <CareIcon className="care-l-filter" />
+      <span className="py-0.5">{t("advanced_filters")}</span>
     </ButtonV2>
   );
 };

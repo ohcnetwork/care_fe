@@ -9,22 +9,20 @@ import LegendInput from "../../CAREUI/interactive/LegendInput";
 import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useConfig from "../../Common/hooks/useConfig";
-import { classNames } from "../../Utils/utils";
 import CircularProgress from "../Common/components/CircularProgress";
 import { LocalStorageKeys } from "../../Common/constants";
+import ReactMarkdown from "react-markdown";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
-    static_light_logo,
-    static_black_logo,
-    static_dpg_white_logo,
-    static_coronasafe_logo,
+    main_logo,
     recaptcha_site_key,
     github_url,
     coronasafe_url,
-    dpg_url,
     state_logo,
-    state_logo_white,
+    custom_logo,
+    custom_logo_alt,
+    custom_description,
   } = useConfig();
   const dispatch: any = useDispatch();
   const initForm: any = {
@@ -132,12 +130,12 @@ export const Login = (props: { forgot?: boolean }) => {
     if (typeof form.username === "string") {
       if (!form.username.match(/\w/)) {
         hasError = true;
-        err.username = t("field_request");
+        err.username = t("field_required");
       }
     }
     if (!form.username) {
       hasError = true;
-      err.username = t("field_request");
+      err.username = t("field_required");
     }
 
     if (hasError) {
@@ -184,14 +182,11 @@ export const Login = (props: { forgot?: boolean }) => {
         <div></div>
         <div className="mt-4 md:mt-12 rounded-lg py-4 flex flex-col items-start">
           <div className="hidden md:flex items-center gap-6 mb-4">
-            {state_logo && (
+            {(custom_logo || state_logo) && (
               <>
                 <img
-                  src={state_logo}
-                  className={classNames(
-                    "rounded-lg p-3 h-24",
-                    state_logo_white && "invert brightness-0"
-                  )}
+                  src={custom_logo?.light ?? state_logo?.light}
+                  className="rounded-lg py-3 h-16"
                   alt="state logo"
                 />
                 <div className="w-0.5 bg-white/50 h-10 rounded-full" />
@@ -204,27 +199,39 @@ export const Login = (props: { forgot?: boolean }) => {
               rel="noopener noreferrer"
             >
               <img
-                src={static_light_logo}
+                src={custom_logo_alt?.light ?? main_logo.light}
                 className="h-8"
                 alt="coronasafe logo"
               />
             </a>
           </div>
           <div className="max-w-lg">
-            <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-white leading-tight tracking-wider">
+            <h1 className="text-4xl lg:text-5xl font-black text-white leading-tight tracking-wider">
               {t("care")}
             </h1>
-            <div className="text-base md:text-lg lg:text-xl font-semibold py-6 max-w-xl text-gray-400 pl-1">
-              {t("goal")}
-            </div>
+            {custom_description ? (
+              <div className="py-6">
+                <ReactMarkdown className="max-w-xl text-gray-400">
+                  {custom_description || t("goal")}
+                </ReactMarkdown>
+              </div>
+            ) : (
+              <div className="text-base md:text-lg lg:text-xl font-semibold py-6 max-w-xl text-gray-400 pl-1">
+                {t("goal")}
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center mb-6">
           <div className="text-xs md:text-sm max-w-lg">
             <div className="ml-1 flex items-center gap-4 mb-2">
-              <a href={dpg_url} rel="noopener noreferrer" target="_blank">
+              <a
+                href="https://digitalpublicgoods.net/registry/coronasafe-care.html"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
                 <img
-                  src={static_dpg_white_logo}
+                  src="https://digitalpublicgoods.net/wp-content/themes/dpga/images/logo-w.svg"
                   className="h-12"
                   alt="Logo of Digital Public Goods Alliance"
                 />
@@ -236,7 +243,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 target="_blank"
               >
                 <img
-                  src={static_coronasafe_logo}
+                  src="https://cdn.coronasafe.network/ohc_logo_light.png"
                   className="h-10 inline-block"
                   alt="coronasafe logo"
                 />
@@ -275,22 +282,19 @@ export const Login = (props: { forgot?: boolean }) => {
             }
           >
             <div className="flex items-center gap-1">
-              {state_logo && (
+              {(custom_logo || state_logo) && (
                 <>
                   <img
-                    src={state_logo}
-                    className={classNames(
-                      "rounded-lg p-3 h-24 md:hidden",
-                      state_logo_white && "invert brightness-0"
-                    )}
+                    src={custom_logo?.dark ?? state_logo?.dark}
+                    className="rounded-lg py-3 h-14 md:hidden"
                     alt="state logo"
                   />
                   <div className="mx-4 w-[1px] md:hidden bg-gray-600 h-8 rounded-full" />
                 </>
               )}
               <img
-                src={static_black_logo}
-                className="h-8 w-auto md:hidden brightness-0 contrast-[0%]"
+                src={custom_logo_alt?.dark ?? main_logo.dark}
+                className="h-8 w-auto md:hidden"
                 alt="care logo"
               />
             </div>{" "}
@@ -371,8 +375,8 @@ export const Login = (props: { forgot?: boolean }) => {
             }
           >
             <img
-              src={static_black_logo}
-              className="h-8 w-auto mb-4 md:hidden brightness-0 contrast-[0%]"
+              src={main_logo.dark}
+              className="h-8 w-auto mb-4 md:hidden"
               alt="care logo"
             />{" "}
             <button
@@ -402,7 +406,6 @@ export const Login = (props: { forgot?: boolean }) => {
                   onChange={handleChange}
                   error={errors.username}
                   outerClassName="my-4"
-                  required
                   size="large"
                   className="font-extrabold"
                 />

@@ -1,29 +1,34 @@
-import { useState, useEffect } from "react";
-import loadable from "@loadable/component";
-import { navigate } from "raviger";
-import { useDispatch } from "react-redux";
-import moment from "moment";
 import {
-  listShiftRequests,
   completeTransfer,
   downloadShiftRequests,
+  listShiftRequests,
 } from "../../Redux/actions";
-import ListFilter from "./ListFilter";
-import { formatFilter } from "./Commons";
-import { formatDate } from "../../Utils/utils";
-import SearchInput from "../Form/SearchInput";
-import useFilters from "../../Common/hooks/useFilters";
+import { useEffect, useState } from "react";
+
 import BadgesList from "./BadgesList";
-import { ExportButton } from "../Common/Export";
-import { useTranslation } from "react-i18next";
 import ButtonV2 from "../Common/components/ButtonV2";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
+import { ExportButton } from "../Common/Export";
+import ListFilter from "./ListFilter";
 import Page from "../Common/components/Page";
+import SearchInput from "../Form/SearchInput";
+import { formatDate } from "../../Utils/utils";
+import { formatFilter } from "./Commons";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { navigate } from "raviger";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch, useSelector } from "react-redux";
+import useFilters from "../../Common/hooks/useFilters";
+import { useTranslation } from "react-i18next";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function ListView() {
   const dispatch: any = useDispatch();
+  const { wartime_shifting } = useConfig();
   const {
     qParams,
     updateQuery,
@@ -39,6 +44,10 @@ export default function ListView() {
     externalId: undefined,
     loading: false,
   });
+  const rootState: any = useSelector((rootState) => rootState);
+  const { currentUser } = rootState;
+  const userHomeFacilityId = currentUser.data.home_facility;
+  const userType = currentUser.data.user_type;
   const { t } = useTranslation();
 
   const handleTransferComplete = (shift: any) => {
@@ -78,7 +87,7 @@ export default function ListView() {
   }, [
     qParams.status,
     qParams.facility,
-    qParams.orgin_facility,
+    qParams.origin_facility,
     qParams.shifting_approving_facility,
     qParams.assigned_facility,
     qParams.emergency,
@@ -161,21 +170,23 @@ export default function ListView() {
                   >
                     <i className="fas fa-plane-departure mr-2"></i>
                     <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {(shift.orgin_facility_object || {}).name}
+                      {(shift.origin_facility_object || {}).name}
                     </dd>
                   </dt>
                 </div>
-                <div className="sm:col-span-1">
-                  <dt
-                    title={t("shifting_approving_facility")}
-                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
-                  >
-                    <i className="fas fa-user-check mr-2"></i>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {(shift.shifting_approving_facility_object || {}).name}
-                    </dd>
-                  </dt>
-                </div>
+                {wartime_shifting && (
+                  <div className="sm:col-span-1">
+                    <dt
+                      title={t("shifting_approving_facility")}
+                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                    >
+                      <i className="fas fa-user-check mr-2"></i>
+                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                        {(shift.shifting_approving_facility_object || {}).name}
+                      </dd>
+                    </dt>
+                  </div>
+                )}
                 <div className="sm:col-span-1">
                   <dt
                     title={t("assigned_facility")}
@@ -184,7 +195,8 @@ export default function ListView() {
                     <i className="fas fa-plane-arrival mr-2"></i>
 
                     <dd className="font-bold text-sm leading-5 text-gray-900">
-                      {(shift.assigned_facility_object || {}).name ||
+                      {shift.assigned_facility_external ||
+                        shift.assigned_facility_object?.name ||
                         t("yet_to_be_decided")}
                     </dd>
                   </dt>
@@ -233,27 +245,33 @@ export default function ListView() {
                 <i className="fas fa-eye mr-2" /> {t("all_details")}
               </ButtonV2>
             </div>
-            {shift.status === "TRANSFER IN PROGRESS" &&
-              shift.assigned_facility && (
-                <div className="mt-2">
-                  <ButtonV2
-                    className="w-full"
-                    onClick={() => setModalFor(shift.external_id)}
-                  >
-                    {t("transfer_to_receiving_facility")}
-                  </ButtonV2>
-                  <ConfirmDialogV2
-                    title={t("confirm_transfer_complete")}
-                    description={t("mark_transfer_complete_confirmation")}
-                    action="Confirm"
-                    show={modalFor === shift.external_id}
-                    onClose={() =>
-                      setModalFor({ externalId: undefined, loading: false })
-                    }
-                    onConfirm={() => handleTransferComplete(shift)}
-                  />
-                </div>
-              )}
+            {shift.status === "COMPLETED" && shift.assigned_facility && (
+              <div className="mt-2">
+                <ButtonV2
+                  className="w-full"
+                  disabled={
+                    !shift.patient_object.allow_transfer ||
+                    !(
+                      ["DistrictAdmin", "StateAdmin"].includes(userType) ||
+                      userHomeFacilityId === shift.assigned_facility
+                    )
+                  }
+                  onClick={() => setModalFor(shift.external_id)}
+                >
+                  {t("transfer_to_receiving_facility")}
+                </ButtonV2>
+                <ConfirmDialog
+                  title={t("confirm_transfer_complete")}
+                  description={t("mark_transfer_complete_confirmation")}
+                  action="Confirm"
+                  show={modalFor === shift.external_id}
+                  onClose={() =>
+                    setModalFor({ externalId: undefined, loading: false })
+                  }
+                  onConfirm={() => handleTransferComplete(shift)}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -286,30 +304,20 @@ export default function ListView() {
           <div className="w-32">
             {/* dummy div to align space as per board view */}
           </div>
-          <div className="flex md:flex-row flex-col justify-center items-center md:gap-6">
-            <div className="my-2 md:my-0">
-              <button
-                className="px-4 py-2 rounded-full border-2 border-gray-200 text-sm bg-white text-gray-800 w-32 md:w-40 leading-none transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 hover:border-gray-400 focus:text-primary-600 focus:border-gray-400"
-                onClick={() =>
-                  navigate("/shifting/board-view", { query: qParams })
-                }
-              >
-                <i
-                  className="fa fa-list mr-1 transform rotate-90"
-                  aria-hidden="true"
-                ></i>
-                {t("board_view")}
-              </button>
-            </div>
-            <div className="flex items-start gap-2">
-              <button
-                className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-                onClick={() => advancedFilter.setShow(true)}
-              >
-                <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-                <span>{t("filters")}</span>
-              </button>
-            </div>
+          <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 w-full lg:w-fit">
+            <ButtonV2
+              className="py-[11px]"
+              onClick={() =>
+                navigate("/shifting/board-view", { query: qParams })
+              }
+            >
+              <CareIcon className="care-l-list-ul transform rotate-90" />
+              {t("board_view")}
+            </ButtonV2>
+
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
+            />
           </div>
         </>
       }
@@ -339,7 +347,11 @@ export default function ListView() {
           </div>
         )}
       </div>
-      <ListFilter showShiftingStatus={true} {...advancedFilter} />
+      <ListFilter
+        showShiftingStatus={true}
+        {...advancedFilter}
+        key={window.location.search}
+      />
     </Page>
   );
 }

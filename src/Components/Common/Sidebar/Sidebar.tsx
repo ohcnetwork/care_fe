@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
@@ -49,7 +49,7 @@ const StatelessSidebar = ({
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
-  const { static_light_logo } = useConfig();
+  const { main_logo } = useConfig();
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
   const { dashboard_url } = useConfig();
@@ -130,7 +130,7 @@ const StatelessSidebar = ({
           className={`${
             shrinked ? "mx-auto" : "ml-5"
           } h-5 md:h-8 self-start transition mb-2 md:mb-5`}
-          src={shrinked ? LOGO_COLLAPSE : static_light_logo}
+          src={shrinked ? LOGO_COLLAPSE : main_logo.light}
         />
       </Link>
       <div className="h-3" /> {/* flexible spacing */}
@@ -192,18 +192,17 @@ const StatelessSidebar = ({
   );
 };
 
+export const SidebarShrinkContext = createContext<{
+  shrinked: boolean;
+  setShrinked: (state: boolean) => void;
+}>({
+  shrinked: false,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setShrinked: () => {},
+});
+
 export const DesktopSidebar = () => {
-  const [shrinked, setShrinked] = useState(
-    () => localStorage.getItem(SIDEBAR_SHRINK_PREFERENCE_KEY) === "true"
-  );
-
-  useEffect(() => {
-    localStorage.setItem(
-      SIDEBAR_SHRINK_PREFERENCE_KEY,
-      shrinked ? "true" : "false"
-    );
-  }, [shrinked]);
-
+  const { shrinked, setShrinked } = useContext(SidebarShrinkContext);
   return (
     <StatelessSidebar
       shrinked={shrinked}
