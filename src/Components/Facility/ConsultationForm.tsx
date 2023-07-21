@@ -1,6 +1,6 @@
 import * as Notification from "../../Utils/Notifications.js";
 
-import { BedModel, FacilityModel } from "./models";
+import { BedModel, FacilityModel, ICD11DiagnosisModel } from "./models";
 import {
   CONSULTATION_STATUS,
   CONSULTATION_SUGGESTION,
@@ -32,16 +32,15 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
-import { FacilitySelect } from "../Common/FacilitySelect.js";
+import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FormAction } from "../Form/Utils";
-import { ICD11DiagnosisModel } from "./models";
-import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { SymptomsSelect } from "../Common/SymptomsSelect";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
+import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import { UserModel } from "../Users/models";
 import { dischargePatient } from "../../Redux/actions";
 import loadable from "@loadable/component";
@@ -1240,12 +1239,16 @@ export const ConsultationForm = (props: any) => {
                               className="flex-[2] col-span-6"
                               ref={fieldRef["assigned_to"]}
                             >
-                              <OnlineUsersSelect
-                                userId={state.form.assigned_to}
-                                selectedUser={state.form.assigned_to_object}
-                                onSelect={handleDoctorSelect}
-                                user_type="Doctor"
-                                outline
+                              <UserAutocompleteFormField
+                                showActiveStatus
+                                value={
+                                  state.form.assigned_to_object ?? undefined
+                                }
+                                onChange={(option) =>
+                                  handleDoctorSelect(option.value)
+                                }
+                                userType={"Doctor"}
+                                name={"assigned_to"}
                               />
                             </div>
                           )}

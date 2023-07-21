@@ -26,12 +26,12 @@ export enum AssetClass {
   VENTILATOR = "VENTILATOR",
 }
 
-export enum AssetStatus {
-  "not_monitored" = 0,
-  "operational" = 1,
-  "down" = 2,
-  "maintenance" = 3,
-}
+export const AssetStatus = {
+  not_monitored: "Not Monitored",
+  operational: "Operational",
+  down: "Down",
+  maintenance: "Under Maintenance",
+};
 
 export const assetClassProps = {
   ONVIF: {
@@ -96,7 +96,7 @@ export interface AssetUptimeRecord {
     id: string;
     name: string;
   };
-  status: number;
+  status: string;
   timestamp: string;
   created_date: string;
   modified_date: string;
