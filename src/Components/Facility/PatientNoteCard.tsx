@@ -1,12 +1,6 @@
 import { relativeDate, formatDate } from "../../Utils/utils";
 
-const PatientNoteCard = ({
-  note,
-  facilityId,
-}: {
-  note: any;
-  facilityId: any;
-}) => {
+const PatientNoteCard = ({ note }: { note: any }) => {
   return (
     <div
       key={note.id}
@@ -19,9 +13,9 @@ const PatientNoteCard = ({
         </span>
         <span className="text-gray-700 text-sm">
           {note.created_by_object.user_type === "Doctor"
-            ? note.created_by_object.home_facility !== facilityId
-              ? "Remote Specialist"
-              : ""
+            ? note.created_by_local_user
+              ? ""
+              : "Remote Specialist"
             : note.created_by_object.user_type}
         </span>
       </div>

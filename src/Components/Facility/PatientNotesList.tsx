@@ -17,7 +17,7 @@ interface PatientNotesProps {
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
 const PatientNotesList = (props: PatientNotesProps) => {
-  const { facilityId, reload, setReload } = props;
+  const { reload, setReload } = props;
 
   const dispatch: any = useDispatch();
   const initialData: any = { notes: [], cPage: 1, totalPages: 1 };
@@ -105,11 +105,7 @@ const PatientNotesList = (props: PatientNotesProps) => {
           scrollableTarget="patient-notes-list"
         >
           {state.notes.map((note: any) => (
-            <PatientNoteCard
-              note={note}
-              key={note.id}
-              facilityId={facilityId}
-            />
+            <PatientNoteCard note={note} key={note.id} />
           ))}
         </InfiniteScroll>
       ) : (
