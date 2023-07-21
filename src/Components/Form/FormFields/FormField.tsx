@@ -1,6 +1,6 @@
-import { classNames } from "../../../Utils/utils";
 import { FieldError } from "../FieldValidators";
 import { FormFieldBaseProps } from "./Utils";
+import { classNames } from "../../../Utils/utils";
 
 type LabelProps = {
   id?: string | undefined;
@@ -50,28 +50,28 @@ const FormField = ({
   field,
   children,
 }: {
-  field: FormFieldBaseProps<any>;
+  field?: FormFieldBaseProps<any>;
   children: React.ReactNode;
   className?: string;
 }) => {
   return (
-    <div className={field.className}>
+    <div className={field?.className}>
       <div className="flex items-center justify-between">
-        {field.label && (
+        {field?.label && (
           <FieldLabel
-            htmlFor={field.id}
-            required={field.required}
-            className={field.labelClassName}
+            htmlFor={field?.id}
+            required={field?.required}
+            className={field?.labelClassName}
           >
-            {field.label}
+            {field?.label}
           </FieldLabel>
         )}
-        {field.labelSuffix && (
-          <span className="text-xs mb-2">{field.labelSuffix}</span>
+        {field?.labelSuffix && (
+          <span className="text-xs mb-2">{field?.labelSuffix}</span>
         )}
       </div>
-      <div className={field.className}>{children}</div>
-      <FieldErrorText error={field.error} className={field.errorClassName} />
+      <div className={field?.className}>{children}</div>
+      <FieldErrorText error={field?.error} className={field?.errorClassName} />
     </div>
   );
 };

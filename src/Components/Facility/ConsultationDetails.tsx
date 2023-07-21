@@ -52,6 +52,7 @@ import loadable from "@loadable/component";
 import moment from "moment";
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
+import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -66,6 +67,7 @@ export const ConsultationDetails = (props: any) => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
+  const [qParams, _] = useQueryParams();
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {} as ConsultationModel
@@ -337,6 +339,8 @@ export const ConsultationDetails = (props: any) => {
               patient={patientData}
               consultation={consultationData}
               fetchPatientData={fetchData}
+              consultationId={consultationId}
+              showAbhaProfile={qParams["show-abha-profile"] === "true"}
             />
 
             <div className="flex md:flex-row flex-col justify-between border-t px-4 pt-5">
