@@ -1,7 +1,6 @@
 import moment from "moment";
 import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
 import Form from "../Form/Form";
-import { createFormContext } from "../Form/FormContext";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -9,14 +8,9 @@ import { MedicineAdministrationRecord, Prescription } from "./models";
 import { PrescriptionActions } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import medicines_list from "../Common/prescription-builder/assets/medicines.json";
 import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
 import { useTranslation } from "react-i18next";
-
-export const medicines = medicines_list;
-
-const prescriptionFormContext = createFormContext<Prescription>();
+import MedibaseAutocompleteFormField from "./MedibaseAutocompleteFormField";
 
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;
@@ -28,12 +22,14 @@ export default function CreatePrescriptionForm(props: {
   const { t } = useTranslation();
 
   return (
-    <Form
+    <Form<Prescription>
       disabled={isCreating}
-      context={prescriptionFormContext}
       defaults={props.prescription}
       onCancel={props.onDone}
       onSubmit={async (obj) => {
+        obj["medicine"] = obj.medicine_object?.id;
+        delete obj.medicine_object;
+
         setIsCreating(true);
         const res = await dispatch(props.create(obj));
         setIsCreating(false);
@@ -46,7 +42,7 @@ export default function CreatePrescriptionForm(props: {
       noPadding
       validate={(form) => {
         const errors: Partial<Record<keyof Prescription, FieldError>> = {};
-        errors.medicine = RequiredFieldValidator()(form.medicine);
+        errors.medicine_object = RequiredFieldValidator()(form.medicine_object);
         errors.dosage = RequiredFieldValidator()(form.dosage);
         if (form.is_prn)
           errors.indicator = RequiredFieldValidator()(form.indicator);
@@ -58,13 +54,10 @@ export default function CreatePrescriptionForm(props: {
     >
       {(field) => (
         <>
-          <AutocompleteFormField
+          <MedibaseAutocompleteFormField
             label={t("medicine")}
-            {...field("medicine", RequiredFieldValidator())}
+            {...field("medicine_object", RequiredFieldValidator())}
             required
-            options={medicines}
-            optionLabel={(medicine) => medicine}
-            optionValue={(medicine) => medicine}
           />
           <div className="flex gap-4 items-center">
             <SelectFormField

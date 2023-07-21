@@ -1,4 +1,3 @@
-import { CircularProgress } from "@material-ui/core";
 import { navigate } from "raviger";
 import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
@@ -6,7 +5,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import {
   getConsultationList,
   listShiftRequests,
@@ -17,17 +15,11 @@ import {
   completeTransfer,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import AlertDialog from "../Common/AlertDialog";
 import Pagination from "../Common/Pagination";
 import { ConsultationCard } from "../Facility/ConsultationCard";
 import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import { LegacyErrorHelperText } from "../Common/HelperInputFields";
-import Modal from "@material-ui/core/Modal";
 import Chip from "../../CAREUI/display/Chip";
 import { classNames, formatDate } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -35,9 +27,12 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useTranslation } from "react-i18next";
+import CircularProgress from "../Common/components/CircularProgress";
+import Page from "../Common/components/Page";
+import ConfirmDialog from "../Common/ConfirmDialog";
+import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
@@ -74,11 +69,7 @@ export const PatientHome = (props: any) => {
     status: number;
     sample: any;
   }>({ status: 0, sample: null });
-  const [showAlertMessage, setAlertMessage] = useState({
-    show: false,
-    message: "",
-    title: "",
-  });
+  const [showAlertMessage, setShowAlertMessage] = useState(false);
   const [modalFor, setModalFor] = useState({
     externalId: undefined,
     loading: false,
@@ -152,7 +143,7 @@ export const PatientHome = (props: any) => {
   };
 
   const handleVolunteerSelect = (volunteer: any) => {
-    setAssignedVolunteerObject(volunteer);
+    setAssignedVolunteerObject(volunteer.value);
   };
 
   const limit = 5;
@@ -268,21 +259,9 @@ export const PatientHome = (props: any) => {
     setSampleListOffset(offset);
   };
 
-  const dismissAlert = () => {
-    setAlertMessage({
-      show: false,
-      message: "",
-      title: "",
-    });
-  };
-
   const confirmApproval = (status: number, sample: any) => {
     setSelectedStatus({ status, sample });
-    setAlertMessage({
-      show: true,
-      message: "Are you sure you want to send the sample to Collection Centre?",
-      title: "Confirm",
-    });
+    setShowAlertMessage(true);
   };
 
   const handleApproval = async () => {
@@ -302,7 +281,7 @@ export const PatientHome = (props: any) => {
       callSampleList(!sampleFlag);
     }
 
-    dismissAlert();
+    setShowAlertMessage(false);
   };
 
   if (isLoading) {
@@ -339,7 +318,7 @@ export const PatientHome = (props: any) => {
   let consultationList, sampleList;
 
   if (isConsultationLoading) {
-    consultationList = <CircularProgress size={20} />;
+    consultationList = <CircularProgress />;
   } else if (consultationListData.length === 0) {
     consultationList = (
       <div>
@@ -360,7 +339,7 @@ export const PatientHome = (props: any) => {
   }
 
   if (isSampleLoading) {
-    sampleList = <CircularProgress size={20} />;
+    sampleList = <CircularProgress />;
   } else if (sampleListData.length === 0) {
     sampleList = (
       <div>
@@ -394,28 +373,24 @@ export const PatientHome = (props: any) => {
   };
 
   return (
-    <div className="px-2 pb-2">
-      {showAlertMessage.show && (
-        <AlertDialog
-          title={showAlertMessage.title}
-          message={showAlertMessage.message}
-          handleClose={() => handleApproval()}
-          handleCancel={() => dismissAlert()}
-        />
-      )}
+    <Page
+      title={"Patient Details"}
+      crumbsReplacements={{
+        [facilityId]: { name: patientData?.facility_object?.name },
+        [id]: { name: patientData?.name },
+      }}
+      backUrl={facilityId ? `/facility/${facilityId}/patients` : "/patients"}
+    >
+      <ConfirmDialog
+        title="Confirm send sample to collection centre"
+        description="Are you sure you want to send the sample to Collection Centre?"
+        show={showAlertMessage}
+        action="Approve"
+        onConfirm={() => handleApproval()}
+        onClose={() => setShowAlertMessage(false)}
+      />
 
-      <div id="revamp">
-        <PageTitle
-          title={"Patient Details"}
-          crumbsReplacements={{
-            [facilityId]: { name: patientData?.facility_object?.name },
-            [id]: { name: patientData?.name },
-          }}
-          backUrl={
-            facilityId ? `/facility/${facilityId}/patients` : "/patients"
-          }
-        />
-
+      <div>
         <div className="relative mt-2">
           <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
             <div className="md:flex">
@@ -490,11 +465,11 @@ export const PatientHome = (props: any) => {
           <div className="lg:w-2/3 mx-2">
             <div className="bg-white rounded-lg shadow flex flex-col justify-between pt-11 pb-5 pl-9 h-full">
               <div>
-                <div className="flex flex-row">
+                <div className="flex flex-row gap-4">
                   <h1 className="font-bold text-2xl pb-3 flex flex-row">
                     {patientData.name} - {patientData.age}
                   </h1>
-                  <div className="flex flex-wrap gap-2 ml-auto mr-9">
+                  <div className="flex flex-wrap gap-3 ml-auto mr-9">
                     {patientData.is_vaccinated ? (
                       <Chip
                         color="blue"
@@ -875,7 +850,7 @@ export const PatientHome = (props: any) => {
                             >
                               <CareIcon className="care-l-plane-fly mr-2 text-lg" />
                               <dd className="font-bold text-sm leading-5 text-gray-900">
-                                {(shift.orgin_facility_object || {})?.name}
+                                {(shift.origin_facility_object || {})?.name}
                               </dd>
                             </dt>
                           </div>
@@ -959,55 +934,19 @@ export const PatientHome = (props: any) => {
                             >
                               {t("transfer_to_receiving_facility")}
                             </ButtonV2>
-                            <Modal
-                              open={modalFor === shift.external_id}
+                            <ConfirmDialog
+                              title="Confirm Transfer Complete"
+                              description="Are you sure you want to mark this transfer as complete? The Origin facility will no longer have access to this patient"
+                              show={modalFor === shift.external_id}
+                              action="Confirm"
                               onClose={() =>
                                 setModalFor({
                                   externalId: undefined,
                                   loading: false,
                                 })
                               }
-                            >
-                              <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-                                <div className="bg-white rounded shadow p-8 m-4 max-w-sm max-h-full text-center">
-                                  <div className="mb-4">
-                                    <h1 className="text-2xl">
-                                      Confirm Transfer Complete!
-                                    </h1>
-                                  </div>
-                                  <div className="mb-8">
-                                    <p>
-                                      Are you sure you want to mark this
-                                      transfer as complete? The Origin facility
-                                      will no longer have access to this patient
-                                    </p>
-                                  </div>
-                                  <div className="flex gap-2 justify-center">
-                                    <ButtonV2
-                                      size="small"
-                                      className="w-full"
-                                      onClick={() => {
-                                        setModalFor({
-                                          externalId: undefined,
-                                          loading: false,
-                                        });
-                                      }}
-                                    >
-                                      Cancel
-                                    </ButtonV2>
-                                    <ButtonV2
-                                      size="small"
-                                      className="w-full"
-                                      onClick={() =>
-                                        handleTransferComplete(shift)
-                                      }
-                                    >
-                                      Confirm
-                                    </ButtonV2>
-                                  </div>
-                                </div>
-                              </div>
-                            </Modal>
+                              onConfirm={() => handleTransferComplete(shift)}
+                            />
                           </div>
                         )}
                     </div>
@@ -1482,41 +1421,26 @@ export const PatientHome = (props: any) => {
         </section>
       </div>
 
-      <Dialog
-        maxWidth={"md"}
-        open={openAssignVolunteerDialog}
+      <ConfirmDialog
+        className="w-full justify-between"
+        title={`Assign a volunteer to ${patientData.name}`}
+        show={openAssignVolunteerDialog}
         onClose={() => setOpenAssignVolunteerDialog(false)}
-      >
-        <div className="mx-10 my-5">
-          <DialogTitle id="form-dialog-title">
-            Assign a volunteer to {patientData.name}
-          </DialogTitle>
-
-          <div>
-            <OnlineUsersSelect
-              userId={assignedVolunteerObject?.id || patientData.assigned_to}
-              selectedUser={assignedVolunteerObject}
-              onSelect={handleVolunteerSelect}
-              user_type={"Volunteer"}
-              outline={false}
+        description={
+          <div className="mt-6">
+            <UserAutocompleteFormField
+              showActiveStatus
+              value={assignedVolunteerObject}
+              onChange={handleVolunteerSelect}
+              userType={"Volunteer"}
+              name={"assign_volunteer"}
+              error={errors.assignedVolunteer}
             />
-            <LegacyErrorHelperText error={errors.assignedVolunteer} />
           </div>
-
-          <DialogActions>
-            <ButtonV2
-              variant="secondary"
-              onClick={() => {
-                handleVolunteerSelect(patientData.assigned_to_object);
-                setOpenAssignVolunteerDialog(false);
-              }}
-            >
-              Cancel
-            </ButtonV2>
-            <ButtonV2 onClick={handleAssignedVolunteer}>Submit</ButtonV2>
-          </DialogActions>
-        </div>
-      </Dialog>
+        }
+        action="Assign"
+        onConfirm={handleAssignedVolunteer}
+      />
 
       <div>
         <h2 className="font-semibold text-2xl leading-tight ml-0 mt-9">
@@ -1551,6 +1475,6 @@ export const PatientHome = (props: any) => {
           </div>
         )}
       </div>
-    </div>
+    </Page>
   );
 };

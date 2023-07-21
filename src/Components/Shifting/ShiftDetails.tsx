@@ -13,7 +13,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import CommentSection from "./CommentsSection";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog.js";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "../Common/components/Page";
 import QRCode from "qrcode.react";
@@ -27,12 +27,8 @@ import { useTranslation } from "react-i18next";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function ShiftDetails(props: { id: string }) {
-  const {
-    static_header_logo,
-    kasp_full_string,
-    wartime_shifting,
-    kasp_enabled,
-  } = useConfig();
+  const { header_logo, kasp_full_string, wartime_shifting, kasp_enabled } =
+    useConfig();
   const dispatch: any = useDispatch();
   const initialData: any = {};
   const [data, setData] = useState(initialData);
@@ -120,7 +116,7 @@ export default function ShiftDetails(props: { id: string }) {
       "\n" +
       t("origin_facility") +
       ":" +
-      data?.orgin_facility_object?.name +
+      data?.origin_facility_object?.name +
       "\n" +
       t("contact_number") +
       ":" +
@@ -344,7 +340,7 @@ export default function ShiftDetails(props: { id: string }) {
 
     return (
       <div id="section-to-print" className="print bg-white ">
-        <div>{data.is_kasp && <img alt="logo" src={static_header_logo} />}</div>
+        <div>{data.is_kasp && <img alt="logo" src={header_logo.dark} />}</div>
         <div className="mx-2">
           <div className="mt-6">
             <span className="font-semibold leading-relaxed mt-4">
@@ -352,7 +348,7 @@ export default function ShiftDetails(props: { id: string }) {
             </span>
             {data.is_kasp
               ? t("district_program_management_supporting_unit")
-              : data.orgin_facility_object?.name || "--"}
+              : data.origin_facility_object?.name || "--"}
             {/*  Made static based on #757 */}
           </div>
           <div className="font-bold text-xl text-center mt-6">
@@ -618,7 +614,7 @@ export default function ShiftDetails(props: { id: string }) {
                 <span className="font-semibold leading-relaxed">
                   {t("origin_facility")}:{" "}
                 </span>
-                {data.orgin_facility_object?.name || "--"}
+                {data.origin_facility_object?.name || "--"}
               </div>
               {wartime_shifting && (
                 <div>
@@ -794,7 +790,7 @@ export default function ShiftDetails(props: { id: string }) {
                 >
                   {t("delete_record")}
                 </ButtonV2>
-                <ConfirmDialogV2
+                <ConfirmDialog
                   title={t("authorize_shift_delete")}
                   description={t("record_delete_confirm")}
                   action="Confirm"
@@ -856,7 +852,7 @@ export default function ShiftDetails(props: { id: string }) {
               <div>
                 <h4 className="mt-8">{t("details_of_origin_facility")}</h4>
 
-                {showFacilityCard(data.orgin_facility_object)}
+                {showFacilityCard(data.origin_facility_object)}
               </div>
               {!data.assigned_facility_external && (
                 <div>

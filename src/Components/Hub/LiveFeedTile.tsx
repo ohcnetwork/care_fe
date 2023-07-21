@@ -3,10 +3,10 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import ReactPlayer from "react-player";
-import screenfull from "screenfull";
 import { getAsset, listAssetBeds } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useTranslation } from "react-i18next";
+import useFullscreen from "../../Common/hooks/useFullscreen.js";
 interface LiveFeedTileProps {
   assetId: string;
 }
@@ -38,6 +38,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
     zoom: 0,
   });
   const { t } = useTranslation();
+  const [_isFullscreen, setFullscreen] = useFullscreen();
 
   useEffect(() => {
     let loadingTimeout: any;
@@ -238,10 +239,8 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
 
   const liveFeedPlayerRef = useRef<any>(null);
   const handleClickFullscreen = () => {
-    if (screenfull.isEnabled) {
-      if (liveFeedPlayerRef.current) {
-        screenfull.request(liveFeedPlayerRef.current.wrapper);
-      }
+    if (liveFeedPlayerRef.current) {
+      setFullscreen(true, liveFeedPlayerRef.current.wrapper);
     }
   };
 

@@ -733,6 +733,10 @@ const routes: Routes = {
   listICD11Diagnosis: {
     path: "/api/v1/icd/",
   },
+  // Medibase
+  listMedibaseMedicines: {
+    path: "/api/v1/medibase/",
+  },
 
   // Resource
   createResource: {
@@ -810,6 +814,17 @@ const routes: Routes = {
   },
   getAssetTransaction: {
     path: "/api/v1/asset_transaction/{id}",
+    method: "GET",
+  },
+
+  // Asset Availability endpoints
+
+  listAssetAvailability: {
+    path: "/api/v1/asset_availability/",
+    method: "GET",
+  },
+  getAssetAvailability: {
+    path: "/api/v1/asset_availability/{id}",
     method: "GET",
   },
 

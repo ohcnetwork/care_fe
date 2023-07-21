@@ -89,8 +89,8 @@ let getStatus = (min, minText, max, maxText, val) => {
                   {str(Pain.regionToString(state.region))}
                 </span>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                <div>
+              <div className="flex flex-col sm:flex-row justify-center mt-2">
+                <div className="w-full">
                   <Slider
                     title={""}
                     className="px-0 py-5 m-0"

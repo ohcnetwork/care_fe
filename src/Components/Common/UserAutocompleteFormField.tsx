@@ -1,5 +1,6 @@
+import moment from "moment";
 import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
-import { getUserList } from "../../Redux/actions";
+import { getFacilityUsers, getUserList } from "../../Redux/actions";
 import { Autocomplete } from "../Form/FormFields/Autocomplete";
 import FormField from "../Form/FormFields/FormField";
 import {
@@ -10,6 +11,9 @@ import { UserModel } from "../Users/models";
 
 type Props = FormFieldBaseProps<UserModel> & {
   placeholder?: string;
+  facilityId?: string;
+  userType?: string;
+  showActiveStatus?: boolean;
 };
 
 export default function UserAutocompleteFormField(props: Props) {
@@ -19,23 +23,64 @@ export default function UserAutocompleteFormField(props: Props) {
     { queryResponseExtractor: (data) => data.results }
   );
 
+  let search_filter: {
+    limit: number;
+    offset: number;
+    user_type?: string;
+    search_text?: string;
+  } = { limit: 5, offset: 0 };
+
+  if (props.showActiveStatus && props.userType) {
+    search_filter = { ...search_filter, user_type: props.userType };
+  }
+
+  const getStatusIcon = (option: UserModel) => {
+    if (!props.showActiveStatus) return null;
+
+    const isOnline = moment()
+      .subtract(5, "minutes")
+      .isBefore(option.last_login);
+
+    return (
+      <div className="mr-6 mt-[2px]">
+        <svg
+          className={`h-3 w-3 ${isOnline ? "text-green-500" : "text-gray-400"}`}
+          fill="currentColor"
+          viewBox="0 0 8 8"
+        >
+          <circle cx="4" cy="4" r="4" />
+        </svg>
+      </div>
+    );
+  };
+
   return (
     <FormField field={field}>
-      <Autocomplete
-        id={field.id}
-        disabled={field.disabled}
-        placeholder={props.placeholder}
-        value={field.value}
-        onChange={field.handleChange}
-        options={options(field.value && [field.value])}
-        optionLabel={getUserFullName}
-        optionDescription={(option) => `${option.user_type}`}
-        optionValue={(option) => option}
-        onQuery={(query) =>
-          fetchOptions(getUserList({ limit: 5, offset: 0, search_text: query }))
-        }
-        isLoading={isLoading}
-      />
+      <div className="relative">
+        <Autocomplete
+          id={field.id}
+          disabled={field.disabled}
+          placeholder={props.placeholder}
+          value={field.value}
+          onChange={field.handleChange}
+          options={options(field.value && [field.value])}
+          optionLabel={getUserFullName}
+          optionIcon={getStatusIcon}
+          optionDescription={(option) => `${option.user_type}`}
+          optionValue={(option) => option}
+          onQuery={(query) =>
+            fetchOptions(
+              props.facilityId
+                ? getFacilityUsers(props.facilityId)
+                : getUserList({
+                    ...search_filter,
+                    search_text: query,
+                  })
+            )
+          }
+          isLoading={isLoading}
+        />
+      </div>
     </FormField>
   );
 }

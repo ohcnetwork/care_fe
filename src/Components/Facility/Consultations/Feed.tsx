@@ -1,33 +1,35 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
-import screenfull from "screenfull";
+import * as Notification from "../../../Utils/Notifications.js";
+
 import {
-  CameraPTZ,
   CAMERA_STATES,
+  CameraPTZ,
   getCameraPTZ,
 } from "../../../Common/constants";
-import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import {
   ICameraAssetState,
   StreamStatus,
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
+import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   getConsultation,
+  getPermittedFacility,
   listAssetBeds,
   partialUpdateAssetBed,
-  getPermittedFacility,
 } from "../../../Redux/actions";
-import Loading from "../../Common/Loading";
+import { statusType, useAbortableEffect } from "../../../Common/utils";
+
+import CareIcon from "../../../CAREUI/icons/CareIcon.js";
 import { ConsultationModel } from "../models";
-import * as Notification from "../../../Utils/Notifications.js";
-import useKeyboardShortcut from "use-keyboard-shortcut";
-import { Tooltip } from "@material-ui/core";
 import FeedButton from "./FeedButton";
+import Loading from "../../Common/Loading";
 import ReactPlayer from "react-player";
-import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import { classNames } from "../../../Utils/utils";
+import { useDispatch } from "react-redux";
+import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
+import useKeyboardShortcut from "use-keyboard-shortcut";
+import useFullscreen from "../../../Common/hooks/useFullscreen.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -52,6 +54,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [bed, setBed] = useState<any>();
   const [precision, setPrecision] = useState(1);
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
+  const [isFullscreen, setFullscreen] = useFullscreen();
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -297,14 +300,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       });
     },
     fullScreen: () => {
-      if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
-      !screenfull.isFullscreen
-        ? screenfull.request(
-            videoWrapper.current
-              ? videoWrapper.current
-              : (liveFeedPlayerRef.current as HTMLElement)
-          )
-        : screenfull.exit();
+      if (!liveFeedPlayerRef.current) return;
+      setFullscreen(
+        !isFullscreen,
+        videoWrapper.current
+          ? videoWrapper.current
+          : (liveFeedPlayerRef.current as HTMLElement)
+      );
     },
     updatePreset: (option) => {
       getCameraStatus({
@@ -498,10 +500,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             }
           )}
           <div className="pl-3 hideonmobilescreen">
-            <FeedCameraPTZHelpButton
-              cameraPTZ={cameraPTZ}
-              tooltipPlacement="left-end"
-            />
+            <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
           </div>
         </div>
         <div className="absolute bottom-8 right-8 z-20">
@@ -572,72 +571,54 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   );
 };
 
-export const FeedCameraPTZHelpButton = (props: {
-  cameraPTZ: CameraPTZ[];
-  tooltipPlacement?:
-    | "bottom-end"
-    | "bottom-start"
-    | "bottom"
-    | "left-end"
-    | "left-start"
-    | "left"
-    | "right-end"
-    | "right-start"
-    | "right"
-    | "top-end"
-    | "top-start"
-    | "top";
-}) => {
-  const { cameraPTZ, tooltipPlacement } = props;
+export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
+  const { cameraPTZ } = props;
   return (
-    <Tooltip
-      placement={tooltipPlacement ?? "left-start"}
-      arrow={true}
-      title={
-        <ul className="p-2 text-sm">
-          {cameraPTZ.map((option) => {
-            return (
-              <li key={option.action} className="py-2 flex gap-3 items-center">
-                <span className="font-semibold w-16">{option.label}</span>
-                <div className="flex gap-1">
-                  {option.shortcutKey.map((hotkey, index) => {
-                    const isArrowKey = hotkey.includes("Arrow");
-                    hotkey = hotkey.replace("Control", "Ctrl");
-
-                    const keyElement = (
-                      <div
-                        key={index}
-                        className="font-mono shadow-md border-gray-500 border rounded-md p-1.5"
-                      >
-                        {isArrowKey ? (
-                          <i className={`fa-sm fas fa-${option.icon}`} />
-                        ) : (
-                          hotkey
-                        )}
-                      </div>
-                    );
-
-                    // Skip wrapping with + for joining with next key
-                    if (index === option.shortcutKey.length - 1)
-                      return keyElement;
-
-                    return (
-                      <div key={index} className="flex gap-1 items-center">
-                        {keyElement}
-                        <span className="p-1">+</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      }
+    <button
+      key="option.action"
+      className="tooltip rounded text-2xl text-gray-600"
     >
-      <button key="option.action" className="rounded text-2xl text-white/40">
-        <i className={"fa fa-circle-question"} />
-      </button>
-    </Tooltip>
+      <CareIcon className="care-l-question-circle" />
+
+      <ul className="tooltip-text tooltip-left -top-60 right-10 p-2 text-sm">
+        {cameraPTZ.map((option) => {
+          return (
+            <li key={option.action} className="py-2 flex gap-3 items-center">
+              <span className="font-semibold w-16">{option.label}</span>
+              <div className="flex gap-1">
+                {option.shortcutKey.map((hotkey, index) => {
+                  const isArrowKey = hotkey.includes("Arrow");
+                  hotkey = hotkey.replace("Control", "Ctrl");
+
+                  const keyElement = (
+                    <div
+                      key={index}
+                      className="font-mono shadow-md border-gray-500 border rounded-md p-1.5"
+                    >
+                      {isArrowKey ? (
+                        <CareIcon className={`care-${option.icon}`} />
+                      ) : (
+                        hotkey
+                      )}
+                    </div>
+                  );
+
+                  // Skip wrapping with + for joining with next key
+                  if (index === option.shortcutKey.length - 1)
+                    return keyElement;
+
+                  return (
+                    <div key={index} className="flex gap-1 items-center">
+                      {keyElement}
+                      <span className="p-1">+</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </button>
   );
 };

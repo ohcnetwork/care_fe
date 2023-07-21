@@ -31,7 +31,7 @@ const formatDateTime: () => string = () => {
 interface BedsProps {
   facilityId: string;
   patientId: number;
-  consultationId: number;
+  consultationId: string;
   smallLoader?: boolean;
   discharged?: boolean;
   setState?: Dispatch<SetStateAction<boolean>>;
@@ -48,6 +48,8 @@ const Beds = (props: BedsProps) => {
     []
   );
   const [isLoading, setIsLoading] = React.useState(false);
+  const [key, setKey] = React.useState(0);
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
@@ -71,7 +73,7 @@ const Beds = (props: BedsProps) => {
     (status: statusType) => {
       fetchData(status);
     },
-    [dispatch, fetchData]
+    [dispatch, fetchData, key]
   );
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
@@ -92,6 +94,7 @@ const Beds = (props: BedsProps) => {
       });
       if (props.fetchPatientData) props.fetchPatientData({ aborted: false });
       if (props.setState) props.setState(false);
+      setKey(key + 1);
     }
   };
 
