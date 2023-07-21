@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
 import {
   getConsultationList,
   listShiftRequests,
@@ -31,7 +30,7 @@ import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
 import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
-import { FieldErrorText } from "../Form/FormFields/FormField";
+import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -144,7 +143,7 @@ export const PatientHome = (props: any) => {
   };
 
   const handleVolunteerSelect = (volunteer: any) => {
-    setAssignedVolunteerObject(volunteer);
+    setAssignedVolunteerObject(volunteer.value);
   };
 
   const limit = 5;
@@ -466,11 +465,11 @@ export const PatientHome = (props: any) => {
           <div className="lg:w-2/3 mx-2">
             <div className="bg-white rounded-lg shadow flex flex-col justify-between pt-11 pb-5 pl-9 h-full">
               <div>
-                <div className="flex flex-row">
+                <div className="flex flex-row gap-4">
                   <h1 className="font-bold text-2xl pb-3 flex flex-row">
                     {patientData.name} - {patientData.age}
                   </h1>
-                  <div className="flex flex-wrap gap-2 ml-auto mr-9">
+                  <div className="flex flex-wrap gap-3 ml-auto mr-9">
                     {patientData.is_vaccinated ? (
                       <Chip
                         color="blue"
@@ -1423,19 +1422,20 @@ export const PatientHome = (props: any) => {
       </div>
 
       <ConfirmDialog
+        className="w-full justify-between"
         title={`Assign a volunteer to ${patientData.name}`}
         show={openAssignVolunteerDialog}
         onClose={() => setOpenAssignVolunteerDialog(false)}
         description={
-          <div>
-            <OnlineUsersSelect
-              userId={assignedVolunteerObject?.id || patientData.assigned_to}
-              selectedUser={assignedVolunteerObject}
-              onSelect={handleVolunteerSelect}
-              user_type={"Volunteer"}
-              outline={false}
+          <div className="mt-6">
+            <UserAutocompleteFormField
+              showActiveStatus
+              value={assignedVolunteerObject}
+              onChange={handleVolunteerSelect}
+              userType={"Volunteer"}
+              name={"assign_volunteer"}
+              error={errors.assignedVolunteer}
             />
-            <FieldErrorText error={errors.assignedVolunteer} />
           </div>
         }
         action="Assign"
