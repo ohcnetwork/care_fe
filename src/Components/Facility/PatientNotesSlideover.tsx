@@ -64,7 +64,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     >
       {!show ? (
         <div className="flex justify-around items-center w-full p-2 rounded-t-md bg-primary-800 text-white">
-          <span className="font-semibold">Doctor&apos;s Notes</span>
+          <span className="font-semibold">{"Doctor's Notes"}</span>
           <div
             className={classNames(
               "flex items-center justify-center w-8 h-8 cursor-pointer rounded text-gray-100 text-opacity-70 hover:text-opacity-100 bg-primary-800 hover:bg-primary-700",
@@ -79,7 +79,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
         <div className="bg-white sm:rounded-t-md w-full h-screen sm:h-[500px] flex flex-col border-2 border-b-0 pb-3 border-primary-800 transition-all overflow-clip -translate-y-0 ">
           {/* Doctor Notes Header */}
           <div className="flex justify-between items-center w-full p-2 px-4 bg-primary-800 text-white">
-            <span className="font-semibold">Doctor&apos;s Notes</span>
+            <span className="font-semibold">{"Doctor's Notes"}</span>
             <div
               className={classNames(
                 "flex items-center justify-center w-8 h-8 cursor-pointer rounded text-gray-100 text-opacity-70 hover:text-opacity-100 bg-primary-800 hover:bg-primary-700",
