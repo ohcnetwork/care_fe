@@ -315,6 +315,7 @@ export default function Uptime(props: { assetId: string }) {
                 previousLatestRecord?.status as keyof typeof STATUS_COLORS
               ] ?? STATUS_COLORS["Not Monitored"]
             );
+            recordsInPeriodCache[i] = [previousLatestRecord];
           } else {
             statusColors.push(STATUS_COLORS["Not Monitored"]);
           }
