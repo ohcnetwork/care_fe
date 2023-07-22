@@ -103,7 +103,7 @@ export default function HL7PatientVitalsMonitor({
             />
           </div>
         </div>
-        <div className="md:absolute md:right-0 md:inset-y-0 z-10 bg-[#020617] grid gap-x-8 gap-y-4 md:gap-x-0 md:gap-y-0 grid-cols-2 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
+        <div className="md:right-0 md:inset-y-0 bg-[#020617] grid gap-x-8 gap-y-4 md:gap-x-0 md:gap-y-0 grid-cols-2 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
           {/* Pulse Rate */}
           <NonWaveformData
             label="ECG"
