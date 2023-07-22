@@ -357,8 +357,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         if (res && res.data) {
           setFacilityName(res.data.facility_object.name);
           setPatientName(res.data.name);
+          console.log(res.data);
           const formData = {
             ...res.data,
+            health_id_number: res.data.abha_number_object?.abha_number || "",
+            health_id: res.data.abha_number_object?.health_id || "",
             nationality: res.data.nationality ? res.data.nationality : "India",
             gender: res.data.gender ? res.data.gender : "",
             cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
@@ -1111,14 +1114,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </h1>
                           {showLinkAbhaNumberModal && (
                             <LinkABHANumberModal
-                              facilityId={facilityId}
                               show={showLinkAbhaNumberModal}
                               onClose={() => setShowLinkAbhaNumberModal(false)}
                               onSuccess={(data: any) => {
-                                if (data.facility) {
-                                  // if patient object
+                                if (id) {
                                   navigate(
-                                    `/facility/${data.facility}/patient/${data.id}/consultation`
+                                    `/facility/${facilityId}/patient/${id}`
                                   );
                                   return;
                                 }
