@@ -106,6 +106,8 @@ const LiveFeed = (props: any) => {
     getPresets,
     gotoPreset,
     relativeMove,
+    lockAsset,
+    unlockAsset,
   } = useFeedPTZ({
     config: {
       middlewareHostname,
@@ -199,6 +201,11 @@ const LiveFeed = (props: any) => {
     setLoading("Moving");
     absoluteMove(preset.meta.position, {
       onSuccess: () => setLoading(undefined),
+      onError: async (resp) => {
+        if (resp.status == 403) {
+          Notification.Error({ msg: "Camera is occupied" });
+        }
+      },
     });
   };
 
@@ -233,6 +240,11 @@ const LiveFeed = (props: any) => {
       }
       absoluteMove(position, {
         onSuccess: () => setLoading(undefined),
+        onError: async (resp) => {
+          if (resp.status == 403) {
+            Notification.Error({ msg: "Camera is occupied" });
+          }
+        },
       });
     } else if (boundaryPreset?.meta?.range && !direction) {
       Notification.Error({ msg: "Please select a direction" });
@@ -298,6 +310,11 @@ const LiveFeed = (props: any) => {
           () =>
             absoluteMove(edge, {
               onSuccess: () => setLoading(undefined),
+              onError: async (resp) => {
+                if (resp.status == 403) {
+                  Notification.Error({ msg: "Camera is occupied" });
+                }
+              },
             }),
           3000
         );
@@ -306,6 +323,27 @@ const LiveFeed = (props: any) => {
       setLoading(undefined);
     }
   };
+
+  useEffect(() => {
+    lockAsset({
+      onSuccess: (data) => {
+        console.log("SUCCESS", data);
+      },
+      onError: (data) => {
+        console.log("ERROR", data);
+      },
+    });
+    return () => {
+      unlockAsset({
+        onSuccess: (data) => {
+          console.log(data);
+        },
+        onError: (data) => {
+          console.log(data);
+        },
+      });
+    };
+  }, []);
 
   useEffect(() => {
     if (cameraAsset?.hostname) {
@@ -318,7 +356,7 @@ const LiveFeed = (props: any) => {
     setBedTransfer(toUpdate?.bed_object);
   }, [toUpdate]);
 
-  //change this function
+  // change this function
   useEffect(() => {
     getBedPresets(cameraAsset.id);
 
@@ -419,6 +457,12 @@ const LiveFeed = (props: any) => {
       setLoading(option.loadingLabel);
       relativeMove(getPTZPayload(option.action, precision), {
         onSuccess: () => setLoading(undefined),
+        onError: (resp) => {
+          console.log("resp", resp);
+          if (resp.status == 403) {
+            Notification.Error({ msg: "Camera is occupied" });
+          }
+        },
       });
     },
   };
