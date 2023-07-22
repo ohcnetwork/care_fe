@@ -371,6 +371,7 @@ export default function PatientInfoCard(props: {
               <>
                 <ButtonV2
                   className="hover:text-white flex gap-3 justify-start font-semibold"
+                  align="start"
                   onClick={() => setShowABHAProfile(true)}
                 >
                   <CareIcon className="care-l-user-square" />
@@ -378,6 +379,7 @@ export default function PatientInfoCard(props: {
                 </ButtonV2>
                 <ButtonV2
                   className="hover:text-white flex gap-3 justify-start font-semibold mt-0"
+                  align="start"
                   onClick={() => setShowLinkCareContext(true)}
                 >
                   <CareIcon className="care-l-link" />
@@ -400,6 +402,7 @@ export default function PatientInfoCard(props: {
               <>
                 <ButtonV2
                   className="hover:text-white flex gap-3 justify-start font-semibold"
+                  align="start"
                   onClick={() => setShowLinkABHANumber(true)}
                 >
                   <CareIcon className="care-l-link" />
