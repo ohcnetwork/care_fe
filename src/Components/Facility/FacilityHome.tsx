@@ -622,6 +622,16 @@ export const FacilityHome = (props: any) => {
                 ghost
                 border
                 className="w-full md:w-auto flex flex-row mt-2 justify-center"
+                onClick={() => navigate(`/facility/${facilityId}/livefeed`)}
+              >
+                <CareIcon className="care-l-video text-lg" />
+                <span>Live Feeds</span>
+              </ButtonV2>
+              <ButtonV2
+                variant="primary"
+                ghost
+                border
+                className="w-full md:w-auto flex flex-row mt-2 justify-center"
                 onClick={() => navigate(`/facility/${facilityId}/patient`)}
                 authorizeFor={NonReadOnlyUsers}
               >

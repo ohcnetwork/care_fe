@@ -74,6 +74,7 @@ import { handleSignOut } from "../Utils/utils";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
 import ManagePrescriptions from "../Components/Medicine/ManagePrescriptions";
 import CentralNursingStation from "../Components/Facility/CentralNursingStation";
+import LiveFeedScreen from "../Components/Facility/LiveFeedScreen";
 
 export default function AppRouter() {
   const { main_logo, enable_hcx } = useConfig();
@@ -330,6 +331,9 @@ export default function AppRouter() {
     }: any) => <AssetConfigure assetId={assetId} facilityId={facilityId} />,
     "/facility/:facilityId/cns": ({ facilityId }: any) => (
       <CentralNursingStation facilityId={facilityId} />
+    ),
+    "/facility/:facilityId/livefeed": ({ facilityId }: any) => (
+      <LiveFeedScreen facilityId={facilityId} />
     ),
 
     "/shifting": () =>
