@@ -152,7 +152,7 @@ export interface DupPatientModel {
   id: number;
   gender: string;
   phone_number: string;
-  patient_id: number;
+  patient_id: string;
   name: string;
   date_of_birth: string;
   year_of_birth: number;
