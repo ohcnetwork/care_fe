@@ -8,8 +8,6 @@ import {
   TEST_TYPE,
   VACCINES,
 } from "../../Common/constants";
-import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import {
   HCXActions,
   createPatient,
@@ -38,13 +36,18 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
 import { DupPatientModel } from "../Facility/models";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
+import { FieldError } from "../Form/FieldValidators";
+import { FieldErrorText } from "../Form/FormFields/FormField";
+import { FieldLabel } from "../Form/FormFields/FormField";
 import Form from "../Form/Form";
 import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
+import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
 import { PatientModel } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
+import { RequiredFieldValidator } from "../Form/FieldValidators";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import Spinner from "../Common/Spinner";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -66,7 +69,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
-  facilityId: number;
+  facilityId: string;
 }
 
 interface medicalHistoryModel {
@@ -137,6 +140,7 @@ const initForm: any = {
   number_of_doses: "0",
   vaccine_name: null,
   last_vaccinated_date: null,
+  abha_number: null,
   ...medicalHistoryChoices,
 };
 
@@ -176,7 +180,7 @@ const scrollTo = (id: string | boolean) => {
 
 export const PatientRegister = (props: PatientRegisterProps) => {
   const { goBack } = useAppHistory();
-  const { gov_data_api_key, enable_hcx } = useConfig();
+  const { gov_data_api_key, enable_hcx, enable_abdm } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
@@ -204,6 +208,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [{ extId }, setQuery] = useQueryParams();
+  const [showLinkAbhaNumberModal, setShowLinkAbhaNumberModal] = useState(false);
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
   const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>(
     []
@@ -352,8 +357,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         if (res && res.data) {
           setFacilityName(res.data.facility_object.name);
           setPatientName(res.data.name);
+          console.log(res.data);
           const formData = {
             ...res.data,
+            health_id_number: res.data.abha_number_object?.abha_number || "",
+            health_id: res.data.abha_number_object?.health_id || "",
             nationality: res.data.nationality ? res.data.nationality : "India",
             gender: res.data.gender ? res.data.gender : "",
             cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
@@ -674,6 +682,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
     });
     const data = {
+      abha_number: state.form.abha_number,
       phone_number: parsePhoneNumberFromString(formData.phone_number)?.format(
         "E.164"
       ),
@@ -824,6 +833,68 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
     }
     setIsLoading(false);
+  };
+
+  const handleAbhaLinking = (
+    {
+      id,
+      abha_profile: {
+        healthIdNumber,
+        healthId,
+        name,
+        mobile,
+        gender,
+        monthOfBirth,
+        dayOfBirth,
+        yearOfBirth,
+        pincode,
+      },
+    }: any,
+    field: any
+  ) => {
+    const values: any = {};
+    if (id) values["abha_number"] = id;
+    if (healthIdNumber) values["health_id_number"] = healthIdNumber;
+    if (healthId) values["health_id"] = healthId;
+
+    if (name)
+      field("name").onChange({
+        name: "name",
+        value: name,
+      });
+
+    if (mobile) {
+      field("phone_number").onChange({
+        name: "phone_number",
+        value: parsePhoneNumberFromString(mobile, "IN")?.format("E.164"),
+      });
+
+      field("emergency_phone_number").onChange({
+        name: "emergency_phone_number",
+        value: parsePhoneNumberFromString(mobile, "IN")?.format("E.164"),
+      });
+    }
+
+    if (gender)
+      field("gender").onChange({
+        name: "gender",
+        value: gender === "M" ? "1" : gender === "F" ? "2" : "3",
+      });
+
+    if (monthOfBirth && dayOfBirth && yearOfBirth)
+      field("date_of_birth").onChange({
+        name: "date_of_birth",
+        value: new Date(`${monthOfBirth}-${dayOfBirth}-${yearOfBirth}`),
+      });
+
+    if (pincode)
+      field("pincode").onChange({
+        name: "pincode",
+        value: pincode,
+      });
+
+    dispatch({ type: "set_form", form: { ...state.form, ...values } });
+    setShowLinkAbhaNumberModal(false);
   };
 
   const handleMedicalCheckboxChange = (e: any, id: number, field: any) => {
@@ -1036,6 +1107,74 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 >
                   {(field) => (
                     <>
+                      {enable_abdm && (
+                        <div className="mb-8 rounded overflow-visible border border-gray-200 p-4">
+                          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                            ABHA Details
+                          </h1>
+                          {showLinkAbhaNumberModal && (
+                            <LinkABHANumberModal
+                              show={showLinkAbhaNumberModal}
+                              onClose={() => setShowLinkAbhaNumberModal(false)}
+                              onSuccess={(data: any) => {
+                                if (id) {
+                                  navigate(
+                                    `/facility/${facilityId}/patient/${id}`
+                                  );
+                                  return;
+                                }
+
+                                handleAbhaLinking(data, field);
+                              }}
+                            />
+                          )}
+                          {!state.form.abha_number ? (
+                            <button
+                              className="btn btn-primary my-4"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setShowLinkAbhaNumberModal(true);
+                              }}
+                            >
+                              Link Abha Number
+                            </button>
+                          ) : (
+                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                              <div id="abha-number">
+                                <TextFormField
+                                  id="abha-number"
+                                  name="abha-number"
+                                  label="ABHA Number"
+                                  type="text"
+                                  value={state.form.health_id_number}
+                                  onChange={() => null}
+                                  disabled={true}
+                                  error=""
+                                />
+                              </div>
+                              <div id="health-id">
+                                {state.form.health_id ? (
+                                  <TextFormField
+                                    id="health-id"
+                                    name="health-id"
+                                    label="Abha Address"
+                                    type="text"
+                                    value={state.form.health_id}
+                                    onChange={() => null}
+                                    disabled={true}
+                                    error=""
+                                  />
+                                ) : (
+                                  <div className="text-sm text-gray-500 mt-4">
+                                    No Abha Address Associated with this ABHA
+                                    Number
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                       <div className="mb-8 rounded overflow-visible border border-gray-200 p-4">
                         <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
                           Personal Details
@@ -1610,7 +1749,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             <div className={"flex flex-wrap gap-2"}>
                               {MEDICAL_HISTORY_CHOICES.map((i) => {
                                 return renderMedicalHistory(
-                                  i.id,
+                                  i.id as number,
                                   i.text,
                                   field
                                 );
