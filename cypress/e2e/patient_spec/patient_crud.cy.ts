@@ -1,11 +1,7 @@
 import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
-
-const username = "devdistrictadmin";
-const password = "Coronasafe@123";
-const phone_number = "9" + Math.floor(100000000 + Math.random() * 900000000);
-const emergency_phone_number = "9430123487";
-const yearOfBirth = "2023";
-let patient_url = "";
+import LoginPage from "../../pageobject/Login/LoginPage";
+import { PatientPage } from "../../pageobject/Patient/PatientCreation";
+import { UpdatePatientPage } from "../../pageobject/Patient/PatientUpdate";
 
 const calculateAge = () => {
   const currentYear = new Date().getFullYear();
@@ -13,8 +9,15 @@ const calculateAge = () => {
 };
 
 describe("Patient Creation with consultation", () => {
+  const loginPage = new LoginPage();
+  const patientPage = new PatientPage();
+  const updatePatientPage = new UpdatePatientPage();
+  const phone_number = "9" + Math.floor(100000000 + Math.random() * 900000000);
+  const emergency_phone_number = "9430123487";
+  const yearOfBirth = "2023";
+
   before(() => {
-    cy.loginByApi(username, password);
+    loginPage.loginAsDisctrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -24,106 +27,44 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Create a new patient with no consultation", () => {
-    cy.get("button").should("contain", "Add Patient Details");
-    cy.get("#add-patient-div").click();
-    cy.get("input[name='facilities']")
-      .type("cypress facility")
-      .then(() => {
-        cy.get("[role='option']").first().click();
-      });
-    cy.get("button").should("contain", "Select");
-    cy.get("button").get("#submit").click();
-    cy.get("#phone_number-div").type(phone_number);
-    cy.get("#emergency_phone_number-div").type(emergency_phone_number);
-    cy.get("[data-testid=date-of-birth] button").click();
-    cy.get("#date-1").click();
-    cy.get("[data-testid=name] input").type("Test E2E User");
-    cy.get("[data-testid=Gender] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains("Male").click();
-      });
-    cy.get("[data-testid=current-address] textarea").type(
-      "Test Patient Address"
+    patientPage.createPatient();
+    patientPage.selectFacility("cypress facility");
+    patientPage.enterPatientDetails(
+      phone_number,
+      emergency_phone_number,
+      "Test E2E User",
+      "Male",
+      "Test Patient Address",
+      "682001",
+      "1: PAZHAMTHOTTAM",
+      "O+"
     );
-    cy.get("[data-testid=permanent-address] input").check();
-    cy.get("#pincode").type("682001");
-    cy.get("[data-testid=localbody] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").first().click();
-      });
-    cy.get("[data-testid=ward-respective-lsgi] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains("1: PAZHAMTHOTTAM").click();
-      });
-    cy.get("[name=medical_history_check_1]").check();
-    cy.get("[data-testid=blood-group] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains("O+").click();
-      });
-    cy.get("button[data-testid='submit-button']").click();
+    patientPage.clickCreatePatient();
 
-    cy.get("h2").should("contain", "Create Consultation");
-    cy.url().should("include", "/patient");
-    cy.url().then((url) => {
-      cy.log(url);
-      patient_url = url.split("/").slice(0, -1).join("/");
-      cy.log(patient_url);
-    });
+    patientPage.verifyPatientIsCreated();
+    patientPage.saveCreatedPatientUrl();
   });
 
   it("Patient Detail verification post registration", () => {
-    cy.log(patient_url);
-    cy.awaitUrl(patient_url);
-    cy.url().should("include", "/facility/");
-    cy.get("[data-testid=patient-dashboard]").should("contain", calculateAge());
-    cy.get("[data-testid=patient-dashboard]").should(
-      "contain",
-      "Test E2E User"
+    patientPage.visitCreatedPatient();
+    const age = calculateAge();
+    patientPage.verifyPatientDetails(
+      age,
+      "Test E2E User",
+      phone_number,
+      emergency_phone_number,
+      yearOfBirth,
+      "O+"
     );
-    cy.get("[data-testid=patient-dashboard]").should("contain", phone_number);
-    cy.get("[data-testid=patient-dashboard]").should(
-      "contain",
-      emergency_phone_number
-    );
-    cy.get("[data-testid=patient-dashboard]").should("contain", yearOfBirth);
-    cy.get("[data-testid=patient-dashboard]").should("contain", "O+");
   });
 
   it("Edit the patient details", () => {
-    cy.awaitUrl(patient_url + "/update");
-    cy.get("[data-testid=name] input").clear();
-    cy.get("[data-testid=name] input").type("Test E2E User Edited");
-    cy.get("#emergency_phone_number-div")
-      .clear()
-      .then(() => {
-        cy.get("#emergency_phone_number__country").select("IN");
-      });
-    cy.get("#emergency_phone_number-div").type("9120330220");
-    cy.get("#address").clear().type("Test Patient Address Edited");
-    cy.get("#present_health").type("Severe Cough");
-    cy.get("#ongoing_medication").type("Paracetamol");
-    cy.get("#allergies").type("Dust");
-    cy.get("[name=medical_history_check_1]").uncheck();
-    cy.get("[name=medical_history_check_2]").check();
-    cy.get("#medical_history_2").type("2 months ago");
-    cy.get("[name=medical_history_check_3]").check();
-    cy.get("#medical_history_3").type("1 month ago");
-    cy.get("button").get("[data-testid=add-insurance-button]").click();
-    cy.get("#subscriber_id").type("SUB123");
-    cy.get("#policy_id").type("P123");
-    cy.get("#insurer_id").type("GICOFINDIA");
-    cy.get("#insurer_name").type("GICOFINDIA");
-    cy.get("button").get("[data-testid=submit-button]").click();
-    cy.url().should("include", "/patient");
-    cy.url().then((url) => {
-      cy.log(url);
-      patient_url = url.split("/").slice(0, -1).join("/");
-      cy.log(patient_url);
-    });
+    patientPage.visitUpdatePatientUrl();
+    updatePatientPage.enterPatientDetails();
+    updatePatientPage.clickUpdatePatient();
+
+    updatePatientPage.verifyPatientUpdated();
+    updatePatientPage.saveUpdatedPatientUrl();
   });
 
   it("Patient Detail verification post edit", () => {
@@ -205,6 +146,10 @@ describe("Patient Creation with consultation", () => {
       });
     cy.get("button#submit").should("be.visible").click();
     cy.get("[data-testid='return-to-patient-dashboard']").click();
+  });
+
+  it("Edit consultation details of existing patient", () => {
+    cy.visit(patient_url + "/consultation");
   });
 
   afterEach(() => {
