@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 export interface CareIconProps {
   className?: string | undefined;
-  onClick?: () => void;
+  onClick?: React.MouseEventHandler<HTMLSpanElement> | undefined;
 }
 
 /**
