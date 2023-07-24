@@ -32,6 +32,8 @@ export type direction = "left" | "right" | "up" | "down" | null;
 const LiveFeed = (props: any) => {
   const middlewareHostname =
     props.middlewareHostname || "dev_middleware.coronasafe.live";
+
+  const [assetOccupiedUser, setAssetOccupiedUser] = useState<string>("");
   const [presetsPage, setPresetsPage] = useState(0);
   const cameraAsset = props.asset;
   const [presets, setPresets] = useState<any>([]);
@@ -200,10 +202,13 @@ const LiveFeed = (props: any) => {
   const gotoBedPreset = (preset: any) => {
     setLoading("Moving");
     absoluteMove(preset.meta.position, {
-      onSuccess: () => setLoading(undefined),
+      onSuccess: () => {
+        setLoading(undefined);
+        setAssetOccupiedUser("");
+      },
       onError: async (resp) => {
-        if (resp.status == 403) {
-          Notification.Error({ msg: "Camera is occupied" });
+        if (resp.status == 409 && resp.data?.username) {
+          setAssetOccupiedUser(resp?.data?.username);
         }
       },
     });
@@ -239,10 +244,13 @@ const LiveFeed = (props: any) => {
         setLoading("Moving to Bottom Boundary");
       }
       absoluteMove(position, {
-        onSuccess: () => setLoading(undefined),
+        onSuccess: () => {
+          setLoading(undefined);
+          setAssetOccupiedUser("");
+        },
         onError: async (resp) => {
-          if (resp.status == 403) {
-            Notification.Error({ msg: "Camera is occupied" });
+          if (resp.status == 409 && resp.data?.username) {
+            setAssetOccupiedUser(resp?.data?.username);
           }
         },
       });
@@ -309,10 +317,13 @@ const LiveFeed = (props: any) => {
         await runFunctionWithDelay(
           () =>
             absoluteMove(edge, {
-              onSuccess: () => setLoading(undefined),
+              onSuccess: () => {
+                setLoading(undefined);
+                setAssetOccupiedUser("");
+              },
               onError: async (resp) => {
-                if (resp.status == 403) {
-                  Notification.Error({ msg: "Camera is occupied" });
+                if (resp.status == 409 && resp.data?.username) {
+                  setAssetOccupiedUser(resp?.data?.username);
                 }
               },
             }),
@@ -326,20 +337,24 @@ const LiveFeed = (props: any) => {
 
   useEffect(() => {
     lockAsset({
-      onSuccess: (data) => {
-        console.log("SUCCESS", data);
+      onSuccess: async () => {
+        setAssetOccupiedUser("");
       },
-      onError: (data) => {
-        console.log("ERROR", data);
+      onError: async (resp) => {
+        if (resp.status == 409 && resp.data?.username) {
+          setAssetOccupiedUser(resp?.data?.username);
+        }
       },
     });
     return () => {
       unlockAsset({
-        onSuccess: (data) => {
-          console.log(data);
+        onSuccess: async () => {
+          setAssetOccupiedUser("");
         },
-        onError: (data) => {
-          console.log(data);
+        onError: async (resp) => {
+          if (resp.status == 409 && resp.data?.username) {
+            setAssetOccupiedUser(resp?.data?.username);
+          }
         },
       });
     };
@@ -456,11 +471,13 @@ const LiveFeed = (props: any) => {
     other: (option) => {
       setLoading(option.loadingLabel);
       relativeMove(getPTZPayload(option.action, precision), {
-        onSuccess: () => setLoading(undefined),
-        onError: (resp) => {
-          console.log("resp", resp);
-          if (resp.status == 403) {
-            Notification.Error({ msg: "Camera is occupied" });
+        onSuccess: () => {
+          setLoading(undefined);
+          setAssetOccupiedUser("");
+        },
+        onError: async (resp) => {
+          if (resp.status == 409 && resp.data?.username) {
+            setAssetOccupiedUser(resp?.data?.username);
           }
         },
       });
@@ -531,6 +548,14 @@ const LiveFeed = (props: any) => {
       )}
       <div className="mt-4 flex flex-col">
         <div className="flex flex-col lg:flex-row gap-4 mt-4 relative">
+          {assetOccupiedUser && (
+            <div>
+              <div className="text-lg font-bold text-black">
+                {assetOccupiedUser} is using the camera
+              </div>
+            </div>
+          )}
+
           <div className="flex-1">
             {/* ADD VIDEO PLAYER HERE */}
             <div className="mb-4 lg:mb-0 relative feed-aspect-ratio w-full bg-primary-100 rounded">

@@ -204,7 +204,6 @@ const lockAsset =
         },
       })
     );
-    console.log("resp in hook", resp);
     resp &&
       (resp.status === 200
         ? options?.onSuccess && options.onSuccess(resp.data.result)
