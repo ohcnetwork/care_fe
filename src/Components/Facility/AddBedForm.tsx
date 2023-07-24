@@ -179,33 +179,31 @@ export const AddBedForm = (props: BedFormProps) => {
           <Card>
             <form onSubmit={(e) => handleSubmit(e)}>
               <div className="mt-2 grid gap-4 grid-cols-1">
-                <div>
-                  <TextFormField
-                    name="name"
-                    type="text"
-                    label="Name"
-                    id="name"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.value)}
-                    error={errors.name}
-                  />
-                </div>
-                <div>
-                  <TextAreaFormField
-                    rows={5}
-                    label="Description"
-                    name="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.value)}
-                    error={errors.description}
-                  />
-                </div>
+                <TextFormField
+                  name="name"
+                  type="text"
+                  label="Name"
+                  id="name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.value)}
+                  error={errors.name}
+                />
+                <TextAreaFormField
+                  rows={5}
+                  label="Description"
+                  name="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.value)}
+                  error={errors.description}
+                />
 
                 <SelectFormField
                   id="bed-type"
                   className="w-full"
                   name="bed_type"
+                  label="Bed Type"
+                  required
                   options={LOCATION_BED_TYPES}
                   optionLabel={(option) => option.name}
                   optionValue={(option) => option.id}
