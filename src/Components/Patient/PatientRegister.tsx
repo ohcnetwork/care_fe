@@ -62,6 +62,7 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { validatePincode } from "../../Common/validation";
+import { FormContextValue } from "../Form/FormContext.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -190,7 +191,13 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     title: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [showImport, setShowImport] = useState(false);
+  const [showImport, setShowImport] = useState<{
+    show?: boolean;
+    field?: FormContextValue<PatientModel> | null;
+  }>({
+    show: false,
+    field: null,
+  });
   const [careExtId, setCareExtId] = useState("");
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
@@ -219,7 +226,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   useEffect(() => {
     if (extId) {
       setCareExtId(extId);
-      fetchExtResultData(null);
+      fetchExtResultData(null, null);
     }
   }, [careExtId]);
 
@@ -284,69 +291,106 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  const fetchExtResultData = async (e: any) => {
+  const fetchExtResultData = async (e: any, field: any) => {
     if (e) e.preventDefault();
-    setIsLoading(true);
     if (!careExtId) return;
     const res = await dispatchAction(externalResult({ id: careExtId }));
 
     if (res?.data) {
-      const form = { ...state.form };
-      form["name"] = res.data.name ? res.data.name : state.form.name;
-      form["address"] = res.data.address
-        ? res.data.address
-        : state.form.address;
-      form["permanent_address"] = res.data.permanent_address
-        ? res.data.permanent_address
-        : state.form.permanent_address;
-      form["gender"] = res.data.gender
-        ? parseGenderFromExt(res.data.gender, state.form.gender)
-        : state.form.gender;
-      form["test_id"] = res.data.test_id
-        ? res.data.test_id
-        : state.form.test_id;
-      form["srf_id"] = res.data.srf_id ? res.data.srf_id : state.form.srf_id;
+      field("name").onChange({
+        name: "name",
+        value: res.data.name ? res.data.name : state.form.name,
+      });
+      field("address").onChange({
+        name: "address",
+        value: res.data.address ? res.data.address : state.form.address,
+      });
+      field("permanent_address").onChange({
+        name: "permanent_address",
+        value: res.data.permanent_address
+          ? res.data.permanent_address
+          : state.form.permanent_address,
+      });
+      field("gender").onChange({
+        name: "gender",
+        value: res.data.gender
+          ? parseGenderFromExt(res.data.gender, state.form.gender)
+          : state.form.gender,
+      });
+      field("test_id").onChange({
+        name: "test_id",
+        value: res.data.test_id ? res.data.test_id : state.form.test_id,
+      });
+      field("srf_id").onChange({
+        name: "srf_id",
+        value: res.data.srf_id ? res.data.srf_id : state.form.srf_id,
+      });
+      field("state").onChange({
+        name: "state",
+        value: res.data.district_object
+          ? res.data.district_object.state
+          : state.form.state,
+      });
+      field("district").onChange({
+        name: "district",
+        value: res.data.district ? res.data.district : state.form.district,
+      });
+      field("local_body").onChange({
+        name: "local_body",
+        value: res.data.local_body
+          ? res.data.local_body
+          : state.form.local_body,
+      });
+      field("ward").onChange({
+        name: "ward",
+        value: res.data.ward ? res.data.ward : state.form.ward,
+      });
+      field("village").onChange({
+        name: "village",
+        value: res.data.village ? res.data.village : state.form.village,
+      });
+      field("disease_status").onChange({
+        name: "disease_status",
+        value: res.data.result
+          ? res.data.result.toUpperCase()
+          : state.form.disease_status,
+      });
+      field("test_type").onChange({
+        name: "test_type",
+        value: res.data.test_type
+          ? res.data.test_type.toUpperCase()
+          : state.form.test_type,
+      });
+      field("date_of_test").onChange({
+        name: "date_of_test",
+        value: res.data.sample_collection_date
+          ? res.data.sample_collection_date
+          : state.form.date_of_test,
+      });
+      field("date_of_result").onChange({
+        name: "date_of_result",
+        value: res.data.result_date
+          ? res.data.result_date
+          : state.form.date_of_result,
+      });
+      field("phone_number").onChange({
+        name: "phone_number",
+        value: res.data.mobile_number
+          ? "+91" + res.data.mobile_number
+          : state.form.phone_number,
+      });
 
-      form["state"] = res.data.district_object
-        ? res.data.district_object.state
-        : state.form.state;
-      form["district"] = res.data.district
-        ? res.data.district
-        : state.form.district;
-      form["local_body"] = res.data.local_body
-        ? res.data.local_body
-        : state.form.local_body;
-      form["ward"] = res.data.ward ? res.data.ward : state.form.ward;
-      form["village"] = res.data.village
-        ? res.data.village
-        : state.form.village;
-      form["disease_status"] = res.data.result
-        ? res.data.result.toUpperCase()
-        : state.form.disease_status;
-      form["test_type"] = res.data.test_type
-        ? res.data.test_type.toUpperCase()
-        : state.form.test_type;
-      form["date_of_test"] = res.data.sample_collection_date
-        ? moment(res.data.sample_collection_date)
-        : state.form.date_of_test;
-      form["date_of_result"] = res.data.result_date
-        ? moment(res.data.result_date)
-        : state.form.date_of_result;
-      form["phone_number"] = res.data.mobile_number
-        ? "+91" + res.data.mobile_number
-        : state.form.phone_number;
-
-      dispatch({ type: "set_form", form });
       Promise.all([
         fetchDistricts(res.data.district_object.state),
         fetchLocalBody(res.data.district),
         fetchWards(res.data.local_body),
         duplicateCheck(res.data.mobile_number),
       ]);
-
-      setShowImport(false);
+      setShowImport({
+        show: false,
+        field: null,
+      });
     }
-    setIsLoading(false);
   };
 
   const fetchData = useCallback(
@@ -354,7 +398,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       setIsLoading(true);
       const res = await dispatchAction(getPatient({ id }));
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setFacilityName(res.data.facility_object.name);
           setPatientName(res.data.name);
           console.log(res.data);
@@ -1004,8 +1048,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         title={headerText}
         className="mb-11"
         onBackClick={() => {
-          if (showImport) {
-            setShowImport(false);
+          if (showImport.show) {
+            setShowImport({
+              show: false,
+              field: null,
+            });
             return false;
           } else {
             id
@@ -1042,7 +1089,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               show
             />
           )}
-          {showImport ? (
+          {showImport.show && (
             <div className="p-4">
               <div>
                 <div className="my-4">
@@ -1061,769 +1108,773 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
                 <button
                   className="btn btn-primary mr-4"
-                  onClick={fetchExtResultData}
+                  onClick={(e) => {
+                    fetchExtResultData(e, showImport.field);
+                  }}
                   disabled={!careExtId}
                 >
                   Import Patient Data from External Results
                 </button>{" "}
                 <button
                   className="btn border"
-                  onClick={(_) => setShowImport(false)}
+                  onClick={(_) =>
+                    setShowImport({
+                      show: false,
+                      field: null,
+                    })
+                  }
                 >
                   Cancel Import
                 </button>
               </div>
             </div>
-          ) : (
-            <>
-              <>
-                <ButtonV2
-                  className="mb-8 sm:mx-4 flex gap-2 items-center"
-                  onClick={(_) => {
-                    setShowImport(true);
-                    setQuery({ extId: "" }, { replace: true });
-                  }}
-                >
-                  <CareIcon className="care-l-import text-lg" />
-                  Import From External Results
-                </ButtonV2>
-                <Form<PatientModel>
-                  defaults={id ? state.form : initForm}
-                  validate={validateForm}
-                  onSubmit={handleSubmit}
-                  submitLabel={buttonText}
-                  onCancel={() => navigate("/facility")}
-                  className="bg-transparent px-1 md:px-2 py-2"
-                  onDraftRestore={(newState) => {
-                    dispatch({ type: "set_state", state: newState });
-                    Promise.all([
-                      fetchDistricts(newState.form.state ?? 0),
-                      fetchLocalBody(newState.form.district?.toString() ?? ""),
-                      fetchWards(newState.form.local_body?.toString() ?? ""),
-                      duplicateCheck(newState.form.phone_number ?? ""),
-                    ]);
-                  }}
-                  noPadding
-                >
-                  {(field) => (
-                    <>
-                      {enable_abdm && (
-                        <div className="mb-8 rounded overflow-visible border border-gray-200 p-4">
-                          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
-                            ABHA Details
-                          </h1>
-                          {showLinkAbhaNumberModal && (
-                            <LinkABHANumberModal
-                              show={showLinkAbhaNumberModal}
-                              onClose={() => setShowLinkAbhaNumberModal(false)}
-                              onSuccess={(data: any) => {
-                                if (id) {
-                                  navigate(
-                                    `/facility/${facilityId}/patient/${id}`
-                                  );
-                                  return;
-                                }
+          )}
+          <>
+            <div className={`${showImport.show && "hidden"}`}>
+              <Form<PatientModel>
+                defaults={id ? state.form : initForm}
+                validate={validateForm}
+                onSubmit={handleSubmit}
+                submitLabel={buttonText}
+                onCancel={() => navigate("/facility")}
+                className="bg-transparent px-1 md:px-2 py-2"
+                onDraftRestore={(newState) => {
+                  dispatch({ type: "set_state", state: newState });
+                  Promise.all([
+                    fetchDistricts(newState.form.state ?? 0),
+                    fetchLocalBody(newState.form.district?.toString() ?? ""),
+                    fetchWards(newState.form.local_body?.toString() ?? ""),
+                    duplicateCheck(newState.form.phone_number ?? ""),
+                  ]);
+                }}
+                noPadding
+              >
+                {(field) => (
+                  <>
+                    <div className="mb-2 rounded overflow-visible border border-gray-200 p-4">
+                      <ButtonV2
+                        className="flex gap-2 items-center"
+                        onClick={(_) => {
+                          setShowImport({
+                            show: true,
+                            field,
+                          });
+                          setQuery({ extId: "" }, { replace: true });
+                        }}
+                      >
+                        <CareIcon className="care-l-import text-lg" />
+                        Import From External Results
+                      </ButtonV2>
+                    </div>
+                    {enable_abdm && (
+                      <div className="mb-8 rounded overflow-visible border border-gray-200 p-4">
+                        <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                          ABHA Details
+                        </h1>
+                        {showLinkAbhaNumberModal && (
+                          <LinkABHANumberModal
+                            show={showLinkAbhaNumberModal}
+                            onClose={() => setShowLinkAbhaNumberModal(false)}
+                            onSuccess={(data: any) => {
+                              if (id) {
+                                navigate(
+                                  `/facility/${facilityId}/patient/${id}`
+                                );
+                                return;
+                              }
 
-                                handleAbhaLinking(data, field);
-                              }}
-                            />
-                          )}
-                          {!state.form.abha_number ? (
-                            <button
-                              className="btn btn-primary my-4"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setShowLinkAbhaNumberModal(true);
-                              }}
-                            >
-                              Link Abha Number
-                            </button>
-                          ) : (
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                              <div id="abha-number">
+                              handleAbhaLinking(data, field);
+                            }}
+                          />
+                        )}
+                        {!state.form.abha_number ? (
+                          <button
+                            className="btn btn-primary my-4"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setShowLinkAbhaNumberModal(true);
+                            }}
+                          >
+                            Link Abha Number
+                          </button>
+                        ) : (
+                          <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                            <div id="abha-number">
+                              <TextFormField
+                                id="abha-number"
+                                name="abha-number"
+                                label="ABHA Number"
+                                type="text"
+                                value={state.form.health_id_number}
+                                onChange={() => null}
+                                disabled={true}
+                                error=""
+                              />
+                            </div>
+                            <div id="health-id">
+                              {state.form.health_id ? (
                                 <TextFormField
-                                  id="abha-number"
-                                  name="abha-number"
-                                  label="ABHA Number"
+                                  id="health-id"
+                                  name="health-id"
+                                  label="Abha Address"
                                   type="text"
-                                  value={state.form.health_id_number}
+                                  value={state.form.health_id}
                                   onChange={() => null}
                                   disabled={true}
                                   error=""
                                 />
-                              </div>
-                              <div id="health-id">
-                                {state.form.health_id ? (
-                                  <TextFormField
-                                    id="health-id"
-                                    name="health-id"
-                                    label="Abha Address"
-                                    type="text"
-                                    value={state.form.health_id}
-                                    onChange={() => null}
-                                    disabled={true}
-                                    error=""
-                                  />
-                                ) : (
-                                  <div className="text-sm text-gray-500 mt-4">
-                                    No Abha Address Associated with this ABHA
-                                    Number
-                                  </div>
-                                )}
-                              </div>
+                              ) : (
+                                <div className="text-sm text-gray-500 mt-4">
+                                  No Abha Address Associated with this ABHA
+                                  Number
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div className="mb-8 rounded overflow-visible border border-gray-200 p-4">
+                      <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                        Personal Details
+                      </h1>
+                      <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                        <div data-testid="phone-number" id="phone_number-div">
+                          <PhoneNumberFormField
+                            {...field("phone_number")}
+                            required
+                            label="Phone Number"
+                            onChange={(event) => {
+                              duplicateCheck(event.value);
+                              field("phone_number").onChange(event);
+                            }}
+                          />
                         </div>
-                      )}
-                      <div className="mb-8 rounded overflow-visible border border-gray-200 p-4">
-                        <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
-                          Personal Details
-                        </h1>
-                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                          <div data-testid="phone-number" id="phone_number-div">
-                            <PhoneNumberFormField
-                              {...field("phone_number")}
-                              required
-                              label="Phone Number"
-                              onChange={(event) => {
-                                duplicateCheck(event.value);
-                                field("phone_number").onChange(event);
-                              }}
-                            />
-                          </div>
-                          <div
-                            data-testid="emergency-phone-number"
-                            id="emergency_phone_number-div"
-                          >
-                            <PhoneNumberFormField
-                              {...field("emergency_phone_number")}
-                              label="Emergency contact number"
-                              required
-                            />
-                          </div>
-                          <div data-testid="name" id="name-div">
-                            <TextFormField
-                              required
-                              {...field("name")}
-                              type="text"
-                              label={"Name"}
-                            />
-                          </div>
-                          <div
-                            data-testid="date-of-birth"
-                            id="date_of_birth-div"
-                          >
-                            <DateFormField
-                              containerClassName="w-full"
-                              {...field("date_of_birth")}
-                              label="Date of Birth"
-                              required
-                              position="LEFT"
-                              disableFuture
-                            />
-                          </div>
-                          <div data-testid="Gender" id="gender-div">
-                            <SelectFormField
-                              {...field("gender")}
-                              required
-                              label="Gender"
-                              options={genderTypes}
-                              optionLabel={(o: any) => o.text}
-                              optionValue={(o: any) => o.id}
-                            />
-                          </div>
-                          <CollapseV2
-                            opened={String(field("gender").value) === "2"}
-                          >
-                            {
-                              <div id="is_antenatal-div" className="col-span-2">
-                                <RadioFormField
-                                  {...field("is_antenatal")}
-                                  label="Is antenatal ?"
-                                  aria-label="is_antenatal"
-                                  options={[
-                                    { label: "Yes", value: "true" },
-                                    { label: "No", value: "false" },
-                                  ]}
-                                  optionDisplay={(option) => option.label}
-                                  optionValue={(option) => option.value}
-                                />
-                              </div>
-                            }
-                          </CollapseV2>
-                          <div data-testid="current-address" id="address-div">
-                            <TextAreaFormField
-                              {...field("address")}
-                              label="Current Address"
-                              placeholder="Enter the current address"
-                            />
-                          </div>
-                          <div
-                            data-testid="permanent-address"
-                            id="permanent_address-div"
-                          >
-                            <TextAreaFormField
-                              {...field("permanent_address")}
-                              label="Permanent Address"
-                              rows={3}
-                              disabled={field("sameAddress").value}
-                              placeholder="Enter the permanent address"
-                              value={
-                                field("sameAddress").value
-                                  ? field("address").value
-                                  : field("permanent_address").value
-                              }
-                            />
-                            <CheckBoxFormField
-                              {...field("sameAddress")}
-                              label="Same as Current Address"
-                              className="font-bold"
-                            />
-                          </div>
-
-                          <div data-testid="pincode" id="pincode-div">
-                            <TextFormField
-                              {...field("pincode")}
-                              required
-                              type="text"
-                              label={"Pincode"}
-                              onChange={(e) => {
-                                field("pincode").onChange(e);
-                                handlePincodeChange(
-                                  e,
-                                  field("pincode").onChange
-                                );
-                              }}
-                            />
-                            {showAutoFilledPincode && (
-                              <div>
-                                <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
-                                <span className="text-primary-500 text-sm">
-                                  State and District auto-filled from Pincode
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div id="village-div">
-                            <TextFormField
-                              {...field("village")}
-                              type="text"
-                              label="Village"
-                            />
-                          </div>
-                          <div id="nationality-div">
-                            <SelectFormField
-                              {...field("nationality")}
-                              label="Nationality"
-                              options={countryList}
-                              optionLabel={(o) => o}
-                              optionValue={(o) => o}
-                            />
-                          </div>
-                          {field("nationality").value === "India" ? (
-                            <>
-                              <div data-testid="state" id="state-div">
-                                {isStateLoading ? (
-                                  <Spinner />
-                                ) : (
-                                  <SelectFormField
-                                    {...field("state")}
-                                    label="State"
-                                    required
-                                    placeholder="Choose State"
-                                    options={states}
-                                    optionLabel={(o: any) => o.name}
-                                    optionValue={(o: any) => o.id}
-                                    onChange={(e: any) => {
-                                      field("state").onChange(e);
-                                      field("district").onChange({
-                                        name: "district",
-                                        value: undefined,
-                                      });
-                                      field("local_body").onChange({
-                                        name: "local_body",
-                                        value: undefined,
-                                      });
-                                      field("ward").onChange({
-                                        name: "ward",
-                                        value: undefined,
-                                      });
-                                      fetchDistricts(e.value);
-                                      fetchLocalBody("0");
-                                      fetchWards("0");
-                                    }}
-                                  />
-                                )}
-                              </div>
-
-                              <div data-testid="district" id="district-div">
-                                {isDistrictLoading ? (
-                                  <div className="w-full flex justify-center items-center">
-                                    <Spinner />
-                                  </div>
-                                ) : (
-                                  <SelectFormField
-                                    {...field("district")}
-                                    label="District"
-                                    required
-                                    placeholder={
-                                      field("state").value
-                                        ? "Choose District"
-                                        : "Select State First"
-                                    }
-                                    disabled={!field("state").value}
-                                    options={districts}
-                                    optionLabel={(o: any) => o.name}
-                                    optionValue={(o: any) => o.id}
-                                    onChange={(e: any) => {
-                                      field("district").onChange(e);
-                                      field("local_body").onChange({
-                                        name: "local_body",
-                                        value: undefined,
-                                      });
-                                      field("ward").onChange({
-                                        name: "ward",
-                                        value: undefined,
-                                      });
-                                      fetchLocalBody(String(e.value));
-                                      fetchWards("0");
-                                    }}
-                                  />
-                                )}
-                              </div>
-
-                              <div data-testid="localbody" id="local_body-div">
-                                {isLocalbodyLoading ? (
-                                  <div className="w-full flex justify-center items-center">
-                                    <Spinner />
-                                  </div>
-                                ) : (
-                                  <SelectFormField
-                                    {...field("local_body")}
-                                    label="Localbody"
-                                    required
-                                    placeholder={
-                                      field("district").value
-                                        ? "Choose Localbody"
-                                        : "Select District First"
-                                    }
-                                    disabled={!field("district").value}
-                                    options={localBody}
-                                    optionLabel={(o: any) => o.name}
-                                    optionValue={(o: any) => o.id}
-                                    onChange={(e: any) => {
-                                      field("local_body").onChange(e);
-                                      field("ward").onChange({
-                                        name: "ward",
-                                        value: undefined,
-                                      });
-                                      fetchWards(String(e.value));
-                                    }}
-                                  />
-                                )}
-                              </div>
-                              <div
-                                data-testid="ward-respective-lsgi"
-                                id="ward-div"
-                              >
-                                {isWardLoading ? (
-                                  <div className="w-full flex justify-center items-center">
-                                    <Spinner />
-                                  </div>
-                                ) : (
-                                  <SelectFormField
-                                    {...field("ward")}
-                                    label="Ward"
-                                    options={ward
-                                      .sort((a, b) => a.number - b.number)
-                                      .map((e) => {
-                                        return {
-                                          id: e.id,
-                                          name: e.number + ": " + e.name,
-                                        };
-                                      })}
-                                    placeholder={
-                                      field("local_body").value
-                                        ? "Choose Ward"
-                                        : "Select Localbody First"
-                                    }
-                                    disabled={!field("local_body").value}
-                                    optionLabel={(o: any) => o.name}
-                                    optionValue={(o: any) => o.id}
-                                    onChange={(e: any) => {
-                                      field("ward").onChange(e);
-                                    }}
-                                  />
-                                )}
-                              </div>
-                            </>
-                          ) : (
-                            <div id="passport_no-div">
-                              <TextFormField
-                                label="Passport Number"
-                                {...field("passport_no")}
-                                type="text"
+                        <div
+                          data-testid="emergency-phone-number"
+                          id="emergency_phone_number-div"
+                        >
+                          <PhoneNumberFormField
+                            {...field("emergency_phone_number")}
+                            label="Emergency contact number"
+                            required
+                          />
+                        </div>
+                        <div data-testid="name" id="name-div">
+                          <TextFormField
+                            required
+                            {...field("name")}
+                            type="text"
+                            label={"Name"}
+                          />
+                        </div>
+                        <div data-testid="date-of-birth" id="date_of_birth-div">
+                          <DateFormField
+                            containerClassName="w-full"
+                            {...field("date_of_birth")}
+                            label="Date of Birth"
+                            required
+                            position="LEFT"
+                            disableFuture
+                          />
+                        </div>
+                        <div data-testid="Gender" id="gender-div">
+                          <SelectFormField
+                            {...field("gender")}
+                            required
+                            label="Gender"
+                            options={genderTypes}
+                            optionLabel={(o: any) => o.text}
+                            optionValue={(o: any) => o.id}
+                          />
+                        </div>
+                        <CollapseV2
+                          opened={String(field("gender").value) === "2"}
+                        >
+                          {
+                            <div id="is_antenatal-div" className="col-span-2">
+                              <RadioFormField
+                                {...field("is_antenatal")}
+                                label="Is antenatal ?"
+                                aria-label="is_antenatal"
+                                options={[
+                                  { label: "Yes", value: "true" },
+                                  { label: "No", value: "false" },
+                                ]}
+                                optionDisplay={(option) => option.label}
+                                optionValue={(option) => option.value}
                               />
                             </div>
+                          }
+                        </CollapseV2>
+                        <div data-testid="current-address" id="address-div">
+                          <TextAreaFormField
+                            {...field("address")}
+                            label="Current Address"
+                            placeholder="Enter the current address"
+                          />
+                        </div>
+                        <div
+                          data-testid="permanent-address"
+                          id="permanent_address-div"
+                        >
+                          <TextAreaFormField
+                            {...field("permanent_address")}
+                            label="Permanent Address"
+                            rows={3}
+                            disabled={field("sameAddress").value}
+                            placeholder="Enter the permanent address"
+                            value={
+                              field("sameAddress").value
+                                ? field("address").value
+                                : field("permanent_address").value
+                            }
+                          />
+                          <CheckBoxFormField
+                            {...field("sameAddress")}
+                            label="Same as Current Address"
+                            className="font-bold"
+                          />
+                        </div>
+
+                        <div data-testid="pincode" id="pincode-div">
+                          <TextFormField
+                            {...field("pincode")}
+                            required
+                            type="text"
+                            label={"Pincode"}
+                            onChange={(e) => {
+                              field("pincode").onChange(e);
+                              handlePincodeChange(e, field("pincode").onChange);
+                            }}
+                          />
+                          {showAutoFilledPincode && (
+                            <div>
+                              <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
+                              <span className="text-primary-500 text-sm">
+                                State and District auto-filled from Pincode
+                              </span>
+                            </div>
                           )}
                         </div>
-                      </div>
-                      <div className="mb-8 rounded border border-gray-200 p-4">
-                        <AccordionV2
-                          className="mt-2 lg:mt-0 md:mt-0 shadow-none"
-                          expandIcon={
-                            <CareIcon className="care-l-angle-down text-2xl font-bold" />
-                          }
-                          title={
-                            <h1 className="font-bold text-purple-500 text-left text-xl">
-                              COVID Details
-                            </h1>
-                          }
-                        >
-                          <div>
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 sm:grid-cols-3 w-full mt-5">
-                              <div>
-                                <RadioFormField
-                                  label="Is patient Vaccinated against COVID?"
-                                  aria-label="is_vaccinated"
-                                  {...field("is_vaccinated")}
-                                  options={[
-                                    { label: "Yes", value: "true" },
-                                    { label: "No", value: "false" },
-                                  ]}
-                                  optionDisplay={(option) => option.label}
-                                  optionValue={(option) => option.value}
+                        <div id="village-div">
+                          <TextFormField
+                            {...field("village")}
+                            type="text"
+                            label="Village"
+                          />
+                        </div>
+                        <div id="nationality-div">
+                          <SelectFormField
+                            {...field("nationality")}
+                            label="Nationality"
+                            options={countryList}
+                            optionLabel={(o) => o}
+                            optionValue={(o) => o}
+                          />
+                        </div>
+                        {field("nationality").value === "India" ? (
+                          <>
+                            <div data-testid="state" id="state-div">
+                              {isStateLoading ? (
+                                <Spinner />
+                              ) : (
+                                <SelectFormField
+                                  {...field("state")}
+                                  label="State"
+                                  required
+                                  placeholder="Choose State"
+                                  options={states}
+                                  optionLabel={(o: any) => o.name}
+                                  optionValue={(o: any) => o.id}
+                                  onChange={(e: any) => {
+                                    field("state").onChange(e);
+                                    field("district").onChange({
+                                      name: "district",
+                                      value: undefined,
+                                    });
+                                    field("local_body").onChange({
+                                      name: "local_body",
+                                      value: undefined,
+                                    });
+                                    field("ward").onChange({
+                                      name: "ward",
+                                      value: undefined,
+                                    });
+                                    fetchDistricts(e.value);
+                                    fetchLocalBody("0");
+                                    fetchWards("0");
+                                  }}
                                 />
-                              </div>
-                              <div id="contact_with_confirmed_carrier-div">
-                                <RadioFormField
-                                  {...field("contact_with_confirmed_carrier")}
-                                  label="Contact with confirmed Covid patient?"
-                                  aria-label="contact_with_confirmed_carrier"
-                                  options={[
-                                    { label: "Yes", value: "true" },
-                                    { label: "No", value: "false" },
-                                  ]}
-                                  optionDisplay={(option) => option.label}
-                                  optionValue={(option) => option.value}
-                                />
-                              </div>
-                              <div id="contact_with_suspected_carrier-div">
-                                <RadioFormField
-                                  {...field("contact_with_suspected_carrier")}
-                                  label="Contact with Covid suspect?"
-                                  aria-label="contact_with_suspected_carrier"
-                                  options={[
-                                    { label: "Yes", value: "true" },
-                                    { label: "No", value: "false" },
-                                  ]}
-                                  optionDisplay={(option) => option.label}
-                                  optionValue={(option) => option.value}
-                                />
-                              </div>
+                              )}
                             </div>
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 w-full mt-5">
-                              <CollapseV2
-                                opened={
-                                  String(field("is_vaccinated").value) ===
-                                  "true"
-                                }
-                              >
-                                {
-                                  <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                                    <div id="covin_id-div">
-                                      <TextFormField
-                                        label="COWIN ID"
-                                        {...field("covin_id")}
-                                        type="text"
-                                      />
-                                    </div>
-                                    <div id="number_of_doses-div">
-                                      <RadioFormField
-                                        label="Number of doses"
-                                        {...field("number_of_doses")}
-                                        options={[
-                                          { label: "1", value: "1" },
-                                          { label: "2", value: "2" },
-                                          {
-                                            label:
-                                              "3 (Booster/Precautionary Dose)",
-                                            value: "3",
-                                          },
-                                        ]}
-                                        optionDisplay={(option) => option.label}
-                                        optionValue={(option) => option.value}
-                                      />
-                                    </div>
-                                    <div id="vaccine_name-div">
-                                      <SelectFormField
-                                        {...field("vaccine_name")}
-                                        label="Vaccine Name"
-                                        options={vaccines}
-                                        optionLabel={(o) => o}
-                                        optionValue={(o) => o}
-                                      />
-                                    </div>
-                                    <div id="last_vaccinated_date-div">
-                                      <DateFormField
-                                        {...field("last_vaccinated_date")}
-                                        label="Last Date of Vaccination"
-                                        disableFuture={true}
-                                        position="LEFT"
-                                      />
-                                    </div>
-                                  </div>
-                                }
-                              </CollapseV2>
-                              <CollapseV2
-                                opened={
-                                  JSON.parse(
-                                    field("contact_with_confirmed_carrier")
-                                      .value ?? "{}"
-                                  ) ||
-                                  JSON.parse(
-                                    field("contact_with_suspected_carrier")
-                                      .value ?? "{}"
-                                  )
-                                }
-                              >
+
+                            <div data-testid="district" id="district-div">
+                              {isDistrictLoading ? (
+                                <div className="w-full flex justify-center items-center">
+                                  <Spinner />
+                                </div>
+                              ) : (
+                                <SelectFormField
+                                  {...field("district")}
+                                  label="District"
+                                  required
+                                  placeholder={
+                                    field("state").value
+                                      ? "Choose District"
+                                      : "Select State First"
+                                  }
+                                  disabled={!field("state").value}
+                                  options={districts}
+                                  optionLabel={(o: any) => o.name}
+                                  optionValue={(o: any) => o.id}
+                                  onChange={(e: any) => {
+                                    field("district").onChange(e);
+                                    field("local_body").onChange({
+                                      name: "local_body",
+                                      value: undefined,
+                                    });
+                                    field("ward").onChange({
+                                      name: "ward",
+                                      value: undefined,
+                                    });
+                                    fetchLocalBody(String(e.value));
+                                    fetchWards("0");
+                                  }}
+                                />
+                              )}
+                            </div>
+
+                            <div data-testid="localbody" id="local_body-div">
+                              {isLocalbodyLoading ? (
+                                <div className="w-full flex justify-center items-center">
+                                  <Spinner />
+                                </div>
+                              ) : (
+                                <SelectFormField
+                                  {...field("local_body")}
+                                  label="Localbody"
+                                  required
+                                  placeholder={
+                                    field("district").value
+                                      ? "Choose Localbody"
+                                      : "Select District First"
+                                  }
+                                  disabled={!field("district").value}
+                                  options={localBody}
+                                  optionLabel={(o: any) => o.name}
+                                  optionValue={(o: any) => o.id}
+                                  onChange={(e: any) => {
+                                    field("local_body").onChange(e);
+                                    field("ward").onChange({
+                                      name: "ward",
+                                      value: undefined,
+                                    });
+                                    fetchWards(String(e.value));
+                                  }}
+                                />
+                              )}
+                            </div>
+                            <div
+                              data-testid="ward-respective-lsgi"
+                              id="ward-div"
+                            >
+                              {isWardLoading ? (
+                                <div className="w-full flex justify-center items-center">
+                                  <Spinner />
+                                </div>
+                              ) : (
+                                <SelectFormField
+                                  {...field("ward")}
+                                  label="Ward"
+                                  options={ward
+                                    .sort((a, b) => a.number - b.number)
+                                    .map((e) => {
+                                      return {
+                                        id: e.id,
+                                        name: e.number + ": " + e.name,
+                                      };
+                                    })}
+                                  placeholder={
+                                    field("local_body").value
+                                      ? "Choose Ward"
+                                      : "Select Localbody First"
+                                  }
+                                  disabled={!field("local_body").value}
+                                  optionLabel={(o: any) => o.name}
+                                  optionValue={(o: any) => o.id}
+                                  onChange={(e: any) => {
+                                    field("ward").onChange(e);
+                                  }}
+                                />
+                              )}
+                            </div>
+                          </>
+                        ) : (
+                          <div id="passport_no-div">
+                            <TextFormField
+                              label="Passport Number"
+                              {...field("passport_no")}
+                              type="text"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="mb-8 rounded border border-gray-200 p-4">
+                      <AccordionV2
+                        className="mt-2 lg:mt-0 md:mt-0 shadow-none"
+                        expandIcon={
+                          <CareIcon className="care-l-angle-down text-2xl font-bold" />
+                        }
+                        title={
+                          <h1 className="font-bold text-purple-500 text-left text-xl">
+                            COVID Details
+                          </h1>
+                        }
+                      >
+                        <div>
+                          <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 sm:grid-cols-3 w-full mt-5">
+                            <div>
+                              <RadioFormField
+                                label="Is patient Vaccinated against COVID?"
+                                aria-label="is_vaccinated"
+                                {...field("is_vaccinated")}
+                                options={[
+                                  { label: "Yes", value: "true" },
+                                  { label: "No", value: "false" },
+                                ]}
+                                optionDisplay={(option) => option.label}
+                                optionValue={(option) => option.value}
+                              />
+                            </div>
+                            <div id="contact_with_confirmed_carrier-div">
+                              <RadioFormField
+                                {...field("contact_with_confirmed_carrier")}
+                                label="Contact with confirmed Covid patient?"
+                                aria-label="contact_with_confirmed_carrier"
+                                options={[
+                                  { label: "Yes", value: "true" },
+                                  { label: "No", value: "false" },
+                                ]}
+                                optionDisplay={(option) => option.label}
+                                optionValue={(option) => option.value}
+                              />
+                            </div>
+                            <div id="contact_with_suspected_carrier-div">
+                              <RadioFormField
+                                {...field("contact_with_suspected_carrier")}
+                                label="Contact with Covid suspect?"
+                                aria-label="contact_with_suspected_carrier"
+                                options={[
+                                  { label: "Yes", value: "true" },
+                                  { label: "No", value: "false" },
+                                ]}
+                                optionDisplay={(option) => option.label}
+                                optionValue={(option) => option.value}
+                              />
+                            </div>
+                          </div>
+                          <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 w-full mt-5">
+                            <CollapseV2
+                              opened={
+                                String(field("is_vaccinated").value) === "true"
+                              }
+                            >
+                              {
                                 <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                                  <div id="estimated_contact_date-div">
-                                    <DateFormField
-                                      {...field("estimated_contact_date")}
-                                      id="estimated_contact_date"
-                                      label="Estimate date of contact"
-                                      disableFuture
-                                      required
-                                      position="LEFT"
+                                  <div id="covin_id-div">
+                                    <TextFormField
+                                      label="COWIN ID"
+                                      {...field("covin_id")}
+                                      type="text"
                                     />
                                   </div>
-
-                                  <div id="cluster_name-div">
-                                    <TextFormField
-                                      {...field("cluster_name")}
-                                      id="cluster_name"
-                                      label="Name / Cluster of Contact"
-                                      placeholder="Name / Cluster of Contact"
-                                      required
+                                  <div id="number_of_doses-div">
+                                    <RadioFormField
+                                      label="Number of doses"
+                                      {...field("number_of_doses")}
+                                      options={[
+                                        { label: "1", value: "1" },
+                                        { label: "2", value: "2" },
+                                        {
+                                          label:
+                                            "3 (Booster/Precautionary Dose)",
+                                          value: "3",
+                                        },
+                                      ]}
+                                      optionDisplay={(option) => option.label}
+                                      optionValue={(option) => option.value}
+                                    />
+                                  </div>
+                                  <div id="vaccine_name-div">
+                                    <SelectFormField
+                                      {...field("vaccine_name")}
+                                      label="Vaccine Name"
+                                      options={vaccines}
+                                      optionLabel={(o) => o}
+                                      optionValue={(o) => o}
+                                    />
+                                  </div>
+                                  <div id="last_vaccinated_date-div">
+                                    <DateFormField
+                                      {...field("last_vaccinated_date")}
+                                      label="Last Date of Vaccination"
+                                      disableFuture={true}
+                                      position="LEFT"
                                     />
                                   </div>
                                 </div>
-                              </CollapseV2>
-                              <div
-                                data-testid="disease-status"
-                                id="disease_status-div"
+                              }
+                            </CollapseV2>
+                            <CollapseV2
+                              opened={
+                                JSON.parse(
+                                  field("contact_with_confirmed_carrier")
+                                    .value ?? "{}"
+                                ) ||
+                                JSON.parse(
+                                  field("contact_with_suspected_carrier")
+                                    .value ?? "{}"
+                                )
+                              }
+                            >
+                              <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                                <div id="estimated_contact_date-div">
+                                  <DateFormField
+                                    {...field("estimated_contact_date")}
+                                    id="estimated_contact_date"
+                                    label="Estimate date of contact"
+                                    disableFuture
+                                    required
+                                    position="LEFT"
+                                  />
+                                </div>
+
+                                <div id="cluster_name-div">
+                                  <TextFormField
+                                    {...field("cluster_name")}
+                                    id="cluster_name"
+                                    label="Name / Cluster of Contact"
+                                    placeholder="Name / Cluster of Contact"
+                                    required
+                                  />
+                                </div>
+                              </div>
+                            </CollapseV2>
+                            <div
+                              data-testid="disease-status"
+                              id="disease_status-div"
+                            >
+                              <SelectFormField
+                                {...field("disease_status")}
+                                id="disease_status"
+                                label="COVID Disease Status"
+                                options={diseaseStatus}
+                                optionLabel={(o) => o}
+                                optionValue={(o) => o}
+                                required
+                              />
+                            </div>
+                            <div id="test_type-div">
+                              <SelectFormField
+                                {...field("test_type")}
+                                id="test_type"
+                                label="COVID Test Type"
+                                options={testType}
+                                optionLabel={(o) => o}
+                                optionValue={(o) => o}
+                                required
+                              />
+                            </div>
+                            <div id="srf_id-div">
+                              <TextFormField
+                                {...field("srf_id")}
+                                id="srf_id"
+                                label="SRF Id for COVID Test"
+                              />
+                            </div>
+                            <div id="is_declared_positive-div">
+                              <RadioFormField
+                                {...field("is_declared_positive")}
+                                label="Is patient declared covid postive by state?"
+                                aria-label="is_declared_positive"
+                                options={[
+                                  { label: "Yes", value: "true" },
+                                  { label: "No", value: "false" },
+                                ]}
+                                optionDisplay={(option) => option.label}
+                                optionValue={(option) => option.value}
+                              />
+                              <CollapseV2
+                                opened={
+                                  String(
+                                    field("is_declared_positive").value
+                                  ) === "true"
+                                }
+                                className="mt-4"
                               >
-                                <SelectFormField
-                                  {...field("disease_status")}
-                                  id="disease_status"
-                                  label="COVID Disease Status"
-                                  options={diseaseStatus}
-                                  optionLabel={(o) => o}
-                                  optionValue={(o) => o}
-                                  required
-                                />
-                              </div>
-                              <div id="test_type-div">
-                                <SelectFormField
-                                  {...field("test_type")}
-                                  id="test_type"
-                                  label="COVID Test Type"
-                                  options={testType}
-                                  optionLabel={(o) => o}
-                                  optionValue={(o) => o}
-                                  required
-                                />
-                              </div>
-                              <div id="srf_id-div">
-                                <TextFormField
-                                  {...field("srf_id")}
-                                  id="srf_id"
-                                  label="SRF Id for COVID Test"
-                                />
-                              </div>
-                              <div id="is_declared_positive-div">
-                                <RadioFormField
-                                  {...field("is_declared_positive")}
-                                  label="Is patient declared covid postive by state?"
-                                  aria-label="is_declared_positive"
-                                  options={[
-                                    { label: "Yes", value: "true" },
-                                    { label: "No", value: "false" },
-                                  ]}
-                                  optionDisplay={(option) => option.label}
-                                  optionValue={(option) => option.value}
-                                />
-                                <CollapseV2
-                                  opened={
-                                    String(
-                                      field("is_declared_positive").value
-                                    ) === "true"
-                                  }
-                                  className="mt-4"
-                                >
-                                  <div id="date_declared_positive-div">
-                                    <DateFormField
-                                      {...field("date_declared_positive")}
-                                      label="Date Patient is Declared Positive for COVID"
-                                      disableFuture
-                                      position="LEFT"
-                                    />
-                                  </div>
-                                </CollapseV2>
-                              </div>
-                              <div id="test_id-div">
-                                <TextFormField
-                                  {...field("test_id")}
-                                  id="test_id"
-                                  label="COVID Positive ID issued by ICMR"
-                                  type="number"
-                                />
-                              </div>
+                                <div id="date_declared_positive-div">
+                                  <DateFormField
+                                    {...field("date_declared_positive")}
+                                    label="Date Patient is Declared Positive for COVID"
+                                    disableFuture
+                                    position="LEFT"
+                                  />
+                                </div>
+                              </CollapseV2>
+                            </div>
+                            <div id="test_id-div">
+                              <TextFormField
+                                {...field("test_id")}
+                                id="test_id"
+                                label="COVID Positive ID issued by ICMR"
+                                type="number"
+                              />
+                            </div>
 
-                              <div id="date_of_test-div">
-                                <DateFormField
-                                  {...field("date_of_test")}
-                                  id="date_of_test"
-                                  label="Date of Sample given for COVID Test"
-                                  disableFuture
-                                  position="LEFT"
-                                />
-                              </div>
-                              <div id="date_of_result-div">
-                                <DateFormField
-                                  {...field("date_of_result")}
-                                  id="date_of_result"
-                                  label="Date of Result for COVID Test"
-                                  disableFuture
-                                  position="LEFT"
-                                />
-                              </div>
+                            <div id="date_of_test-div">
+                              <DateFormField
+                                {...field("date_of_test")}
+                                id="date_of_test"
+                                label="Date of Sample given for COVID Test"
+                                disableFuture
+                                position="LEFT"
+                              />
+                            </div>
+                            <div id="date_of_result-div">
+                              <DateFormField
+                                {...field("date_of_result")}
+                                id="date_of_result"
+                                label="Date of Result for COVID Test"
+                                disableFuture
+                                position="LEFT"
+                              />
+                            </div>
 
-                              <div id="number_of_primary_contacts-div">
-                                <TextFormField
-                                  {...field("number_of_primary_contacts")}
-                                  id="number_of_primary_contacts"
-                                  label="Number Of Primary Contacts for COVID"
-                                  type="number"
-                                />
-                              </div>
-                              <div id="number_of_secondary_contacts-div">
-                                <TextFormField
-                                  {...field("number_of_secondary_contacts")}
-                                  id="number_of_secondary_contacts"
-                                  label="Number Of Secondary Contacts for COVID"
-                                  type="number"
-                                />
-                              </div>
+                            <div id="number_of_primary_contacts-div">
+                              <TextFormField
+                                {...field("number_of_primary_contacts")}
+                                id="number_of_primary_contacts"
+                                label="Number Of Primary Contacts for COVID"
+                                type="number"
+                              />
+                            </div>
+                            <div id="number_of_secondary_contacts-div">
+                              <TextFormField
+                                {...field("number_of_secondary_contacts")}
+                                id="number_of_secondary_contacts"
+                                label="Number Of Secondary Contacts for COVID"
+                                type="number"
+                              />
                             </div>
                           </div>
-                        </AccordionV2>
+                        </div>
+                      </AccordionV2>
+                    </div>
+                    <div className="mb-8 rounded overflow-visible border p-4">
+                      <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                        Medical History
+                      </h1>
+                      <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                        <div id="present_health-div">
+                          <TextAreaFormField
+                            {...field("present_health")}
+                            label="Present Health Condition"
+                            rows={3}
+                            placeholder="Optional Information"
+                          />
+                        </div>
+
+                        <div id="ongoing_medication-div">
+                          <TextAreaFormField
+                            {...field("ongoing_medication")}
+                            label="Ongoing Medication"
+                            rows={3}
+                            placeholder="Optional Information"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <FieldLabel id="med-history-label" required>
+                            Any medical history? (Comorbidities)
+                          </FieldLabel>
+                          <div className={"flex flex-wrap gap-2"}>
+                            {MEDICAL_HISTORY_CHOICES.map((i) => {
+                              return renderMedicalHistory(
+                                i.id as number,
+                                i.text,
+                                field
+                              );
+                            })}
+                          </div>
+                          <FieldErrorText
+                            error={field("medical_history")["error"]}
+                          />
+                        </div>
+
+                        <div id="allergies-div">
+                          <TextAreaFormField
+                            {...field("allergies")}
+                            label="Allergies"
+                            rows={1}
+                            placeholder="Optional Information"
+                          />
+                        </div>
+
+                        <div data-testid="blood-group" id="blood_group-div">
+                          <SelectFormField
+                            {...field("blood_group")}
+                            position="above"
+                            label="Blood Group"
+                            required
+                            options={bloodGroups}
+                            optionLabel={(o: any) => o}
+                            optionValue={(o: any) => o}
+                          />
+                        </div>
                       </div>
-                      <div className="mb-8 rounded overflow-visible border p-4">
-                        <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
-                          Medical History
+                    </div>
+                    <div className="bg-white rounded flex flex-col gap-4 w-full p-4 border border-gray-200">
+                      <div className="flex flex-col gap-4 w-full items-center justify-between sm:flex-row">
+                        <h1 className="font-bold text-purple-500 text-left text-xl">
+                          Insurance Details
                         </h1>
-                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                          <div id="present_health-div">
-                            <TextAreaFormField
-                              {...field("present_health")}
-                              label="Present Health Condition"
-                              rows={3}
-                              placeholder="Optional Information"
-                            />
-                          </div>
-
-                          <div id="ongoing_medication-div">
-                            <TextAreaFormField
-                              {...field("ongoing_medication")}
-                              label="Ongoing Medication"
-                              rows={3}
-                              placeholder="Optional Information"
-                            />
-                          </div>
-                          <div className="md:col-span-2">
-                            <FieldLabel id="med-history-label" required>
-                              Any medical history? (Comorbidities)
-                            </FieldLabel>
-                            <div className={"flex flex-wrap gap-2"}>
-                              {MEDICAL_HISTORY_CHOICES.map((i) => {
-                                return renderMedicalHistory(
-                                  i.id as number,
-                                  i.text,
-                                  field
-                                );
-                              })}
-                            </div>
-                            <FieldErrorText
-                              error={field("medical_history")["error"]}
-                            />
-                          </div>
-
-                          <div id="allergies-div">
-                            <TextAreaFormField
-                              {...field("allergies")}
-                              label="Allergies"
-                              rows={1}
-                              placeholder="Optional Information"
-                            />
-                          </div>
-
-                          <div data-testid="blood-group" id="blood_group-div">
-                            <SelectFormField
-                              {...field("blood_group")}
-                              position="above"
-                              label="Blood Group"
-                              required
-                              options={bloodGroups}
-                              optionLabel={(o: any) => o}
-                              optionValue={(o: any) => o}
-                            />
-                          </div>
-                        </div>
+                        <ButtonV2
+                          type="button"
+                          variant="alert"
+                          border
+                          ghost={insuranceDetails.length !== 0}
+                          onClick={() =>
+                            setInsuranceDetails([
+                              ...insuranceDetails,
+                              {
+                                id: "",
+                                subscriber_id: "",
+                                policy_id: "",
+                                insurer_id: "",
+                                insurer_name: "",
+                              },
+                            ])
+                          }
+                          data-testid="add-insurance-button"
+                        >
+                          <CareIcon className="care-l-plus text-lg" />
+                          <span>Add Insurance Details</span>
+                        </ButtonV2>
                       </div>
-                      <div className="bg-white rounded flex flex-col gap-4 w-full p-4 border border-gray-200">
-                        <div className="flex flex-col gap-4 w-full items-center justify-between sm:flex-row">
-                          <h1 className="font-bold text-purple-500 text-left text-xl">
-                            Insurance Details
-                          </h1>
-                          <ButtonV2
-                            type="button"
-                            variant="alert"
-                            border
-                            ghost={insuranceDetails.length !== 0}
-                            onClick={() =>
-                              setInsuranceDetails([
-                                ...insuranceDetails,
-                                {
-                                  id: "",
-                                  subscriber_id: "",
-                                  policy_id: "",
-                                  insurer_id: "",
-                                  insurer_name: "",
-                                },
-                              ])
-                            }
-                            data-testid="add-insurance-button"
-                          >
-                            <CareIcon className="care-l-plus text-lg" />
-                            <span>Add Insurance Details</span>
-                          </ButtonV2>
-                        </div>
-                        <InsuranceDetailsBuilder
-                          name="insurance_details"
-                          value={insuranceDetails}
-                          onChange={({ value }) => setInsuranceDetails(value)}
-                          error={insuranceDetailsError}
-                          gridView
-                        />
-                      </div>
-                    </>
-                  )}
-                </Form>
-              </>
-            </>
-          )}
+                      <InsuranceDetailsBuilder
+                        name="insurance_details"
+                        value={insuranceDetails}
+                        onChange={({ value }) => setInsuranceDetails(value)}
+                        error={insuranceDetailsError}
+                        gridView
+                      />
+                    </div>
+                  </>
+                )}
+              </Form>
+            </div>
+          </>
         </>
       </div>
     </div>
