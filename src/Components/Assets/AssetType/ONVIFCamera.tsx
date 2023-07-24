@@ -19,6 +19,7 @@ import TextFormField from "../../Form/FormFields/TextFormField";
 import { Submit } from "../../Common/components/ButtonV2";
 import { SyntheticEvent } from "react";
 import LiveFeed from "../../Facility/Consultations/LiveFeed";
+import Card from "../../../CAREUI/display/Card";
 
 interface ONVIFCameraProps {
   assetId: string;
@@ -350,8 +351,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     }
   };
 
-  const addPreset = async (e: SyntheticEvent) => {
-    e.preventDefault();
+  const addPreset = async () => {
     const config = getCameraConfig(asset as AssetData);
     const data = {
       bed_id: bed.id,
@@ -468,27 +468,29 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             setToUpdateBoundary={setToUpdateBoundary}
             loadingAddBoundaryPreset={loadingAddBoundaryPreset}
           /> */}
-          <LiveFeed
-            middlewareHostname={facilityMiddlewareHostname}
-            asset={getCameraConfig(asset)}
-            addPreset={addPreset}
-            setBed={setBed}
-            bed={bed}
-            newPreset={newPreset}
-            loadingAddPreset={loadingAddPreset}
-            setNewPreset={setNewPreset}
-            showRefreshButton={true}
-            refreshPresetsHash={refreshPresetsHash}
-            boundaryPreset={boundaryPreset}
-            fetchBoundaryBedPreset={fetchBoundaryBedPreset}
-            setBoundaryPreset={setBoundaryPreset}
-            addBoundaryPreset={addBoundaryPreset}
-            updateBoundaryPreset={updateBoundaryPreset}
-            deleteBoundaryPreset={deleteBoundaryPreset}
-            toUpdateBoundary={toUpdateBoundary}
-            setToUpdateBoundary={setToUpdateBoundary}
-            loadingAddBoundaryPreset={loadingAddBoundaryPreset}
-          />
+          <Card className="mt-4" title="Live Feed">
+            <LiveFeed
+              middlewareHostname={facilityMiddlewareHostname}
+              asset={getCameraConfig(asset)}
+              addPreset={addPreset}
+              setBed={setBed}
+              bed={bed}
+              newPreset={newPreset}
+              loadingAddPreset={loadingAddPreset}
+              setNewPreset={setNewPreset}
+              showRefreshButton={true}
+              refreshPresetsHash={refreshPresetsHash}
+              boundaryPreset={boundaryPreset}
+              fetchBoundaryBedPreset={fetchBoundaryBedPreset}
+              setBoundaryPreset={setBoundaryPreset}
+              addBoundaryPreset={addBoundaryPreset}
+              updateBoundaryPreset={updateBoundaryPreset}
+              deleteBoundaryPreset={deleteBoundaryPreset}
+              toUpdateBoundary={toUpdateBoundary}
+              setToUpdateBoundary={setToUpdateBoundary}
+              loadingAddBoundaryPreset={loadingAddBoundaryPreset}
+            />
+          </Card>
         </>
       ) : null}
     </div>
