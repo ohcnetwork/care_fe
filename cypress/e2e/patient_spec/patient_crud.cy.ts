@@ -3,6 +3,7 @@ import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { UpdatePatientPage } from "../../pageobject/Patient/PatientUpdate";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
+const yearOfBirth = "2023";
 
 const calculateAge = () => {
   const currentYear = new Date().getFullYear();
@@ -16,7 +17,6 @@ describe("Patient Creation with consultation", () => {
   const patientConsultationPage = new PatientConsultationPage();
   const phone_number = "9" + Math.floor(100000000 + Math.random() * 900000000);
   const emergency_phone_number = "9430123487";
-  const yearOfBirth = "2023";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
