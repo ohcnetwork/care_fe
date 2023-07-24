@@ -81,20 +81,20 @@ export class PatientPage {
   }
 
   verifyPatientDetails(
-    age: string,
+    age: number,
     patientName: string,
-    phone_number: string,
-    emergency_phone_number: string,
+    phoneNumber: string,
+    emergencyPhoneNumber: string,
     yearOfBirth: string,
     bloodGroup: string
   ) {
     cy.url().should("include", "/facility/");
     cy.get("[data-testid=patient-dashboard]").should("contain", age);
     cy.get("[data-testid=patient-dashboard]").should("contain", patientName);
-    cy.get("[data-testid=patient-dashboard]").should("contain", phone_number);
+    cy.get("[data-testid=patient-dashboard]").should("contain", phoneNumber);
     cy.get("[data-testid=patient-dashboard]").should(
       "contain",
-      emergency_phone_number
+      emergencyPhoneNumber
     );
     cy.get("[data-testid=patient-dashboard]").should("contain", yearOfBirth);
     cy.get("[data-testid=patient-dashboard]").should("contain", bloodGroup);

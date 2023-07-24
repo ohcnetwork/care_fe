@@ -2,6 +2,7 @@ import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { UpdatePatientPage } from "../../pageobject/Patient/PatientUpdate";
+import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
 
 const calculateAge = () => {
   const currentYear = new Date().getFullYear();
@@ -12,6 +13,7 @@ describe("Patient Creation with consultation", () => {
   const loginPage = new LoginPage();
   const patientPage = new PatientPage();
   const updatePatientPage = new UpdatePatientPage();
+  const patientConsultationPage = new PatientConsultationPage();
   const phone_number = "9" + Math.floor(100000000 + Math.random() * 900000000);
   const emergency_phone_number = "9430123487";
   const yearOfBirth = "2023";
@@ -60,7 +62,19 @@ describe("Patient Creation with consultation", () => {
 
   it("Edit the patient details", () => {
     patientPage.visitUpdatePatientUrl();
-    updatePatientPage.enterPatientDetails();
+    updatePatientPage.enterPatientDetails(
+      "Test E2E User Edited",
+      "9120330220",
+      "Test Patient Address Edited",
+      "Severe Cough",
+      "Paracetamol",
+      "Dust",
+      ["2 months ago", "1 month ago"],
+      "SUB123",
+      "P123",
+      "GICOFINDIA",
+      "GICOFINDIA"
+    );
     updatePatientPage.clickUpdatePatient();
 
     updatePatientPage.verifyPatientUpdated();
@@ -68,17 +82,7 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Patient Detail verification post edit", () => {
-    cy.log(patient_url);
-    cy.awaitUrl(patient_url);
-    cy.url().should("include", "/facility/");
-    cy.get("[data-testid=patient-dashboard]").should(
-      "contain",
-      "Test E2E User Edited"
-    );
-    cy.get("[data-testid=patient-dashboard]").should(
-      "contain",
-      "+919120330220"
-    );
+    updatePatientPage.visitUpdatedPatient();
     const patientDetails_values: string[] = [
       "Test Patient Address Edited",
       "Severe Cough",
@@ -90,66 +94,34 @@ describe("Patient Creation with consultation", () => {
       "1 month ago",
     ];
 
-    patientDetails_values.forEach((value) => {
-      cy.get("[data-testid=patient-details]").should("contain", value);
-    });
+    updatePatientPage.verifyPatientDetails(
+      "Test E2E User Edited",
+      "+919120330220",
+      patientDetails_values
+    );
   });
 
   it("Create a New consultation to existing patient", () => {
-    cy.visit(patient_url + "/consultation");
-    cy.get("#consultation_status")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains("Out-patient (walk in)").click();
-      });
-    cy.get("#symptoms")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains("ASYMPTOMATIC").click();
-      });
-    cy.get("#symptoms").click();
-    cy.get("#history_of_present_illness").click().type("histroy");
-    cy.get("#examination_details")
-      .click()
-      .type("Examination details and Clinical conditions");
-    cy.get("#weight").click().type("70");
-    cy.get("#height").click().type("170");
-    cy.get("#ip_no").type("192.168.1.11");
-    cy.get(
-      "#icd11_diagnoses_object input[placeholder='Select'][role='combobox']"
-    )
-      .click()
-      .type("1A");
-    cy.wait(1000);
-    cy.get("#icd11_diagnoses_object [role='option']")
-      .contains("1A03 Intestinal infections due to Escherichia coli")
-      .click();
-    cy.get("#consultation_notes").click().type("generalnote");
-    cy.get("#verified_by").click().type("generalnote");
-    cy.get("#submit").click();
-    // Below code for the prescription module only present while creating a new consultation
-    cy.contains("button", "Add Prescription Medication")
-      .should("be.visible")
-      .click();
-    cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
-      .click()
-      .type("dolo");
-    cy.get("div#medicine_object [role='option']")
-      .contains("DOLO")
-      .should("be.visible")
-      .click();
-    cy.get("#dosage").click().type("3");
-    cy.get("#frequency")
-      .click()
-      .then(() => {
-        cy.get("div#frequency [role='option']").contains("Twice daily").click();
-      });
-    cy.get("button#submit").should("be.visible").click();
-    cy.get("[data-testid='return-to-patient-dashboard']").click();
-  });
+    updatePatientPage.visitConsultationPage();
+    patientConsultationPage.selectConsultationStatus("Out-patient (walk in)");
+    patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
 
-  it("Edit consultation details of existing patient", () => {
-    cy.visit(patient_url + "/consultation");
+    patientConsultationPage.enterConsultationDetails(
+      "history",
+      "Examination details and Clinical conditions",
+      "70",
+      "170",
+      "192.168.1.11",
+      "generalnote",
+      "generalnote"
+    );
+    patientConsultationPage.submitConsultation();
+    // Below code for the prescription module only present while creating a new consultation
+    patientConsultationPage.clickAddPrescription();
+    patientConsultationPage.prescribeMedicine();
+    patientConsultationPage.enterDosage("3");
+    patientConsultationPage.selectDosageFrequency("Twice daily");
+    patientConsultationPage.submitPrescriptionAndReturn();
   });
 
   afterEach(() => {
