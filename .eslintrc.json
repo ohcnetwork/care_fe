@@ -31,7 +31,6 @@
     "i18next"
   ],
   "rules": {
-    "@typescript-eslint/no-explicit-any": "off",
     "quotes": ["error", "double"],
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": [
@@ -43,12 +42,19 @@
       }
     ],
     "react/react-in-jsx-scope": "off",
-    "i18next/no-literal-string": "off",
-    "tailwindcss/no-custom-classname": "off",
-    "tailwindcss/migration-from-tailwind-2": "error",
-    "tailwindcss/classnames-order": "error",
-    "tailwindcss/enforces-shorthand": "error",
-    "tailwindcss/no-contradicting-classname": "error"
+    "i18next/no-literal-string": [
+      "warn",
+      {
+        "mode": "jsx-only",
+        "jsx-attributes": {
+          "include": ["label", "placeholder", "error", "title"],
+          "exclude": [".*"]
+        },
+        "callees": {
+          "exclude": [".*"]
+        }
+      }
+    ]
   },
   "ignorePatterns": [
     "dist",
