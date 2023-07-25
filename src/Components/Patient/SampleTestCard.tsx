@@ -76,11 +76,11 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
     <div
       className={`${
         itemData.result === "POSITIVE"
-          ? "hover:border-red-700 border-red-500 bg-red-100"
+          ? "border-red-500 bg-red-100 hover:border-red-700"
           : itemData.result === "NEGATIVE"
-          ? "hover:border-primary-700 border-primary-500 bg-primary-100"
+          ? "border-primary-500 bg-primary-100 hover:border-primary-700"
           : "bg-white hover:border-primary-500"
-      } block border rounded-lg bg-white shadow cursor-pointer text-black mt-4 p-4`}
+      } mt-4 block cursor-pointer rounded-lg border bg-white p-4 text-black shadow`}
     >
       <div
         onClick={(_e) =>
@@ -88,24 +88,24 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             `/facility/${facilityId}/patient/${patientId}/sample/${itemData.id}`
           )
         }
-        className="grid gap-4 grid-cols-1 md:grid-cols-4 ml-2 mt-2"
+        className="ml-2 mt-2 grid grid-cols-1 gap-4 md:grid-cols-4"
       >
         <div>
           <div className="sm:col-span-1">
-            <div className="text-sm leading-5 font-semibold text-zinc-400">
+            <div className="text-sm font-semibold leading-5 text-zinc-400">
               Status{" "}
             </div>
-            <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
               {_.startCase(_.camelCase(itemData.status))}
             </div>
           </div>
         </div>
         <div>
           <div className="sm:col-span-1">
-            <div className="text-sm leading-5 font-semibold text-zinc-400">
+            <div className="text-sm font-semibold leading-5 text-zinc-400">
               Sample Type{" "}
             </div>
-            <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
               {itemData.sample_type !== "OTHER TYPE"
                 ? itemData.sample_type
                 : itemData.sample_type_other}
@@ -115,10 +115,10 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
         {itemData.fast_track && (
           <div>
             <div className="sm:col-span-1">
-              <div className="text-sm leading-5 font-semibold text-zinc-400">
+              <div className="text-sm font-semibold leading-5 text-zinc-400">
                 Fast-Track{" "}
               </div>
-              <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+              <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
                 {itemData.fast_track}
               </div>
             </div>
@@ -126,26 +126,26 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
         )}
         <div>
           <div className="sm:col-span-1">
-            <div className="text-sm leading-5 font-semibold text-zinc-400">
+            <div className="text-sm font-semibold leading-5 text-zinc-400">
               Result{" "}
             </div>
-            <div className="mt-1 text-sm leading-5 font-medium whitespace-normal break-words overflow-x-scroll">
+            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
               {_.startCase(_.camelCase(itemData.result))}
             </div>
           </div>
         </div>
       </div>
-      <div className="mt-4 flex flex-col md:flex-row justify-between gap-4 m-2">
-        <div className="flex flex-col md:flex-row justify-between gap-4">
+      <div className="m-2 mt-4 flex flex-col justify-between gap-4 md:flex-row">
+        <div className="flex flex-col justify-between gap-4 md:flex-row">
           <div>
-            <div className="text-gray-700 text-sm mb-2">
-              <span className="text-black font-medium">Date of Sample:</span>{" "}
+            <div className="mb-2 text-sm text-gray-700">
+              <span className="font-medium text-black">Date of Sample:</span>{" "}
               {itemData.date_of_sample
                 ? formatDate(itemData.date_of_sample)
                 : "Not Available"}
             </div>
-            <div className="text-gray-700 text-sm">
-              <span className="text-black font-medium">Date of Result:</span>{" "}
+            <div className="text-sm text-gray-700">
+              <span className="font-medium text-black">Date of Result:</span>{" "}
               {itemData.date_of_result
                 ? formatDate(itemData.date_of_result)
                 : "Not Available"}
@@ -153,7 +153,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row justify-end">
+          <div className="flex flex-col items-center justify-end text-sm text-gray-700 md:flex-row">
             Created:{" "}
             <RelativeDateUserMention
               actionDate={itemData.created_date}
@@ -161,7 +161,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               tooltipPosition="left"
             />
           </div>
-          <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row justify-end">
+          <div className="flex flex-col items-center justify-end text-sm text-gray-700 md:flex-row">
             Last Modified:{" "}
             <RelativeDateUserMention
               actionDate={itemData.modified_date}
@@ -171,28 +171,28 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           </div>
         </div>
       </div>
-      <div className="mt-4 flex flex-col gap-2 md:flex-row justify-between mx-2">
+      <div className="mx-2 mt-4 flex flex-col justify-between gap-2 md:flex-row">
         {itemData.status === "APPROVED" && (
           <ButtonV2
             onClick={(e) => {
               e.stopPropagation();
               handleApproval(4, itemData);
             }}
-            className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+            className="border border-gray-500 bg-white text-black hover:bg-gray-300"
           >
             Send to Collection Centre
           </ButtonV2>
         )}
         <ButtonV2
           onClick={() => showUpdateStatus(itemData)}
-          className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+          className="border border-gray-500 bg-white text-black hover:bg-gray-300"
           authorizeFor={NonReadOnlyUsers}
         >
           Update Sample Test Status
         </ButtonV2>
         <ButtonV2
           onClick={(_e) => navigate(`/sample/${itemData.id}`)}
-          className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+          className="border border-gray-500 bg-white text-black hover:bg-gray-300"
         >
           Sample Report
         </ButtonV2>

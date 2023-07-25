@@ -90,7 +90,7 @@ export default function PhoneNumberFormField(props: Props) {
           name={field.name}
           autoComplete={props.autoComplete ?? "tel"}
           className={classNames(
-            "cui-input-base pr-24 md:pr-28 sm:leading-6 tracking-widest",
+            "cui-input-base pr-24 tracking-widest sm:leading-6 md:pr-28",
             field.error && "border-danger-500",
             field.className
           )}
@@ -111,7 +111,7 @@ export default function PhoneNumberFormField(props: Props) {
               id={field.id + "__country"}
               name="country"
               autoComplete="country"
-              className="cui-input-base h-full border-0 bg-transparent pl-2 pr-8 text-gray-700 focus:ring-2 focus:ring-inset text-end tracking-wider font-medium"
+              className="cui-input-base h-full border-0 bg-transparent pl-2 pr-8 text-end font-medium tracking-wider text-gray-700 focus:ring-2 focus:ring-inset"
               value={
                 asYouType.getCountry() ??
                 (field.value?.startsWith("1800") ? "1800" : "Other")

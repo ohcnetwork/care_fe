@@ -25,7 +25,7 @@ export default function CollapseV2(props: {
 
   return (
     <div
-      className="transition-all ease-in-out duration-300"
+      className="transition-all duration-300 ease-in-out"
       style={
         outerDivState
           ? {
@@ -35,7 +35,7 @@ export default function CollapseV2(props: {
       }
     >
       <div
-        className={`transition-all ease-in-out duration-300 ${
+        className={`transition-all duration-300 ease-in-out ${
           props.className ? props.className : ""
         }`}
         ref={content}

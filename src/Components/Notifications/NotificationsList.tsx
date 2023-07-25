@@ -1,6 +1,6 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   getNotifications,
   markNotificationAsRead,
@@ -8,14 +8,12 @@ import {
   updateUserPnconfig,
   getPublicKey,
 } from "../../Redux/actions";
-import { useSelector } from "react-redux";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
-import { classNames } from "../../Utils/utils";
+import { classNames, formatDate } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import * as Sentry from "@sentry/browser";
-import { formatDate } from "../../Utils/utils";
 import {
   ShrinkedSidebarItem,
   SidebarItem,
@@ -83,11 +81,11 @@ const NotificationTile = ({
       onClick={() => {
         handleMarkAsRead();
         navigate(resultUrl(result.event, result.caused_objects));
-        onClickCB && onClickCB();
+        onClickCB?.();
         setShowNotifications(false);
       }}
       className={classNames(
-        "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-200 rounded md:rounded-lg cursor-pointer",
+        "relative cursor-pointer rounded px-4 py-5 transition duration-200 ease-in-out hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg lg:px-8",
         result.read_at && "text-gray-500"
       )}
     >
@@ -99,15 +97,15 @@ const NotificationTile = ({
           <i className={`${getNotificationIcon(result.event)} fa-2x `} />
         </div>
       </div>
-      <div className="text-sm py-1">{result.message}</div>
+      <div className="py-1 text-sm">{result.message}</div>
       <div className="flex flex-col justify-end gap-2">
-        <div className="text-xs text-right py-1 text-secondary-700">
+        <div className="py-1 text-right text-xs text-secondary-700">
           {formatDate(result.created_date)}
         </div>
         <div className="flex justify-end gap-2">
           <ButtonV2
             className={classNames(
-              "font-semibold px-2 py-1 bg-white hover:bg-secondary-300",
+              "bg-white px-2 py-1 font-semibold hover:bg-secondary-300",
               result.read_at && "invisible"
             )}
             variant="secondary"
@@ -131,7 +129,7 @@ const NotificationTile = ({
           <ButtonV2
             border
             ghost
-            className="font-semibold px-2 py-1 bg-white hover:bg-secondary-300 flex-shrink-0"
+            className="shrink-0 bg-white px-2 py-1 font-semibold hover:bg-secondary-300"
           >
             <CareIcon className="care-l-envelope-open" />
             <span className="text-xs">{t("open")}</span>
@@ -351,7 +349,7 @@ export default function NotificationsList({
         <CircularProgress />
       </div>
     );
-  } else if (data && data.length) {
+  } else if (data?.length) {
     manageResults = (
       <>
         {data.map((result: any) => (
@@ -368,7 +366,7 @@ export default function NotificationsList({
           </div>
         )}
         {totalCount > RESULT_LIMIT && offset < totalCount - RESULT_LIMIT && (
-          <div className="mt-4 flex w-full justify-center py-5 px-4 lg:px-8">
+          <div className="mt-4 flex w-full justify-center px-4 py-5 lg:px-8">
             <ButtonV2
               className="w-full"
               disabled={isLoading}
@@ -385,8 +383,8 @@ export default function NotificationsList({
     );
   } else if (data && data.length === 0) {
     manageResults = (
-      <div className="px-4 pt-3 lg:px-8 flex justify-center">
-        <h5 className="text-gray-600 text-xl font-bold">
+      <div className="flex justify-center px-4 pt-3 lg:px-8">
+        <h5 className="text-xl font-bold text-gray-600">
           {t("no_results_found")}
         </h5>
       </div>

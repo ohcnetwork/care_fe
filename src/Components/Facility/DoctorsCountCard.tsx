@@ -50,19 +50,19 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
 
   return (
     <div className="w-full">
-      <div className="shadow-sm rounded-sm h-full border border-[#D2D6DC] flex flex-col">
-        <div className="flex justify-start items-center gap-3 px-4 py-6 flex-1">
+      <div className="flex h-full flex-col rounded-sm border border-[#D2D6DC] shadow-sm">
+        <div className="flex flex-1 items-center justify-start gap-3 px-4 py-6">
           <div className={`rounded-full p-4 ${specialization?.desc}`}>
-            <DoctorIcon className="fill-current text-white w-5 h-5" />
+            <DoctorIcon className="h-5 w-5 fill-current text-white" />
           </div>
           <div>
-            <div className="font-medium text-sm text-[#808080]">
+            <div className="text-sm font-medium text-[#808080]">
               {specialization?.text} Doctors
             </div>
-            <h2 className="font-bold text-xl mt-2">{props.count}</h2>
+            <h2 className="mt-2 text-xl font-bold">{props.count}</h2>
           </div>
         </div>
-        <div className="bg-[#FBF9FB] py-2 px-3 flex justify-end gap-4 border-t border-[#D2D6DC]">
+        <div className="flex justify-end gap-4 border-t border-[#D2D6DC] bg-[#FBF9FB] px-3 py-2">
           <ButtonV2
             variant="secondary"
             ghost

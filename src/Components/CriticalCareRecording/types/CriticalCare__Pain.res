@@ -65,7 +65,7 @@ type part = {
   description: string,
 }
 
-export type t = array<part>
+type t = array<part>
 
 let decodeRegion = region => switch region {
   | "anterior_head" => AnteriorHead

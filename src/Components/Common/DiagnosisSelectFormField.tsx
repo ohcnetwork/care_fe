@@ -19,7 +19,7 @@ export function DiagnosisSelectFormField(props: Props) {
 
   if (!props.multiple) {
     return (
-      <div className="bg-danger-500 text-white font-bold">
+      <div className="bg-danger-500 font-bold text-white">
         Component not implemented
       </div>
     );

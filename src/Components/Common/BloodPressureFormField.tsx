@@ -52,12 +52,24 @@ export default function BloodPressureFormField(props: Props) {
           labelClassName="hidden"
           errorClassName="hidden"
           thresholds={[
-            { value: 0, label: "Low", className: "text-danger-500" },
-            { value: 100, label: "Normal", className: "text-primary-500" },
-            { value: 140, label: "High", className: "text-warning-500" },
+            {
+              value: 0,
+              label: "Low",
+              className: "hidden md:block text-danger-500",
+            },
+            {
+              value: 100,
+              label: "Normal",
+              className: "hidden md:block text-primary-500",
+            },
+            {
+              value: 140,
+              label: "High",
+              className: "hidden md:block text-warning-500",
+            },
           ]}
         />
-        <span className="text-lg font-medium text-gray-400 px-2">/</span>
+        <span className="px-2 text-lg font-medium text-gray-400">/</span>
         <RangeAutocompleteFormField
           name="diastolic"
           placeholder="Diastolic"
@@ -69,9 +81,21 @@ export default function BloodPressureFormField(props: Props) {
           labelClassName="hidden"
           errorClassName="hidden"
           thresholds={[
-            { value: 0, label: "Low", className: "text-danger-500" },
-            { value: 50, label: "Normal", className: "text-primary-500" },
-            { value: 90, label: "High", className: "text-warning-500" },
+            {
+              value: 0,
+              label: "Low",
+              className: "hidden md:block text-danger-500",
+            },
+            {
+              value: 50,
+              label: "Normal",
+              className: "hidden md:block text-primary-500",
+            },
+            {
+              value: 90,
+              label: "High",
+              className: "hidden md:block text-warning-500",
+            },
           ]}
         />
       </div>

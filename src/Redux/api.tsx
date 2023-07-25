@@ -817,6 +817,77 @@ const routes: Routes = {
     method: "GET",
   },
 
+  // ABDM HealthID endpoints
+  generateAadhaarOtp: {
+    path: "/api/v1/abdm/healthid/generate_aadhaar_otp/",
+    method: "POST",
+  },
+
+  resendAadhaarOtp: {
+    path: "/api/v1/abdm/healthid/resend_aadhaar_otp/",
+    method: "POST",
+  },
+
+  verifyAadhaarOtp: {
+    path: "/api/v1/abdm/healthid/verify_aadhaar_otp/",
+    method: "POST",
+  },
+
+  generateMobileOtp: {
+    path: "/api/v1/abdm/healthid/generate_mobile_otp/",
+    method: "POST",
+  },
+
+  checkAndGenerateMobileOtp: {
+    path: "/api/v1/abdm/healthid/check_and_generate_mobile_otp/",
+    method: "POST",
+  },
+
+  // TODO: resend mobile otp
+  verifyMobileOtp: {
+    path: "/api/v1/abdm/healthid/verify_mobile_otp/",
+    method: "POST",
+  },
+
+  createHealthId: {
+    path: "/api/v1/abdm/healthid/create_health_id/",
+    method: "POST",
+  },
+
+  searchByHealthId: {
+    path: "/api/v1/abdm/healthid/search_by_health_id/",
+    method: "POST",
+  },
+
+  initiateAbdmAuthentication: {
+    path: "/api/v1/abdm/healthid/auth_init/",
+    method: "POST",
+  },
+
+  confirmWithAadhaarOtp: {
+    path: "/api/v1/abdm/healthid/confirm_with_aadhaar_otp/",
+    method: "POST",
+  },
+
+  confirmWithMobileOtp: {
+    path: "/api/v1/abdm/healthid/confirm_with_mobile_otp/",
+    method: "POST",
+  },
+
+  linkViaQR: {
+    path: "/api/v1/abdm/healthid/link_via_qr/",
+    method: "POST",
+  },
+
+  linkCareContext: {
+    path: "/api/v1/abdm/healthid/add_care_context/",
+    method: "POST",
+  },
+
+  getAbhaCard: {
+    path: "/api/v1/abdm/healthid/get_abha_card/",
+    method: "POST",
+  },
   // Asset Availability endpoints
 
   listAssetAvailability: {

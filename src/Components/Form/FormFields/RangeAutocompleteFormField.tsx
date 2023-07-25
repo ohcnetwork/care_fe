@@ -52,7 +52,7 @@ export default function RangeAutocompleteFormField(props: Props) {
       optionIcon={({ threshold }) => (
         <div
           className={classNames(
-            "flex group-hover/option:text-white text-xs space-x-2",
+            "flex space-x-2 text-xs group-hover/option:text-white",
             threshold?.className
           )}
         >
