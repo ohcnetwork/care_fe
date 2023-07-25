@@ -36,12 +36,12 @@ export default function CameraConfigure(props: CameraConfigureProps) {
     <div className="mb-5">
       <Card className="mt-4">
         <form onSubmit={addPreset} className="">
-          <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+          <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <label id="asset-type">Bed</label>
               <BedSelect
                 name="bed"
-                className="overflow-y-scoll mt-2 z-50"
+                className="overflow-y-scoll z-50 mt-2"
                 setSelected={(selected) => setBed(selected as BedModel)}
                 selected={bed}
                 error=""
@@ -63,7 +63,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
               />
             </div>
           </div>
-          <div className="flex justify-end mt-4">
+          <div className="mt-4 flex justify-end">
             <Submit disabled={isLoading} label="Add Preset" />
           </div>
         </form>

@@ -30,7 +30,7 @@ export default function SortDropdownMenu(props: Props) {
         <DropdownItem
           className={
             props.selected === value
-              ? "bg-primary-100 text-primary-500 !font-medium"
+              ? "bg-primary-100 !font-medium text-primary-500"
               : ""
           }
           onClick={() => props.onSelect({ ordering: value })}

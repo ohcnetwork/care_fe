@@ -134,24 +134,24 @@ const AssetManage = (props: AssetManageProps) => {
       setTransactionDetails(
         transactions.map((transaction: AssetTransaction) => (
           <tr key={`transaction_id_${transaction.id}`}>
-            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
-              <span className="text-gray-900 font-medium">
+            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+              <span className="font-medium text-gray-900">
                 {transaction.from_location.name}
               </span>
             </td>
-            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
-              <span className="text-gray-900 font-medium">
+            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+              <span className="font-medium text-gray-900">
                 {transaction.to_location.name}
               </span>
             </td>
-            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
-              <span className="text-gray-900 font-medium">
+            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+              <span className="font-medium text-gray-900">
                 {transaction.performed_by.first_name}{" "}
                 {transaction.performed_by.last_name}
               </span>
             </td>
-            <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
-              <span className="text-gray-900 font-medium">
+            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+              <span className="font-medium text-gray-900">
                 {formatDate(transaction.modified_date)}
               </span>
             </td>
@@ -162,7 +162,7 @@ const AssetManage = (props: AssetManageProps) => {
       setTransactionDetails(
         <tr>
           <td
-            className="px-6 py-4 whitespace-nowrap text-sm leading-5 text-gray-500 text-center"
+            className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500"
             colSpan={4}
           >
             <h5>No Transactions Found</h5>
@@ -185,14 +185,14 @@ const AssetManage = (props: AssetManageProps) => {
 
   const detailBlock = (item: any) =>
     item.hide ? null : (
-      <div className="flex flex-col grow-0 md:w-[200px]">
-        <div className="flex flex-start items-center">
+      <div className="flex grow-0 flex-col md:w-[200px]">
+        <div className="flex-start flex items-center">
           <div className="w-8">
-            <CareIcon className={`care-l-${item.icon} text-lg fill-gray-700`} />
+            <CareIcon className={`care-l-${item.icon} fill-gray-700 text-lg`} />
           </div>
-          <div className="text-gray-700 break-words">{item.label}</div>
+          <div className="break-words text-gray-700">{item.label}</div>
         </div>
-        <div className="font-semibold text-lg ml-8 break-words grow-0">
+        <div className="ml-8 grow-0 break-words text-lg font-semibold">
           {item.content || "--"}
         </div>
       </div>
@@ -246,13 +246,13 @@ const AssetManage = (props: AssetManageProps) => {
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={handleDelete}
       />
-      <div className="flex flex-col xl:flex-row gap-8">
-        <div className="bg-white rounded-lg md:rounded-xl w-full flex service-panel">
-          <div className="w-full md:p-8 md:pt-6 p-6 pt-4 flex flex-col justify-between gap-6">
+      <div className="flex flex-col gap-8 xl:flex-row">
+        <div className="service-panel flex w-full rounded-lg bg-white md:rounded-xl">
+          <div className="flex w-full flex-col justify-between gap-6 p-6 pt-4 md:p-8 md:pt-6">
             <div>
-              <div className="flex flex-wrap items-center gap-2 justify-between w-full">
+              <div className="flex w-full flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl md:text-3xl font-bold break-words">
+                  <span className="break-words text-2xl font-bold md:text-3xl">
                     {asset?.name}
                   </span>
                   <ButtonV2
@@ -320,7 +320,7 @@ const AssetManage = (props: AssetManageProps) => {
                 },
               ].map(detailBlock)}
             </div>
-            <div className="flex flex-col md:flex-row gap-1">
+            <div className="flex flex-col gap-1 md:flex-row">
               <ButtonV2
                 className="flex gap-2"
                 onClick={() =>
@@ -332,7 +332,7 @@ const AssetManage = (props: AssetManageProps) => {
                 data-testid="asset-update-button"
                 authorizeFor={NonReadOnlyUsers}
               >
-                <CareIcon className="care-l-pen h-4 mr-1" />
+                <CareIcon className="care-l-pen mr-1 h-4" />
                 {t("update")}
               </ButtonV2>
               {asset?.asset_class && (
@@ -363,9 +363,9 @@ const AssetManage = (props: AssetManageProps) => {
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-2 justify-between md:p-8 p-6 md:border-l border-gray-300 shrink-0">
+          <div className="flex shrink-0 flex-col justify-between gap-2 border-gray-300 p-6 md:border-l md:p-8">
             <div>
-              <div className="font-bold text-lg mb-5">Service Details</div>
+              <div className="mb-5 text-lg font-bold">Service Details</div>
               <div className="flex flex-col gap-6">
                 {[
                   {
@@ -384,7 +384,7 @@ const AssetManage = (props: AssetManageProps) => {
               </div>
             </div>
 
-            <div className="flex flex-col text-sm text-gray-600 break-words justify-end">
+            <div className="flex flex-col justify-end break-words text-sm text-gray-600">
               {asset?.created_date && (
                 <RecordMeta prefix={t("created")} time={asset?.created_date} />
               )}
@@ -395,32 +395,32 @@ const AssetManage = (props: AssetManageProps) => {
           </div>
         </div>
         {asset && (
-          <div className="flex gap-8 lg:gap-4 xl:gap-8 items-center justify-center flex-col md:flex-row xl:flex-col transition-all duration-200 ease-in">
+          <div className="flex flex-col items-center justify-center gap-8 transition-all duration-200 ease-in md:flex-row lg:gap-4 xl:flex-col xl:gap-8">
             <AssetWarrantyCard asset={asset} />
           </div>
         )}
       </div>
       {asset?.id && <Uptime assetId={asset?.id} />}
-      <div className="text-xl font-semibold mt-8 mb-4">Transaction History</div>
-      <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
+      <div className="mb-4 mt-8 text-xl font-semibold">Transaction History</div>
+      <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Moved from
               </th>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Moved to
               </th>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Moved By
               </th>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
+              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Moved On
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-200 bg-white">
             {transactionDetails}
           </tbody>
         </table>

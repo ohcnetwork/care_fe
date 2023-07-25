@@ -28,7 +28,7 @@ export default function VentilatorPatientVitalsMonitor({
   }, [socketUrl]);
 
   return (
-    <div className="flex flex-col gap-1 bg-[#020617] p-2 rounded">
+    <div className="flex flex-col gap-1 rounded bg-[#020617] p-2">
       {patientAssetBed && (
         <div className="flex items-center justify-between px-2 tracking-wide">
           <div className="flex items-center gap-2">
@@ -40,13 +40,13 @@ export default function VentilatorPatientVitalsMonitor({
                 {patient?.name}
               </Link>
             ) : (
-              <span className="flex gap-1 items-center text-gray-500">
+              <span className="flex items-center gap-1 text-gray-500">
                 <CareIcon className="care-l-ban" />
                 No Patient
               </span>
             )}
             {patient && (
-              <span className="text-gray-400 font-bold text-sm">
+              <span className="text-sm font-bold text-gray-400">
                 {patient.age}y;{" "}
                 {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
               </span>
@@ -66,16 +66,16 @@ export default function VentilatorPatientVitalsMonitor({
           )}
         </div>
       )}
-      <div className="relative flex flex-col md:flex-row md:justify-between divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2">
+      <div className="relative flex flex-col gap-2 divide-x-0 divide-y divide-blue-600 md:flex-row md:justify-between md:divide-x md:divide-y-0">
         <div>
           <div
             className={classNames(
-              "flex flex-col gap-1 justify-center items-center text-center p-1 text-warning-500 font-medium font-mono",
+              "flex flex-col items-center justify-center gap-1 p-1 text-center font-mono font-medium text-warning-500",
               isOnline && "hidden"
             )}
             style={{ ...(size ?? waveformCanvas.size) }}
           >
-            <CareIcon className="care-l-cloud-times text-4xl animate-pulse mb-2" />
+            <CareIcon className="care-l-cloud-times mb-2 animate-pulse text-4xl" />
             <span className="font-bold">No incoming data from Ventilator</span>
           </div>
           <div
@@ -90,20 +90,20 @@ export default function VentilatorPatientVitalsMonitor({
               }}
             />
             <canvas
-              className="absolute top-0 left-0"
+              className="absolute left-0 top-0"
               ref={waveformCanvas.background.canvasRef}
               style={{ ...(size ?? waveformCanvas.size) }}
               {...waveformCanvas.size}
             />
             <canvas
-              className="absolute top-0 left-0"
+              className="absolute left-0 top-0"
               ref={waveformCanvas.foreground.canvasRef}
               style={{ ...(size ?? waveformCanvas.size) }}
               {...waveformCanvas.size}
             />
           </div>
         </div>
-        <div className="md:absolute md:right-0 md:inset-y-0 z-10 bg-[#020617] grid grid-cols-3 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
+        <div className="z-10 grid grid-cols-3 divide-blue-600 bg-[#020617] tracking-wider text-white md:absolute md:inset-y-0 md:right-0 md:grid-cols-1 md:divide-y">
           <NonWaveformData
             label="PEEP"
             attr={data.peep}
@@ -139,13 +139,13 @@ interface NonWaveformDataProps {
 const NonWaveformData = ({ label, attr, className }: NonWaveformDataProps) => {
   return (
     <div
-      className={classNames("flex justify-between items-center p-1", className)}
+      className={classNames("flex items-center justify-between p-1", className)}
     >
-      <div className="flex flex-col gap-1 items-start h-full font-bold">
+      <div className="flex h-full flex-col items-start gap-1 font-bold">
         <span className="text-sm">{label}</span>
         <span className="text-xs">{attr?.unit ?? "--"}</span>
       </div>
-      <span className="text-4xl md:text-6xl font-black mr-3">
+      <span className="mr-3 text-4xl font-black md:text-6xl">
         {attr?.value ?? "--"}
       </span>
     </div>

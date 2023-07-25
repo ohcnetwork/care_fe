@@ -26,7 +26,7 @@ export default function SessionRouter() {
   return (
     <div className={!login ? "bg-primary-100" : ""}>
       {!login && <TopBar />}
-      <div className={!login ? "p-4 container max-w-5xl mx-auto" : ""}>
+      <div className={!login ? "container mx-auto max-w-5xl p-4" : ""}>
         {content}
       </div>
     </div>

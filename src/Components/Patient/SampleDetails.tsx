@@ -63,7 +63,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
     )?.text;
 
     return (
-      <div className="border rounded-lg bg-white shadow h-full text-black mt-2 mr-3 md:mr-8 p-4">
+      <div className="mr-3 mt-2 h-full rounded-lg border bg-white p-4 text-black shadow md:mr-8">
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="mt-2 flex flex-col gap-2">
             <div>
@@ -259,7 +259,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
   const renderFlow = (flow: FlowModel) => {
     return (
       <Card key={flow.id}>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Status: </span>{" "}
             {_.startCase(_.camelCase(flow.status))}
@@ -302,7 +302,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
       }
     >
       <Card>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Status: </span>
             {_.startCase(_.camelCase(sampleDetails.status))}

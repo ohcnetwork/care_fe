@@ -24,13 +24,13 @@ function RelativeDateUserMention(props: {
               props.tooltipPosition || "left"
             }`}
           >
-            <div className="text-sm leading-5 text-white whitespace-normal font-semibold flex flex-col">
+            <div className="flex flex-col whitespace-normal text-sm font-semibold leading-5 text-white">
               <p className="flex justify-center">{`${props.user.first_name} ${props.user.last_name}`}</p>
               <p className="flex justify-center">{`@${props.user.username}`}</p>
               <p className="flex justify-center">{props.user.user_type}</p>
             </div>
           </span>
-          <CareIcon className="ml-1 care-l-user-circle text-green-700 font-semibold text-xl hover:text-green-600" />
+          <CareIcon className="care-l-user-circle ml-1 text-xl font-semibold text-green-700 hover:text-green-600" />
         </div>
       )}
     </div>
