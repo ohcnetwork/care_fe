@@ -44,7 +44,7 @@ import ShowInvestigation from "../Components/Facility/Investigations/ShowInvesti
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import AssetCreate from "../Components/Facility/AssetCreate";
 import DeathReport from "../Components/DeathReport/DeathReport";
-import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
+import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.bs";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
@@ -449,21 +449,21 @@ export default function AppRouter() {
 
   return (
     <SidebarShrinkContext.Provider value={{ shrinked, setShrinked }}>
-      <div className="absolute inset-0 h-screen flex overflow-hidden print:overflow-visible bg-gray-100">
+      <div className="absolute inset-0 flex h-screen overflow-hidden bg-gray-100 print:overflow-visible">
         <>
           <div className="block md:hidden">
             <MobileSidebar open={sidebarOpen} setOpen={setSidebarOpen} />{" "}
           </div>
-          <div className="md:block hidden">
+          <div className="hidden md:block">
             <DesktopSidebar />
           </div>
         </>
 
-        <div className="flex flex-col w-full flex-1 overflow-hidden print:overflow-visible">
-          <div className="flex md:hidden relative z-10 shrink-0 h-16 bg-white shadow">
+        <div className="flex w-full flex-1 flex-col overflow-hidden print:overflow-visible">
+          <div className="relative z-10 flex h-16 shrink-0 bg-white shadow md:hidden">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:bg-gray-100 focus:text-gray-600 md:hidden"
+              className="border-r border-gray-200 px-4 text-gray-500 focus:bg-gray-100 focus:text-gray-600 focus:outline-none md:hidden"
               aria-label="Open sidebar"
             >
               <svg
@@ -482,7 +482,7 @@ export default function AppRouter() {
             </button>
             <a
               href="/"
-              className="md:hidden flex h-full w-full items-center px-4"
+              className="flex h-full w-full items-center px-4 md:hidden"
             >
               <img
                 className="h-6 w-auto"
@@ -494,9 +494,9 @@ export default function AppRouter() {
 
           <main
             id="pages"
-            className="flex-1 overflow-y-scroll pb-4 md:py-0 focus:outline-none"
+            className="flex-1 overflow-y-scroll pb-4 focus:outline-none md:py-0"
           >
-            <div className="max-w-8xl mx-auto px-3 py-3">{pages}</div>
+            <div className="max-w-8xl mx-auto p-3">{pages}</div>
           </main>
         </div>
       </div>

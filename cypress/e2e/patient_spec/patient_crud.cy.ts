@@ -193,11 +193,8 @@ describe("Patient Creation with consultation", () => {
     cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
       .click()
       .type("dolo");
-    cy.get("div#medicine_object [role='option']")
-      .contains("DOLO")
-      .should("be.visible")
-      .click();
-    cy.get("#dosage").click().type("3");
+    cy.get("#medicine_object-option-DOLO").click();
+    cy.get("#dosage").type("3", { force: true });
     cy.get("#frequency")
       .click()
       .then(() => {

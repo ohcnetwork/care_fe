@@ -16,7 +16,7 @@ export const FieldLabel = (props: LabelProps) => {
     <label
       id={props.id}
       className={classNames(
-        "block text-gray-900 text-base font-normal",
+        "block text-base font-normal text-gray-900",
         !props.noPadding && "mb-2",
         props.className
       )}
@@ -36,7 +36,7 @@ export const FieldErrorText = ({ error, className }: ErrorProps) => {
   return (
     <span
       className={classNames(
-        "error-text font-medium tracking-wide text-danger-500 text-xs mt-2 ml-1 transition-opacity duration-300",
+        "error-text ml-1 mt-2 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300",
         error ? "opacity-100" : "opacity-0",
         className
       )}
@@ -67,7 +67,7 @@ const FormField = ({
           </FieldLabel>
         )}
         {field?.labelSuffix && (
-          <span className="text-xs mb-2">{field?.labelSuffix}</span>
+          <span className="mb-2 text-xs">{field?.labelSuffix}</span>
         )}
       </div>
       <div className={field?.className}>{children}</div>

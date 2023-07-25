@@ -390,14 +390,14 @@ export default function UserProfile() {
   };
   return (
     <div>
-      <div className="lg:p-20 p-10">
+      <div className="p-10 lg:p-20">
         <div className="lg:grid lg:grid-cols-3 lg:gap-6">
           <div className="lg:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
                 Personal Information
               </h3>
-              <p className="mt-1 text-sm leading-5 text-gray-600 mb-1">
+              <p className="my-1 text-sm leading-5 text-gray-600">
                 Local Body, District and State are Non Editable Settings.
               </p>
               <div className="flex flex-col gap-2">
@@ -411,20 +411,20 @@ export default function UserProfile() {
               </div>
             </div>
           </div>
-          <div className="mt-5 lg:mt-0 lg:col-span-2">
+          <div className="mt-5 lg:col-span-2 lg:mt-0">
             {!showEdit && (
-              <div className="px-4 py-5 sm:px-6 bg-white shadow overflow-hidden  sm:rounded-lg m-2 rounded-lg">
-                <dl className="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2">
-                  <div className="sm:col-span-1 my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+              <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5  shadow sm:rounded-lg sm:px-6">
+                <dl className="col-gap-4 row-gap-8 grid grid-cols-1 sm:grid-cols-2">
+                  <div className="my-2 sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Username
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.username || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Contact No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
@@ -432,81 +432,81 @@ export default function UserProfile() {
                     </dd>
                   </div>
 
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Whatsapp No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.alt_phone_number || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Email address
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.email || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       First Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.first_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Last Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.last_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Age
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.age || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Access Level
                     </dt>
-                    <dd className="mt-1 badge badge-pill bg-primary-500 text-sm text-white">
+                    <dd className="badge badge-pill mt-1 bg-primary-500 text-sm text-white">
                       <i className="fa-solid fa-user-check mr-1"></i>{" "}
                       {details.user_type || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Gender
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.gender || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Local Body
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.local_body_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       District
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.district_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       State
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
@@ -514,8 +514,8 @@ export default function UserProfile() {
                     </dd>
                   </div>
                 </dl>
-                <div className="sm:col-span-1  my-2">
-                  <dt className="text-sm leading-5 font-medium text-black">
+                <div className="my-2  sm:col-span-1">
+                  <dt className="text-sm font-medium leading-5 text-black">
                     Skills
                   </dt>
                   <dd className="mt-1 text-sm leading-5 text-gray-900">
@@ -523,7 +523,7 @@ export default function UserProfile() {
                       {details.skills && details.skills.length
                         ? details.skills?.map((skill: SkillObjectModel) => {
                             return (
-                              <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-700 rounded-full text-xs px-3">
+                              <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
                                 <p className="py-1.5">{skill.name}</p>
                               </span>
                             );
@@ -539,7 +539,7 @@ export default function UserProfile() {
               <div className="space-y-4">
                 <form action="#" method="POST">
                   <div className="shadow sm:rounded-md">
-                    <div className="px-4 pt-5 bg-white">
+                    <div className="bg-white px-4 pt-5">
                       <div className="grid grid-cols-6 gap-4">
                         <TextFormField
                           {...fieldProps("firstName")}
@@ -624,14 +624,14 @@ export default function UserProfile() {
                         )}
                       </div>
                     </div>
-                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
+                    <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                       <Submit onClick={handleSubmit} label="Update" />
                     </div>
                   </div>
                 </form>
                 <form action="#" method="POST">
-                  <div className="shadow overflow-hidden sm:rounded-md">
-                    <div className="px-4 pt-5 bg-white">
+                  <div className="overflow-hidden shadow sm:rounded-md">
+                    <div className="bg-white px-4 pt-5">
                       <div className="grid grid-cols-6 gap-4">
                         <TextFormField
                           name="old_password"
@@ -679,7 +679,7 @@ export default function UserProfile() {
                         />
                       </div>
                     </div>
-                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
+                    <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                       <Submit
                         onClick={changePassword}
                         label="Change Password"
@@ -692,7 +692,7 @@ export default function UserProfile() {
           </div>
         </div>
 
-        <div className="md:grid md:grid-cols-3 md:gap-6 mt-6 mb-8">
+        <div className="mb-8 mt-6 md:grid md:grid-cols-3 md:gap-6">
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
@@ -703,11 +703,11 @@ export default function UserProfile() {
               </p>
             </div>
           </div>
-          <div className="mt-5 md:mt-0 md:col-span-2">
-            <LanguageSelector className="bg-white w-full" />
+          <div className="mt-5 md:col-span-2 md:mt-0">
+            <LanguageSelector className="w-full bg-white" />
           </div>
         </div>
-        <div className="md:grid md:grid-cols-3 md:gap-6 mt-6 mb-8">
+        <div className="mb-8 mt-6 md:grid md:grid-cols-3 md:gap-6">
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
@@ -728,7 +728,7 @@ export default function UserProfile() {
               </ButtonV2>
             </UpdatableApp>
           )}
-          <div className="mt-5 md:mt-0 md:col-span-2">
+          <div className="mt-5 md:col-span-2 md:mt-0">
             {!updateStatus.isUpdateAvailable && (
               <ButtonV2
                 disabled={updateStatus.isChecking}

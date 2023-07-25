@@ -49,7 +49,7 @@ export default function MedicineAdministration(props: Props) {
     Promise.all(
       records.map(async ({ prescription, ...record }) => {
         const res = await dispatch(
-          props.action(prescription!.id!).administer(record)
+          props.action(prescription?.id ?? "").administer(record)
         );
         if (res.status !== 201) {
           Error({ msg: t("medicines_administered_error") });
@@ -67,13 +67,13 @@ export default function MedicineAdministration(props: Props) {
     <div className="flex flex-col gap-3">
       {prescriptions.map((obj, index) => (
         <PrescriptionDetailCard
-          key={index}
+          key={obj.id}
           prescription={obj}
           readonly
-          actions={props.action(obj.id!)}
+          actions={props.action(obj?.id ?? "")}
           selected={shouldAdminister[index]}
         >
-          <div className="w-full max-w-[400px] mt-4 md:mt-0 pt-4 md:pt-0 md:ml-4 md:pl-4 py-2 border-t-2 md:border-t-0 md:border-l-2 border-dashed border-gray-500 flex flex-col gap-2">
+          <div className="mt-4 flex w-full max-w-[400px] flex-col gap-2 border-t-2 border-dashed border-gray-500 py-2 pt-4 md:ml-4 md:mt-0 md:border-l-2 md:border-t-0 md:pl-4 md:pt-0">
             <CheckBoxFormField
               name="should_administer"
               label={t("select_for_administration")}
@@ -87,7 +87,7 @@ export default function MedicineAdministration(props: Props) {
               }
               errorClassName="hidden"
             />
-            <div className="text-gray-600 font-semibold leading-relaxed text-sm">
+            <div className="text-sm font-semibold leading-relaxed text-gray-600">
               <CareIcon className="care-l-history-alt pr-1" />{" "}
               {t("last_administered")}
               <span className="pl-1">

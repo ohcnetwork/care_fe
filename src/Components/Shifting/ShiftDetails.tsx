@@ -149,8 +149,8 @@ export default function ShiftDetails(props: { id: string }) {
     )?.text;
 
     return (
-      <div className="border rounded-lg bg-white shadow h-full text-black mt-2 mr-3 md:mr-8 p-4">
-        <div className="mt-2 grid grid-cols-1 md:grid-cols-2 justify-between gap-4">
+      <div className="mr-3 mt-2 h-full rounded-lg border bg-white p-4 text-black shadow md:mr-8">
+        <div className="mt-2 grid grid-cols-1 justify-between gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">{t("name")}: </span>
             <Link href={`/patient/${patientData?.id}`}>
@@ -293,33 +293,33 @@ export default function ShiftDetails(props: { id: string }) {
 
   const showFacilityCard = (facilityData: any) => {
     return (
-      <div className="border rounded-lg bg-white shadow h-full text-black mt-2 p-4">
+      <div className="mt-2 h-full rounded-lg border bg-white p-4 text-black shadow">
         <div>
-          <span className="font-semibold leading-relaxed mr-1">
+          <span className="mr-1 font-semibold leading-relaxed">
             {t("name")}:{" "}
           </span>
           {facilityData?.name || "--"}
         </div>
         <div>
-          <span className="font-semibold leading-relaxed mr-1">
+          <span className="mr-1 font-semibold leading-relaxed">
             {t("facility_type")}:{" "}
           </span>
           {facilityData?.facility_type?.name || "--"}
         </div>
         <div>
-          <span className="font-semibold leading-relaxed mr-1">
+          <span className="mr-1 font-semibold leading-relaxed">
             {t("district")}:{" "}
           </span>
           {facilityData?.district_object?.name || "--"}
         </div>
         <div>
-          <span className="font-semibold leading-relaxed mr-1">
+          <span className="mr-1 font-semibold leading-relaxed">
             {t("local_body")}:{" "}
           </span>
           {facilityData?.local_body_object?.name || "--"}
         </div>
         <div>
-          <span className="font-semibold leading-relaxed mr-1">
+          <span className="mr-1 font-semibold leading-relaxed">
             {t("state")}:{" "}
           </span>
           {facilityData?.state_object?.name || "--"}
@@ -343,7 +343,7 @@ export default function ShiftDetails(props: { id: string }) {
         <div>{data.is_kasp && <img alt="logo" src={header_logo.dark} />}</div>
         <div className="mx-2">
           <div className="mt-6">
-            <span className="font-semibold leading-relaxed mt-4">
+            <span className="mt-4 font-semibold leading-relaxed">
               {t("name_of_hospital")}:{" "}
             </span>
             {data.is_kasp
@@ -351,17 +351,17 @@ export default function ShiftDetails(props: { id: string }) {
               : data.origin_facility_object?.name || "--"}
             {/*  Made static based on #757 */}
           </div>
-          <div className="font-bold text-xl text-center mt-6">
+          <div className="mt-6 text-center text-xl font-bold">
             {t("referral_letter")}
           </div>
-          <div className="text-left mt-4">
+          <div className="mt-4 text-left">
             <span className="font-semibold leading-relaxed">
               {" "}
               {t("date_and_time")}{" "}
             </span>
             {formatDate(data.created_date) || "--"}
           </div>
-          <div className="text-left mt-2">
+          <div className="mt-2 text-left">
             <span className="font-semibold leading-relaxed">
               {" "}
               {t("unique_id")} :
@@ -397,7 +397,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span>{patientData?.phone_number || ""}</span>
             </div>
           </div>
-          <div className="text-left mt-2 flex">
+          <div className="mt-2 flex text-left">
             <span className="font-semibold leading-relaxed">
               {t("address")}:{" "}
             </span>
@@ -518,7 +518,7 @@ export default function ShiftDetails(props: { id: string }) {
               </span>
             </div>
           </div>
-          <div className="flex justify-center text-center mt-20">
+          <div className="mt-20 flex justify-center text-center">
             {t("auto_generated_for_care")}
           </div>
           <div className="font-xs font-gray-600 text-center font-mono">
@@ -578,9 +578,9 @@ export default function ShiftDetails(props: { id: string }) {
           }
         >
           {data.assigned_to_object && (
-            <div className="relative rounded-lg shadow bg-primary-200">
-              <div className="max-w-screen-xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
-                <div className="pr-16 sm:text-center sm:px-16">
+            <div className="relative rounded-lg bg-primary-200 shadow">
+              <div className="mx-auto max-w-screen-xl p-3 sm:px-6 lg:px-8">
+                <div className="pr-16 sm:px-16 sm:text-center">
                   <p className="font-bold text-primary-800">
                     <span className="inline">
                       {t("assigned_to")}: {data.assigned_to_object.first_name}{" "}
@@ -592,8 +592,8 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
             </div>
           )}
-          <div className="border rounded-lg bg-white shadow h-full text-black mt-4 p-4">
-            <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
+          <div className="mt-4 h-full rounded-lg border bg-white p-4 text-black shadow">
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
               <div>
                 <span className="font-semibold leading-relaxed">
                   {t("patient_name")}:{" "}
@@ -604,7 +604,7 @@ export default function ShiftDetails(props: { id: string }) {
               </div>
               <div>
                 <span className="font-semibold leading-relaxed">Status: </span>
-                <span className="badge badge-pill badge-primary py-1 px-2">
+                <span className="badge badge-pill badge-primary px-2 py-1">
                   {shiftStatusOptions.find(
                     (option) => data.status === option.text
                   )?.label || data.status}
@@ -655,7 +655,7 @@ export default function ShiftDetails(props: { id: string }) {
                   {" "}
                   {t("is_emergency")}:{" "}
                 </span>
-                <span className="badge badge-pill badge-danger py-1 px-2">
+                <span className="badge badge-pill badge-danger px-2 py-1">
                   {" "}
                   {data.emergency ? t("yes") : t("no")}
                 </span>
@@ -664,7 +664,7 @@ export default function ShiftDetails(props: { id: string }) {
                 <span className="font-semibold leading-relaxed">
                   {t("is_up_shift")}:{" "}
                 </span>
-                <span className="badge badge-pill badge-warning py-1 px-2">
+                <span className="badge badge-pill badge-warning px-2 py-1">
                   {" "}
                   {data.is_up_shift ? t("yes") : t("no")}
                 </span>
@@ -673,7 +673,7 @@ export default function ShiftDetails(props: { id: string }) {
                 <span className="font-semibold leading-relaxed">
                   {t("patient_category")}:{" "}
                 </span>
-                <span className="badge badge-pill badge-warning py-1 px-2">
+                <span className="badge badge-pill badge-warning px-2 py-1">
                   {" "}
                   {data.patient_object.last_consultation?.last_daily_round
                     ?.patient_category ??
@@ -685,7 +685,7 @@ export default function ShiftDetails(props: { id: string }) {
                   <span className="font-semibold leading-relaxed">
                     {kasp_full_string}:{" "}
                   </span>
-                  <span className="badge badge-pill badge-warning py-1 px-2">
+                  <span className="badge badge-pill badge-warning px-2 py-1">
                     {" "}
                     {data.is_kasp ? t("yes") : t("no")}
                   </span>
@@ -697,7 +697,7 @@ export default function ShiftDetails(props: { id: string }) {
                     <span className="font-semibold leading-relaxed">
                       {kasp_full_string}:{" "}
                     </span>
-                    <span className="badge badge-pill badge-warning py-1 px-2">
+                    <span className="badge badge-pill badge-warning px-2 py-1">
                       {" "}
                       {data.is_kasp ? t("yes") : t("no")}
                     </span>
@@ -723,13 +723,13 @@ export default function ShiftDetails(props: { id: string }) {
                 </>
               )}
 
-              <div className="md:row-span-2 md:col-span-2">
+              <div className="md:col-span-2 md:row-span-2">
                 <span className="font-semibold leading-relaxed">
                   {t("reason")}:{" "}
                 </span>
                 <span className="ml-2">{data.reason || "--"}</span>
               </div>
-              <div className="md:row-span-2 md:col-span-2">
+              <div className="md:col-span-2 md:row-span-2">
                 <span className="font-semibold leading-relaxed">
                   {t("ambulance_driver_name")}:{" "}
                 </span>
@@ -737,7 +737,7 @@ export default function ShiftDetails(props: { id: string }) {
                   {data.ambulance_driver_name || "--"}
                 </span>
               </div>
-              <div className="md:row-span-2 md:col-span-2">
+              <div className="md:col-span-2 md:row-span-2">
                 <span className="font-semibold leading-relaxed">
                   {t("ambulance_phone_number")}:{" "}
                 </span>
@@ -751,13 +751,13 @@ export default function ShiftDetails(props: { id: string }) {
                   )}
                 </span>
               </div>
-              <div className="md:row-span-2 md:col-span-2">
+              <div className="md:col-span-2 md:row-span-2">
                 <span className="font-semibold leading-relaxed">
                   {t("ambulance_number")}:{" "}
                 </span>
                 <span className="ml-2">{data.ambulance_number || "--"}</span>
               </div>
-              <div className="md:row-span-2 md:col-span-2">
+              <div className="md:col-span-2 md:row-span-2">
                 <span className="font-semibold leading-relaxed">
                   {t("comments")}:{" "}
                 </span>
@@ -782,7 +782,7 @@ export default function ShiftDetails(props: { id: string }) {
               />
             </div>
 
-            <div className="flex justify-end mt-4">
+            <div className="mt-4 flex justify-end">
               <div>
                 <ButtonV2
                   variant="danger"
@@ -802,7 +802,7 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
           </div>
 
-          <div className="md:grid grid-cols-5 gap-2">
+          <div className="grid-cols-5 gap-2 md:grid">
             <div className="col-span-3">
               <div>
                 <h4 className="mt-8">
@@ -810,7 +810,7 @@ export default function ShiftDetails(props: { id: string }) {
                 </h4>
                 {showPatientCard(data.patient_object)}
               </div>
-              <div className="mr-3 md:mr-8 mb-10">
+              <div className="mb-10 mr-3 md:mr-8">
                 <h4 className="mt-8">{t("comments")}</h4>
                 <CommentSection id={props.id} />
               </div>
@@ -819,12 +819,12 @@ export default function ShiftDetails(props: { id: string }) {
             <div className="col-span-2">
               <h4 className="mt-8">{t("audit_log")}</h4>
 
-              <div className="p-2 bg-white rounded-lg shadow text-center px-4 mt-2 grid lg:grid-cols-2">
-                <div className="lg:border-r-2 border-b-2 lg:border-b-0 pb-2 lg:pb-0">
-                  <div className="text-sm leading-5 font-medium text-gray-500">
+              <div className="mt-2 grid rounded-lg bg-white p-2 px-4 text-center shadow lg:grid-cols-2">
+                <div className="border-b-2 pb-2 lg:border-b-0 lg:border-r-2 lg:pb-0">
+                  <div className="text-sm font-medium leading-5 text-gray-500">
                     {t("created")}
                   </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+                  <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
                     <div className="text-sm">
                       {data?.created_by_object?.first_name}
                       {data?.created_by_object?.last_name}
@@ -835,10 +835,10 @@ export default function ShiftDetails(props: { id: string }) {
                   </div>
                 </div>
                 <div className="mt-2 lg:mt-0">
-                  <div className="text-sm leading-5 font-medium text-gray-500">
+                  <div className="text-sm font-medium leading-5 text-gray-500">
                     {t("last_edited")}
                   </div>
-                  <div className="mt-1 text-sm leading-5 text-gray-900 whitespace-pre">
+                  <div className="mt-1 whitespace-pre text-sm leading-5 text-gray-900">
                     <div className="text-sm">
                       {data?.last_edited_by_object?.first_name}{" "}
                       {data?.last_edited_by_object?.last_name}
