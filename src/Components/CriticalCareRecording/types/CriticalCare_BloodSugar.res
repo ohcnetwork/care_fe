@@ -4,7 +4,7 @@ type frequency =
   | BD
   | TD
 
-export type t = {
+type t = {
   bloodsugar_level: option<int>,
   dosage: option<float>,
   frequency: frequency,

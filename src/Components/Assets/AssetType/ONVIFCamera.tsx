@@ -146,8 +146,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
 
   return (
     <div className="space-y-6">
-      <form className="bg-white rounded shadow p-8" onSubmit={handleSubmit}>
-        <div className="grid gap-x-4 grid-cols-1 lg:grid-cols-2">
+      <form className="rounded bg-white p-8 shadow" onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 gap-x-4 lg:grid-cols-2">
           <TextFormField
             name="middleware_hostname"
             label="Hospital Middleware Hostname"

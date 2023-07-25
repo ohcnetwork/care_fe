@@ -59,7 +59,7 @@ type UserForm = {
   gender: string;
   password: string;
   c_password: string;
-  facilities: Array<FacilityModel>;
+  facilities: Array<number>;
   home_facility: FacilityModel | null;
   username: string;
   first_name: string;
@@ -120,7 +120,7 @@ const user_create_reducer = (state = initialState, action: any) => {
         form: action.form,
       };
     }
-    case "set_error": {
+    case "set_errors": {
       return {
         ...state,
         errors: action.errors,
@@ -163,7 +163,7 @@ export const UserAdd = (props: UserProps) => {
   const dispatchAction: any = useDispatch();
   const { userId } = props;
 
-  const [state, dispatch] = useAutoSaveReducer(
+  const [state, dispatch] = useAutoSaveReducer<UserForm>(
     user_create_reducer,
     initialState
   );
@@ -384,7 +384,7 @@ export const UserAdd = (props: UserProps) => {
     setSelectedFacility(selected as FacilityModel[]);
     const form = { ...state.form };
     form.facilities = selected
-      ? (selected as FacilityModel[]).map((i) => i.id)
+      ? (selected as FacilityModel[]).map((i) => i.id ?? -1)
       : [];
     dispatch({ type: "set_form", form });
   };
@@ -531,7 +531,7 @@ export const UserAdd = (props: UserProps) => {
           }
           return;
         case "district":
-          if (!Number(state.form[field]) || state.form[field] === "") {
+          if (!Number(state.form[field])) {
             errors[field] = "Please select the district";
             invalidForm = true;
           }
@@ -548,10 +548,10 @@ export const UserAdd = (props: UserProps) => {
       }
     });
     if (invalidForm) {
-      dispatch({ type: "set_error", errors });
+      dispatch({ type: "set_errors", errors });
       return false;
     }
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return true;
   };
 
@@ -581,7 +581,7 @@ export const UserAdd = (props: UserProps) => {
             state.form.phone_number_is_whatsapp
               ? state.form.phone_number
               : state.form.alt_phone_number
-          )?.format("E.164") || "",
+          )?.format("E.164") ?? "",
         date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
         age: Number(moment().diff(state.form.date_of_birth, "years", false)),
         doctor_qualification:
@@ -601,14 +601,12 @@ export const UserAdd = (props: UserProps) => {
       };
 
       const res = await dispatchAction(addUser(data));
-      // userId ? updateUser(userId, data) : addUser(data)
       if (
         res &&
         (res.data || res.data === "") &&
         res.status >= 200 &&
         res.status < 300
       ) {
-        // const id = res.data.id;
         dispatch({ type: "set_form", form: initForm });
         if (!userId) {
           Notification.Success({
@@ -645,7 +643,7 @@ export const UserAdd = (props: UserProps) => {
       options={
         <Link
           href="https://school.coronasafe.network/targets/12953"
-          className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
+          className="inline-block rounded border border-gray-600 bg-gray-50 px-4 py-2 text-gray-600 transition hover:bg-gray-100"
           target="_blank"
         >
           <i className="fas fa-info-circle" /> &nbsp;Need Help?
@@ -661,7 +659,7 @@ export const UserAdd = (props: UserProps) => {
             }}
             formData={state.form}
           />
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
               <FieldLabel>Facilities</FieldLabel>
               <FacilitySelect
@@ -678,9 +676,7 @@ export const UserAdd = (props: UserProps) => {
               required
               label="User Type"
               options={userTypes}
-              optionLabel={(o) =>
-                o.role + ((o.readOnly && " (Read Only)") || "")
-              }
+              optionLabel={(o) => o.role + (o.readOnly ? " (Read Only)" : "")}
               optionValue={(o) => o.id}
             />
 
@@ -714,7 +710,7 @@ export const UserAdd = (props: UserProps) => {
             <SelectFormField
               {...field("home_facility")}
               label="Home facility"
-              options={selectedFacility || []}
+              options={selectedFacility ?? []}
               optionLabel={(option) => option.name}
               optionValue={(option) => option.id}
               onChange={handleFieldChange}
@@ -766,7 +762,7 @@ export const UserAdd = (props: UserProps) => {
                 }}
               />
               {usernameInputInFocus && (
-                <div className="pl-2 text-small text-gray-500">
+                <div className="text-small pl-2 text-gray-500">
                   <div>
                     {usernameExists !== userExistsEnums.idle && (
                       <>
@@ -836,7 +832,7 @@ export const UserAdd = (props: UserProps) => {
                 onBlur={() => setPasswordInputInFocus(false)}
               />
               {passwordInputInFocus && (
-                <div className="pl-2 text-small text-gray-500">
+                <div className="text-small pl-2 text-gray-500">
                   {validateRule(
                     state.form.password?.length >= 8,
                     "Password should be atleast 8 characters long"
@@ -954,7 +950,7 @@ export const UserAdd = (props: UserProps) => {
                 />
               ))}
           </div>
-          <div className="flex flex-col md:flex-row gap-2 justify-end mt-4">
+          <div className="mt-4 flex flex-col justify-end gap-2 md:flex-row">
             <Cancel onClick={() => goBack()} />
             <Submit onClick={handleSubmit} label={buttonText} />
           </div>

@@ -26,10 +26,10 @@ import FeedButton from "./FeedButton";
 import Loading from "../../Common/Loading";
 import ReactPlayer from "react-player";
 import { classNames } from "../../../Utils/utils";
-import screenfull from "screenfull";
 import { useDispatch } from "react-redux";
 import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import useKeyboardShortcut from "use-keyboard-shortcut";
+import useFullscreen from "../../../Common/hooks/useFullscreen.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -54,6 +54,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [bed, setBed] = useState<any>();
   const [precision, setPrecision] = useState(1);
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
+  const [isFullscreen, setFullscreen] = useFullscreen();
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -299,14 +300,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       });
     },
     fullScreen: () => {
-      if (!(screenfull.isEnabled && liveFeedPlayerRef.current)) return;
-      !screenfull.isFullscreen
-        ? screenfull.request(
-            videoWrapper.current
-              ? videoWrapper.current
-              : (liveFeedPlayerRef.current as HTMLElement)
-          )
-        : screenfull.exit();
+      if (!liveFeedPlayerRef.current) return;
+      setFullscreen(
+        !isFullscreen,
+        videoWrapper.current
+          ? videoWrapper.current
+          : (liveFeedPlayerRef.current as HTMLElement)
+      );
     },
     updatePreset: (option) => {
       getCameraStatus({
@@ -363,8 +363,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   if (isLoading) return <Loading />;
 
   return (
-    <div className="px-2 flex flex-col h-[calc(100vh-1.5rem)]">
-      <div className="flex items-center flex-wrap justify-between gap-2">
+    <div className="flex h-[calc(100vh-1.5rem)] flex-col px-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-4 px-3">
           <p className="block text-lg font-medium"> Camera Presets :</p>
           <div className="flex items-center">
@@ -393,9 +393,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                   getCameraStatus({});
                 }}
                 className={classNames(
-                  "px-4 py-2 border border-gray-500 block",
+                  "block border border-gray-500 px-4 py-2",
                   currentPreset === preset
-                    ? "bg-primary-500 border-primary-500 text-white rounded"
+                    ? "rounded border-primary-500 bg-primary-500 text-white"
                     : "bg-transparent"
                 )}
               >
@@ -406,7 +406,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         </div>
       </div>
       <div
-        className="bg-black h-[calc(100vh-1.5rem-90px)] grow-0 flex items-center justify-center relative rounded-xl overflow-hidden"
+        className="relative flex h-[calc(100vh-1.5rem-90px)] grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
         ref={videoWrapper}
       >
         {isIOS ? (
@@ -444,14 +444,14 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         )}
 
         {loading !== CAMERA_STATES.IDLE && (
-          <div className="absolute inset-x-0 top-2 text-center flex items-center justify-center">
-            <div className="inline-flex items-center rounded p-4 gap-2 bg-white/70">
-              <div className="w-4 h-4 border-2 border-b-0 border-primary-500 rounded-full animate-spin an" />
+          <div className="absolute inset-x-0 top-2 flex items-center justify-center text-center">
+            <div className="inline-flex items-center gap-2 rounded bg-white/70 p-4">
+              <div className="an h-4 w-4 animate-spin rounded-full border-2 border-b-0 border-primary-500" />
               <p className="text-base font-bold">{loading}</p>
             </div>
           </div>
         )}
-        <div className="absolute right-0 h-full w-full bottom-0 p-4 flex items-center justify-center text-white">
+        <div className="absolute bottom-0 right-0 flex h-full w-full items-center justify-center p-4 text-white">
           {streamStatus === StreamStatus.Offline && (
             <div className="text-center">
               <p className="font-bold">
@@ -483,7 +483,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             </div>
           )}
         </div>
-        <div className="absolute top-8 right-8 z-20 flex flex-col gap-4">
+        <div className="absolute right-8 top-8 z-20 flex flex-col gap-4">
           {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
             (button, index) => {
               const option = cameraPTZ.find(
@@ -499,7 +499,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
               );
             }
           )}
-          <div className="pl-3 hideonmobilescreen">
+          <div className="hideonmobilescreen pl-3">
             <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
           </div>
         </div>
@@ -510,7 +510,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             clickAction={() => cameraPTZ[4].callback()}
           />
         </div>
-        <div className="absolute bottom-8 left-8 grid grid-rows-3 grid-flow-col gap-1 z-10">
+        <div className="absolute bottom-8 left-8 z-10 grid grid-flow-col grid-rows-3 gap-1">
           {[
             false,
             cameraPTZ[2],
@@ -522,7 +522,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             cameraPTZ[3],
             false,
           ].map((c, i) => {
-            let out = <div className="w-[60px] h-[60px]" key={i}></div>;
+            let out = <div className="h-[60px] w-[60px]" key={i}></div>;
             if (c) {
               const button = c as any;
               out = (
@@ -576,15 +576,15 @@ export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
   return (
     <button
       key="option.action"
-      className="tooltip rounded text-2xl text-white/40"
+      className="tooltip rounded text-2xl text-gray-600"
     >
       <CareIcon className="care-l-question-circle" />
 
       <ul className="tooltip-text tooltip-left -top-60 right-10 p-2 text-sm">
         {cameraPTZ.map((option) => {
           return (
-            <li key={option.action} className="py-2 flex gap-3 items-center">
-              <span className="font-semibold w-16">{option.label}</span>
+            <li key={option.action} className="flex items-center gap-3 py-2">
+              <span className="w-16 font-semibold">{option.label}</span>
               <div className="flex gap-1">
                 {option.shortcutKey.map((hotkey, index) => {
                   const isArrowKey = hotkey.includes("Arrow");
@@ -593,7 +593,7 @@ export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
                   const keyElement = (
                     <div
                       key={index}
-                      className="font-mono shadow-md border-gray-500 border rounded-md p-1.5"
+                      className="rounded-md border border-gray-500 p-1.5 font-mono shadow-md"
                     >
                       {isArrowKey ? (
                         <CareIcon className={`care-${option.icon}`} />
@@ -608,7 +608,7 @@ export const FeedCameraPTZHelpButton = (props: { cameraPTZ: CameraPTZ[] }) => {
                     return keyElement;
 
                   return (
-                    <div key={index} className="flex gap-1 items-center">
+                    <div key={index} className="flex items-center gap-1">
                       {keyElement}
                       <span className="p-1">+</span>
                     </div>

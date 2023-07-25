@@ -208,7 +208,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
     >
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded w-full mx-auto px-8 md:px-16 py-5 md:py-11 max-w-5xl"
+        className="mx-auto w-full max-w-5xl rounded bg-white px-8 py-5 md:px-16 md:py-11"
       >
         <SelectFormField
           {...field("sample_type", "Sample Test Type")}
@@ -231,7 +231,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
           optionLabel={(option) => option}
           optionValue={(option) => option}
         />
-        <div className="flex flex-col gap-1 mb-6">
+        <div className="mb-6 flex flex-col gap-1">
           <p className="font-medium">
             Refer below to know more about ICMR Categories
           </p>
@@ -256,7 +256,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
         </div>
 
         <TextFormField {...field("icmr_label", "ICMR Label")} required />
-        <div className="w-full flex-none mb-6">
+        <div className="mb-6 w-full flex-none">
           <FieldLabel>Testing Facility</FieldLabel>
           <FacilitySelect
             name="testing_facility"
@@ -315,7 +315,7 @@ export const SampleTest = ({ facilityId, patientId }: any) => {
         <CheckBoxFormField
           {...field("is_unusual_course", "Is unusual course?")}
         />
-        <div className="flex flex-col lg:flex-row gap-2 justify-end mt-4">
+        <div className="mt-4 flex flex-col justify-end gap-2 lg:flex-row">
           <Cancel onClick={() => goBack()} />
           <Submit onClick={handleSubmit} label={buttonText} />
         </div>
