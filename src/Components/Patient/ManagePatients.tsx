@@ -503,10 +503,10 @@ export const PatientManager = () => {
           key={`usr_${patient.id}`}
           data-cy="patient"
           href={patientUrl}
-          className={`group relative w-full cursor-pointer rounded-lg bg-white p-4 pl-5 text-black shadow ring-2 ${categoryClass}-ring/0 hover: transition-all duration-200 ease-in-out hover:pl-5${categoryClass}-ring/100 overflow-hidden`}
+          className={`ring/0 hover:ring/100 group relative w-full cursor-pointer rounded-lg bg-white p-4 pl-5 text-black shadow transition-all duration-200 ease-in-out hover:pl-5 ${categoryClass}-ring overflow-hidden`}
         >
           <div
-            className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5${categoryClass}`}
+            className={`absolute inset-y-0 left-0 flex h-full w-1 items-center rounded-l-lg transition-all duration-200 ease-in-out group-hover:w-5 ${categoryClass}`}
           >
             <span className="absolute -inset-x-32 inset-y-0 flex -rotate-90 items-center justify-center text-center text-xs font-bold uppercase tracking-widest opacity-0 transition-all duration-200 ease-in-out group-hover:opacity-100">
               {category ? PatientCategoryDisplayText[category] : "UNKNOWN"}
@@ -644,7 +644,9 @@ export const PatientManager = () => {
                       </span>
                     </span>
                   )}
-                  {patient.last_consultation?.facility === patient.facility &&
+                  {!(
+                    patient.last_consultation?.facility !== patient.facility
+                  ) &&
                     !(
                       patient.last_consultation?.discharge_date ||
                       !patient.is_active
