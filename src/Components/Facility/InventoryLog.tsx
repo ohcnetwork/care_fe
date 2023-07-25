@@ -41,7 +41,7 @@ export default function InventoryLog(props: any) {
         getInventoryLog(facilityId, { item, limit, offset })
       );
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setInventory(res.data.results);
           setCurrentStock(res.data.results[0].current_stock);
           setTotalCount(res.data.count);
@@ -116,20 +116,20 @@ export default function InventoryLog(props: any) {
   };
 
   let inventoryList: any = [];
-  if (inventory && inventory.length) {
+  if (inventory?.length) {
     inventoryList = inventory.map((inventoryItem: any) => (
       <tr key={inventoryItem.id} className="bg-white">
-        <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
+        <td className="border-b border-gray-200 p-5 text-sm hover:bg-gray-100">
           <div className="flex items-center">
             <div className="ml-3">
-              <p className="text-gray-900 whitespace-nowrap">
+              <p className="whitespace-nowrap text-gray-900">
                 {formatDate(inventoryItem.created_date)}
               </p>
             </div>
           </div>
         </td>
-        <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
-          <p className="text-gray-900 whitespace-nowrap lowercase">
+        <td className="border-b border-gray-200 p-5 text-sm hover:bg-gray-100">
+          <p className="whitespace-nowrap lowercase text-gray-900">
             {inventoryItem.quantity_in_default_unit}{" "}
             {inventoryItem.item_object?.default_unit?.name}
             {inventoryItem.probable_accident && (
@@ -137,8 +137,8 @@ export default function InventoryLog(props: any) {
             )}
           </p>
         </td>
-        <td className="px-5 py-5 border-b border-gray-200 text-sm hover:bg-gray-100">
-          <p className="text-gray-900 whitespace-nowrap lowercase">
+        <td className="border-b border-gray-200 p-5 text-sm hover:bg-gray-100">
+          <p className="whitespace-nowrap lowercase text-gray-900">
             {inventoryItem.is_incoming ? (
               <span className="ml-2 text-primary-600">Added Stock</span>
             ) : (
@@ -150,13 +150,13 @@ export default function InventoryLog(props: any) {
           <div className="tooltip">
             <div className="tooltip-left tooltip-text">
               {inventoryItem.probable_accident ? (
-                <div className="text-sm leading-snug text-justify">
+                <div className="text-justify text-sm leading-snug">
                   <b>Unmarks this transaction as accident</b>
                   <br />
                   This action will not affect the total stock.
                 </div>
               ) : (
-                <div className="text-sm leading-snug text-justify ">
+                <div className="text-justify text-sm leading-snug ">
                   <b>Marks this transaction as accident</b>
                   <br />
                   This action will not affect the total stock. To delete the
@@ -196,11 +196,8 @@ export default function InventoryLog(props: any) {
   } else if (inventory && inventory.length === 0) {
     inventoryList = (
       <tr className="bg-white">
-        <td
-          colSpan={3}
-          className="px-5 py-5 border-b border-gray-200 text-center"
-        >
-          <p className="text-gray-500 whitespace-nowrap">
+        <td colSpan={3} className="border-b border-gray-200 p-5 text-center">
+          <p className="whitespace-nowrap text-gray-500">
             No log for this inventory available
           </p>
         </td>
@@ -213,21 +210,21 @@ export default function InventoryLog(props: any) {
   } else if (inventory) {
     inventoryItem = (
       <>
-        <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
+        <div className="-mx-4 overflow-x-auto p-4 sm:-mx-8 sm:px-8">
           <div className="inline-block min-w-full">
-            <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
+            <table className="min-w-full overflow-hidden rounded-lg leading-normal shadow">
               <thead>
                 <tr>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Created On
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Quantity
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Status
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Actions
                   </th>
                 </tr>
@@ -267,7 +264,7 @@ export default function InventoryLog(props: any) {
               <h4>Item: {itemName}</h4>
               {current_stock > 0 && (
                 <div className="tooltip ">
-                  <div className="text-sm leading-snug text-justify tooltip-text tooltip-left">
+                  <div className="tooltip-text tooltip-left text-justify text-sm leading-snug">
                     <b>Deletes the last transaction</b> by creating an
                     equivalent undo transaction and marks both the transactions
                     as accident.

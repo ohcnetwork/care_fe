@@ -36,9 +36,8 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
 import { DupPatientModel } from "../Facility/models";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
-import { FieldError } from "../Form/FieldValidators";
-import { FieldErrorText } from "../Form/FormFields/FormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import Form from "../Form/Form";
 import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
@@ -47,7 +46,6 @@ import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
 import { PatientModel } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
-import { RequiredFieldValidator } from "../Form/FieldValidators";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import Spinner from "../Common/Spinner";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -1019,12 +1017,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         }}
       />
       <div className="mt-4">
-        <div className="bg-purple-100 text-purple-800 p-4 font-semibold text-xs my-8 rounded mx-4">
-          <div className="text-lg font-bold flex items-center mb-1 mx-1">
-            <CareIcon className=" care-l-info-circle text-2xl font-bold mr-1" />{" "}
+        <div className="mx-4 my-8 rounded bg-purple-100 p-4 text-xs font-semibold text-purple-800">
+          <div className="mx-1 mb-1 flex items-center text-lg font-bold">
+            <CareIcon className=" care-l-info-circle mr-1 text-2xl font-bold" />{" "}
             Please enter the correct date of birth for the patient
           </div>
-          <p className="text-sm text-black font-normal">
+          <p className="text-sm font-normal text-black">
             Each patient in the system is uniquely identifiable by the number
             and date of birth. Adding incorrect date of birth can result in
             duplication of patient records.
@@ -1078,7 +1076,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
             <>
               <>
                 <ButtonV2
-                  className="mb-8 sm:mx-4 flex gap-2 items-center"
+                  className="mb-8 flex items-center gap-2 sm:mx-4"
                   onClick={(_) => {
                     setShowImport(true);
                     setQuery({ extId: "" }, { replace: true });
@@ -1093,7 +1091,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   onSubmit={handleSubmit}
                   submitLabel={buttonText}
                   onCancel={() => navigate("/facility")}
-                  className="bg-transparent px-1 md:px-2 py-2"
+                  className="bg-transparent px-1 py-2 md:px-2"
                   onDraftRestore={(newState) => {
                     dispatch({ type: "set_state", state: newState });
                     Promise.all([
@@ -1108,8 +1106,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                   {(field) => (
                     <>
                       {enable_abdm && (
-                        <div className="mb-8 rounded overflow-visible border border-gray-200 p-4">
-                          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                        <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
+                          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                             ABHA Details
                           </h1>
                           {showLinkAbhaNumberModal && (
@@ -1139,7 +1137,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               Link Abha Number
                             </button>
                           ) : (
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
                               <div id="abha-number">
                                 <TextFormField
                                   id="abha-number"
@@ -1165,7 +1163,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                     error=""
                                   />
                                 ) : (
-                                  <div className="text-sm text-gray-500 mt-4">
+                                  <div className="mt-4 text-sm text-gray-500">
                                     No Abha Address Associated with this ABHA
                                     Number
                                   </div>
@@ -1175,11 +1173,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           )}
                         </div>
                       )}
-                      <div className="mb-8 rounded overflow-visible border border-gray-200 p-4">
-                        <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                      <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
+                        <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                           Personal Details
                         </h1>
-                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
                           <div data-testid="phone-number" id="phone_number-div">
                             <PhoneNumberFormField
                               {...field("phone_number")}
@@ -1297,8 +1295,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                             {showAutoFilledPincode && (
                               <div>
-                                <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
-                                <span className="text-primary-500 text-sm">
+                                <i className="fas fa-circle-check mr-2 text-sm text-green-500" />
+                                <span className="text-sm text-primary-500">
                                   State and District auto-filled from Pincode
                                 </span>
                               </div>
@@ -1358,7 +1356,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                               <div data-testid="district" id="district-div">
                                 {isDistrictLoading ? (
-                                  <div className="w-full flex justify-center items-center">
+                                  <div className="flex w-full items-center justify-center">
                                     <Spinner />
                                   </div>
                                 ) : (
@@ -1394,7 +1392,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                               <div data-testid="localbody" id="local_body-div">
                                 {isLocalbodyLoading ? (
-                                  <div className="w-full flex justify-center items-center">
+                                  <div className="flex w-full items-center justify-center">
                                     <Spinner />
                                   </div>
                                 ) : (
@@ -1427,7 +1425,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 id="ward-div"
                               >
                                 {isWardLoading ? (
-                                  <div className="w-full flex justify-center items-center">
+                                  <div className="flex w-full items-center justify-center">
                                     <Spinner />
                                   </div>
                                 ) : (
@@ -1470,18 +1468,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </div>
                       <div className="mb-8 rounded border border-gray-200 p-4">
                         <AccordionV2
-                          className="mt-2 lg:mt-0 md:mt-0 shadow-none"
+                          className="mt-2 shadow-none md:mt-0 lg:mt-0"
                           expandIcon={
                             <CareIcon className="care-l-angle-down text-2xl font-bold" />
                           }
                           title={
-                            <h1 className="font-bold text-purple-500 text-left text-xl">
+                            <h1 className="text-left text-xl font-bold text-purple-500">
                               COVID Details
                             </h1>
                           }
                         >
                           <div>
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 sm:grid-cols-3 w-full mt-5">
+                            <div className="mt-5 grid w-full grid-cols-1 gap-4 sm:grid-cols-3 xl:gap-x-20 xl:gap-y-6">
                               <div>
                                 <RadioFormField
                                   label="Is patient Vaccinated against COVID?"
@@ -1522,7 +1520,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                               </div>
                             </div>
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 w-full mt-5">
+                            <div className="mt-5 grid w-full grid-cols-1 gap-4 xl:gap-x-20 xl:gap-y-6">
                               <CollapseV2
                                 opened={
                                   String(field("is_vaccinated").value) ===
@@ -1530,7 +1528,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 }
                               >
                                 {
-                                  <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
                                     <div id="covin_id-div">
                                       <TextFormField
                                         label="COWIN ID"
@@ -1587,7 +1585,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   )
                                 }
                               >
-                                <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
                                   <div id="estimated_contact_date-div">
                                     <DateFormField
                                       {...field("estimated_contact_date")}
@@ -1720,11 +1718,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </div>
                         </AccordionV2>
                       </div>
-                      <div className="mb-8 rounded overflow-visible border p-4">
-                        <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                      <div className="mb-8 overflow-visible rounded border p-4">
+                        <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                           Medical History
                         </h1>
-                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
                           <div id="present_health-div">
                             <TextAreaFormField
                               {...field("present_health")}
@@ -1782,9 +1780,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </div>
                         </div>
                       </div>
-                      <div className="bg-white rounded flex flex-col gap-4 w-full p-4 border border-gray-200">
-                        <div className="flex flex-col gap-4 w-full items-center justify-between sm:flex-row">
-                          <h1 className="font-bold text-purple-500 text-left text-xl">
+                      <div className="flex w-full flex-col gap-4 rounded border border-gray-200 bg-white p-4">
+                        <div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
+                          <h1 className="text-left text-xl font-bold text-purple-500">
                             Insurance Details
                           </h1>
                           <ButtonV2

@@ -89,7 +89,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
             className="w-full"
           />
         </div>
-        <Submit className="shrink-0 w-full mt-6">
+        <Submit className="mt-6 w-full shrink-0">
           <i className="fas fa-bed-pulse" />
           {updateLink ? "Update Bed" : "Save Bed"}
         </Submit>

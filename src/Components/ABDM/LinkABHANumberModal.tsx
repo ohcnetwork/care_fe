@@ -69,9 +69,9 @@ export default function LinkABHANumberModal({
   const [transactionId, setTransactionId] = useState<string>("sds");
 
   const title = (
-    <div className="flex gap-3 items-center">
+    <div className="flex items-center gap-3">
       <CareIcon className="care-l-link text-xl" />
-      <h2 className="text-xl text-black font-bold">
+      <h2 className="text-xl font-bold text-black">
         {currentStep === "ScanExistingQR"
           ? "Link Existing ABHA Number"
           : "Generate ABHA number"}
@@ -158,7 +158,7 @@ const ScanABHAQRSection = ({
 
   if (isLoading) {
     return (
-      <div className="flex gap-2 items-center justify-center">
+      <div className="flex items-center justify-center gap-2">
         <span className="text-3xl font-semibold text-gray-700">Loading</span>
         <CircularProgress className="text-green-500" />
       </div>
@@ -220,14 +220,14 @@ const ScanABHAQRSection = ({
       />
       {!txnId && (
         <div>
-          <span className="text-gray-800 text-xs items-center">
+          <span className="items-center text-xs text-gray-800">
             <input
               type="checkbox"
               checked={acceptedDisclaimer}
               onChange={(e) => {
                 setAcceptedDisclaimer(e.target.checked);
               }}
-              className="border-gray-700 rounded shadow-sm ring-offset-0 ring-0 mr-2"
+              className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
             />
             I declare that the ABHA No. of the patient is voluntarily provided
             by the patient (or guardian or nominee of the patient).
@@ -243,10 +243,10 @@ const ScanABHAQRSection = ({
           error=""
         />
       )}
-      <div className="flex gap-2 items-center justify-between mt-4">
+      <div className="mt-4 flex items-center justify-between gap-2">
         <span
           onClick={onSignup}
-          className="text-sm text-blue-800 cursor-pointer"
+          className="cursor-pointer text-sm text-blue-800"
         >
           Don't have an ABHA Number
         </span>
@@ -459,7 +459,7 @@ const VerifyAadhaarSection = ({
         />
         <span
           className={classNames(
-            "ml-2 text-gray-600 text-sm font-medium",
+            "ml-2 text-sm font-medium text-gray-600",
             !aadhaarNumberError && "-mt-4"
           )}
         >
@@ -469,14 +469,14 @@ const VerifyAadhaarSection = ({
 
       {!otpSent && (
         <div className="flex flex-col gap-2">
-          <span className="text-gray-800 text-xs items-center">
+          <span className="items-center text-xs text-gray-800">
             <input
               type="checkbox"
               checked={acceptedDisclaimer1}
               onChange={(e) => {
                 setAcceptedDisclaimer1(e.target.checked);
               }}
-              className="border-gray-700 rounded shadow-sm ring-offset-0 ring-0 mr-2"
+              className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
             />
             I declare that consent of the patient (or guardian or nominee of the
             patient) is obtained for generation of such ABHA Number as per the{" "}
@@ -486,14 +486,14 @@ const VerifyAadhaarSection = ({
             .
           </span>
 
-          <span className="text-gray-800 text-xs items-center">
+          <span className="items-center text-xs text-gray-800">
             <input
               type="checkbox"
               checked={acceptedDisclaimer2}
               onChange={(e) => {
                 setAcceptedDisclaimer2(e.target.checked);
               }}
-              className="border-gray-700 rounded shadow-sm ring-offset-0 ring-0 mr-2"
+              className="mr-2 rounded border-gray-700 shadow-sm ring-0 ring-offset-0"
             />
             I declare that the Aadhaar Number and demographic details of the
             patient are shared voluntarily by the patient (or guardian or
@@ -521,10 +521,10 @@ const VerifyAadhaarSection = ({
         />
       )}
 
-      <div className="flex gap-2 items-center justify-between mt-4">
+      <div className="mt-4 flex items-center justify-between gap-2">
         <span
           onClick={onSignin}
-          className="text-sm text-blue-800 cursor-pointer"
+          className="cursor-pointer text-sm text-blue-800"
         >
           Already have an ABHA number
         </span>
@@ -679,14 +679,14 @@ const VerifyMobileSection = ({
           error={otpError}
         />
       ) : (
-        <p className="-mt-4 text-warning-600 text-sm">
-          <CareIcon className="w-4 h-4 care-l-exclamation-triangle" /> OTP is
+        <p className="-mt-4 text-sm text-warning-600">
+          <CareIcon className="care-l-exclamation-triangle h-4 w-4" /> OTP is
           generated if the above phone number is not linked with given Aadhaar
           number.
         </p>
       )}
 
-      <div className="flex gap-2 items-center justify-end mt-4">
+      <div className="mt-4 flex items-center justify-end gap-2">
         <ButtonV2
           disabled={isSendingOtp}
           onClick={sendOtp}
@@ -752,13 +752,13 @@ const CreateHealthIDSection = ({
         onBlur={() => setIsHealthIdInputInFocus(false)}
       />
 
-      <p className="-mt-4 text-warning-600 text-sm">
-        <CareIcon className="w-4 h-4 care-l-exclamation-triangle" /> Existing
+      <p className="-mt-4 text-sm text-warning-600">
+        <CareIcon className="care-l-exclamation-triangle h-4 w-4" /> Existing
         ABHA Address is used if ABHA Number already exists.
       </p>
 
       {isHealthIdInputInFocus && (
-        <div className="pl-2 text-sm text-gray-500 mb-2">
+        <div className="mb-2 pl-2 text-sm text-gray-500">
           {validateRule(
             healthId.length >= 4,
             "Should be atleast 4 character long"
@@ -778,7 +778,7 @@ const CreateHealthIDSection = ({
         </div>
       )}
 
-      <div className="flex gap-2 items-center justify-end mt-4">
+      <div className="mt-4 flex items-center justify-end gap-2">
         <ButtonV2
           disabled={
             isCreating || !/^(?![\d.])[a-zA-Z0-9.]{4,}(?<!\.)$/.test(healthId)

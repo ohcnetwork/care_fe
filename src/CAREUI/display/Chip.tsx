@@ -36,10 +36,10 @@ export default function Chip(props: Props) {
   return (
     <span
       className={`inline-flex ${
-        props.hideBorder === true || `border border-${props.color}-300`
-      } items-center gap-2 ${chipStyle} font-medium leading-4 bg-${
+        !props.hideBorder && "border-ashsec-300 border"
+      } items-center gap-2 ${chipStyle} bg-${props.color}-100 text-${
         props.color
-      }-100 text-gray-800 text-${props.color}-900`}
+      }-900 font-medium leading-4 text-gray-800`}
       title={props.text}
     >
       {props.startIcon && (

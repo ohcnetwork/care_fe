@@ -26,14 +26,14 @@ const RecordMeta = ({ time, user, prefix, className }: Props) => {
   let child = (
     <div className="tooltip">
       <span className="underline">{relativeTime}</span>
-      <span className="flex gap-1 tooltip-text font-medium tracking-wider text-xs -translate-x-1/3">
+      <span className="tooltip-text flex -translate-x-1/3 gap-1 text-xs font-medium tracking-wider">
         {moment(time).format("hh:mm A; DD/MM/YYYY")}
         {user && (
           <>
             <CareIcon className="care-l-user" />
             {user.first_name} {user.last_name}
             {isOnline && (
-              <div className="rounded-full w-1 h-1 bg-primary-500" />
+              <div className="h-1 w-1 rounded-full bg-primary-500" />
             )}
           </>
         )}

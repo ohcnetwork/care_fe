@@ -221,12 +221,12 @@ export default function UpdateResult(props: any) {
     <div>
       <Page
         title="Update External Result"
-        className="px-6 mb-2"
+        className="mb-2 px-6"
         backUrl={`/external_results/${id}`}
       >
         <div className="md:p-4">
-          <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
+          <div className="border-b border-gray-200 px-4 py-5 sm:px-6">
+            <h3 className="text-lg font-medium leading-6 text-gray-900">
               {state.form.name} - {state.form.age} {state.form.age_in}
             </h3>
             <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
@@ -237,7 +237,7 @@ export default function UpdateResult(props: any) {
             </p>
           </div>
           <form onSubmit={(e) => handleSubmit(e)}>
-            <div className="px-4 py-5 grid gap-4 grid-cols-1 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 px-4 py-5 md:grid-cols-2">
               <div data-testid="current-address">
                 <TextAreaFormField
                   rows={2}
@@ -307,7 +307,7 @@ export default function UpdateResult(props: any) {
                 />
               </div>
             </div>
-            <div className="flex flex-col md:flex-row gap-2 justify-end mt-4">
+            <div className="mt-4 flex flex-col justify-end gap-2 md:flex-row">
               <Cancel onClick={() => goBack()} />
               <Submit onClick={handleSubmit} />
             </div>

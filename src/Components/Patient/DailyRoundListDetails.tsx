@@ -77,7 +77,7 @@ export const DailyRoundListDetails = (props: any) => {
       title={`Consultation Update #${id}`}
       backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
     >
-      <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
+      <div className="mt-4 h-full rounded-lg border bg-white p-4 text-black shadow hover:border-primary-500">
         <div className="flex justify-between">
           <div className="max-w-md">
             <div>
@@ -99,7 +99,7 @@ export const DailyRoundListDetails = (props: any) => {
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Temperature: </span>
             {dailyRoundListDetailsData.temperature ?? "-"}
@@ -114,13 +114,13 @@ export const DailyRoundListDetails = (props: any) => {
             <span className="font-semibold leading-relaxed">SpO2: </span>
             {dailyRoundListDetailsData.ventilator_spo2 ?? "-"}
           </div>
-          <div className="md:col-span-2 capitalize">
+          <div className="capitalize md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Additional Symptoms:{" "}
             </span>
             {dailyRoundListDetailsData.additional_symptoms_text ?? "-"}
           </div>
-          <div className="md:col-span-2 capitalize">
+          <div className="capitalize md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Admitted To *:{" "}
             </span>
