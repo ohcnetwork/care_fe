@@ -1,8 +1,9 @@
-import React, { HTMLInputTypeAttribute, useState } from "react";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { classNames } from "../../../Utils/utils";
-import FormField from "./FormField";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import React, { HTMLInputTypeAttribute, useState } from "react";
+
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import FormField from "./FormField";
+import { classNames } from "../../../Utils/utils";
 
 export type TextFormFieldProps = FormFieldBaseProps<string> & {
   placeholder?: string;
@@ -10,6 +11,8 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   autoComplete?: string;
   type?: HTMLInputTypeAttribute;
   className?: string | undefined;
+  inputClassName?: string | undefined;
+  removeDefaultClasses?: true | undefined;
   leading?: React.ReactNode | undefined;
   trailing?: React.ReactNode | undefined;
   leadingFocused?: React.ReactNode | undefined;
@@ -80,30 +83,30 @@ const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
   if (hasIcon) {
     const _leading =
       leading === leadingFocused ? (
-        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-3">
           {leading}
         </div>
       ) : (
         <>
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex translate-y-0 items-center pl-3 opacity-100 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-1 peer-focus:opacity-0">
+          <div className="absolute inset-y-0 left-0 flex translate-y-0 items-center pl-3 opacity-100 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-1 peer-focus:opacity-0">
             {leading}
           </div>
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex -translate-y-1 items-center pl-3 opacity-0 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-0 peer-focus:opacity-100">
+          <div className="absolute inset-y-0 left-0 flex -translate-y-1 items-center pl-3 opacity-0 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-0 peer-focus:opacity-100">
             {leadingFocused}
           </div>
         </>
       );
     const _trailing =
       trailing === trailingFocused ? (
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+        <div className="absolute inset-y-0 right-0 flex items-center pr-3">
           {trailing}
         </div>
       ) : (
         <>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex translate-y-0 items-center pr-3 opacity-100 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-1 peer-focus:opacity-0">
+          <div className="absolute inset-y-0 right-0 flex translate-y-0 items-center pr-3 opacity-100 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-1 peer-focus:opacity-0">
             {trailing}
           </div>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex -translate-y-1 items-center pr-3 opacity-0 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-0 peer-focus:opacity-100">
+          <div className="absolute inset-y-0 right-0 flex -translate-y-1 items-center pr-3 opacity-0 transition-all delay-300 duration-500 ease-in-out peer-focus:translate-y-0 peer-focus:opacity-100">
             {trailingFocused}
           </div>
         </>

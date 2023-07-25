@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { NormalPrescription, Prescription } from "./models";
+import { NormalPrescription, Prescription, PRNPrescription } from "./models";
 import DialogModal from "../Common/Dialog";
-import { PRNPrescription } from "./models";
 import CreatePrescriptionForm from "./CreatePrescriptionForm";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import { PrescriptionActions } from "../../Redux/actions";
@@ -100,7 +99,7 @@ export default function PrescriptionBuilder({
             is_prn ? "add_prn_prescription" : "add_prescription_medication"
           )}
           description={
-            <div className="mt-2 flex w-full justify-end gap-2 text-warning-500">
+            <div className="mt-2 flex w-full justify-start gap-2 text-warning-500">
               <CareIcon className="care-l-exclamation-triangle text-base" />
               <span>{t("modification_caution_note")}</span>
             </div>

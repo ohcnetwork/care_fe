@@ -26,6 +26,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import Uptime from "../Common/Uptime";
 
 interface AssetManageProps {
   assetId: string;
@@ -399,6 +400,7 @@ const AssetManage = (props: AssetManageProps) => {
           </div>
         )}
       </div>
+      {asset?.id && <Uptime assetId={asset?.id} />}
       <div className="mb-4 mt-8 text-xl font-semibold">Transaction History</div>
       <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">

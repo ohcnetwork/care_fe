@@ -1,12 +1,13 @@
-import { Menu } from "@headlessui/react";
-import { ReactNode } from "react";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
 import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
-import { classNames } from "../../../Utils/utils";
+
 import { ButtonVariant } from "./ButtonV2";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { DropdownTransition } from "./HelperComponents";
+import { Menu } from "@headlessui/react";
 import React from "react";
+import { ReactNode } from "react";
+import { classNames } from "../../../Utils/utils";
+import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
 
 interface DropdownMenuProps {
   id?: string;
@@ -31,7 +32,7 @@ export default function DropdownMenu({
         >
           <div className="flex h-6 items-center gap-2">
             {props.icon}
-            {props.title}
+            {props.title || "Dropdown"}
           </div>
           <CareIcon className="care-l-angle-down -mr-1 ml-2 text-lg" />
         </Menu.Button>

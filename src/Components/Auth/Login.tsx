@@ -9,22 +9,20 @@ import LegendInput from "../../CAREUI/interactive/LegendInput";
 import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useConfig from "../../Common/hooks/useConfig";
-import { classNames } from "../../Utils/utils";
 import CircularProgress from "../Common/components/CircularProgress";
 import { LocalStorageKeys } from "../../Common/constants";
+import ReactMarkdown from "react-markdown";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
-    static_black_logo,
-    static_dpg_white_logo,
-    static_light_logo,
-    static_ohc_light_logo,
+    main_logo,
     recaptcha_site_key,
     github_url,
     coronasafe_url,
-    dpg_url,
     state_logo,
-    state_logo_white,
+    custom_logo,
+    custom_logo_alt,
+    custom_description,
   } = useConfig();
   const dispatch: any = useDispatch();
   const initForm: any = {
@@ -184,14 +182,11 @@ export const Login = (props: { forgot?: boolean }) => {
         <div></div>
         <div className="mt-4 flex flex-col items-start rounded-lg py-4 md:mt-12">
           <div className="mb-4 hidden items-center gap-6 md:flex">
-            {state_logo && (
+            {(custom_logo || state_logo) && (
               <>
                 <img
-                  src={state_logo}
-                  className={classNames(
-                    "h-24 rounded-lg p-3",
-                    state_logo_white && "brightness-0 invert"
-                  )}
+                  src={custom_logo?.light ?? state_logo?.light}
+                  className="h-16 rounded-lg py-3"
                   alt="state logo"
                 />
                 <div className="h-10 w-0.5 rounded-full bg-white/50" />
@@ -204,27 +199,39 @@ export const Login = (props: { forgot?: boolean }) => {
               rel="noopener noreferrer"
             >
               <img
-                src={static_light_logo}
+                src={custom_logo_alt?.light ?? main_logo.light}
                 className="h-8"
                 alt="coronasafe logo"
               />
             </a>
           </div>
           <div className="max-w-lg">
-            <h1 className="text-4xl font-black leading-tight tracking-wider text-white md:text-5xl lg:text-7xl">
+            <h1 className="text-4xl font-black leading-tight tracking-wider text-white lg:text-5xl">
               {t("care")}
             </h1>
-            <div className="max-w-xl py-6 pl-1 text-base font-semibold text-gray-400 md:text-lg lg:text-xl">
-              {t("goal")}
-            </div>
+            {custom_description ? (
+              <div className="py-6">
+                <ReactMarkdown className="max-w-xl text-gray-400">
+                  {custom_description || t("goal")}
+                </ReactMarkdown>
+              </div>
+            ) : (
+              <div className="max-w-xl py-6 pl-1 text-base font-semibold text-gray-400 md:text-lg lg:text-xl">
+                {t("goal")}
+              </div>
+            )}
           </div>
         </div>
         <div className="mb-6 flex items-center">
           <div className="max-w-lg text-xs md:text-sm">
             <div className="mb-2 ml-1 flex items-center gap-4">
-              <a href={dpg_url} rel="noopener noreferrer" target="_blank">
+              <a
+                href="https://digitalpublicgoods.net/registry/coronasafe-care.html"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
                 <img
-                  src={static_dpg_white_logo}
+                  src="https://digitalpublicgoods.net/wp-content/themes/dpga/images/logo-w.svg"
                   className="h-12"
                   alt="Logo of Digital Public Goods Alliance"
                 />
@@ -236,7 +243,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 target="_blank"
               >
                 <img
-                  src={static_ohc_light_logo}
+                  src="https://cdn.coronasafe.network/ohc_logo_light.png"
                   className="inline-block h-10"
                   alt="coronasafe logo"
                 />
@@ -275,22 +282,19 @@ export const Login = (props: { forgot?: boolean }) => {
             }
           >
             <div className="flex items-center gap-1">
-              {state_logo && (
+              {(custom_logo || state_logo) && (
                 <>
                   <img
-                    src={state_logo}
-                    className={classNames(
-                      "h-24 rounded-lg p-3 md:hidden",
-                      state_logo_white && "brightness-0 invert"
-                    )}
+                    src={custom_logo?.dark ?? state_logo?.dark}
+                    className="h-14 rounded-lg py-3 md:hidden"
                     alt="state logo"
                   />
                   <div className="mx-4 h-8 w-[1px] rounded-full bg-gray-600 md:hidden" />
                 </>
               )}
               <img
-                src={static_black_logo}
-                className="h-8 w-auto brightness-0 contrast-[0%] md:hidden"
+                src={custom_logo_alt?.dark ?? main_logo.dark}
+                className="h-8 w-auto md:hidden"
                 alt="care logo"
               />
             </div>{" "}
@@ -371,8 +375,8 @@ export const Login = (props: { forgot?: boolean }) => {
             }
           >
             <img
-              src={static_black_logo}
-              className="mb-4 h-8 w-auto brightness-0 contrast-[0%] md:hidden"
+              src={main_logo.dark}
+              className="mb-4 h-8 w-auto md:hidden"
               alt="care logo"
             />{" "}
             <button

@@ -34,7 +34,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'Dockerfile') }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('package-lock.json', 'Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-buildx-
 
@@ -86,7 +86,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'Dockerfile') }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('package-lock.json', 'Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-buildx-
 
@@ -148,7 +148,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('yarn.lock', '.yarnrc.yml', 'Dockerfile') }}
+          key: ${{ runner.os }}-buildx-${{ hashFiles('package-lock.json', 'Dockerfile') }}
           restore-keys: |
             ${{ runner.os }}-buildx-
 

@@ -1,21 +1,23 @@
-import { navigate } from "raviger";
-import moment from "moment";
-import { useReducer, useState } from "react";
-import { useDispatch } from "react-redux";
-import { transferPatient } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { DupPatientModel } from "./models";
-import { OptionsType } from "../../Common/constants";
+
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { useReducer, useState } from "react";
+
 import DateFormField from "../Form/FormFields/DateFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { DupPatientModel } from "./models";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import { OptionsType } from "../../Common/constants";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import moment from "moment";
+import { navigate } from "raviger";
+import { transferPatient } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
 
 interface Props {
   patientList: Array<DupPatientModel>;
   handleOk: () => void;
   handleCancel: () => void;
-  facilityId: number;
+  facilityId: string;
 }
 
 const initForm: any = {
@@ -62,7 +64,7 @@ const TransferPatientDialog = (props: Props) => {
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
   const patientOptions: Array<OptionsType> = patientList.map((patient) => {
     return {
-      id: patient.patient_id,
+      id: patient.patient_id as unknown as number,
       text: `${patient.name} (${patient.gender})`,
     };
   });

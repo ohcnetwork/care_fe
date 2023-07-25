@@ -1,5 +1,6 @@
-import React from "react";
 import { Dialog, Transition } from "@headlessui/react";
+
+import React from "react";
 import { classNames } from "../../Utils/utils";
 
 type DialogProps = {
@@ -59,9 +60,9 @@ const DialogModal = (props: DialogProps) => {
                 >
                   <Dialog.Title
                     as="h4"
-                    className="flex justify-between text-lg font-medium leading-6 text-gray-900"
+                    className="flex w-full flex-col text-lg font-medium leading-6 text-gray-900"
                   >
-                    <div>
+                    <div className="w-full">
                       <h4>{title}</h4>
                       <p className="mt-2 text-sm text-gray-600">
                         {description}

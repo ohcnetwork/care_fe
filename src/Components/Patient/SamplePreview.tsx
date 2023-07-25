@@ -7,7 +7,6 @@ import Page from "../Common/components/Page";
 import { SampleReportModel } from "./models";
 import loadable from "@loadable/component";
 import { sampleReport } from "../../Redux/actions";
-import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 
 const Loading = loadable(() => import("../Common/Loading"));
@@ -61,7 +60,6 @@ export default function SampleReport(props: ISamplePreviewProps) {
   const { id, sampleId } = props;
   const [isLoading, setIsLoading] = useState(false);
   const [sampleData, setSampleData] = useState<SampleReportModel>({});
-  const { static_ohc_green_logo } = useConfig();
 
   let report: JSX.Element = <></>;
   let reportData: JSX.Element = <></>;
@@ -103,7 +101,7 @@ export default function SampleReport(props: ISamplePreviewProps) {
               <div className="flex justify-end">
                 <div className="p-2">
                   <img
-                    src={static_ohc_green_logo}
+                    src="https://cdn.coronasafe.network/ohc_logo_green.png"
                     className="h-[50px] max-w-[400px] object-contain"
                     alt="Open HealthCare Network"
                   />

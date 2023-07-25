@@ -121,7 +121,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
       </div>
       <div className="mt-4 flex w-full flex-col justify-between gap-1 md:flex-row">
         <ButtonV2
-          className="border border-gray-500 bg-white text-black hover:bg-gray-300"
+          className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
           onClick={() =>
             navigate(
               `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}`
@@ -131,7 +131,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
           View Consultation / Consultation Updates
         </ButtonV2>
         <ButtonV2
-          className="border border-gray-500 bg-white text-black hover:bg-gray-300"
+          className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
           onClick={() =>
             navigate(
               `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/files/`
@@ -142,7 +142,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
         </ButtonV2>
         {isLastConsultation && (
           <ButtonV2
-            className="border border-gray-500 bg-white text-black hover:bg-gray-300"
+            className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
             onClick={() =>
               navigate(
                 `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`

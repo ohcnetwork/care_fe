@@ -8,11 +8,14 @@ import {
 } from "../../Common/constants";
 import { ConsultationModel, PatientCategory } from "../Facility/models";
 
+import ABHAProfileModal from "../ABDM/ABHAProfileModal";
 import Beds from "../Facility/Consultations/Beds";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
 import { Link } from "raviger";
+import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
+import LinkCareContextModal from "../ABDM/LinkCareContextModal";
 import { PatientModel } from "./models";
 import { getDimensionOrDash } from "../../Common/utils";
 import moment from "moment";
@@ -23,9 +26,17 @@ export default function PatientInfoCard(props: {
   patient: PatientModel;
   consultation?: ConsultationModel;
   fetchPatientData?: (state: { aborted: boolean }) => void;
+  consultationId: string;
+  showAbhaProfile?: boolean;
 }) {
   const [open, setOpen] = useState(false);
-  const { enable_hcx } = useConfig();
+  const [showLinkABHANumber, setShowLinkABHANumber] = useState(false);
+  const [showABHAProfile, setShowABHAProfile] = useState(
+    !!props.showAbhaProfile
+  );
+
+  const { enable_hcx, enable_abdm } = useConfig();
+  const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
   const patient = props.patient;
   const consultation = props.consultation;
@@ -355,6 +366,58 @@ export default function PatientInfoCard(props: {
                   </div>
                 )
             )}
+          {enable_abdm &&
+            (patient.abha_number ? (
+              <>
+                <ButtonV2
+                  className="flex justify-start gap-3 font-semibold hover:text-white"
+                  align="start"
+                  onClick={() => setShowABHAProfile(true)}
+                >
+                  <CareIcon className="care-l-user-square" />
+                  <p>Show ABHA Profile</p>
+                </ButtonV2>
+                <ButtonV2
+                  className="mt-0 flex justify-start gap-3 font-semibold hover:text-white"
+                  align="start"
+                  onClick={() => setShowLinkCareContext(true)}
+                >
+                  <CareIcon className="care-l-link" />
+                  <p>Link Care Context</p>
+                </ButtonV2>
+                <ABHAProfileModal
+                  patientId={patient.id}
+                  abha={patient.abha_number_object}
+                  show={showABHAProfile}
+                  onClose={() => setShowABHAProfile(false)}
+                />
+                <LinkCareContextModal
+                  consultationId={props.consultationId}
+                  patient={patient}
+                  show={showLinkCareContext}
+                  onClose={() => setShowLinkCareContext(false)}
+                />
+              </>
+            ) : (
+              <>
+                <ButtonV2
+                  className="flex justify-start gap-3 font-semibold hover:text-white"
+                  align="start"
+                  onClick={() => setShowLinkABHANumber(true)}
+                >
+                  <CareIcon className="care-l-link" />
+                  <p>Link ABHA Number</p>
+                </ButtonV2>
+                <LinkABHANumberModal
+                  show={showLinkABHANumber}
+                  onClose={() => setShowLinkABHANumber(false)}
+                  patientId={patient.id as any}
+                  onSuccess={(_) => {
+                    window.location.href += "?show-abha-profile=true";
+                  }}
+                />
+              </>
+            ))}
         </div>
       </section>
     </>

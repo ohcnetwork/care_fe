@@ -1,47 +1,51 @@
-import { navigate } from "raviger";
-import { useCallback, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import loadable from "@loadable/component";
-import {
-  DOCTOR_SPECIALIZATION,
-  FACILITY_FEATURE_TYPES,
-  getBedTypes,
-  USER_TYPES,
-} from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getPermittedFacility,
-  deleteFacility,
-  getTriageInfo,
-  listCapacity,
-  listDoctor,
-} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import BedTypeCard from "./BedTypeCard";
-import DoctorsCountCard from "./DoctorsCountCard";
+
+import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import {
   CapacityModal,
   DoctorModal,
   FacilityModel,
   PatientStatsModel,
 } from "./models";
-import CoverImageEditModal from "./CoverImageEditModal";
+import {
+  DOCTOR_SPECIALIZATION,
+  FACILITY_FEATURE_TYPES,
+  USER_TYPES,
+  getBedTypes,
+} from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
-import Table from "../Common/components/Table";
-import ButtonV2 from "../Common/components/ButtonV2";
-import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import ContactLink from "../Common/components/ContactLink";
-import Chip from "../../CAREUI/display/Chip";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import {
+  deleteFacility,
+  getPermittedFacility,
+  getTriageInfo,
+  listCapacity,
+  listDoctor,
+} from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useCallback, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import { BedCapacity } from "./BedCapacity";
-import { DoctorCapacity } from "./DoctorCapacity";
-import DialogModal from "../Common/Dialog";
-import useConfig from "../../Common/hooks/useConfig";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { useTranslation } from "react-i18next";
-import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
+import BedTypeCard from "./BedTypeCard";
+import ButtonV2 from "../Common/components/ButtonV2";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import Chip from "../../CAREUI/display/Chip";
 import ConfirmDialog from "../Common/ConfirmDialog";
+import ContactLink from "../Common/components/ContactLink";
+import CoverImageEditModal from "./CoverImageEditModal";
+import DialogModal from "../Common/Dialog";
+import { DoctorCapacity } from "./DoctorCapacity";
+import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
+import DoctorsCountCard from "./DoctorsCountCard";
 import Page from "../Common/components/Page";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
+import Table from "../Common/components/Table";
+import loadable from "@loadable/component";
+import { navigate } from "raviger";
+import useConfig from "../../Common/hooks/useConfig";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import { useTranslation } from "react-i18next";
+
 const Loading = loadable(() => import("../Common/Loading"));
 
 export const getFacilityFeatureIcon = (featureId: number) => {
@@ -72,6 +76,8 @@ export const FacilityHome = (props: any) => {
   const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
   const [doctorCapacityModalOpen, setDoctorCapacityModalOpen] = useState(false);
   const config = useConfig();
+
+  useMessageListener((data) => console.log(data));
 
   const fetchData = useCallback(
     async (status: statusType) => {

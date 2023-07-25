@@ -27,12 +27,8 @@ import { useTranslation } from "react-i18next";
 const Loading = loadable(() => import("../Common/Loading"));
 
 export default function ShiftDetails(props: { id: string }) {
-  const {
-    static_header_logo,
-    kasp_full_string,
-    wartime_shifting,
-    kasp_enabled,
-  } = useConfig();
+  const { header_logo, kasp_full_string, wartime_shifting, kasp_enabled } =
+    useConfig();
   const dispatch: any = useDispatch();
   const initialData: any = {};
   const [data, setData] = useState(initialData);
@@ -344,7 +340,7 @@ export default function ShiftDetails(props: { id: string }) {
 
     return (
       <div id="section-to-print" className="print bg-white ">
-        <div>{data.is_kasp && <img alt="logo" src={static_header_logo} />}</div>
+        <div>{data.is_kasp && <img alt="logo" src={header_logo.dark} />}</div>
         <div className="mx-2">
           <div className="mt-6">
             <span className="mt-4 font-semibold leading-relaxed">
