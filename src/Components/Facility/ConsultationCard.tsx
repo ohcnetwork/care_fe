@@ -104,7 +104,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
           <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
             Created:{" "}
             <RelativeDateUserMention
-              tooltipPosition="left"
+              tooltipPosition="right"
               actionDate={itemData.created_date}
               user={itemData.created_by}
             />
@@ -113,7 +113,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
         <div className="text-sm text-gray-700 items-center flex flex-col md:flex-row">
           Last Modified:{" "}
           <RelativeDateUserMention
-            tooltipPosition="left"
+            tooltipPosition="right"
             actionDate={itemData.modified_date}
             user={itemData.last_edited_by}
           />
@@ -121,7 +121,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
       </div>
       <div className="mt-4 flex flex-col gap-1 md:flex-row justify-between w-full">
         <ButtonV2
-          className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+          className="bg-white hover:bg-gray-300 border border-gray-500 text-black whitespace-pre-wrap h-auto"
           onClick={() =>
             navigate(
               `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}`
@@ -131,7 +131,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
           View Consultation / Consultation Updates
         </ButtonV2>
         <ButtonV2
-          className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+          className="bg-white hover:bg-gray-300 border border-gray-500 text-black whitespace-pre-wrap h-auto"
           onClick={() =>
             navigate(
               `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/files/`
@@ -142,7 +142,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
         </ButtonV2>
         {isLastConsultation && (
           <ButtonV2
-            className="bg-white hover:bg-gray-300 border border-gray-500 text-black"
+            className="bg-white hover:bg-gray-300 border border-gray-500 text-black whitespace-pre-wrap h-auto"
             onClick={() =>
               navigate(
                 `/facility/${itemData.facility}/patient/${itemData.patient}/consultation/${itemData.id}/daily-rounds`

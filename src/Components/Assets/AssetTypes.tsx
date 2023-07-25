@@ -26,6 +26,13 @@ export enum AssetClass {
   VENTILATOR = "VENTILATOR",
 }
 
+export const AssetStatus = {
+  not_monitored: "Not Monitored",
+  operational: "Operational",
+  down: "Down",
+  maintenance: "Under Maintenance",
+};
+
 export const assetClassProps = {
   ONVIF: {
     name: "ONVIF Camera",
@@ -81,6 +88,18 @@ export interface AssetsResponse {
   next?: string;
   previous?: string;
   results: AssetData[];
+}
+
+export interface AssetUptimeRecord {
+  id: string;
+  asset: {
+    id: string;
+    name: string;
+  };
+  status: string;
+  timestamp: string;
+  created_date: string;
+  modified_date: string;
 }
 
 export interface AssetTransaction {

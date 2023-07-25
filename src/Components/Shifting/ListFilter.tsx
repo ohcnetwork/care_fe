@@ -207,7 +207,8 @@ export default function ListFilter(props: any) {
       emergency: emergency || "",
       is_up_shift: is_up_shift || "",
       patient_phone_number: patient_phone_number
-        ? parsePhoneNumberFromString(patient_phone_number)?.format("E.164")
+        ? parsePhoneNumberFromString(patient_phone_number)?.format("E.164") ??
+          ""
         : "",
       created_date_before:
         created_date_before && moment(created_date_before).isValid()
@@ -278,7 +279,6 @@ export default function ListFilter(props: any) {
               name="origin_facility"
               selected={filterState.origin_facility_ref}
               setSelected={(obj) => setFacility(obj, "origin_facility")}
-              className="shifting-page-filter-dropdown"
               errors={""}
             />
           )}
@@ -299,7 +299,6 @@ export default function ListFilter(props: any) {
                 setSelected={(obj) =>
                   setFacility(obj, "shifting_approving_facility")
                 }
-                className="shifting-page-filter-dropdown"
                 errors={""}
               />
             )}
@@ -318,7 +317,6 @@ export default function ListFilter(props: any) {
               name="assigned_facility"
               selected={filterState.assigned_facility_ref}
               setSelected={(obj) => setFacility(obj, "assigned_facility")}
-              className="shifting-page-filter-dropdown"
               errors={""}
             />
           )}

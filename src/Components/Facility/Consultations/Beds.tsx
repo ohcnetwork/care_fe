@@ -1,21 +1,23 @@
+import * as Notification from "../../../Utils/Notifications.js";
+
+import { BedModel, CurrentBed } from "../models";
 import React, { Dispatch, SetStateAction, useCallback } from "react";
-import { useDispatch } from "react-redux";
 import {
   createConsultationBed,
   listConsultationBeds,
 } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
-import * as Notification from "../../../Utils/Notifications.js";
-import Loading from "../../Common/Loading";
-import { BedModel, CurrentBed } from "../models";
+
 import { BedSelect } from "../../Common/BedSelect";
-import { formatDate } from "../../../Utils/utils";
-import { FieldLabel } from "../../Form/FormFields/FormField";
 import ButtonV2 from "../../Common/components/ButtonV2";
-import moment from "moment";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import CircularProgress from "../../Common/components/CircularProgress.js";
+import { FieldLabel } from "../../Form/FormFields/FormField";
+import Loading from "../../Common/Loading";
 import TextFormField from "../../Form/FormFields/TextFormField";
-import CircularProgress from "../../Common/components/CircularProgress";
+import { formatDate } from "../../../Utils/utils";
+import moment from "moment";
+import { useDispatch } from "react-redux";
 
 const formatDateTime: () => string = () => {
   const current = new Date();
@@ -30,8 +32,8 @@ const formatDateTime: () => string = () => {
 
 interface BedsProps {
   facilityId: string;
-  patientId: number;
-  consultationId: number;
+  patientId: string;
+  consultationId: string;
   smallLoader?: boolean;
   discharged?: boolean;
   setState?: Dispatch<SetStateAction<boolean>>;

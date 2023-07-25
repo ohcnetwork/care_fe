@@ -29,7 +29,7 @@ export interface ConsultationTabProps {
 }
 
 export interface OptionsType {
-  id: number;
+  id: number | string;
   text: string;
   label?: string;
   desc?: string;
@@ -260,6 +260,7 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
 ];
 
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
+  { id: -1, text: "No Review" },
   { id: 10, text: "10 mins" },
   { id: 15, text: "15 mins" },
   { id: 30, text: "30 mins" },
@@ -711,9 +712,9 @@ export const CONSULTATION_TABS: Array<OptionsType> = [
 ];
 
 export const RHYTHM_CHOICES: Array<OptionsType> = [
-  { id: 0, text: "Unknown" },
-  { id: 5, text: "Regular" },
-  { id: 10, text: "Irregular" },
+  { id: 0, text: "UNKNOWN", desc: "Unknown" },
+  { id: 5, text: "REGULAR", desc: "Regular" },
+  { id: 10, text: "IRREGULAR", desc: "Irregular" },
 ];
 
 export const LOCATION_BED_TYPES: Array<any> = [

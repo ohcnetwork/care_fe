@@ -12,4 +12,10 @@ export class AssetSearchPage {
       expect(currentUrl).not.to.equal(initialUrl);
     });
   }
+
+  verifyAssetIsPresent(assetName: string) {
+    cy.get("[data-testid=created-asset-list]")
+      .first()
+      .should("contain", assetName);
+  }
 }

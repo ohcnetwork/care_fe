@@ -1,57 +1,55 @@
-import loadable from "@loadable/component";
-import { navigate } from "raviger";
-import moment from "moment";
-import { createRef, LegacyRef, useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import * as Notification from "../../Utils/Notifications.js";
+
+import { BedModel, FacilityModel, ICD11DiagnosisModel } from "./models";
 import {
+  CONSULTATION_STATUS,
   CONSULTATION_SUGGESTION,
   PATIENT_CATEGORIES,
-  TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
-  CONSULTATION_STATUS,
+  TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  createConsultation,
-  getConsultation,
-  updateConsultation,
-  getPatient,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { BedModel, FacilityModel } from "./models";
-import { OnlineUsersSelect } from "../Common/OnlineUsersSelect";
-import { UserModel } from "../Users/models";
-import { BedSelect } from "../Common/BedSelect";
-import { dischargePatient } from "../../Redux/actions";
-import Beds from "./Consultations/Beds";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import InvestigationBuilder, {
   InvestigationType,
 } from "../Common/prescription-builder/InvestigationBuilder";
+import { LegacyRef, createRef, useCallback, useEffect, useState } from "react";
 import ProcedureBuilder, {
   ProcedureType,
 } from "../Common/prescription-builder/ProcedureBuilder";
-import { ICD11DiagnosisModel } from "./models";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import PatientCategorySelect from "../Patient/PatientCategorySelect";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
-import { SymptomsSelect } from "../Common/SymptomsSelect";
-import DateFormField from "../Form/FormFields/DateFormField";
-import useConfig from "../../Common/hooks/useConfig";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import useVisibility from "../../Utils/useVisibility";
+import {
+  createConsultation,
+  getConsultation,
+  getPatient,
+  updateConsultation,
+} from "../../Redux/actions";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import { BedSelect } from "../Common/BedSelect";
+import Beds from "./Consultations/Beds";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import {
-  DraftSection,
-  FormReducerAction,
-  useAutoSaveReducer,
-} from "../../Utils/AutoSave";
+import DateFormField from "../Form/FormFields/DateFormField";
+import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
+import { FormAction } from "../Form/Utils";
+import PatientCategorySelect from "../Patient/PatientCategorySelect";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { SymptomsSelect } from "../Common/SymptomsSelect";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+import { UserModel } from "../Users/models";
+import { dischargePatient } from "../../Redux/actions";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { navigate } from "raviger";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import useVisibility from "../../Utils/useVisibility";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -171,10 +169,7 @@ const fieldRef = formErrorKeys.reduce(
   {}
 );
 
-const consultationFormReducer = (
-  state = initialState,
-  action: FormReducerAction
-) => {
+const consultationFormReducer = (state = initialState, action: FormAction) => {
   switch (action.type) {
     case "set_form": {
       return {
@@ -210,7 +205,6 @@ export const ConsultationForm = (props: any) => {
     initialState
   );
   const [bed, setBed] = useState<BedModel | BedModel[] | null>(null);
-
   const [selectedFacility, setSelectedFacility] =
     useState<FacilityModel | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -301,7 +295,7 @@ export const ConsultationForm = (props: any) => {
         else setSelectedFacility(res.data.referred_to_object);
       }
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           const formData = {
             ...res.data,
             symptoms_onset_date: isoStringToDate(res.data.symptoms_onset_date),
@@ -310,7 +304,7 @@ export const ConsultationForm = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
               ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
-                  ?.id || "Comfort"
+                  ?.id ?? "Comfort"
               : "Comfort",
             ip_no: res.data.ip_no ? res.data.ip_no : "",
             op_no: res.data.op_no ? res.data.op_no : "",
@@ -343,11 +337,7 @@ export const ConsultationForm = (props: any) => {
 
   useAbortableEffect(
     (status: statusType) => {
-      if (id && patientId && patientName) {
-        fetchData(status);
-      } else if (id && !patientId) {
-        fetchData(status);
-      }
+      if (id && ((patientId && patientName) || !patientId)) fetchData(status);
     },
     [fetchData, id, patientId, patientName]
   );
@@ -640,7 +630,7 @@ export const ConsultationForm = (props: any) => {
         id ? updateConsultation(id, data) : createConsultation(data)
       );
       setIsLoading(false);
-      if (res && res.data && res.status !== 400) {
+      if (res?.data && res.status !== 400) {
         dispatch({ type: "set_form", form: initForm });
 
         if (data.suggestion === "DD") {
@@ -755,9 +745,9 @@ export const ConsultationForm = (props: any) => {
     const selectedFacility = selected as FacilityModel;
     setSelectedFacility(selectedFacility);
     const form: FormDetails = { ...state.form };
-    if (selectedFacility && selectedFacility.id) {
+    if (selectedFacility?.id) {
       if (selectedFacility.id === -1) {
-        form.referred_to_external = selectedFacility.name || "";
+        form.referred_to_external = selectedFacility.name ?? "";
         delete form.referred_to;
       } else {
         form.referred_to = selectedFacility.id.toString() || "";
@@ -1249,12 +1239,16 @@ export const ConsultationForm = (props: any) => {
                               className="flex-[2] col-span-6"
                               ref={fieldRef["assigned_to"]}
                             >
-                              <OnlineUsersSelect
-                                userId={state.form.assigned_to}
-                                selectedUser={state.form.assigned_to_object}
-                                onSelect={handleDoctorSelect}
-                                user_type="Doctor"
-                                outline
+                              <UserAutocompleteFormField
+                                showActiveStatus
+                                value={
+                                  state.form.assigned_to_object ?? undefined
+                                }
+                                onChange={(option) =>
+                                  handleDoctorSelect(option.value)
+                                }
+                                userType={"Doctor"}
+                                name={"assigned_to"}
                               />
                             </div>
                           )}

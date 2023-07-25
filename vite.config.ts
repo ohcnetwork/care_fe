@@ -1,8 +1,7 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
 import { VitePWA } from "vite-plugin-pwa";
-import { resolve } from "path";
+import { defineConfig } from "vite";
 import { promises as fs } from "fs";
+import react from "@vitejs/plugin-react-swc";
 
 export default defineConfig({
   envPrefix: "REACT_",
@@ -104,35 +103,6 @@ export default defineConfig({
   define: {
     // for unconventional usage of global by third party libraries
     global: "window",
-  },
-  resolve: {
-    alias: [
-      {
-        // to revert the above workaround for jss-plugin used by material-ui
-        find: /^jss-plugin-(.*)$/,
-        replacement: "$1",
-        customResolver: (id) => {
-          if (id === "window") {
-            id = "global";
-          }
-          return resolve(
-            __dirname,
-            `./node_modules/jss-plugin-${id}/src/index.js`
-          );
-        },
-      },
-      {
-        // to revert the above wokraround for global-cache used by react-dates
-        find: /^(.*)-cache$/,
-        replacement: "$1",
-        customResolver: (id) => {
-          if (id === "window") {
-            id = "global";
-          }
-          return resolve(__dirname, `./node_modules/${id}-cache/index.js`);
-        },
-      },
-    ],
   },
   optimizeDeps: {
     esbuildOptions: {

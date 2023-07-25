@@ -1,33 +1,34 @@
-import React, { useReducer, useState, useEffect, LegacyRef } from "react";
+import * as Notification from "../../Utils/Notifications.js";
+
+import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import React, { LegacyRef, useEffect, useReducer, useState } from "react";
 import {
   createAsset,
   getAsset,
   listFacilityAssetLocation,
   updateAsset,
 } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
-import * as Notification from "../../Utils/Notifications.js";
 
-import Page from "../Common/components/Page";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { validateEmailAddress } from "../../Common/validation";
-import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
-import loadable from "@loadable/component";
-import { navigate } from "raviger";
-import QrReader from "react-qr-reader";
-import { parseQueryParams } from "../../Utils/primitives";
-import moment from "moment";
-import SwitchV2 from "../Common/components/Switch";
-import useVisibility from "../../Utils/useVisibility";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import useAppHistory from "../../Common/hooks/useAppHistory";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { LocationSelect } from "../Common/LocationSelect";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import { LocationSelect } from "../Common/LocationSelect";
+import Page from "../Common/components/Page";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import QrReader from "react-qr-reader";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import SwitchV2 from "../Common/components/Switch";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { navigate } from "raviger";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parseQueryParams } from "../../Utils/primitives";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import { useDispatch } from "react-redux";
+import useVisibility from "../../Utils/useVisibility";
+import { validateEmailAddress } from "../../Common/validation";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -914,6 +915,7 @@ const AssetCreate = (props: AssetProps) => {
                     />
                     {!assetId && (
                       <Submit
+                        data-testid="create-asset-add-more-button"
                         onClick={(e) => handleSubmit(e, true)}
                         label="Create & Add More"
                       />

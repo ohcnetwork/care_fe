@@ -26,6 +26,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 const Loading = loadable(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import Uptime from "../Common/Uptime";
 
 interface AssetManageProps {
   assetId: string;
@@ -63,7 +64,7 @@ const AssetManage = (props: AssetManageProps) => {
       const assetData = await dispatch(getAsset(assetId));
       if (!status.aborted) {
         setIsLoading(false);
-        if (assetData && assetData.data) {
+        if (assetData?.data) {
           setAsset(assetData.data);
 
           const transactionFilter = assetData.qr_code_id
@@ -77,7 +78,7 @@ const AssetManage = (props: AssetManageProps) => {
               offset,
             })
           );
-          if (transactionsData && transactionsData.data) {
+          if (transactionsData?.data) {
             setTransactions(transactionsData.data.results);
             setTotalCount(transactionsData.data.count);
           } else {
@@ -124,7 +125,7 @@ const AssetManage = (props: AssetManageProps) => {
       </div>
       <h2 className="text-center">Print Preview</h2>
       <div id="section-to-print" className="print flex justify-center">
-        <QRCode size={200} value={asset?.id || ""} />
+        <QRCode size={200} value={asset?.id ?? ""} />
       </div>
     </div>
   );
@@ -215,6 +216,9 @@ const AssetManage = (props: AssetManageProps) => {
     if (asset) {
       const response = await dispatch(deleteAsset(asset.id));
       if (response && response.status === 204) {
+        Notification.Success({
+          msg: "Asset deleted successfully",
+        });
         navigate("/assets");
       }
     }
@@ -325,6 +329,7 @@ const AssetManage = (props: AssetManageProps) => {
                   )
                 }
                 id="update-asset"
+                data-testid="asset-update-button"
                 authorizeFor={NonReadOnlyUsers}
               >
                 <CareIcon className="care-l-pen h-4 mr-1" />
@@ -349,6 +354,7 @@ const AssetManage = (props: AssetManageProps) => {
                   authorizeFor={NonReadOnlyUsers}
                   onClick={() => setShowDeleteDialog(true)}
                   variant="danger"
+                  data-testid="asset-delete-button"
                   className="inline-flex"
                 >
                   <CareIcon className="care-l-trash h-4" />
@@ -394,6 +400,7 @@ const AssetManage = (props: AssetManageProps) => {
           </div>
         )}
       </div>
+      {asset?.id && <Uptime assetId={asset?.id} />}
       <div className="text-xl font-semibold mt-8 mb-4">Transaction History</div>
       <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
