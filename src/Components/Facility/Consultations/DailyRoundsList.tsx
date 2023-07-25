@@ -78,7 +78,7 @@ export const DailyRoundsList = (props: any) => {
     );
   } else if (dailyRoundsListData.length === 0) {
     roundsList = (
-      <span className="text-gray-700 bg-white rounded-lg shadow p-3 flex justify-center">
+      <span className="flex justify-center rounded-lg bg-white p-3 text-gray-700 shadow">
         {t("no_consultation_updates")}
       </span>
     );
@@ -125,8 +125,8 @@ export const DailyRoundsList = (props: any) => {
   }
 
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden max-h-[85vh] px-3">
+    <div className="flex w-full flex-col gap-4">
+      <div className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
         {roundsList}
       </div>
       {!isDailyRoundLoading && totalCount > limit && (

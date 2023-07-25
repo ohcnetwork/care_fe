@@ -395,8 +395,8 @@ const AssetCreate = (props: AssetProps) => {
         backUrl={`/facility/${facilityId}`}
       >
         <section className="text-center">
-          <h1 className="text-6xl flex items-center flex-col py-10">
-            <div className="p-5 rounded-full flex items-center justify-center bg-gray-200 w-40 h-40">
+          <h1 className="flex flex-col items-center py-10 text-6xl">
+            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gray-200 p-5">
               <CareIcon className="care-l-map-marker text-green-600" />
             </div>
           </h1>
@@ -407,7 +407,7 @@ const AssetCreate = (props: AssetProps) => {
             className="btn-primary btn mt-5"
             onClick={() => navigate(`/facility/${facilityId}/location/add`)}
           >
-            <i className="fas fa-plus text-white mr-2"></i>
+            <i className="fas fa-plus mr-2 text-white"></i>
             Add Location
           </button>
         </section>
@@ -417,7 +417,7 @@ const AssetCreate = (props: AssetProps) => {
 
   if (isScannerActive)
     return (
-      <div className="md:w-1/2 w-full my-2 mx-auto flex flex-col justify-start items-end">
+      <div className="mx-auto my-2 flex w-full flex-col items-end justify-start md:w-1/2">
         <button
           onClick={() => setIsScannerActive(false)}
           className="btn btn-default mb-2"
@@ -434,7 +434,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           style={{ width: "100%" }}
         />
-        <h2 className="text-center text-lg self-center">Scan Asset QR!</h2>
+        <h2 className="self-center text-center text-lg">Scan Asset QR!</h2>
       </div>
     );
 
@@ -446,14 +446,14 @@ const AssetCreate = (props: AssetProps) => {
     return (
       <div
         id={sectionId(sectionTitle)}
-        className="col-span-6 flex flex-row items-center mb-6 -ml-2"
+        className="col-span-6 -ml-2 mb-6 flex flex-row items-center"
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
-        <i className={`${section.iconClass} text-lg mr-3`} />
-        <label className="font-bold text-lg text-gray-900">
+        <i className={`${section.iconClass} mr-3 text-lg`} />
+        <label className="text-lg font-bold text-gray-900">
           {sectionTitle}
         </label>
-        <hr className="ml-6 flex-1 border-gray-400 border" />
+        <hr className="ml-6 flex-1 border border-gray-400" />
       </div>
     );
   };
@@ -462,7 +462,7 @@ const AssetCreate = (props: AssetProps) => {
     <div className="relative flex flex-col">
       <Page
         title={`${assetId ? "Update" : "Create"} Asset`}
-        className="pl-6 flex-grow-0"
+        className="grow-0 pl-6"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           assets: { style: "text-gray-200 pointer-events-none" },
@@ -474,16 +474,16 @@ const AssetCreate = (props: AssetProps) => {
             : `/facility/${facilityId}`
         }
       >
-        <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
-          <div className="hidden xl:flex flex-col w-72 fixed h-full mt-4">
+        <div className="top-0 mt-5 flex grow-0 sm:mx-auto">
+          <div className="fixed mt-4 hidden h-full w-72 flex-col xl:flex">
             {Object.keys(sections).map((sectionTitle) => {
               const isCurrent = currentSection === sectionTitle;
               const section = sections[sectionTitle as AssetFormSection];
               return (
                 <button
-                  className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
+                  className={`flex w-full items-center justify-start gap-3 rounded-l-lg px-5 py-3 font-medium ${
                     isCurrent ? "bg-white text-primary-500" : "bg-transparent"
-                  } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
+                  } transition-all duration-100 ease-in hover:bg-white hover:tracking-wider`}
                   onClick={() => {
                     section.ref.current?.scrollIntoView({
                       behavior: "smooth",
@@ -498,13 +498,13 @@ const AssetCreate = (props: AssetProps) => {
               );
             })}
           </div>
-          <div className="w-full h-full flex overflow-auto xl:ml-72">
+          <div className="flex h-full w-full overflow-auto xl:ml-72">
             <div className="w-full max-w-3xl 2xl:max-w-4xl">
               <form
                 onSubmit={(e) => handleSubmit(e, false)}
-                className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
+                className="rounded bg-white p-6 transition-all sm:rounded-xl sm:p-12"
               >
-                <div className="grid grid-cols-1 gap-x-12 items-start">
+                <div className="grid grid-cols-1 items-start gap-x-12">
                   <div className="grid grid-cols-6 gap-x-6">
                     {/* General Details Section */}
                     {sectionTitle("General Details")}
@@ -525,7 +525,7 @@ const AssetCreate = (props: AssetProps) => {
                     </div>
 
                     {/* Location */}
-                    <FieldLabel className="text-sm w-max" required>
+                    <FieldLabel className="w-max text-sm" required>
                       Asset Location
                     </FieldLabel>
                     <div
@@ -546,7 +546,7 @@ const AssetCreate = (props: AssetProps) => {
                       />
                     </div>
                     {/* Asset Type */}
-                    <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
+                    <div className="col-span-6 flex flex-col gap-x-12 transition-all lg:flex-row xl:gap-x-16">
                       <div
                         ref={fieldRef["asset_type"]}
                         className="flex-1"
@@ -631,8 +631,8 @@ const AssetCreate = (props: AssetProps) => {
                         className={
                           "transition-all " +
                           (is_working === "true"
-                            ? "opacity-0 my-0"
-                            : "opacity-100 my-4")
+                            ? "my-0 opacity-0"
+                            : "my-4 opacity-100")
                         }
                       />
                     </div>
@@ -687,8 +687,8 @@ const AssetCreate = (props: AssetProps) => {
                         className={
                           "transition-all " +
                           (is_working === "true"
-                            ? "opacity-0 my-0"
-                            : "opacity-100 mb-7")
+                            ? "my-0 opacity-0"
+                            : "mb-7 opacity-100")
                         }
                       />
                     </div>
@@ -706,7 +706,7 @@ const AssetCreate = (props: AssetProps) => {
                         />
                       </div>
                       <div
-                        className="flex items-center justify-self-end ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
+                        className="ml-1 mt-1 flex h-10 cursor-pointer items-center justify-self-end rounded border border-gray-400 px-4 hover:bg-gray-200"
                         onClick={() => setIsScannerActive(true)}
                       >
                         <CareIcon className="care-l-focus cursor-pointer text-lg" />
@@ -899,7 +899,7 @@ const AssetCreate = (props: AssetProps) => {
                     </div>
                   </div>
 
-                  <div className="mt-12 flex justify-end gap-x-2 gap-y-2 flex-wrap">
+                  <div className="mt-12 flex flex-wrap justify-end gap-2">
                     <Cancel
                       onClick={() =>
                         navigate(

@@ -59,7 +59,7 @@ export default function CreatePrescriptionForm(props: {
             {...field("medicine_object", RequiredFieldValidator())}
             required
           />
-          <div className="flex gap-4 items-center">
+          <div className="flex items-center gap-4">
             <SelectFormField
               className="flex-1"
               label={t("route")}
@@ -101,7 +101,7 @@ export default function CreatePrescriptionForm(props: {
               />
             </>
           ) : (
-            <div className="flex gap-4 items-center">
+            <div className="flex items-center gap-4">
               <SelectFormField
                 position="above"
                 className="flex-1"
