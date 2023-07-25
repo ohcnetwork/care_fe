@@ -37,7 +37,9 @@ const GLocationPicker = ({
     null
   );
   const [zoom, setZoom] = React.useState(4);
-  const [center, setCenter] = React.useState<google.maps.LatLngLiteral>({
+  const [center, setCenter] = React.useState<
+    google.maps.LatLngLiteral | undefined
+  >({
     lat,
     lng,
   });
@@ -61,12 +63,12 @@ const GLocationPicker = ({
   };
 
   const onIdle = (m: google.maps.Map) => {
-    setZoom(m.getZoom()!);
-    setCenter(m.getCenter()!.toJSON());
+    setZoom(m?.getZoom() ?? 0);
+    setCenter(m?.getCenter()?.toJSON());
   };
 
   return (
-    <div className="flex w-80 h-80 sm:w-96 sm:h-96">
+    <div className="flex h-80 w-80 sm:h-96 sm:w-96">
       <Wrapper libraries={["places"]} apiKey={gmaps_api_key} render={render}>
         <Map
           center={center}
@@ -198,14 +200,14 @@ const Map: React.FC<MapProps> = ({
           id="pac-input"
           ref={searchRef}
           type="text"
-          className="m-[10px] py-2.5 w-[60%] cui-input-base peer"
+          className="cui-input-base peer m-[10px] w-[60%] py-2.5"
           placeholder="Start typing to search"
         />
         {handleOnClose && (
           <Popover.Button>
             <div
               id="map-close"
-              className="bg-white m-[10px] p-2 rounded cursor-pointer"
+              className="m-[10px] cursor-pointer rounded bg-white p-2"
               ref={mapCloseRef}
               onClick={handleOnClose}
             >
@@ -216,7 +218,7 @@ const Map: React.FC<MapProps> = ({
         {handleOnSelectCurrentLocation && (
           <div
             id="current-loaction-select"
-            className="bg-white m-[10px] p-2 rounded cursor-pointer"
+            className="m-[10px] cursor-pointer rounded bg-white p-2"
             ref={currentLocationSelectRef}
             onClick={() =>
               handleOnSelectCurrentLocation((lat: number, lng: number) =>

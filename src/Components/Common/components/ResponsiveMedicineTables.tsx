@@ -37,13 +37,13 @@ export default function ResponsiveMedicineTable(props: {
             <tr>
               {props.theads.map((item) => {
                 return (
-                  <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider whitespace-nowrap">
+                  <th className="whitespace-nowrap border-b border-gray-200 bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-800">
                     {item}
                   </th>
                 );
               })}
               {props.actions && (
-                <th className="px-6 py-3 border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider">
+                <th className="border-b border-gray-200 bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-800">
                   {props.actionLabel || ""}
                 </th>
               )}
@@ -54,7 +54,7 @@ export default function ResponsiveMedicineTable(props: {
               <tr
                 className={classNames(
                   "bg-white",
-                  props.onClick && "hover:bg-gray-200 cursor-pointer"
+                  props.onClick && "cursor-pointer hover:bg-gray-200"
                 )}
                 key={index}
                 onClick={() => props.onClick && props.onClick(med)}
@@ -65,7 +65,7 @@ export default function ResponsiveMedicineTable(props: {
                     idx === props.maxWidthColumn
                   ) {
                     return (
-                      <td className="px-6 py-4 w-full text-sm leading-5 font-medium text-gray-900">
+                      <td className="w-full px-6 py-4 text-sm font-medium leading-5 text-gray-900">
                         {med[key]}
                       </td>
                     );
@@ -91,11 +91,11 @@ export default function ResponsiveMedicineTable(props: {
               title={
                 <div className="grid">
                   <div className="flex flex-col">
-                    <h3 className="text-sm font-medium overflow-hidden text-ellipsis w-full text-left">
+                    <h3 className="w-full overflow-hidden text-ellipsis text-left text-sm font-medium">
                       {med[props.objectKeys[0]]}
                     </h3>
                   </div>
-                  <div className="flex gap-[160px] w-full mt-2">
+                  <div className="mt-2 flex w-full gap-[160px]">
                     {props.fieldsToDisplay?.map((i) => (
                       <div>
                         <h4 className="text-base font-semibold">
@@ -110,17 +110,17 @@ export default function ResponsiveMedicineTable(props: {
               className={
                 props.list.length - 1 === index
                   ? "bg-white p-5 "
-                  : "bg-white p-5 border-b border-b-gray-400"
+                  : "border-b border-b-gray-400 bg-white p-5"
               }
               key={index}
             >
-              <div className="flex flex-col w-full border-t border-t-gray-400 mt-3">
-                <div className="grid grid-cols-2 gap-3 w-full mt-3">
+              <div className="mt-3 flex w-full flex-col border-t border-t-gray-400">
+                <div className="mt-3 grid w-full grid-cols-2 gap-3">
                   {props.objectKeys.map((key, i) => {
                     if (i !== 0 && i !== props.objectKeys.length - 1)
                       return (
                         <div>
-                          <h4 className="font-semibold text-base">
+                          <h4 className="text-base font-semibold">
                             {props.theads[i]}
                           </h4>{" "}
                           <p>{med[key]}</p>
@@ -130,7 +130,7 @@ export default function ResponsiveMedicineTable(props: {
                     if (i === props.objectKeys.length - 1)
                       return (
                         <div className="col-span-2">
-                          <h4 className="font-semibold text-base">
+                          <h4 className="text-base font-semibold">
                             {props.theads[i]}
                           </h4>{" "}
                           <p>{med[key]}</p>

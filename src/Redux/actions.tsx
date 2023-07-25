@@ -5,6 +5,8 @@ import {
 } from "../Components/Medicine/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
+import { ICreateHealthIdRequest } from "../Components/ABDM/models";
+
 export const getConfig = () => {
   return fireRequestForFiles("config");
 };
@@ -855,6 +857,77 @@ export const listAssetTransaction = (params: object) =>
 export const getAssetTransaction = (id: string) =>
   fireRequest("getAssetTransaction", [], {}, { id });
 
+// ABDM related
+export const generateAadhaarOtp = (aadhaar: string) =>
+  fireRequest("generateAadhaarOtp", [], { aadhaar });
+
+export const resentAadhaarOtp = (txnId: string) =>
+  fireRequest("resendAadhaarOtp", [], { txnId });
+
+export const verifyAadhaarOtp = (txnId: string, otp: string) =>
+  fireRequest("verifyAadhaarOtp", [], { txnId, otp });
+
+export const generateMobileOtp = (txnId: string, mobile: string) =>
+  fireRequest("generateMobileOtp", [], { txnId, mobile });
+
+export const checkAndGenerateMobileOtp = (txnId: string, mobile: string) =>
+  fireRequest("checkAndGenerateMobileOtp", [], { txnId, mobile });
+
+export const verifyMobileOtp = (txnId: string, otp: string) =>
+  fireRequest("verifyMobileOtp", [], { txnId, otp });
+
+export const createHealthId = (data: ICreateHealthIdRequest) =>
+  fireRequest("createHealthId", [], data);
+
+export const searchByHealthId = (healthId: string) =>
+  fireRequest("searchByHealthId", [], { healthId });
+
+export const initiateAbdmAuthentication = (
+  authMethod: string,
+  healthid: string
+) => fireRequest("initiateAbdmAuthentication", [], { authMethod, healthid });
+
+export const confirmWithAadhaarOtp = (
+  txnId: string,
+  otp: string,
+  patientId?: string
+) => fireRequest("confirmWithAadhaarOtp", [], { txnId, otp, patientId });
+
+export const confirmWithMobileOtp = (
+  txnId: string,
+  otp: string,
+  patientId?: string
+) => fireRequest("confirmWithMobileOtp", [], { txnId, otp, patientId });
+
+export const linkViaQR = (abha_details: any, patientId?: string) => {
+  return fireRequest("linkViaQR", [], {
+    ...abha_details,
+    patientId,
+  });
+};
+
+export const linkCareContext = (
+  consultationId: string,
+  data: { name?: string; gender?: "M" | "F" | "O"; dob?: string }
+) => {
+  return fireRequest("linkCareContext", [], {
+    consultation: consultationId,
+    ...data,
+  });
+};
+
+export const getAbhaCard = (patient: string, type: "pdf" | "png") => {
+  return fireRequest("getAbhaCard", [], {
+    patient,
+    type,
+  });
+};
+
+export const listAssetAvailability = (params: object) =>
+  fireRequest("listAssetAvailability", [], params);
+export const getAssetAvailability = (id: string) =>
+  fireRequest("getAssetAvailability", [], {}, { id });
+
 export const listPMJYPackages = (query?: string) =>
   fireRequest("listPMJYPackages", [], { query });
 
@@ -915,7 +988,6 @@ export const PrescriptionActions = (consultation_external_id: string) => {
 };
 
 // HCX Actions
-
 export const HCXActions = {
   checkEligibility: (policy: string) => {
     return fireRequest("hcxCheckEligibility", [], { policy });

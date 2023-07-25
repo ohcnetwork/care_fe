@@ -1,31 +1,30 @@
-import React, { useReducer, useEffect, useState, useCallback } from "react";
-import loadable from "@loadable/component";
-
-import { FacilitySelect } from "../Common/FacilitySelect";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
-import { navigate, useQueryParams } from "raviger";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getResourceDetails,
-  updateResource,
-  getUserList,
-} from "../../Redux/actions";
-import { RESOURCE_CHOICES } from "../../Common/constants";
-import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
-import CircularProgress from "../Common/components/CircularProgress";
-
-import { FieldLabel } from "../Form/FormFields/FormField";
-import Card from "../../CAREUI/display/Card";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
 
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import React, { useCallback, useEffect, useReducer, useState } from "react";
+import {
+  getResourceDetails,
+  getUserList,
+  updateResource,
+} from "../../Redux/actions";
+import { navigate, useQueryParams } from "raviger";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import Card from "../../CAREUI/display/Card";
+import CircularProgress from "../Common/components/CircularProgress";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { FieldLabel } from "../Form/FormFields/FormField";
 import Page from "../Common/components/Page";
+import { RESOURCE_CHOICES } from "../../Common/constants";
+import RadioFormField from "../Form/FormFields/RadioFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+import loadable from "@loadable/component";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import { useDispatch } from "react-redux";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -223,8 +222,8 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       crumbsReplacements={{ [props.id]: { name: requestTitle } }}
     >
       <div className="mt-4">
-        <Card className="w-full flex flex-col">
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <Card className="flex w-full flex-col">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-1">
               <SelectFormField
                 label="Status"
@@ -336,7 +335,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
               />
             </div>
 
-            <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
+            <div className="mt-4 flex flex-col justify-between gap-2 md:col-span-2 md:flex-row">
               <Cancel variant="secondary" onClick={() => goBack()} />
               <Submit onClick={handleSubmit} />
             </div>

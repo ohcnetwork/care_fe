@@ -23,9 +23,28 @@ export interface AssignedToObjectModel {
   user_type: string;
 }
 
+export interface AbhaObject {
+  id: number;
+  created_date: string;
+  modified_date: string;
+  abha_number: string;
+  email: string | null;
+  first_name: string;
+  date_of_birth: string;
+  gender: "M" | "F" | "O";
+  address: string;
+  district: string;
+  state: string;
+  health_id: string | null;
+  name: string;
+  last_name: string;
+  middle_name: string;
+  profile_photo: string;
+}
+
 export interface PatientModel {
   test_id?: string;
-  id?: number;
+  id?: string;
   name?: string;
   age?: number;
   allow_transfer?: boolean;
@@ -116,6 +135,10 @@ export interface PatientModel {
   };
   assigned_to?: { first_name?: string; username?: string; last_name?: string };
   assigned_to_object?: AssignedToObjectModel;
+
+  // ABDM related
+  abha_number?: string;
+  abha_number_object?: AbhaObject;
 }
 
 export interface SampleTestModel {
@@ -174,7 +197,7 @@ export interface SampleReportModel {
     address?: string;
     pincode?: string;
     passport_no?: string;
-    aadhar_no?: string;
+    aadhaar_no?: string;
     local_body_name?: string;
     district_name?: string;
     state_name?: string;

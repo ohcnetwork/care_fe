@@ -188,11 +188,11 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
   return (
     <div className={className}>
       {isLoading ? (
-        <div className="flex justify-center items-center">
+        <div className="flex items-center justify-center">
           <div role="status">
             <svg
               aria-hidden="true"
-              className="mr-2 w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-primary"
+              className="mr-2 h-8 w-8 animate-spin fill-primary text-gray-200 dark:text-gray-600"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -245,11 +245,11 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
             />
           </div>
           <div>
-            <div className="flex justify-between flex-col md:flex-row mt-4">
-              <div className="flex flex-row w-full sm:w-auto gap-4 mt-2">
+            <div className="mt-4 flex flex-col justify-between md:flex-row">
+              <div className="mt-2 flex w-full flex-row gap-4 sm:w-auto">
                 <Cancel onClick={() => handleClose()} />
               </div>
-              <div className="flex flex-row w-full sm:w-auto flex-wrap gap-2 mt-2">
+              <div className="mt-2 flex w-full flex-row flex-wrap gap-2 sm:w-auto">
                 {!isLastOptionType && headerText === "Add Doctor Capacity" && (
                   <ButtonV2 id="save-and-exit" onClick={handleSubmit}>
                     Save Doctor Capacity

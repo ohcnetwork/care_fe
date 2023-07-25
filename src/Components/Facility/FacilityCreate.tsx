@@ -557,7 +557,7 @@ export const FacilityCreate = (props: FacilityProps) => {
 
   if (!capacityData || !capacityData.length) {
     capacityList = (
-      <h5 className="mt-4 text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
         {t("no_bed_types_found")}
       </h5>
     );
@@ -568,7 +568,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
 
     capacityList = (
-      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-7 w-full">
+      <div className="mt-4 grid w-full gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <BedTypeCard
           label={t("total_beds")}
           bedCapacityId={0}
@@ -618,13 +618,13 @@ export const FacilityCreate = (props: FacilityProps) => {
   let doctorList: any = null;
   if (!doctorData || !doctorData.length) {
     doctorList = (
-      <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+      <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
         {t("no_doctors")}
       </h5>
     );
   } else {
     doctorList = (
-      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-6">
+      <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {doctorData.map((data: DoctorModal) => {
           const removeCurrentDoctorData = (doctorId: number | undefined) => {
             setDoctorData((state) =>
@@ -678,7 +678,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           <div className="mt-3">
             <DoctorCapacity
               key={docCapacityKey}
-              className="max-w-2xl w-full mx-auto"
+              className="mx-auto w-full max-w-2xl"
               facilityId={createdFacilityId || ""}
               handleClose={() => {
                 navigate(`/facility/${createdFacilityId}`);
@@ -693,9 +693,9 @@ export const FacilityCreate = (props: FacilityProps) => {
               }}
             />
           </div>
-          <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
-            <div className="md:flex justify-between md:pb-2">
-              <div className="font-bold text-xl mb-2">{t("doctors_list")}</div>
+          <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
+            <div className="justify-between md:flex md:pb-2">
+              <div className="mb-2 text-xl font-bold">{t("doctors_list")}</div>
             </div>
             <div className="mt-4">{doctorList}</div>
           </div>
@@ -713,7 +713,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           <div className="mt-3">
             <BedCapacity
               key={bedCapacityKey}
-              className="max-w-2xl w-full mx-auto"
+              className="mx-auto w-full max-w-2xl"
               facilityId={createdFacilityId || ""}
               handleClose={() => {
                 setCurrentStep(3);
@@ -728,9 +728,9 @@ export const FacilityCreate = (props: FacilityProps) => {
               }}
             />
           </div>
-          <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
-            <div className="md:flex justify-between  md:border-b md:pb-2">
-              <div className="font-semibold text-xl mb-2">
+          <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
+            <div className="justify-between md:flex  md:border-b md:pb-2">
+              <div className="mb-2 text-xl font-semibold">
                 {t("bed_capacity")}
               </div>
             </div>
@@ -762,7 +762,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   }}
                   formData={state.form}
                 />
-                <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <SelectFormField
                     {...field("facility_type")}
                     required
@@ -866,7 +866,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     required
                     disableCountry
                   />
-                  <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 py-4">
+                  <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:col-span-2 xl:grid-cols-4">
                     <TextFormField
                       {...field("oxygen_capacity")}
                       type="number"
@@ -950,7 +950,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                   )}
                 </div>
 
-                <div className="flex gap-3 items-center">
+                <div className="flex items-center gap-3">
                   <TextFormField
                     className="flex-1"
                     {...field("latitude")}
@@ -984,7 +984,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                           leaveFrom="opacity-100 translate-y-0"
                           leaveTo="opacity-0 translate-y-1"
                         >
-                          <Popover.Panel className="absolute bottom-10 -right-40 sm:-right-48">
+                          <Popover.Panel className="absolute -right-40 bottom-10 sm:-right-48">
                             <GLocationPicker
                               lat={Number(state.form.latitude)}
                               lng={Number(state.form.longitude)}
@@ -1006,7 +1006,7 @@ export const FacilityCreate = (props: FacilityProps) => {
                     placeholder="Longitude"
                   />
                 </div>
-                <div className="mt-12 flex flex-col-reverse sm:flex-row gap-3 justify-end">
+                <div className="mt-12 flex flex-col-reverse justify-end gap-3 sm:flex-row">
                   <Cancel onClick={() => goBack()} />
                   <Submit
                     type="button"
@@ -1023,5 +1023,5 @@ export const FacilityCreate = (props: FacilityProps) => {
 };
 
 const FieldUnit = ({ unit }: { unit: string }) => {
-  return <p className="text-xs text-gray-700 mr-8">{unit}</p>;
+  return <p className="mr-8 text-xs text-gray-700">{unit}</p>;
 };

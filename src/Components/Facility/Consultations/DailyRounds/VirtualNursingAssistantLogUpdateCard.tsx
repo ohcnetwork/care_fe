@@ -67,13 +67,13 @@ const VirtualNursingAssistantLogUpdateCard = (props: Props) => {
   const diffKeys = Object.keys(diff);
 
   return (
-    <div className="p-4 flex flex-col gap-4 w-full rounded-lg bg-white shadow shadow-primary-500/20 border border-green-300">
-      <div className="flex flex-col gap-1 items-start">
-        <div className="rounded-full bg-green-50 border flex gap-2 w-min items-center text-primary-400">
-          <div className="px-1.5 py-0.5 rounded-full bg-green-100">
+    <div className="flex w-full flex-col gap-4 rounded-lg border border-green-300 bg-white p-4 shadow shadow-primary-500/20">
+      <div className="flex flex-col items-start gap-1">
+        <div className="flex w-min items-center gap-2 rounded-full border bg-green-50 text-primary-400">
+          <div className="rounded-full bg-green-100 px-1.5 py-0.5">
             <CareIcon className="care-l-robot text-lg" />
           </div>
-          <span className="text-sm font-semibold tracking-wider whitespace-nowrap pr-3">
+          <span className="whitespace-nowrap pr-3 text-sm font-semibold tracking-wider">
             {t("virtual_nursing_assistant")}
           </span>
         </div>

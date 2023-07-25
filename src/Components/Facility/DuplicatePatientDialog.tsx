@@ -23,9 +23,9 @@ const DuplicatePatientDialog = (props: Props) => {
       onClose={handleCancel}
       className="w-3/4 md:w-1/2"
     >
-      <div className="grid gap-4 grid-cols-1">
+      <div className="grid grid-cols-1 gap-4">
         <div>
-          <p className="leading-relaxed text-sm">
+          <p className="text-sm leading-relaxed">
             It appears that there are patient records that contain the same
             phone number as the one you just entered. (
             <span className="font-bold">{patientList[0].phone_number}</span>)
@@ -33,7 +33,7 @@ const DuplicatePatientDialog = (props: Props) => {
         </div>
         <div>
           <div className="max-h-[200px] overflow-auto rounded border border-y-gray-400">
-            <table className="w-full relative border-collapse">
+            <table className="relative w-full border-collapse">
               <thead>
                 <tr className="border-separate">
                   {["Patient Name and ID", "Gender"].map((heading, i) => (
@@ -52,7 +52,7 @@ const DuplicatePatientDialog = (props: Props) => {
                     <tr key={i}>
                       <td className={tdClass}>
                         <div className="font-semibold">{patient.name}</div>
-                        <div className="text-xs break-words">
+                        <div className="break-words text-xs">
                           ID : {patient.patient_id}
                         </div>
                       </td>
@@ -65,14 +65,14 @@ const DuplicatePatientDialog = (props: Props) => {
           </div>
         </div>
         <div className="flex flex-col">
-          <div className="flex items-center mb-2">
+          <div className="mb-2 flex items-center">
             <label
-              className="flex bg-primary-500 text-white mb-2 pr-2 py-2 rounded-md w-full ml-0"
+              className="mb-2 ml-0 flex w-full rounded-md bg-primary-500 py-2 pr-2 text-white"
               htmlFor="transfer"
             >
               <input
                 type="radio"
-                className="m-3 text-green-600 focus:ring-green-500 focus:ring-2"
+                className="m-3 text-green-600 focus:ring-2 focus:ring-green-500"
                 id="transfer"
                 name="confirm_action"
                 value="transfer"
@@ -85,15 +85,15 @@ const DuplicatePatientDialog = (props: Props) => {
             </label>
           </div>
 
-          <div className="flex items-center mb-2">
+          <div className="mb-2 flex items-center">
             <label
-              className="flex bg-red-500 text-white mb-2 pr-2 py-2 rounded-md w-full ml-0"
+              className="mb-2 ml-0 flex w-full rounded-md bg-red-500 py-2 pr-2 text-white"
               htmlFor="close"
             >
               <input
                 type="radio"
                 id="close"
-                className="m-3 text-red-600 focus:ring-red-500 focus:ring-2"
+                className="m-3 text-red-600 focus:ring-2 focus:ring-red-500"
                 name="confirm_action"
                 value="close"
                 onChange={(e) => setAction(e.target.value)}
@@ -112,7 +112,7 @@ const DuplicatePatientDialog = (props: Props) => {
           </p>
         </div>
       </div>
-      <div className="mt-4 flex justify-between flex-col sm:flex-row">
+      <div className="mt-4 flex flex-col justify-between sm:flex-row">
         <Cancel
           onClick={handleCancel}
           className="mb-2 sm:mb-0"
