@@ -52,6 +52,7 @@ import loadable from "@loadable/component";
 import moment from "moment";
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
+import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import PatientNotesSlideover from "./PatientNotesSlideover";
 
@@ -67,6 +68,7 @@ export const ConsultationDetails = (props: any) => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
+  const [qParams, _] = useQueryParams();
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {} as ConsultationModel
@@ -275,11 +277,12 @@ export const ConsultationDetails = (props: any) => {
               [facilityId]: { name: patientData?.facility_object?.name },
               [patientId]: { name: patientData?.name },
               [consultationId]: {
-                name: `Admitted on ${formatDate(
-                  consultationData.admission_date
-                    ? consultationData.admission_date
-                    : "00:00"
-                )}`,
+                name:
+                  consultationData.suggestion === "HI"
+                    ? "Recommended Home Isolation"
+                    : `Admitted on ${formatDate(
+                        consultationData.admission_date!
+                      )}`,
               },
             }}
             breadcrumbs={true}
@@ -337,6 +340,8 @@ export const ConsultationDetails = (props: any) => {
               patient={patientData}
               consultation={consultationData}
               fetchPatientData={fetchData}
+              consultationId={consultationId}
+              showAbhaProfile={qParams["show-abha-profile"] === "true"}
             />
 
             <div className="flex md:flex-row flex-col justify-between border-t px-4 pt-5">

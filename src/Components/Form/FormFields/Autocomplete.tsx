@@ -6,6 +6,7 @@ import { dropdownOptionClassNames } from "../MultiSelectMenuV2";
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
 import { classNames } from "../../../Utils/utils";
+import { useTranslation } from "react-i18next";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -89,6 +90,7 @@ type AutocompleteProps<T, V = T> = {
  * customizability.
  */
 export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
+  const { t } = useTranslation();
   const [query, setQuery] = useState(""); // Ensure lower case
   useEffect(() => {
     props.onQuery?.(query);
@@ -160,25 +162,28 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
               <div className="absolute right-0 top-1 mr-2 flex h-full items-center gap-1 pb-2 text-lg text-gray-900">
                 <span>{value?.icon}</span>
+
+                {value && !props.isLoading && !props.required && (
+                  <div className="tooltip">
+                    <CareIcon
+                      className="care-l-times-circle h-4 w-4 text-gray-800 hover:text-gray-500 transition-colors duration-200 ease-in-out"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        props.onChange(undefined);
+                      }}
+                    />
+                    <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs">
+                      {t("clear_selection")}
+                    </span>
+                  </div>
+                )}
+
                 {props.isLoading ? (
                   <CareIcon className="care-l-spinner animate-spin" />
                 ) : (
                   <CareIcon className="care-l-angle-down" />
                 )}
               </div>
-              {value && (
-                <div
-                  className="absolute right-0 top-1 mr-7 flex h-full items-center gap-1 pb-2 text-lg text-gray-900 hover:text-gray-500"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (!props.required) props.onChange(undefined);
-                  }}
-                >
-                  {!props.isLoading && (
-                    <CareIcon className="care-l-times-circle h-4 w-4" />
-                  )}
-                </div>
-              )}
             </Combobox.Button>
           </div>
 
