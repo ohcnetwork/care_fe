@@ -21,7 +21,7 @@ export default function VentilatorPatientVitalsMonitor({
 }: Props) {
   const { connect, waveformCanvas, data, isOnline } =
     useVentilatorVitalsMonitor();
-  const { patient, bed } = patientAssetBed ?? {};
+  const { patient, bed, asset } = patientAssetBed ?? {};
 
   useEffect(() => {
     connect(socketUrl);
@@ -52,18 +52,38 @@ export default function VentilatorPatientVitalsMonitor({
               </span>
             )}
           </div>
-          {bed && (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span className="flex items-center gap-1">
-                <CareIcon className="care-l-bed text-base" />
-                {bed.name}
-              </span>
-              <span className="flex items-center gap-1">
-                <CareIcon className="care-l-location-point text-base" />
-                {bed.location_object?.name}
-              </span>
-            </div>
-          )}
+          <div className="flex gap-3">
+            {asset && (
+              <div className="flex items-center gap-2 text-sm">
+                <Link
+                  className="flex gap-2 text-gray-500"
+                  href={`/facility/${patient?.facility_object?.id}/assets/${asset?.id}`}
+                >
+                  <span className="flex items-center gap-1">
+                    <CareIcon className="care-l-lungs text-base" />
+                    {asset.name}
+                  </span>
+                </Link>
+              </div>
+            )}
+            {bed && (
+              <div className="flex items-center gap-2 text-sm">
+                <Link
+                  className="flex gap-2 text-gray-500"
+                  href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
+                >
+                  <span className="flex items-center gap-1">
+                    <CareIcon className="care-l-bed text-base" />
+                    {bed.name}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <CareIcon className="care-l-location-point text-base" />
+                    {bed.location_object?.name}
+                  </span>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       )}
       <div className="relative flex flex-col md:flex-row md:justify-between divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2">
