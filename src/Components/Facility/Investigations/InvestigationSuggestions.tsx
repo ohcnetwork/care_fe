@@ -35,8 +35,8 @@ export default function ViewInvestigationSuggestions(props: {
   return (
     <div className="mt-5">
       <h3>Investigations Suggested</h3>
-      <table className="hidden md:table w-full bg-white shadow rounded-xl mt-3">
-        <thead className="text-left bg-gray-200">
+      <table className="mt-3 hidden w-full rounded-xl bg-white shadow md:table">
+        <thead className="bg-gray-200 text-left">
           <tr>
             <th className="p-4">Investigations</th>
             <th className="p-4">To be conducted</th>
@@ -51,7 +51,7 @@ export default function ViewInvestigationSuggestions(props: {
               return (
                 <tr key={index} className="border-b border-b-gray-200">
                   <td className="p-4">
-                    <ul className="list-decimal ml-4">
+                    <ul className="ml-4 list-decimal">
                       {investigation.type?.map((type, index) => {
                         const investigationType = type.includes(" (GROUP)")
                           ? {
@@ -127,7 +127,7 @@ export default function ViewInvestigationSuggestions(props: {
                           >
                             {type}
                             {investigationMissed && (
-                              <div className="tooltip text-red-400 inline-block cursor-pointer">
+                              <div className="tooltip inline-block cursor-pointer text-red-400">
                                 <i className="fas fa-triangle-exclamation" />
                                 <div className="tooltip-text">
                                   Investigation Missed!
@@ -135,7 +135,7 @@ export default function ViewInvestigationSuggestions(props: {
                               </div>
                             )}
                             {investigated && !investigationMissed && (
-                              <div className="tooltip text-green-400 inline-block cursor-pointer">
+                              <div className="tooltip inline-block cursor-pointer text-green-400">
                                 <i className="fas fa-check" />
                                 <div className="tooltip-text">
                                   Investigation Recorded
@@ -146,7 +146,7 @@ export default function ViewInvestigationSuggestions(props: {
                         );
                       })}
                     </ul>
-                    <div className="text-sm mt-4">
+                    <div className="mt-4 text-sm">
                       <span className="font-bold">Notes:</span>{" "}
                       {investigation.notes || "none"}
                     </div>
@@ -206,9 +206,9 @@ export default function ViewInvestigationSuggestions(props: {
             let nextFurthestInvestigation: any = undefined;
 
             return (
-              <div key={index} className="bg-white shadow rounded-xl p-4">
+              <div key={index} className="rounded-xl bg-white p-4 shadow">
                 <b>Investigations :</b>
-                <ul className="list-decimal ml-4">
+                <ul className="ml-4 list-decimal">
                   {investigation.type?.map((type, index) => {
                     const investigationType = type.includes(" (GROUP)")
                       ? {
@@ -314,7 +314,7 @@ export default function ViewInvestigationSuggestions(props: {
             );
           })
         ) : (
-          <div className="bg-white shadow rounded-xl">
+          <div className="rounded-xl bg-white shadow">
             No Investigation Suggestions
           </div>
         )}

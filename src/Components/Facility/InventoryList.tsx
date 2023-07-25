@@ -31,7 +31,7 @@ export default function InventoryList(props: any) {
         getInventorySummary(facilityId, { limit, offset })
       );
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setInventory(res.data.results);
           setTotalCount(res.data.count);
         }
@@ -68,7 +68,7 @@ export default function InventoryList(props: any) {
   };
 
   let inventoryList: any = [];
-  if (inventory && inventory.length) {
+  if (inventory?.length) {
     inventoryList = inventory.map((inventoryItem: any) => (
       <tr
         key={inventoryItem.id}
@@ -82,18 +82,18 @@ export default function InventoryList(props: any) {
           )
         }
       >
-        <td className="px-5 py-5 border-b border-gray-200 text-sm ">
+        <td className="border-b border-gray-200 p-5 text-sm">
           <div className="flex items-center">
-            <p className="text-gray-900 whitespace-nowrap">
+            <p className="whitespace-nowrap text-gray-900">
               {inventoryItem.item_object?.name}
               {inventoryItem.is_low && (
-                <span className="ml-2 badge badge badge-danger">Low Stock</span>
+                <span className="badge badge-danger ml-2">Low Stock</span>
               )}
             </p>
           </div>
         </td>
-        <td className="px-5 py-5 border-b border-gray-200 text-sm ">
-          <p className="text-gray-900 whitespace-nowrap lowercase">
+        <td className="border-b border-gray-200 p-5 text-sm">
+          <p className="whitespace-nowrap lowercase text-gray-900">
             {inventoryItem.quantity}{" "}
             {inventoryItem.item_object?.default_unit?.name}
           </p>
@@ -103,11 +103,8 @@ export default function InventoryList(props: any) {
   } else if (inventory && inventory.length === 0) {
     inventoryList = (
       <tr className="bg-white">
-        <td
-          colSpan={3}
-          className="px-5 py-5 border-b border-gray-200 text-center"
-        >
-          <p className="text-gray-500 whitespace-nowrap">
+        <td colSpan={3} className="border-b border-gray-200 p-5 text-center">
+          <p className="whitespace-nowrap text-gray-500">
             No inventory available
           </p>
         </td>
@@ -120,15 +117,15 @@ export default function InventoryList(props: any) {
   } else if (inventory) {
     inventoryItem = (
       <>
-        <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4 overflow-x-auto">
+        <div className="-mx-4 overflow-x-auto p-4 sm:-mx-8 sm:px-8">
           <div className="inline-block min-w-full">
-            <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
+            <table className="min-w-full overflow-hidden rounded-lg leading-normal shadow">
               <thead>
                 <tr>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Name
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-400 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="border-b-2 border-gray-200 bg-primary-400 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Stock
                   </th>
                 </tr>
@@ -160,7 +157,7 @@ export default function InventoryList(props: any) {
     >
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-4 md:py-8">
-          <div className="flex flex-col md:flex-row gap-2">
+          <div className="flex flex-col gap-2 md:flex-row">
             <ButtonV2
               className="w-full"
               href={`/facility/${facilityId}/inventory/add`}

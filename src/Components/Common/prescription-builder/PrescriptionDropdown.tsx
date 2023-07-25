@@ -34,11 +34,11 @@ export function PrescriptionDropdown(props: {
   useOutsideAlerter(dropRef);
 
   return (
-    <div className="w-full relative">
+    <div className="relative w-full">
       <input
         type={props.type}
         placeholder={props.placeholder}
-        className={`relative cui-input-base py-2 ${props.className}`}
+        className={`cui-input-base relative py-2 ${props.className}`}
         onClick={() => setOpen(!open)}
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -50,7 +50,7 @@ export function PrescriptionDropdown(props: {
       <div
         ref={dropRef}
         className={classNames(
-          "absolute z-40 top-[calc(100%+10px)] left-0 w-full rounded-md shadow-lg bg-white max-h-[300px] overflow-auto",
+          "absolute left-0 top-[calc(100%+10px)] z-40 max-h-[300px] w-full overflow-auto rounded-md bg-white shadow-lg",
           !open && "hidden"
         )}
       >
@@ -60,7 +60,7 @@ export function PrescriptionDropdown(props: {
               <button
                 type="button"
                 key={i}
-                className="w-full block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
+                className="block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900 focus:outline-none"
                 onClick={() => {
                   setValue(option);
                   setOpen(false);
@@ -72,7 +72,7 @@ export function PrescriptionDropdown(props: {
               {tips && tips[option] && (
                 <button
                   onClick={(event) => event.preventDefault()}
-                  className="rounded px-4 tooltip"
+                  className="tooltip rounded px-4"
                 >
                   <span className="tooltip-text tooltip-right">
                     {tips[option]}
