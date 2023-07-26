@@ -104,7 +104,7 @@ export default function PrescriptionBuilder({
               <span>{t("modification_caution_note")}</span>
             </div>
           }
-          className="w-full max-w-3xl lg:min-w-[600px]"
+          className="w-full lg:max-w-3xl"
         >
           <CreatePrescriptionForm
             prescription={
