@@ -78,6 +78,7 @@ export const ConsultationDetails = (props: any) => {
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
   const [showAutomatedRounds, setShowAutomatedRounds] = useState(true);
+  const [showPatientNotesPopup, setShowPatientNotesPopup] = useState(false);
 
   const getPatientGender = (patientData: any) =>
     GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
@@ -325,12 +326,12 @@ export const ConsultationDetails = (props: any) => {
               >
                 Patient Details
               </Link>
-              <Link
-                href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
+              <ButtonV2
+                onClick={() => setShowPatientNotesPopup(true)}
                 className="btn btn-primary m-1 w-full hover:text-white"
               >
                 Doctor&apos;s Notes
-              </Link>
+              </ButtonV2>
             </div>
           </div>
         </nav>
@@ -1239,7 +1240,13 @@ export const ConsultationDetails = (props: any) => {
         setShow={setShowDoctors}
       />
 
-      <PatientNotesSlideover patientId={patientId} facilityId={facilityId} />
+      {showPatientNotesPopup && (
+        <PatientNotesSlideover
+          patientId={patientId}
+          facilityId={facilityId}
+          setShowPatientNotesPopup={setShowPatientNotesPopup}
+        />
+      )}
     </div>
   );
 };

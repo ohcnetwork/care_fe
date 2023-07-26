@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Dispatch, SetStateAction } from "react";
 import { getPatient, addPatientNote } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
@@ -8,10 +8,12 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
+import { make as Link } from "../Common/components/Link.bs";
 
 interface PatientNotesProps {
-  patientId: any;
-  facilityId: any;
+  patientId: string;
+  facilityId: string;
+  setShowPatientNotesPopup: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function PatientNotesSlideover(props: PatientNotesProps) {
@@ -22,7 +24,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
 
   const dispatch = useDispatch();
 
-  const { facilityId, patientId } = props;
+  const { facilityId, patientId, setShowPatientNotesPopup } = props;
 
   const onAddNote = () => {
     const payload = {
@@ -53,42 +55,58 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
     fetchPatientName();
   }, [dispatch, patientId]);
 
+  const notesActionIcons = (
+    <div className="flex gap-1">
+      {show && (
+        <Link
+          className={classNames(
+            "flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+          )}
+          href={`/facility/${facilityId}/patient/${patientId}/notes`}
+        >
+          <CareIcon className="care-l-window-maximize text-lg transition-all delay-150 duration-300 ease-out" />
+        </Link>
+      )}
+      <div
+        className={classNames(
+          "flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100",
+          show ? "rotate-180" : ""
+        )}
+        onClick={() => setShow(!show)}
+      >
+        <CareIcon className="care-l-angle-up text-lg transition-all delay-150 duration-300 ease-out" />
+      </div>
+      <div
+        className={classNames(
+          "flex h-8 w-8 cursor-pointer items-center justify-center rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100"
+        )}
+        onClick={() => setShowPatientNotesPopup(false)}
+      >
+        <CareIcon className="care-l-times text-lg transition-all delay-150 duration-300 ease-out" />
+      </div>
+    </div>
+  );
+
   return (
     <div
       className={classNames(
-        "fixed sm:right-20 bottom-0 z-20",
+        "fixed bottom-0 z-20 sm:right-8",
         show
-          ? "w-screen h-screen sm:h-fit sm:w-[400px] right-0"
-          : "w-[250px] right-10"
+          ? "right-0 h-screen w-screen sm:h-fit sm:w-[400px]"
+          : "right-8 w-[250px]"
       )}
     >
       {!show ? (
-        <div className="flex justify-around items-center w-full p-2 rounded-t-md bg-primary-800 text-white">
+        <div className="flex w-full items-center justify-around rounded-t-md bg-primary-800 p-2 text-white">
           <span className="font-semibold">{"Doctor's Notes"}</span>
-          <div
-            className={classNames(
-              "flex items-center justify-center w-8 h-8 cursor-pointer rounded text-gray-100 text-opacity-70 hover:text-opacity-100 bg-primary-800 hover:bg-primary-700",
-              show ? "rotate-180" : ""
-            )}
-            onClick={() => setShow(!show)}
-          >
-            <CareIcon className="care-l-angle-up text-lg transition-all duration-300 delay-150 ease-out" />
-          </div>
+          {notesActionIcons}
         </div>
       ) : (
-        <div className="bg-white sm:rounded-t-md w-full h-screen sm:h-[500px] flex flex-col border-2 border-b-0 pb-3 border-primary-800 transition-all overflow-clip -translate-y-0 ">
+        <div className="flex h-screen w-full -translate-y-0 flex-col text-clip border-2 border-b-0 border-primary-800 bg-white pb-3 transition-all sm:h-[500px] sm:rounded-t-md ">
           {/* Doctor Notes Header */}
-          <div className="flex justify-between items-center w-full p-2 px-4 bg-primary-800 text-white">
+          <div className="flex w-full items-center justify-between bg-primary-800 p-2 px-4 text-white">
             <span className="font-semibold">{"Doctor's Notes"}</span>
-            <div
-              className={classNames(
-                "flex items-center justify-center w-8 h-8 cursor-pointer rounded text-gray-100 text-opacity-70 hover:text-opacity-100 bg-primary-800 hover:bg-primary-700",
-                show ? "rotate-180" : ""
-              )}
-              onClick={() => setShow(!show)}
-            >
-              <CareIcon className="care-l-angle-up text-lg transition-all duration-300 delay-150 ease-out" />
-            </div>
+            {notesActionIcons}
           </div>
           {/* Doctor Notes Body */}
           <PatientNotesList
@@ -97,7 +115,7 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
             reload={reload}
             setReload={setReload}
           />
-          <div className="flex items-center mx-4 relative">
+          <div className="relative mx-4 flex items-center">
             <TextFormField
               name="note"
               value={noteField}
