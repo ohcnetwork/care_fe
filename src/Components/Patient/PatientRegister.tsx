@@ -416,9 +416,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               ? res.data.last_vaccinated_date
               : null,
           };
-          if (res.data.address !== res.data.permanent_address) {
-            formData["sameAddress"] = false;
-          }
+
+          formData.sameAddress =
+            res.data.address === res.data.permanent_address;
           res.data.medical_history.forEach((i: any) => {
             const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
               (j: any) =>
@@ -1263,6 +1263,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           >
                             <TextAreaFormField
                               {...field("permanent_address")}
+                              required
                               label="Permanent Address"
                               rows={3}
                               disabled={field("sameAddress").value}
