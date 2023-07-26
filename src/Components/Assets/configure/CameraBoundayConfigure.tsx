@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { BedModel } from "../../Facility/models";
+import ButtonV2 from "../../Common/components/ButtonV2";
 import Card from "../../../CAREUI/display/Card";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
