@@ -561,7 +561,7 @@ export const DailyRounds = (props: any) => {
                   label="Respiratory Rate"
                   unit="bpm"
                   required
-                  start={10}
+                  start={0}
                   end={50}
                   step={1}
                   thresholds={[
