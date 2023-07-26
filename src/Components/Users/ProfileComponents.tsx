@@ -3,7 +3,7 @@ export const LabelValueCard = (props: { children: React.ReactNode }) => (
 );
 
 export const ProfileLabel = (props: { text: string }) => (
-  <dt className="text-sm leading-5 font-medium text-gray-800">{props.text}</dt>
+  <dt className="text-sm font-medium leading-5 text-gray-800">{props.text}</dt>
 );
 
 export const ProfileValue = (props: { text: string }) => (
@@ -11,7 +11,7 @@ export const ProfileValue = (props: { text: string }) => (
 );
 
 export const ValueBadge = (props: { text: string }) => (
-  <dd className="mt-2 mb-1 badge badge-pill badge-primary text-sm leading-5 text-white">
+  <dd className="badge badge-pill badge-primary mb-1 mt-2 text-sm leading-5 text-white">
     {props.text}
   </dd>
 );

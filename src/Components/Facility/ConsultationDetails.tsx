@@ -174,7 +174,7 @@ export const ConsultationDetails = (props: any) => {
     const [showMore, setShowMore] = useState(false);
 
     return diagnoses.length ? (
-      <div className="text-sm w-full">
+      <div className="w-full text-sm">
         <p className="font-semibold leading-relaxed">{label}</p>
 
         {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) => (
@@ -185,14 +185,14 @@ export const ConsultationDetails = (props: any) => {
             {!showMore ? (
               <a
                 onClick={() => setShowMore(true)}
-                className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+                className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
               >
                 show more
               </a>
             ) : (
               <a
                 onClick={() => setShowMore(false)}
-                className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+                className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
               >
                 show less
               </a>
@@ -218,6 +218,7 @@ export const ConsultationDetails = (props: any) => {
       />
 
       <div className="px-2 pb-2">
+
         <nav className="flex justify-between flex-wrap relative">
           <Page
             title="Patient Dashboard"
@@ -284,8 +285,8 @@ export const ConsultationDetails = (props: any) => {
             </div>
           </Page>
         </nav>
-        <div className="flex md:flex-row flex-col w-full mt-2">
-          <div className="border rounded-lg bg-white shadow h-full text-black w-full">
+        <div className="mt-2 flex w-full flex-col md:flex-row">
+          <div className="h-full w-full rounded-lg border bg-white text-black shadow">
             <PatientInfoCard
               patient={patientData}
               consultation={consultationData}
@@ -294,15 +295,15 @@ export const ConsultationDetails = (props: any) => {
               showAbhaProfile={qParams["show-abha-profile"] === "true"}
             />
 
-            <div className="flex md:flex-row flex-col justify-between border-t px-4 pt-5">
+            <div className="flex flex-col justify-between border-t px-4 pt-5 md:flex-row">
               {consultationData.admitted_to && (
-                <div className="border rounded-lg bg-gray-100 p-2 md:mt-0 mt-2">
+                <div className="mt-2 rounded-lg border bg-gray-100 p-2 md:mt-0">
                   <div className="border-b-2 py-1">
                     Patient
                     {consultationData.discharge_date
                       ? " Discharged from"
                       : " Admitted to"}
-                    <span className="badge badge-pill badge-warning font-bold ml-2">
+                    <span className="badge badge-pill badge-warning ml-2 font-bold">
                       {consultationData.admitted_to}
                     </span>
                   </div>
@@ -316,7 +317,7 @@ export const ConsultationDetails = (props: any) => {
                       ).fromNow()}
                     </div>
                   )}
-                  <div className="text-xs -mt-2">
+                  <div className="-mt-2 text-xs">
                     {consultationData.admission_date &&
                       formatDate(consultationData.admission_date)}
                     {consultationData.discharge_date &&
@@ -336,6 +337,9 @@ export const ConsultationDetails = (props: any) => {
                   {consultationData.other_symptoms}
                 </div>
                 )
+
+          
+
                 <ShowDiagnosis
                   diagnoses={
                     consultationData?.icd11_provisional_diagnoses_object
@@ -358,16 +362,16 @@ export const ConsultationDetails = (props: any) => {
                   label="Diagnosis (as per ICD-11 recommended by WHO)"
                 />
                 {consultationData.verified_by && (
-                  <div className="text-sm mt-2">
+                  <div className="mt-2 text-sm">
                     <span className="font-semibold leading-relaxed">
                       Verified By:{" "}
                     </span>
                     {consultationData.verified_by}
-                    <i className="fas fa-check fill-current text-lg text-green-500 ml-2"></i>
+                    <i className="fas fa-check ml-2 fill-current text-lg text-green-500"></i>
                   </div>
                 )}
               </div>
-              <div className="flex flex-col lg:flex-row gap-2 text-right h-full">
+              <div className="flex h-full flex-col gap-2 text-right lg:flex-row">
                 <button
                   className="btn btn-primary"
                   onClick={() => setOpenDischargeSummaryDialog(true)}
@@ -386,8 +390,8 @@ export const ConsultationDetails = (props: any) => {
                 </button>
               </div>
             </div>
-            <div className="flex md:flex-row flex-col gap-2 justify-between p-4">
-              <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
+            <div className="flex flex-col justify-between gap-2 p-4 md:flex-row">
+              <div className="font-base flex flex-col text-xs leading-relaxed text-gray-700">
                 <div>
                   <span className="text-gray-900">Created: </span>
                   {consultationData.created_date
@@ -402,7 +406,7 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
+              <div className="font-base flex flex-col text-xs leading-relaxed text-gray-700 md:text-right">
                 <div>
                   <span className="text-gray-900">Last Modified: </span>
                   {consultationData.modified_date
@@ -421,10 +425,10 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </div>
 
-        <div className="border-b-2 border-gray-200 mt-4 w-full">
-          <div className="sm:flex sm:items-baseline overflow-x-auto">
+        <div className="mt-4 w-full border-b-2 border-gray-200">
+          <div className="overflow-x-auto sm:flex sm:items-baseline">
             <div className="mt-4 sm:mt-0">
-              <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
+              <nav className="flex space-x-6 overflow-x-auto pb-2 pl-2 ">
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
                     if (
@@ -448,7 +452,9 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </div>
 
+
         <SelectedTab {...consultationProps} />
+
 
               </div>
 

@@ -46,7 +46,7 @@ export default function DoctorVideoSlideover(props: {
       dialogClass="md:w-[400px]"
     >
       {/* Title and close button */}
-      <p className="text-gray-600 text-sm -mt-3 pb-4">
+      <p className="-mt-3 pb-4 text-sm text-gray-600">
         Select a doctor to connect via video
       </p>
       {[
@@ -72,7 +72,7 @@ export default function DoctorVideoSlideover(props: {
           </div>
 
           <ul
-            className="max-h-96 scroll-py-3 overflow-y-auto list-none"
+            className="max-h-96 scroll-py-3 list-none overflow-y-auto"
             id="options"
             role="listbox"
           >
@@ -104,10 +104,10 @@ function UserListItem(props: { user: UserAssignedModel }) {
       <li
         key={user.id}
         className={
-          "mt-2 group cursor-default select-none rounded-xl p-3 " +
+          "group mt-2 cursor-default select-none rounded-xl p-3 " +
           (user.alt_phone_number
             ? "cursor-pointer border border-gray-400 transition hover:border-green-500 hover:bg-green-50"
-            : "cursor-not-allowed pointer-events-none bg-gray-400 ")
+            : "pointer-events-none cursor-not-allowed bg-gray-400 ")
         }
         id="option-1"
         role="option"
@@ -161,7 +161,7 @@ function UserListItem(props: { user: UserAssignedModel }) {
                     <span className="tooltip-text tooltip-left">
                       Connect on WhatsApp
                     </span>
-                    <CareIcon className="care-l-whatsapp w-5 h-5" />
+                    <CareIcon className="care-l-whatsapp h-5 w-5" />
                   </div>
                 </a>
                 <a
@@ -173,7 +173,7 @@ function UserListItem(props: { user: UserAssignedModel }) {
                     <span className="tooltip-text tooltip-left">
                       Connect on Phone
                     </span>
-                    <CareIcon className="care-l-phone-alt w-5 h-5" />
+                    <CareIcon className="care-l-phone-alt h-5 w-5" />
                   </div>
                 </a>
               </div>
@@ -182,14 +182,14 @@ function UserListItem(props: { user: UserAssignedModel }) {
               <div className="mt-1 text-sm leading-5 text-gray-900">
                 <div className="flex flex-wrap gap-2">
                   {user.skills?.map((skill: SkillObjectModel) => (
-                    <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-900 rounded-full text-xs px-3">
+                    <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-900">
                       <p className="py-1.5">{skill.name}</p>
                     </span>
                   ))}
                 </div>
               </div>
             )}
-            <p className="text-sm text-gray-500 flex gap-2 divide-gray-800">
+            <p className="flex gap-2 divide-gray-800 text-sm text-gray-500">
               <a
                 role="button"
                 href="#"
@@ -203,7 +203,7 @@ function UserListItem(props: { user: UserAssignedModel }) {
                   <span className="tooltip-text tooltip-top">
                     Copy Phone number
                   </span>
-                  <CareIcon className="care-l-clipboard w-5 h-5" />
+                  <CareIcon className="care-l-clipboard h-5 w-5" />
                 </div>
               </a>
               <span>{user.alt_phone_number}</span>

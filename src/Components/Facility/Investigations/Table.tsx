@@ -7,10 +7,10 @@ import { useState } from "react";
 const TestRow = ({ data, value, onChange, i }: any) => {
   return (
     <tr className={i % 2 == 0 ? "bg-gray-50" : "bg-white"}>
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
         {data.name}
       </td>
-      <td className="px-6 py-4 min-w-[200px] whitespace-nowrap text-sm text-gray-700 text-right">
+      <td className="min-w-[200px] whitespace-nowrap px-6 py-4 text-right text-sm text-gray-700">
         {data.investigation_type === "Choice" ? (
           <SelectFormField
             name={data.name}
@@ -31,16 +31,16 @@ const TestRow = ({ data, value, onChange, i }: any) => {
           />
         )}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.unit || "---"}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.min_value ?? "---"}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.max_value ?? "---"}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.ideal_value || "---"}
       </td>
     </tr>
@@ -64,7 +64,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
   };
 
   return (
-    <div className="md:p-4 md:m-4">
+    <div className="md:m-4 md:p-4">
       {title && <h1 className="text-3xl font-bold">{title}</h1>}
       <br />
       <TextFormField
@@ -76,7 +76,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
         onChange={(e) => setSearchFilter(e.value)}
       />
       <br />
-      <div className="shadow border-b border-gray-200 sm:rounded-lg overflow-x-scroll sm:overflow-x-visible">
+      <div className="overflow-x-scroll border-b border-gray-200 shadow sm:overflow-x-visible sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -84,7 +84,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
                 (heading) => (
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-semibold text-gray-800 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-800"
                   >
                     {heading}
                   </th>

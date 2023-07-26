@@ -1,7 +1,7 @@
 let str = React.string
 
 @react.component
-export make = (~others, ~renderOptionalIntWithIndicators, ~renderOptionalBool) => {
+let make = (~others, ~renderOptionalIntWithIndicators, ~renderOptionalBool) => {
   <div>
     {renderOptionalBool(
       "Bilateral Air Entry",
