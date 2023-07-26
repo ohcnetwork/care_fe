@@ -150,7 +150,7 @@ function UptimeInfoPopover({
   return (
     <Popover className="relative mt-10 hidden sm:block">
       <Popover.Panel
-        className={`absolute z-50 w-64 px-4 sm:px-0 lg:w-96 ${
+        className={`absolute z-50 w-64 px-4 sm:px-0 lg:w-96${
           day > numDays - 10
             ? "-translate-x-6"
             : day < 10
