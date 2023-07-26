@@ -1,7 +1,7 @@
 let str = React.string
 
 @react.component
-export make = (
+let make = (
   ~title,
   ~id=title,
   ~name=title,

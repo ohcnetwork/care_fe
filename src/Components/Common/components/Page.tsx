@@ -20,7 +20,7 @@ export default function Page(props: PageProps) {
 
   return (
     <div className={classNames(padding, props.className)} ref={props.ref}>
-      <div className="flex flex-col md:flex-row justify-between md:items-center md:gap-6 gap-2">
+      <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center md:gap-6">
         <PageTitle
           title={props.title}
           breadcrumbs={props.breadcrumbs}

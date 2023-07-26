@@ -58,8 +58,8 @@ export default function BoardView() {
   const { t } = useTranslation();
 
   return (
-    <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="w-full flex flex-col lg:flex-row items-center justify-between">
+    <div className="flex h-screen flex-col px-2 pb-2">
+      <div className="flex w-full flex-col items-center justify-between lg:flex-row">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
             title={t("shifting")}
@@ -76,7 +76,7 @@ export default function BoardView() {
             breadcrumbs={false}
           />
         </div>
-        <div className="w-full flex gap-2 pt-2 items-center flex-col xl:flex-row justify-between">
+        <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 xl:flex-row">
           <SearchInput
             name="patient_name"
             value={qParams.patient_name}
@@ -92,7 +92,7 @@ export default function BoardView() {
             activeTab={boardFilter[0].text !== activeBoards[0].text}
           />
 
-          <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 w-full lg:w-fit lg:mr-4">
+          <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
             <ButtonV2
               className="py-[11px]"
               onClick={() =>
@@ -109,8 +109,8 @@ export default function BoardView() {
         </div>
       </div>
       <BadgesList {...{ qParams, FilterBadges }} />
-      <ScrollingComponent className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
-        <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-2">
+      <ScrollingComponent className="mt-4 flex flex-1 items-start overflow-x-scroll px-4 pb-2">
+        <div className="mt-4 flex flex-1 items-start overflow-x-scroll px-2 pb-2">
           {isLoading ? (
             <Loading />
           ) : (

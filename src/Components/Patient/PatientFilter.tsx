@@ -379,14 +379,14 @@ export default function PatientFilter(props: any) {
     >
       <AccordionV2
         title={
-          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
             Patient Details based
           </h1>
         }
         expanded={true}
         className="w-full rounded-md"
       >
-        <div className="w-full grid gap-4 grid-cols-1">
+        <div className="grid w-full grid-cols-1 gap-4">
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Gender</FieldLabel>
             <SelectMenuV2
@@ -525,14 +525,14 @@ export default function PatientFilter(props: any) {
       </AccordionV2>
       <AccordionV2
         title={
-          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
             Date based
           </h1>
         }
         expanded={true}
         className="w-full rounded-md"
       >
-        <div className="w-full grid gap-4 grid-cols-1">
+        <div className="grid w-full grid-cols-1 gap-4">
           <DateRangeFormField
             labelClassName="text-sm"
             name="created_date"
@@ -600,14 +600,14 @@ export default function PatientFilter(props: any) {
       </AccordionV2>
       <AccordionV2
         title={
-          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
             Geography based
           </h1>
         }
         expanded={true}
         className="w-full rounded-md"
       >
-        <div className="w-full grid gap-4 grid-cols-1">
+        <div className="grid w-full grid-cols-1 gap-4">
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Facility</FieldLabel>
             <FacilitySelect
@@ -669,14 +669,14 @@ export default function PatientFilter(props: any) {
       </AccordionV2>
       <AccordionV2
         title={
-          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
             COVID Details based
           </h1>
         }
         expanded={true}
         className="w-full rounded-md"
       >
-        <div className="w-full grid gap-4 grid-cols-1">
+        <div className="grid w-full grid-cols-1 gap-4">
           {kasp_enabled && (
             <div className="w-full flex-none">
               <FieldLabel className="text-sm">{kasp_string}</FieldLabel>
@@ -713,7 +713,7 @@ export default function PatientFilter(props: any) {
               optionValue={({ id }) => id}
               optionIcon={({ id }) => (
                 <>
-                  <CareIcon className="care-l-syringe w-5 mr-2" />
+                  <CareIcon className="care-l-syringe mr-2 w-5" />
                   <span className="font-bold">{id}</span>
                 </>
               )}

@@ -27,7 +27,7 @@ interface ISampleReportSectionProps {
 function SampleReportSection({ title, fields }: ISampleReportSectionProps) {
   return (
     <>
-      <div className="flex justify-center font-medium bg-gray-700 text-white py-2 border border-b-0 border-gray-800">
+      <div className="flex justify-center border border-b-0 border-gray-800 bg-gray-700 py-2 font-medium text-white">
         <h6 className="text-lg">{title}</h6>
       </div>
       <div className="grid grid-cols-2 border-b border-gray-800">
@@ -39,12 +39,12 @@ function SampleReportSection({ title, fields }: ISampleReportSectionProps) {
             )}
           >
             <div className="w-[65%] border-r border-gray-800 py-2">
-              <p className="text-right font-semibold pr-2 pl-1 mr-2.5">
+              <p className="mr-2.5 pl-1 pr-2 text-right font-semibold">
                 {field.title}
               </p>
             </div>
             <div className="w-[35%] py-2">
-              <p className="text-left pl-2 pr-1 whitespace-pre-wrap break-words">
+              <p className="whitespace-pre-wrap break-words pl-2 pr-1 text-left">
                 {field.value}
               </p>
             </div>
@@ -89,20 +89,20 @@ export default function SampleReport(props: ISamplePreviewProps) {
   if (sampleData) {
     reportData = (
       <>
-        <div className="m-2 pt-2 flex justify-end print:hidden">
+        <div className="m-2 flex justify-end pt-2 print:hidden">
           <ButtonV2 variant="primary" onClick={window.print}>
             Print Report
           </ButtonV2>
         </div>
         <div className="block h-screen" id="section-to-print">
           <div className="flex flex-col">
-            <div className="flex justify-between items-center border border-gray-800">
+            <div className="flex items-center justify-between border border-gray-800">
               <div className="flex justify-start p-2"></div>
               <div className="flex justify-end">
                 <div className="p-2">
                   <img
                     src="https://cdn.coronasafe.network/ohc_logo_green.png"
-                    className="max-w-[400px] h-[50px] object-contain"
+                    className="h-[50px] max-w-[400px] object-contain"
                     alt="Open HealthCare Network"
                   />
                 </div>
@@ -110,28 +110,28 @@ export default function SampleReport(props: ISamplePreviewProps) {
             </div>
             <div className="flex justify-start border border-t-0 border-gray-800">
               <div className="w-full p-5 py-2 text-black">
-                <p className="font-bold text-lg">
+                <p className="text-lg font-bold">
                   ICMR Specimen Referral Data for COVID-19 (SARS-CoV2)
                 </p>
               </div>
             </div>
-            <div className="py-2 flex justify-center border border-t-0 border-gray-800">
-              <h6 className="font-semibold text-lg text-danger-500">
+            <div className="flex justify-center border border-t-0 border-gray-800 py-2">
+              <h6 className="text-lg font-semibold text-danger-500">
                 FOR INTERNAL USE ONLY
               </h6>
             </div>
             <div className="flex flex-col">
-              <div className="flex justify-center font-medium bg-black text-white py-2 border border-b-0 border-gray-800">
+              <div className="flex justify-center border border-b-0 border-gray-800 bg-black py-2 font-medium text-white">
                 <h6 className="text-lg">Sample Id : {sampleId}</h6>
               </div>
-              <div className="flex justify-center font-medium bg-black text-white py-2 border border-b-0 border-gray-800">
+              <div className="flex justify-center border border-b-0 border-gray-800 bg-black py-2 font-medium text-white">
                 <h6 className="text-lg">Patient Id : {id}</h6>
               </div>
               <div
                 className="border-4 border-black"
                 style={{ border: "solid 5px black" }}
               >
-                <div className="flex justify-center font-medium bg-gray-900 text-white py-2 border border-b-0 border-gray-800">
+                <div className="flex justify-center border border-b-0 border-gray-800 bg-gray-900 py-2 font-medium text-white">
                   <h6 className="text-lg">SECTION A - MANDATORY FIELDS</h6>
                 </div>
                 <SampleReportSection
@@ -231,7 +231,7 @@ export default function SampleReport(props: ISamplePreviewProps) {
                   ]}
                 />
 
-                <div className="flex justify-center font-medium bg-gray-900 text-white py-2 border border-b-0 border-gray-800">
+                <div className="flex justify-center border border-b-0 border-gray-800 bg-gray-900 py-2 font-medium text-white">
                   <h6 className="text-lg">
                     SECTION B - OTHER FIELDS TO BE UPDATED
                   </h6>
@@ -453,7 +453,7 @@ export default function SampleReport(props: ISamplePreviewProps) {
   }
   if (isLoading) {
     report = (
-      <div className="flex justify-center print:hidden h-screen">
+      <div className="flex h-screen justify-center print:hidden">
         <Loading />
       </div>
     );
@@ -461,8 +461,8 @@ export default function SampleReport(props: ISamplePreviewProps) {
     report = reportData;
   } else if (!sampleData) {
     report = (
-      <div className="flex justify-center print:hidden h-screen">
-        <h5 className="text-lg font-semibold self-center">No Data Found</h5>
+      <div className="flex h-screen justify-center print:hidden">
+        <h5 className="self-center text-lg font-semibold">No Data Found</h5>
       </div>
     );
   }

@@ -62,15 +62,17 @@ export default function useHL7VitalsMonitor() {
         if (
           !ecgOptionsRef.current ||
           !plethOptionsRef.current ||
-          !spo2OptionsRef.current
+          !spo2OptionsRef.current ||
+          !waveformForegroundCanvas.contextRef.current ||
+          !waveformBackgroundCanvas.contextRef.current
         )
           return;
 
         setIsOnline(true);
 
         renderer.current = new HL7VitalsRenderer({
-          foregroundRenderContext: waveformForegroundCanvas.contextRef.current!,
-          backgroundRenderContext: waveformBackgroundCanvas.contextRef.current!,
+          foregroundRenderContext: waveformForegroundCanvas.contextRef.current,
+          backgroundRenderContext: waveformBackgroundCanvas.contextRef.current,
           size: MONITOR_WAVEFORMS_CANVAS_SIZE,
           animationInterval: 50,
           ecg: ecgOptionsRef.current,
@@ -79,19 +81,19 @@ export default function useHL7VitalsMonitor() {
         });
 
         const _renderer = renderer.current;
-        device.current!.on("ecg-waveform", ingestTo(_renderer, "ecg"));
-        device.current!.on("pleth-waveform", ingestTo(_renderer, "pleth"));
-        device.current!.on("spo2-waveform", ingestTo(_renderer, "spo2"));
+        device.current?.on("ecg-waveform", ingestTo(_renderer, "ecg"));
+        device.current?.on("pleth-waveform", ingestTo(_renderer, "pleth"));
+        device.current?.on("spo2-waveform", ingestTo(_renderer, "spo2"));
 
         const hook = (set: (data: any) => void) => (d: HL7MonitorData) =>
           set(d);
-        device.current!.on("pulse-rate", hook(setPulseRate));
-        device.current!.on("heart-rate", hook(setHeartRate));
-        device.current!.on("SpO2", hook(setSpo2));
-        device.current!.on("respiratory-rate", hook(setRespiratoryRate));
-        device.current!.on("body-temperature1", hook(setTemperature1));
-        device.current!.on("body-temperature2", hook(setTemperature2));
-        device.current!.on("blood-pressure", hook(setBp));
+        device.current?.on("pulse-rate", hook(setPulseRate));
+        device.current?.on("heart-rate", hook(setHeartRate));
+        device.current?.on("SpO2", hook(setSpo2));
+        device.current?.on("respiratory-rate", hook(setRespiratoryRate));
+        device.current?.on("body-temperature1", hook(setTemperature1));
+        device.current?.on("body-temperature2", hook(setTemperature2));
+        device.current?.on("blood-pressure", hook(setBp));
       }
 
       device.current.once("ecg-waveform", (observation) => {

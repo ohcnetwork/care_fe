@@ -53,15 +53,17 @@ export default function useVentilatorVitalsMonitor() {
         if (
           !pressureOptionsRef.current ||
           !flowOptionsRef.current ||
-          !volumeOptionsRef.current
+          !volumeOptionsRef.current ||
+          !waveformForegroundCanvas.contextRef.current ||
+          !waveformBackgroundCanvas.contextRef.current
         )
           return;
 
         setIsOnline(true);
 
         renderer.current = new VentilatorVitalsRenderer({
-          foregroundRenderContext: waveformForegroundCanvas.contextRef.current!,
-          backgroundRenderContext: waveformBackgroundCanvas.contextRef.current!,
+          foregroundRenderContext: waveformForegroundCanvas.contextRef.current,
+          backgroundRenderContext: waveformBackgroundCanvas.contextRef.current,
           size: MONITOR_WAVEFORMS_CANVAS_SIZE,
           animationInterval: 50,
           pressure: pressureOptionsRef.current,
@@ -70,19 +72,19 @@ export default function useVentilatorVitalsMonitor() {
         });
 
         const _renderer = renderer.current;
-        device.current!.on(
+        device.current?.on(
           "pressure-waveform",
           ingestTo(_renderer, "pressure")
         );
-        device.current!.on("flow-waveform", ingestTo(_renderer, "flow"));
-        device.current!.on("volume-waveform", ingestTo(_renderer, "volume"));
+        device.current?.on("flow-waveform", ingestTo(_renderer, "flow"));
+        device.current?.on("volume-waveform", ingestTo(_renderer, "volume"));
 
         const hook = (set: (data: any) => void) => (d: VentilatorData) =>
           set(d);
-        device.current!.on("PEEP", hook(setPeep));
-        device.current!.on("R.Rate", hook(setRespRate));
-        device.current!.on("Insp-Time", hook(setInspTime));
-        device.current!.on("FiO2", hook(setFio2));
+        device.current?.on("PEEP", hook(setPeep));
+        device.current?.on("R.Rate", hook(setRespRate));
+        device.current?.on("Insp-Time", hook(setInspTime));
+        device.current?.on("FiO2", hook(setFio2));
       }
 
       device.current.once("pressure-waveform", (observation) => {

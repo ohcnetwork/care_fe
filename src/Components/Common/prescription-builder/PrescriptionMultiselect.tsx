@@ -33,14 +33,14 @@ export function PrescriptionMultiDropdown(props: {
   useOutsideAlerter(dropRef);
 
   return (
-    <div className="w-full relative">
-      <div className="flex gap-1 flex-wrap my-2">
+    <div className="relative w-full">
+      <div className="my-2 flex flex-wrap gap-1">
         {selectedValues.length > 0 &&
           selectedValues.map((selectedValue, i) => {
             return (
               <div
                 key={i}
-                className="inline-flex bg-primary-100 border border-primary-600 text-primary-900 rounded-lg gap-2 py-1 px-3"
+                className="inline-flex gap-2 rounded-lg border border-primary-600 bg-primary-100 px-3 py-1 text-primary-900"
               >
                 {selectedValue}
                 <button
@@ -70,7 +70,7 @@ export function PrescriptionMultiDropdown(props: {
       <div
         ref={dropRef}
         className={classNames(
-          "absolute z-40 top-[calc(100%+10px)] left-0 w-full rounded-md shadow-lg bg-white max-h-[300px] overflow-auto",
+          "absolute left-0 top-[calc(100%+10px)] z-40 max-h-[300px] w-full overflow-auto rounded-md bg-white shadow-lg",
           !open && "hidden"
         )}
       >
@@ -82,7 +82,7 @@ export function PrescriptionMultiDropdown(props: {
                 type="button"
                 key={i}
                 className={classNames(
-                  "w-full block px-4 py-2 text-sm leading-5 text-left text-gray-700 hover:text-gray-900 focus:outline-none focus:text-gray-900",
+                  "block w-full px-4 py-2 text-left text-sm leading-5 text-gray-700 hover:text-gray-900 focus:text-gray-900 focus:outline-none",
                   selectedValues.includes(option)
                     ? "bg-primary-100 hover:bg-primary-200"
                     : "hover:bg-gray-100 focus:bg-gray-100"

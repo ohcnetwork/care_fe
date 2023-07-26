@@ -58,8 +58,8 @@ export const DialysisPlots = (props: any) => {
 
   return (
     <div>
-      <div className="grid grid-row-1 md:grid-cols-2 gap-4">
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+      <div className="grid-row-1 grid gap-4 md:grid-cols-2">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="Dialysis Fluid Balance"
             name="Fluid Balance"
@@ -68,7 +68,7 @@ export const DialysisPlots = (props: any) => {
           />
         </div>
 
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="Dialysis Net Balance"
             name="Net Balance"
