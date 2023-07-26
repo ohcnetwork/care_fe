@@ -1,6 +1,7 @@
 import moment from "moment";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AssetData } from "./AssetTypes";
+import { classNames } from "../../Utils/utils";
 
 export default function AssetWarrantyCard(props: { asset: AssetData }) {
   const { asset } = props;
@@ -53,7 +54,9 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
                       }
                       className="border-b border-primary-300 text-primary-300 hover:text-primary-400"
                     >
-                      <CareIcon className={"care-l- mr-1 h-5" + item[2]} />
+                      <CareIcon
+                        className={classNames(`care-l-${item[2]}`, "mr-1")}
+                      />
                       {item[1]}
                     </a>
                   </>
