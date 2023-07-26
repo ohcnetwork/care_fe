@@ -1252,6 +1252,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           <div data-testid="current-address" id="address-div">
                             <TextAreaFormField
                               {...field("address")}
+                              required
                               label="Current Address"
                               placeholder="Enter the current address"
                             />
