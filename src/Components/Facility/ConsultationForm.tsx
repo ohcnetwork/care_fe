@@ -323,6 +323,7 @@ export const ConsultationForm = (props: any) => {
             cause_of_death: res.data?.discharge_notes || "",
             death_datetime: res.data?.death_datetime || "",
             death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
+            InvestigationAdvice: res.data.investigation,
           };
           dispatch({ type: "set_form", form: formData });
           setBed(formData.bed);
