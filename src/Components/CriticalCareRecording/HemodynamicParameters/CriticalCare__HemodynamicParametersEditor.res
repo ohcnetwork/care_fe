@@ -279,14 +279,14 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
       />
       <Slider
         title={"Respiratory Rate (bpm)"}
-        start={"0"}
+        start={"1"}
         end={"70"}
         interval={"5"}
         step={1.0}
         value={Belt.Option.mapWithDefault(state.resp, "", string_of_int)}
         setValue={s => send(SetResp(int_of_string(s)))}
         getLabel={getStatus(12.0, "Low", 16.0, "High")}
-        hasError={ValidationUtils.isInputInRangeInt(0, 70, state.resp)}
+        hasError={ValidationUtils.isInputInRangeInt(1, 70, state.resp)}
       />
       <div className="w-full">
         <div className="mx-2">
