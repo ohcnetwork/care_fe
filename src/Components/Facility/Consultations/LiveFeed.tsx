@@ -585,6 +585,7 @@ const LiveFeed = (props: any) => {
                   onClick={() => {
                     setToAddPreset(true);
                   }}
+                  disabled={toUpdateBoundary}
                 >
                   <span className="sr-only">Add Preset</span>
 
@@ -624,6 +625,7 @@ const LiveFeed = (props: any) => {
               toUpdateBoundary={toUpdateBoundary}
               setToUpdateBoundary={setToUpdateBoundary}
               loadingAddBoundaryPreset={loadingAddBoundaryPreset}
+              toAddPreset={toAddPreset}
             />
             {toUpdateBoundary && boundaryPreset && (
               <UpdateCameraBoundaryConfigure
@@ -638,7 +640,6 @@ const LiveFeed = (props: any) => {
               />
             )}
           </div>
-
           <div className="mx-4 flex max-w-sm flex-col">
             <div>
               <label id="asset-type">Bed</label>
@@ -653,169 +654,7 @@ const LiveFeed = (props: any) => {
                 facility={asset?.facility_id}
               />
             </div>
-            {!toAddPreset ? (
-              <>
-                <nav className="flex flex-wrap">
-                  <button
-                    className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
-                      showDefaultPresets
-                        ? "border-b-2 border-primary-500 text-primary-600"
-                        : ""
-                    }`}
-                    onClick={() => {
-                      setShowDefaultPresets(true);
-                    }}
-                  >
-                    Default Presets
-                  </button>
-                  <button
-                    className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
-                      !showDefaultPresets
-                        ? "border-b-2 border-primary-500 text-primary-600"
-                        : ""
-                    }`}
-                    onClick={() => {
-                      setShowDefaultPresets(false);
-                    }}
-                  >
-                    Patient Presets
-                  </button>
-                </nav>
-                <div className="my-2 w-full space-y-4">
-                  <div
-                    className={`grid ${
-                      isExtremeSmallScreen
-                        ? " sm:grid-cols-2 "
-                        : " grid-cols-2 "
-                    } my-auto gap-2`}
-                  >
-                    {showDefaultPresets ? (
-                      <>
-                        {viewOptions(presetsPage)?.map((option: any, i) => (
-                          <button
-                            key={i}
-                            className="max- flex w-full flex-wrap gap-2 truncate rounded-md border border-white bg-green-100 p-3  text-black hover:bg-green-500 hover:text-white"
-                            onClick={() => {
-                              setLoading(`Moving to Preset ${option.label}`);
-                              gotoPreset(
-                                { preset: option.value },
-                                {
-                                  onSuccess: () => {
-                                    setLoading(undefined);
-                                    console.log("Preset Updated", option);
-                                  },
-                                }
-                              );
-                            }}
-                          >
-                            {option.label}
-                          </button>
-                        ))}
-                      </>
-                    ) : (
-                      <>
-                        {bedPresets?.map(
-                          (preset: any, index: number) =>
-                            preset?.meta?.type != "boundary" && (
-                              <div className="flex flex-col">
-                                <button
-                                  key={preset.id}
-                                  className="flex flex-col truncate rounded-t-md border border-white bg-green-100 p-2  text-black hover:bg-green-500 hover:text-white"
-                                  onClick={() => {
-                                    setLoading("Moving");
-                                    gotoBedPreset(preset);
-                                    setCurrentPreset(preset);
-                                    getBedPresets(cameraAsset?.id);
-                                    fetchCameraPresets();
-                                  }}
-                                >
-                                  <span className="justify-start text-xs font-semibold">
-                                    {preset.bed_object.name}
-                                  </span>
-                                  <span className="mx-auto">
-                                    {preset.meta.preset_name
-                                      ? preset.meta.preset_name
-                                      : `Unnamed Preset ${index + 1}`}
-                                  </span>
-                                </button>
-                                <div className="flex">
-                                  <button
-                                    onClick={() => setToUpdate(preset)}
-                                    className="flex w-1/2 items-center justify-center gap-2 bg-green-200 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
-                                  >
-                                    <i className="fa-solid fa-pencil"></i>
-                                  </button>
-                                  <button
-                                    onClick={() => setToDelete(preset)}
-                                    className="flex w-1/2 items-center justify-center gap-2 bg-red-200 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200 "
-                                  >
-                                    <i className="fa-solid fa-trash-can"></i>
-                                  </button>
-                                </div>
-                              </div>
-                            )
-                        )}
-                      </>
-                    )}
-                  </div>
-                  {/* Page Number Next and Prev buttons */}
-                  {showDefaultPresets ? (
-                    <div className="flex flex-row gap-1">
-                      <button
-                        className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                        disabled={presetsPage < 10}
-                        onClick={() => {
-                          setPresetsPage(presetsPage - 10);
-                        }}
-                      >
-                        <i className="fas fa-arrow-left"></i>
-                      </button>
-                      <button
-                        className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                        disabled={presetsPage >= presets?.length}
-                        onClick={() => {
-                          setPresetsPage(presetsPage + 10);
-                        }}
-                      >
-                        <i className="fas fa-arrow-right"></i>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-row gap-1">
-                      <button
-                        className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                        disabled={page.offset === 0}
-                        onClick={() => {
-                          handlePagination(page.offset - page.limit);
-                        }}
-                      >
-                        <i className="fas fa-arrow-left"></i>
-                      </button>
-                      <button
-                        className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                        disabled={page.offset + page.limit >= page.count}
-                        onClick={() => {
-                          handlePagination(page.offset + page.limit);
-                        }}
-                      >
-                        <i className="fas fa-arrow-right"></i>
-                      </button>
-                    </div>
-                  )}
-                  {props?.showRefreshButton && (
-                    <button
-                      className="w-full rounded-md border border-white bg-green-100 px-3 py-2 font-semibold text-black hover:bg-green-500 hover:text-white"
-                      onClick={() => {
-                        getBedPresets(cameraAsset?.id);
-                        fetchCameraPresets();
-                      }}
-                    >
-                      <CareIcon className="care-l-redo h-4 text-lg" /> Refresh
-                    </button>
-                  )}
-                </div>
-              </>
-            ) : (
+            {toAddPreset ? (
               <CameraConfigure
                 setToAddPreset={setToAddPreset}
                 addPreset={addPreset}
@@ -823,6 +662,186 @@ const LiveFeed = (props: any) => {
                 newPreset={newPreset}
                 setNewPreset={setNewPreset}
               />
+            ) : (
+              <>
+                {toUpdateBoundary ? (
+                  <UpdateCameraBoundaryConfigure
+                    cameraPTZ={cameraPTZ}
+                    direction={direction}
+                    setDirection={setDirection}
+                    changeDirectionalBoundary={changeDirectionalBoundary}
+                    updateBoundaryPreset={updateBoundaryPreset}
+                    previewBoundary={previewBoundary}
+                    isPreview={isPreview}
+                    boundaryPreset={boundaryPreset}
+                  />
+                ) : (
+                  <>
+                    <nav className="flex flex-wrap">
+                      <button
+                        className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
+                          showDefaultPresets
+                            ? "border-b-2 border-primary-500 text-primary-600"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          setShowDefaultPresets(true);
+                        }}
+                      >
+                        Default Presets
+                      </button>
+                      <button
+                        className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
+                          !showDefaultPresets
+                            ? "border-b-2 border-primary-500 text-primary-600"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          setShowDefaultPresets(false);
+                        }}
+                      >
+                        Patient Presets
+                      </button>
+                    </nav>
+                    <div className="my-2 w-full space-y-4">
+                      <div
+                        className={`grid ${
+                          isExtremeSmallScreen
+                            ? " sm:grid-cols-2 "
+                            : " grid-cols-2 "
+                        } my-auto gap-2`}
+                      >
+                        {showDefaultPresets ? (
+                          <>
+                            {viewOptions(presetsPage)?.map((option: any, i) => (
+                              <button
+                                key={i}
+                                className="max- flex w-full flex-wrap gap-2 truncate rounded-md border border-white bg-green-100 p-3  text-black hover:bg-green-500 hover:text-white"
+                                onClick={() => {
+                                  setLoading(
+                                    `Moving to Preset ${option.label}`
+                                  );
+                                  gotoPreset(
+                                    { preset: option.value },
+                                    {
+                                      onSuccess: () => {
+                                        setLoading(undefined);
+                                        console.log("Preset Updated", option);
+                                      },
+                                    }
+                                  );
+                                }}
+                              >
+                                {option.label}
+                              </button>
+                            ))}
+                          </>
+                        ) : (
+                          <>
+                            {bedPresets?.map(
+                              (preset: any, index: number) =>
+                                preset?.meta?.type != "boundary" && (
+                                  <div className="flex flex-col">
+                                    <button
+                                      key={preset.id}
+                                      className="flex flex-col truncate rounded-t-md border border-white bg-green-100 p-2  text-black hover:bg-green-500 hover:text-white"
+                                      onClick={() => {
+                                        setLoading("Moving");
+                                        gotoBedPreset(preset);
+                                        setCurrentPreset(preset);
+                                        getBedPresets(cameraAsset?.id);
+                                        fetchCameraPresets();
+                                      }}
+                                    >
+                                      <span className="justify-start text-xs font-semibold">
+                                        {preset.bed_object.name}
+                                      </span>
+                                      <span className="mx-auto">
+                                        {preset.meta.preset_name
+                                          ? preset.meta.preset_name
+                                          : `Unnamed Preset ${index + 1}`}
+                                      </span>
+                                    </button>
+                                    <div className="flex">
+                                      <button
+                                        onClick={() => setToUpdate(preset)}
+                                        className="flex w-1/2 items-center justify-center gap-2 bg-green-200 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
+                                      >
+                                        <i className="fa-solid fa-pencil"></i>
+                                      </button>
+                                      <button
+                                        onClick={() => setToDelete(preset)}
+                                        className="flex w-1/2 items-center justify-center gap-2 bg-red-200 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200 "
+                                      >
+                                        <i className="fa-solid fa-trash-can"></i>
+                                      </button>
+                                    </div>
+                                  </div>
+                                )
+                            )}
+                          </>
+                        )}
+                      </div>
+                      {/* Page Number Next and Prev buttons */}
+                      {showDefaultPresets ? (
+                        <div className="flex flex-row gap-1">
+                          <button
+                            className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                            disabled={presetsPage < 10}
+                            onClick={() => {
+                              setPresetsPage(presetsPage - 10);
+                            }}
+                          >
+                            <i className="fas fa-arrow-left"></i>
+                          </button>
+                          <button
+                            className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                            disabled={presetsPage >= presets?.length}
+                            onClick={() => {
+                              setPresetsPage(presetsPage + 10);
+                            }}
+                          >
+                            <i className="fas fa-arrow-right"></i>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-row gap-1">
+                          <button
+                            className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                            disabled={page.offset === 0}
+                            onClick={() => {
+                              handlePagination(page.offset - page.limit);
+                            }}
+                          >
+                            <i className="fas fa-arrow-left"></i>
+                          </button>
+                          <button
+                            className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                            disabled={page.offset + page.limit >= page.count}
+                            onClick={() => {
+                              handlePagination(page.offset + page.limit);
+                            }}
+                          >
+                            <i className="fas fa-arrow-right"></i>
+                          </button>
+                        </div>
+                      )}
+                      {props?.showRefreshButton && (
+                        <button
+                          className="w-full rounded-md border border-white bg-green-100 px-3 py-2 font-semibold text-black hover:bg-green-500 hover:text-white"
+                          onClick={() => {
+                            getBedPresets(cameraAsset?.id);
+                            fetchCameraPresets();
+                          }}
+                        >
+                          <CareIcon className="care-l-redo h-4 text-lg" />{" "}
+                          Refresh
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+              </>
             )}
           </div>
         </div>
