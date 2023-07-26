@@ -419,23 +419,19 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-              <div className="flex h-full flex-col gap-2 text-right lg:flex-row">
-                <button
-                  className="btn btn-primary"
-                  onClick={() => setOpenDischargeSummaryDialog(true)}
-                >
+              <div className="flex h-full w-full flex-col justify-end gap-2 text-right lg:flex-row">
+                <ButtonV2 onClick={() => setOpenDischargeSummaryDialog(true)}>
                   <i className="fas fa-clipboard-list"></i>
-                  &nbsp; Discharge Summary
-                </button>
+                  <span>Discharge Summary</span>
+                </ButtonV2>
 
-                <button
-                  className="btn btn-primary"
+                <ButtonV2
                   onClick={() => setOpenDischargeDialog(true)}
                   disabled={!!consultationData.discharge_date}
                 >
                   <i className="fas fa-hospital-user"></i>
-                  &nbsp; Discharge from CARE
-                </button>
+                  <span>Discharge from CARE</span>
+                </ButtonV2>
               </div>
             </div>
             <div className="flex flex-col justify-between gap-2 p-4 md:flex-row">
