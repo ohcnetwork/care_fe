@@ -422,7 +422,7 @@ export const ConsultationDetails = (props: any) => {
               <div className="flex h-full w-full flex-col justify-end gap-2 text-right lg:flex-row">
                 <ButtonV2 onClick={() => setOpenDischargeSummaryDialog(true)}>
                   <i className="fas fa-clipboard-list"></i>
-                  <span>Discharge Summary</span>
+                  <span>{t("discharge_summary")}</span>
                 </ButtonV2>
 
                 <ButtonV2
@@ -430,7 +430,7 @@ export const ConsultationDetails = (props: any) => {
                   disabled={!!consultationData.discharge_date}
                 >
                   <i className="fas fa-hospital-user"></i>
-                  <span>Discharge from CARE</span>
+                  <span>{t("discharge_from_care")}</span>
                 </ButtonV2>
               </div>
             </div>
