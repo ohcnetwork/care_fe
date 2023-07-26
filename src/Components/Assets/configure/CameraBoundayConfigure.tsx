@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { BedModel } from "../../Facility/models";
-import ButtonV2, { Submit } from "../../Common/components/ButtonV2";
 import Card from "../../../CAREUI/display/Card";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { direction } from "../../Facility/Consultations/LiveFeed";
 
 interface CameraBoundaryConfigureProps {
-  addBoundaryPreset: (e: React.SyntheticEvent) => void;
+  addBoundaryPreset: () => void;
   deleteBoundaryPreset: () => void;
   boundaryPreset: any;
   bed: BedModel;
@@ -66,53 +65,51 @@ export default function CameraBoundaryConfigure(
         />
       )}
       {bed?.id && (
-        <div className="flex flex-col justify-between">
-          <div>
-            <div className="text-lg font-semibold">
+        <div className="my-4 flex flex-col">
+          <div className="flex-initial">
+            <div className="text-md font-semibold">
               {`${!boundaryPreset ? "Add" : ""}`} Boundary Preset
             </div>
-            <div className="mt-2">
+            <div className="">
               <label id="asset-name">Name</label>
-              <div className="text-lg">{`${
+              <div className="text-md">{`${
                 !boundaryPreset ? bed?.name : boundaryPreset?.meta?.preset_name
               } ${!boundaryPreset ? "boundary" : ""}`}</div>
             </div>
           </div>
           {!boundaryPreset ? (
-            <div>
-              <form onSubmit={addBoundaryPreset} className="mt-2">
-                <Submit
-                  label="Add Boundary"
-                  disabled={loadingAddBoundaryPreset}
-                />
-              </form>
+            <div className="mt-1 flex-initial">
+              <ButtonV2
+                variant="primary"
+                onClick={addBoundaryPreset}
+                disabled={loadingAddBoundaryPreset}
+                id="add-boundary-preset"
+                size="small"
+              >
+                <CareIcon className="care-l-plus-circle" />
+                Add
+              </ButtonV2>
             </div>
           ) : (
             <>
               {!toUpdateBoundary && (
-                <div className="flex justify-start mt-4 gap-4">
-                  <div>
-                    <ButtonV2
-                      variant="primary"
-                      onClick={() => {
-                        setToUpdateBoundary(true);
-                      }}
-                      id="update-boundary-preset"
-                    >
-                      Update
-                    </ButtonV2>
-                  </div>
-                  <div>
-                    <ButtonV2
-                      variant="danger"
-                      onClick={() => {
-                        setToDeleteBoundary(boundaryPreset);
-                      }}
-                      id="delete-boundary-preset"
-                    >
-                      Delete
-                    </ButtonV2>
-                  </div>
+                <div className="mt-1 flex flex-initial justify-start gap-1">
+                  <button
+                    className="items-center rounded-md  bg-green-200 p-2 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
+                    onClick={() => {
+                      setToUpdateBoundary(true);
+                    }}
+                    id="update-boundary-preset"
+                  >
+                    <CareIcon className="care-l-pen" />
+                  </button>
+                  <button
+                    className="items-center gap-2 rounded-md bg-red-200 p-2 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200"
+                    onClick={() => setToDeleteBoundary(boundaryPreset)}
+                    id="delete-boundary-preset"
+                  >
+                    <CareIcon className="care-l-trash" />
+                  </button>
                 </div>
               )}
             </>
@@ -148,7 +145,7 @@ export function UpdateCameraBoundaryConfigure(
             </div>
           </div>
           <div className="flex space-x-8">
-            <div className="flex-initial grid grid-cols-3">
+            <div className="grid flex-initial grid-cols-3">
               {[
                 null,
                 "up",
@@ -160,7 +157,7 @@ export function UpdateCameraBoundaryConfigure(
                 "down",
                 null,
               ].map((button, index) => {
-                let out = <div className="w-[20px] h-[20px]" key={index}></div>;
+                let out = <div className="h-[20px] w-[20px]" key={index}></div>;
                 if (button) {
                   out = (
                     <ButtonV2
@@ -184,7 +181,7 @@ export function UpdateCameraBoundaryConfigure(
                 return out;
               })}
             </div>
-            <div className="flex-initial flex flex-col justify-center space-y-2 items-center">
+            <div className="flex flex-initial flex-col items-center justify-center space-y-2">
               {" "}
               {[cameraPTZ[4], cameraPTZ[5], cameraPTZ[6]].map(
                 (option, index) => {
@@ -201,14 +198,14 @@ export function UpdateCameraBoundaryConfigure(
                   return (
                     <div key={index}>
                       <button
-                        className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 tooltip"
+                        className="tooltip border border-green-100 bg-green-100 p-2 hover:bg-green-200"
                         onClick={option.callback}
                       >
                         <span className="sr-only">{option.label}</span>
                         {option.icon ? (
                           <CareIcon className={`care-${option.icon}`} />
                         ) : (
-                          <span className="font-bold flex items-center justify-center ">
+                          <span className="flex items-center justify-center font-bold ">
                             {option.value}x
                           </span>
                         )}
@@ -219,7 +216,7 @@ export function UpdateCameraBoundaryConfigure(
                 }
               )}
             </div>
-            <div className="flex-initial flex flex-col justify-center space-y-2 items-center">
+            <div className="flex flex-initial flex-col items-center justify-center space-y-2">
               <ButtonV2
                 size="small"
                 variant="primary"

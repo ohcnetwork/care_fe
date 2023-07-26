@@ -229,8 +229,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     }
   };
 
-  const addBoundaryPreset = async (e: SyntheticEvent) => {
-    e.preventDefault();
+  const addBoundaryPreset = async () => {
     const config = getCameraConfig(asset as AssetData);
     try {
       setLoadingAddBoundaryPreset(true);

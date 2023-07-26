@@ -66,8 +66,7 @@ const LiveFeed = (props: any) => {
   const setNewPreset: (preset: string) => void = props.setNewPreset;
 
   const boundaryPreset: any = props.boundaryPreset;
-  const addBoundaryPreset: (e: React.SyntheticEvent) => void =
-    props.addBoundaryPreset;
+  const addBoundaryPreset: () => void = props.addBoundaryPreset;
   const deleteBoundaryPreset: () => void = props.deleteBoundaryPreset;
   const setBoundaryPreset: (preset: any) => void = props.setBoundaryPreset;
   const fetchBoundaryBedPreset: () => void = props.fetchBoundaryBedPreset;
@@ -546,77 +545,76 @@ const LiveFeed = (props: any) => {
                 )}
               </div>
             </div>
-            {!toUpdateBoundary && (
-              <div
-                className={`${
-                  isExtremeSmallScreen ? " flex flex-wrap " : " md:flex "
-                } mt-4 max-w-lg`}
-              >
-                {cameraPTZ.map((option) => {
-                  const shortcutKeyDescription =
-                    option.shortcutKey &&
-                    option.shortcutKey
-                      .join(" + ")
-                      .replace("Control", "Ctrl")
-                      .replace("ArrowUp", "↑")
-                      .replace("ArrowDown", "↓")
-                      .replace("ArrowLeft", "←")
-                      .replace("ArrowRight", "→");
 
-                  return (
-                    <button
-                      className="tooltip flex-1 border border-green-100 bg-green-100 p-2 hover:bg-green-200"
-                      onClick={option.callback}
-                    >
-                      <span className="sr-only">{option.label}</span>
-                      {option.icon ? (
-                        <CareIcon className={`care-${option.icon}`} />
-                      ) : (
-                        <span className="flex h-full w-8 items-center justify-center px-2 font-bold">
-                          {option.value}x
-                        </span>
-                      )}
-                      <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">{`${option.label}  (${shortcutKeyDescription})`}</span>
-                    </button>
-                  );
-                })}
-                {!toAddPreset ? (
+            <div
+              className={`${
+                isExtremeSmallScreen ? " flex flex-wrap " : " md:flex "
+              } mt-4 max-w-lg`}
+            >
+              {cameraPTZ.map((option) => {
+                const shortcutKeyDescription =
+                  option.shortcutKey &&
+                  option.shortcutKey
+                    .join(" + ")
+                    .replace("Control", "Ctrl")
+                    .replace("ArrowUp", "↑")
+                    .replace("ArrowDown", "↓")
+                    .replace("ArrowLeft", "←")
+                    .replace("ArrowRight", "→");
+
+                return (
                   <button
                     className="tooltip flex-1 border border-green-100 bg-green-100 p-2 hover:bg-green-200"
-                    onClick={() => {
-                      setToAddPreset(true);
-                    }}
+                    onClick={option.callback}
                   >
-                    <span className="sr-only">Add Preset</span>
-
-                    <CareIcon className={"care-l-plus}"} />
-
-                    <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">
-                      Add Preset (Ctrl + A)
-                    </span>
+                    <span className="sr-only">{option.label}</span>
+                    {option.icon ? (
+                      <CareIcon className={`care-${option.icon}`} />
+                    ) : (
+                      <span className="flex h-full w-8 items-center justify-center px-2 font-bold">
+                        {option.value}x
+                      </span>
+                    )}
+                    <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">{`${option.label}  (${shortcutKeyDescription})`}</span>
                   </button>
-                ) : (
-                  <button
-                    className="tooltip flex-1 border border-green-100 bg-green-100 p-2 hover:bg-green-200"
-                    onClick={() => {
-                      setToAddPreset(false);
-                    }}
-                  >
-                    <span className="sr-only">Cancel</span>
+                );
+              })}
+              {!toAddPreset ? (
+                <button
+                  className="tooltip flex-1 border border-green-100 bg-green-100 p-2 hover:bg-green-200"
+                  onClick={() => {
+                    setToAddPreset(true);
+                  }}
+                >
+                  <span className="sr-only">Add Preset</span>
 
-                    <CareIcon className={"care-l-times-circle}"} />
+                  <CareIcon className={"care-l-plus}"} />
 
-                    <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">
-                      Cancel (Cntrl + A)
-                    </span>
-                  </button>
-                )}
+                  <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">
+                    Add Preset (Ctrl + A)
+                  </span>
+                </button>
+              ) : (
+                <button
+                  className="tooltip flex-1 border border-green-100 bg-green-100 p-2 hover:bg-green-200"
+                  onClick={() => {
+                    setToAddPreset(false);
+                  }}
+                >
+                  <span className="sr-only">Cancel</span>
 
-                <div className="hideonmobilescreen pl-3">
-                  <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
-                </div>
+                  <CareIcon className={"care-l-times-circle}"} />
+
+                  <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">
+                    Cancel (Cntrl + A)
+                  </span>
+                </button>
+              )}
+
+              <div className="hideonmobilescreen pl-3">
+                <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
               </div>
-            )}
+            </div>
 
             <CameraBoundaryConfigure
               addBoundaryPreset={addBoundaryPreset}
