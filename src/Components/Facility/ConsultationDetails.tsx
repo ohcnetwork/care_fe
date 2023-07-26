@@ -652,6 +652,14 @@ export const ConsultationDetails = (props: any) => {
                                   {consultationData.discharge_notes ?? "--"}
                                 </span>
                               </div>
+                              <div>
+                                Referred Facility {" - "}
+                                <span className="font-semibold">
+                                  {consultationData.referred_to_external ??
+                                    consultationData.referred_to_object?.name ??
+                                    "--"}
+                                </span>
+                              </div>
                             </div>
                           )}
                         </div>
