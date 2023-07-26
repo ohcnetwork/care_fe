@@ -132,7 +132,7 @@ export const AddBedForm = (props: BedFormProps) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
+    <div className="mx-auto max-w-3xl px-2 pb-2">
       <Page
         title={headerText}
         backUrl={`/facility/${facilityId}/location/${locationId}/beds`}
@@ -154,7 +154,7 @@ export const AddBedForm = (props: BedFormProps) => {
           <Card>
             <form onSubmit={(e) => handleSubmit(e)}>
               <div className="md:p-4">
-                <div className="mt-2 grid gap-4 grid-cols-1">
+                <div className="mt-2 grid grid-cols-1 gap-4">
                   <div>
                     <TextFormField
                       name="name"

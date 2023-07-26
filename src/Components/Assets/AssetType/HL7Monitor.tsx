@@ -85,12 +85,12 @@ const HL7Monitor = (props: HL7MonitorProps) => {
 
   if (isLoading) return <Loading />;
   return (
-    <div className="flex w-full mx-auto xl:mt-8">
-      <div className="flex flex-col xl:flex-row-reverse gap-4 mx-auto">
-        <div className="w-full xl:max-w-xs shrink-0 flex flex-col gap-4">
-          <Card className="w-full flex flex-col">
+    <div className="mx-auto flex w-full xl:mt-8">
+      <div className="mx-auto flex flex-col gap-4 xl:flex-row-reverse">
+        <div className="flex w-full shrink-0 flex-col gap-4 xl:max-w-xs">
+          <Card className="flex w-full flex-col">
             <form onSubmit={handleSubmit}>
-              <h2 className="text-lg font-bold mb-2">Connection</h2>
+              <h2 className="mb-2 text-lg font-bold">Connection</h2>
               <div className="flex flex-col">
                 <TextFormField
                   name="middlewareHostname"

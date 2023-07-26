@@ -57,7 +57,7 @@ export default function InsuranceDetailsBuilder(props: Props) {
     <FormField field={field}>
       <div className="flex flex-col gap-3">
         {props.value?.length === 0 && (
-          <span className="text-center text-gray-500 py-16">
+          <span className="py-16 text-center text-gray-500">
             No insurance details added
           </span>
         )}
@@ -96,9 +96,9 @@ const InsuranceDetailEditCard = ({
       : undefined;
 
   return (
-    <div className="border-2 border-gray-200 border-dashed p-4 rounded-lg">
-      <div className="flex justify-between items-center">
-        <FieldLabel className="!font-bold my-auto">Policy</FieldLabel>
+    <div className="rounded-lg border-2 border-dashed border-gray-200 p-4">
+      <div className="flex items-center justify-between">
+        <FieldLabel className="my-auto !font-bold">Policy</FieldLabel>
         <ButtonV2 variant="danger" type="button" ghost onClick={handleRemove}>
           Delete
           <CareIcon className="care-l-trash-alt text-lg" />
@@ -109,7 +109,7 @@ const InsuranceDetailEditCard = ({
         className={classNames(
           "p-2",
           gridView
-            ? "grid gap-x-8 gap-y-2 grid-cols-1 md:grid-cols-2"
+            ? "grid grid-cols-1 gap-x-8 gap-y-2 md:grid-cols-2"
             : "flex flex-col gap-2"
         )}
       >

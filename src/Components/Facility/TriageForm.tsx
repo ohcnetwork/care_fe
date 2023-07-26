@@ -260,7 +260,7 @@ export const TriageForm = (props: triageFormProps) => {
         <ConfirmDialog
           title={
             <div className="flex gap-2">
-              <CareIcon className="care-l-exclamation-triangle text-red-500 text-xl" />
+              <CareIcon className="care-l-exclamation-triangle text-xl text-red-500" />
               <p>A Triage already exist on this date</p>
             </div>
           }
@@ -295,7 +295,7 @@ export const TriageForm = (props: triageFormProps) => {
                   error={state.errors.entry_date}
                 />
               </div>
-              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <TextFormField
                     name="num_patients_visited"
@@ -347,7 +347,7 @@ export const TriageForm = (props: triageFormProps) => {
                   />
                 </div>
               </div>
-              <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
+              <div className="mt-4 flex flex-col justify-between gap-2 md:flex-row">
                 <Cancel onClick={() => goBack()} />
                 <Submit label={buttonText} />
               </div>

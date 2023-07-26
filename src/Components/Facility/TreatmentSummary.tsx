@@ -97,7 +97,7 @@ const TreatmentSummary = (props: any) => {
         <Loading />
       ) : (
         <div className="my-4">
-          <div className="my-4 flex sm:justify-end flex-wrap justify-center gap-2">
+          <div className="my-4 flex flex-wrap justify-center gap-2 sm:justify-end">
             <button
               onClick={(_) => window.print()}
               className="btn btn-primary mr-2"
@@ -123,21 +123,21 @@ const TreatmentSummary = (props: any) => {
               {moment(date).format("DD/MM/YYYY")}
             </div>
 
-            <div className="mt-2 mb-5 border border-gray-800">
-              <div className="border-b-2 border-gray-800 grid sm:grid-cols-3 print:grid-cols-3">
-                <div className="col-span-1 py-2 px-3 sm:border-r-2 sm:border-b-0 print:border-r-2 print:border-b-0 border-b-2 border-gray-800">
+            <div className="mb-5 mt-2 border border-gray-800">
+              <div className="grid border-b-2 border-gray-800 print:grid-cols-3 sm:grid-cols-3">
+                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-b-0 sm:border-r-2">
                   <b>Name :</b> {patientData.name}
                 </div>
-                <div className="col-span-1 py-2 px-3">
+                <div className="col-span-1 px-3 py-2">
                   <b>Address :</b> {patientData.address}
                 </div>
               </div>
 
-              <div className="border-b-2 border-gray-800 grid sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3">
-                <div className="col-span-1 py-2 px-3 sm:border-r-2 md:border-b-0 print:border-r-2 print:border-b-0 border-b-2 border-gray-800 ">
+              <div className="grid border-b-2 border-gray-800 print:grid-cols-3 sm:grid-cols-2 md:grid-cols-3">
+                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-r-2 md:border-b-0 ">
                   <b>Age :</b> {patientData.age}
                 </div>
-                <div className="col-span-1 py-2 px-3 md:border-r-2 md:border-b-0 print:border-r-2 print:border-b-0 border-b-2 border-gray-800">
+                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 md:border-b-0 md:border-r-2">
                   <b>Date of admission :</b>
                   <span>
                     {consultationData.admitted
@@ -147,7 +147,7 @@ const TreatmentSummary = (props: any) => {
                       : " ---"}
                   </span>
                 </div>
-                <div className="col-span-1 py-2 px-3">
+                <div className="col-span-1 px-3 py-2">
                   <b>Date of positive :</b>
                   {patientData.date_of_result
                     ? moment(patientData.date_of_result).format("DD/MM/YYYY")
@@ -155,13 +155,13 @@ const TreatmentSummary = (props: any) => {
                 </div>
               </div>
 
-              <div className="border-b-2 border-gray-800 grid sm:grid-cols-2 md:grid-cols-3 print:grid-cols-3">
-                <div className="col-span-1 py-2 px-3 sm:border-r-2 md:border-b-0 print:border-r-2 print:border-b-0 border-b-2 border-gray-800">
+              <div className="grid border-b-2 border-gray-800 print:grid-cols-3 sm:grid-cols-2 md:grid-cols-3">
+                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-r-2 md:border-b-0">
                   <b>Gender :</b>
                   {GENDER_TYPES.find((i) => i.id === patientData.gender)?.text}
                 </div>
 
-                <div className="col-span-1 py-2 px-3 md:border-r-2 md:border-b-0 print:border-r-2 print:border-b-0 border-b-2 border-gray-800">
+                <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 md:border-b-0 md:border-r-2">
                   <b>Contact person :</b>
                   <span>
                     {" "}
@@ -171,7 +171,7 @@ const TreatmentSummary = (props: any) => {
                   </span>
                 </div>
 
-                <div className="col-span-1 py-2 px-3">
+                <div className="col-span-1 px-3 py-2">
                   <b>Date of negative :</b>
                   <span>
                     {patientData.disease_status == "NEGATIVE"
@@ -183,8 +183,8 @@ const TreatmentSummary = (props: any) => {
 
               <div className="border-b-2 border-gray-800 px-5 py-2">
                 <b>Comorbidities :</b>
-                <div className="print:mx-5 mx-0 sm:mx-5">
-                  <table className="border-collapse border border-gray-800 w-full">
+                <div className="mx-0 print:mx-5 sm:mx-5">
+                  <table className="w-full border-collapse border border-gray-800">
                     <thead>
                       <tr>
                         <th className="border border-gray-800">Disease</th>
@@ -270,8 +270,8 @@ const TreatmentSummary = (props: any) => {
               <div className="border-b-2 border-gray-800 px-5 py-2">
                 <b>Relevant investigations :</b>
 
-                <div className="print:mx-5 mx-0 sm:mx-5 overflow-x-auto">
-                  <table className="border-collapse border border-gray-800 w-full">
+                <div className="mx-0 overflow-x-auto print:mx-5 sm:mx-5">
+                  <table className="w-full border-collapse border border-gray-800">
                     <thead>
                       <tr>
                         <th className="border border-gray-800 text-center">
@@ -357,7 +357,7 @@ const TreatmentSummary = (props: any) => {
                 </div>
               </div>
 
-              <div className="border-b-2 border-gray-800 py-2 px-5">
+              <div className="border-b-2 border-gray-800 px-5 py-2">
                 <b>Treatment :</b>
                 {consultationData.prescribed_medication ? (
                   <p className="ml-4">
@@ -368,8 +368,8 @@ const TreatmentSummary = (props: any) => {
                 )}
                 <b className="mb-2">Treatment summary/Treament Plan :</b>
 
-                <div className="print:mx-5 mx-0 sm:mx-5 overflow-x-auto">
-                  <table className="border-collapse border border-gray-800 w-full">
+                <div className="mx-0 overflow-x-auto print:mx-5 sm:mx-5">
+                  <table className="w-full border-collapse border border-gray-800">
                     <thead>
                       <tr>
                         <th className="border border-gray-800">Date</th>
