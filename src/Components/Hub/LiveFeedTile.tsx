@@ -39,6 +39,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
   });
   const { t } = useTranslation();
   const [_isFullscreen, setFullscreen] = useFullscreen();
+  console.log("re-rendered");
 
   useEffect(() => {
     let loadingTimeout: any;
@@ -271,7 +272,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
           <div>
             {sourceUrl ? (
               <div
-                onMouseOver={(_) => setShowControls(true)}
+                onMouseEnter={(_) => setShowControls(true)}
                 onMouseLeave={(_) => setShowControls(false)}
               >
                 <ReactPlayer
@@ -299,6 +300,8 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
               </div>
             ) : (
               <div
+                onMouseEnter={(_) => setShowControls(true)}
+                onMouseLeave={(_) => setShowControls(false)}
                 className="bg-gray-500 flex flex-col justify-center items-center"
                 style={{ height: "360px", width: "640px" }}
               >
@@ -310,35 +313,6 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
                 </p>
               </div>
             )}
-            <div className="flex flex-row justify-between">
-              <div className="mt-5 p-2 flex flex-row bg-green-100 border border-white rounded flex-1 justify-evenly">
-                {cameraPTZ.map((option: any) => (
-                  <div
-                    key={option.action}
-                    onClick={(_) => {
-                      // console.log(option.action);
-                      requestPTZ(option.action);
-                    }}
-                  >
-                    <button className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2">
-                      <span className="sr-only">{option.label}</span>
-                      <i className={`${option.icon} md:p-2`}></i>
-                    </button>
-                  </div>
-                ))}
-                <button
-                  className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
-                  onClick={handleClickFullscreen}
-                >
-                  <span className="sr-only">{t("full_screen")}</span>
-                  <i className="fas fa-expand hover:text-black"></i>
-                </button>
-              </div>
-              {/* <div className="flex flex-col justify-center mt-5 mr-4 md:mt-auto md:mr-0">
-                    <button onClick={handleClickFullscreen}>
-                    </button>
-                  </div> */}
-            </div>
           </div>
           <div
             className={
@@ -347,8 +321,36 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
             }
             style={{ height: "360px", width: "640px" }}
           >
-            <div className="flex justify-center items-center h-full">
-              <div className="bg-red-900 h-24 w-24"></div>
+            <div className="flex justify-center items-end h-full">
+              <div className="flex flex-row justify-between">
+                <div className="mt-5 p-2 flex flex-row bg-green-100 border border-white rounded flex-1 justify-evenly">
+                  {cameraPTZ.map((option: any) => (
+                    <div
+                      key={option.action}
+                      onClick={(_) => {
+                        // console.log(option.action);
+                        requestPTZ(option.action);
+                      }}
+                    >
+                      <button className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2">
+                        <span className="sr-only">{option.label}</span>
+                        <i className={`${option.icon} md:p-2`}></i>
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    className="bg-green-100 hover:bg-green-200 border border-green-100 rounded p-2"
+                    onClick={handleClickFullscreen}
+                  >
+                    <span className="sr-only">{t("full_screen")}</span>
+                    <i className="fas fa-expand hover:text-black"></i>
+                  </button>
+                </div>
+                {/* <div className="flex flex-col justify-center mt-5 mr-4 md:mt-auto md:mr-0">
+                    <button onClick={handleClickFullscreen}>
+                    </button>
+                  </div> */}
+              </div>
             </div>
           </div>
           <div

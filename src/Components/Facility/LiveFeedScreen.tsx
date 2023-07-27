@@ -250,7 +250,8 @@ export default function LiveFeedScreen({ facilityId }: Props) {
           No Camera present in this location or facility.
         </div>
       ) : (
-        <div className="mt-1 grid grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3 gap-1">
+        <div className="mt-1 flex flex-row flex-wrap gap-2">
+          {/* <div className="mt-1 grid grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3 gap-2"> */}
           {assetList.map((asset: any) => (
             <LiveFeedTile
               assetId={asset.asset.id}
