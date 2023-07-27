@@ -508,9 +508,9 @@ export const ConsultationDetails = (props: any) => {
             {!consultationData.discharge_date &&
               hl7SocketUrl &&
               ventilatorSocketUrl && (
-                <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-auto">
-                  <div className="w-full lg:w-auto lg:min-w-[1280px] flex flex-col lg:flex-row bg-[#020617] gap-1 justify-between rounded mx-auto">
-                    <div className="flex-1 min-h-[400px]">
+                <section className="flex w-full flex-col items-stretch overflow-auto rounded-md bg-white shadow-sm lg:flex-row">
+                  <div className="mx-auto flex w-full flex-col justify-between gap-1 rounded bg-[#020617] lg:w-auto lg:min-w-[1280px] lg:flex-row">
+                    <div className="min-h-[400px] flex-1">
                       <HL7PatientVitalsMonitor
                         patientAssetBed={{
                           asset: monitorBedData?.asset_object as AssetData,
@@ -544,7 +544,7 @@ export const ConsultationDetails = (props: any) => {
                       (!hl7SocketUrl && ventilatorSocketUrl)) && (
                       <section className="flex w-full flex-col items-stretch overflow-hidden rounded-md bg-white shadow-sm lg:col-span-2 lg:flex-row">
                         {(hl7SocketUrl || ventilatorSocketUrl) && (
-                          <div className="w-full lg:w-auto lg:min-w-[640px] flex flex-col lg:flex-row bg-[#020617] gap-1 justify-between rounded mx-auto">
+                          <div className="mx-auto flex w-full flex-col justify-between gap-1 rounded bg-[#020617] lg:w-auto lg:min-w-[640px] lg:flex-row">
                             {hl7SocketUrl && (
                               <div className="min-h-[400px] flex-1">
                                 <HL7PatientVitalsMonitor

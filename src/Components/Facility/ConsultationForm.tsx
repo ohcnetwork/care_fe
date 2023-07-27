@@ -398,8 +398,11 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "admission_date":
-          if (state.form.suggestion === "A" && !state.form[field]) {
-            errors[field] = "Field is required as person is admitted";
+          if (
+            ["A", "DC"].includes(state.form.suggestion) &&
+            !state.form[field]
+          ) {
+            errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
@@ -587,8 +590,9 @@ export const ConsultationForm = (props: any) => {
         suggestion: state.form.suggestion,
         consultation_status: Number(state.form.consultation_status),
         admitted: state.form.suggestion === "A",
-        admission_date:
-          state.form.suggestion === "A" ? state.form.admission_date : undefined,
+        admission_date: ["A", "DC"].includes(state.form.suggestion)
+          ? state.form.admission_date
+          : undefined,
         category: state.form.category,
         is_kasp: state.form.is_kasp,
         kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
@@ -975,7 +979,9 @@ export const ConsultationForm = (props: any) => {
                       label="Decision after consultation"
                       disabled={String(state.form.consultation_status) === "1"}
                       {...selectField("suggestion")}
-                      options={CONSULTATION_SUGGESTION}
+                      options={CONSULTATION_SUGGESTION.filter(
+                        ({ deprecated }) => !deprecated
+                      )}
                     />
                   </div>
 
@@ -1040,7 +1046,7 @@ export const ConsultationForm = (props: any) => {
                     </>
                   )}
 
-                  {state.form.suggestion === "A" && (
+                  {["A", "DC"].includes(state.form.suggestion) && (
                     <>
                       <div
                         className="col-span-6"
@@ -1050,7 +1056,11 @@ export const ConsultationForm = (props: any) => {
                           {...field("admission_date")}
                           required
                           disableFuture
-                          label="Admission date"
+                          label={
+                            state.form.suggestion === "A"
+                              ? "Date of Admission"
+                              : "Domiciliary Care Start Date"
+                          }
                           position="LEFT"
                         />
                       </div>
