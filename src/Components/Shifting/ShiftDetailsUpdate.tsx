@@ -303,7 +303,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           handleSubmit(true);
         }}
       />
-      <Card className="mx-auto mt-4 w-full max-w-4xl !p-6">
+      <Card className="mx-auto mt-4 w-full max-w-4xl md:p-6 lg:p-8">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <SelectFormField
             name="status"
@@ -319,7 +319,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             optionValue={(option) => option.text}
             optionSelectedLabel={(option) => option.text}
             onChange={handleFormFieldChange}
-            className="mt-2 w-full bg-white md:col-span-1 md:leading-5"
+            className="w-full bg-white md:col-span-1 md:leading-5"
           />
 
           {wartime_shifting &&
@@ -360,7 +360,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               multiple={false}
               freeText
               name="assigned_facility"
-              className="mt-4"
               selected={state.form.assigned_facility_object}
               setSelected={(obj) =>
                 setFacility(obj, "assigned_facility_object")
