@@ -1,7 +1,12 @@
 import { useState, useCallback, useEffect, ReactElement } from "react";
 
 import loadable from "@loadable/component";
-import { assetClassProps, AssetData, AssetTransaction } from "./AssetTypes";
+import {
+  AssetClass,
+  assetClassProps,
+  AssetData,
+  AssetTransaction,
+} from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -400,7 +405,9 @@ const AssetManage = (props: AssetManageProps) => {
           </div>
         )}
       </div>
-      {asset?.id && <Uptime assetId={asset?.id} />}
+      {asset?.id && asset?.asset_class != AssetClass.NONE && (
+        <Uptime assetId={asset?.id} />
+      )}
       <div className="mb-4 mt-8 text-xl font-semibold">Transaction History</div>
       <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
