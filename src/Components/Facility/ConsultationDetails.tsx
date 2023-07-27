@@ -1,4 +1,4 @@
-import { AssetBedModel, AssetClass } from "../Assets/AssetTypes";
+import { AssetBedModel, AssetClass, AssetData } from "../Assets/AssetTypes";
 import {
   CONSULTATION_TABS,
   DISCHARGE_REASONS,
@@ -7,6 +7,7 @@ import {
   SYMPTOM_CHOICES,
 } from "../../Common/constants";
 import {
+  BedModel,
   ConsultationModel,
   FacilityModel,
   ICD11DiagnosisModel,
@@ -95,6 +96,8 @@ export const ConsultationDetails = (props: any) => {
 
   const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
+  const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
+  const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
 
   useEffect(() => {
     if (
@@ -117,9 +120,12 @@ export const ConsultationDetails = (props: any) => {
       const { middleware_address } = facilityRes.data as FacilityModel;
       const assetBeds = assetBedRes.data.results as AssetBedModel[];
 
-      const hl7Meta = assetBeds.find(
+      const monitorBedData = assetBeds.find(
         (i) => i.asset_object.asset_class === AssetClass.HL7MONITOR
-      )?.asset_object?.meta;
+      );
+      setMonitorBedData(monitorBedData);
+      const assetDataForMonitor = monitorBedData?.asset_object;
+      const hl7Meta = assetDataForMonitor?.meta;
       const hl7Middleware = hl7Meta?.middleware_hostname || middleware_address;
       if (hl7Middleware && hl7Meta?.local_ip_address) {
         setHL7SocketUrl(
@@ -127,9 +133,11 @@ export const ConsultationDetails = (props: any) => {
         );
       }
 
-      const ventilatorMeta = assetBeds.find(
+      const ventilatorBedData = assetBeds.find(
         (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
-      )?.asset_object?.meta;
+      );
+      setVentilatorBedData(ventilatorBedData);
+      const ventilatorMeta = ventilatorBedData?.asset_object?.meta;
       const ventilatorMiddleware =
         ventilatorMeta?.middleware_hostname || middleware_address;
       if (ventilatorMiddleware && ventilatorMeta?.local_ip_address) {
@@ -419,23 +427,19 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-              <div className="flex h-full flex-col gap-2 text-right lg:flex-row">
-                <button
-                  className="btn btn-primary"
-                  onClick={() => setOpenDischargeSummaryDialog(true)}
-                >
+              <div className="flex h-full w-full flex-col justify-end gap-2 text-right lg:flex-row">
+                <ButtonV2 onClick={() => setOpenDischargeSummaryDialog(true)}>
                   <i className="fas fa-clipboard-list"></i>
-                  &nbsp; Discharge Summary
-                </button>
+                  <span>{t("discharge_summary")}</span>
+                </ButtonV2>
 
-                <button
-                  className="btn btn-primary"
+                <ButtonV2
                   onClick={() => setOpenDischargeDialog(true)}
                   disabled={!!consultationData.discharge_date}
                 >
                   <i className="fas fa-hospital-user"></i>
-                  &nbsp; Discharge from CARE
-                </button>
+                  <span>{t("discharge_from_care")}</span>
+                </ButtonV2>
               </div>
             </div>
             <div className="flex flex-col justify-between gap-2 p-4 md:flex-row">
@@ -504,13 +508,27 @@ export const ConsultationDetails = (props: any) => {
             {!consultationData.discharge_date &&
               hl7SocketUrl &&
               ventilatorSocketUrl && (
-                <section className="flex w-full flex-col items-stretch overflow-auto rounded-md bg-white shadow-sm lg:flex-row">
-                  <div className="mx-auto flex w-full flex-col justify-between gap-1 rounded bg-slate-800 lg:w-auto lg:min-w-[1280px] lg:flex-row">
-                    <div className="min-h-[400px] flex-1">
-                      <HL7PatientVitalsMonitor socketUrl={hl7SocketUrl} />
+                <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-auto">
+                  <div className="w-full lg:w-auto lg:min-w-[1280px] flex flex-col lg:flex-row bg-[#020617] gap-1 justify-between rounded mx-auto">
+                    <div className="flex-1 min-h-[400px]">
+                      <HL7PatientVitalsMonitor
+                        patientAssetBed={{
+                          asset: monitorBedData?.asset_object as AssetData,
+                          bed: monitorBedData?.bed_object as BedModel,
+                          patient: patientData,
+                          meta: monitorBedData?.asset_object?.meta,
+                        }}
+                        socketUrl={hl7SocketUrl}
+                      />
                     </div>
                     <div className="min-h-[400px] flex-1">
                       <VentilatorPatientVitalsMonitor
+                        patientAssetBed={{
+                          asset: ventilatorBedData?.asset_object as AssetData,
+                          bed: ventilatorBedData?.bed_object as BedModel,
+                          patient: patientData,
+                          meta: ventilatorBedData?.asset_object?.meta,
+                        }}
                         socketUrl={ventilatorSocketUrl}
                       />
                     </div>
@@ -526,10 +544,17 @@ export const ConsultationDetails = (props: any) => {
                       (!hl7SocketUrl && ventilatorSocketUrl)) && (
                       <section className="flex w-full flex-col items-stretch overflow-hidden rounded-md bg-white shadow-sm lg:col-span-2 lg:flex-row">
                         {(hl7SocketUrl || ventilatorSocketUrl) && (
-                          <div className="mx-auto flex w-full flex-col justify-between gap-1 rounded bg-slate-800 lg:w-auto lg:min-w-[640px] lg:flex-row">
+                          <div className="w-full lg:w-auto lg:min-w-[640px] flex flex-col lg:flex-row bg-[#020617] gap-1 justify-between rounded mx-auto">
                             {hl7SocketUrl && (
                               <div className="min-h-[400px] flex-1">
                                 <HL7PatientVitalsMonitor
+                                  patientAssetBed={{
+                                    asset:
+                                      monitorBedData?.asset_object as AssetData,
+                                    bed: monitorBedData?.bed_object as BedModel,
+                                    patient: patientData,
+                                    meta: monitorBedData?.asset_object?.meta,
+                                  }}
                                   socketUrl={hl7SocketUrl}
                                 />
                               </div>
@@ -537,6 +562,13 @@ export const ConsultationDetails = (props: any) => {
                             {ventilatorSocketUrl && (
                               <div className="min-h-[400px] flex-1">
                                 <VentilatorPatientVitalsMonitor
+                                  patientAssetBed={{
+                                    asset:
+                                      ventilatorBedData?.asset_object as AssetData,
+                                    bed: ventilatorBedData?.bed_object as BedModel,
+                                    patient: patientData,
+                                    meta: ventilatorBedData?.asset_object?.meta,
+                                  }}
                                   socketUrl={ventilatorSocketUrl}
                                 />
                               </div>
