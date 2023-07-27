@@ -222,7 +222,7 @@ export default function PatientInfoCard(props: {
                       )?.text
                     }{" "}
                     on{" "}
-                    {consultation?.suggestion === "A"
+                    {["A", "DC"].includes(consultation?.suggestion ?? "")
                       ? moment(consultation?.admission_date).format(
                           "DD/MM/YYYY"
                         )
