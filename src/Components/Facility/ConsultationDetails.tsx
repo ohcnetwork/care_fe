@@ -285,11 +285,11 @@ export const ConsultationDetails = (props: any) => {
               [patientId]: { name: patientData?.name },
               [consultationId]: {
                 name:
-                  consultationData.suggestion === "HI"
-                    ? "Recommended Home Isolation"
-                    : `Admitted on ${formatDate(
+                  consultationData.suggestion === "A"
+                    ? `Admitted on ${formatDate(
                         consultationData.admission_date!
-                      )}`,
+                      )}`
+                    : consultationData.suggestion_text,
               },
             }}
             breadcrumbs={true}
