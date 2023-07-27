@@ -28,9 +28,9 @@ import CircularProgress from "../Common/components/CircularProgress";
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
-  discharge_date: string | null;
-  death_datetime: string | null;
-  death_confirmed_doctor: string | null;
+  discharge_date?: string;
+  death_datetime?: string;
+  death_confirmed_doctor?: string;
 }
 
 interface IProps {
@@ -40,8 +40,8 @@ interface IProps {
   afterSubmit?: () => void;
   discharge_reason?: string;
   discharge_notes?: string;
-  discharge_date?: string | null;
-  death_datetime?: string | null;
+  discharge_date?: string;
+  death_datetime?: string;
 }
 
 const DischargeModal = ({
@@ -54,8 +54,8 @@ const DischargeModal = ({
   },
   discharge_reason = "",
   discharge_notes = "",
-  discharge_date = new Date().toISOString(),
-  death_datetime = null,
+  discharge_date = moment().format("YYYY-MM-DDTHH:mm"),
+  death_datetime = moment().format("YYYY-MM-DDTHH:mm"),
 }: IProps) => {
   const { enable_hcx } = useConfig();
   const dispatch: any = useDispatch();
@@ -65,7 +65,7 @@ const DischargeModal = ({
       discharge_notes,
       discharge_date,
       death_datetime,
-      death_confirmed_doctor: null,
+      death_confirmed_doctor: undefined,
     });
   const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
   const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
@@ -256,26 +256,25 @@ const DischargeModal = ({
         )}
         {preDischargeForm.discharge_reason === "EXP" && (
           <div>
-            <div>
-              Death Date and Time
-              <span className="text-danger-500">{" *"}</span>
-              <input
-                type="datetime-local"
-                className="block w-[calc(100%-5px)] rounded border border-gray-400 bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
-                value={preDischargeForm.death_datetime ?? ""}
-                required
-                min={consultationData?.admission_date?.substring(0, 16)}
-                max={moment(new Date()).format("YYYY-MM-DDThh:mm")}
-                onChange={(e) => {
-                  setPreDischargeForm((form) => {
-                    return {
-                      ...form,
-                      death_datetime: e.target.value,
-                    };
-                  });
-                }}
-              />
-            </div>
+            <TextFormField
+              name="death_datetime"
+              label="Death Date and Time"
+              type="datetime-local"
+              value={preDischargeForm.death_datetime}
+              onChange={(e) => {
+                setPreDischargeForm((form) => {
+                  return {
+                    ...form,
+                    death_datetime: e.value,
+                  };
+                });
+              }}
+              required
+              min={moment(consultationData?.admission_date).format(
+                "YYYY-MM-DDTHH:mm"
+              )}
+              max={moment().format("YYYY-MM-DDTHH:mm")}
+            />
             <TextFormField
               name="death_confirmed_by"
               label="Confirmed By"
