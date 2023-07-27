@@ -19,17 +19,6 @@ import { formatDate } from "../../../Utils/utils";
 import moment from "moment";
 import { useDispatch } from "react-redux";
 
-const formatDateTime: () => string = () => {
-  const current = new Date();
-  const yyyy = String(current.getFullYear()).padStart(4, "0");
-  const mm = String(current.getMonth() + 1).padStart(2, "0");
-  const dd = String(current.getDate()).padStart(2, "0");
-  const hh = String(current.getHours()).padStart(2, "0");
-  const min = String(current.getMinutes()).padStart(2, "0");
-
-  return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-};
-
 interface BedsProps {
   facilityId: string;
   patientId: string;
@@ -45,7 +34,9 @@ const Beds = (props: BedsProps) => {
   const dispatch = useDispatch<any>();
   const { facilityId, consultationId, discharged } = props;
   const [bed, setBed] = React.useState<BedModel>({});
-  const [startDate, setStartDate] = React.useState<string>(formatDateTime());
+  const [startDate, setStartDate] = React.useState<string>(
+    moment().format("YYYY-MM-DDTHH:mm")
+  );
   const [consultationBeds, setConsultationBeds] = React.useState<CurrentBed[]>(
     []
   );

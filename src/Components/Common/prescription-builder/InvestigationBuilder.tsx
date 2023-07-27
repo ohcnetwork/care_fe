@@ -211,7 +211,7 @@ export default function InvestigationBuilder(
                     </div>
                   ) : (
                     <div className="w-full">
-                      <div className="mb-1">Time</div>
+                      Time<span className="text-danger-500">{" *"}</span>
                       <input
                         type="datetime-local"
                         className="block w-[calc(100%-5px)] rounded border border-gray-400 bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-primary-500"
