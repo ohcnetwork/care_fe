@@ -982,7 +982,6 @@ export const ConsultationForm = (props: any) => {
                       options={CONSULTATION_SUGGESTION.filter(
                         ({ deprecated }) => !deprecated
                       )}
-                      optionDescription={(option) => option.desc}
                     />
                   </div>
 
