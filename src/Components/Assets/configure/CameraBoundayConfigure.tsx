@@ -15,16 +15,13 @@ interface CameraBoundaryConfigureProps {
   loadingAddBoundaryPreset: boolean;
   toAddPreset: boolean;
   setDirection: (direction: direction) => void;
+  isPreview: boolean;
+  previewBoundary: () => void;
 }
 
 interface UpdateCameraBoundaryConfigureProps {
   direction: direction;
   setDirection(direction: direction): void;
-  changeDirectionalBoundary(option: any): void;
-  updateBoundaryPreset: () => void;
-  previewBoundary: () => void;
-  isPreview: boolean;
-  boundaryPreset: any;
   setToUpdateBoundary: (toUpdate: boolean) => void;
 }
 export default function CameraBoundaryConfigure(
@@ -40,6 +37,8 @@ export default function CameraBoundaryConfigure(
     loadingAddBoundaryPreset,
     toAddPreset,
     setDirection,
+    isPreview,
+    previewBoundary,
   } = props;
   const [toDeleteBoundary, setToDeleteBoundary] = useState<any>(null);
   return (
@@ -105,7 +104,7 @@ export default function CameraBoundaryConfigure(
                       setDirection("left");
                     }}
                     id="update-boundary-preset"
-                    disabled={toAddPreset}
+                    disabled={toAddPreset || isPreview}
                   >
                     <CareIcon className="care-l-pen" />
                   </button>
@@ -115,8 +114,19 @@ export default function CameraBoundaryConfigure(
                       setToDeleteBoundary(boundaryPreset);
                     }}
                     id="delete-boundary-preset"
+                    disabled={isPreview}
                   >
                     <CareIcon className="care-l-trash" />
+                  </button>
+                  <button
+                    className="items-center gap-2 rounded-md bg-gray-200 p-2 py-1 text-sm text-gray-800 hover:bg-gray-800 hover:text-gray-200"
+                    onClick={() => {
+                      previewBoundary();
+                    }}
+                    id="delete-boundary-preset"
+                    disabled={isPreview}
+                  >
+                    <CareIcon className="care-l-eye" />
                   </button>
                 </div>
               )}
@@ -131,16 +141,7 @@ export default function CameraBoundaryConfigure(
 export function UpdateCameraBoundaryConfigure(
   props: UpdateCameraBoundaryConfigureProps
 ) {
-  const {
-    direction,
-    setDirection,
-    // changeDirectionalBoundary,
-    // updateBoundaryPreset,
-    // previewBoundary,
-    // isPreview,
-    // boundaryPreset,
-    setToUpdateBoundary,
-  } = props;
+  const { direction, setDirection, setToUpdateBoundary } = props;
 
   const handlePrevButtonClick = () => {
     switch (direction) {

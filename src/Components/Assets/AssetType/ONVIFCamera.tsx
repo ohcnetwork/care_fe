@@ -355,14 +355,13 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         Notification.Success({
           msg: "Preset Added Successfully",
         });
-        // setBed({});
-        setNewPreset("");
-        setRefreshPresetsHash(Number(new Date()));
       } else {
         Notification.Error({
           msg: "Something went wrong..!",
         });
       }
+      setNewPreset("");
+      setRefreshPresetsHash(Number(new Date()));
     } catch (e) {
       Notification.Error({
         msg: "Something went wrong..!",
@@ -370,10 +369,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     }
     setLoadingAddPreset(false);
   };
-
-  console.log(boundaryPreset);
   if (isLoading) return <Loading />;
-
   return (
     <div className="space-y-6">
       <form className="rounded bg-white p-8 shadow" onSubmit={handleSubmit}>

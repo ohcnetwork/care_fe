@@ -243,6 +243,28 @@ const LiveFeed = (props: any) => {
     }
   };
 
+  const disableButton: (action: string) => boolean = (action) => {
+    if (
+      (direction == "left" || direction == "right") &&
+      (action == "left" || action == "right")
+    ) {
+      return false;
+    } else if (
+      (direction == "up" || direction == "down") &&
+      (action == "up" || action == "down")
+    ) {
+      return false;
+    } else if (
+      action == "precision" ||
+      action == "zoomIn" ||
+      action == "zoomOut" ||
+      action == "fullScreen"
+    ) {
+      return false;
+    }
+    return true;
+  };
+
   const changeDirectionalBoundary = (option: any) => {
     const { max_x, max_y, min_x, min_y }: BoundaryRange =
       boundaryPreset.meta.range;
@@ -361,16 +383,12 @@ const LiveFeed = (props: any) => {
     other: (option) => {
       setLoading(option.loadingLabel);
 
-      if (toUpdateBoundary) {
-        if (boundaryPreset?.meta?.range) {
-          changeDirectionalBoundary(option);
-        }
-        setLoading(undefined);
-      } else {
-        relativeMove(getPTZPayload(option.action, precision), {
-          onSuccess: () => setLoading(undefined),
-        });
+      if (toUpdateBoundary && boundaryPreset?.meta?.range) {
+        changeDirectionalBoundary(option);
       }
+      relativeMove(getPTZPayload(option.action, precision), {
+        onSuccess: () => setLoading(undefined),
+      });
     },
   };
 
@@ -408,7 +426,7 @@ const LiveFeed = (props: any) => {
         Notification.Error({ msg: "Something Went Wrong" });
       }
     }
-  }, [direction, boundaryPreset]);
+  }, [direction]);
 
   const viewOptions = (page: number) => {
     return presets
@@ -443,14 +461,6 @@ const LiveFeed = (props: any) => {
       offset: cOffset,
     });
   };
-
-  // const cameraPTZ = getCameraPTZ(precision).map((option) => {
-  //   const cb =
-  //     cameraPTZActionCBs[
-  //       cameraPTZActionCBs[option.action] ? option.action : "other"
-  //     ];
-  //   return { ...option, callback: () => cb(option) };
-  // });
 
   // Voluntarily disabling eslint, since length of `cameraPTZ` is constant and
   // hence shall not cause issues. (https://news.ycombinator.com/item?id=24363703)
@@ -586,6 +596,7 @@ const LiveFeed = (props: any) => {
                   <button
                     className="tooltip flex-1 border border-green-100 bg-green-100 p-2 hover:bg-green-200"
                     onClick={option.callback}
+                    disabled={toUpdateBoundary && disableButton(option.action)}
                   >
                     <span className="sr-only">{option.label}</span>
                     {option.icon ? (
@@ -647,6 +658,8 @@ const LiveFeed = (props: any) => {
               loadingAddBoundaryPreset={loadingAddBoundaryPreset}
               toAddPreset={toAddPreset}
               setDirection={setDirection}
+              previewBoundary={previewBoundary}
+              isPreview={isPreview}
             />
           </div>
           <div className="mx-4 flex max-w-sm flex-col">
@@ -677,11 +690,6 @@ const LiveFeed = (props: any) => {
                   <UpdateCameraBoundaryConfigure
                     direction={direction}
                     setDirection={setDirection}
-                    changeDirectionalBoundary={changeDirectionalBoundary}
-                    updateBoundaryPreset={updateBoundaryPreset}
-                    previewBoundary={previewBoundary}
-                    isPreview={isPreview}
-                    boundaryPreset={boundaryPreset}
                     setToUpdateBoundary={setToUpdateBoundary}
                   />
                 ) : (
