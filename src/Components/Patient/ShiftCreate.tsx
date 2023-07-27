@@ -114,11 +114,10 @@ export const ShiftCreate = (props: patientShiftProps) => {
       if (patientId) {
         const res = await dispatchAction(getPatient({ id: patientId }));
         if (res.data) {
-          const patient_category =
-            res.data.last_consultation?.last_daily_round?.patient_category ??
-            res.data.last_consultation?.category;
           setPatientCategory(
-            PATIENT_CATEGORIES.find((c) => c.text === patient_category)?.id
+            PATIENT_CATEGORIES.find(
+              (c) => c.text === res.data.last_consultation?.category
+            )?.id
           );
           setPatientName(res.data.name);
           setFacilityName(res.data.facility_object.name);

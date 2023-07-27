@@ -264,11 +264,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             };
           d["initial_status"] = res.data.status;
           d["status"] = qParams.status || res.data.status;
-          const patient_category =
-            d.patient.last_consultation?.last_daily_round?.patient_category ??
-            d.patient.last_consultation?.category;
           d["patient_category"] = PATIENT_CATEGORIES.find(
-            (c) => c.text === patient_category
+            (c) => c.text === d.patient.last_consultation?.category
           )?.id;
           dispatch({ type: "set_form", form: d });
         }
