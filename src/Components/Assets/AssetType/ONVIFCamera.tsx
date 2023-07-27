@@ -54,7 +54,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     Number(new Date())
   );
   const [boundaryPreset, setBoundaryPreset] = useState<any>(null);
-  const [refBoundaryPreset, setRefBoundaryPreset] = useState<any>(null); // to reference in case modification of boundary preset is cancelled.
   const [toUpdateBoundary, setToUpdateBoundary] = useState<boolean>(false);
   const [loadingAddBoundaryPreset, setLoadingAddBoundaryPreset] =
     useState<boolean>(false);
@@ -183,17 +182,14 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         });
         if (boundaryPreset) {
           setBoundaryPreset(boundaryPreset);
-          setRefBoundaryPreset(boundaryPreset);
         } else {
           setBoundaryPreset(null);
-          setRefBoundaryPreset(null);
         }
         setPresets(bedAssets);
       }
     } else {
       setPresets([]);
       setBoundaryPreset(null);
-      setRefBoundaryPreset(null);
     }
   };
 
@@ -255,9 +251,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             msg: "Boundary Preset Added Successfully",
           });
           // setBed({});
-          setNewPreset("");
           setRefreshPresetsHash(Number(new Date()));
-          setBoundaryPreset(null);
         } else {
           Notification.Error({
             msg: "Failed to add Boundary Preset",
@@ -276,14 +270,9 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     setLoadingAddBoundaryPreset(false);
   };
 
-  const updateBoundaryPreset = async (action: any) => {
+  const updateBoundaryPreset = async () => {
     if (boundaryPreset && bed?.id) {
       try {
-        if (action == "cancel") {
-          setBoundaryPreset(refBoundaryPreset);
-          setToUpdateBoundary(false);
-          return;
-        }
         if (
           !boundaryPreset?.asset_object?.id ||
           !boundaryPreset?.bed_object?.id
@@ -305,11 +294,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           Notification.Success({
             msg: "Boundary Preset Modified Successfully",
           });
-          // setBed({});
-          setNewPreset("");
-          setRefreshPresetsHash(Number(new Date()));
-          setBoundaryPreset(null);
-          setToUpdateBoundary(false);
         } else {
           Notification.Error({
             msg: "Failed to modify Boundary Preset",
@@ -333,10 +317,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             msg: "Boundary Preset Deleted Successfully",
           });
           // setBed({});
-          setNewPreset("");
           setRefreshPresetsHash(Number(new Date()));
-          setBoundaryPreset(null);
-          setRefBoundaryPreset(null);
         } else {
           Notification.Error({
             msg: "Failed to delete Boundary Preset",
@@ -390,6 +371,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     setLoadingAddPreset(false);
   };
 
+  console.log(boundaryPreset);
   if (isLoading) return <Loading />;
 
   return (

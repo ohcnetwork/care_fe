@@ -14,17 +14,18 @@ interface CameraBoundaryConfigureProps {
   setToUpdateBoundary: (toUpdate: boolean) => void;
   loadingAddBoundaryPreset: boolean;
   toAddPreset: boolean;
+  setDirection: (direction: direction) => void;
 }
 
 interface UpdateCameraBoundaryConfigureProps {
-  cameraPTZ: any;
   direction: direction;
   setDirection(direction: direction): void;
-  changeDirectionalBoundary(action: "expand" | "shrink"): void;
-  updateBoundaryPreset(action: "confirm" | "cancel"): void;
+  changeDirectionalBoundary(option: any): void;
+  updateBoundaryPreset: () => void;
   previewBoundary: () => void;
   isPreview: boolean;
   boundaryPreset: any;
+  setToUpdateBoundary: (toUpdate: boolean) => void;
 }
 export default function CameraBoundaryConfigure(
   props: CameraBoundaryConfigureProps
@@ -38,6 +39,7 @@ export default function CameraBoundaryConfigure(
     setToUpdateBoundary,
     loadingAddBoundaryPreset,
     toAddPreset,
+    setDirection,
   } = props;
   const [toDeleteBoundary, setToDeleteBoundary] = useState<any>(null);
   return (
@@ -100,6 +102,7 @@ export default function CameraBoundaryConfigure(
                     className="items-center rounded-md  bg-green-200 p-2 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
                     onClick={() => {
                       setToUpdateBoundary(true);
+                      setDirection("left");
                     }}
                     id="update-boundary-preset"
                     disabled={toAddPreset}
@@ -108,7 +111,9 @@ export default function CameraBoundaryConfigure(
                   </button>
                   <button
                     className="items-center gap-2 rounded-md bg-red-200 p-2 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200"
-                    onClick={() => setToDeleteBoundary(boundaryPreset)}
+                    onClick={() => {
+                      setToDeleteBoundary(boundaryPreset);
+                    }}
                     id="delete-boundary-preset"
                   >
                     <CareIcon className="care-l-trash" />
@@ -126,25 +131,68 @@ export default function CameraBoundaryConfigure(
 export function UpdateCameraBoundaryConfigure(
   props: UpdateCameraBoundaryConfigureProps
 ) {
-  // const {
-  //   // cameraPTZ,
-  //   // direction,
-  //   // setDirection,
-  //   // changeDirectionalBoundary,
-  //   // updateBoundaryPreset,
-  //   // previewBoundary,
-  //   // isPreview,
-  //   // boundaryPreset,
-  // } = props;
-  console.log(props);
+  const {
+    direction,
+    setDirection,
+    // changeDirectionalBoundary,
+    // updateBoundaryPreset,
+    // previewBoundary,
+    // isPreview,
+    // boundaryPreset,
+    setToUpdateBoundary,
+  } = props;
+
+  const handlePrevButtonClick = () => {
+    switch (direction) {
+      case "left":
+        setToUpdateBoundary(false);
+        setDirection(null);
+        break;
+
+      case "right":
+        setDirection("left");
+        break;
+
+      case "up":
+        setDirection("right");
+        break;
+
+      case "down":
+        setDirection("up");
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const handleNextButtonClick = () => {
+    switch (direction) {
+      case "left":
+        setDirection("right");
+        break;
+      case "right":
+        setDirection("up");
+        break;
+      case "up":
+        setDirection("down");
+        break;
+      case "down":
+        setDirection(null);
+        setToUpdateBoundary(false);
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <div className="mt-4 flex flex-col flex-wrap">
       <div className="flex-1 rounded-lg  bg-gray-300 p-4  text-center text-2xl font-bold text-gray-700 hover:text-gray-800">
-        Update Preset
+        Update {direction} boundary
       </div>
       <div className="flex flex-1 flex-col gap-2 py-4">
-        {["left", "right", "top", "bottom"].map((dir) => {
+        {["left", "right", "up", "down"].map((dir) => {
           return (
             <div className="flex flex-1 flex-row justify-between gap-2">
               <div>{dir}</div>
@@ -154,11 +202,17 @@ export function UpdateCameraBoundaryConfigure(
         })}
       </div>
       <div className="flex flex-1 flex-row gap-1">
-        <button className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800">
-          <i className="fas fa-arrow-left"></i>
+        <button
+          className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+          onClick={handlePrevButtonClick}
+        >
+          {direction === "left" ? "Cancel" : "Previous"}
         </button>
-        <button className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800">
-          <i className="fas fa-arrow-right"></i>
+        <button
+          className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+          onClick={handleNextButtonClick}
+        >
+          {direction === "down" ? "Done" : "Next"}
         </button>
       </div>
     </div>

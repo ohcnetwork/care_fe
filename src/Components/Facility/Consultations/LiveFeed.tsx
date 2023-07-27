@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import {
@@ -29,6 +29,7 @@ import CameraConfigure from "../../Assets/configure/CameraConfigure";
 import CameraBoundaryConfigure from "../../Assets/configure/CameraBoundayConfigure";
 
 export type direction = "left" | "right" | "up" | "down" | null;
+
 const LiveFeed = (props: any) => {
   const middlewareHostname =
     props.middlewareHostname || "dev_middleware.coronasafe.live";
@@ -55,7 +56,6 @@ const LiveFeed = (props: any) => {
   const [isPreview, setIsPreview] = useState<boolean>(false);
   const [direction, setDirection] = useState<direction>(null);
   const [_isFullscreen, setFullscreen] = useFullscreen();
-
   const [toAddPreset, setToAddPreset] = useState<boolean>(false);
   const asset: any = props.asset;
   const addPreset: () => void = props.addPreset;
@@ -70,8 +70,8 @@ const LiveFeed = (props: any) => {
   const deleteBoundaryPreset: () => void = props.deleteBoundaryPreset;
   const setBoundaryPreset: (preset: any) => void = props.setBoundaryPreset;
   const fetchBoundaryBedPreset: () => void = props.fetchBoundaryBedPreset;
-  const updateBoundaryPreset: (action: "confirm" | "cancel") => void =
-    props.updateBoundaryPreset;
+  const updateBoundaryPreset: () => void = props.updateBoundaryPreset;
+  props.updateBoundaryPreset;
   const setToUpdateBoundary: (toUpdate: boolean) => void =
     props.setToUpdateBoundary;
   const loadingAddBoundaryPreset: boolean = props.loadingAddBoundaryPreset;
@@ -243,35 +243,38 @@ const LiveFeed = (props: any) => {
     }
   };
 
-  const changeDirectionalBoundary = (action: "expand" | "shrink") => {
-    if (boundaryPreset?.meta?.range) {
-      const { max_x, max_y, min_x, min_y }: BoundaryRange =
-        boundaryPreset.meta.range;
-      const range: BoundaryRange = {
-        max_x: max_x,
-        max_y: max_y,
-        min_x: min_x,
-        min_y: min_y,
-      };
-      const delta = 0.1 / Math.max(1, precision);
-      if (direction == "left") {
-        range.min_x = action == "expand" ? min_x - delta : min_x + delta;
-      } else if (direction == "right") {
-        range.max_x = action == "expand" ? max_x + delta : max_x - delta;
-      } else if (direction == "up") {
-        range.max_y = action == "expand" ? max_y + delta : max_y - delta;
-      } else if (direction == "down") {
-        range.min_y = action == "expand" ? min_y - delta : min_y + delta;
-      }
-      setBoundaryPreset({
-        ...boundaryPreset,
-        meta: {
-          ...boundaryPreset.meta,
-          range: range,
-        },
-      });
-      setLoading(undefined);
+  const changeDirectionalBoundary = (option: any) => {
+    const { max_x, max_y, min_x, min_y }: BoundaryRange =
+      boundaryPreset.meta.range;
+    const range: BoundaryRange = {
+      max_x: max_x,
+      max_y: max_y,
+      min_x: min_x,
+      min_y: min_y,
+    };
+    const delta = 0.1 / Math.max(1, precision);
+    if (direction == "left") {
+      range.min_x =
+        option.action == "left" ? range.min_x - delta : range.min_x + delta;
+    } else if (direction == "right") {
+      range.max_x =
+        option.action == "right" ? range.max_x + delta : range.max_x - delta;
+    } else if (direction == "up") {
+      range.max_y =
+        option.action == "up" ? range.max_y + delta : range.max_y - delta;
+    } else if (direction == "down") {
+      range.min_y =
+        option.action == "down" ? range.min_y - delta : range.min_y + delta;
     }
+
+    setBoundaryPreset({
+      ...boundaryPreset,
+      meta: {
+        ...boundaryPreset.meta,
+        range: range,
+      },
+    });
+    updateBoundaryPreset();
   };
 
   const runFunctionWithDelay = (func: () => any, delay: number) => {
@@ -305,67 +308,6 @@ const LiveFeed = (props: any) => {
       setIsPreview(false);
       setLoading(undefined);
     }
-  };
-
-  useEffect(() => {
-    if (cameraAsset?.hostname) {
-      fetchCameraPresets();
-    }
-  }, []);
-
-  useEffect(() => {
-    setNewPresetName(toUpdate?.meta?.preset_name);
-    setBedTransfer(toUpdate?.bed_object);
-  }, [toUpdate]);
-
-  //change this function
-  useEffect(() => {
-    getBedPresets(cameraAsset.id);
-
-    //absoluteMove(bedPresets[0]?.meta?.position, {});
-  }, [page.offset, cameraAsset.id, refreshPresetsHash, bed]);
-
-  useEffect(() => {
-    if (boundaryPreset?.meta?.range && direction) {
-      try {
-        gotoDirectionalBoundary();
-      } catch (e) {
-        Notification.Error({ msg: "Something Went Wrong" });
-      }
-    }
-  }, [direction, boundaryPreset]);
-  const viewOptions = (page: number) => {
-    return presets
-      ? Object.entries(presets)
-          .map(([key, value]) => ({ label: key, value }))
-          .slice(page, page + 10)
-      : Array.from(Array(10), (_, i) => ({
-          label: "Monitor " + (i + 1),
-          value: i + 1,
-        }));
-  };
-  useEffect(() => {
-    let tId: any;
-    if (streamStatus !== StreamStatus.Playing) {
-      setStreamStatus(StreamStatus.Loading);
-      tId = setTimeout(() => {
-        startStream({
-          onSuccess: () => setStreamStatus(StreamStatus.Playing),
-          onError: () => setStreamStatus(StreamStatus.Offline),
-        });
-      }, 500);
-    }
-
-    return () => {
-      clearTimeout(tId);
-    };
-  }, [startStream, streamStatus]);
-
-  const handlePagination = (cOffset: number) => {
-    setPage({
-      ...page,
-      offset: cOffset,
-    });
   };
 
   const cameraPTZActionCBs: { [key: string]: (option: any) => void } = {
@@ -418,9 +360,17 @@ const LiveFeed = (props: any) => {
     },
     other: (option) => {
       setLoading(option.loadingLabel);
-      relativeMove(getPTZPayload(option.action, precision), {
-        onSuccess: () => setLoading(undefined),
-      });
+
+      if (toUpdateBoundary) {
+        if (boundaryPreset?.meta?.range) {
+          changeDirectionalBoundary(option);
+        }
+        setLoading(undefined);
+      } else {
+        relativeMove(getPTZPayload(option.action, precision), {
+          onSuccess: () => setLoading(undefined),
+        });
+      }
     },
   };
 
@@ -431,6 +381,76 @@ const LiveFeed = (props: any) => {
       ];
     return { ...option, callback: () => cb(option) };
   });
+
+  useEffect(() => {
+    if (cameraAsset?.hostname) {
+      fetchCameraPresets();
+    }
+  }, []);
+
+  useEffect(() => {
+    setNewPresetName(toUpdate?.meta?.preset_name);
+    setBedTransfer(toUpdate?.bed_object);
+  }, [toUpdate]);
+
+  //change this function
+  useEffect(() => {
+    getBedPresets(cameraAsset.id);
+    setToUpdateBoundary(false);
+    setDirection(null);
+  }, [page.offset, cameraAsset.id, refreshPresetsHash, bed]);
+
+  useEffect(() => {
+    if (boundaryPreset?.meta?.range && direction) {
+      try {
+        gotoDirectionalBoundary();
+      } catch (e) {
+        Notification.Error({ msg: "Something Went Wrong" });
+      }
+    }
+  }, [direction, boundaryPreset]);
+
+  const viewOptions = (page: number) => {
+    return presets
+      ? Object.entries(presets)
+          .map(([key, value]) => ({ label: key, value }))
+          .slice(page, page + 10)
+      : Array.from(Array(10), (_, i) => ({
+          label: "Monitor " + (i + 1),
+          value: i + 1,
+        }));
+  };
+  useEffect(() => {
+    let tId: any;
+    if (streamStatus !== StreamStatus.Playing) {
+      setStreamStatus(StreamStatus.Loading);
+      tId = setTimeout(() => {
+        startStream({
+          onSuccess: () => setStreamStatus(StreamStatus.Playing),
+          onError: () => setStreamStatus(StreamStatus.Offline),
+        });
+      }, 500);
+    }
+
+    return () => {
+      clearTimeout(tId);
+    };
+  }, [startStream, streamStatus]);
+
+  const handlePagination = (cOffset: number) => {
+    setPage({
+      ...page,
+      offset: cOffset,
+    });
+  };
+
+  // const cameraPTZ = getCameraPTZ(precision).map((option) => {
+  //   const cb =
+  //     cameraPTZActionCBs[
+  //       cameraPTZActionCBs[option.action] ? option.action : "other"
+  //     ];
+  //   return { ...option, callback: () => cb(option) };
+  // });
 
   // Voluntarily disabling eslint, since length of `cameraPTZ` is constant and
   // hence shall not cause issues. (https://news.ycombinator.com/item?id=24363703)
@@ -626,19 +646,8 @@ const LiveFeed = (props: any) => {
               setToUpdateBoundary={setToUpdateBoundary}
               loadingAddBoundaryPreset={loadingAddBoundaryPreset}
               toAddPreset={toAddPreset}
+              setDirection={setDirection}
             />
-            {toUpdateBoundary && boundaryPreset && (
-              <UpdateCameraBoundaryConfigure
-                cameraPTZ={cameraPTZ}
-                direction={direction}
-                setDirection={setDirection}
-                changeDirectionalBoundary={changeDirectionalBoundary}
-                updateBoundaryPreset={updateBoundaryPreset}
-                previewBoundary={previewBoundary}
-                isPreview={isPreview}
-                boundaryPreset={boundaryPreset}
-              />
-            )}
           </div>
           <div className="mx-4 flex max-w-sm flex-col">
             <div>
@@ -666,7 +675,6 @@ const LiveFeed = (props: any) => {
               <>
                 {toUpdateBoundary ? (
                   <UpdateCameraBoundaryConfigure
-                    cameraPTZ={cameraPTZ}
                     direction={direction}
                     setDirection={setDirection}
                     changeDirectionalBoundary={changeDirectionalBoundary}
@@ -674,6 +682,7 @@ const LiveFeed = (props: any) => {
                     previewBoundary={previewBoundary}
                     isPreview={isPreview}
                     boundaryPreset={boundaryPreset}
+                    setToUpdateBoundary={setToUpdateBoundary}
                   />
                 ) : (
                   <>
