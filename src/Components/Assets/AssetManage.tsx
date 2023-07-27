@@ -405,9 +405,9 @@ const AssetManage = (props: AssetManageProps) => {
           </div>
         )}
       </div>
-      {asset?.id && asset?.asset_class != AssetClass.NONE && (
-        <Uptime assetId={asset?.id} />
-      )}
+      {asset?.id &&
+        asset?.asset_class &&
+        asset?.asset_class != AssetClass.NONE && <Uptime assetId={asset?.id} />}
       <div className="mb-4 mt-8 text-xl font-semibold">Transaction History</div>
       <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg">
         <table className="min-w-full divide-y divide-gray-200">
