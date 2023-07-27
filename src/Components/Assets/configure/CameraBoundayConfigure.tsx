@@ -4,7 +4,6 @@ import ButtonV2 from "../../Common/components/ButtonV2";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { direction } from "../../Facility/Consultations/LiveFeed";
-
 interface CameraBoundaryConfigureProps {
   addBoundaryPreset: () => void;
   deleteBoundaryPreset: () => void;
@@ -23,6 +22,8 @@ interface UpdateCameraBoundaryConfigureProps {
   direction: direction;
   setDirection(direction: direction): void;
   setToUpdateBoundary: (toUpdate: boolean) => void;
+  updateBoundaryInfo: Record<string, boolean>;
+  setUpdateBoundaryInfo: (info: Record<string, boolean>) => void;
 }
 export default function CameraBoundaryConfigure(
   props: CameraBoundaryConfigureProps
@@ -141,13 +142,32 @@ export default function CameraBoundaryConfigure(
 export function UpdateCameraBoundaryConfigure(
   props: UpdateCameraBoundaryConfigureProps
 ) {
-  const { direction, setDirection, setToUpdateBoundary } = props;
+  const {
+    direction,
+    setDirection,
+    setToUpdateBoundary,
+    updateBoundaryInfo,
+    setUpdateBoundaryInfo,
+  } = props;
+
+  const translation: Record<string, string> = {
+    left: "Left",
+    right: "Right",
+    up: "Top",
+    down: "Bottom",
+  };
 
   const handlePrevButtonClick = () => {
     switch (direction) {
       case "left":
         setToUpdateBoundary(false);
         setDirection(null);
+        setUpdateBoundaryInfo({
+          left: false,
+          right: false,
+          up: false,
+          down: false,
+        });
         break;
 
       case "right":
@@ -167,6 +187,28 @@ export function UpdateCameraBoundaryConfigure(
     }
   };
 
+  const showUpdateBoundaryInfo = (dir: string, updated: boolean) => {
+    if (dir == direction) {
+      return (
+        <div className="rounded-md bg-purple-100 py-1 text-center text-purple-700">
+          updating
+        </div>
+      );
+    }
+    if (updated) {
+      return (
+        <div className="rounded-md bg-green-100 py-1 text-center text-green-700">
+          updated
+        </div>
+      );
+    }
+    return (
+      <div className="rounded-md bg-gray-100 py-1 text-center text-gray-700">
+        not updated
+      </div>
+    );
+  };
+
   const handleNextButtonClick = () => {
     switch (direction) {
       case "left":
@@ -181,6 +223,12 @@ export function UpdateCameraBoundaryConfigure(
       case "down":
         setDirection(null);
         setToUpdateBoundary(false);
+        setUpdateBoundaryInfo({
+          left: false,
+          right: false,
+          up: false,
+          down: false,
+        });
         break;
       default:
         break;
@@ -189,15 +237,17 @@ export function UpdateCameraBoundaryConfigure(
 
   return (
     <div className="mt-4 flex flex-col flex-wrap">
-      <div className="flex-1 rounded-lg  bg-gray-300 p-4  text-center text-2xl font-bold text-gray-700 hover:text-gray-800">
-        Update {direction} boundary
+      <div className="text-l  flex-1 bg-gray-200  p-4 text-center text-gray-800">
+        Updating boundary
       </div>
       <div className="flex flex-1 flex-col gap-2 py-4">
         {["left", "right", "up", "down"].map((dir) => {
           return (
             <div className="flex flex-1 flex-row justify-between gap-2">
-              <div>{dir}</div>
-              <div>Not updated</div>
+              <div>{translation[dir]}</div>
+              <div className="w-28">
+                {showUpdateBoundaryInfo(dir, updateBoundaryInfo[dir])}
+              </div>
             </div>
           );
         })}

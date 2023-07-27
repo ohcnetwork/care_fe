@@ -71,6 +71,14 @@ const LiveFeed = (props: any) => {
   const setBoundaryPreset: (preset: any) => void = props.setBoundaryPreset;
   const fetchBoundaryBedPreset: () => void = props.fetchBoundaryBedPreset;
   const updateBoundaryPreset: () => void = props.updateBoundaryPreset;
+  const [updateBoundaryInfo, setUpdateBoundaryInfo] = useState<
+    Record<string, boolean>
+  >({
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+  });
   props.updateBoundaryPreset;
   const setToUpdateBoundary: (toUpdate: boolean) => void =
     props.setToUpdateBoundary;
@@ -297,6 +305,11 @@ const LiveFeed = (props: any) => {
       },
     });
     updateBoundaryPreset();
+
+    setUpdateBoundaryInfo({
+      ...updateBoundaryInfo,
+      [direction as string]: true,
+    });
   };
 
   const runFunctionWithDelay = (func: () => any, delay: number) => {
@@ -691,6 +704,8 @@ const LiveFeed = (props: any) => {
                     direction={direction}
                     setDirection={setDirection}
                     setToUpdateBoundary={setToUpdateBoundary}
+                    updateBoundaryInfo={updateBoundaryInfo}
+                    setUpdateBoundaryInfo={setUpdateBoundaryInfo}
                   />
                 ) : (
                   <>
