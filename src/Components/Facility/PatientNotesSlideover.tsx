@@ -93,7 +93,10 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       )}
     >
       {!show ? (
-        <div className="flex w-full items-center justify-around rounded-t-md bg-primary-800 p-2 text-white">
+        <div
+          className="flex w-full cursor-pointer items-center justify-around rounded-t-md bg-primary-800 p-2 text-white"
+          onClick={() => setShow(!show)}
+        >
           <span className="font-semibold">{"Doctor's Notes"}</span>
           {notesActionIcons}
         </div>
