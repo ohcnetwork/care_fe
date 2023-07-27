@@ -13,6 +13,7 @@ import {
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Popover } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
+import moment from "moment";
 
 type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
@@ -228,7 +229,7 @@ const DateInputV2: React.FC<Props> = ({
                   disabled={disabled}
                   className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
                   placeholder={placeholder ?? "Select date"}
-                  value={value && format(value, "yyyy-MM-dd")}
+                  value={value && moment(value).format("DD / MM / YYYY")}
                 />
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 p-2">
                   <CareIcon className="care-l-calendar-alt text-lg text-gray-600" />
@@ -247,10 +248,28 @@ const DateInputV2: React.FC<Props> = ({
                   )}
                 >
                   <div className="mb-4 flex w-full flex-col items-center justify-between">
-                    <p className="text-sm font-medium text-gray-600">
-                      {placeholder}
-                    </p>
-                    <div className="flex">
+                    <input
+                      key={value && moment(value).format("DD / MM / YYYY")}
+                      className="cui-input-base bg-gray-50"
+                      defaultValue={
+                        value && moment(value).format("DD / MM / YYYY")
+                      }
+                      onChange={(e) => {
+                        const momentObj = moment(
+                          e.target.value,
+                          "DD / MM / YYYY"
+                        );
+
+                        if (momentObj.isValid()) {
+                          onChange(momentObj.toDate());
+                        }
+                      }}
+                      // label={placeholder}
+                      // labelClassName="text-sm"
+                      // errorClassName="hidden"
+                      // inputClassName="bg-gray-100"
+                    />
+                    <div className="mt-4 flex">
                       <button
                         type="button"
                         disabled={!isDateWithinConstraints()}
