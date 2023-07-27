@@ -323,6 +323,7 @@ export const ConsultationForm = (props: any) => {
             cause_of_death: res.data?.discharge_notes || "",
             death_datetime: res.data?.death_datetime || "",
             death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
+            InvestigationAdvice: res.data.investigation,
           };
           dispatch({ type: "set_form", form: formData });
           setBed(formData.bed);
@@ -489,7 +490,12 @@ export const ConsultationForm = (props: any) => {
               break;
             }
             if (i.repetitive && !i.frequency?.replace(/\s/g, "").length) {
-              errors[field] = "Frequency field can not be empty";
+              errors[field] = "Frequency field cannot be empty";
+              invalidForm = true;
+              break;
+            }
+            if (!i.repetitive && !i.time?.replace(/\s/g, "").length) {
+              errors[field] = "Time field cannot be empty";
               invalidForm = true;
               break;
             }
