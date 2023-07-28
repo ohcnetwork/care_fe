@@ -4,12 +4,12 @@ import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { DoctorModal, OptionsType } from "./models";
 import ButtonV2, { Cancel } from "../Common/components/ButtonV2";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
+import TextFormField from "../Form/FormFields/TextFormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
+import SelectMenuV2 from "../Form/SelectMenuV2";
+import { DoctorModal, OptionsType } from "./models";
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: string;
@@ -217,14 +217,15 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
             </FieldLabel>
             <SelectMenuV2
               id="area-of-specialization"
-              value={doctorTypes.find((type) => type.id == state.form.area)}
+              value={doctorTypes.find((type) => type.id == state.form.area)?.id}
               options={doctorTypes.filter((type) => !type.disabled)}
               optionLabel={(option) => option.text}
+              optionValue={(option) => option.id}
               requiredError={state.errors.area.length !== 0}
               onChange={(e) =>
                 handleFormFieldChange({
                   name: "area",
-                  value: (e && e.id) || "",
+                  value: e || "",
                 })
               }
               disabled={!!id}
