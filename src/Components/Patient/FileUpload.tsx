@@ -706,12 +706,14 @@ export const FileUpload = (props: FileUploadProps) => {
                         </span>{" "}
                         {item.name}
                       </div>
-                      <div>
-                        <span className="font-semibold leading-relaxed">
-                          Created By:
-                        </span>{" "}
-                        {item.uploaded_by ? item.uploaded_by.username : null}
-                      </div>
+                      {sortFileState != "DISCHARGE_SUMMARY" && (
+                        <div>
+                          <span className="font-semibold leading-relaxed">
+                            Created By:
+                          </span>{" "}
+                          {item.uploaded_by ? item.uploaded_by.username : null}
+                        </div>
+                      )}
                       {item.created_date && (
                         <RecordMeta
                           prefix={
