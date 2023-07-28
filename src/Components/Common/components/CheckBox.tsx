@@ -14,7 +14,7 @@ export default function Checkbox(props: Props) {
     <div className={props.className} id={props.id}>
       <div className="flex gap-4 py-2">
         <input
-          className="focus:outline-none focus:ring-0 focus:ring-offset-0 rounded-none"
+          className="rounded-none focus:outline-none focus:ring-0 focus:ring-offset-0"
           type="checkbox"
           name={props.name}
           checked={props.checked}

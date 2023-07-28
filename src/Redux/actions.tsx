@@ -857,7 +857,6 @@ export const listAssetTransaction = (params: object) =>
 export const getAssetTransaction = (id: string) =>
   fireRequest("getAssetTransaction", [], {}, { id });
 
-
 // ABDM related
 export const generateAadhaarOtp = (aadhaar: string) =>
   fireRequest("generateAadhaarOtp", [], { aadhaar });
@@ -928,7 +927,6 @@ export const listAssetAvailability = (params: object) =>
   fireRequest("listAssetAvailability", [], params);
 export const getAssetAvailability = (id: string) =>
   fireRequest("getAssetAvailability", [], {}, { id });
-
 
 export const listPMJYPackages = (query?: string) =>
   fireRequest("listPMJYPackages", [], { query });

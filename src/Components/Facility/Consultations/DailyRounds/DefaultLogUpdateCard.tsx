@@ -25,18 +25,18 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
 
   return (
     <div
-      className={`p-4 flex flex-col gap-4 w-full rounded-lg shadow ${
+      className={`flex w-full flex-col gap-4 rounded-lg p-4 shadow ${
         telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
       }`}
     >
-      <div className="flex flex-col gap-1 items-start">
-        <div className="rounded-full bg-gray-50 border flex gap-2 w-min items-center text-gray-500">
-          <div className="px-1.5 py-0.5 rounded-full bg-gray-100">
+      <div className="flex flex-col items-start gap-1">
+        <div className="flex w-min items-center gap-2 rounded-full border bg-gray-50 text-gray-500">
+          <div className="rounded-full bg-gray-100 px-1.5 py-0.5">
             <CareIcon className="care-l-user-nurse text-lg" />
           </div>
-          <span className="flex gap-1 text-sm tracking-wider whitespace-nowrap pr-3">
+          <span className="flex gap-1 whitespace-nowrap pr-3 text-sm tracking-wider">
             <span className="font-semibold">{`${by?.first_name} ${by?.last_name}`}</span>
-            <span className="font-medium hidden md:block">
+            <span className="hidden font-medium md:block">
               ({by?.user_type})
             </span>
           </span>
@@ -65,7 +65,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
           attributeValue={round.other_details}
         />
 
-        <div className="mt-2 flex md:flex-row flex-col md:space-y-0 space-y-2 space-x-0 md:space-x-2">
+        <div className="mt-2 flex flex-col space-x-0 space-y-2 md:flex-row md:space-x-2 md:space-y-0">
           <ButtonV2
             variant="secondary"
             border

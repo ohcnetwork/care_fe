@@ -134,7 +134,7 @@ export default function ManageUsers() {
 
   const addUser = (
     <ButtonV2 className="w-full" onClick={() => navigate("/users/add")}>
-      <CareIcon className="care-l-plus text-lg w-full" />
+      <CareIcon className="care-l-plus w-full text-lg" />
       <p>Add New User</p>
     </ButtonV2>
   );
@@ -192,21 +192,21 @@ export default function ManageUsers() {
         <div
           key={`usr_${user.id}`}
           id={`usr_${idx}`}
-          className=" w-full lg:w-1/2 xl:w-1/3 mt-6 md:px-4"
+          className=" mt-6 w-full md:px-4 lg:w-1/2 xl:w-1/3"
         >
-          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-visible relative">
-            <div className="h-full flex flex-col justify-between pb-36 sm:pb-28 md:pb-24">
+          <div className="relative block h-full cursor-pointer overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
+            <div className="flex h-full flex-col justify-between pb-36 sm:pb-28 md:pb-24">
               <div className="px-6 py-4">
-                <div className="flex lg:flex-row gap-3 flex-col justify-between flex-wrap">
+                <div className="flex flex-col flex-wrap justify-between gap-3 lg:flex-row">
                   {user.username && (
                     <div
                       id="username"
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit"
+                      className="inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium leading-5 text-blue-800"
                     >
                       {user.username}
                     </div>
                   )}
-                  <div className="flex-shrink-0 text-sm text-gray-600 min-width-50">
+                  <div className="min-width-50 shrink-0 text-sm text-gray-600">
                     {user.last_login && cur_online ? (
                       <span>
                         {" "}
@@ -220,7 +220,7 @@ export default function ManageUsers() {
                         <span
                           aria-label="Online"
                           className={classNames(
-                            "shrink-0 inline-block h-2 w-2 rounded-full",
+                            "inline-block h-2 w-2 shrink-0 rounded-full",
                             cur_online ? "bg-primary-400" : "bg-gray-300"
                           )}
                         ></span>
@@ -233,12 +233,12 @@ export default function ManageUsers() {
                     )}
                   </div>
                 </div>
-                <div id="name" className="font-bold text-2xl capitalize mt-2">
+                <div id="name" className="mt-2 text-2xl font-bold capitalize">
                   {`${user.first_name} ${user.last_name}`}
 
                   {user.last_login && cur_online ? (
                     <i
-                      className="animate-pulse text-primary-500 fas fa-circle ml-1 opacity-75"
+                      className="fas fa-circle ml-1 animate-pulse text-primary-500 opacity-75"
                       aria-label="Online"
                     ></i>
                   ) : null}
@@ -258,13 +258,13 @@ export default function ManageUsers() {
                   className={`flex ${
                     isExtremeSmallScreen
                       ? " flex-wrap "
-                      : " flex-col md:flex-row justify-between "
-                  } md:grid md:grid-cols-4 gap-2`}
+                      : " flex-col justify-between md:flex-row "
+                  } gap-2 md:grid md:grid-cols-4`}
                 >
                   {user.user_type && (
                     <div className="col-span-2">
                       <UserDetails id="role" title="Role">
-                        <div className="font-semibold break-all">
+                        <div className="break-all font-semibold">
                           {user.user_type}
                         </div>
                       </UserDetails>
@@ -345,7 +345,7 @@ export default function ManageUsers() {
                   {user.created_by && (
                     <div className="col-span-2">
                       <UserDetails id="created_by" title="Created by">
-                        <div className="font-semibold break-all">
+                        <div className="break-all font-semibold">
                           {user.created_by}
                         </div>
                       </UserDetails>
@@ -354,7 +354,7 @@ export default function ManageUsers() {
                   {user.username && (
                     <div className="col-span-2">
                       <UserDetails id="home_facility" title="Home Facility">
-                        <span className="font-semibold block">
+                        <span className="block font-semibold">
                           {user.home_facility_object?.name ||
                             "No Home Facility"}
                         </span>
@@ -363,10 +363,10 @@ export default function ManageUsers() {
                   )}
                 </div>
                 {user.username && (
-                  <div className="flex justify-between flex-col w-full md:flex-row gap-2 absolute bottom-0 sm:bottom-6 left-0 p-4">
+                  <div className="absolute bottom-0 left-0 flex w-full flex-col justify-between gap-2 p-4 sm:bottom-6 md:flex-row">
                     <ButtonV2
                       id="facilities"
-                      className="flex items-center w-full md:w-1/2"
+                      className="flex w-full items-center md:w-1/2"
                       onClick={() => {
                         setExpandFacilityList(!expandFacilityList);
                         setSelectedUser(user);
@@ -377,7 +377,7 @@ export default function ManageUsers() {
                     </ButtonV2>
                     <ButtonV2
                       id="skills"
-                      className="flex items-center w-full md:w-1/2"
+                      className="flex w-full items-center md:w-1/2"
                       onClick={() => {
                         setExpandSkillList(true);
                         setSelectedUser(user.username);
@@ -434,14 +434,14 @@ export default function ManageUsers() {
         <UserFacilities user={selectedUser} />
       </SlideOverCustom>
 
-      <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-2">
+      <div className="m-4 mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5 md:px-2">
         <CountBlock
           text="Total Users"
           count={totalCount}
           loading={isLoading}
           icon={"user-injured"}
         />
-        <div className="flex flex-col lg:flex-row justify-between col-span-2 lg:px-3 space-y-3 lg:space-y-0 lg:space-x-4 my-2">
+        <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">
           <div className="w-full">
             <SearchInput
               name="username"
@@ -461,7 +461,7 @@ export default function ManageUsers() {
         </div>
       </div>
 
-      <div className="pl-6 pb-2">
+      <div className="pb-2 pl-6">
         <FilterBadges
           badges={({ badge, value, phoneNumber }) => [
             badge("Username", "username"),
@@ -598,7 +598,7 @@ function UserFacilities(props: { user: any }) {
           handleOk={handleUnlinkFacilitySubmit}
         />
       )}
-      <div className="flex gap-2 mb-4 items-stretch">
+      <div className="mb-4 flex items-stretch gap-2">
         <FacilitySelect
           multiple={false}
           name="facility"
@@ -619,7 +619,7 @@ function UserFacilities(props: { user: any }) {
         </ButtonV2>
       </div>
       {isLoading ? (
-        <div className="flex justify-center items-center">
+        <div className="flex items-center justify-center">
           <CircularProgress />
         </div>
       ) : (
@@ -627,9 +627,9 @@ function UserFacilities(props: { user: any }) {
           {/* Home Facility section */}
           {user?.home_facility_object && (
             <div className="mt-2">
-              <div className="text-lg font-bold mb-2 ml-2">Home Facility</div>
-              <div className="relative p-2 hover:bg-gray-200 focus:bg-gray-200 transition rounded md:rounded-lg cursor-pointer">
-                <div className="flex justify-between items-center">
+              <div className="mb-2 ml-2 text-lg font-bold">Home Facility</div>
+              <div className="relative cursor-pointer rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
+                <div className="flex items-center justify-between">
                   <span>{user?.home_facility_object?.name}</span>
                   <div className="flex items-center gap-2">
                     <button
@@ -658,7 +658,7 @@ function UserFacilities(props: { user: any }) {
           {/* Linked Facilities section */}
           {facilities.length > 0 && (
             <div className="mt-2">
-              <div className="text-lg font-bold mb-2 ml-2">
+              <div className="mb-2 ml-2 text-lg font-bold">
                 Linked Facilities
               </div>
               <div className="flex flex-col">
@@ -672,10 +672,10 @@ function UserFacilities(props: { user: any }) {
                       id={`facility_${i}`}
                       key={`facility_${i}`}
                       className={classNames(
-                        "relative p-2 hover:bg-gray-200 focus:bg-gray-200 transition rounded md:rounded-lg cursor-pointer"
+                        "relative cursor-pointer rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg"
                       )}
                     >
-                      <div className="flex justify-between items-center">
+                      <div className="flex items-center justify-between">
                         <span>{facility.name}</span>
                         <div className="flex items-center gap-2">
                           <button
@@ -725,15 +725,15 @@ function UserFacilities(props: { user: any }) {
             </div>
           )}
           {!user?.home_facility_object && facilities.length === 0 && (
-            <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
+            <div className="my-2 flex h-96 flex-col content-center justify-center align-middle">
               <div className="w-full">
                 <img
                   src="/images/404.svg"
                   alt="No linked facilities"
-                  className="w-80 mx-auto"
+                  className="mx-auto w-80"
                 />
               </div>
-              <p className="text-lg font-semibold text-center text-primary pt-4">
+              <p className="pt-4 text-center text-lg font-semibold text-primary">
                 No Linked Facilities
               </p>
             </div>

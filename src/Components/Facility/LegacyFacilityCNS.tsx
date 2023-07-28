@@ -144,7 +144,7 @@ export default function LegacyFacilityCNS({
       noImplicitPadding
       breadcrumbs={false}
       options={
-        <div className="flex gap-4 items-center">
+        <div className="flex items-center gap-4">
           {monitors?.length > 0 ? (
             <>
               <ButtonV2
@@ -245,10 +245,10 @@ export default function LegacyFacilityCNS({
             optionValue={(location) => location}
             disabled={!monitors}
           />
-          <div className="md:flex justify-end">
+          <div className="justify-end md:flex">
             <ButtonV2
               variant="primary"
-              className="w-full mr-2 my-2"
+              className="my-2 mr-2 w-full"
               onClick={() => {
                 setDefaultShowAllLocation(true);
                 setShowSelectLocation(false);
@@ -261,22 +261,22 @@ export default function LegacyFacilityCNS({
                 setDefaultShowAllLocation(false);
                 setShowSelectLocation(false);
               }}
-              className="mr-2 my-2"
+              className="my-2 mr-2"
               label="Confirm"
             />
             <Cancel
               onClick={() => setShowSelectLocation(false)}
-              className="mr-2 my-2"
+              className="my-2 mr-2"
             />
           </div>
         </div>
       </DialogModal>
       {monitors.length === 0 && (
-        <div className="flex w-full h-[80vh] items-center justify-center text-black text-center">
+        <div className="flex h-[80vh] w-full items-center justify-center text-center text-black">
           No patients are currently monitored
         </div>
       )}
-      <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-1">
+      <div className="mt-4 grid grid-cols-1 gap-1 lg:grid-cols-3">
         {defaultShowAllLocation
           ? monitors
               ?.slice(
