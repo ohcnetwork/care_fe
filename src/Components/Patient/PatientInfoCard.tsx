@@ -175,6 +175,15 @@ export default function PatientInfoCard(props: {
               <span>{patient.age} years</span>
               <span className="mx-2">•</span>
               <span>{patient.gender}</span>
+              {consultation?.suggestion === "DC" && (
+                <>
+                  <span className="mx-2">•</span>
+                  <span className="space-x-2">
+                    Domiciliary Care{" "}
+                    <CareIcon className="care-l-estate text-base text-gray-700" />
+                  </span>
+                </>
+              )}
             </p>
             <div className="flex flex-col items-center gap-2 text-sm sm:flex-row lg:mt-4">
               {[
@@ -222,7 +231,7 @@ export default function PatientInfoCard(props: {
                       )?.text
                     }{" "}
                     on{" "}
-                    {consultation?.suggestion === "A"
+                    {["A", "DC"].includes(consultation?.suggestion ?? "")
                       ? moment(consultation?.admission_date).format(
                           "DD/MM/YYYY"
                         )
