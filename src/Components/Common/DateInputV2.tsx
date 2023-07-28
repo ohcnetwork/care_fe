@@ -249,7 +249,7 @@ const DateInputV2: React.FC<Props> = ({
                 >
                   <div className="mb-4 flex w-full flex-col items-center justify-between">
                     <input
-                      key={value && moment(value).format("DD / MM / YYYY")}
+                      // key={value && moment(value).format("DD / MM / YYYY")}
                       className="cui-input-base bg-gray-50"
                       defaultValue={
                         value && moment(value).format("DD / MM / YYYY")
@@ -264,10 +264,6 @@ const DateInputV2: React.FC<Props> = ({
                           onChange(momentObj.toDate());
                         }
                       }}
-                      // label={placeholder}
-                      // labelClassName="text-sm"
-                      // errorClassName="hidden"
-                      // inputClassName="bg-gray-100"
                     />
                     <div className="mt-4 flex">
                       <button
