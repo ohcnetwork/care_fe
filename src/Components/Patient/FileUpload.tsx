@@ -146,6 +146,8 @@ export const FileUpload = (props: FileUploadProps) => {
   const [uploadedUnarchievedFiles, setuploadedUnarchievedFiles] = useState<
     Array<FileUploadModel>
   >([{}]);
+  const [uploadedDischargeSummaryFiles, setuploadedDischargeSummaryFiles] =
+    useState<Array<FileUploadModel>>([{}]);
   const [uploadStarted, setUploadStarted] = useState<boolean>(false);
   const [audiouploadStarted, setAudioUploadStarted] = useState<boolean>(false);
   const [reload, setReload] = useState<boolean>(false);
@@ -193,6 +195,8 @@ export const FileUpload = (props: FileUploadProps) => {
   const [totalArchievedFilesCount, setTotalArchievedFilesCount] = useState(0);
   const [totalUnarchievedFilesCount, setTotalUnarchievedFilesCount] =
     useState(0);
+  const [totalDischargeSummaryFilesCount, setTotalDischargeSummaryFilesCount] =
+    useState(0);
   const [offset, setOffset] = useState(0);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
@@ -213,10 +217,10 @@ export const FileUpload = (props: FileUploadProps) => {
   const currentuser_type = currentUser.data.user_type;
   const limit = RESULTS_PER_PAGE_LIMIT;
   const [isActive, setIsActive] = useState(true);
-  const tabs = [
+  const [tabs, setTabs] = useState([
     { name: "Unarchived Files", value: "UNARCHIVED" },
     { name: "Archived Files", value: "ARCHIVED" },
-  ];
+  ]);
   useEffect(() => {
     async function fetchPatientName() {
       if (patientId) {
@@ -301,7 +305,7 @@ export const FileUpload = (props: FileUploadProps) => {
       };
       let res = await dispatch(viewUpload(unarchivedFileData));
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           audio_urls(res.data.results);
           setuploadedUnarchievedFiles(
             res.data.results.filter(
@@ -322,9 +326,33 @@ export const FileUpload = (props: FileUploadProps) => {
       };
       res = await dispatch(viewUpload(archivedFileData));
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setuploadedArchievedFiles(res.data.results);
           setTotalArchievedFilesCount(res.data.count);
+        }
+        setIsLoading(false);
+      }
+      const dischargeSummaryFileData = {
+        file_type: "DISCHARGE_SUMMARY",
+        associating_id: getAssociatedId(),
+        is_archived: false,
+        limit: limit,
+        offset: offset,
+      };
+      res = await dispatch(viewUpload(dischargeSummaryFileData));
+      if (!status.aborted) {
+        if (res?.data) {
+          setuploadedDischargeSummaryFiles(res.data.results);
+          setTotalDischargeSummaryFilesCount(res.data.count);
+          if (res?.data?.results?.length > 0) {
+            setTabs([
+              ...tabs,
+              {
+                name: "Discharge Summary",
+                value: "DISCHARGE_SUMMARY",
+              },
+            ]);
+          }
         }
         setIsLoading(false);
       }
@@ -441,7 +469,10 @@ export const FileUpload = (props: FileUploadProps) => {
   const loadFile = async (id: any) => {
     setFileUrl("");
     setFileState({ ...file_state, open: true });
-    const data = { file_type: type, associating_id: getAssociatedId() };
+    const data = {
+      file_type: sortFileState === "DISCHARGE_SUMMARY" ? sortFileState : type,
+      associating_id: getAssociatedId(),
+    };
     const responseData = await dispatch(retrieveUpload(data, id));
     const file_extension = getExtension(responseData.data.read_signed_url);
     setFileState({
@@ -477,7 +508,7 @@ export const FileUpload = (props: FileUploadProps) => {
 
   const partialupdateFileName = async (id: any, name: string) => {
     const data = {
-      file_type: type,
+      file_type: sortFileState === "DISCHARGE_SUMMARY" ? sortFileState : type,
       name: name,
       associating_id: getAssociatedId(),
     };
@@ -724,9 +755,10 @@ export const FileUpload = (props: FileUploadProps) => {
                     ) : (
                       <></>
                     )}
-                    {item?.uploaded_by?.username === currentuser_username ||
-                    currentuser_type === "DistrictAdmin" ||
-                    currentuser_type === "StateAdmin" ? (
+                    {sortFileState != "DISCHARGE_SUMMARY" &&
+                    (item?.uploaded_by?.username === currentuser_username ||
+                      currentuser_type === "DistrictAdmin" ||
+                      currentuser_type === "StateAdmin") ? (
                       <>
                         <ButtonV2
                           onClick={() => {
@@ -1559,7 +1591,7 @@ export const FileUpload = (props: FileUploadProps) => {
               </div>
             )}
           </>
-        ) : (
+        ) : sortFileState === "ARCHIVED" ? (
           // First it would check the filtered array contains any files or not else it would state the message
           <>
             {uploadedArchievedFiles.length > 0 ? (
@@ -1584,6 +1616,33 @@ export const FileUpload = (props: FileUploadProps) => {
               </div>
             )}
           </>
+        ) : (
+          sortFileState === "DISCHARGE_SUMMARY" &&
+          totalDischargeSummaryFilesCount > 0 && (
+            <>
+              {uploadedDischargeSummaryFiles.length > 0 ? (
+                uploadedDischargeSummaryFiles.map((item: FileUploadModel) =>
+                  renderFileUpload(item)
+                )
+              ) : (
+                <div className="mt-4 rounded-lg border bg-white p-4 shadow">
+                  <div className="text-md flex items-center justify-center font-bold text-gray-500">
+                    {"No discharge summary files in the current Page"}
+                  </div>
+                </div>
+              )}
+              {totalDischargeSummaryFilesCount > limit && (
+                <div className="mt-4 flex w-full justify-center">
+                  <Pagination
+                    cPage={currentPage}
+                    defaultPerPage={limit}
+                    data={{ totalCount: totalDischargeSummaryFilesCount }}
+                    onChange={handlePagination}
+                  />
+                </div>
+              )}
+            </>
+          )
         )}
       </Page>
     </div>
