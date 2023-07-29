@@ -49,9 +49,18 @@ export default function DischargeSummaryModal(props: Props) {
       }
     }
 
-    await dispatch(
+    const res = await dispatch(
       generateDischargeSummary({ external_id: props.consultation.id })
     );
+    if (res.status === 406) {
+      Error({
+        msg:
+          res.data?.message ||
+          t("discharge_summary_not_ready") + " " + t("try_again_later"),
+      });
+      setDownloading(false);
+      return;
+    }
 
     setGenerating(true);
     Success({ msg: t("generating_discharge_summary") + "..." });
@@ -74,7 +83,7 @@ export default function DischargeSummaryModal(props: Props) {
         msg: t("discharge_summary_not_ready") + " " + t("try_again_later"),
       });
       setDownloading(false);
-    }, 5000);
+    }, 7000);
   };
 
   const handleEmail = async () => {
@@ -95,7 +104,7 @@ export default function DischargeSummaryModal(props: Props) {
       emailDischargeSummary({ email }, { external_id: props.consultation.id })
     );
 
-    if (res.status === 200) {
+    if (res.status === 202) {
       Success({ msg: t("email_success") });
       props.onClose();
     }

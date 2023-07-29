@@ -6,6 +6,8 @@
   "no_log_update_delta": "No changes since previous log update",
   "virtual_nursing_assistant": "Virtual Nursing Assistant",
   "discharge": "Discharge",
+  "discharge_summary": "Discharge Summary",
+  "discharge_from_care": "Discharge from CARE",
   "generating_discharge_summary": "Generating discharge summary",
   "discharge_summary_not_ready": "Discharge summary is not ready yet.",
   "download_discharge_summary": "Download discharge summary",
