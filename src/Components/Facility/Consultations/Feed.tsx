@@ -1,5 +1,4 @@
 import * as Notification from "../../../Utils/Notifications.js";
-
 import {
   CAMERA_STATES,
   CameraPTZ,
@@ -56,6 +55,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
   const [boundaryPreset, setBoundaryPreset] = useState<any>();
   const [isFullscreen, setFullscreen] = useFullscreen();
+  const [borderAlert, setBorderAlert] = useState<any>(null);
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -302,6 +302,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     }
   }, [bedPresets, streamStatus]);
 
+  const borderFlash: (dir: any) => void = (dir: any) => {
+    setBorderAlert(dir);
+    setTimeout(() => {
+      setBorderAlert(null);
+    }, 3000);
+  };
+
   const cameraPTZActionCBs: {
     [key: string]: (option: any, value?: any) => void;
   } = {
@@ -360,28 +367,28 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       if (boundaryPreset?.meta?.range && cameraState) {
         const range = boundaryPreset.meta.range;
         if (option.action == "up" && cameraState.y + payLoad.y > range.max_y) {
-          Notification.Error({ msg: "Cannot move beyond boundary" });
+          borderFlash("top");
           setLoading(CAMERA_STATES.IDLE);
           return;
         } else if (
           option.action == "down" &&
           cameraState.y + payLoad.y < range.min_y
         ) {
-          Notification.Error({ msg: "Cannot move beyond boundary" });
+          borderFlash("bottom");
           setLoading(CAMERA_STATES.IDLE);
           return;
         } else if (
           option.action == "left" &&
           cameraState.x + payLoad.x < range.min_x
         ) {
-          Notification.Error({ msg: "Cannot move beyond boundary" });
+          borderFlash("left");
           setLoading(CAMERA_STATES.IDLE);
           return;
         } else if (
           option.action == "right" &&
           cameraState.x + payLoad.x > range.max_x
         ) {
-          Notification.Error({ msg: "Cannot move beyond boundary" });
+          borderFlash("right");
           setLoading(CAMERA_STATES.IDLE);
           return;
         } else if (
@@ -503,140 +510,142 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           </div>
         </div>
       </div>
-      <div
-        className="relative flex h-[calc(100vh-1.5rem-90px)] grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
-        ref={videoWrapper}
-      >
-        {isIOS ? (
-          <ReactPlayer
-            url={url}
-            ref={liveFeedPlayerRef.current as any}
-            controls={false}
-            playsinline={true}
-            playing={true}
-            muted={true}
-            width="100%"
-            height="100%"
-            onBuffer={() => {
-              setStreamStatus(StreamStatus.Loading);
-            }}
-            onError={(e: any, _: any, hlsInstance: any) => {
-              if (e === "hlsError") {
-                const recovered = hlsInstance.recoverMediaError();
-                console.log(recovered);
+      <div className={`${borderAlert == null ? "" : borderAlert}-border-flash`}>
+        <div
+          className="relative flex h-[calc(100vh-1.5rem-90px)] grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
+          ref={videoWrapper}
+        >
+          {isIOS ? (
+            <ReactPlayer
+              url={url}
+              ref={liveFeedPlayerRef.current as any}
+              controls={false}
+              playsinline={true}
+              playing={true}
+              muted={true}
+              width="100%"
+              height="100%"
+              onBuffer={() => {
+                setStreamStatus(StreamStatus.Loading);
+              }}
+              onError={(e: any, _: any, hlsInstance: any) => {
+                if (e === "hlsError") {
+                  const recovered = hlsInstance.recoverMediaError();
+                  console.log(recovered);
+                }
+              }}
+              onEnded={() => {
+                setStreamStatus(StreamStatus.Stop);
+              }}
+            />
+          ) : (
+            <video
+              id="mse-video"
+              autoPlay
+              muted
+              playsInline
+              className="max-h-full max-w-full"
+              ref={liveFeedPlayerRef as any}
+            />
+          )}
+
+          {loading !== CAMERA_STATES.IDLE && (
+            <div className="absolute inset-x-0 top-2 flex items-center justify-center text-center">
+              <div className="inline-flex items-center gap-2 rounded bg-white/70 p-4">
+                <div className="an h-4 w-4 animate-spin rounded-full border-2 border-b-0 border-primary-500" />
+                <p className="text-base font-bold">{loading}</p>
+              </div>
+            </div>
+          )}
+          <div className="absolute bottom-0 right-0 flex h-full w-full items-center justify-center p-4 text-white">
+            {streamStatus === StreamStatus.Offline && (
+              <div className="text-center">
+                <p className="font-bold">
+                  STATUS: <span className="text-red-600">OFFLINE</span>
+                </p>
+                <p className="font-semibold ">Feed is currently not live.</p>
+                <p className="font-semibold ">
+                  Click refresh button to try again.
+                </p>
+              </div>
+            )}
+            {streamStatus === StreamStatus.Stop && (
+              <div className="text-center">
+                <p className="font-bold">
+                  STATUS: <span className="text-red-600">STOPPED</span>
+                </p>
+                <p className="font-semibold ">Feed is Stooped.</p>
+                <p className="font-semibold ">
+                  Click refresh button to start feed.
+                </p>
+              </div>
+            )}
+            {streamStatus === StreamStatus.Loading && (
+              <div className="text-center">
+                <p className="font-bold ">
+                  STATUS: <span className="text-red-600"> LOADING</span>
+                </p>
+                <p className="font-semibold ">Fetching latest feed.</p>
+              </div>
+            )}
+          </div>
+          <div className="absolute right-8 top-8 z-20 flex flex-col gap-4">
+            {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
+              (button, index) => {
+                const option = cameraPTZ.find(
+                  (option) => option.action === button
+                );
+                return (
+                  <FeedButton
+                    key={index}
+                    camProp={option}
+                    styleType="CHHOTUBUTTON"
+                    clickAction={() => option?.callback()}
+                  />
+                );
               }
-            }}
-            onEnded={() => {
-              setStreamStatus(StreamStatus.Stop);
-            }}
-          />
-        ) : (
-          <video
-            id="mse-video"
-            autoPlay
-            muted
-            playsInline
-            className="max-h-full max-w-full"
-            ref={liveFeedPlayerRef as any}
-          />
-        )}
-
-        {loading !== CAMERA_STATES.IDLE && (
-          <div className="absolute inset-x-0 top-2 flex items-center justify-center text-center">
-            <div className="inline-flex items-center gap-2 rounded bg-white/70 p-4">
-              <div className="an h-4 w-4 animate-spin rounded-full border-2 border-b-0 border-primary-500" />
-              <p className="text-base font-bold">{loading}</p>
+            )}
+            <div className="hideonmobilescreen pl-3">
+              <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
             </div>
           </div>
-        )}
-        <div className="absolute bottom-0 right-0 flex h-full w-full items-center justify-center p-4 text-white">
-          {streamStatus === StreamStatus.Offline && (
-            <div className="text-center">
-              <p className="font-bold">
-                STATUS: <span className="text-red-600">OFFLINE</span>
-              </p>
-              <p className="font-semibold ">Feed is currently not live.</p>
-              <p className="font-semibold ">
-                Click refresh button to try again.
-              </p>
-            </div>
-          )}
-          {streamStatus === StreamStatus.Stop && (
-            <div className="text-center">
-              <p className="font-bold">
-                STATUS: <span className="text-red-600">STOPPED</span>
-              </p>
-              <p className="font-semibold ">Feed is Stooped.</p>
-              <p className="font-semibold ">
-                Click refresh button to start feed.
-              </p>
-            </div>
-          )}
-          {streamStatus === StreamStatus.Loading && (
-            <div className="text-center">
-              <p className="font-bold ">
-                STATUS: <span className="text-red-600"> LOADING</span>
-              </p>
-              <p className="font-semibold ">Fetching latest feed.</p>
-            </div>
-          )}
-        </div>
-        <div className="absolute right-8 top-8 z-20 flex flex-col gap-4">
-          {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
-            (button, index) => {
-              const option = cameraPTZ.find(
-                (option) => option.action === button
-              );
-              return (
-                <FeedButton
-                  key={index}
-                  camProp={option}
-                  styleType="CHHOTUBUTTON"
-                  clickAction={() => option?.callback()}
-                />
-              );
-            }
-          )}
-          <div className="hideonmobilescreen pl-3">
-            <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
+          <div className="absolute bottom-8 right-8 z-20">
+            <FeedButton
+              camProp={cameraPTZ[4]}
+              styleType="CHHOTUBUTTON"
+              clickAction={() => cameraPTZ[4].callback()}
+            />
           </div>
-        </div>
-        <div className="absolute bottom-8 right-8 z-20">
-          <FeedButton
-            camProp={cameraPTZ[4]}
-            styleType="CHHOTUBUTTON"
-            clickAction={() => cameraPTZ[4].callback()}
-          />
-        </div>
-        <div className="absolute bottom-8 left-8 z-10 grid grid-flow-col grid-rows-3 gap-1">
-          {[
-            false,
-            cameraPTZ[2],
-            false,
-            cameraPTZ[0],
-            false,
-            cameraPTZ[1],
-            false,
-            cameraPTZ[3],
-            false,
-          ].map((c, i) => {
-            let out = <div className="h-[60px] w-[60px]" key={i}></div>;
-            if (c) {
-              const button = c as any;
-              out = (
-                <FeedButton
-                  key={i}
-                  camProp={button}
-                  styleType="BUTTON"
-                  clickAction={() => {
-                    button.callback();
-                  }}
-                />
-              );
-            }
+          <div className="absolute bottom-8 left-8 z-10 grid grid-flow-col grid-rows-3 gap-1">
+            {[
+              false,
+              cameraPTZ[2],
+              false,
+              cameraPTZ[0],
+              false,
+              cameraPTZ[1],
+              false,
+              cameraPTZ[3],
+              false,
+            ].map((c, i) => {
+              let out = <div className="h-[60px] w-[60px]" key={i}></div>;
+              if (c) {
+                const button = c as any;
+                out = (
+                  <FeedButton
+                    key={i}
+                    camProp={button}
+                    styleType="BUTTON"
+                    clickAction={() => {
+                      button.callback();
+                    }}
+                  />
+                );
+              }
 
-            return out;
-          })}
+              return out;
+            })}
+          </div>
         </div>
       </div>
     </div>

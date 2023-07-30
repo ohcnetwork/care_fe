@@ -400,6 +400,43 @@ button:disabled,
     }
 }
 
+.left-border-flash {
+    animation: borderPulse 1s infinite ease-out;
+    border-left: 10px solid #ffffff;
+    border-radius: 20px;
+}
+
+.right-border-flash {
+    animation: borderPulse 1s infinite ease-out;
+    border-right: 10px solid #ffffff;
+    border-radius: 20px;
+}
+
+.top-border-flash {
+    animation: borderPulse 1s infinite ease-out;
+    border-top: 10px solid #ffffff;
+    border-radius: 20px;
+}
+
+.bottom-border-flash {
+    animation: borderPulse 1s infinite ease-out;
+    border-bottom: 10px solid #ffffff;
+    border-radius: 20px;
+}
+
+
+@keyframes borderPulse {
+    0% {
+      border-color: #ffffff;
+      
+    }
+    50% {
+      border-color: #ff7272;
+    }
+    100% {
+      border-color: #ff0000;
+    }
+  }
 .feed-aspect-ratio {
     aspect-ratio: 16/9;
 }
