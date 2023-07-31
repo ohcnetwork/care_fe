@@ -410,7 +410,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           />
 
           <PatientCategorySelect
-            required={false}
+            required={true}
             name="patient_category"
             value={state.form.patient_category}
             onChange={handleFormFieldChange}

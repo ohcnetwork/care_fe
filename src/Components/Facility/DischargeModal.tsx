@@ -225,6 +225,7 @@ const DischargeModal = ({
         {preDischargeForm.discharge_reason === "REC" && (
           <div>
             <DateFormField
+              position="LEFT"
               label="Discharge Date"
               name="discharge_date"
               value={moment(preDischargeForm?.discharge_date).toDate()}
