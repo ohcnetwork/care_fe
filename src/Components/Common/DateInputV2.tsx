@@ -364,7 +364,7 @@ const DateInputV2: React.FC<Props> = ({
                               new Date(
                                 datePickerHeaderDate.getFullYear(),
                                 i,
-                                datePickerHeaderDate.getDate()
+                                1
                               ),
                               "MMM"
                             )}
