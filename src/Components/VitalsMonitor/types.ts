@@ -1,3 +1,5 @@
+import { PatientAssetBed } from "../Assets/AssetTypes";
+
 export interface VitalsDataBase {
   device_id: string;
   "date-time": string;
@@ -40,4 +42,14 @@ export interface ChannelOptions {
    * No. of data points expected to be received per second.
    */
   samplingRate: number;
+}
+
+export interface IUseVitalsMonitorConfig {
+  wide?: boolean;
+}
+
+export interface IVitalsComponentProps {
+  patientAssetBed?: PatientAssetBed;
+  socketUrl: string;
+  config?: IUseVitalsMonitorConfig;
 }

@@ -556,6 +556,7 @@ export const ConsultationDetails = (props: any) => {
                                     meta: monitorBedData?.asset_object?.meta,
                                   }}
                                   socketUrl={hl7SocketUrl}
+                                  config={{ wide: true }}
                                 />
                               </div>
                             )}
@@ -570,6 +571,7 @@ export const ConsultationDetails = (props: any) => {
                                     meta: ventilatorBedData?.asset_object?.meta,
                                   }}
                                   socketUrl={ventilatorSocketUrl}
+                                  config={{ wide: true }}
                                 />
                               </div>
                             )}
