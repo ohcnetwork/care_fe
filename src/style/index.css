@@ -357,7 +357,11 @@ input:disabled,
 .disabled {
     @apply cursor-not-allowed bg-gray-200 border-gray-400 text-gray-700;
 }
-
+.disabled-select-form {
+    pointer-events: none; 
+    cursor: not-allowed;
+    background-color: rgb(219, 219, 219,0.5);
+  }
 textarea {
     @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300;
 }

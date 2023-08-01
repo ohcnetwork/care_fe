@@ -676,7 +676,7 @@ const LiveFeed = (props: any) => {
             />
           </div>
           <div className="mx-4 flex max-w-sm flex-col">
-            <div>
+            <div className={`${isPreview ? "disabled-select-form" : null}`}>
               <label id="asset-type">Bed</label>
               <BedSelect
                 name="bed"
