@@ -10,7 +10,7 @@ import {
 import ListFilter from "./ListFilter";
 import { formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -165,7 +165,7 @@ export default function ListView() {
                   >
                     <i className="fas fa-stopwatch mr-2"></i>
                     <dd className="text-sm font-bold leading-5">
-                      {formatDate(resource.modified_date) || "--"}
+                      {formatDateTime(resource.modified_date) || "--"}
                     </dd>
                   </dt>
                 </div>

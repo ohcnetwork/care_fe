@@ -7,7 +7,7 @@ import { LinePlot } from "./components/LinePlot";
 import { StackedLinePlot } from "./components/StackedLinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
-import { formatDate } from "../../../Utils/utils";
+import { formatDateTime } from "../../../Utils/utils";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { PainDiagrams } from "./PainDiagrams";
 import PageTitle from "../../Common/PageTitle";
@@ -71,7 +71,7 @@ export const PrimaryParametersPlot = ({
   };
 
   const dates = Object.keys(results)
-    .map((p: string) => formatDate(p))
+    .map((p: string) => formatDateTime(p))
     .reverse();
 
   const yAxisData = (name: string) => {

@@ -8,7 +8,7 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import moment from "moment";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import Page from "../Common/components/Page";
 import Form from "../Form/Form";
 import { useTranslation } from "react-i18next";
@@ -210,7 +210,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 Date of declaring positive:{" "}
               </span>
               {patientData.date_declared_positive
-                ? formatDate(patientData.date_declared_positive)
+                ? formatDateTime(patientData.date_declared_positive)
                 : ""}
             </div>
             <div>
@@ -224,7 +224,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 Date of sample collection for Covid testing:{" "}
               </span>
               {patientData.date_of_test
-                ? formatDate(patientData.date_of_test)
+                ? formatDateTime(patientData.date_of_test)
                 : ""}
             </div>
             <div>
@@ -232,7 +232,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 Date of confirmation as Covid with SRF ID:{" "}
               </span>
               {patientData.date_of_result
-                ? formatDate(patientData.date_of_result)
+                ? formatDateTime(patientData.date_of_result)
                 : ""}{" "}
               ({"SRF ID: "}
               {patientData.srf_id || "-"})
@@ -255,7 +255,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 Date of admission:{" "}
               </span>
               {patientData.date_of_admission
-                ? formatDate(patientData.date_of_admission)
+                ? formatDateTime(patientData.date_of_admission)
                 : ""}
             </div>
             <div>
@@ -263,7 +263,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 Date of death:{" "}
               </span>
               {patientData.date_of_death
-                ? formatDate(patientData.date_of_death)
+                ? formatDateTime(patientData.date_of_death)
                 : ""}
             </div>
             <div>
@@ -308,7 +308,7 @@ export default function PrintDeathReport(props: { id: string }) {
                 Kottayam:{" "}
               </span>
               {patientData.kottayam_sample_date
-                ? formatDate(patientData.kottayam_sample_date)
+                ? formatDateTime(patientData.kottayam_sample_date)
                 : ""}
             </div>
             <div>

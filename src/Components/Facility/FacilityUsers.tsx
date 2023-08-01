@@ -19,7 +19,7 @@ import UserDeleteDialog from "../Users/UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import UserDetails from "../Common/UserDetails";
 import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
-import { classNames } from "../../Utils/utils";
+import { classNames, relativeTime } from "../../Utils/utils";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -329,7 +329,7 @@ export default function FacilityUsers(props: any) {
                     ></span>
                     <span className="pl-2">
                       {user.last_login
-                        ? moment(user.last_login).fromNow()
+                        ? relativeTime(user.last_login)
                         : "Never"}
                     </span>
                   </div>

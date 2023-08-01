@@ -1,5 +1,5 @@
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { formatDate, relativeDate } from "../../Utils/utils";
+import { formatDateTime, relativeDate } from "../../Utils/utils";
 import { UserModel } from "../Users/models";
 
 function RelativeDateUserMention(props: {
@@ -13,7 +13,7 @@ function RelativeDateUserMention(props: {
         <span
           className={`tooltip-text tooltip-${props.tooltipPosition || "top"}`}
         >
-          {props.actionDate ? formatDate(props.actionDate) : "--:--"}
+          {props.actionDate ? formatDateTime(props.actionDate) : "--:--"}
         </span>
         {props.actionDate ? relativeDate(props.actionDate) : "--:--"}
       </div>

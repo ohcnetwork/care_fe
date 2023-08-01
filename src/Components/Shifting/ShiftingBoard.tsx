@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { classNames, formatDate } from "../../Utils/utils";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import {
   completeTransfer,
   downloadShiftRequests,
@@ -153,7 +153,7 @@ const ShiftCard = ({ shift, filter }: any) => {
                 >
                   <i className="fas fa-stopwatch mr-2"></i>
                   <dd className="break-normal text-sm font-bold leading-5">
-                    {formatDate(shift.modified_date) || "--"}
+                    {formatDateTime(shift.modified_date) || "--"}
                   </dd>
                 </dt>
               </div>

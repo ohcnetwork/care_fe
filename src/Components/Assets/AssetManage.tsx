@@ -18,7 +18,7 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -157,7 +157,7 @@ const AssetManage = (props: AssetManageProps) => {
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
-                {formatDate(transaction.modified_date)}
+                {formatDateTime(transaction.modified_date)}
               </span>
             </td>
           </tr>

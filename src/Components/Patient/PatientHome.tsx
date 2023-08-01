@@ -21,7 +21,7 @@ import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 import Chip from "../../CAREUI/display/Chip";
-import { classNames, formatDate } from "../../Utils/utils";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
@@ -608,7 +608,7 @@ export const PatientHome = (props: any) => {
                       Date of Return
                     </div>
                     <div className="mt-1 text-sm font-medium leading-5">
-                      {formatDate(patientData.date_of_return)}
+                      {formatDateTime(patientData.date_of_return)}
                     </div>
                   </div>
                 )}
@@ -639,7 +639,7 @@ export const PatientHome = (props: any) => {
                         Last Vaccinated on
                       </div>
                       <div className="mt-1 text-sm font-medium leading-5">
-                        {formatDate(patientData.last_vaccinated_date)}
+                        {formatDateTime(patientData.last_vaccinated_date)}
                       </div>
                     </div>
                   )}
@@ -680,7 +680,7 @@ export const PatientHome = (props: any) => {
                         {(moment().isBefore(patientData.review_time)
                           ? "Review before: "
                           : "Review Missed: ") +
-                          formatDate(patientData.review_time)}
+                          formatDateTime(patientData.review_time)}
                       </p>
                     </div>
                   )}
@@ -897,7 +897,7 @@ export const PatientHome = (props: any) => {
                             >
                               <CareIcon className="care-l-stopwatch mr-2 text-lg" />
                               <dd className="text-sm font-bold leading-5">
-                                {formatDate(shift.modified_date) || "--"}
+                                {formatDateTime(shift.modified_date) || "--"}
                               </dd>
                             </dt>
                           </div>

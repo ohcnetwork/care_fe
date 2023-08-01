@@ -18,7 +18,7 @@ import {
   getPatient,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -377,7 +377,7 @@ export const DailyRounds = (props: any) => {
       state.form.review_interval || prevReviewInterval
     );
     if (nextReviewTime > 0)
-      return formatDate(moment().add(nextReviewTime, "minutes").toDate());
+      return formatDateTime(moment().add(nextReviewTime, "minutes").toDate());
     return "No Reviews Planned!";
   };
 

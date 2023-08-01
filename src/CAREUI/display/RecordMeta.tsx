@@ -1,5 +1,6 @@
 import moment from "moment";
 import CareIcon from "../icons/CareIcon";
+import { formatDateTime, relativeTime } from "../../Utils/utils";
 
 interface Props {
   time?: string;
@@ -17,17 +18,15 @@ interface Props {
  * if provided.
  */
 const RecordMeta = ({ time, user, prefix, className }: Props) => {
-  const relativeTime = moment(time).fromNow();
-
   const isOnline =
     user?.last_login &&
     moment().subtract(5, "minutes").isBefore(user.last_login);
 
   let child = (
     <div className="tooltip">
-      <span className="underline">{relativeTime}</span>
+      <span className="underline">{relativeTime(time)}</span>
       <span className="tooltip-text flex -translate-x-1/3 gap-1 text-xs font-medium tracking-wider">
-        {moment(time).format("hh:mm A; DD/MM/YYYY")}
+        {formatDateTime(time)}
         {user && (
           <>
             <CareIcon className="care-l-user" />

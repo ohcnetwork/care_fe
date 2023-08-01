@@ -1,4 +1,4 @@
-import moment from "moment";
+import moment, { MomentInput } from "moment";
 import { navigate } from "raviger";
 import { LocalStorageKeys } from "../Common/constants";
 
@@ -67,21 +67,26 @@ export const calculateApache2Score = (apacheParams: ApacheParams): number => {
   return totalScore;
 };
 
-export const formatDate = (
-  date: string | Date,
-  format = "hh:mm A; DD/MM/YYYY"
-) => {
-  return moment(date).format(format);
-};
+const DATE_FORMAT = "DD/MM/YYYY";
+const TIME_FORMAT = "hh:mm A";
+const DATE_TIME_FORMAT = `${TIME_FORMAT}; ${DATE_FORMAT}`;
+
+export const formatDateTime = (date: MomentInput, format = DATE_TIME_FORMAT) =>
+  moment(date).format(format);
+
+export const formatDate = (date: MomentInput, format = DATE_FORMAT) =>
+  formatDateTime(date, format);
+
+export const formatTime = (date: MomentInput, format = TIME_FORMAT) =>
+  formatDateTime(date, format);
 
 export const relativeDate = (date: string | Date) => {
   const momentDate = moment(date);
-  return `${momentDate.fromNow()} at ${momentDate.format("hh:mm A")}`;
+  return `${momentDate.fromNow()} at ${momentDate.format(TIME_FORMAT)}`;
 };
 
-export const relativeTime = (time: string | Date) => {
-  const momentTime = moment(time);
-  return `${momentTime.fromNow()}`;
+export const relativeTime = (time?: string | Date | number) => {
+  return `${moment(time).fromNow()}`;
 };
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

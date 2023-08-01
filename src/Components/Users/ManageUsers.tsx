@@ -28,7 +28,7 @@ import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import UserDetails from "../Common/UserDetails";
 import UserFilter from "./UserFilter";
-import { classNames } from "../../Utils/utils";
+import { classNames, relativeTime } from "../../Utils/utils";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { navigate } from "raviger";
@@ -226,7 +226,7 @@ export default function ManageUsers() {
                         ></span>
                         <span className="pl-2">
                           {user.last_login
-                            ? moment(user.last_login).fromNow()
+                            ? relativeTime(user.last_login)
                             : "Never"}
                         </span>
                       </>

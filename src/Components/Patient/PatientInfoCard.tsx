@@ -21,6 +21,7 @@ import { getDimensionOrDash } from "../../Common/utils";
 import moment from "moment";
 import useConfig from "../../Common/hooks/useConfig";
 import { useState } from "react";
+import { formatDate } from "../../Utils/utils.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -231,27 +232,21 @@ export default function PatientInfoCard(props: {
                       )?.text
                     }{" "}
                     on{" "}
-                    {["A", "DC"].includes(consultation?.suggestion ?? "")
-                      ? moment(consultation?.admission_date).format(
-                          "DD/MM/YYYY"
-                        )
-                      : moment(consultation?.created_date).format("DD/MM/YYYY")}
+                    {formatDate(
+                      ["A", "DC"].includes(consultation?.suggestion ?? "")
+                        ? consultation?.admission_date
+                        : consultation?.created_date
+                    )}
                     ,
                     {consultation?.discharge_reason === "EXP" ? (
                       <span>
                         {" "}
-                        Expired on{" "}
-                        {moment(consultation?.death_datetime).format(
-                          "DD/MM/YYYY"
-                        )}
+                        Expired on {formatDate(consultation?.death_datetime)}
                       </span>
                     ) : (
                       <span>
                         {" "}
-                        Discharged on{" "}
-                        {moment(consultation?.discharge_date).format(
-                          "DD/MM/YYYY"
-                        )}
+                        Discharged on {formatDate(consultation?.discharge_date)}
                       </span>
                     )}
                   </span>

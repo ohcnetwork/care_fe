@@ -1,7 +1,6 @@
-import moment from "moment";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AssetData } from "./AssetTypes";
-import { classNames } from "../../Utils/utils";
+import { classNames, formatDate } from "../../Utils/utils";
 
 export default function AssetWarrantyCard(props: { asset: AssetData }) {
   const { asset } = props;
@@ -10,7 +9,7 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
     "Serial Number": asset.serial_number,
     Expiry:
       asset.warranty_amc_end_of_validity &&
-      moment(asset.warranty_amc_end_of_validity).format("DD/MM/YYYY"),
+      formatDate(asset.warranty_amc_end_of_validity),
     Vendor: asset.vendor_name,
   };
 

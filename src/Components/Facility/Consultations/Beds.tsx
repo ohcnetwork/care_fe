@@ -15,7 +15,7 @@ import CircularProgress from "../../Common/components/CircularProgress.js";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import Loading from "../../Common/Loading";
 import TextFormField from "../../Form/FormFields/TextFormField";
-import { formatDate } from "../../../Utils/utils";
+import { formatDateTime } from "../../../Utils/utils";
 import moment from "moment";
 import { useDispatch } from "react-redux";
 
@@ -186,11 +186,11 @@ const Beds = (props: BedsProps) => {
                   {bed?.bed_object?.location_object?.name}
                 </div>
                 <div className="break-words bg-primary-100 p-2 text-center">
-                  {formatDate(bed?.start_date)}
+                  {formatDateTime(bed?.start_date)}
                 </div>
                 {bed?.end_date ? (
                   <div className="break-words bg-primary-100 p-2 text-center">
-                    {formatDate(bed?.end_date)}
+                    {formatDateTime(bed?.end_date)}
                   </div>
                 ) : (
                   <div className="bg-primary-100 p-2 text-center">

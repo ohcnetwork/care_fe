@@ -12,7 +12,7 @@ import { ExportButton } from "../Common/Export";
 import ListFilter from "./ListFilter";
 import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { formatFilter } from "./Commons";
 import loadable from "@loadable/component";
 import moment from "moment";
@@ -216,7 +216,7 @@ export default function ListView() {
                   >
                     <i className="fas fa-stopwatch mr-2"></i>
                     <dd className="text-sm font-bold leading-5">
-                      {formatDate(shift.modified_date) || "--"}
+                      {formatDateTime(shift.modified_date) || "--"}
                     </dd>
                   </dt>
                 </div>
