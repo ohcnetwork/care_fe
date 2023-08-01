@@ -227,7 +227,7 @@ export default function ResourceCreate(props: resourceProps) {
       }}
       backUrl={`/facility/${facilityId}`}
     >
-      <Card className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
+      <Card className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
         <TextFormField
           required
           label={t("contact_person")}
@@ -321,7 +321,7 @@ export default function ResourceCreate(props: resourceProps) {
           />
         </div>
 
-        <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-end mt-4">
+        <div className="mt-4 flex flex-col justify-end gap-2 md:col-span-2 md:flex-row">
           <Cancel onClick={() => goBack()} />
           <Submit onClick={handleSubmit} />
         </div>

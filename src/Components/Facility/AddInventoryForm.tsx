@@ -272,7 +272,7 @@ export const AddInventoryForm = (props: any) => {
       <div className="mt-4">
         <Card>
           <form onSubmit={handleSubmit}>
-            <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+            <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <FieldLabel id="inventory_name_label">
                   Inventory Name
@@ -328,7 +328,7 @@ export const AddInventoryForm = (props: any) => {
                 />
               </div>
             </div>
-            <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
+            <div className="mt-4 flex flex-col justify-between gap-2 md:flex-row">
               <Cancel onClick={() => goBack()} />
               <Submit onClick={handleSubmit} label="Add/Update Inventory" />
             </div>

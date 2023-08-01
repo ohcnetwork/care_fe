@@ -157,7 +157,7 @@ export const AddBedForm = (props: BedFormProps) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
+    <div className="mx-auto max-w-3xl px-2 pb-2">
       <Page
         title={headerText}
         backUrl={`/facility/${facilityId}/location/${locationId}/beds`}
@@ -175,73 +175,69 @@ export const AddBedForm = (props: BedFormProps) => {
           }),
         }}
       >
-        <div className="mt-10">
-          <Card>
-            <form onSubmit={(e) => handleSubmit(e)}>
-              <div className="mt-2 grid gap-4 grid-cols-1">
+        <Card className="mt-10 lg:p-6">
+          <form onSubmit={(e) => handleSubmit(e)}>
+            <TextFormField
+              name="name"
+              type="text"
+              label="Name"
+              id="name"
+              required
+              value={name}
+              onChange={(e) => setName(e.value)}
+              error={errors.name}
+            />
+            <TextAreaFormField
+              rows={5}
+              label="Description"
+              name="description"
+              value={description}
+              onChange={(e) => setDescription(e.value)}
+              error={errors.description}
+            />
+
+            <SelectFormField
+              id="bed-type"
+              className="w-full"
+              name="bed_type"
+              label="Bed Type"
+              required
+              options={LOCATION_BED_TYPES}
+              optionLabel={(option) => option.name}
+              optionValue={(option) => option.id}
+              value={bedType}
+              onChange={(e) => setBedType(e.value)}
+              error={errors.bedType}
+            />
+
+            {!bedId && (
+              <>
+                <CheckBoxFormField
+                  label="Do you want to make multiple beds?"
+                  onChange={() => {
+                    setMultipleBeds(!multipleBeds);
+                    if (!multipleBeds) setNumberOfBeds(1);
+                  }}
+                  name={"multipleBeds"}
+                />
                 <TextFormField
-                  name="name"
-                  type="text"
-                  label="Name"
-                  id="name"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.value)}
-                  error={errors.name}
+                  name="number_of_beds"
+                  disabled={!multipleBeds}
+                  label="Number of beds"
+                  type="number"
+                  value={numberOfBeds.toString()}
+                  min={1}
+                  max={100}
+                  onChange={(e) => setNumberOfBeds(Number(e.value))}
                 />
-                <TextAreaFormField
-                  rows={5}
-                  label="Description"
-                  name="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.value)}
-                  error={errors.description}
-                />
-
-                <SelectFormField
-                  id="bed-type"
-                  className="w-full"
-                  name="bed_type"
-                  label="Bed Type"
-                  required
-                  options={LOCATION_BED_TYPES}
-                  optionLabel={(option) => option.name}
-                  optionValue={(option) => option.id}
-                  value={bedType}
-                  onChange={(e) => setBedType(e.value)}
-                  error={errors.bedType}
-                />
-
-                {!bedId && (
-                  <>
-                    <CheckBoxFormField
-                      label="Do you want to make multiple beds?"
-                      onChange={() => {
-                        setMultipleBeds(!multipleBeds);
-                        if (!multipleBeds) setNumberOfBeds(1);
-                      }}
-                      name={"multipleBeds"}
-                    />
-                    <TextFormField
-                      name="number_of_beds"
-                      disabled={!multipleBeds}
-                      label="Number of beds"
-                      type="number"
-                      value={numberOfBeds.toString()}
-                      min={1}
-                      max={100}
-                      onChange={(e) => setNumberOfBeds(Number(e.value))}
-                    />
-                  </>
-                )}
-                <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-                  <Cancel onClick={handleCancel} />
-                  <Submit onClick={handleSubmit} label={buttonText} />
-                </div>
-              </div>
-            </form>
-          </Card>
-        </div>
+              </>
+            )}
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <Cancel onClick={handleCancel} />
+              <Submit onClick={handleSubmit} label={buttonText} />
+            </div>
+          </form>
+        </Card>
       </Page>
     </div>
   );

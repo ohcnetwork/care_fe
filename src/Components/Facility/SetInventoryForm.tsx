@@ -144,7 +144,7 @@ export const SetInventoryForm = (props: any) => {
       }}
       backUrl={`/facility/${facilityId}/inventory/min_quantity/list`}
     >
-      <Card className="mt-10 max-w-3xl mx-auto">
+      <Card className="mx-auto mt-10 max-w-3xl">
         <form onSubmit={(e) => handleSubmit(e)} className="mt-6 flex flex-col">
           <SelectFormField
             name="id"
@@ -177,7 +177,7 @@ export const SetInventoryForm = (props: any) => {
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-end mt-4 gap-2">
+          <div className="mt-4 flex flex-col justify-end gap-2 sm:flex-row">
             <Cancel onClick={() => goBack()} />
             <Submit label="Set" />
           </div>
