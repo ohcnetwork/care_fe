@@ -1,6 +1,6 @@
-import "cypress-localstorage-commands";
+// commands.ts
 
-import { Cypress, cy } from "local-cypress";
+import "cypress-localstorage-commands";
 
 Cypress.Commands.add("login", (username: string, password: string) => {
   cy.log(`Logging in the user: ${username}:${password}`);
@@ -22,11 +22,11 @@ Cypress.Commands.add("refreshApiLogin", (username, password) => {
     failOnStatusCode: false,
   }).then((response) => {
     if (response.status === 200) {
-      cy.writeFile("cypress/fixtures/token.json", {
+      cy.wrap({
         username: username,
         access: response.body.access,
         refresh: response.body.refresh,
-      });
+      }).as("authToken"); // Store the tokens as an alias for later use
       cy.setLocalStorage("care_access_token", response.body.access);
       cy.setLocalStorage("care_refresh_token", response.body.refresh);
     } else {
@@ -37,33 +37,55 @@ Cypress.Commands.add("refreshApiLogin", (username, password) => {
 
 Cypress.Commands.add("loginByApi", (username, password) => {
   cy.log(`Logging in the user: ${username}:${password}`);
-  cy.task("readFileMaybe", "cypress/fixtures/token.json").then(
-    (tkn: string) => {
-      const token = JSON.parse(tkn);
-      if (tkn && token.access && token.username === username) {
+
+  const loginAndSetTokens = () => {
+    // Log in the user and get the access and refresh tokens
+    cy.refreshApiLogin(username, password).then(() => {
+      cy.getLocalStorage("care_access_token").then((access) => {
+        cy.setLocalStorage("care_access_token", access);
+        cy.getLocalStorage("care_refresh_token").as("refreshToken"); // Store the refresh token as an alias for later use
+      });
+    });
+  };
+
+  // Check if the tokens exist in local storage and if they are valid
+  cy.getLocalStorage("care_access_token")
+    .then((access) => {
+      if (access) {
+        // If the access token exists, verify it with the server
         cy.request({
           method: "POST",
           url: "/api/v1/auth/token/verify/",
           body: {
-            token: token.access,
+            token: access,
           },
           headers: {
             "Content-Type": "application/json",
           },
           failOnStatusCode: false,
         }).then((response) => {
-          if (response.status === 200) {
-            cy.setLocalStorage("care_access_token", token.access);
-            cy.setLocalStorage("care_refresh_token", token.refresh);
-          } else {
-            cy.refreshApiLogin(username, password);
+          if (response.status === 403) {
+            // If the access token is invalid or expired, log in the user again
+            loginAndSetTokens();
+          } else if (response.status === 200) {
+            // If the access token is valid, set the tokens in local storage
+            cy.setLocalStorage("care_access_token", access);
+            cy.getLocalStorage("care_refresh_token").as("refreshToken"); // Store the refresh token as an alias for later use
           }
         });
       } else {
-        cy.refreshApiLogin(username, password);
+        // If the access token does not exist, log in the user
+        loginAndSetTokens();
       }
-    }
-  );
+    })
+    .then(() => {
+      // Set the refresh token from the alias to local storage
+      cy.get("@refreshToken").then((refresh) => {
+        if (refresh) {
+          cy.setLocalStorage("care_refresh_token", refresh);
+        }
+      });
+    });
 });
 
 Cypress.Commands.add(
