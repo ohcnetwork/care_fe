@@ -1,4 +1,5 @@
 import { PatientAssetBed } from "../Assets/AssetTypes";
+import { getVitalsCanvasSizeAndDuration } from "./utils";
 
 export interface VitalsDataBase {
   device_id: string;
@@ -44,12 +45,8 @@ export interface ChannelOptions {
   samplingRate: number;
 }
 
-export interface IUseVitalsMonitorConfig {
-  wide?: boolean;
-}
-
 export interface IVitalsComponentProps {
   patientAssetBed?: PatientAssetBed;
   socketUrl: string;
-  config?: IUseVitalsMonitorConfig;
+  config?: ReturnType<typeof getVitalsCanvasSizeAndDuration>;
 }

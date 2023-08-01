@@ -7,7 +7,7 @@ import HL7VitalsRenderer from "./HL7VitalsRenderer";
 import useCanvas from "../../Common/hooks/useCanvas";
 import {
   ChannelOptions,
-  IUseVitalsMonitorConfig,
+  IVitalsComponentProps,
   VitalsValueBase as VitalsValue,
 } from "./types";
 import { getChannel, getVitalsCanvasSizeAndDuration } from "./utils";
@@ -18,12 +18,12 @@ interface VitalsBPValue {
   map: VitalsValue;
 }
 
-export default function useHL7VitalsMonitor(config?: IUseVitalsMonitorConfig) {
+export default function useHL7VitalsMonitor(
+  config?: IVitalsComponentProps["config"]
+) {
   const waveformForegroundCanvas = useCanvas();
   const waveformBackgroundCanvas = useCanvas();
-  const rendererConfig = getVitalsCanvasSizeAndDuration(
-    config?.wide ? 19 / 11 : undefined
-  );
+  const rendererConfig = config ?? getVitalsCanvasSizeAndDuration();
 
   // Non waveform data states.
   const [isOnline, setIsOnline] = useState<boolean>(false);

@@ -52,12 +52,13 @@ export const getChannel = (observation: VitalsWaveformBase): ChannelOptions => {
 };
 
 const DEFAULT_RATIO = 13 / 11;
+const DEFAULT_DURATION = 7;
 const DEFAULT_SCALE = 38 * 11;
 
 /**
  * Returns the size of the canvas for the vitals monitor.
- * @param aspectRatio The aspect ratio of the canvas.
- * @param scale The scale of the canvas.
+ * @param aspectRatio The aspect ratio of the canvas. Defaults to 13:11.
+ * @param scale The scale of the canvas. Defaults to 38 * 11.
  * @returns The computed size of the canvas.
  */
 export const getVitalsCanvasSizeAndDuration = (
@@ -69,6 +70,6 @@ export const getVitalsCanvasSizeAndDuration = (
       width: scale * ratio,
       height: scale,
     },
-    duration: (7 * ratio) / DEFAULT_RATIO,
+    duration: DEFAULT_DURATION * (ratio / DEFAULT_RATIO),
   };
 };
