@@ -323,6 +323,7 @@ export const ConsultationForm = (props: any) => {
             cause_of_death: res.data?.discharge_notes || "",
             death_datetime: res.data?.death_datetime || "",
             death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
+            InvestigationAdvice: res.data.investigation,
           };
           dispatch({ type: "set_form", form: formData });
           setBed(formData.bed);
@@ -397,8 +398,11 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "admission_date":
-          if (state.form.suggestion === "A" && !state.form[field]) {
-            errors[field] = "Field is required as person is admitted";
+          if (
+            ["A", "DC"].includes(state.form.suggestion) &&
+            !state.form[field]
+          ) {
+            errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
@@ -489,7 +493,12 @@ export const ConsultationForm = (props: any) => {
               break;
             }
             if (i.repetitive && !i.frequency?.replace(/\s/g, "").length) {
-              errors[field] = "Frequency field can not be empty";
+              errors[field] = "Frequency field cannot be empty";
+              invalidForm = true;
+              break;
+            }
+            if (!i.repetitive && !i.time?.replace(/\s/g, "").length) {
+              errors[field] = "Time field cannot be empty";
               invalidForm = true;
               break;
             }
@@ -581,8 +590,9 @@ export const ConsultationForm = (props: any) => {
         suggestion: state.form.suggestion,
         consultation_status: Number(state.form.consultation_status),
         admitted: state.form.suggestion === "A",
-        admission_date:
-          state.form.suggestion === "A" ? state.form.admission_date : undefined,
+        admission_date: ["A", "DC"].includes(state.form.suggestion)
+          ? state.form.admission_date
+          : undefined,
         category: state.form.category,
         is_kasp: state.form.is_kasp,
         kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
@@ -969,7 +979,9 @@ export const ConsultationForm = (props: any) => {
                       label="Decision after consultation"
                       disabled={String(state.form.consultation_status) === "1"}
                       {...selectField("suggestion")}
-                      options={CONSULTATION_SUGGESTION}
+                      options={CONSULTATION_SUGGESTION.filter(
+                        ({ deprecated }) => !deprecated
+                      )}
                     />
                   </div>
 
@@ -1013,7 +1025,7 @@ export const ConsultationForm = (props: any) => {
                         <TextFormField
                           {...field("death_datetime")}
                           type="datetime-local"
-                          max={new Date().toISOString().slice(0, 16)}
+                          max={moment().format("YYYY-MM-DDTHH:mm")}
                           required={state.form.suggestion === "DD"}
                           label="Date & Time of Death"
                           value={state.form.death_datetime}
@@ -1034,7 +1046,7 @@ export const ConsultationForm = (props: any) => {
                     </>
                   )}
 
-                  {state.form.suggestion === "A" && (
+                  {["A", "DC"].includes(state.form.suggestion) && (
                     <>
                       <div
                         className="col-span-6"
@@ -1044,7 +1056,11 @@ export const ConsultationForm = (props: any) => {
                           {...field("admission_date")}
                           required
                           disableFuture
-                          label="Admission date"
+                          label={
+                            state.form.suggestion === "A"
+                              ? "Date of Admission"
+                              : "Domiciliary Care Start Date"
+                          }
                           position="LEFT"
                         />
                       </div>

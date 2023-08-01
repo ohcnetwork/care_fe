@@ -514,8 +514,7 @@ export const PatientManager = () => {
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
             <div className="h-20 w-full min-w-[5rem] rounded-lg border border-gray-300 bg-gray-50 md:w-20">
-              {patient?.last_consultation &&
-              patient?.last_consultation?.current_bed &&
+              {patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="flex h-full flex-col items-center justify-center">
                   <span className="tooltip w-full truncate px-1 text-center text-sm text-gray-900">
@@ -540,6 +539,15 @@ export const PatientManager = () => {
                     </span>
                   </span>
                 </div>
+              ) : patient.last_consultation?.suggestion === "DC" ? (
+                <div className="flex h-full flex-col items-center justify-center">
+                  <div className="tooltip">
+                    <CareIcon className="care-l-estate text-3xl text-gray-500" />
+                    <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm font-medium">
+                      Domiciliary Care
+                    </span>
+                  </div>
+                </div>
               ) : (
                 <div className="flex min-h-[5rem] items-center justify-center">
                   <i className="fas fa-user-injured text-3xl text-gray-500"></i>
@@ -548,21 +556,20 @@ export const PatientManager = () => {
             </div>
             <div className="flex w-full flex-col gap-2 pl-2 md:block md:flex-row">
               <div className="flex w-full justify-between gap-2">
-                <div className="text-xl font-semibold capitalize">
-                  <span>{patient.name}</span>
-                  <span className="text-gray-800">{" - " + patient.age}</span>
-                  {patient.action && patient.action != 10 && (
-                    <span className="ml-2 font-semibold text-gray-700">
-                      -{" "}
-                      {
-                        TELEMEDICINE_ACTIONS.find(
-                          (i) => i.id === patient.action
-                        )?.desc
-                      }
-                    </span>
-                  )}
+                <div className="font-semibold">
+                  <span className="text-xl capitalize">{patient.name}</span>
+                  <span className="ml-4 text-gray-800">{`${patient.age} yrs.`}</span>
                 </div>
               </div>
+
+              {patient.action && patient.action != 10 && (
+                <span className="text-sm font-semibold text-gray-700">
+                  {
+                    TELEMEDICINE_ACTIONS.find((i) => i.id === patient.action)
+                      ?.desc
+                  }
+                </span>
+              )}
 
               {patient.facility_object && (
                 <div className="mb-2">

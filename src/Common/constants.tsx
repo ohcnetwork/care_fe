@@ -323,7 +323,7 @@ export const SAMPLE_TEST_RESULT = [
 ];
 
 export const CONSULTATION_SUGGESTION = [
-  { id: "HI", text: "Home Isolation" },
+  { id: "HI", text: "Home Isolation", deprecated: true }, // # Deprecated. Preserving option for backward compatibility (use only for readonly operations)
   { id: "A", text: "Admission" },
   { id: "R", text: "Refer to another Hospital" },
   { id: "OP", text: "OP Consultation" },

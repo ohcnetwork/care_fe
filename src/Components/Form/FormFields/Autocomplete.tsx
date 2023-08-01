@@ -196,8 +196,8 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
               )}
               {filteredOptions.map((option, index) => (
                 <Combobox.Option
-                  id={`${props.id}-option-${option.label}`}
-                  key={index}
+                  id={`${props.id}-option-${option.label}-value-${index}`}
+                  key={`${props.id}-option-${option.label}-value-${index}`}
                   className={dropdownOptionClassNames}
                   value={option}
                 >
