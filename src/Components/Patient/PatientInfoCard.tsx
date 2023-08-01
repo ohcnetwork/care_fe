@@ -18,10 +18,10 @@ import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
 import LinkCareContextModal from "../ABDM/LinkCareContextModal";
 import { PatientModel } from "./models";
 import { getDimensionOrDash } from "../../Common/utils";
-import moment from "moment";
 import useConfig from "../../Common/hooks/useConfig";
 import { useState } from "react";
 import { formatDate } from "../../Utils/utils.js";
+import dayjs from "dayjs";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -132,16 +132,16 @@ export default function PatientInfoCard(props: {
                   <div
                     className={
                       "mb-2 inline-flex w-full items-center justify-center rounded-lg border border-gray-500 p-1 px-3 py-1 text-xs font-semibold leading-4 " +
-                      (moment().isBefore(patient.review_time)
+                      (dayjs().isBefore(patient.review_time)
                         ? " bg-gray-100"
                         : " bg-red-400 p-1 text-white")
                     }
                   >
                     <i className="text-md fas fa-clock mr-2"></i>
-                    {(moment().isBefore(patient.review_time)
+                    {(dayjs().isBefore(patient.review_time)
                       ? "Review before: "
                       : "Review Missed: ") +
-                      moment(patient.review_time).format("lll")}
+                      dayjs(patient.review_time).format("lll")}
                   </div>
                 )}
             </div>
@@ -294,8 +294,8 @@ export default function PatientInfoCard(props: {
               [
                 !(consultation?.facility !== patient.facility) &&
                   !(consultation?.discharge_date ?? !patient.is_active) &&
-                  moment(consultation?.modified_date).isBefore(
-                    new Date().getTime() - 24 * 60 * 60 * 1000
+                  dayjs(consultation?.modified_date).isBefore(
+                    dayjs().subtract(1, "day")
                   ),
                 <div className="text-center">
                   <CareIcon className="care-l-exclamation-triangle" /> No update

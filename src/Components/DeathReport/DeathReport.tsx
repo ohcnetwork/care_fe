@@ -7,12 +7,12 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import moment from "moment";
 import { formatDateTime } from "../../Utils/utils";
 import Page from "../Common/components/Page";
 import Form from "../Form/Form";
 import { useTranslation } from "react-i18next";
 import { navigate } from "raviger";
+import dayjs from "dayjs";
 
 type DeathReport = {
   name: string;
@@ -119,23 +119,19 @@ export default function PrintDeathReport(props: { id: string }) {
               patientRes.data.last_consultation?.discharge_notes || "",
             hospital_died_in: patientRes.data.last_consultation.facility_name,
             date_declared_positive: patientRes.data.date_declared_positive
-              ? moment(patientRes.data.date_declared_positive).toDate()
+              ? dayjs(patientRes.data.date_declared_positive).toDate()
               : "",
             date_of_admission: patientRes.data.last_consultation.admission_date
-              ? moment(
-                  patientRes.data.last_consultation.admission_date
-                ).toDate()
+              ? dayjs(patientRes.data.last_consultation.admission_date).toDate()
               : "",
             date_of_test: patientRes.data.date_of_test
-              ? moment(patientRes.data.date_of_test).toDate()
+              ? dayjs(patientRes.data.date_of_test).toDate()
               : "",
             date_of_result: patientRes.data.date_of_result
-              ? moment(patientRes.data.date_of_result).toDate()
+              ? dayjs(patientRes.data.date_of_result).toDate()
               : "",
             date_of_death: patientRes.data.last_consultation.death_datetime
-              ? moment(
-                  patientRes.data.last_consultation.death_datetime
-                ).toDate()
+              ? dayjs(patientRes.data.last_consultation.death_datetime).toDate()
               : "",
           };
           setPatientData(data);

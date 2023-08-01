@@ -1,5 +1,4 @@
 import { Popover } from "@headlessui/react";
-import moment from "moment";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { listAssetAvailability } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
@@ -7,6 +6,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { AssetStatus, AssetUptimeRecord } from "../Assets/AssetTypes";
 import { reverse } from "lodash";
 import { classNames } from "../../Utils/utils";
+import dayjs from "dayjs";
 
 const STATUS_COLORS = {
   Operational: "bg-green-500",
@@ -22,9 +22,9 @@ const STATUS_COLORS_TEXT = {
   "Under Maintenance": "text-blue-500",
 };
 
-const now = moment();
+const now = dayjs();
 const formatDateBeforeDays = Array.from({ length: 100 }, (_, index) =>
-  now.clone().subtract(index, "days").format("Do MMMM YYYY")
+  now.subtract(index, "days").format("Do MMMM YYYY")
 );
 
 const uptimeScore: number[] = Array.from({ length: 100 }, () => 0);
@@ -69,22 +69,22 @@ function UptimeInfo({
                     let ongoing = false;
 
                     if (prevIncident?.id) {
-                      endTimestamp = moment(prevIncident.timestamp);
-                    } else if (moment(incident.timestamp).isSame(now, "day")) {
-                      endTimestamp = moment();
+                      endTimestamp = dayjs(prevIncident.timestamp);
+                    } else if (dayjs(incident.timestamp).isSame(now, "day")) {
+                      endTimestamp = dayjs();
                       ongoing = true;
                     } else {
-                      endTimestamp = moment(incident.timestamp)
+                      endTimestamp = dayjs(incident.timestamp)
                         .set("hour", 23)
                         .set("minute", 59)
                         .set("second", 59);
                     }
                     const duration = !ongoing
                       ? formatDurationMins(
-                          moment
+                          dayjs
                             .duration(
-                              moment(endTimestamp).diff(
-                                moment(incident.timestamp)
+                              dayjs(endTimestamp).diff(
+                                dayjs(incident.timestamp)
                               )
                             )
                             .asMinutes()
@@ -94,8 +94,8 @@ function UptimeInfo({
                       incident.status === AssetStatus.down ||
                       incident.status === AssetStatus.maintenance
                     )
-                      totalMinutes += moment(endTimestamp).diff(
-                        moment(incident.timestamp),
+                      totalMinutes += dayjs(endTimestamp).diff(
+                        dayjs(incident.timestamp),
                         "minutes"
                       );
 
@@ -111,8 +111,8 @@ function UptimeInfo({
                           {incident.status}
                         </span>
                         <span className="md:col-span-2">
-                          {moment(incident.timestamp).format("h:mmA")} -{" "}
-                          {moment(endTimestamp).format("h:mmA")}
+                          {dayjs(incident.timestamp).format("h:mmA")} -{" "}
+                          {dayjs(endTimestamp).format("h:mmA")}
                         </span>
                         <span className="border-b md:border-b-0">
                           {duration}
@@ -192,8 +192,8 @@ export default function Uptime(props: { assetId: string }) {
     const recordsByDayBefore: { [key: number]: AssetUptimeRecord[] } = {};
 
     records.forEach((record) => {
-      const timestamp = moment(record.timestamp).startOf("day");
-      const today = moment().startOf("day");
+      const timestamp = dayjs(record.timestamp).startOf("day");
+      const today = dayjs().startOf("day");
       const diffDays = today.diff(timestamp, "days");
       if (diffDays <= 100) {
         const recordsForDay = recordsByDayBefore[diffDays] || [];
@@ -214,7 +214,7 @@ export default function Uptime(props: { assetId: string }) {
             created_date: "",
             modified_date: "",
             status: statusToCarryOver,
-            timestamp: moment()
+            timestamp: dayjs()
               .subtract(i, "days")
               .startOf("day")
               .format("YYYY-MM-DDTHH:mm:ss.SSSSSSZ"),
@@ -223,7 +223,7 @@ export default function Uptime(props: { assetId: string }) {
       } else {
         if (
           recordsByDayBefore[i].filter(
-            (r) => moment(r.timestamp).get("hour") < 8
+            (r) => dayjs(r.timestamp).get("hour") < 8
           ).length === 0
         ) {
           recordsByDayBefore[i].unshift({
@@ -232,7 +232,7 @@ export default function Uptime(props: { assetId: string }) {
             created_date: "",
             modified_date: "",
             status: statusToCarryOver,
-            timestamp: moment()
+            timestamp: dayjs()
               .subtract(i, "days")
               .startOf("day")
               .format("YYYY-MM-DDTHH:mm:ss.SSSSSSZ"),
@@ -250,8 +250,8 @@ export default function Uptime(props: { assetId: string }) {
     let upStatus = 0;
 
     const oldestRecord = availabilityData[0];
-    const daysAvailable = moment().diff(
-      moment(oldestRecord?.timestamp)
+    const daysAvailable = dayjs().diff(
+      dayjs(oldestRecord?.timestamp)
         .set("hour", 0)
         .set("minute", 0)
         .set("second", 0),
@@ -312,8 +312,8 @@ export default function Uptime(props: { assetId: string }) {
         const end = (i + 1) * 8;
         const recordsInPeriod = dayRecords.filter(
           (record) =>
-            moment(record.timestamp).hour() >= start &&
-            moment(record.timestamp).hour() < end
+            dayjs(record.timestamp).hour() >= start &&
+            dayjs(record.timestamp).hour() < end
         );
         recordsInPeriodCache[i] = recordsInPeriod;
         if (recordsInPeriod.length === 0) {
@@ -322,11 +322,11 @@ export default function Uptime(props: { assetId: string }) {
               recordsInPeriodCache[i - 1]?.length - 1
             ];
           if (
-            moment(previousLatestRecord?.timestamp)
+            dayjs(previousLatestRecord?.timestamp)
               .hour(end)
               .minute(0)
               .second(0)
-              .isBefore(moment())
+              .isBefore(dayjs())
           ) {
             if (previousLatestRecord?.status === AssetStatus["operational"]) {
               dayUptimeScore += 1;

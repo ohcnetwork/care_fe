@@ -28,14 +28,14 @@ import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
 import UserDeleteDialog from "./UserDeleteDialog";
 import UserDetails from "../Common/UserDetails";
 import UserFilter from "./UserFilter";
-import { classNames, relativeTime } from "../../Utils/utils";
+import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
 import loadable from "@loadable/component";
-import moment from "moment";
 import { navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
 import CircularProgress from "../Common/components/CircularProgress.js";
 import Page from "../Common/components/Page.js";
+import dayjs from "dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -185,9 +185,7 @@ export default function ManageUsers() {
   users &&
     users.length &&
     (userList = users.map((user: any, idx) => {
-      const cur_online = moment()
-        .subtract(5, "minutes")
-        .isBefore(user.last_login);
+      const cur_online = isUserOnline(user);
       return (
         <div
           key={`usr_${user.id}`}
@@ -299,7 +297,7 @@ export default function ManageUsers() {
                         <UserDetails id="doctor-experience" title="Experience">
                           {user.doctor_experience_commenced_on ? (
                             <span className="font-semibold">
-                              {moment().diff(
+                              {dayjs().diff(
                                 user.doctor_experience_commenced_on,
                                 "years",
                                 false

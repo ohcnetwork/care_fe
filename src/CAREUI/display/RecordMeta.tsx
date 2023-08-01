@@ -1,6 +1,5 @@
-import moment from "moment";
 import CareIcon from "../icons/CareIcon";
-import { formatDateTime, relativeTime } from "../../Utils/utils";
+import { formatDateTime, isUserOnline, relativeTime } from "../../Utils/utils";
 
 interface Props {
   time?: string;
@@ -9,7 +8,7 @@ interface Props {
   user?: {
     first_name: string;
     last_name: string;
-    last_login?: string;
+    last_login: string | undefined;
   };
 }
 
@@ -18,9 +17,7 @@ interface Props {
  * if provided.
  */
 const RecordMeta = ({ time, user, prefix, className }: Props) => {
-  const isOnline =
-    user?.last_login &&
-    moment().subtract(5, "minutes").isBefore(user.last_login);
+  const isOnline = user && isUserOnline(user);
 
   let child = (
     <div className="tooltip">

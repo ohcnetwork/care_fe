@@ -1,4 +1,3 @@
-import moment from "moment";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
@@ -11,6 +10,7 @@ import { formatDateTime } from "../../../Utils/utils";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { PainDiagrams } from "./PainDiagrams";
 import PageTitle from "../../Common/PageTitle";
+import dayjs from "dayjs";
 
 interface PrimaryParametersPlotProps {
   facilityId: string;
@@ -125,7 +125,7 @@ export const PrimaryParametersPlot = ({
   const rhythmValues: any = {};
   Object.entries(results).forEach((obj: any) => {
     if (obj[1].rhythm && obj[1].rhythm > 0) {
-      const key: string = moment(obj[0]).format("LL");
+      const key: string = dayjs(obj[0]).format("LL");
       const lst: Array<any> = Object.prototype.hasOwnProperty.call(
         rhythmValues,
         key
@@ -133,7 +133,7 @@ export const PrimaryParametersPlot = ({
         ? rhythmValues[key]
         : [];
       const value: any = {};
-      value["time"] = moment(obj[0]).format("LT");
+      value["time"] = dayjs(obj[0]).format("LT");
       value["rhythm"] = obj[1].rhythm;
       value["rhythm_detail"] = obj[1].rhythm_detail;
       lst.push(value);

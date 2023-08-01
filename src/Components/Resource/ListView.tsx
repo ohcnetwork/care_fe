@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
-import moment from "moment";
 import {
   listResourceRequests,
   downloadResourceRequests,
@@ -17,6 +16,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import dayjs from "dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -156,7 +156,7 @@ export default function ListView() {
                     title="  Last Modified"
                     className={
                       "flex items-center text-sm font-medium leading-5 " +
-                      (moment()
+                      (dayjs()
                         .subtract(2, "hours")
                         .isBefore(resource.modified_date)
                         ? "text-gray-900"

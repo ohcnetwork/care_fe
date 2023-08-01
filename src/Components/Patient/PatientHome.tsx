@@ -1,5 +1,4 @@
 import { navigate } from "raviger";
-import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
@@ -31,6 +30,7 @@ import CircularProgress from "../Common/components/CircularProgress";
 import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+import dayjs from "dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -670,14 +670,14 @@ export const PatientHome = (props: any) => {
                     <div
                       className={
                         "mb-6 mt-6 inline-flex w-full items-center justify-center rounded-md border p-3 text-xs font-semibold leading-4 shadow-sm lg:mt-0 " +
-                        (moment().isBefore(patientData.review_time)
+                        (dayjs().isBefore(patientData.review_time)
                           ? " bg-gray-100"
                           : " bg-red-600/5 p-1 text-sm font-normal text-red-600")
                       }
                     >
                       <i className="text-md fa-regular fa-clock mr-2" />
                       <p className="p-1">
-                        {(moment().isBefore(patientData.review_time)
+                        {(dayjs().isBefore(patientData.review_time)
                           ? "Review before: "
                           : "Review Missed: ") +
                           formatDateTime(patientData.review_time)}
@@ -888,7 +888,7 @@ export const PatientHome = (props: any) => {
                               title="  Last Modified"
                               className={
                                 "flex items-center text-sm font-medium leading-5 " +
-                                (moment()
+                                (dayjs()
                                   .subtract(2, "hours")
                                   .isBefore(shift.modified_date)
                                   ? "text-gray-900"

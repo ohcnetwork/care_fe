@@ -15,7 +15,6 @@ import SearchInput from "../Form/SearchInput";
 import { formatDateTime } from "../../Utils/utils";
 import { formatFilter } from "./Commons";
 import loadable from "@loadable/component";
-import moment from "moment";
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,6 +22,7 @@ import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import dayjs from "dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -207,7 +207,7 @@ export default function ListView() {
                     title={t("last_modified")}
                     className={
                       "flex items-center text-sm font-medium leading-5 " +
-                      (moment()
+                      (dayjs()
                         .subtract(2, "hours")
                         .isBefore(shift.modified_date)
                         ? "text-gray-900"

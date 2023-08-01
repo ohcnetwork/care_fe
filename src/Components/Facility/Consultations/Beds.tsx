@@ -16,8 +16,8 @@ import { FieldLabel } from "../../Form/FormFields/FormField";
 import Loading from "../../Common/Loading";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import { formatDateTime } from "../../../Utils/utils";
-import moment from "moment";
 import { useDispatch } from "react-redux";
+import dayjs from "dayjs";
 
 interface BedsProps {
   facilityId: string;
@@ -35,7 +35,7 @@ const Beds = (props: BedsProps) => {
   const { facilityId, consultationId, discharged } = props;
   const [bed, setBed] = React.useState<BedModel>({});
   const [startDate, setStartDate] = React.useState<string>(
-    moment().format("YYYY-MM-DDTHH:mm")
+    dayjs().format("YYYY-MM-DDTHH:mm")
   );
   const [consultationBeds, setConsultationBeds] = React.useState<CurrentBed[]>(
     []
@@ -143,7 +143,7 @@ const Beds = (props: BedsProps) => {
               value={startDate}
               type="datetime-local"
               onChange={(e) => setStartDate(e.value)}
-              max={moment().format("YYYY-MM-DDTHH:mm")}
+              max={dayjs().format("YYYY-MM-DDTHH:mm")}
               error=""
             />
           </div>

@@ -1,5 +1,4 @@
 import loadable from "@loadable/component";
-import moment from "moment";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { CURRENT_HEALTH_CHANGE, SYMPTOM_CHOICES } from "../../Common/constants";
@@ -8,6 +7,7 @@ import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DailyRoundsModel } from "./models";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
+import dayjs from "dayjs";
 const Loading = loadable(() => import("../Common/Loading"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
@@ -107,7 +107,7 @@ export const DailyRoundListDetails = (props: any) => {
           <div>
             <span className="font-semibold leading-relaxed">Taken at: </span>
             {dailyRoundListDetailsData.taken_at
-              ? moment(dailyRoundListDetailsData.taken_at).format("lll")
+              ? dayjs(dailyRoundListDetailsData.taken_at).format("lll")
               : "-"}
           </div>
           <div>

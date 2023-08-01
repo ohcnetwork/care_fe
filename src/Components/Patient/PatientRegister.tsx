@@ -21,7 +21,11 @@ import {
   searchPatient,
   updatePatient,
 } from "../../Redux/actions";
-import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
+import {
+  dateQueryString,
+  getPincodeDetails,
+  includesIgnoreCase,
+} from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useEffect, useReducer, useState } from "react";
@@ -54,12 +58,12 @@ import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import countryList from "../../Common/static/countries.json";
 import { debounce } from "lodash";
 import loadable from "@loadable/component";
-import moment from "moment";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { validatePincode } from "../../Common/validation";
+import dayjs from "dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -325,10 +329,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         ? res.data.test_type.toUpperCase()
         : state.form.test_type;
       form["date_of_test"] = res.data.sample_collection_date
-        ? moment(res.data.sample_collection_date)
+        ? dayjs(res.data.sample_collection_date)
         : state.form.date_of_test;
       form["date_of_result"] = res.data.result_date
-        ? moment(res.data.result_date)
+        ? dayjs(res.data.result_date)
         : state.form.date_of_result;
       form["phone_number"] = res.data.mobile_number
         ? "+91" + res.data.mobile_number
@@ -687,7 +691,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       emergency_phone_number: parsePhoneNumberFromString(
         formData.emergency_phone_number
       )?.format("E.164"),
-      date_of_birth: moment(formData.date_of_birth).format("YYYY-MM-DD"),
+      date_of_birth: dateQueryString(formData.date_of_birth),
       disease_status: formData.disease_status,
       date_of_test: formData.date_of_test ? formData.date_of_test : undefined,
       date_of_result: formData.date_of_result

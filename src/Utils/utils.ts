@@ -1,6 +1,6 @@
-import moment, { MomentInput } from "moment";
 import { navigate } from "raviger";
 import { LocalStorageKeys } from "../Common/constants";
+import dayjs from "dayjs";
 
 interface ApacheParams {
   age: number;
@@ -71,22 +71,29 @@ const DATE_FORMAT = "DD/MM/YYYY";
 const TIME_FORMAT = "hh:mm A";
 const DATE_TIME_FORMAT = `${TIME_FORMAT}; ${DATE_FORMAT}`;
 
-export const formatDateTime = (date: MomentInput, format = DATE_TIME_FORMAT) =>
-  moment(date).format(format);
+type DateLike = Parameters<typeof dayjs>[0];
 
-export const formatDate = (date: MomentInput, format = DATE_FORMAT) =>
+export const formatDateTime = (date: DateLike, format = DATE_TIME_FORMAT) =>
+  dayjs(date).format(format);
+
+export const formatDate = (date: DateLike, format = DATE_FORMAT) =>
   formatDateTime(date, format);
 
-export const formatTime = (date: MomentInput, format = TIME_FORMAT) =>
+export const formatTime = (date: DateLike, format = TIME_FORMAT) =>
   formatDateTime(date, format);
 
-export const relativeDate = (date: string | Date) => {
-  const momentDate = moment(date);
-  return `${momentDate.fromNow()} at ${momentDate.format(TIME_FORMAT)}`;
+export const relativeDate = (date: DateLike) => {
+  const obj = dayjs(date);
+  return `${obj.fromNow()} at ${obj.format(TIME_FORMAT)}`;
 };
 
-export const relativeTime = (time?: string | Date | number) => {
-  return `${moment(time).fromNow()}`;
+export const relativeTime = (time?: DateLike) => {
+  return `${dayjs(time).fromNow()}`;
+};
+
+export const dateQueryString = (date: DateLike) => {
+  if (!date || !dayjs(date).isValid()) return "";
+  return dayjs(date).format("YYYY-MM-DD");
 };
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -229,3 +236,7 @@ export const formatCurrency = (price: number) =>
     style: "currency",
     currency: "INR",
   });
+
+export const isUserOnline = (user: { last_login: DateLike }) => {
+  return dayjs().subtract(5, "minutes").isBefore(user.last_login);
+};

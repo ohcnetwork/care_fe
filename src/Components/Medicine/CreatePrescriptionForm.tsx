@@ -1,4 +1,3 @@
-import moment from "moment";
 import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
 import Form from "../Form/Form";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -11,6 +10,7 @@ import { useState } from "react";
 import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
 import { useTranslation } from "react-i18next";
 import MedibaseAutocompleteFormField from "./MedibaseAutocompleteFormField";
+import dayjs from "dayjs";
 
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;
@@ -142,42 +142,42 @@ export const PRESCRIPTION_FREQUENCIES = {
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day")
       ),
   },
   HS: {
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day")
       ),
   },
   BD: {
     slots: 2,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day")
       ),
   },
   TID: {
     slots: 3,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day")
       ),
   },
   QID: {
     slots: 4,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day")
       ),
   },
   Q4H: {
     slots: 6,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "day")
+        dayjs(administration.administered_date).isSame(dayjs(), "day")
       ),
   },
   QOD: {
@@ -188,9 +188,9 @@ export const PRESCRIPTION_FREQUENCIES = {
         return [];
       }
       if (
-        moment(lastAdministration.administered_date).isSame(moment(), "day") ||
-        moment(lastAdministration.administered_date).isSame(
-          moment().subtract(1, "day"),
+        dayjs(lastAdministration.administered_date).isSame(dayjs(), "day") ||
+        dayjs(lastAdministration.administered_date).isSame(
+          dayjs().subtract(1, "day"),
           "day"
         )
       ) {
@@ -204,7 +204,7 @@ export const PRESCRIPTION_FREQUENCIES = {
     slots: 1,
     completed: (administrations: MedicineAdministrationRecord[]) =>
       administrations.filter((administration) =>
-        moment(administration.administered_date).isSame(moment(), "week")
+        dayjs(administration.administered_date).isSame(dayjs(), "week")
       ),
   },
 };

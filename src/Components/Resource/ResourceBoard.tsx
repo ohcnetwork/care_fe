@@ -5,11 +5,11 @@ import {
   downloadResourceRequests,
 } from "../../Redux/actions";
 import { navigate } from "raviger";
-import moment from "moment";
 import { classNames } from "../../Utils/utils";
 import { useDrag, useDrop } from "react-dnd";
 import { formatDateTime } from "../../Utils/utils";
 import { ExportButton } from "../Common/Export";
+import dayjs from "dayjs";
 
 const limit = 14;
 
@@ -105,7 +105,7 @@ const ResourceCard = ({ resource }: any) => {
                   title="  Last Modified"
                   className={
                     "flex items-center text-sm font-medium leading-5 " +
-                    (moment()
+                    (dayjs()
                       .subtract(2, "hours")
                       .isBefore(resource.modified_date)
                       ? "text-gray-900"
