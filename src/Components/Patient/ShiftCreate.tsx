@@ -329,7 +329,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
         />
 
         <PatientCategorySelect
-          required={false}
+          required={true}
           {...field("patient_category")}
           value={patientCategory}
           onChange={(e) => setPatientCategory(e.value)}
