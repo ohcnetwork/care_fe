@@ -172,25 +172,25 @@ export default function SampleViewAdmin() {
         (i) => i.text === status
       )?.desc;
       return (
-        <div key={`usr_${item.id}`} className="w-full lg:w-1/2 mt-6 lg:px-4">
+        <div key={`usr_${item.id}`} className="mt-6 w-full lg:w-1/2 lg:px-4">
           <div
-            className={`block border rounded-lg bg-white shadow h-full hover:border-black text-black ${
-              item.result === "POSITIVE" ? "border-red-700 bg-red-100" : ""
-            } ${
-              item.result === "NEGATIVE"
+            className={`block h-full rounded-lg border text-black shadow hover:border-black ${
+              item.result === "POSITIVE"
+                ? "border-red-700 bg-red-100"
+                : item.result === "NEGATIVE"
                 ? "border-primary-700 bg-primary-100"
-                : ""
+                : "bg-white"
             }`}
           >
-            <div className="px-6 py-4 h-full flex flex-col justify-between">
+            <div className="flex h-full flex-col justify-between px-6 py-4">
               <div>
                 <div className="flex flex-col md:flex-row md:justify-between">
-                  <div className="font-bold text-xl capitalize mb-2">
+                  <div className="mb-2 text-xl font-bold capitalize">
                     {item.patient_name}
                   </div>
                   <div>
                     {item.sample_type && (
-                      <span className="truncate bg-blue-200 text-blue-800 text-sm rounded-md font-bold px-2 py-1 mx-1 text-wrap">
+                      <span className="text-wrap mx-1 truncate rounded-md bg-blue-200 px-2 py-1 text-sm font-bold text-blue-800">
                         Type: {item.sample_type}
                       </span>
                     )}
@@ -232,7 +232,7 @@ export default function SampleViewAdmin() {
                       Contact:{" "}
                     </span>
                     Confirmed carrier
-                    <CareIcon className="care-l-exclamation-triangle text-red-500 text-xl font-bold" />
+                    <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-red-500" />
                   </div>
                 )}
                 {item.patient_has_suspected_contact &&
@@ -264,14 +264,14 @@ export default function SampleViewAdmin() {
               </div>
 
               <div className="mt-4">
-                <div className="text-gray-600 text-sm font-bold">
+                <div className="text-sm font-bold text-gray-600">
                   <span className="text-gray-800">Date of Sample:</span>{" "}
                   {item.date_of_sample
                     ? formatDate(item.date_of_sample)
                     : "Not Available"}
                 </div>
 
-                <div className="text-gray-600 text-sm font-bold">
+                <div className="text-sm font-bold text-gray-600">
                   <span className="text-gray-800">Date of Result:</span>{" "}
                   {item.date_of_result
                     ? formatDate(item.date_of_result)
@@ -284,7 +284,7 @@ export default function SampleViewAdmin() {
                   <div className="mt-2">
                     <button
                       onClick={() => showUpdateStatus(item)}
-                      className="w-full text-sm bg-primary-500 hover:bg-primary-700 text-white font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                      className="w-full rounded border border-gray-400 bg-primary-500 px-4 py-2 text-center text-sm font-semibold text-white shadow hover:bg-primary-700"
                     >
                       UPDATE SAMPLE TEST STATUS
                     </button>
@@ -293,7 +293,7 @@ export default function SampleViewAdmin() {
 
                 <button
                   onClick={() => navigate(`/sample/${item.id}`)}
-                  className="mt-2 w-full text-sm bg-white hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                  className="mt-2 w-full rounded border border-gray-400 bg-white px-4 py-2 text-center text-sm font-semibold text-gray-800 shadow hover:bg-gray-400"
                 >
                   Sample Details
                 </button>
@@ -307,7 +307,7 @@ export default function SampleViewAdmin() {
 
   if (isLoading || !sample) {
     manageSamples = (
-      <div className="flex justify-center w-full">
+      <div className="flex w-full justify-center">
         <Loading />
       </div>
     );
@@ -320,8 +320,8 @@ export default function SampleViewAdmin() {
     );
   } else if (sample && sample.length === 0) {
     manageSamples = (
-      <div className="w-full bg-white rounded-lg p-3">
-        <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+      <div className="w-full rounded-lg bg-white p-3">
+        <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-gray-600">
           No Sample Tests Found
         </div>
       </div>
@@ -349,8 +349,8 @@ export default function SampleViewAdmin() {
           userType={userType}
         />
       )}
-      <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
-        <div className="flex flex-col lg:flex-row gap-6 justify-between">
+      <div className="mt-5 gap-5 lg:grid lg:grid-cols-1">
+        <div className="flex flex-col justify-between gap-6 lg:flex-row">
           <div className="w-full">
             <CountBlock
               text="Total Samples Taken"
@@ -360,7 +360,7 @@ export default function SampleViewAdmin() {
             />
           </div>
 
-          <div className="w-full flex flex-col gap-3">
+          <div className="flex w-full flex-col gap-3">
             <SearchInput
               name="patient_name"
               value={qParams.patient_name}

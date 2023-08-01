@@ -20,14 +20,14 @@ export default function HL7PatientVitalsMonitor({
   size,
 }: Props) {
   const { connect, waveformCanvas, data, isOnline } = useHL7VitalsMonitor();
-  const { patient, bed } = patientAssetBed ?? {};
+  const { patient, bed, asset } = patientAssetBed ?? {};
 
   useEffect(() => {
     connect(socketUrl);
   }, [socketUrl]);
 
   return (
-    <div className="flex flex-col gap-1 bg-[#020617] p-2 rounded">
+    <div className="flex flex-col gap-1 rounded bg-[#020617] p-2">
       {patientAssetBed && (
         <div className="flex items-center justify-between px-2 tracking-wide">
           <div className="flex items-center gap-2">
@@ -39,42 +39,62 @@ export default function HL7PatientVitalsMonitor({
                 {patient?.name}
               </Link>
             ) : (
-              <span className="flex gap-1 items-center text-gray-500">
+              <span className="flex items-center gap-1 text-gray-500">
                 <CareIcon className="care-l-ban" />
                 No Patient
               </span>
             )}
             {patient && (
-              <span className="text-gray-400 font-bold text-sm">
+              <span className="text-sm font-bold text-gray-400">
                 {patient.age}y;{" "}
                 {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
               </span>
             )}
           </div>
-          {bed && (
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span className="flex items-center gap-1">
-                <CareIcon className="care-l-bed text-base" />
-                {bed.name}
-              </span>
-              <span className="flex items-center gap-1">
-                <CareIcon className="care-l-location-point text-base" />
-                {bed.location_object?.name}
-              </span>
-            </div>
-          )}
+          <div className="flex gap-3">
+            {asset && (
+              <div className="flex items-center gap-2 text-sm">
+                <Link
+                  className="flex gap-2 text-gray-500"
+                  href={`/facility/${patient?.facility_object?.id}/assets/${asset?.id}`}
+                >
+                  <span className="flex items-center gap-1">
+                    <CareIcon className="care-l-monitor-heart-rate text-base" />
+                    {asset.name}
+                  </span>
+                </Link>
+              </div>
+            )}
+            {bed && (
+              <div className="flex items-center gap-2 text-sm">
+                <Link
+                  className="flex gap-2 text-gray-500"
+                  href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
+                >
+                  <span className="flex items-center gap-1">
+                    <CareIcon className="care-l-bed text-base" />
+                    {bed.name}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <CareIcon className="care-l-location-point text-base" />
+                    {bed.location_object?.name}
+                  </span>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       )}
-      <div className="relative flex flex-col md:flex-row md:justify-between divide-y divide-x-0 md:divide-y-0 md:divide-x divide-blue-600 gap-2">
+      <div className="relative flex flex-col gap-2 divide-x-0 divide-y divide-blue-600 md:flex-row md:justify-between md:divide-x md:divide-y-0">
         <div>
           <div
             className={classNames(
-              "flex flex-col gap-1 justify-center items-center text-center p-1 text-warning-500 font-medium font-mono",
+              "flex flex-col items-center justify-center gap-1 p-1 text-center font-mono font-medium text-warning-500",
               isOnline && "hidden"
             )}
             style={{ ...(size ?? waveformCanvas.size) }}
           >
-            <CareIcon className="care-l-cloud-times text-4xl animate-pulse mb-2" />
+            <CareIcon className="care-l-cloud-times mb-2 animate-pulse text-4xl" />
             <span className="font-bold">No incoming data from HL7 Monitor</span>
           </div>
           <div
@@ -90,49 +110,49 @@ export default function HL7PatientVitalsMonitor({
               }}
             />
             <canvas
-              className="absolute top-0 left-0"
+              className="absolute left-0 top-0"
               ref={waveformCanvas.background.canvasRef}
               style={{ ...(size ?? waveformCanvas.size) }}
               {...waveformCanvas.size}
             />
             <canvas
-              className="absolute top-0 left-0"
+              className="absolute left-0 top-0"
               ref={waveformCanvas.foreground.canvasRef}
               style={{ ...(size ?? waveformCanvas.size) }}
               {...waveformCanvas.size}
             />
           </div>
         </div>
-        <div className="md:absolute md:right-0 md:inset-y-0 z-10 bg-[#020617] grid gap-x-8 gap-y-4 md:gap-x-0 md:gap-y-0 grid-cols-2 md:grid-cols-1 md:divide-y divide-blue-600 text-white tracking-wider">
+        <div className="grid grid-cols-2 gap-x-8 gap-y-4 divide-blue-600 bg-[#020617] tracking-wider text-white md:inset-y-0 md:right-0 md:grid-cols-1 md:gap-0 md:divide-y">
           {/* Pulse Rate */}
           <NonWaveformData
             label="ECG"
             attr={data.pulseRate ?? data.heartRate}
             className="text-green-400"
             suffix={
-              <span className="text-red-500 animate-pulse font-sans">❤️</span>
+              <span className="animate-pulse font-sans text-red-500">❤️</span>
             }
           />
 
           {/* Blood Pressure */}
           <div className="flex flex-col p-1">
-            <div className="flex w-full gap-2 text-orange-500 font-bold">
+            <div className="flex w-full gap-2 font-bold text-orange-500">
               <span className="text-sm">NIBP</span>
               <span className="text-xs">{data.bp?.systolic.unit ?? "--"}</span>
             </div>
-            <div className="flex w-full text-sm text-orange-500 font-medium justify-center">
+            <div className="flex w-full justify-center text-sm font-medium text-orange-500">
               Sys / Dia
             </div>
-            <div className="flex w-full text-orange-300 text-2xl md:text-4xl font-black justify-center">
+            <div className="flex w-full justify-center text-2xl font-black text-orange-300 md:text-4xl">
               <span>{data.bp?.systolic.value ?? "--"}</span>
               <span>/</span>
               <span>{data.bp?.diastolic.value ?? "--"}</span>
             </div>
             <div className="flex items-end">
-              <span className="flex-1 text-orange-500 font-bold text-sm">
+              <span className="flex-1 text-sm font-bold text-orange-500">
                 Mean
               </span>
-              <span className="flex-1 text-gray-300 font-bold text-xl">
+              <span className="flex-1 text-xl font-bold text-gray-300">
                 {data.bp?.map.value ?? "--"}
               </span>
             </div>
@@ -153,32 +173,32 @@ export default function HL7PatientVitalsMonitor({
           />
 
           {/* Temperature */}
-          <div className="flex flex-col p-1 col-span-2 md:col-span-1">
-            <div className="flex w-full gap-2 text-fuchsia-400 font-bold">
+          <div className="col-span-2 flex flex-col p-1 md:col-span-1">
+            <div className="flex w-full gap-2 font-bold text-fuchsia-400">
               <span className="text-sm">TEMP</span>
               <span className="text-xs">
                 {data.temperature1?.unit?.replace("deg ", "°") ?? "--"}
               </span>
             </div>
-            <div className="flex w-full gap-3 justify-between text-fuchsia-400">
-              <div className="flex flex-col gap-1 justify-start">
+            <div className="flex w-full justify-between gap-3 text-fuchsia-400">
+              <div className="flex flex-col justify-start gap-1">
                 <span className="text-xs font-bold">T1</span>
-                <span className="text-lg md:text-2xl font-black">
+                <span className="text-lg font-black md:text-2xl">
                   {data.temperature1?.value ?? "--"}
                 </span>
               </div>
-              <div className="flex flex-col gap-1 justify-start">
+              <div className="flex flex-col justify-start gap-1">
                 <span className="text-xs font-bold">T2</span>
-                <span className="text-lg md:text-2xl font-black">
+                <span className="text-lg font-black md:text-2xl">
                   {data.temperature2?.value ?? "--"}
                 </span>
               </div>
-              <div className="flex flex-col gap-1 justify-start">
+              <div className="flex flex-col justify-start gap-1">
                 <span className="text-xs font-bold">TD</span>
-                <span className="text-lg md:text-2xl font-black">
+                <span className="text-lg font-black md:text-2xl">
                   {data.temperature1?.value && data.temperature2?.value
                     ? Math.abs(
-                        data.temperature1!.value - data.temperature2!.value
+                        data.temperature1?.value - data.temperature2?.value
                       )
                     : "--"}
                 </span>
@@ -206,13 +226,13 @@ const NonWaveformData = ({
 }: NonWaveformDataProps) => {
   return (
     <div
-      className={classNames("flex justify-between items-center p-1", className)}
+      className={classNames("flex items-center justify-between p-1", className)}
     >
-      <div className="flex flex-col gap-1 items-start h-full font-bold">
+      <div className="flex h-full flex-col items-start gap-1 font-bold">
         <span className="text-sm">{label}</span>
         <span className="text-xs">{attr?.unit ?? "--"}</span>
       </div>
-      <span className="ml-4 text-4xl md:text-6xl font-black mr-3">
+      <span className="ml-4 mr-3 text-4xl font-black md:text-6xl">
         {attr?.value ?? "--"}
       </span>
       {attr?.value && suffix}

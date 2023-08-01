@@ -25,7 +25,7 @@ export default function BadgesList(props: any) {
       const res = await dispatch(
         getUserList({ id: qParams.assigned_to }, "assigned_user_name")
       );
-      const { first_name, last_name } = res?.data?.results[0];
+      const { first_name, last_name } = res?.data?.results[0] || {};
       setAssignedUsername(`${first_name} ${last_name}`);
     }
     fetchData();
