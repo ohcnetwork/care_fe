@@ -114,7 +114,7 @@ export default function VentilatorPatientVitalsMonitor(
             />
           </div>
         </div>
-        <div className="z-10 grid grid-cols-3 divide-blue-600 bg-[#020617] tracking-wider text-white md:absolute md:inset-y-0 md:right-0 md:grid-cols-1 md:divide-y">
+        <div className="grid grid-cols-3 divide-blue-600 bg-[#020617] tracking-wider text-white md:inset-y-0 md:right-0 md:grid-cols-1 md:divide-y">
           <NonWaveformData
             label="PEEP"
             attr={data.peep}
