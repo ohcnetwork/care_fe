@@ -38,6 +38,32 @@ interface Props {
   facilityId: string;
 }
 
+const getOrderingList = async (
+  facilityId: string,
+  setOrdering: (order: string) => void
+) => {
+  const orderData = localStorage.getItem("live-feed-order");
+  if (orderData) {
+    const order = JSON.parse(orderData);
+    const orderValue = order.find((item: any) => item.facility === facilityId);
+    setOrdering(orderValue.order);
+  }
+};
+
+const setOrderingList = async (facilityId: string, order: string) => {
+  const orderData = localStorage.getItem("live-feed-order") || "[]";
+  const orderList = JSON.parse(orderData);
+  const index = orderList.findIndex(
+    (item: any) => item.facility === facilityId
+  );
+  if (index !== -1) {
+    orderList[index].order = order;
+  } else {
+    orderList.push({ facility: facilityId, order });
+  }
+  localStorage.setItem("live-feed-order", JSON.stringify(orderList));
+};
+
 export default function LiveFeedScreen({ facilityId }: Props) {
   const { t } = useTranslation();
   const dispatch = useDispatch<any>();
@@ -50,6 +76,7 @@ export default function LiveFeedScreen({ facilityId }: Props) {
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
+  const [ordering, setOrdering] = useState<string>("bed__name");
 
   // To automatically collapse sidebar.
   useEffect(() => {
@@ -59,6 +86,10 @@ export default function LiveFeedScreen({ facilityId }: Props) {
       sidebar.setShrinked(sidebar.shrinked);
     };
   }, []);
+
+  useEffect(() => {
+    getOrderingList(facilityId, setOrdering);
+  }, [facilityId]);
 
   useEffect(() => {
     async function fetchFacilityOrObject() {
@@ -78,7 +109,7 @@ export default function LiveFeedScreen({ facilityId }: Props) {
         limit: PER_PAGE_LIMIT,
         offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
         asset_class: "ONVIF",
-        ordering: qParams.ordering || "bed__name",
+        ordering: qParams.ordering || ordering,
         bed_is_occupied: qParams.bed_is_occupied ?? true,
       };
 
@@ -99,6 +130,7 @@ export default function LiveFeedScreen({ facilityId }: Props) {
 
       setTotalCount(entries.length);
       setAssetList(entries);
+      console.log("assetList", assetList);
     }
     fetchData();
   }, [
@@ -177,8 +209,11 @@ export default function LiveFeedScreen({ facilityId }: Props) {
                       name="ordering"
                       label={t("sort_by")}
                       required
-                      value={qParams.ordering || "bed__name"}
-                      onChange={({ value }) => updateQuery({ ordering: value })}
+                      value={qParams.ordering || ordering}
+                      onChange={({ value }) => {
+                        updateQuery({ ordering: value });
+                        setOrderingList(facilityId, value);
+                      }}
                       options={SORT_OPTIONS}
                       optionLabel={({ value }) => t("SortOptions." + value)}
                       optionIcon={({ isAscending }) => (
@@ -250,13 +285,14 @@ export default function LiveFeedScreen({ facilityId }: Props) {
           No Camera present in this location or facility.
         </div>
       ) : (
-        <div className="mt-1 flex flex-row flex-wrap gap-2">
-          {/* <div className="mt-1 grid grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3 gap-2"> */}
+        <div className="mt-1 grid grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3 gap-2">
           {assetList.map((asset: any) => (
-            <LiveFeedTile
-              assetId={asset.asset.id}
-              key={asset.patientAssetBed?.bed.id}
-            />
+            <div className="overflow-clip">
+              <LiveFeedTile
+                assetId={asset.asset.id}
+                key={asset.patientAssetBed?.bed.id}
+              />
+            </div>
           ))}
         </div>
       )}

@@ -39,6 +39,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
   });
   const { t } = useTranslation();
   const [_isFullscreen, setFullscreen] = useFullscreen();
+  // const [toggle, setToggle] = useState(false);
   console.log("re-rendered");
 
   useEffect(() => {
@@ -65,7 +66,6 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
             msg: t("something_went_wrong"),
           });
         else {
-          console.log("Asset Fetched", assetData.data);
           setAsset(assetData.data);
         }
       }
@@ -122,10 +122,11 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
       });
   };
   const getPresets = (asset: any) => {
+    console.log(asset);
+    const url = `https://${asset.meta.middleware_hostname}/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`;
+    console.log(url);
     axios
-      .get(
-        `https://${asset.meta.middleware_hostname}/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`
-      )
+      .get(url)
       .then((resp: any) => {
         setPresets(resp.data);
         console.log("PRESETS", resp.data);
@@ -237,6 +238,13 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
   useEffect(() => {
     if (bedPresets.length > 0) absoluteMove(bedPresets[0].meta.position);
   }, [bedPresets]);
+
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     setShowControls(toggle);
+  //   }, 300);
+  //   return () => clearTimeout(timer);
+  // }, [toggle]);
 
   const liveFeedPlayerRef = useRef<any>(null);
   const handleClickFullscreen = () => {
@@ -385,46 +393,46 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
               <div className="text-white text-2xl">{t("moving_camera")}</div>
             </div>
           </div>
-          <div className="grid grid-cols-2 md:ml-12 md:w-1/3 my-auto gap-4 mt-4 md:mt-0">
+        </div>
+        <div className="flex flex-wrap my-auto gap-4 mt-4 max-w-[640px]">
+          <button
+            className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300"
+            onClick={() => {
+              setShowDefaultPresets(!showDefaultPresets);
+            }}
+          >
             {showDefaultPresets
-              ? viewOptions.map((option: any) => (
-                  <div
-                    onClick={() => {
-                      setLoading(true);
-                      gotoPreset(option.value);
-                    }}
-                  >
-                    <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-200 w-full">
-                      {option.label}
-                    </button>
-                  </div>
-                ))
-              : bedPresets.map((preset: any, index: number) => (
-                  <div
-                    onClick={() => {
-                      setLoading(true);
-                      gotoBedPreset(preset);
-                    }}
-                    key={preset.id}
-                  >
-                    <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-200 w-full">
-                      {preset.meta.preset_name
-                        ? preset.meta.preset_name
-                        : `Unnamed Preset ${index + 1}`}
-                    </button>
-                  </div>
-                ))}
-            <button
-              className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300 w-full"
-              onClick={() => {
-                setShowDefaultPresets(!showDefaultPresets);
-              }}
-            >
-              {showDefaultPresets
-                ? t("show_patient_presets")
-                : t("show_default_presets")}
-            </button>
-          </div>
+              ? t("show_patient_presets")
+              : t("show_default_presets")}
+          </button>
+          {showDefaultPresets
+            ? viewOptions.map((option: any) => (
+                <div
+                  onClick={() => {
+                    setLoading(true);
+                    gotoPreset(option.value);
+                  }}
+                >
+                  <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-200 w-full">
+                    {option.label}
+                  </button>
+                </div>
+              ))
+            : bedPresets.map((preset: any, index: number) => (
+                <div
+                  onClick={() => {
+                    setLoading(true);
+                    gotoBedPreset(preset);
+                  }}
+                  key={preset.id}
+                >
+                  <button className="bg-green-100 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-200 w-full">
+                    {preset.meta.preset_name
+                      ? preset.meta.preset_name
+                      : `Unnamed Preset ${index + 1}`}
+                  </button>
+                </div>
+              ))}
         </div>
       </div>
     </div>
