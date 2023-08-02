@@ -437,7 +437,6 @@ const LiveFeed = (props: any) => {
       return false;
     })?.[0]?.meta?.position;
     if (position) {
-      console.log(position);
       setLoading("Moving to default preset");
       absoluteMove(position, {
         onSuccess: () => setLoading(undefined),
