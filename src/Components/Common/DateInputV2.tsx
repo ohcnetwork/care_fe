@@ -229,7 +229,7 @@ const DateInputV2: React.FC<Props> = ({
                   disabled={disabled}
                   className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
                   placeholder={placeholder ?? "Select date"}
-                  value={value && moment(value).format("DD / MM / YYYY")}
+                  value={value && moment(value).format("DD/MM/YYYY")}
                 />
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 p-2">
                   <CareIcon className="care-l-calendar-alt text-lg text-gray-600" />
@@ -249,19 +249,20 @@ const DateInputV2: React.FC<Props> = ({
                 >
                   <div className="mb-4 flex w-full flex-col items-center justify-between">
                     <input
-                      // key={value && moment(value).format("DD / MM / YYYY")}
+                      // key={value && moment(value).format("DD/MM/YYYY")}
                       className="cui-input-base bg-gray-50"
-                      defaultValue={
-                        value && moment(value).format("DD / MM / YYYY")
-                      }
+                      defaultValue={value && moment(value).format("DD/MM/YYYY")}
+                      placeholder="DD/MM/YYYY"
                       onChange={(e) => {
                         const momentObj = moment(
                           e.target.value,
-                          "DD / MM / YYYY"
+                          "DD/MM/YYYY",
+                          true
                         );
 
                         if (momentObj.isValid()) {
                           onChange(momentObj.toDate());
+                          close();
                         }
                       }}
                     />
