@@ -1,7 +1,7 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
 import { VitePWA } from "vite-plugin-pwa";
+import { defineConfig } from "vite";
 import { promises as fs } from "fs";
+import react from "@vitejs/plugin-react-swc";
 
 export default defineConfig({
   envPrefix: "REACT_",

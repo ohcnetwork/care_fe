@@ -8,8 +8,6 @@ import {
   TEST_TYPE,
   VACCINES,
 } from "../../Common/constants";
-import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import {
   HCXActions,
   createPatient,
@@ -38,10 +36,13 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
 import { DupPatientModel } from "../Facility/models";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
+import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import Form from "../Form/Form";
 import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
 import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
+import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
 import { PatientModel } from "./models";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
@@ -59,6 +60,7 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { validatePincode } from "../../Common/validation";
+import { FormContextValue } from "../Form/FormContext.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -66,7 +68,7 @@ const PageTitle = loadable(() => import("../Common/PageTitle"));
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
-  facilityId: number;
+  facilityId: string;
 }
 
 interface medicalHistoryModel {
@@ -137,6 +139,7 @@ const initForm: any = {
   number_of_doses: "0",
   vaccine_name: null,
   last_vaccinated_date: null,
+  abha_number: null,
   ...medicalHistoryChoices,
 };
 
@@ -176,7 +179,7 @@ const scrollTo = (id: string | boolean) => {
 
 export const PatientRegister = (props: PatientRegisterProps) => {
   const { goBack } = useAppHistory();
-  const { gov_data_api_key, enable_hcx } = useConfig();
+  const { gov_data_api_key, enable_hcx, enable_abdm } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
@@ -186,8 +189,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     title: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [showImport, setShowImport] = useState(false);
+  const [showImport, setShowImport] = useState<{
+    show?: boolean;
+    field?: FormContextValue<PatientModel> | null;
+  }>({
+    show: false,
+    field: null,
+  });
   const [careExtId, setCareExtId] = useState("");
+  const [formField, setFormField] = useState<any>();
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
@@ -204,6 +214,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [{ extId }, setQuery] = useQueryParams();
+  const [showLinkAbhaNumberModal, setShowLinkAbhaNumberModal] = useState(false);
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
   const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>(
     []
@@ -212,11 +223,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     useState<FieldError>();
 
   useEffect(() => {
-    if (extId) {
+    if (extId && formField) {
       setCareExtId(extId);
-      fetchExtResultData(null);
+      fetchExtResultData(null, formField);
     }
-  }, [careExtId]);
+  }, [careExtId, formField]);
 
   const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
@@ -279,69 +290,106 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  const fetchExtResultData = async (e: any) => {
+  const fetchExtResultData = async (e: any, field: any) => {
     if (e) e.preventDefault();
-    setIsLoading(true);
     if (!careExtId) return;
     const res = await dispatchAction(externalResult({ id: careExtId }));
 
     if (res?.data) {
-      const form = { ...state.form };
-      form["name"] = res.data.name ? res.data.name : state.form.name;
-      form["address"] = res.data.address
-        ? res.data.address
-        : state.form.address;
-      form["permanent_address"] = res.data.permanent_address
-        ? res.data.permanent_address
-        : state.form.permanent_address;
-      form["gender"] = res.data.gender
-        ? parseGenderFromExt(res.data.gender, state.form.gender)
-        : state.form.gender;
-      form["test_id"] = res.data.test_id
-        ? res.data.test_id
-        : state.form.test_id;
-      form["srf_id"] = res.data.srf_id ? res.data.srf_id : state.form.srf_id;
+      field.onChange({
+        name: "name",
+        value: res.data.name ? res.data.name : state.form.name,
+      });
+      field.onChange({
+        name: "address",
+        value: res.data.address ? res.data.address : state.form.address,
+      });
+      field.onChange({
+        name: "permanent_address",
+        value: res.data.permanent_address
+          ? res.data.permanent_address
+          : state.form.permanent_address,
+      });
+      field.onChange({
+        name: "gender",
+        value: res.data.gender
+          ? parseGenderFromExt(res.data.gender, state.form.gender)
+          : state.form.gender,
+      });
+      field.onChange({
+        name: "test_id",
+        value: res.data.test_id ? res.data.test_id : state.form.test_id,
+      });
+      field.onChange({
+        name: "srf_id",
+        value: res.data.srf_id ? res.data.srf_id : state.form.srf_id,
+      });
+      field.onChange({
+        name: "state",
+        value: res.data.district_object
+          ? res.data.district_object.state
+          : state.form.state,
+      });
+      field.onChange({
+        name: "district",
+        value: res.data.district ? res.data.district : state.form.district,
+      });
+      field.onChange({
+        name: "local_body",
+        value: res.data.local_body
+          ? res.data.local_body
+          : state.form.local_body,
+      });
+      field.onChange({
+        name: "ward",
+        value: res.data.ward ? res.data.ward : state.form.ward,
+      });
+      field.onChange({
+        name: "village",
+        value: res.data.village ? res.data.village : state.form.village,
+      });
+      field.onChange({
+        name: "disease_status",
+        value: res.data.result
+          ? res.data.result.toUpperCase()
+          : state.form.disease_status,
+      });
+      field.onChange({
+        name: "test_type",
+        value: res.data.test_type
+          ? res.data.test_type.toUpperCase()
+          : state.form.test_type,
+      });
+      field.onChange({
+        name: "date_of_test",
+        value: res.data.sample_collection_date
+          ? res.data.sample_collection_date
+          : state.form.date_of_test,
+      });
+      field.onChange({
+        name: "date_of_result",
+        value: res.data.result_date
+          ? res.data.result_date
+          : state.form.date_of_result,
+      });
+      field.onChange({
+        name: "phone_number",
+        value: res.data.mobile_number
+          ? "+91" + res.data.mobile_number
+          : state.form.phone_number,
+      });
 
-      form["state"] = res.data.district_object
-        ? res.data.district_object.state
-        : state.form.state;
-      form["district"] = res.data.district
-        ? res.data.district
-        : state.form.district;
-      form["local_body"] = res.data.local_body
-        ? res.data.local_body
-        : state.form.local_body;
-      form["ward"] = res.data.ward ? res.data.ward : state.form.ward;
-      form["village"] = res.data.village
-        ? res.data.village
-        : state.form.village;
-      form["disease_status"] = res.data.result
-        ? res.data.result.toUpperCase()
-        : state.form.disease_status;
-      form["test_type"] = res.data.test_type
-        ? res.data.test_type.toUpperCase()
-        : state.form.test_type;
-      form["date_of_test"] = res.data.sample_collection_date
-        ? moment(res.data.sample_collection_date)
-        : state.form.date_of_test;
-      form["date_of_result"] = res.data.result_date
-        ? moment(res.data.result_date)
-        : state.form.date_of_result;
-      form["phone_number"] = res.data.mobile_number
-        ? "+91" + res.data.mobile_number
-        : state.form.phone_number;
-
-      dispatch({ type: "set_form", form });
       Promise.all([
         fetchDistricts(res.data.district_object.state),
         fetchLocalBody(res.data.district),
         fetchWards(res.data.local_body),
         duplicateCheck(res.data.mobile_number),
       ]);
-
-      setShowImport(false);
+      setShowImport({
+        show: false,
+        field: null,
+      });
     }
-    setIsLoading(false);
   };
 
   const fetchData = useCallback(
@@ -349,11 +397,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       setIsLoading(true);
       const res = await dispatchAction(getPatient({ id }));
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setFacilityName(res.data.facility_object.name);
           setPatientName(res.data.name);
+          console.log(res.data);
           const formData = {
             ...res.data,
+            health_id_number: res.data.abha_number_object?.abha_number || "",
+            health_id: res.data.abha_number_object?.health_id || "",
             nationality: res.data.nationality ? res.data.nationality : "India",
             gender: res.data.gender ? res.data.gender : "",
             cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
@@ -410,9 +461,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               ? res.data.last_vaccinated_date
               : null,
           };
-          if (res.data.address !== res.data.permanent_address) {
-            formData["sameAddress"] = false;
-          }
+
+          formData.sameAddress =
+            res.data.address === res.data.permanent_address;
           res.data.medical_history.forEach((i: any) => {
             const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
               (j: any) =>
@@ -674,6 +725,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
     });
     const data = {
+      abha_number: state.form.abha_number,
       phone_number: parsePhoneNumberFromString(formData.phone_number)?.format(
         "E.164"
       ),
@@ -826,6 +878,68 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     setIsLoading(false);
   };
 
+  const handleAbhaLinking = (
+    {
+      id,
+      abha_profile: {
+        healthIdNumber,
+        healthId,
+        name,
+        mobile,
+        gender,
+        monthOfBirth,
+        dayOfBirth,
+        yearOfBirth,
+        pincode,
+      },
+    }: any,
+    field: any
+  ) => {
+    const values: any = {};
+    if (id) values["abha_number"] = id;
+    if (healthIdNumber) values["health_id_number"] = healthIdNumber;
+    if (healthId) values["health_id"] = healthId;
+
+    if (name)
+      field("name").onChange({
+        name: "name",
+        value: name,
+      });
+
+    if (mobile) {
+      field("phone_number").onChange({
+        name: "phone_number",
+        value: parsePhoneNumberFromString(mobile, "IN")?.format("E.164"),
+      });
+
+      field("emergency_phone_number").onChange({
+        name: "emergency_phone_number",
+        value: parsePhoneNumberFromString(mobile, "IN")?.format("E.164"),
+      });
+    }
+
+    if (gender)
+      field("gender").onChange({
+        name: "gender",
+        value: gender === "M" ? "1" : gender === "F" ? "2" : "3",
+      });
+
+    if (monthOfBirth && dayOfBirth && yearOfBirth)
+      field("date_of_birth").onChange({
+        name: "date_of_birth",
+        value: new Date(`${monthOfBirth}-${dayOfBirth}-${yearOfBirth}`),
+      });
+
+    if (pincode)
+      field("pincode").onChange({
+        name: "pincode",
+        value: pincode,
+      });
+
+    dispatch({ type: "set_form", form: { ...state.form, ...values } });
+    setShowLinkAbhaNumberModal(false);
+  };
+
   const handleMedicalCheckboxChange = (e: any, id: number, field: any) => {
     const values = field("medical_history").value ?? [];
     if (e.value) {
@@ -933,8 +1047,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         title={headerText}
         className="mb-11"
         onBackClick={() => {
-          if (showImport) {
-            setShowImport(false);
+          if (showImport.show) {
+            setShowImport({
+              show: false,
+              field: null,
+            });
             return false;
           } else {
             id
@@ -948,12 +1065,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         }}
       />
       <div className="mt-4">
-        <div className="bg-purple-100 text-purple-800 p-4 font-semibold text-xs my-8 rounded mx-4">
-          <div className="text-lg font-bold flex items-center mb-1 mx-1">
-            <CareIcon className=" care-l-info-circle text-2xl font-bold mr-1" />{" "}
+        <div className="mx-4 my-8 rounded bg-purple-100 p-4 text-xs font-semibold text-purple-800">
+          <div className="mx-1 mb-1 flex items-center text-lg font-bold">
+            <CareIcon className=" care-l-info-circle mr-1 text-2xl font-bold" />{" "}
             Please enter the correct date of birth for the patient
           </div>
-          <p className="text-sm text-black font-normal">
+          <p className="text-sm font-normal text-black">
             Each patient in the system is uniquely identifiable by the number
             and date of birth. Adding incorrect date of birth can result in
             duplication of patient records.
@@ -971,7 +1088,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               show
             />
           )}
-          {showImport ? (
+          {showImport.show && (
             <div className="p-4">
               <div>
                 <div className="my-4">
@@ -990,57 +1107,139 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
                 <button
                   className="btn btn-primary mr-4"
-                  onClick={fetchExtResultData}
+                  onClick={(e) => {
+                    fetchExtResultData(e, showImport?.field?.("name"));
+                  }}
                   disabled={!careExtId}
                 >
                   Import Patient Data from External Results
                 </button>{" "}
                 <button
                   className="btn border"
-                  onClick={(_) => setShowImport(false)}
+                  onClick={(_) =>
+                    setShowImport({
+                      show: false,
+                      field: null,
+                    })
+                  }
                 >
                   Cancel Import
                 </button>
               </div>
             </div>
-          ) : (
-            <>
-              <>
-                <ButtonV2
-                  className="mb-8 sm:mx-4 flex gap-2 items-center"
-                  onClick={(_) => {
-                    setShowImport(true);
-                    setQuery({ extId: "" }, { replace: true });
-                  }}
-                >
-                  <CareIcon className="care-l-import text-lg" />
-                  Import From External Results
-                </ButtonV2>
-                <Form<PatientModel>
-                  defaults={id ? state.form : initForm}
-                  validate={validateForm}
-                  onSubmit={handleSubmit}
-                  submitLabel={buttonText}
-                  onCancel={() => navigate("/facility")}
-                  className="bg-transparent px-1 md:px-2 py-2"
-                  onDraftRestore={(newState) => {
-                    dispatch({ type: "set_state", state: newState });
-                    Promise.all([
-                      fetchDistricts(newState.form.state ?? 0),
-                      fetchLocalBody(newState.form.district?.toString() ?? ""),
-                      fetchWards(newState.form.local_body?.toString() ?? ""),
-                      duplicateCheck(newState.form.phone_number ?? ""),
-                    ]);
-                  }}
-                  noPadding
-                >
-                  {(field) => (
+          )}
+          <>
+            <div className={`${showImport.show && "hidden"}`}>
+              <Form<PatientModel>
+                defaults={id ? state.form : initForm}
+                validate={validateForm}
+                onSubmit={handleSubmit}
+                submitLabel={buttonText}
+                onCancel={() => navigate("/facility")}
+                className="bg-transparent px-1 py-2 md:px-2"
+                onDraftRestore={(newState) => {
+                  dispatch({ type: "set_state", state: newState });
+                  Promise.all([
+                    fetchDistricts(newState.form.state ?? 0),
+                    fetchLocalBody(newState.form.district?.toString() ?? ""),
+                    fetchWards(newState.form.local_body?.toString() ?? ""),
+                    duplicateCheck(newState.form.phone_number ?? ""),
+                  ]);
+                }}
+                noPadding
+              >
+                {(field) => {
+                  if (!formField) setFormField(field);
+                  return (
                     <>
-                      <div className="mb-8 rounded overflow-visible border border-gray-200 p-4">
-                        <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                      <div className="mb-2 overflow-visible rounded border border-gray-200 p-4">
+                        <ButtonV2
+                          className="flex items-center gap-2"
+                          onClick={(_) => {
+                            setShowImport({
+                              show: true,
+                              field,
+                            });
+                            setQuery({ extId: "" }, { replace: true });
+                          }}
+                        >
+                          <CareIcon className="care-l-import text-lg" />
+                          Import From External Results
+                        </ButtonV2>
+                      </div>
+                      {enable_abdm && (
+                        <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
+                          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
+                            ABHA Details
+                          </h1>
+                          {showLinkAbhaNumberModal && (
+                            <LinkABHANumberModal
+                              show={showLinkAbhaNumberModal}
+                              onClose={() => setShowLinkAbhaNumberModal(false)}
+                              onSuccess={(data: any) => {
+                                if (id) {
+                                  navigate(
+                                    `/facility/${facilityId}/patient/${id}`
+                                  );
+                                  return;
+                                }
+
+                                handleAbhaLinking(data, field);
+                              }}
+                            />
+                          )}
+                          {!state.form.abha_number ? (
+                            <button
+                              className="btn btn-primary my-4"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setShowLinkAbhaNumberModal(true);
+                              }}
+                            >
+                              Link Abha Number
+                            </button>
+                          ) : (
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
+                              <div id="abha-number">
+                                <TextFormField
+                                  id="abha-number"
+                                  name="abha-number"
+                                  label="ABHA Number"
+                                  type="text"
+                                  value={state.form.health_id_number}
+                                  onChange={() => null}
+                                  disabled={true}
+                                  error=""
+                                />
+                              </div>
+                              <div id="health-id">
+                                {state.form.health_id ? (
+                                  <TextFormField
+                                    id="health-id"
+                                    name="health-id"
+                                    label="Abha Address"
+                                    type="text"
+                                    value={state.form.health_id}
+                                    onChange={() => null}
+                                    disabled={true}
+                                    error=""
+                                  />
+                                ) : (
+                                  <div className="mt-4 text-sm text-gray-500">
+                                    No Abha Address Associated with this ABHA
+                                    Number
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
+                        <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                           Personal Details
                         </h1>
-                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
                           <div data-testid="phone-number" id="phone_number-div">
                             <PhoneNumberFormField
                               {...field("phone_number")}
@@ -1115,6 +1314,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           <div data-testid="current-address" id="address-div">
                             <TextAreaFormField
                               {...field("address")}
+                              required
                               label="Current Address"
                               placeholder="Enter the current address"
                             />
@@ -1125,6 +1325,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           >
                             <TextAreaFormField
                               {...field("permanent_address")}
+                              required
                               label="Permanent Address"
                               rows={3}
                               disabled={field("sameAddress").value}
@@ -1158,8 +1359,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             />
                             {showAutoFilledPincode && (
                               <div>
-                                <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
-                                <span className="text-primary-500 text-sm">
+                                <i className="fas fa-circle-check mr-2 text-sm text-green-500" />
+                                <span className="text-sm text-primary-500">
                                   State and District auto-filled from Pincode
                                 </span>
                               </div>
@@ -1219,7 +1420,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                               <div data-testid="district" id="district-div">
                                 {isDistrictLoading ? (
-                                  <div className="w-full flex justify-center items-center">
+                                  <div className="flex w-full items-center justify-center">
                                     <Spinner />
                                   </div>
                                 ) : (
@@ -1255,7 +1456,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
                               <div data-testid="localbody" id="local_body-div">
                                 {isLocalbodyLoading ? (
-                                  <div className="w-full flex justify-center items-center">
+                                  <div className="flex w-full items-center justify-center">
                                     <Spinner />
                                   </div>
                                 ) : (
@@ -1288,7 +1489,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 id="ward-div"
                               >
                                 {isWardLoading ? (
-                                  <div className="w-full flex justify-center items-center">
+                                  <div className="flex w-full items-center justify-center">
                                     <Spinner />
                                   </div>
                                 ) : (
@@ -1331,18 +1532,18 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                       </div>
                       <div className="mb-8 rounded border border-gray-200 p-4">
                         <AccordionV2
-                          className="mt-2 lg:mt-0 md:mt-0 shadow-none"
+                          className="mt-2 shadow-none md:mt-0 lg:mt-0"
                           expandIcon={
                             <CareIcon className="care-l-angle-down text-2xl font-bold" />
                           }
                           title={
-                            <h1 className="font-bold text-purple-500 text-left text-xl">
+                            <h1 className="text-left text-xl font-bold text-purple-500">
                               COVID Details
                             </h1>
                           }
                         >
                           <div>
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 sm:grid-cols-3 w-full mt-5">
+                            <div className="mt-5 grid w-full grid-cols-1 gap-4 sm:grid-cols-3 xl:gap-x-20 xl:gap-y-6">
                               <div>
                                 <RadioFormField
                                   label="Is patient Vaccinated against COVID?"
@@ -1383,7 +1584,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 />
                               </div>
                             </div>
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 w-full mt-5">
+                            <div className="mt-5 grid w-full grid-cols-1 gap-4 xl:gap-x-20 xl:gap-y-6">
                               <CollapseV2
                                 opened={
                                   String(field("is_vaccinated").value) ===
@@ -1391,7 +1592,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 }
                               >
                                 {
-                                  <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
                                     <div id="covin_id-div">
                                       <TextFormField
                                         label="COWIN ID"
@@ -1448,7 +1649,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                   )
                                 }
                               >
-                                <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
                                   <div id="estimated_contact_date-div">
                                     <DateFormField
                                       {...field("estimated_contact_date")}
@@ -1581,11 +1782,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </div>
                         </AccordionV2>
                       </div>
-                      <div className="mb-8 rounded overflow-visible border p-4">
-                        <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+                      <div className="mb-8 overflow-visible rounded border p-4">
+                        <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
                           Medical History
                         </h1>
-                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
                           <div id="present_health-div">
                             <TextAreaFormField
                               {...field("present_health")}
@@ -1610,7 +1811,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                             <div className={"flex flex-wrap gap-2"}>
                               {MEDICAL_HISTORY_CHOICES.map((i) => {
                                 return renderMedicalHistory(
-                                  i.id,
+                                  i.id as number,
                                   i.text,
                                   field
                                 );
@@ -1643,9 +1844,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                           </div>
                         </div>
                       </div>
-                      <div className="bg-white rounded flex flex-col gap-4 w-full p-4 border border-gray-200">
-                        <div className="flex flex-col gap-4 w-full items-center justify-between sm:flex-row">
-                          <h1 className="font-bold text-purple-500 text-left text-xl">
+                      <div className="flex w-full flex-col gap-4 rounded border border-gray-200 bg-white p-4">
+                        <div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
+                          <h1 className="text-left text-xl font-bold text-purple-500">
                             Insurance Details
                           </h1>
                           <ButtonV2
@@ -1680,11 +1881,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         />
                       </div>
                     </>
-                  )}
-                </Form>
-              </>
-            </>
-          )}
+                  );
+                }}
+              </Form>
+            </div>
+          </>
         </>
       </div>
     </div>

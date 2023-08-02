@@ -17,11 +17,6 @@ interface Position {
   y: number;
 }
 
-/**
- * Duration of each row on the canvas in seconds.
- */
-const DURATION = 7;
-
 interface Options {
   /**
    * The size of the canvas rendering context.
@@ -53,6 +48,10 @@ interface Options {
    * Options for Volume channel.
    */
   volume: ChannelOptions;
+  /**
+   * Duration of each row on the canvas in seconds.
+   */
+  duration: number;
 }
 
 /**
@@ -69,6 +68,7 @@ class VentilatorVitalsRenderer {
       flow,
       volume,
       size: { height: h, width: w },
+      duration,
     } = options;
 
     this.options = options;
@@ -77,7 +77,7 @@ class VentilatorVitalsRenderer {
         color: "#0ffc03",
         buffer: [],
         cursor: { x: 0, y: 0 },
-        deltaX: w / (DURATION * pressure.samplingRate),
+        deltaX: w / (duration * pressure.samplingRate),
         transform: lerp(pressure.lowLimit, pressure.highLimit, h * 0.33, 0),
         chunkSize: pressure.samplingRate * options.animationInterval * 1e-3,
         options: pressure,
@@ -88,7 +88,7 @@ class VentilatorVitalsRenderer {
         color: "#ffff24",
         buffer: [],
         cursor: { x: 0, y: 0 },
-        deltaX: w / (DURATION * flow.samplingRate),
+        deltaX: w / (duration * flow.samplingRate),
         transform: lerp(flow.lowLimit, flow.highLimit, h * 0.67, h * 0.33),
         chunkSize: flow.samplingRate * options.animationInterval * 1e-3,
         options: flow,
@@ -99,7 +99,7 @@ class VentilatorVitalsRenderer {
         color: "#03a9f4",
         buffer: [],
         cursor: { x: 0, y: 0 },
-        deltaX: w / (DURATION * volume.samplingRate),
+        deltaX: w / (duration * volume.samplingRate),
         transform: lerp(volume.lowLimit, volume.highLimit, h, h * 0.67),
         chunkSize: volume.samplingRate * options.animationInterval * 1e-3,
         options: volume,

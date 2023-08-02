@@ -106,7 +106,7 @@ export default ({ show, setShow, username }: IProps) => {
         dialogClass="md:w-[400px]"
       >
         <div>
-          <div className="sm:col-start-2 col-span-full sm:col-span-3">
+          <div className="col-span-full sm:col-span-3 sm:col-start-2">
             <div className="tooltip flex items-center gap-2">
               <SkillSelect
                 multiple={false}

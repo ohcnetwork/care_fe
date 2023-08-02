@@ -6,12 +6,13 @@ import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import { AssetStatus, AssetUptimeRecord } from "../Assets/AssetTypes";
 import { reverse } from "lodash";
+import { classNames } from "../../Utils/utils";
 
 const STATUS_COLORS = {
-  operational: "bg-green-500",
-  not_monitored: "bg-gray-400",
-  down: "bg-red-500",
-  maintenance: "bg-blue-500",
+  Operational: "bg-green-500",
+  "Not Monitored": "bg-gray-400",
+  Down: "bg-red-500",
+  "Under Maintenance": "bg-blue-500",
 };
 
 const STATUS_COLORS_TEXT = {
@@ -48,20 +49,20 @@ function UptimeInfo({
   let totalMinutes = 0;
 
   return (
-    <div className="z-50 absolute rounded-lg shadow-lg ring-1 ring-gray-400 w-full">
+    <div className="absolute z-50 w-full rounded-lg shadow-lg ring-1 ring-gray-400">
       <div className="rounded-lg bg-white px-6 py-4">
         <div className="flow-root rounded-md">
-          <div className="block text-sm text-gray-800 text-center">
+          <div className="block text-center text-sm text-gray-800">
             <span className="font-bold ">{date}</span>
-            <div className="border-t border-gray-200 my-2"></div>
+            <div className="my-2 border-t border-gray-200"></div>
             {incidents.length === 0 ? (
               <>
                 <span>No status for the day</span>
               </>
             ) : (
               <>
-                <span className="font-bold my-2 block">Status Updates</span>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-1">
+                <span className="my-2 block font-bold">Status Updates</span>
+                <div className="grid grid-cols-1 gap-1 md:grid-cols-4">
                   {reverse(incidents)?.map((incident, index) => {
                     const prevIncident = incidents[index - 1];
                     let endTimestamp;
@@ -120,8 +121,8 @@ function UptimeInfo({
                     );
                   })}
                 </div>
-                <div className="border-t border-gray-200 my-2"></div>
-                <div className="flex justify-between mt-1">
+                <div className="my-2 border-t border-gray-200"></div>
+                <div className="mt-1 flex justify-between">
                   <span className="font-bold">Total downtime</span>
                   <span>
                     {incidents.length > 0 && formatDurationMins(totalMinutes)}
@@ -148,15 +149,16 @@ function UptimeInfoPopover({
   numDays: number;
 }) {
   return (
-    <Popover className="mt-10 relative hidden sm:block">
+    <Popover className="relative mt-10 hidden sm:block">
       <Popover.Panel
-        className={`absolute z-50 w-64 lg:w-96 transform px-4 sm:px-0 ${
+        className={classNames(
+          "absolute z-50 w-64 px-4 sm:px-0 lg:w-96",
           day > numDays - 10
             ? "-translate-x-6"
             : day < 10
             ? "-translate-x-full"
             : "-translate-x-1/2"
-        }`}
+        )}
         static
       >
         <UptimeInfo records={records} date={date} />
@@ -215,11 +217,29 @@ export default function Uptime(props: { assetId: string }) {
             timestamp: moment()
               .subtract(i, "days")
               .startOf("day")
-              .toISOString(),
+              .format("YYYY-MM-DDTHH:mm:ss.SSSSSSZ"),
           });
         }
       } else {
-        statusToCarryOver = recordsByDayBefore[i][0].status;
+        if (
+          recordsByDayBefore[i].filter(
+            (r) => moment(r.timestamp).get("hour") < 8
+          ).length === 0
+        ) {
+          recordsByDayBefore[i].unshift({
+            id: "",
+            asset: { id: "", name: "" },
+            created_date: "",
+            modified_date: "",
+            status: statusToCarryOver,
+            timestamp: moment()
+              .subtract(i, "days")
+              .startOf("day")
+              .format("YYYY-MM-DDTHH:mm:ss.SSSSSSZ"),
+          });
+        }
+        statusToCarryOver =
+          recordsByDayBefore[i][recordsByDayBefore[i].length - 1].status;
       }
     }
 
@@ -286,6 +306,7 @@ export default function Uptime(props: { assetId: string }) {
       const statusColors: (typeof STATUS_COLORS)[keyof typeof STATUS_COLORS][] =
         [];
       let dayUptimeScore = 0;
+      const recordsInPeriodCache: { [key: number]: AssetUptimeRecord[] } = {};
       for (let i = 0; i < 3; i++) {
         const start = i * 8;
         const end = (i + 1) * 8;
@@ -294,48 +315,52 @@ export default function Uptime(props: { assetId: string }) {
             moment(record.timestamp).hour() >= start &&
             moment(record.timestamp).hour() < end
         );
+        recordsInPeriodCache[i] = recordsInPeriod;
         if (recordsInPeriod.length === 0) {
+          const previousLatestRecord =
+            recordsInPeriodCache[i - 1]?.[
+              recordsInPeriodCache[i - 1]?.length - 1
+            ];
           if (
-            moment(dayRecords[0].timestamp)
+            moment(previousLatestRecord?.timestamp)
               .hour(end)
               .minute(0)
               .second(0)
               .isBefore(moment())
           ) {
-            if (
-              statusColors[statusColors.length - 1] ===
-              STATUS_COLORS["operational"]
-            ) {
+            if (previousLatestRecord?.status === AssetStatus["operational"]) {
               dayUptimeScore += 1;
             }
             statusColors.push(
-              statusColors[statusColors.length - 1] ??
-                STATUS_COLORS["not_monitored"]
+              STATUS_COLORS[
+                previousLatestRecord?.status as keyof typeof STATUS_COLORS
+              ] ?? STATUS_COLORS["Not Monitored"]
             );
+            recordsInPeriodCache[i] = [previousLatestRecord];
           } else {
-            statusColors.push(STATUS_COLORS["not_monitored"]);
+            statusColors.push(STATUS_COLORS["Not Monitored"]);
           }
         } else if (
           recordsInPeriod.some(
             (record) => record.status === AssetStatus["down"]
           )
         ) {
-          statusColors.push(STATUS_COLORS["down"]);
+          statusColors.push(STATUS_COLORS["Down"]);
         } else if (
           recordsInPeriod.some(
             (record) => record.status === AssetStatus["maintenance"]
           )
         ) {
-          statusColors.push(STATUS_COLORS["maintenance"]);
+          statusColors.push(STATUS_COLORS["Under Maintenance"]);
         } else if (
           recordsInPeriod.some(
             (record) => record.status === AssetStatus["operational"]
           )
         ) {
-          statusColors.push(STATUS_COLORS["operational"]);
+          statusColors.push(STATUS_COLORS["Operational"]);
           dayUptimeScore += 1;
         } else {
-          statusColors.push(STATUS_COLORS["not_monitored"]);
+          statusColors.push(STATUS_COLORS["Not Monitored"]);
         }
       }
       uptimeScore[day] = dayUptimeScore;
@@ -343,27 +368,27 @@ export default function Uptime(props: { assetId: string }) {
     } else {
       uptimeScore[day] = 0;
       return [
-        STATUS_COLORS["not_monitored"],
-        STATUS_COLORS["not_monitored"],
-        STATUS_COLORS["not_monitored"],
+        STATUS_COLORS["Not Monitored"],
+        STATUS_COLORS["Not Monitored"],
+        STATUS_COLORS["Not Monitored"],
       ];
     }
   };
   if (loading) {
     return (
-      <div className="mt-8 flex flex-col bg-white w-full sm:rounded-lg shadow-sm p-4">
+      <div className="mt-8 flex w-full flex-col bg-white p-4 shadow-sm sm:rounded-lg">
         <p>Loading status...</p>
       </div>
     );
   } else if (summary) {
     return (
-      <div className="mt-8 flex flex-col bg-white w-full sm:rounded-lg shadow-sm p-4">
+      <div className="mt-8 flex w-full flex-col bg-white p-4 shadow-sm sm:rounded-lg">
         <div className="mx-2 w-full">
           <div className="grid grid-cols-1">
             <div className="text-xl font-semibold">Availability History</div>
             <div>
-              <div className="mt-2 px-5 overflow-x-clip">
-                <div className="flex text-gray-700 text-xs mt-2 opacity-70 justify-center mb-1">
+              <div className="mt-2 overflow-x-clip px-5">
+                <div className="mb-1 mt-2 flex justify-center text-xs text-gray-700 opacity-70">
                   {getUptimePercent(numDays)}% uptime
                 </div>
                 <div
@@ -379,7 +404,7 @@ export default function Uptime(props: { assetId: string }) {
                         <span
                           onMouseEnter={() => setHoveredDay(index)}
                           key={index}
-                          className="h-8 w-3 flex-1 mx-1"
+                          className="mx-1 h-8 w-3 flex-1"
                         >
                           <div
                             className={`h-[11px] w-3 rounded-t-sm ${
@@ -418,17 +443,17 @@ export default function Uptime(props: { assetId: string }) {
                   })}
                 </div>
                 <div
-                  className={`flex text-gray-700 text-xs opacity-70 ${
+                  className={`flex text-xs text-gray-700 opacity-70 ${
                     hoveredDay == -1 && "mt-2"
                   }`}
                 >
                   <span className="ml-0 mr-auto">{numDays} days ago</span>
-                  <span className="mr-0 ml-auto">Today</span>
+                  <span className="ml-auto mr-0">Today</span>
                 </div>
               </div>
             </div>
             {hoveredDay !== -1 && (
-              <div className="sm:hidden relative">
+              <div className="relative sm:hidden">
                 <UptimeInfo
                   records={summary[hoveredDay]}
                   date={formatDateBeforeDays[hoveredDay]}
@@ -441,7 +466,7 @@ export default function Uptime(props: { assetId: string }) {
     );
   } else {
     return (
-      <div className="mt-8 flex flex-col bg-white w-full sm:rounded-lg shadow-sm p-4">
+      <div className="mt-8 flex w-full flex-col bg-white p-4 shadow-sm sm:rounded-lg">
         <p>No status information available.</p>
       </div>
     );

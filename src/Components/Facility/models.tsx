@@ -152,7 +152,7 @@ export interface DupPatientModel {
   id: number;
   gender: string;
   phone_number: string;
-  patient_id: number;
+  patient_id: string;
   name: string;
   date_of_birth: string;
   year_of_birth: number;
@@ -192,6 +192,7 @@ export interface BedModel {
   facility?: string;
   location_object?: {
     name: string;
+    id?: string;
   };
   location?: string;
   is_occupied?: boolean;

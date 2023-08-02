@@ -90,15 +90,15 @@ const BedRow = (props: BedRowProps) => {
       />
       <div
         key={id}
-        className="w-full border-b lg:flex justify-between items-center py-4"
+        className="w-full items-center justify-between border-b py-4 lg:flex"
       >
-        <div className="px-4 lg:w-3/4 space-y-2 mt-2">
+        <div className="mt-2 space-y-2 px-4 lg:w-3/4">
           <div className="flex flex-col sm:flex-row">
-            <p className="inline text-xl capitalize break-words">{name}</p>{" "}
+            <p className="inline break-words text-xl capitalize">{name}</p>{" "}
             &nbsp;
             <div>
               {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
-                <p className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
+                <p className="mb-1 inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium capitalize leading-5 text-blue-800">
                   {LOCATION_BED_TYPES.find(
                     (item) => item.id === bedType
                   )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
@@ -109,7 +109,7 @@ const BedRow = (props: BedRowProps) => {
                   isOccupied
                     ? "bg-warning-100 text-warning-600"
                     : "bg-primary-100 text-primary-600"
-                } inline-flex ml-1 items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 w-fit capitalize mb-1`}
+                } mb-1 ml-1 inline-flex w-fit items-center rounded-md px-2.5 py-0.5 text-sm font-medium capitalize leading-5`}
               >
                 {isOccupied ? "Occupied" : "Vacant"}
               </p>
@@ -117,7 +117,7 @@ const BedRow = (props: BedRowProps) => {
           </div>
           <p className="break-all">{description}</p>
         </div>
-        <div className="flex flex-col lg:flex-row gap-2 mt-4 lg:mt-0">
+        <div className="mt-4 flex flex-col gap-2 lg:mt-0 lg:flex-row">
           <ButtonV2
             href={`/facility/${facilityId}/location/${locationId}/beds/${id}/update`}
             authorizeFor={NonReadOnlyUsers}
@@ -190,7 +190,7 @@ export const BedManagement = (props: BedManagementProps) => {
         })
       );
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setBeds(res.data.results);
           setTotalCount(res.data.count);
         }
@@ -216,20 +216,20 @@ export const BedManagement = (props: BedManagementProps) => {
   if (beds && beds.length) {
     BedList = beds.map((bedItem: BedModel) => (
       <BedRow
-        id={bedItem.id || ""}
-        facilityId={facilityId || ""}
-        name={bedItem.name || ""}
-        description={bedItem.description || ""}
-        bedType={bedItem.bed_type || ""}
+        id={bedItem.id ?? ""}
+        facilityId={facilityId ?? ""}
+        name={bedItem.name ?? ""}
+        description={bedItem.description ?? ""}
+        bedType={bedItem.bed_type ?? ""}
         triggerRerender={triggerRerender}
-        key={locationId || ""}
-        locationId={locationId || ""}
-        isOccupied={bedItem.is_occupied || false}
+        key={locationId ?? ""}
+        locationId={locationId ?? ""}
+        isOccupied={bedItem.is_occupied ?? false}
       />
     ));
   } else if (beds && beds.length === 0) {
     BedList = (
-      <p className="bg-white text-2xl w-full flex justify-center font-bold px-5 py-5 border-b border-gray-200 text-center text-gray-500">
+      <p className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
         No beds available in this location
       </p>
     );
@@ -238,7 +238,7 @@ export const BedManagement = (props: BedManagementProps) => {
   if (beds) {
     bed = (
       <>
-        <div className="grow mt-5 bg-white p-4 flex flex-wrap">{BedList}</div>
+        <div className="mt-5 flex grow flex-wrap bg-white p-4">{BedList}</div>
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
@@ -276,7 +276,7 @@ export const BedManagement = (props: BedManagementProps) => {
             authorizeFor={NonReadOnlyUsers}
           >
             <CareIcon className="care-l-plus text-lg" />
-            Add New Bed
+            Add New Bed(s)
           </ButtonV2>
         </div>
         {bed}

@@ -2,7 +2,7 @@ type consciousnessLevel = Alert | Drowsy | Stuporous | Comatose | CannotBeAssess
 type lightReaction = Brisk | Sluggish | Fixed | CannotBeAssessed | Unknown
 type limpResponse = Strong | Moderate | Weak | Flexion | Extension | NONE_ | Unknown
 
-export type t = {
+type t = {
   inPronePosition: option<bool>,
   consciousnessLevel: consciousnessLevel,
   consciousnessLevelDetails: option<string>,

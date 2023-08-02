@@ -6,16 +6,16 @@ export default function SwitchTabs(props: {
   Tab2: string;
 }) {
   return (
-    <div className="relative w-full lg:w-52 bg-primary-500/10 rounded-md py-3 px-4 grid grid-cols-2 gap-4 items-center">
+    <div className="relative grid w-full grid-cols-2 items-center gap-4 rounded-md bg-primary-500/10 px-4 py-3 lg:w-52">
       <div
-        className={`absolute bg-primary-500 py-4 z-0 rounded transition-all lg:left-1.5 duration-200 ease-out w-[50%] origin-left ${
-          props.activeTab ? "lg:translate-x-[89%] right-1.5" : "left-1.5"
+        className={`absolute z-0 w-[50%] origin-left rounded bg-primary-500 py-4 transition-all duration-200 ease-out lg:left-1.5 ${
+          props.activeTab ? "right-1.5 lg:translate-x-[89%]" : "left-1.5"
         }`}
       ></div>
       <div
-        className={`flex items-center justify-center z-10 text-sm transition-all duration-200 ease-out cursor-pointer ${
+        className={`z-10 flex cursor-pointer items-center justify-center text-sm transition-all duration-200 ease-out ${
           props.activeTab
-            ? "text-primary-500 hover:text-green-600 hover:font-medium"
+            ? "text-primary-500 hover:font-medium hover:text-green-600"
             : "text-white"
         } `}
         onClick={props.onClickTab1}
@@ -23,9 +23,9 @@ export default function SwitchTabs(props: {
         {props.Tab1}
       </div>
       <div
-        className={`flex items-center justify-center text-white z-10 text-sm transition-all duration-200 ease-out cursor-pointer ${
+        className={`z-10 flex cursor-pointer items-center justify-center text-sm transition-all duration-200 ease-out ${
           !props.activeTab
-            ? "text-primary-500 hover:text-green-600 hover:font-medium ml-2"
+            ? "ml-2 text-primary-500 hover:font-medium hover:text-green-600"
             : "text-white"
         }`}
         onClick={props.onClickTab2}

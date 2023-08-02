@@ -83,13 +83,13 @@ export default function LegendInput(props: InputProps) {
             htmlFor={props.id || props.name}
             ref={legendRef}
             className={classNames(
-              "absolute flex items-center z-10 transition-all font-semibold cursor-text",
+              "absolute z-10 flex cursor-text items-center font-semibold transition-all",
               focused || ref.current?.value
-                ? "h-auto cui-input-legend"
+                ? "cui-input-legend h-auto"
                 : "top-0 h-full",
               (!props.size || !["small", "large"].includes(props.size)) &&
                 "left-4",
-              props.size === "small" && "text-xs left-3",
+              props.size === "small" && "left-3 text-xs",
               props.size === "large" && "left-5",
               (focused || ref.current?.value) &&
                 (!props.size || props.size !== "small") &&
@@ -127,11 +127,11 @@ export default function LegendInput(props: InputProps) {
           required={props.required}
           autoComplete={props.autoComplete}
           className={classNames(
-            "w-full border-gray-300 rounded-md shadow-sm bg-gray-50 focus:bg-gray-100 cui-input focus:border-2 focus:border-primary-500 focus:ring-0 focus:outline-none",
-            props.size === "small" && "text-xs px-3 py-2",
+            "cui-input w-full rounded-md border-gray-300 bg-gray-50 shadow-sm focus:border-2 focus:border-primary-500 focus:bg-gray-100 focus:outline-none focus:ring-0",
+            props.size === "small" && "px-3 py-2 text-xs",
             (!props.size || !["small", "large"].includes(props.size)) &&
               "px-4 py-3",
-            props.size === "large" && "text-lg px-5 py-4",
+            props.size === "large" && "px-5 py-4 text-lg",
             props.type === "PASSWORD" && "pr-10",
             props.error && "border-red-500",
             props.className
@@ -140,7 +140,7 @@ export default function LegendInput(props: InputProps) {
         {props.type === "PASSWORD" && (
           <button
             type="button"
-            className="absolute right-0 top-0 h-full flex items-center px-3 z-10 text-xl"
+            className="absolute right-0 top-0 z-10 flex h-full items-center px-3 text-xl"
             onClick={() => setShowPassword(!showPassword)}
           >
             <CareIcon
@@ -150,7 +150,7 @@ export default function LegendInput(props: InputProps) {
         )}
       </div>
       {props.error && (
-        <div className="text-red-500 text-xs mt-1">{props.error}</div>
+        <div className="mt-1 text-xs text-red-500">{props.error}</div>
       )}
     </div>
   );

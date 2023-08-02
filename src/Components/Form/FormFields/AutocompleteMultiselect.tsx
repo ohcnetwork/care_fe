@@ -108,7 +108,7 @@ export const AutocompleteMutliSelect = <T, V>(
             <Combobox.Input
               multiple
               className={classNames(
-                "cui-input-base pr-16 truncate",
+                "cui-input-base truncate pr-16",
                 props.error && "border-danger-500"
               )}
               placeholder={
@@ -120,7 +120,7 @@ export const AutocompleteMutliSelect = <T, V>(
               autoComplete="off"
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-gray-900">
+              <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-gray-900">
                 {props.isLoading ? (
                   <CareIcon className="care-l-spinner animate-spin" />
                 ) : (
@@ -130,7 +130,7 @@ export const AutocompleteMutliSelect = <T, V>(
             </Combobox.Button>
           </div>
           {value.length !== 0 && (
-            <div className="p-2 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 p-2">
               {value.map((v) => (
                 <MultiSelectOptionChip
                   label={v.label}
@@ -145,7 +145,7 @@ export const AutocompleteMutliSelect = <T, V>(
           )}
 
           <DropdownTransition>
-            <Combobox.Options className="cui-dropdown-base top-12 absolute z-10 mt-0.5">
+            <Combobox.Options className="cui-dropdown-base absolute top-12 z-10 mt-0.5">
               {props.isLoading ? (
                 <Searching />
               ) : filteredOptions.length ? (

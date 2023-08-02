@@ -90,12 +90,12 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
               <Listbox.Button
                 className={`${
                   props?.requiredError ? "border-red-500" : ""
-                } w-full flex rounded cui-input-base`}
+                } cui-input-base flex w-full rounded`}
                 onFocus={props.onFocus}
                 onBlur={props.onBlur}
               >
-                <div className="relative z-0 flex items-center w-full">
-                  <div className="relative flex-1 flex items-center focus:z-10">
+                <div className="relative z-0 flex w-full items-center">
+                  <div className="relative flex flex-1 items-center focus:z-10">
                     {props.showIconWhenSelected && value?.icon && (
                       <div className="ml-2 text-sm text-gray-700">
                         {value.icon}
@@ -106,13 +106,13 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                     </p>
                   </div>
                   {showChevronIcon && (
-                    <CareIcon className="-mb-0.5 care-l-angle-down text-lg text-gray-900" />
+                    <CareIcon className="care-l-angle-down -mb-0.5 text-lg text-gray-900" />
                   )}
                 </div>
               </Listbox.Button>
               <div
                 className={classNames(
-                  "absolute w-full z-10",
+                  "absolute z-10 w-full",
                   props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12"
                 )}
               >

@@ -110,18 +110,18 @@ export default function ListView() {
   const showShiftingCardList = (data: any) => {
     if (data && !data.length) {
       return (
-        <div className="flex flex-1 justify-center text-gray-600 mt-64">
+        <div className="mt-64 flex flex-1 justify-center text-gray-600">
           {t("no_patients_to_show")}
         </div>
       );
     }
 
     return data.map((shift: any) => (
-      <div key={`shift_${shift.id}`} className="w-full mt-6">
-        <div className="overflow-hidden shadow rounded-lg bg-white h-full">
+      <div key={`shift_${shift.id}`} className="mt-6 w-full">
+        <div className="h-full overflow-hidden rounded-lg bg-white shadow">
           <div
             className={
-              "p-4 h-full flex flex-col justify-between " +
+              "flex h-full flex-col justify-between p-4 " +
               (shift.patient_object.disease_status == "POSITIVE"
                 ? "bg-red-50"
                 : "")
@@ -129,12 +129,12 @@ export default function ListView() {
           >
             <div>
               <div className="flex justify-between">
-                <div className="font-bold text-xl capitalize mb-2">
+                <div className="mb-2 text-xl font-bold capitalize">
                   {shift.patient_object.name} - {shift.patient_object.age}
                 </div>
                 <div>
                   {shift.emergency && (
-                    <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                    <span className="inline-block shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium leading-4 text-red-800">
                       {t("emergency")}
                     </span>
                   )}
@@ -144,10 +144,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("shifting_status")}
-                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
                     <i className="fas fa-truck mr-2" />
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-gray-900">
                       {shift.status}
                     </dd>
                   </dt>
@@ -155,10 +155,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("phone_number")}
-                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
                     <i className="fas fa-mobile mr-2" />
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-gray-900">
                       {shift.patient_object.phone_number || ""}
                     </dd>
                   </dt>
@@ -166,10 +166,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("origin_facility")}
-                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
                     <i className="fas fa-plane-departure mr-2"></i>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-gray-900">
                       {(shift.origin_facility_object || {}).name}
                     </dd>
                   </dt>
@@ -178,10 +178,10 @@ export default function ListView() {
                   <div className="sm:col-span-1">
                     <dt
                       title={t("shifting_approving_facility")}
-                      className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                      className="flex items-center text-sm font-medium leading-5 text-gray-500"
                     >
                       <i className="fas fa-user-check mr-2"></i>
-                      <dd className="font-bold text-sm leading-5 text-gray-900">
+                      <dd className="text-sm font-bold leading-5 text-gray-900">
                         {(shift.shifting_approving_facility_object || {}).name}
                       </dd>
                     </dt>
@@ -190,11 +190,11 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("assigned_facility")}
-                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
                     <i className="fas fa-plane-arrival mr-2"></i>
 
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-gray-900">
                       {shift.assigned_facility_external ||
                         shift.assigned_facility_object?.name ||
                         t("yet_to_be_decided")}
@@ -206,16 +206,16 @@ export default function ListView() {
                   <dt
                     title={t("last_modified")}
                     className={
-                      "text-sm leading-5 font-medium flex items-center " +
+                      "flex items-center text-sm font-medium leading-5 " +
                       (moment()
                         .subtract(2, "hours")
                         .isBefore(shift.modified_date)
                         ? "text-gray-900"
-                        : "rounded p-1 bg-red-400 text-white")
+                        : "rounded bg-red-400 p-1 text-white")
                     }
                   >
                     <i className="fas fa-stopwatch mr-2"></i>
-                    <dd className="font-bold text-sm leading-5">
+                    <dd className="text-sm font-bold leading-5">
                       {formatDate(shift.modified_date) || "--"}
                     </dd>
                   </dt>
@@ -224,10 +224,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title={t("patient_address")}
-                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
                     <i className="fas fa-home mr-2"></i>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-gray-900">
                       {shift.patient_object.address || "--"}
                     </dd>
                   </dt>
@@ -304,14 +304,14 @@ export default function ListView() {
           <div className="w-32">
             {/* dummy div to align space as per board view */}
           </div>
-          <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 w-full lg:w-fit">
+          <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
             <ButtonV2
               className="py-[11px]"
               onClick={() =>
                 navigate("/shifting/board-view", { query: qParams })
               }
             >
-              <CareIcon className="care-l-list-ul transform rotate-90" />
+              <CareIcon className="care-l-list-ul rotate-90" />
               {t("board_view")}
             </ButtonV2>
 
@@ -328,7 +328,7 @@ export default function ListView() {
           <Loading />
         ) : (
           <div>
-            <div className="flex justify-end mt-4 mr-2 -mb-4">
+            <div className="-mb-4 mr-2 mt-4 flex justify-end">
               <button
                 className="text-xs hover:text-blue-800"
                 onClick={refreshList}
@@ -338,7 +338,7 @@ export default function ListView() {
               </button>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-x-6 mb-5">
+            <div className="mb-5 grid gap-x-6 md:grid-cols-2">
               {showShiftingCardList(data)}
             </div>
             <div>
