@@ -1,21 +1,26 @@
+import { IConfig } from "./hooks/useConfig";
 import { PatientCategory } from "../Components/Facility/models";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { SortOption } from "../Components/Common/SortDropdown";
 import moment from "moment";
-
-export const KeralaLogo = "images/kerala-logo.png";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
+
+/**
+ * Contains local storage keys that are potentially used in multiple places.
+ */
+export const LocalStorageKeys = {
+  accessToken: "care_access_token",
+  refreshToken: "care_refresh_token",
+};
 export interface OptionsType {
-  id: number;
+  id: number | string;
   text: string;
+  label?: string;
   desc?: string;
   disabled?: boolean;
 }
-
-export const KASP_STRING = process.env.REACT_APP_KASP_STRING ?? "";
-export const KASP_FULL_STRING = process.env.REACT_APP_KASP_FULL_STRING ?? "";
-export const KASP_ENABLED = process.env.REACT_APP_KASP_ENABLED === "true";
 
 export type UserRole =
   | "Pharmacist"
@@ -32,25 +37,24 @@ export type UserRole =
   | "StateReadOnlyAdmin"
   | "StateAdmin";
 
-const readOnly = true;
 export const USER_TYPE_OPTIONS: {
   id: UserRole;
   role: string;
-  readOnly?: true | undefined;
+  readOnly?: boolean;
 }[] = [
-  { id: "Pharmacist", role: "Pharmacist" },
-  { id: "Volunteer", role: "Volunteer" },
-  { id: "StaffReadOnly", role: "Staff", readOnly },
-  { id: "Staff", role: "Staff" },
-  { id: "Doctor", role: "Doctor" },
-  { id: "WardAdmin", role: "Ward Admin" },
-  { id: "LocalBodyAdmin", role: "Local Body Admin" },
-  { id: "DistrictLabAdmin", role: "District Lab Admin" },
-  { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly },
-  { id: "DistrictAdmin", role: "District Admin" },
-  { id: "StateLabAdmin", role: "State Lab Admin" },
-  { id: "StateReadOnlyAdmin", role: "State Admin", readOnly },
-  { id: "StateAdmin", role: "State Admin" },
+  { id: "Pharmacist", role: "Pharmacist", readOnly: false },
+  { id: "Volunteer", role: "Volunteer", readOnly: false },
+  { id: "StaffReadOnly", role: "Staff", readOnly: true },
+  { id: "Staff", role: "Staff", readOnly: false },
+  { id: "Doctor", role: "Doctor", readOnly: false },
+  { id: "WardAdmin", role: "Ward Admin", readOnly: false },
+  { id: "LocalBodyAdmin", role: "Local Body Admin", readOnly: false },
+  { id: "DistrictLabAdmin", role: "District Lab Admin", readOnly: false },
+  { id: "DistrictReadOnlyAdmin", role: "District Admin", readOnly: true },
+  { id: "DistrictAdmin", role: "District Admin", readOnly: false },
+  { id: "StateLabAdmin", role: "State Lab Admin", readOnly: false },
+  { id: "StateReadOnlyAdmin", role: "State Admin", readOnly: true },
+  { id: "StateAdmin", role: "State Admin", readOnly: false },
 ];
 
 export const USER_TYPES = USER_TYPE_OPTIONS.map((o) => o.id);
@@ -132,8 +136,8 @@ export const FACILITY_TYPES: Array<OptionsType> = [
   // { id: 1600, text: "District War Room" },
 ];
 
-export const SHIFTING_CHOICES: Array<OptionsType> = [
-  { id: 10, text: "PENDING" },
+export const SHIFTING_CHOICES_WARTIME: Array<OptionsType> = [
+  { id: 10, text: "PENDING", label: "SHIFTING APPROVAL PENDING" },
   { id: 15, text: "ON HOLD" },
   { id: 20, text: "APPROVED" },
   { id: 30, text: "REJECTED" },
@@ -143,6 +147,19 @@ export const SHIFTING_CHOICES: Array<OptionsType> = [
   { id: 60, text: "PATIENT TO BE PICKED UP" },
   { id: 70, text: "TRANSFER IN PROGRESS" },
   { id: 80, text: "COMPLETED" },
+  { id: 90, text: "PATIENT EXPIRED" },
+  { id: 100, text: "CANCELLED" },
+];
+
+export const SHIFTING_CHOICES_PEACETIME: Array<OptionsType> = [
+  { id: 20, text: "APPROVED", label: "PATIENTS TO BE SHIFTED" },
+  { id: 40, text: "DESTINATION APPROVED" },
+  // { id: 50, text: "DESTINATION REJECTED" },
+  { id: 60, text: "PATIENT TO BE PICKED UP", label: "TRANSPORTATION ARRANGED" },
+  { id: 70, text: "TRANSFER IN PROGRESS" },
+  { id: 80, text: "COMPLETED" },
+  { id: 90, text: "PATIENT EXPIRED" },
+  { id: 100, text: "CANCELLED" },
 ];
 
 export const SHIFTING_VEHICLE_CHOICES: Array<OptionsType> = [
@@ -160,37 +177,54 @@ export const SHIFTING_FILTER_ORDER: Array<OptionsType> = [
   { id: 4, text: "-modified_date", desc: "DESC Modified Date" },
 ];
 
-export const PATIENT_FILTER_ORDER: (OptionsType & { order: string })[] = [
-  { id: 1, text: "created_date", desc: "Created Date", order: "Ascending" },
-  { id: 2, text: "-created_date", desc: "Created Date", order: "Descending" },
-  { id: 3, text: "modified_date", desc: "Modified Date", order: "Ascending" },
-  { id: 4, text: "-modified_date", desc: "Modified Date", order: "Descending" },
-  { id: 5, text: "review_time", desc: "Review Time", order: "Ascending" },
-  { id: 6, text: "-review_time", desc: "Review Time", order: "Descending" },
+export const PATIENT_SORT_OPTIONS: SortOption[] = [
+  { isAscending: false, value: "-created_date" },
+  { isAscending: true, value: "created_date" },
+  { isAscending: false, value: "-category_severity" },
+  { isAscending: true, value: "category_severity" },
+  { isAscending: false, value: "-modified_date" },
+  { isAscending: true, value: "modified_date" },
+  {
+    isAscending: true,
+    value: "facility__name,last_consultation__current_bed__bed__name",
+  },
+  {
+    isAscending: false,
+    value: "facility__name,-last_consultation__current_bed__bed__name",
+  },
+  { isAscending: false, value: "-review_time" },
+  { isAscending: true, value: "review_time" },
+  { isAscending: true, value: "name" },
+  { isAscending: false, value: "-name" },
 ];
 
-const KASP_BED_TYPES = KASP_ENABLED
-  ? [
-      { id: 40, text: KASP_STRING + " Ordinary Beds" },
-      { id: 60, text: KASP_STRING + " Oxygen beds" },
-      { id: 50, text: KASP_STRING + " ICU (ICU without ventilator)" },
-      { id: 70, text: KASP_STRING + " ICU (ICU with ventilator)" },
-    ]
-  : [];
+export const getBedTypes = ({
+  kasp_enabled,
+  kasp_string,
+}: Pick<IConfig, "kasp_enabled" | "kasp_string">) => {
+  const kaspBedTypes = kasp_enabled
+    ? [
+        { id: 40, text: kasp_string + " Ordinary Beds" },
+        { id: 60, text: kasp_string + " Oxygen beds" },
+        { id: 50, text: kasp_string + " ICU (ICU without ventilator)" },
+        { id: 70, text: kasp_string + " ICU (ICU with ventilator)" },
+      ]
+    : [];
 
-export const BED_TYPES: Array<OptionsType> = [
-  { id: 1, text: "Non-Covid Ordinary Beds" },
-  { id: 150, text: "Non-Covid Oxygen beds" },
-  { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
-  { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
-  { id: 30, text: "Covid Ordinary Beds" },
-  { id: 120, text: "Covid Oxygen beds" },
-  { id: 110, text: "Covid ICU (ICU without ventilator)" },
-  { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
-  ...KASP_BED_TYPES,
-  { id: 2, text: "Hostel" },
-  { id: 3, text: "Single Room with Attached Bathroom" },
-];
+  return [
+    { id: 1, text: "Non-Covid Ordinary Beds" },
+    { id: 150, text: "Non-Covid Oxygen beds" },
+    { id: 10, text: "Non-Covid ICU (ICU without ventilator)" },
+    { id: 20, text: "Non-Covid Ventilator (ICU with ventilator)" },
+    { id: 30, text: "Covid Ordinary Beds" },
+    { id: 120, text: "Covid Oxygen beds" },
+    { id: 110, text: "Covid ICU (ICU without ventilator)" },
+    { id: 100, text: "Covid Ventilators (ICU with ventilator)" },
+    ...kaspBedTypes,
+    { id: 2, text: "Hostel" },
+    { id: 3, text: "Single Room with Attached Bathroom" },
+  ];
+};
 
 export const DOCTOR_SPECIALIZATION: Array<OptionsType> = [
   { id: 1, text: "General Medicine", desc: "bg-doctors-general" },
@@ -212,17 +246,24 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
 ];
 
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
+  { id: -1, text: "No Review" },
+  { id: 10, text: "10 mins" },
+  { id: 15, text: "15 mins" },
   { id: 30, text: "30 mins" },
   { id: 60, text: "1 hr" },
-  { id: 120, text: "2 hr" },
-  { id: 180, text: "3 hr" },
-  { id: 240, text: "4 hr" },
-  { id: 360, text: "6 hr" },
-  { id: 480, text: "8 hr" },
-  { id: 720, text: "12 hr" },
-  { id: 1440, text: "24 hr" },
-  { id: 2160, text: "36 hr" },
-  { id: 2880, text: "48 hr" },
+  { id: 2 * 60, text: "2 hr" },
+  { id: 3 * 60, text: "3 hr" },
+  { id: 4 * 60, text: "4 hr" },
+  { id: 6 * 60, text: "6 hr" },
+  { id: 8 * 60, text: "8 hr" },
+  { id: 12 * 60, text: "12 hr" },
+  { id: 24 * 60, text: "24 hr" },
+  { id: 36 * 60, text: "36 hr" },
+  { id: 2 * 24 * 60, text: "2 days" },
+  { id: 3 * 24 * 60, text: "3 days" },
+  { id: 7 * 24 * 60, text: "7 days" },
+  { id: 14 * 24 * 60, text: "2 weeks" },
+  { id: 30 * 24 * 60, text: "1 month" },
 ];
 
 export const SYMPTOM_CHOICES = [
@@ -233,15 +274,22 @@ export const SYMPTOM_CHOICES = [
   { id: 5, text: "BREATHLESSNESS" },
   { id: 6, text: "MYALGIA" },
   { id: 7, text: "ABDOMINAL DISCOMFORT" },
-  { id: 8, text: "VOMITING/DIARRHOEA" },
-  { id: 10, text: "SARI" },
+  { id: 8, text: "VOMITING" },
+  { id: 9, text: "OTHERS" },
   { id: 11, text: "SPUTUM" },
   { id: 12, text: "NAUSEA" },
   { id: 13, text: "CHEST PAIN" },
   { id: 14, text: "HEMOPTYSIS" },
   { id: 15, text: "NASAL DISCHARGE" },
   { id: 16, text: "BODY ACHE" },
-  { id: 9, text: "OTHERS" },
+  { id: 17, text: "DIARRHOEA" },
+  { id: 18, text: "PAIN" },
+  { id: 19, text: "PEDAL EDEMA" },
+  { id: 20, text: "WOUND" },
+  { id: 21, text: "CONSTIPATION" },
+  { id: 22, text: "HEAD ACHE" },
+  { id: 23, text: "BLEEDING" },
+  { id: 24, text: "DIZZINESS" },
 ];
 
 export const DISCHARGE_REASONS = [
@@ -262,9 +310,9 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
 ];
 
 export const GENDER_TYPES = [
-  { id: 1, text: "Male", icon: <i className="fa-solid fa-person" /> },
-  { id: 2, text: "Female", icon: <i className="fa-solid fa-person-dress" /> },
-  { id: 3, text: "Non-binary", icon: <i className="fa-solid fa-genderless" /> },
+  { id: 1, text: "Male", icon: "M" },
+  { id: 2, text: "Female", icon: "F" },
+  { id: 3, text: "Transgender", icon: "TRANS" },
 ];
 
 export const SAMPLE_TEST_RESULT = [
@@ -275,7 +323,7 @@ export const SAMPLE_TEST_RESULT = [
 ];
 
 export const CONSULTATION_SUGGESTION = [
-  { id: "HI", text: "Home Isolation" },
+  { id: "HI", text: "Home Isolation", deprecated: true }, // # Deprecated. Preserving option for backward compatibility (use only for readonly operations)
   { id: "A", text: "Admission" },
   { id: "R", text: "Refer to another Hospital" },
   { id: "OP", text: "OP Consultation" },
@@ -283,11 +331,26 @@ export const CONSULTATION_SUGGESTION = [
   { id: "DD", text: "Declare Death" },
 ];
 
+export const CONSULTATION_STATUS = [
+  { id: "1", text: "Brought Dead" },
+  { id: "2", text: "Transferred from ward" },
+  { id: "3", text: "Transferred from ICU" },
+  { id: "4", text: "Referred from other hospital" },
+  { id: "5", text: "Out-patient (walk in)" },
+];
+
 export const ADMITTED_TO = [
   { id: "1", text: "Isolation" },
   { id: "2", text: "ICU" },
   { id: "6", text: "Bed with oxygen support" },
   { id: "7", text: "Regular" },
+];
+
+export const RESPIRATORY_SUPPORT = [
+  { id: "NIV", text: "NON_INVASIVE" },
+  { id: "IV", text: "INVASIVE" },
+  { id: "O2", text: "OXYGEN_SUPPORT" },
+  { id: "NONE", text: "UNKNOWN" },
 ];
 
 export type PatientCategoryID = "Comfort" | "Stable" | "Moderate" | "Critical";
@@ -299,7 +362,7 @@ export const PATIENT_CATEGORIES: {
 }[] = [
   { id: "Comfort", text: "Comfort Care", twClass: "patient-comfort" },
   { id: "Stable", text: "Stable", twClass: "patient-stable" },
-  { id: "Moderate", text: "Slightly Abnormal", twClass: "patient-abnormal" },
+  { id: "Moderate", text: "Abnormal", twClass: "patient-abnormal" },
   { id: "Critical", text: "Critical", twClass: "patient-critical" },
 ];
 
@@ -368,7 +431,6 @@ export const DISEASE_STATUS = [
   "SUSPECTED",
   "NEGATIVE",
   "RECOVERED",
-  "EXPIRED",
 ];
 
 export const TEST_TYPE = [
@@ -404,16 +466,16 @@ export const BLOOD_GROUPS = [
 ];
 
 export const SAMPLE_TYPE_CHOICES = [
-  { id: 0, text: "UNKNOWN" },
-  { id: 1, text: "BA/ETA" },
-  { id: 2, text: "TS/NPS/NS" },
-  { id: 3, text: "Blood in EDTA" },
-  { id: 4, text: "Acute Sera" },
-  { id: 5, text: "Covalescent sera" },
-  { id: 6, text: "Biopsy" },
-  { id: 7, text: "AMR" },
-  { id: 8, text: "Communicable Diseases" },
-  { id: 9, text: "OTHER TYPE" },
+  { id: "0", text: "UNKNOWN" },
+  { id: "1", text: "BA/ETA" },
+  { id: "2", text: "TS/NPS/NS" },
+  { id: "3", text: "Blood in EDTA" },
+  { id: "4", text: "Acute Sera" },
+  { id: "5", text: "Covalescent sera" },
+  { id: "6", text: "Biopsy" },
+  { id: "7", text: "AMR" },
+  { id: "8", text: "Communicable Diseases" },
+  { id: "9", text: "OTHER TYPE" },
 ];
 
 export const ICMR_CATEGORY = [
@@ -427,7 +489,8 @@ export const ICMR_CATEGORY = [
 ];
 
 export const TELEMEDICINE_ACTIONS = [
-  { id: 10, text: "PENDING", desc: "Pending" },
+  { id: 10, text: "NO_ACTION", desc: "No Action" },
+  { id: 20, text: "PENDING", desc: "Pending" },
   { id: 30, text: "SPECIALIST_REQUIRED", desc: "Specialist Required" },
   { id: 40, text: "PLAN_FOR_HOME_CARE", desc: "Plan for Home Care" },
   { id: 50, text: "FOLLOW_UP_NOT_REQUIRED", desc: "Follow Up Not Required" },
@@ -592,6 +655,7 @@ export const NURSING_CARE_FIELDS: Array<OptionsType> = [
   { id: 10, text: "chest_tube_care", desc: "Chest Tube Care" },
   { id: 11, text: "tracheostomy_care", desc: "Tracheostomy Care" },
   { id: 12, text: "stoma_care", desc: "Stoma Care" },
+  { id: 13, text: "catheter_care", desc: "Catheter Care" },
 ];
 
 export const EYE_OPEN_SCALE = [
@@ -627,16 +691,16 @@ export const CONSULTATION_TABS: Array<OptionsType> = [
   { id: 6, text: "ABG", desc: "ABG" },
   { id: 7, text: "NURSING", desc: "Nursing" },
   { id: 8, text: "NEUROLOGICAL_MONITORING", desc: "Neurological Monitoring" },
-  { id: 9, text: "VENTILATOR", desc: "Ventilator" },
+  { id: 9, text: "VENTILATOR", desc: "Respiratory Support" },
   { id: 10, text: "NUTRITION", desc: "Nutrition" },
   { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
   { id: 12, text: "DIALYSIS", desc: "Dialysis" },
 ];
 
 export const RHYTHM_CHOICES: Array<OptionsType> = [
-  { id: 0, text: "Unknown" },
-  { id: 5, text: "Regular" },
-  { id: 10, text: "Irregular" },
+  { id: 0, text: "UNKNOWN", desc: "Unknown" },
+  { id: 5, text: "REGULAR", desc: "Regular" },
+  { id: 10, text: "IRREGULAR", desc: "Irregular" },
 ];
 
 export const LOCATION_BED_TYPES: Array<any> = [
@@ -694,28 +758,28 @@ export const CAMERA_STATES = {
 
 export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
   {
-    icon: "chevron-up",
+    icon: "l-angle-up",
     label: "Move Up",
     action: "up",
     loadingLabel: CAMERA_STATES.MOVING.UP,
     shortcutKey: ["Control", "Shift", "ArrowUp"],
   },
   {
-    icon: "chevron-down",
+    icon: "l-angle-down",
     label: "Move Down",
     action: "down",
     loadingLabel: CAMERA_STATES.MOVING.DOWN,
     shortcutKey: ["Control", "Shift", "ArrowDown"],
   },
   {
-    icon: "chevron-left",
+    icon: "l-angle-left",
     label: "Move Left",
     action: "left",
     loadingLabel: CAMERA_STATES.MOVING.LEFT,
     shortcutKey: ["Control", "Shift", "ArrowLeft"],
   },
   {
-    icon: "chevron-right",
+    icon: "l-angle-right",
     label: "Move Right",
     action: "right",
     loadingLabel: CAMERA_STATES.MOVING.RIGHT,
@@ -729,34 +793,34 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
     shortcutKey: ["Shift", "P"],
   },
   {
-    icon: "search-plus",
+    icon: "l-search-plus",
     label: "Zoom In",
     action: "zoomIn",
     loadingLabel: CAMERA_STATES.ZOOMING.IN,
     shortcutKey: ["Shift", "I"],
   },
   {
-    icon: "search-minus",
+    icon: "l-search-minus",
     label: "Zoom Out",
     action: "zoomOut",
     loadingLabel: CAMERA_STATES.ZOOMING.OUT,
     shortcutKey: ["Shift", "O"],
   },
   {
-    icon: "save",
+    icon: "l-save",
     label: "Update Preset",
     action: "updatePreset",
     loadingLabel: CAMERA_STATES.UPDATING_PRESET,
     shortcutKey: ["Shift", "S"],
   },
   {
-    icon: "undo",
+    icon: "l-redo",
     label: "Reset",
     action: "reset",
     shortcutKey: ["Shift", "R"],
   },
   {
-    icon: "expand",
+    icon: "l-expand-arrows-alt",
     label: "Full Screen",
     action: "fullScreen",
     shortcutKey: ["F"],

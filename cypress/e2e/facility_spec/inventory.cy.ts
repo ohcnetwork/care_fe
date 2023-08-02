@@ -16,10 +16,11 @@ describe("Inventory Management Section", () => {
 
   it("Adds Inventory", () => {
     cy.contains("Manage Inventory").click();
-    cy.get("[name='id']").select("PPE");
-    cy.get("[name='isIncoming']").select("Add Stock");
+    cy.get("div#id").click();
+    cy.get("div#id ul li").contains("Liquid Oxygen").click();
+    cy.get("div#isIncoming").click();
+    cy.get("div#isIncoming ul li").contains("Add Stock").click();
     cy.get("[name='quantity']").type("120");
-    cy.get("[name='unit']").select("Items");
     cy.get("button").contains("Add/Update Inventory").click();
     cy.verifyNotification("Inventory created successfully");
   });

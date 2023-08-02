@@ -1,9 +1,9 @@
-import { Link } from "raviger";
-import { useTranslation } from "react-i18next";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
 import AuthorizedChild from "../../../CAREUI/misc/AuthorizedChild";
 import { AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { Link } from "raviger";
 import { classNames } from "../../../Utils/utils";
+import { useTranslation } from "react-i18next";
 
 export type ButtonSize = "small" | "default" | "large";
 export type ButtonShape = "square" | "circle";
@@ -45,7 +45,7 @@ export type ButtonProps = RawButtonProps &
      */
     variant?: ButtonVariant;
     /** Specify text alignment. Defaults to `center` */
-    align?: "left" | "center" | "right" | "between";
+    align?: "start" | "center" | "end" | "between" | "around" | "evenly";
     /** If set, gives an elevated button with hover effects. */
     shadow?: boolean | undefined;
     /** If set, removes the background to give a simple text button. */
@@ -75,6 +75,14 @@ export type ButtonProps = RawButtonProps &
      * Whether the button should be having a Id.
      */
     id?: string | undefined;
+    /**
+     * Tooltip showed when hovered over.
+     */
+    tooltip?: string;
+    /**
+     * Class for tooltip
+     */
+    tooltipClassName?: string;
   };
 
 const ButtonV2 = ({
@@ -91,43 +99,58 @@ const ButtonV2 = ({
   children,
   href,
   target,
+  tooltip,
+  tooltipClassName,
   ...props
 }: ButtonProps) => {
   const className = classNames(
     props.className,
-    "font-medium h-min inline-flex items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
+    "inline-flex h-min cursor-pointer items-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500",
     `button-size-${size}`,
     `justify-${align}`,
     `button-shape-${circle ? "circle" : "square"}`,
     ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
     border && `button-${variant}-border`,
-    shadow && "shadow enabled:hover:shadow-lg"
+    shadow && "shadow enabled:hover:shadow-lg",
+    tooltip && "tooltip"
   );
 
-  if (authorizeFor) {
-    <AuthorizedChild authorizeFor={authorizeFor}>
-      {({ isAuthorized }) => (
-        <button
-          {...props}
-          disabled={disabled || !isAuthorized || loading}
-          className={className}
-        >
-          {children}
-        </button>
-      )}
-    </AuthorizedChild>;
+  if (tooltip) {
+    children = (
+      <>
+        {tooltip && (
+          <span className={classNames("tooltip-text", tooltipClassName)}>
+            {tooltip}
+          </span>
+        )}
+        {children}
+      </>
+    );
   }
 
   if (href && !(disabled || loading)) {
     return (
-      <Link
-        {...(props as any)}
-        href={href}
-        target={target}
-        className={className}
-      >
-        {children}
+      <Link href={href} target={target}>
+        <button {...props} disabled={disabled || loading} className={className}>
+          {children}
+        </button>
       </Link>
+    );
+  }
+
+  if (authorizeFor) {
+    return (
+      <AuthorizedChild authorizeFor={authorizeFor}>
+        {({ isAuthorized }) => (
+          <button
+            {...props}
+            disabled={disabled || !isAuthorized || loading}
+            className={className}
+          >
+            {children}
+          </button>
+        )}
+      </AuthorizedChild>
     );
   }
 
@@ -150,15 +173,14 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
     <ButtonV2
       id="submit"
       type="submit"
-      className="w-full md:w-auto"
-      // Voluntarily setting children this way, so that it's overridable when using.
       children={
         <>
           <CareIcon className="care-l-check-circle text-lg" />
-          <span>{t(label)}</span>
+          <span className="whitespace-pre-wrap">{t(label)}</span>
         </>
       }
       {...props}
+      className={classNames("w-full md:w-auto", props.className)}
     />
   );
 };
@@ -170,15 +192,15 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
       id="cancel"
       type="button"
       variant="secondary"
-      className="w-full md:w-auto"
-      // Voluntarily setting children this way, so that it's overridable when using.
+      border
       children={
         <>
           <CareIcon className="care-l-times-circle text-lg" />
-          <span>{t(label)}</span>
+          <span className="whitespace-pre-wrap">{t(label)}</span>
         </>
       }
       {...props}
+      className={classNames("w-full md:w-auto", props.className)}
     />
   );
 };

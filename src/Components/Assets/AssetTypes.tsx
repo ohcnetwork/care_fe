@@ -1,3 +1,6 @@
+import { BedModel } from "../Facility/models";
+import { PatientModel } from "../Patient/models";
+
 export interface AssetLocationObject {
   id: string;
   name: string;
@@ -20,25 +23,35 @@ export enum AssetClass {
   NONE = "NONE",
   ONVIF = "ONVIF",
   HL7MONITOR = "HL7MONITOR",
+  VENTILATOR = "VENTILATOR",
 }
+
+export const AssetStatus = {
+  not_monitored: "Not Monitored",
+  operational: "Operational",
+  down: "Down",
+  maintenance: "Under Maintenance",
+};
 
 export const assetClassProps = {
   ONVIF: {
     name: "ONVIF Camera",
     description: "",
     icon: "camera",
-    uicon: "camera",
   },
   HL7MONITOR: {
     name: "HL7 Vitals Monitor",
     description: "",
-    icon: "tv",
-    uicon: "tv-retro",
+    icon: "monitor-heart-rate",
+  },
+  VENTILATOR: {
+    name: "Ventilator",
+    description: "",
+    icon: "lungs",
   },
   NONE: {
     name: "N/A",
-    icon: "cart-plus",
-    uicon: "shopping-cart",
+    icon: "box",
   },
 };
 
@@ -77,6 +90,18 @@ export interface AssetsResponse {
   results: AssetData[];
 }
 
+export interface AssetUptimeRecord {
+  id: string;
+  asset: {
+    id: string;
+    name: string;
+  };
+  status: string;
+  timestamp: string;
+  created_date: string;
+  modified_date: string;
+}
+
 export interface AssetTransaction {
   id: string;
   asset: {
@@ -95,4 +120,20 @@ export interface AssetTransaction {
   };
   created_date: string;
   modified_date: string;
+}
+
+export interface AssetBedModel {
+  id: string;
+  asset_object: AssetData;
+  bed_object: BedModel;
+  created_date: string;
+  modified_date: string;
+  meta: Record<string, any>;
+}
+
+export interface PatientAssetBed {
+  asset: AssetData;
+  bed: BedModel;
+  patient?: PatientModel;
+  meta?: Record<string, any>;
 }

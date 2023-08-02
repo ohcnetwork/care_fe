@@ -2,10 +2,10 @@ import React from "react";
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { deepEqual } from "../../Common/utils";
 import { isLatLngLiteral } from "@googlemaps/typescript-guards";
-import PersonPinIcon from "@material-ui/icons/PersonPin";
-import { GMAPS_API_KEY } from "../../Common/env";
 import Spinner from "./Spinner";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import useConfig from "../../Common/hooks/useConfig";
+import { Popover } from "@headlessui/react";
 
 const render = (status: Status) => {
   if (status === "LOADING") {
@@ -32,11 +32,14 @@ const GLocationPicker = ({
   handleOnClose,
   handleOnSelectCurrentLocation,
 }: GLocationPickerProps) => {
+  const { gmaps_api_key } = useConfig();
   const [location, setLocation] = React.useState<google.maps.LatLng | null>(
     null
   );
   const [zoom, setZoom] = React.useState(4);
-  const [center, setCenter] = React.useState<google.maps.LatLngLiteral>({
+  const [center, setCenter] = React.useState<
+    google.maps.LatLngLiteral | undefined
+  >({
     lat,
     lng,
   });
@@ -60,13 +63,13 @@ const GLocationPicker = ({
   };
 
   const onIdle = (m: google.maps.Map) => {
-    setZoom(m.getZoom()!);
-    setCenter(m.getCenter()!.toJSON());
+    setZoom(m?.getZoom() ?? 0);
+    setCenter(m?.getCenter()?.toJSON());
   };
 
   return (
-    <div className="flex w-80 h-80 sm:w-96 sm:h-96">
-      <Wrapper libraries={["places"]} apiKey={GMAPS_API_KEY} render={render}>
+    <div className="flex h-80 w-80 sm:h-96 sm:w-96">
+      <Wrapper libraries={["places"]} apiKey={gmaps_api_key} render={render}>
         <Map
           center={center}
           onClick={onClick}
@@ -197,23 +200,25 @@ const Map: React.FC<MapProps> = ({
           id="pac-input"
           ref={searchRef}
           type="text"
-          className="rounded m-[10px] p-2 w-[60%] border-0"
+          className="cui-input-base peer m-[10px] w-[60%] py-2.5"
           placeholder="Start typing to search"
         />
         {handleOnClose && (
-          <div
-            id="map-close"
-            className="bg-white m-[10px] p-2 rounded cursor-pointer"
-            ref={mapCloseRef}
-            onClick={handleOnClose}
-          >
-            <CareIcon className="care-l-times-circle text-lg" />
-          </div>
+          <Popover.Button>
+            <div
+              id="map-close"
+              className="m-[10px] cursor-pointer rounded bg-white p-2"
+              ref={mapCloseRef}
+              onClick={handleOnClose}
+            >
+              <CareIcon className="care-l-times-circle text-2xl text-gray-800" />
+            </div>
+          </Popover.Button>
         )}
         {handleOnSelectCurrentLocation && (
           <div
             id="current-loaction-select"
-            className="bg-white m-[10px] p-2 rounded cursor-pointer"
+            className="m-[10px] cursor-pointer rounded bg-white p-2"
             ref={currentLocationSelectRef}
             onClick={() =>
               handleOnSelectCurrentLocation((lat: number, lng: number) =>
@@ -221,7 +226,7 @@ const Map: React.FC<MapProps> = ({
               )
             }
           >
-            <PersonPinIcon />
+            <CareIcon className="care-l-user-location text-2xl text-gray-800" />
           </div>
         )}
       </>

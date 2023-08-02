@@ -1,13 +1,11 @@
-import { classNames } from "../../../Utils/utils";
 import DateInputV2, { DatePickerPosition } from "../../Common/DateInputV2";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+
 import FormField from "./FormField";
-import {
-  FormFieldBaseProps,
-  resolveFormFieldChangeEventHandler,
-  resolveFormFieldError,
-} from "./Utils";
+import { classNames } from "../../../Utils/utils";
 
 type Props = FormFieldBaseProps<Date> & {
+  containerClassName?: string;
   placeholder?: string;
   max?: Date;
   min?: Date;
@@ -30,21 +28,25 @@ type Props = FormFieldBaseProps<Date> & {
  * />
  * ```
  */
-const DateFormField = ({ position = "RIGHT", ...props }: Props) => {
-  const handleChange = resolveFormFieldChangeEventHandler(props);
-  const error = resolveFormFieldError(props);
-  const name = props.name;
-
+const DateFormField = (props: Props) => {
+  const field = useFormFieldPropsResolver(props as any);
   return (
-    <FormField props={props}>
+    <FormField field={field}>
       <DateInputV2
-        className={classNames(error && "border-danger-500")}
-        value={props.value}
-        onChange={(value) => handleChange({ name, value })}
-        max={props.max || (props.disableFuture ? new Date() : undefined)}
-        min={props.min || (props.disablePast ? yesterday() : undefined)}
-        position={position}
-        disabled={props.disabled}
+        className={classNames(field.error && "border-red-500")}
+        containerClassName={props.containerClassName}
+        id={field.id}
+        name={field.name}
+        value={
+          field.value && typeof field.value === "string"
+            ? new Date(field.value)
+            : field.value
+        }
+        onChange={field.handleChange}
+        disabled={field.disabled}
+        max={props.max ?? (props.disableFuture ? new Date() : undefined)}
+        min={props.min ?? (props.disablePast ? yesterday() : undefined)}
+        position={props.position ?? "RIGHT"}
         placeholder={props.placeholder}
       />
     </FormField>

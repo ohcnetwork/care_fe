@@ -1,16 +1,6 @@
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
-  Radio,
-  Box,
-  RadioGroup,
-  InputLabel,
-} from "@material-ui/core";
 import { useState } from "react";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
+import DialogModal from "../Common/Dialog";
 import { DupPatientModel } from "./models";
 
 interface Props {
@@ -27,90 +17,105 @@ const DuplicatePatientDialog = (props: Props) => {
   const [action, setAction] = useState("");
 
   return (
-    <Dialog open={true} maxWidth={"sm"}>
-      <DialogTitle
-        className=" font-semibold text-3xl"
-        id="font-semibold text-3xl"
-      >
-        Patient Records Found
-      </DialogTitle>
-      <DialogContent>
-        <div className="grid gap-4 grid-cols-1">
-          <div>
-            <p className="leading-relaxed text-sm">
-              It appears that there are patient records that contain the same
-              phone number as the one you just entered. (
-              <span className="font-bold">{patientList[0].phone_number}</span>)
-            </p>
-          </div>
-          <div>
-            <div className="max-h-[200px] overflow-auto rounded border border-y-gray-400">
-              <table className="w-full relative border-collapse">
-                <thead>
-                  <tr className="border-separate">
-                    {["Patient Name and ID", "Gender"].map((heading, i) => (
-                      <th
-                        key={i}
-                        className={tdClass + " sticky top-0 bg-white/90"}
-                      >
-                        {heading}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {patientList.map((patient, i) => {
-                    return (
-                      <tr key={i}>
-                        <td className={tdClass}>
-                          <div className="font-semibold">{patient.name}</div>
-                          <div className="text-xs break-words">
-                            ID : {patient.patient_id}
-                          </div>
-                        </td>
-                        <td className={tdClass}>{patient.gender}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div>
-            <InputLabel className="mb-2">
-              Please select one option to continue or click cancel
-            </InputLabel>
-            <RadioGroup
-              name="confirm_action"
-              value={action}
-              onChange={(e: any) => setAction(e.target.value)}
-            >
-              <Box display="flex" flexDirection="column">
-                <FormControlLabel
-                  value="transfer"
-                  control={<Radio />}
-                  className="bg-primary-500 text-white mb-2 pr-2 py-2 rounded-md w-full ml-0"
-                  label="Admit the patient record to your facility by adding the date of birth"
-                />
-                <FormControlLabel
-                  value="close"
-                  control={<Radio />}
-                  className="bg-red-500 text-white mb-2 pr-2 py-2 rounded-md w-full ml-0"
-                  label="I confirm that the suspect / patient i want to create is not on the list."
-                />
-                <p>
-                  Please contact your district care coordinator, the shifting
-                  facility or the patient themselves if you are not sure about
-                  the patient's date of birth.
-                </p>
-              </Box>
-            </RadioGroup>
+    <DialogModal
+      title="Patient Records Found"
+      show={true}
+      onClose={handleCancel}
+      className="w-3/4 md:w-1/2"
+    >
+      <div className="grid grid-cols-1 gap-4">
+        <div>
+          <p className="text-sm leading-relaxed">
+            It appears that there are patient records that contain the same
+            phone number as the one you just entered. (
+            <span className="font-bold">{patientList[0].phone_number}</span>)
+          </p>
+        </div>
+        <div>
+          <div className="max-h-[200px] overflow-auto rounded border border-y-gray-400">
+            <table className="relative w-full border-collapse">
+              <thead>
+                <tr className="border-separate">
+                  {["Patient Name and ID", "Gender"].map((heading, i) => (
+                    <th
+                      key={i}
+                      className={tdClass + " sticky top-0 bg-white/90"}
+                    >
+                      {heading}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {patientList.map((patient, i) => {
+                  return (
+                    <tr key={i}>
+                      <td className={tdClass}>
+                        <div className="font-semibold">{patient.name}</div>
+                        <div className="break-words text-xs">
+                          ID : {patient.patient_id}
+                        </div>
+                      </td>
+                      <td className={tdClass}>{patient.gender}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
-      </DialogContent>
-      <DialogActions className="justify-between flex flex-col md:flex-row md:px-6">
+        <div className="flex flex-col">
+          <div className="mb-2 flex items-center">
+            <label
+              className="mb-2 ml-0 flex w-full rounded-md bg-primary-500 py-2 pr-2 text-white"
+              htmlFor="transfer"
+            >
+              <input
+                type="radio"
+                className="m-3 text-green-600 focus:ring-2 focus:ring-green-500"
+                id="transfer"
+                name="confirm_action"
+                value="transfer"
+                onChange={(e) => setAction(e.target.value)}
+              />
+              <p>
+                Admit the patient record to your facility by adding the date of
+                birth
+              </p>
+            </label>
+          </div>
+
+          <div className="mb-2 flex items-center">
+            <label
+              className="mb-2 ml-0 flex w-full rounded-md bg-red-500 py-2 pr-2 text-white"
+              htmlFor="close"
+            >
+              <input
+                type="radio"
+                id="close"
+                className="m-3 text-red-600 focus:ring-2 focus:ring-red-500"
+                name="confirm_action"
+                value="close"
+                onChange={(e) => setAction(e.target.value)}
+              />
+              <p>
+                I confirm that the suspect / patient I want to create is not on
+                the list.
+              </p>
+            </label>
+          </div>
+
+          <p>
+            Please contact your district care coordinator, the shifting facility
+            or the patient themselves if you are not sure about the patient's
+            date of birth.
+          </p>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-col justify-between sm:flex-row">
         <Cancel
           onClick={handleCancel}
+          className="mb-2 sm:mb-0"
           label={`Cancel ${isNew ? "Registration" : "Update"}`}
         />
         <Submit
@@ -118,8 +123,8 @@ const DuplicatePatientDialog = (props: Props) => {
           disabled={!action}
           label="Continue"
         />
-      </DialogActions>
-    </Dialog>
+      </div>
+    </DialogModal>
   );
 };
 

@@ -1,10 +1,14 @@
 import React from "react";
 
-function UserDetails(props: { children: React.ReactNode; title: string }) {
+function UserDetails(props: {
+  children: React.ReactNode;
+  title: string;
+  id?: string;
+}) {
   return (
-    <div className="mt-2">
-      <div className="text-gray-900 leading-relaxed font-light">
-        {props.title} :
+    <div className="mt-2" id={props.id}>
+      <div className="font-light leading-relaxed text-gray-900">
+        {props.title}:
       </div>
       {props.children}
     </div>

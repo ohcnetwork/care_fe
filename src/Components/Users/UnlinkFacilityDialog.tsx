@@ -1,21 +1,17 @@
 import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
-} from "@material-ui/core";
+import ConfirmDialog from "../Common/ConfirmDialog";
 
 interface ConfirmDialogProps {
   facilityName: string;
   userName: string;
+  isHomeFacility: boolean;
   handleCancel: () => void;
   handleOk: () => void;
 }
 
 const UnlinkFacilityDialog = (props: ConfirmDialogProps) => {
-  const { facilityName, userName, handleCancel, handleOk } = props;
+  const { facilityName, userName, isHomeFacility, handleCancel, handleOk } =
+    props;
 
   const [disable, setDisable] = useState(false);
 
@@ -24,35 +20,30 @@ const UnlinkFacilityDialog = (props: ConfirmDialogProps) => {
     setDisable(true);
   };
   return (
-    <Dialog open={true} onClose={handleCancel}>
-      <DialogContent>
-        <div className="md:min-w-[400px] max-w-[650px]">
-          <DialogContentText
-            id="alert-dialog-description"
-            className="flex text-gray-800 leading-relaxed sm:min-w-[400px]"
-          >
-            <div>
-              Are you sure you want to unlink the facility{" "}
-              <strong>{facilityName}</strong> from user{" "}
-              <strong>{userName}</strong>? The user will lose access to the
-              facility.
-            </div>
-          </DialogContentText>
+    <ConfirmDialog
+      title={
+        <span>
+          {isHomeFacility ? "Clear Home Facility" : "Unlink User Facility"}
+        </span>
+      }
+      show={true}
+      action={isHomeFacility ? "Clear" : "Unlink"}
+      onClose={handleCancel}
+      onConfirm={handleSubmit}
+      disabled={disable}
+      variant="danger"
+    >
+      <div className="flex leading-relaxed text-gray-800">
+        <div>
+          Are you sure you want to{" "}
+          {isHomeFacility ? "clear the home facility" : "unlink the facility"}{" "}
+          <strong>{facilityName}</strong> from user <strong>{userName}</strong>{" "}
+          ?
+          <br />
+          {!isHomeFacility && "The user will lose access to the facility."}
         </div>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCancel} color="primary">
-          Cancel
-        </Button>
-        <button
-          onClick={handleSubmit}
-          className="font-medium btn btn-danger"
-          disabled={disable}
-        >
-          Delete
-        </button>
-      </DialogActions>
-    </Dialog>
+      </div>
+    </ConfirmDialog>
   );
 };
 

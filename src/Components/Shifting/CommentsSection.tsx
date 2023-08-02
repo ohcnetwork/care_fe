@@ -2,9 +2,11 @@ import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftComments, addShiftComments } from "../../Redux/actions";
-import { Button, CircularProgress } from "@material-ui/core";
+import CircularProgress from "../Common/components/CircularProgress";
 import * as Notification from "../../Utils/Notifications.js";
 import { formatDate } from "../../Utils/utils";
+import { useTranslation } from "react-i18next";
+import ButtonV2 from "../Common/components/ButtonV2";
 
 interface CommentSectionProps {
   id: string;
@@ -15,6 +17,8 @@ const CommentSection = (props: CommentSectionProps) => {
   const [comments, setComments] = useState(initialData);
   const [commentBox, setCommentBox] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation();
+
   const fetchData = useCallback(
     async (status: statusType = { aborted: false }) => {
       setIsLoading(true);
@@ -42,34 +46,31 @@ const CommentSection = (props: CommentSectionProps) => {
     };
     if (!/\S+/.test(commentBox)) {
       Notification.Error({
-        msg: "Comment Should Contain At Least 1 Character",
+        msg: t("comment_min_length"),
       });
       return;
     }
     dispatch(addShiftComments(props.id, payload)).then((_: any) => {
-      Notification.Success({ msg: "Comment added successfully" });
+      Notification.Success({ msg: t("comment_added_successfully") });
       fetchData();
       setCommentBox("");
     });
   };
 
   return (
-    <div className="w-full flex flex-col">
+    <div className="flex w-full flex-col">
       <textarea
         rows={3}
         value={commentBox}
         minLength={3}
-        placeholder="Type your comment"
-        className="mt-4 border border-gray-500 rounded-lg p-4 focus:ring-primary-500"
+        placeholder={t("type_your_comment")}
+        className="mt-4 rounded-lg border border-gray-500 p-4 focus:ring-primary-500"
         onChange={(e) => setCommentBox(e.target.value)}
       />
       <div className="flex w-full justify-end">
-        <Button
-          onClick={onSubmitComment}
-          className="border border-solid border-primary-600 hover:border-primary-700 text-primary-600 hover:bg-white capitalize my-2 text-sm"
-        >
-          Post Your Comment
-        </Button>
+        <ButtonV2 onClick={onSubmitComment} className="mt-4">
+          {t("post_your_comment")}
+        </ButtonV2>
       </div>
       <div className=" w-full">
         {isLoading ? (
@@ -78,7 +79,7 @@ const CommentSection = (props: CommentSectionProps) => {
           comments.map((comment: any) => (
             <div
               key={comment.id}
-              className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
+              className="mt-4 flex w-full flex-col rounded-lg border border-gray-300 bg-white p-4 text-gray-800"
             >
               <div className="flex  w-full ">
                 <p className="text-justify">{comment.comment}</p>
@@ -90,12 +91,13 @@ const CommentSection = (props: CommentSectionProps) => {
                     : "-"}
                 </span>
               </div>
-              <div className=" flex mr-auto bg-gray-100 border items-center rounded-md py-1 pl-2 pr-3">
-                <div className="flex justify-center items-center w-8 h-8 rounded-full bg-primary-700 uppercase text-white p-1">
-                  {comment.created_by_object?.first_name?.charAt(0) || "U"}
+              <div className=" mr-auto flex items-center rounded-md border bg-gray-100 py-1 pl-2 pr-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-700 p-1 uppercase text-white">
+                  {comment.created_by_object?.first_name?.charAt(0) ||
+                    t("unknown")}
                 </div>
-                <span className="text-gray-700 text-sm pl-2">
-                  {comment.created_by_object?.first_name || "Unknown"}{" "}
+                <span className="pl-2 text-sm text-gray-700">
+                  {comment.created_by_object?.first_name || t("unknown")}{" "}
                   {comment.created_by_object?.last_name}
                 </span>
               </div>

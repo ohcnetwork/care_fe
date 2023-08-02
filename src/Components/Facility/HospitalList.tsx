@@ -15,17 +15,17 @@ import {
 } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { FacilityModel } from "./models";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import FacilityFilter from "./FacilityFilter";
 import { useTranslation } from "react-i18next";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { FacilityCard } from "./FacilityCard";
 import ExportMenu from "../Common/Export";
+import CountBlock from "../../CAREUI/display/Count";
+import Page from "../Common/components/Page";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export const HospitalList = () => {
   const {
@@ -179,7 +179,7 @@ export const HospitalList = () => {
   } else if (data && data.length) {
     manageFacilities = (
       <>
-        <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-4">
+        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
           {facilityList}
         </div>
         <Pagination totalCount={totalCount} />
@@ -187,20 +187,20 @@ export const HospitalList = () => {
     );
   } else if (data && data.length === 0) {
     manageFacilities = hasFiltersApplied(qParams) ? (
-      <div className="w-full bg-white rounded-lg p-3">
-        <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+      <div className="w-full rounded-lg bg-white p-3">
+        <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-gray-600">
           {t("no_facilities")}
         </div>
       </div>
     ) : (
       <div>
         <div
-          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+          className="border-grey-500 mt-4 cursor-pointer whitespace-nowrap rounded-md border bg-white p-16 text-center text-sm font-semibold shadow hover:bg-gray-300"
           onClick={() => navigate("/facility/create")}
         >
           <i className="fas fa-plus text-3xl"></i>
           <div className="mt-2 text-xl">{t("create_facility")}</div>
-          <div className="text-xs mt-1 text-red-700">
+          <div className="mt-1 text-xs text-red-700">
             {t("no_duplicate_facility")}
           </div>
         </div>
@@ -209,9 +209,11 @@ export const HospitalList = () => {
   }
 
   return (
-    <div className="px-6">
-      <div className="flex justify-between items-center">
-        <PageTitle title={t("Facilities")} breadcrumbs={false} hideBack />
+    <Page
+      title={t("Facilities")}
+      breadcrumbs={false}
+      hideBack
+      options={
         <ExportMenu
           exportItems={[
             {
@@ -236,82 +238,27 @@ export const HospitalList = () => {
             },
           ]}
         />
-      </div>
-      <div className="lg:flex gap-2 mt-4">
-        <div className="bg-white overflow-hidden shadow rounded-lg md:mr-2 min-w-fit flex-1">
-          <div className="px-4 py-5 sm:p-6">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Facilities
-              </dt>
-              {/* Show spinner until cound is fetched from server */}
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
-                </dd>
-              ) : (
-                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
-          </div>
-        </div>
-        <div className="flex my-4 gap-2 flex-col md:flex-row justify-between flex-grow">
+      }
+    >
+      <div className="mt-4 gap-2 lg:flex">
+        <CountBlock
+          text="Total Facilities"
+          count={totalCount}
+          loading={isLoading}
+          icon={"hospital"}
+        />
+        <div className="my-4 flex grow flex-col justify-between gap-2 sm:flex-row">
           <SearchInput
             name="search"
             value={qParams.search}
             onChange={(e) => updateQuery({ [e.name]: e.value })}
             placeholder={t("facility_search_placeholder")}
           />
-
-          <div className="flex items-start mb-2 w-full md:w-auto">
-            <button
-              className="btn btn-primary-ghost w-full md:w-auto"
-              onClick={() => advancedFilter.setShow(true)}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="fill-current w-4 h-4 mr-2"
-              >
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12">
-                  {" "}
-                </line>
-                <line x1="8" y1="18" x2="21" y2="18">
-                  {" "}
-                </line>
-                <line x1="3" y1="6" x2="3.01" y2="6">
-                  {" "}
-                </line>
-                <line x1="3" y1="12" x2="3.01" y2="12">
-                  {" "}
-                </line>
-                <line x1="3" y1="18" x2="3.01" y2="18">
-                  {" "}
-                </line>
-              </svg>
-              <span>{t("advanced_filters")}</span>
-            </button>
-          </div>
+          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
         </div>
       </div>
 
-      <div>
-        <SlideOver {...advancedFilter}>
-          <div className="bg-white min-h-screen p-4">
-            <FacilityFilter {...advancedFilter} />
-          </div>
-        </SlideOver>
-      </div>
+      <FacilityFilter {...advancedFilter} key={window.location.search} />
       <FilterBadges
         badges={({ badge, value, kasp }) => [
           badge("Facility/District Name", "search"),
@@ -329,6 +276,6 @@ export const HospitalList = () => {
       <div className="mt-4 pb-4">
         <div>{manageFacilities}</div>
       </div>
-    </div>
+    </Page>
   );
 };

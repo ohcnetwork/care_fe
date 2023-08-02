@@ -5,21 +5,24 @@ import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserDetails,
+  getUserListSkills,
   partialUpdateUser,
   updateUserPassword,
 } from "../../Redux/actions";
-import { ErrorHelperText } from "../Common/HelperInputFields";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
-import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { handleSignOut } from "../../Utils/utils";
+import { classNames, handleSignOut } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import moment from "moment";
+import { SkillModel, SkillObjectModel } from "../Users/models";
+import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -31,6 +34,9 @@ type EditForm = {
   email: string;
   phoneNumber: string;
   altPhoneNumber: string;
+  doctor_qualification: string | undefined;
+  doctor_experience_commenced_on: number | string | undefined;
+  doctor_medical_council_registration: string | undefined;
 };
 type State = {
   form: EditForm;
@@ -48,6 +54,9 @@ const initForm: EditForm = {
   email: "",
   phoneNumber: "",
   altPhoneNumber: "",
+  doctor_qualification: undefined,
+  doctor_experience_commenced_on: undefined,
+  doctor_medical_council_registration: undefined,
 };
 
 const initError: EditForm = Object.assign(
@@ -79,6 +88,10 @@ const editFormReducer = (state: State, action: Action) => {
 export default function UserProfile() {
   const [states, dispatch] = useReducer(editFormReducer, initialState);
   const reduxDispatch: any = useDispatch();
+  const [updateStatus, setUpdateStatus] = useState({
+    isChecking: false,
+    isUpdateAvailable: false,
+  });
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -116,8 +129,12 @@ export default function UserProfile() {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatchAction(getUserDetails(username));
+      const resSkills = await dispatchAction(getUserListSkills({ username }));
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res && res.data && resSkills) {
+          res.data.skills = resSkills.data.results.map(
+            (skill: SkillModel) => skill.skill_object
+          );
           setDetails(res.data);
           const formData: EditForm = {
             firstName: res.data.first_name,
@@ -127,6 +144,13 @@ export default function UserProfile() {
             email: res.data.email,
             phoneNumber: res.data.phone_number,
             altPhoneNumber: res.data.alt_phone_number,
+            doctor_qualification: res.data.doctor_qualification,
+            doctor_experience_commenced_on: moment().diff(
+              moment(res.data.doctor_experience_commenced_on),
+              "years"
+            ),
+            doctor_medical_council_registration:
+              res.data.doctor_medical_council_registration,
           };
           dispatch({
             type: "set_form",
@@ -211,8 +235,19 @@ export default function UserProfile() {
           }
           return;
         case "email":
-          if (states.form[field] && !validateEmailAddress(states.form[field])) {
+          if (!states.form[field]) {
+            errors[field] = "This field is required";
+            invalidForm = true;
+          } else if (!validateEmailAddress(states.form[field])) {
             errors[field] = "Enter a valid email address";
+            invalidForm = true;
+          }
+          return;
+        case "doctor_qualification":
+        case "doctor_experience_commenced_on":
+        case "doctor_medical_council_registration":
+          if (details.user_type === "Doctor" && !states.form[field]) {
+            errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
@@ -222,16 +257,21 @@ export default function UserProfile() {
     return !invalidForm;
   };
 
-  const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFieldChange = (event: FieldChangeEvent<unknown>) => {
     dispatch({
       type: "set_form",
-      form: { ...states.form, [e.target.name]: e.target.value },
+      form: { ...states.form, [event.name]: event.value },
     });
   };
 
-  const handleValueChange = (phoneNo: string, name: string) => {
-    const form: EditForm = { ...states.form, [name]: phoneNo };
-    dispatch({ type: "set_form", form });
+  const fieldProps = (name: string) => {
+    return {
+      name,
+      id: name,
+      value: (states.form as any)[name],
+      onChange: handleFieldChange,
+      error: (states.errors as any)[name],
+    };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -252,6 +292,20 @@ export default function UserProfile() {
           ) || "",
         gender: states.form.gender,
         age: states.form.age,
+        doctor_qualification:
+          details.user_type === "Doctor"
+            ? states.form.doctor_qualification
+            : undefined,
+        doctor_experience_commenced_on:
+          details.user_type === "Doctor"
+            ? moment()
+                .subtract(states.form.doctor_experience_commenced_on, "years")
+                .format("YYYY-MM-DD")
+            : undefined,
+        doctor_medical_council_registration:
+          details.user_type === "Doctor"
+            ? states.form.doctor_medical_council_registration
+            : undefined,
       };
       const res = await dispatchAction(partialUpdateUser(username, data));
       if (res && res.data) {
@@ -277,6 +331,25 @@ export default function UserProfile() {
   if (isLoading) {
     return <Loading />;
   }
+
+  const checkUpdates = async () => {
+    setUpdateStatus({ ...updateStatus, isChecking: true });
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    if ((await checkForUpdate()) != null) {
+      setUpdateStatus({
+        isUpdateAvailable: true,
+        isChecking: false,
+      });
+    } else {
+      setUpdateStatus({
+        isUpdateAvailable: false,
+        isChecking: false,
+      });
+      Notification.Success({
+        msg: "No update available",
+      });
+    }
+  };
 
   const changePassword = (e: any) => {
     e.preventDefault();
@@ -317,14 +390,14 @@ export default function UserProfile() {
   };
   return (
     <div>
-      <div className="lg:p-20 p-10">
+      <div className="p-10 lg:p-20">
         <div className="lg:grid lg:grid-cols-3 lg:gap-6">
           <div className="lg:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
                 Personal Information
               </h3>
-              <p className="mt-1 text-sm leading-5 text-gray-600 mb-1">
+              <p className="my-1 text-sm leading-5 text-gray-600">
                 Local Body, District and State are Non Editable Settings.
               </p>
               <div className="flex flex-col gap-2">
@@ -338,20 +411,20 @@ export default function UserProfile() {
               </div>
             </div>
           </div>
-          <div className="mt-5 lg:mt-0 lg:col-span-2">
+          <div className="mt-5 lg:col-span-2 lg:mt-0">
             {!showEdit && (
-              <div className="px-4 py-5 sm:px-6 bg-white shadow overflow-hidden  sm:rounded-lg m-2 rounded-lg">
-                <dl className="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2">
-                  <div className="sm:col-span-1 my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+              <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5  shadow sm:rounded-lg sm:px-6">
+                <dl className="col-gap-4 row-gap-8 grid grid-cols-1 sm:grid-cols-2">
+                  <div className="my-2 sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Username
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.username || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Contact No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
@@ -359,81 +432,81 @@ export default function UserProfile() {
                     </dd>
                   </div>
 
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Whatsapp No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.alt_phone_number || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Email address
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.email || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       First Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.first_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Last Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.last_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Age
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.age || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Access Level
                     </dt>
-                    <dd className="mt-1 badge badge-pill bg-primary-500 text-sm text-white">
+                    <dd className="badge badge-pill mt-1 bg-primary-500 text-sm text-white">
                       <i className="fa-solid fa-user-check mr-1"></i>{" "}
                       {details.user_type || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Gender
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.gender || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Local Body
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.local_body_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       District
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.district_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       State
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
@@ -441,168 +514,172 @@ export default function UserProfile() {
                     </dd>
                   </div>
                 </dl>
+                <div className="my-2  sm:col-span-1">
+                  <dt className="text-sm font-medium leading-5 text-black">
+                    Skills
+                  </dt>
+                  <dd className="mt-1 text-sm leading-5 text-gray-900">
+                    <div className="flex flex-wrap gap-2">
+                      {details.skills && details.skills.length
+                        ? details.skills?.map((skill: SkillObjectModel) => {
+                            return (
+                              <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
+                                <p className="py-1.5">{skill.name}</p>
+                              </span>
+                            );
+                          })
+                        : "-"}
+                    </div>
+                  </dd>
+                </div>
               </div>
             )}
 
             {showEdit && (
-              <div>
+              <div className="space-y-4">
                 <form action="#" method="POST">
-                  <div className="shadow overflow-hidden sm:rounded-md">
-                    <div className="px-4 pt-5 bg-white">
+                  <div className="shadow sm:rounded-md">
+                    <div className="bg-white px-4 pt-5">
                       <div className="grid grid-cols-6 gap-4">
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
-                            name="firstName"
-                            label="First Name"
-                            value={states.form.firstName}
-                            onChange={handleChangeInput}
-                            error={states.errors.firstName}
-                            required
-                          />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
-                            name="lastName"
-                            label="Last name"
-                            value={states.form.lastName}
-                            onChange={handleChangeInput}
-                            error={states.errors.lastName}
-                            required
-                          />
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
-                            name="age"
-                            label="Age"
-                            value={states.form.age}
-                            onChange={handleChangeInput}
-                            error={states.errors.age}
-                            required
-                          />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3">
-                          <FieldLabel className="text-sm">Gender</FieldLabel>
-                          <SelectMenuV2
-                            required
-                            placeholder="Select"
-                            optionLabel={(o) => o.text}
-                            optionValue={(o) => o.text}
-                            optionIcon={(o) => (
-                              <i className="text-base">{o.icon}</i>
-                            )}
-                            value={states.form.gender}
-                            options={GENDER_TYPES}
-                            onChange={(v) => {
-                              dispatch({
-                                type: "set_form",
-                                form: {
-                                  ...states.form,
-                                  gender: v,
-                                },
-                              });
-                            }}
-                          />
-                          <ErrorHelperText error={states.errors.gender} />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3">
-                          <PhoneNumberFormField
-                            label="Phone Number"
-                            required
-                            name="phoneNumber"
-                            placeholder="Phone Number"
-                            value={states.form.phoneNumber}
-                            onChange={(event) =>
-                              handleValueChange(event.value, event.name)
-                            }
-                            error={states.errors.phoneNumber}
-                          />
-                        </div>
-
-                        <div className="col-span-6 sm:col-span-3">
-                          <PhoneNumberFormField
-                            name="altPhoneNumber"
-                            label="Whatsapp Number"
-                            placeholder="WhatsApp Number"
-                            value={states.form.altPhoneNumber}
-                            onChange={(event) =>
-                              handleValueChange(event.value, event.name)
-                            }
-                            error={states.errors.altPhoneNumber}
-                          />
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
-                            name="email"
-                            label="Email"
-                            value={states.form.email}
-                            onChange={handleChangeInput}
-                            error={states.errors.email}
-                          />
-                        </div>
+                        <TextFormField
+                          {...fieldProps("firstName")}
+                          required
+                          label="First Name"
+                          className="col-span-6 sm:col-span-3"
+                        />
+                        <TextFormField
+                          {...fieldProps("lastName")}
+                          required
+                          label="Last name"
+                          className="col-span-6 sm:col-span-3"
+                        />
+                        <TextFormField
+                          {...fieldProps("age")}
+                          required
+                          label="Age"
+                          className="col-span-6 sm:col-span-3"
+                          type="number"
+                          min={1}
+                        />
+                        <SelectFormField
+                          {...fieldProps("gender")}
+                          label="Gender"
+                          className="col-span-6 sm:col-span-3"
+                          required
+                          optionLabel={(o) => o.text}
+                          optionValue={(o) => o.text}
+                          optionIcon={(o) => (
+                            <i className="text-base">{o.icon}</i>
+                          )}
+                          options={GENDER_TYPES}
+                        />
+                        <PhoneNumberFormField
+                          {...fieldProps("phoneNumber")}
+                          label="Phone Number"
+                          className="col-span-6 sm:col-span-3"
+                          required
+                          placeholder="Phone Number"
+                        />
+                        <PhoneNumberFormField
+                          {...fieldProps("altPhoneNumber")}
+                          label="Whatsapp Number"
+                          className="col-span-6 sm:col-span-3"
+                          placeholder="WhatsApp Number"
+                        />
+                        <TextFormField
+                          {...fieldProps("email")}
+                          label="Email"
+                          className="col-span-6 sm:col-span-3"
+                          required
+                          type="email"
+                        />
+                        {details.user_type === "Doctor" && (
+                          <>
+                            <TextFormField
+                              {...fieldProps("doctor_qualification")}
+                              required
+                              className="col-span-6 sm:col-span-3"
+                              label="Qualification"
+                              placeholder="Doctor's Qualification"
+                            />
+                            <TextFormField
+                              {...fieldProps("doctor_experience_commenced_on")}
+                              required
+                              className="col-span-6 sm:col-span-3"
+                              type="number"
+                              min={0}
+                              label="Years of experience"
+                              placeholder="Years of experience of the Doctor"
+                            />
+                            <TextFormField
+                              {...fieldProps(
+                                "doctor_medical_council_registration"
+                              )}
+                              required
+                              className="col-span-6 sm:col-span-3"
+                              label="Medical Council Registration"
+                              placeholder="Doctor's Medical Council Registration"
+                            />
+                          </>
+                        )}
                       </div>
                     </div>
-                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
+                    <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                       <Submit onClick={handleSubmit} label="Update" />
                     </div>
                   </div>
                 </form>
                 <form action="#" method="POST">
-                  <div className="shadow overflow-hidden sm:rounded-md">
-                    <div className="px-4 pt-5 bg-white">
+                  <div className="overflow-hidden shadow sm:rounded-md">
+                    <div className="bg-white px-4 pt-5">
                       <div className="grid grid-cols-6 gap-4">
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
-                            name="old_password"
-                            label="Current Password"
-                            type="password"
-                            value={changePasswordForm.old_password}
-                            onChange={(e) =>
-                              setChangePasswordForm({
-                                ...changePasswordForm,
-                                old_password: e.target.value,
-                              })
-                            }
-                            error={changePasswordErrors.old_password}
-                            required
-                          />
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
-                            name="new_password_1"
-                            label="New Password"
-                            type="password"
-                            value={changePasswordForm.new_password_1}
-                            onChange={(e) =>
-                              setChangePasswordForm({
-                                ...changePasswordForm,
-                                new_password_1: e.target.value,
-                              })
-                            }
-                            error=""
-                            required
-                          />
-                        </div>
-                        <div className="col-span-6 sm:col-span-3">
-                          <TextInputFieldV2
-                            name="new_password_2"
-                            label="New Password Confirmation"
-                            type="password"
-                            value={changePasswordForm.new_password_2}
-                            onChange={(e) =>
-                              setChangePasswordForm({
-                                ...changePasswordForm,
-                                new_password_2: e.target.value,
-                              })
-                            }
-                            error={changePasswordErrors.password_confirmation}
-                          />
-                        </div>
+                        <TextFormField
+                          name="old_password"
+                          label="Current Password"
+                          className="col-span-6 sm:col-span-3"
+                          type="password"
+                          value={changePasswordForm.old_password}
+                          onChange={(e) =>
+                            setChangePasswordForm({
+                              ...changePasswordForm,
+                              old_password: e.value,
+                            })
+                          }
+                          error={changePasswordErrors.old_password}
+                          required
+                        />
+                        <TextFormField
+                          name="new_password_1"
+                          label="New Password"
+                          type="password"
+                          value={changePasswordForm.new_password_1}
+                          className="col-span-6 sm:col-span-3"
+                          onChange={(e) =>
+                            setChangePasswordForm({
+                              ...changePasswordForm,
+                              new_password_1: e.value,
+                            })
+                          }
+                          error=""
+                          required
+                        />
+                        <TextFormField
+                          name="new_password_2"
+                          label="New Password Confirmation"
+                          className="col-span-6 sm:col-span-3"
+                          type="password"
+                          value={changePasswordForm.new_password_2}
+                          onChange={(e) =>
+                            setChangePasswordForm({
+                              ...changePasswordForm,
+                              new_password_2: e.value,
+                            })
+                          }
+                          error={changePasswordErrors.password_confirmation}
+                        />
                       </div>
                     </div>
-                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
+                    <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                       <Submit
                         onClick={changePassword}
                         label="Change Password"
@@ -615,7 +692,7 @@ export default function UserProfile() {
           </div>
         </div>
 
-        <div className="md:grid md:grid-cols-3 md:gap-6 mt-6 mb-8">
+        <div className="mb-8 mt-6 md:grid md:grid-cols-3 md:gap-6">
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
@@ -626,8 +703,51 @@ export default function UserProfile() {
               </p>
             </div>
           </div>
-          <div className="mt-5 md:mt-0 md:col-span-2">
-            <LanguageSelector className="bg-white w-full" />
+          <div className="mt-5 md:col-span-2 md:mt-0">
+            <LanguageSelector className="w-full bg-white" />
+          </div>
+        </div>
+        <div className="mb-8 mt-6 md:grid md:grid-cols-3 md:gap-6">
+          <div className="md:col-span-1">
+            <div className="px-4 sm:px-0">
+              <h3 className="text-lg font-medium leading-6 text-gray-900">
+                Software Update
+              </h3>
+              <p className="mt-1 text-sm leading-5 text-gray-600">
+                Check for an available update
+              </p>
+            </div>
+          </div>
+          {updateStatus.isUpdateAvailable && (
+            <UpdatableApp silentlyAutoUpdate={false}>
+              <ButtonV2 disabled={true}>
+                <div className="flex items-center gap-4">
+                  <CareIcon className="care-l-exclamation text-2xl" />
+                  Update available
+                </div>
+              </ButtonV2>
+            </UpdatableApp>
+          )}
+          <div className="mt-5 md:col-span-2 md:mt-0">
+            {!updateStatus.isUpdateAvailable && (
+              <ButtonV2
+                disabled={updateStatus.isChecking}
+                onClick={checkUpdates}
+              >
+                {" "}
+                <div className="flex items-center gap-4">
+                  <CareIcon
+                    className={classNames(
+                      "care-l-sync text-2xl",
+                      updateStatus.isChecking && "animate-spin"
+                    )}
+                  />
+                  {updateStatus.isChecking
+                    ? "Checking for update"
+                    : "Check for update"}
+                </div>
+              </ButtonV2>
+            )}
           </div>
         </div>
       </div>

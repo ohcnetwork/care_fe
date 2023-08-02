@@ -1,86 +1,36 @@
-import React, { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import {
-  getInvestigationSessions,
-  getInvestigation,
-} from "../../../Redux/actions";
 import { navigate } from "raviger";
 import ReportTable from "./Reports/ReportTable";
-import { InvestigationResponse } from "./Reports/types";
 import loadable from "@loadable/component";
 import { formatDate } from "../../../Utils/utils";
+import { InvestigationSessionType } from "./investigationsTab";
 const Loading = loadable(() => import("../../Common/Loading"));
 
-interface InvestigationSessionType {
-  session_external_id: string;
-  session_created_date: string;
-}
-
-export default function ViewInvestigations(props: any) {
-  const [isLoading, setIsLoading] = useState(false);
-  const { facilityId, patientId, consultationId }: any = props;
-  const dispatchAction: any = useDispatch();
-  const [investigations, setInvestigations] = useState<InvestigationResponse>(
-    []
-  );
-  const [investigationSessions, setInvestigationSessions] = useState<
-    InvestigationSessionType[]
-  >([]);
-
-  const fetchInvestigations = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(getInvestigation({}, consultationId));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setInvestigations(res.data.results);
-        }
-        setIsLoading(false);
-      }
-    },
-    [dispatchAction, consultationId]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchInvestigations(status);
-    },
-    [fetchInvestigations]
-  );
-
-  const fetchInvestigationSessions = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(
-        getInvestigationSessions({}, consultationId)
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setInvestigationSessions(res.data.reverse());
-        }
-        setIsLoading(false);
-      }
-    },
-    [dispatchAction, consultationId]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchInvestigationSessions(status);
-    },
-    [fetchInvestigationSessions]
-  );
+export default function ViewInvestigations(props: {
+  isLoading: boolean;
+  investigations: any;
+  investigationSessions: InvestigationSessionType[];
+  facilityId: string;
+  patientId: string;
+  consultationId: string;
+}) {
+  const {
+    isLoading,
+    investigations,
+    investigationSessions,
+    facilityId,
+    patientId,
+    consultationId,
+  } = props;
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="mx-auto max-w-7xl">
       {isLoading ? (
         <Loading />
       ) : (
         <div className="mt-4 space-y-2 ">
           {investigations.length > 0 && (
             <div>
-              <h4 className="text-gray-700 -mb-14">Summary</h4>
+              <h4 className="-mb-14 text-gray-700">Summary</h4>
               <ReportTable
                 investigationData={investigations}
                 hidePrint={true}
@@ -88,7 +38,7 @@ export default function ViewInvestigations(props: any) {
             </div>
           )}
           {investigationSessions.length === 0 && (
-            <div className="text-lg h-full text-center mt-5 text-gray-500 text-semibold bg-white py-4 rounded-lg shadow">
+            <div className="text-semibold mt-5 h-full rounded-lg bg-white py-4 text-center text-lg text-gray-500 shadow">
               No Investigation Reports Found
             </div>
           )}
@@ -96,7 +46,7 @@ export default function ViewInvestigations(props: any) {
             return (
               <div
                 key={investigationSession.session_external_id}
-                className="flex justify-between items-center bg-white hover:bg-gray-200 cursor-pointer p-4 border rounded-lg shadow"
+                className="flex cursor-pointer items-center justify-between rounded-lg border bg-white p-4 shadow hover:bg-gray-200"
               >
                 <div>
                   {formatDate(investigationSession.session_created_date)}

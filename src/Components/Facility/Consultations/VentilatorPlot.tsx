@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
@@ -6,7 +6,9 @@ import { LinePlot } from "./components/LinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 import { formatDate } from "../../../Utils/utils";
+import BinaryChronologicalChart from "./components/BinaryChronologicalChart";
 
+/*
 interface ModalityType {
   id: number;
   type: string;
@@ -24,18 +26,17 @@ const modality: Array<ModalityType> = [
     normal_rate_high: 15,
   },
 ];
+*/
 
 export const VentilatorPlot = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
@@ -50,6 +51,7 @@ export const VentilatorPlot = (props: any) => {
               "ventilator_fi02",
               "ventilator_spo2",
               "etco2",
+              "bilateral_air_entry",
               "ventilator_oxygen_modality_oxygen_rate",
               "ventilator_oxygen_modality_flow_rate",
             ],
@@ -59,10 +61,10 @@ export const VentilatorPlot = (props: any) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
+          console.log(res);
           setResults(res.data.results);
           setTotalCount(res.data.count);
         }
-        setIsLoading(false);
       }
     },
     [consultationId, dispatch, currentPage]
@@ -75,7 +77,7 @@ export const VentilatorPlot = (props: any) => {
     [currentPage]
   );
 
-  const handlePagination = (page: number, limit: number) => {
+  const handlePagination = (page: number) => {
     setCurrentPage(page);
   };
 
@@ -89,10 +91,23 @@ export const VentilatorPlot = (props: any) => {
       .reverse();
   };
 
+  const bilateral = Object.values(results)
+    .map((p: any, i) => {
+      return {
+        value: p.bilateral_air_entry,
+        timestamp: Object.keys(results)[i],
+      };
+    })
+    .filter((p) => p.value !== null);
+
+  useEffect(() => {
+    console.log(bilateral);
+  }, [bilateral]);
+
   return (
     <div>
-      <div className="grid grid-row-1 md:grid-cols-2 gap-4">
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+      <div className="grid-row-1 grid gap-4 md:grid-cols-2">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="PIP"
             name="PIP"
@@ -102,7 +117,7 @@ export const VentilatorPlot = (props: any) => {
             high={30}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="MAP"
             name="MAP"
@@ -112,7 +127,7 @@ export const VentilatorPlot = (props: any) => {
             high={25}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="Resp Rate"
             name="resp"
@@ -122,7 +137,7 @@ export const VentilatorPlot = (props: any) => {
             high={20}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="Pressure Support"
             name="Pressure Support"
@@ -132,7 +147,7 @@ export const VentilatorPlot = (props: any) => {
             high={15}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="Tidal Volume"
             name="Tidal Volume"
@@ -140,7 +155,7 @@ export const VentilatorPlot = (props: any) => {
             yData={yAxisData("ventilator_tidal_volume")}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="PEEP"
             name="PEEP"
@@ -150,7 +165,7 @@ export const VentilatorPlot = (props: any) => {
             high={10}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="FiO2"
             name="FiO2"
@@ -160,7 +175,7 @@ export const VentilatorPlot = (props: any) => {
             high={60}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="SpO2"
             name="SpO2"
@@ -170,7 +185,7 @@ export const VentilatorPlot = (props: any) => {
             high={100}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="EtCo2"
             name="EtCo2"
@@ -180,7 +195,15 @@ export const VentilatorPlot = (props: any) => {
             high={45}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
+          <BinaryChronologicalChart
+            title="Bilateral Air Entry"
+            data={bilateral}
+            trueName="Yes"
+            falseName="No"
+          />
+        </div>
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="Oxygen Flow Rate"
             name="Oxygen Flow Rate"
@@ -188,7 +211,7 @@ export const VentilatorPlot = (props: any) => {
             yData={yAxisData("ventilator_oxygen_modality_oxygen_rate")}
           />
         </div>
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="Flow Rate"
             name="Flow Rate"

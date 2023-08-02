@@ -1,13 +1,22 @@
 import * as React from "react";
 import useRecorder from "./useRecorder";
-import { Button } from "@material-ui/core";
-import MicIcon from "@material-ui/icons/Mic";
-import MicOffIcon from "@material-ui/icons/MicOff";
 import { useEffect, useState } from "react";
+import ButtonV2 from "../Components/Common/components/ButtonV2";
+import CareIcon from "../CAREUI/icons/CareIcon";
+import { NonReadOnlyUsers } from "./AuthorizeFor";
+import { useTranslation } from "react-i18next";
 export const VoiceRecorder = (props: any) => {
-  const { createAudioBlob } = props;
-  const [audioURL, isRecording, startRecording, stopRecording, newBlob] =
-    useRecorder();
+  const { t } = useTranslation();
+  const { createAudioBlob, confirmAudioBlobExists, reset, setResetRecording } =
+    props;
+  const [
+    audioURL,
+    isRecording,
+    startRecording,
+    stopRecording,
+    newBlob,
+    resetRecording,
+  ] = useRecorder();
   const [time, setTime] = useState(0);
   createAudioBlob(newBlob);
   useEffect(() => {
@@ -20,32 +29,32 @@ export const VoiceRecorder = (props: any) => {
       clearInterval(interval);
       setTime(0);
     }
+    if (reset) {
+      resetRecording();
+      setResetRecording(false);
+    }
     return () => clearInterval(interval);
-  }, [isRecording]);
+  }, [isRecording, reset, setResetRecording, resetRecording]);
 
   return (
     <div>
-      <div className="text-xs">
-        Please allow browser permission before you start speaking
-      </div>
-      <div className="mt-2">
+      <div>
         {isRecording ? (
           <>
-            <div className="space-x-2 flex">
+            <div className="flex space-x-2">
               <div className="bg-gray-100 p-2 text-primary-700">
-                <i className="fas fa-microphone-alt animate-pulse mr-2"></i>
-                Recording...
+                <CareIcon className="care-l-record-audio mr-2 animate-pulse" />
+                {t("recording") + "..."}
               </div>
-              <Button
-                color="primary"
-                variant="contained"
-                style={{ marginLeft: "auto" }}
-                startIcon={<MicOffIcon />}
-                onClick={stopRecording}
-                disabled={!isRecording}
+              <ButtonV2
+                onClick={() => {
+                  stopRecording();
+                  confirmAudioBlobExists();
+                }}
               >
-                Stop
-              </Button>
+                <CareIcon className="care-l-microphone-slash text-lg" />
+                {t("stop")}
+              </ButtonV2>
             </div>
             <div className="mx-3">
               <span>{("0" + Math.floor((time / 60000) % 60)).slice(-2)}:</span>
@@ -53,22 +62,24 @@ export const VoiceRecorder = (props: any) => {
             </div>
           </>
         ) : (
-          <Button
-            color="primary"
-            variant="contained"
-            style={{ marginLeft: "auto" }}
-            startIcon={<MicIcon />}
-            onClick={startRecording}
-            disabled={isRecording}
-          >
-            {audioURL ? "Re-Record" : "Record"}
-          </Button>
+          <div>
+            {!audioURL && (
+              <ButtonV2
+                onClick={startRecording}
+                authorizeFor={NonReadOnlyUsers}
+                className="w-full md:w-fit"
+              >
+                <CareIcon className="care-l-microphone text-lg" />
+                {t("record")}
+              </ButtonV2>
+            )}
+          </div>
         )}
       </div>
       {audioURL && (
         <div className="my-4">
           <audio
-            className="max-h-full max-w-full m-auto object-contain"
+            className="m-auto max-h-full max-w-full object-contain"
             src={audioURL}
             controls
           />{" "}

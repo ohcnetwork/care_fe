@@ -1,6 +1,6 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   getNotifications,
   markNotificationAsRead,
@@ -8,15 +8,12 @@ import {
   updateUserPnconfig,
   getPublicKey,
 } from "../../Redux/actions";
-import { useSelector } from "react-redux";
-import { CircularProgress } from "@material-ui/core";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
-import { classNames } from "../../Utils/utils";
+import { classNames, formatDate } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import * as Sentry from "@sentry/browser";
-import { formatDate } from "../../Utils/utils";
 import {
   ShrinkedSidebarItem,
   SidebarItem,
@@ -24,6 +21,8 @@ import {
 import SlideOver from "../../CAREUI/interactive/SlideOver";
 import ButtonV2 from "../Common/components/ButtonV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
+import { useTranslation } from "react-i18next";
+import CircularProgress from "../Common/components/CircularProgress";
 
 const RESULT_LIMIT = 14;
 
@@ -41,6 +40,7 @@ const NotificationTile = ({
   const dispatch: any = useDispatch();
   const [result, setResult] = useState(notification);
   const [isMarkingAsRead, setIsMarkingAsRead] = useState(false);
+  const { t } = useTranslation();
 
   const handleMarkAsRead = async () => {
     setIsMarkingAsRead(true);
@@ -81,11 +81,11 @@ const NotificationTile = ({
       onClick={() => {
         handleMarkAsRead();
         navigate(resultUrl(result.event, result.caused_objects));
-        onClickCB && onClickCB();
+        onClickCB?.();
         setShowNotifications(false);
       }}
       className={classNames(
-        "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-200 rounded md:rounded-lg cursor-pointer",
+        "relative cursor-pointer rounded px-4 py-5 transition duration-200 ease-in-out hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg lg:px-8",
         result.read_at && "text-gray-500"
       )}
     >
@@ -97,15 +97,15 @@ const NotificationTile = ({
           <i className={`${getNotificationIcon(result.event)} fa-2x `} />
         </div>
       </div>
-      <div className="text-sm py-1">{result.message}</div>
+      <div className="py-1 text-sm">{result.message}</div>
       <div className="flex flex-col justify-end gap-2">
-        <div className="text-xs text-right py-1 text-secondary-700">
+        <div className="py-1 text-right text-xs text-secondary-700">
           {formatDate(result.created_date)}
         </div>
         <div className="flex justify-end gap-2">
           <ButtonV2
             className={classNames(
-              "font-semibold px-2 py-1 bg-white hover:bg-secondary-300",
+              "bg-white px-2 py-1 font-semibold hover:bg-secondary-300",
               result.read_at && "invisible"
             )}
             variant="secondary"
@@ -124,15 +124,15 @@ const NotificationTile = ({
                   : "care-l-envelope-check"
               }
             />
-            <span className="text-xs">Mark as Read</span>
+            <span className="text-xs">{t("mark_as_read")}</span>
           </ButtonV2>
           <ButtonV2
             border
             ghost
-            className="font-semibold px-2 py-1 bg-white hover:bg-secondary-300 flex-shrink-0"
+            className="shrink-0 bg-white px-2 py-1 font-semibold hover:bg-secondary-300"
           >
             <CareIcon className="care-l-envelope-open" />
-            <span className="text-xs">Open</span>
+            <span className="text-xs">{t("open")}</span>
           </ButtonV2>
         </div>
       </div>
@@ -143,11 +143,13 @@ const NotificationTile = ({
 interface NotificationsListProps {
   shrinked: boolean;
   onClickCB?: () => void;
+  handleOverflow: any;
 }
 
 export default function NotificationsList({
   shrinked,
   onClickCB,
+  handleOverflow,
 }: NotificationsListProps) {
   const rootState: any = useSelector((rootState) => rootState);
   const { currentUser } = rootState;
@@ -164,6 +166,7 @@ export default function NotificationsList({
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -188,7 +191,6 @@ export default function NotificationsList({
         setIsSubscribed("SubscribedOnAnotherDevice");
       }
     } catch (error) {
-      console.error(`Service worker error...Details: ${error}`);
       Sentry.captureException(error);
     }
   };
@@ -208,21 +210,21 @@ export default function NotificationsList({
       return (
         <>
           <CareIcon className="care-l-bell" />
-          <span className="text-xs">Subscribe</span>
+          <span className="text-xs">{t("subscribe")}</span>
         </>
       );
     } else if (status === "SubscribedOnAnotherDevice") {
       return (
         <>
           <CareIcon className="care-l-bell" />
-          <span className="text-xs">Subscribe on this device</span>
+          <span className="text-xs">{t("subscribe_on_this_device")}</span>
         </>
       );
     } else {
       return (
         <>
           <CareIcon className="care-l-bell-slash" />
-          <span className="text-xs">Unsubscribe</span>
+          <span className="text-xs">{t("unsubscribe")}</span>
         </>
       );
     }
@@ -254,16 +256,15 @@ export default function NotificationsList({
               })
               .catch(function (_e) {
                 Error({
-                  msg: "Unsubscribe failed.",
+                  msg: t("unsubscribe_failed"),
                 });
               });
           })
           .catch(function (_e) {
-            Error({ msg: "Subscription Error" });
+            Error({ msg: t("subscription_error") });
           });
       })
       .catch(function (_e) {
-        console.error(`Service worker error...Details: ${_e}`);
         Sentry.captureException(_e);
       });
   };
@@ -302,8 +303,6 @@ export default function NotificationsList({
 
     if (res.status >= 200 && res.status <= 300) {
       setIsSubscribed("SubscribedOnThisDevice");
-    } else {
-      console.log("Error saving web push info.");
     }
     setIsSubscribing(false);
   }
@@ -347,10 +346,10 @@ export default function NotificationsList({
   if (!offset && isLoading) {
     manageResults = (
       <div className="flex items-center justify-center">
-        <CircularProgress color="primary" />
+        <CircularProgress />
       </div>
     );
-  } else if (data && data.length) {
+  } else if (data?.length) {
     manageResults = (
       <>
         {data.map((result: any) => (
@@ -363,11 +362,11 @@ export default function NotificationsList({
         ))}
         {isLoading && (
           <div className="flex items-center justify-center">
-            <CircularProgress color="primary" />
+            <CircularProgress />
           </div>
         )}
         {totalCount > RESULT_LIMIT && offset < totalCount - RESULT_LIMIT && (
-          <div className="mt-4 flex w-full justify-center py-5 px-4 lg:px-8">
+          <div className="mt-4 flex w-full justify-center px-4 py-5 lg:px-8">
             <ButtonV2
               className="w-full"
               disabled={isLoading}
@@ -376,7 +375,7 @@ export default function NotificationsList({
               border
               onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
             >
-              {isLoading ? "Loading..." : "Load More"}
+              {isLoading ? t("loading") : t("load_more")}
             </ButtonV2>
           </div>
         )}
@@ -384,8 +383,10 @@ export default function NotificationsList({
     );
   } else if (data && data.length === 0) {
     manageResults = (
-      <div className="px-4 pt-3 lg:px-8">
-        <h5> No Results Found </h5>
+      <div className="flex justify-center px-4 pt-3 lg:px-8">
+        <h5 className="text-xl font-bold text-gray-600">
+          {t("no_results_found")}
+        </h5>
       </div>
     );
   }
@@ -395,16 +396,17 @@ export default function NotificationsList({
   return (
     <>
       <Item
-        text="Notifications"
+        text={t("Notifications")}
         do={() => setOpen(!open)}
         icon={<CareIcon className="care-l-bell h-5" />}
         badgeCount={unreadCount}
+        handleOverflow={handleOverflow}
       />
       <SlideOver
         open={open}
         setOpen={setOpen}
         slideFrom="right"
-        title="Notifications"
+        title={t("Notifications")}
         dialogClass="md:w-[400px]"
         onCloseClick={onClickCB}
       >
@@ -421,7 +423,7 @@ export default function NotificationsList({
               }}
             >
               <CareIcon className="care-l-sync" />
-              <span className="text-xs">Reload</span>
+              <span className="text-xs">{t("reload")}</span>
             </ButtonV2>
             <ButtonV2
               onClick={handleSubscribeClick}
@@ -445,13 +447,13 @@ export default function NotificationsList({
                     : "care-l-envelope-check"
                 }
               />
-              <span className="text-xs">Mark all as Read</span>
+              <span className="text-xs">{t("mark_all_as_read")}</span>
             </ButtonV2>
           </div>
 
           <SelectMenuV2
             className="mb-2"
-            placeholder="Filter by category"
+            placeholder={t("filter_by_category")}
             options={NOTIFICATION_EVENTS}
             value={eventFilter}
             optionLabel={(o) => o.text}

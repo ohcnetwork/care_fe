@@ -21,7 +21,7 @@ let celciusToFahrenheit = (temp: option<float>) => {
 }
 
 type state = {
-  pain: option<int>,
+  pain: array<CriticalCare__Pain.part>,
   systolic: option<int>,
   diastolic: option<int>,
   pulse: option<int>,
@@ -36,7 +36,7 @@ type state = {
 }
 
 type action =
-  | SetPain(int)
+  | SetPain(array<CriticalCare__Pain.part>)
   | SetSystolic(int)
   | SetDiastolic(int)
   | SetPulse(int)
@@ -53,7 +53,7 @@ let reducer = (state, action) => {
   switch action {
   | SetPain(pain) => {
       ...state,
-      pain: Some(pain),
+      pain: pain,
       dirty: true,
     }
   | SetSystolic(systolic) => {
@@ -119,6 +119,14 @@ let computeMeanArterialPressure = (systolic, diastolic) => {
   float_of_int(systolic + 2 * diastolic) /. 3.0
 }
 
+let makePainField = p => {
+  let payload = Js.Dict.empty()
+  Js.Dict.set(payload, "region", Js.Json.string(Pain.endcodeRegion(p)))
+  Js.Dict.set(payload, "scale", Js.Json.number(float_of_int(Pain.scale(p))))
+  Js.Dict.set(payload, "description", Js.Json.string(p.description))
+  payload
+}
+
 let makeBpPayload = (systolic, diastolic) => {
   let payload = Js.Dict.empty()
   Js.Dict.set(payload, "systolic", Js.Json.number(float_of_int(systolic)))
@@ -135,7 +143,7 @@ let makePayload = state => {
     Js.Dict.set(payload, "bp", Js.Json.object_(makeBpPayload(systolic, diastolic)))
   | (_, _) => ()
   }
-  DictUtils.setOptionalNumber("pain", state.pain, payload)
+  Js.Dict.set(payload, "pain_scale_enhanced", Js.Json.objectArray(Js.Array.map(makePainField, state.pain)))
   DictUtils.setOptionalNumber("pulse", state.pulse, payload)
   DictUtils.setOptionalNumber("ventilator_spo2", state.spo2, payload)
   DictUtils.setOptionalFloat(
@@ -271,25 +279,29 @@ let make = (~hemodynamicParameter, ~updateCB, ~id, ~consultationId) => {
       />
       <Slider
         title={"Respiratory Rate (bpm)"}
-        start={"10"}
+        start={"0"}
         end={"70"}
         interval={"5"}
         step={1.0}
         value={Belt.Option.mapWithDefault(state.resp, "", string_of_int)}
         setValue={s => send(SetResp(int_of_string(s)))}
         getLabel={getStatus(12.0, "Low", 16.0, "High")}
-        hasError={ValidationUtils.isInputInRangeInt(10, 70, state.resp)}
+        hasError={ValidationUtils.isInputInRangeInt(0, 70, state.resp)}
       />
-      <Slider
-        title={"Pain Scale"}
-        start={"0"}
-        end={"10"}
-        interval={"1"}
-        step={1.0}
-        value={Belt.Option.mapWithDefault(state.pain, "", string_of_int)}
-        setValue={s => send(SetPain(int_of_string(s)))}
-        getLabel={val => getPainStatus(val)}
-        hasError={ValidationUtils.isInputInRangeInt(0, 10, state.pain)}
+      <div className="w-full">
+        <div className="mx-2">
+          <h4> {str("Pain")} </h4>
+          <p>{str("Mark region and intensity of pain")}</p>
+        </div>
+      </div>
+      <CriticalCare__PainEditor
+        previewMode={false}
+        painParameter={state.pain}
+        updateCB={data => {
+          send(SetPain(data));
+        }}
+        id={id}
+        consultationId={consultationId}
       />
       <div className="border-b border-b-gray-500 w-full mt-10" />
       <Slider

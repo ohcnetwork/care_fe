@@ -1,19 +1,16 @@
 import React from "react";
-import { Grid } from "@material-ui/core";
-const img = "https://cdn.coronasafe.network/break-chain.webp";
+const img = "https://cdn.coronasafe.network/light-logo.svg";
 const Loading = () => {
   return (
-    <Grid container>
-      <Grid item xs={12} sm={12} md={12} lg={12} style={{ display: "flex" }}>
-        <Grid container justify="center" alignItems="center">
-          <div className="App">
-            <header className="App-header">
-              <img src={img} className="App-logo" alt="logo" />
-            </header>
-          </div>
-        </Grid>
-      </Grid>
-    </Grid>
+    <div className="grid">
+      <div className="col-span-12 flex items-center justify-center sm:col-span-12 md:col-span-12 lg:col-span-12">
+        <div className="App">
+          <header className="App-header">
+            <img src={img} className="App-logo" alt="logo" />
+          </header>
+        </div>
+      </div>
+    </div>
   );
 };
 export default Loading;

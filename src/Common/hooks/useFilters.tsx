@@ -3,7 +3,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
-import { KASP_STRING } from "../constants";
+import useConfig from "./useConfig";
+import { classNames } from "../../Utils/utils";
 
 export type FilterState = Record<string, unknown>;
 export type FilterParamKeys = string | string[];
@@ -18,6 +19,8 @@ interface FilterBadgeProps {
  * of pagination and filters.
  */
 export default function useFilters({ limit = 14 }: { limit?: number }) {
+  const { t } = useTranslation();
+  const { kasp_string } = useConfig();
   const hasPagination = limit > 0;
   const [showFilters, setShowFilters] = useState(false);
   const [qParams, setQueryParams] = useQueryParams();
@@ -64,6 +67,13 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     badge(name: string, paramKey: FilterParamKeys) {
       return { name, paramKey };
     },
+    ordering(name = "Sort by", paramKey = "ordering") {
+      return {
+        name,
+        paramKey,
+        value: qParams[paramKey] && t("SortOptions." + qParams[paramKey]),
+      };
+    },
     value(name: string, paramKey: FilterParamKeys, value: string) {
       return { name, value, paramKey };
     },
@@ -106,38 +116,49 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
       return { name, value, paramKey };
     },
     kasp(nameSuffix = "", paramKey = "is_kasp") {
-      const name = nameSuffix ? KASP_STRING + " " + nameSuffix : KASP_STRING;
-      const [trueLabel, falseLabel] = [KASP_STRING, "Non " + KASP_STRING];
+      const name = nameSuffix ? kasp_string + " " + nameSuffix : kasp_string;
+      const [trueLabel, falseLabel] = [kasp_string, "Non " + kasp_string];
       return badgeUtils.boolean(name, paramKey, { trueLabel, falseLabel });
     },
   };
 
   const FilterBadges = ({
     badges,
+    children,
   }: {
     badges: (utils: typeof badgeUtils) => FilterBadgeProps[];
+    children?: React.ReactNode;
   }) => {
     const compiledBadges = badges(badgeUtils);
     const { t } = useTranslation();
     return (
-      <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3">
+      <div className="col-span-3 my-2 flex w-full flex-wrap items-center gap-2">
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
+        {children}
       </div>
     );
   };
 
-  const Pagination = ({ totalCount }: { totalCount: number }) => {
+  const Pagination = ({
+    totalCount,
+    noMargin,
+  }: {
+    totalCount: number;
+    noMargin?: boolean;
+  }) => {
     if (!hasPagination) {
       const errorMsg = "Do not render Pagination component, when limit is <= 0";
       return <span className="bg-red-500 text-white">{errorMsg}</span>;
     }
     return (
       <div
-        className={`mt-4 flex w-full justify-center ${
-          totalCount > limit ? "visible" : "invisible"
-        }`}
+        className={classNames(
+          "flex w-full justify-center",
+          totalCount > limit ? "visible" : "invisible",
+          !noMargin && "mt-4"
+        )}
       >
         <PaginationComponent
           cPage={qParams.page}

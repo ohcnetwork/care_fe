@@ -19,17 +19,19 @@ export const LanguageSelectorLogin = () => {
   };
 
   return (
-    <div className="text-sm text-gray-800 flex flex-col items-center mt-8">
+    <div className="mt-8 flex flex-col items-center text-sm text-gray-800">
       Available in:
       <br />
-      <div className="inline-flex gap-3 flex-wrap">
+      <div className="inline-flex flex-wrap gap-3">
         {Object.keys(LANGUAGE_NAMES).map((e: string) => (
           <button
             key={e}
             onClick={() => handleLanguage(e)}
             className={classNames(
               "text-primary-400 hover:text-primary-600",
-              i18n.language === e && "text-primary-600 underline"
+              (i18n.language === e ||
+                (i18n.language === "en-US" && e === "en")) &&
+                "text-primary-600 underline"
             )}
           >
             {LANGUAGE_NAMES[e]}

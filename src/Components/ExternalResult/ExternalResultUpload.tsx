@@ -2,14 +2,16 @@ import loadable from "@loadable/component";
 import _ from "lodash";
 import { navigate } from "raviger";
 import { useState } from "react";
-//@ts-ignore
 import CSVReader from "react-csv-reader";
 import { useDispatch } from "react-redux";
+import useConfig from "../../Common/hooks/useConfig";
 import { externalResultUploadCsv } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 const PageTitle = loadable(() => import("../Common/PageTitle"));
+import { useTranslation } from "react-i18next";
 
 export default function ExternalResultUpload() {
+  const { sample_format_external_result_import } = useConfig();
   const dispatch: any = useDispatch();
   // for disabling save button once clicked
   const [loading, setLoading] = useState(false);
@@ -18,6 +20,7 @@ export default function ExternalResultUpload() {
   const handleForce = (data: any) => {
     setCsvData(data);
   };
+  const { t } = useTranslation();
 
   const papaparseOptions = {
     header: true,
@@ -52,7 +55,7 @@ export default function ExternalResultUpload() {
       }
     } else {
       Notification.Error({
-        msg: "Please Upload A CSV file !!!",
+        msg: t("please_upload_a_csv_file"),
       });
       setLoading(false);
     }
@@ -61,19 +64,19 @@ export default function ExternalResultUpload() {
   return (
     <div className="px-4">
       <PageTitle
-        title="Upload External Results"
+        title={t("upload_external_results")}
         backUrl="/external_results"
         className="mt-4"
       />
-      <div className="max-w-3xl mx-auto mt-6">
+      <div className="mx-auto mt-6 max-w-3xl">
         <div className="py-4">
-          <div className="block text-sm leading-5 font-medium text-gray-700 sm:mt-px sm:pt-2">
-            <div className="mt-2 sm:mt-0 sm:col-span-2 my-2">
-              <div className="mx-auto max-w-lg flex flex-col text-center justify-center pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+          <div className="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2">
+            <div className="my-2 sm:col-span-2 sm:mt-0">
+              <div className="mx-auto flex max-w-lg flex-col justify-center rounded-md border-2 border-dashed border-gray-300 pb-6 pt-5 text-center">
                 <span className="flex justify-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-12 w-12 text-gray-700 mb-2"
+                    className="mb-2 h-12 w-12 text-gray-700"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -87,31 +90,32 @@ export default function ExternalResultUpload() {
                   </svg>
                 </span>
                 <CSVReader
+                  inputId="result-upload"
                   cssLabelClass="mx-auto text-sm leading-5 font-medium text-gray-700"
                   cssClass="flex flex-col react-csv-input"
                   cssInputClass="csv-input"
-                  label="Select a CSV file in the specified format"
+                  label={t("csv_file_in_the_specified_format")}
                   onFileLoaded={handleForce}
                   parserOptions={papaparseOptions}
                 />
                 <a
-                  className="mt-4 ml-auto mr-auto max-w-xs items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
-                  href="https://docs.google.com/spreadsheets/d/17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE/export?format=csv&id=17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE"
+                  className="focus:ring-blue mx-auto mt-4 max-w-xs items-center rounded-md border border-primary-500 bg-white px-3 py-2 text-sm font-medium leading-4 text-primary-700 transition duration-150 ease-in-out hover:text-primary-500 hover:shadow focus:border-primary-300 focus:outline-none active:bg-gray-50 active:text-primary-800"
+                  href={sample_format_external_result_import}
                 >
                   <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
-                  <span>Sample Format</span>
+                  <span>{t("sample_format")}</span>
                 </a>
               </div>
             </div>
           </div>
-          <div className=" bg-white rounded shadow">
+          <div className=" rounded bg-white shadow">
             {csvData.map((data: any, index: number) => {
               return (
-                <div key={index} className="p-2 border-b flex">
-                  <div className="p-2 mr-2">{index + 1}</div>
-                  <div className="p-2 mr-2 md:w-1/3">{data.name}</div>
+                <div key={data.name} className="flex border-b p-2">
+                  <div className="mr-2 p-2">{index + 1}</div>
+                  <div className="mr-2 p-2 md:w-1/3">{data.name}</div>
 
-                  <div className="p-2 mr-2">
+                  <div className="mr-2 p-2">
                     {errors && errors.length !== 0
                       ? errors.map((error: any) => {
                           return (
@@ -131,10 +135,10 @@ export default function ExternalResultUpload() {
           <div className="mt-2 text-center">
             <button
               disabled={loading}
-              className="block btn btn-primary mx-auto"
+              className="btn btn-primary mx-auto block"
               onClick={handleSubmit}
             >
-              Save
+              {t("save")}
             </button>
           </div>
         </div>

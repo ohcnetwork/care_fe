@@ -1,30 +1,31 @@
 import * as Notification from "../../Utils/Notifications";
 import { useEffect } from "react";
 import { Link } from "raviger";
+import { useTranslation } from "react-i18next";
 
 export default function InvalidReset() {
+  const { t } = useTranslation();
   useEffect(() => {
     Notification.closeAllNotifications();
   }, []);
   return (
-    <div className="flex justify-center text-center items-center h-screen">
-      <div className="text-center w-[500px]">
+    <div className="flex h-screen items-center justify-center text-center">
+      <div className="w-[500px] text-center">
         <img
-          src={`${process.env.PUBLIC_URL}/images/invalid_reset.svg`}
-          alt="Session Expired"
+          src="/images/invalid_reset.svg"
+          alt={t("invalid_reset")}
           className="w-full"
         />
-        <h1>Invalid password reset link</h1>
+        <h1>{t("invalid_password_reset_link")}</h1>
         <p>
-          It appears that the password reset link you have used is either
-          invalid or expired. Please request a new password reset link.
+          {t("invalid_link_msg")}
           <br />
           <br />
           <Link
             href="/forgot-password"
-            className="rounded-lg px-4 py-2 inline-block bg-primary-600 text-white hover:text-white hover:bg-primary- cursor-pointer"
+            className="hover:bg-primary- inline-block cursor-pointer rounded-lg bg-primary-600 px-4 py-2 text-white hover:text-white"
           >
-            Return to Password Reset
+            {t("return_to_password_reset")}
           </Link>
         </p>
       </div>

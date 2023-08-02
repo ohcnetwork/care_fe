@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@material-ui/core";
 import { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
 import loadable from "@loadable/component";
@@ -10,9 +9,9 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import TextInputFieldV2 from "../Common/components/TextInputFieldV2";
+import TextFormField from "../Form/FormFields/TextFormField";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 const initForm = {
   name: "",
@@ -24,6 +23,7 @@ const initForm = {
 };
 const initialState = {
   form: { ...initForm },
+  errors: {},
 };
 
 const FormReducer = (state = initialState, action: any) => {
@@ -85,6 +85,28 @@ export const UpdateFacilityMiddleware = (props: any) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
+    if (!state.form.middleware_address) {
+      dispatch({
+        type: "set_error",
+        errors: { middleware_address: ["Middleware Address is required"] },
+      });
+      setIsLoading(false);
+      return;
+    }
+    if (
+      state.form.middleware_address.match(
+        /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/
+      ) === null
+    ) {
+      dispatch({
+        type: "set_error",
+        errors: {
+          middleware_address: ["Invalid Middleware Address"],
+        },
+      });
+      setIsLoading(false);
+      return;
+    }
     const data: any = {
       ...state.form,
       middleware_address: state.form.middleware_address,
@@ -109,7 +131,7 @@ export const UpdateFacilityMiddleware = (props: any) => {
   const handleChange = (e: any) => {
     dispatch({
       type: "set_form",
-      form: { ...state.form, [e.target.name]: e.target.value },
+      form: { ...state.form, [e.name]: e.value },
     });
   };
 
@@ -118,35 +140,32 @@ export const UpdateFacilityMiddleware = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle
-        title="Update Middleware"
-        crumbsReplacements={{
-          [facilityId]: { name: state.form.name },
-        }}
-      />
-      <div className="mt-4">
-        <Card>
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1">
-                <div>
-                  <TextInputFieldV2
-                    name="middleware_address"
-                    label="Facility Middleware Address"
-                    value={state.form.middleware_address}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-                <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
-                <Submit onClick={handleSubmit} label="Update" />
-              </div>
-            </CardContent>
-          </form>
-        </Card>
+    <Page
+      title="Update Middleware"
+      crumbsReplacements={{
+        [facilityId]: { name: state.form.name },
+      }}
+      className="mx-auto max-w-3xl"
+    >
+      <div className="cui-card mt-4">
+        <form onSubmit={(e) => handleSubmit(e)}>
+          <div className="mt-2 grid grid-cols-1 gap-4">
+            <div>
+              <TextFormField
+                name="middleware_address"
+                label="Facility Middleware Address"
+                value={state.form.middleware_address}
+                onChange={(e) => handleChange(e)}
+                error={state.errors?.middleware_address}
+              />
+            </div>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+            <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
+            <Submit onClick={handleSubmit} label="Update" />
+          </div>
+        </form>
       </div>
-    </div>
+    </Page>
   );
 };

@@ -1,6 +1,3 @@
-import { CircularProgress } from "@material-ui/core";
-import WarningRoundedIcon from "@material-ui/icons/WarningRounded";
-import { make as SlideOver } from "../Common/SlideOver.gen";
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
 import loadable from "@loadable/component";
@@ -26,8 +23,11 @@ import { formatDate } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
+import CountBlock from "../../CAREUI/display/Count";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function SampleViewAdmin() {
   const {
@@ -147,6 +147,23 @@ export default function SampleViewAdmin() {
     });
   };
 
+  const parseExportData = (data: string) =>
+    data
+      .trim()
+      .split("\n")
+      .map((row: string) =>
+        row
+          .trim()
+          .split(",")
+          .map((field: string) =>
+            new Date(field).toString() === "Invalid Date"
+              ? field
+              : formatDate(field, "DD/MM/YYYY hh:mm A")
+          )
+          .join(",")
+      )
+      .join("\n");
+
   let sampleList: any[] = [];
   if (sample && sample.length) {
     sampleList = sample.map((item) => {
@@ -155,25 +172,25 @@ export default function SampleViewAdmin() {
         (i) => i.text === status
       )?.desc;
       return (
-        <div key={`usr_${item.id}`} className="w-full lg:w-1/2 mt-6 lg:px-4">
+        <div key={`usr_${item.id}`} className="mt-6 w-full lg:w-1/2 lg:px-4">
           <div
-            className={`block border rounded-lg bg-white shadow h-full hover:border-black text-black ${
-              item.result === "POSITIVE" ? "border-red-700 bg-red-100" : ""
-            } ${
-              item.result === "NEGATIVE"
+            className={`block h-full rounded-lg border text-black shadow hover:border-black ${
+              item.result === "POSITIVE"
+                ? "border-red-700 bg-red-100"
+                : item.result === "NEGATIVE"
                 ? "border-primary-700 bg-primary-100"
-                : ""
+                : "bg-white"
             }`}
           >
-            <div className="px-6 py-4 h-full flex flex-col justify-between">
+            <div className="flex h-full flex-col justify-between px-6 py-4">
               <div>
                 <div className="flex flex-col md:flex-row md:justify-between">
-                  <div className="font-bold text-xl capitalize mb-2">
+                  <div className="mb-2 text-xl font-bold capitalize">
                     {item.patient_name}
                   </div>
                   <div>
                     {item.sample_type && (
-                      <span className="truncate bg-blue-200 text-blue-800 text-sm rounded-md font-bold px-2 py-1 mx-1 text-wrap">
+                      <span className="text-wrap mx-1 truncate rounded-md bg-blue-200 px-2 py-1 text-sm font-bold text-blue-800">
                         Type: {item.sample_type}
                       </span>
                     )}
@@ -215,7 +232,7 @@ export default function SampleViewAdmin() {
                       Contact:{" "}
                     </span>
                     Confirmed carrier
-                    <WarningRoundedIcon className="text-red-500"></WarningRoundedIcon>
+                    <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-red-500" />
                   </div>
                 )}
                 {item.patient_has_suspected_contact &&
@@ -225,7 +242,7 @@ export default function SampleViewAdmin() {
                         Contact:{" "}
                       </span>
                       Suspected carrier
-                      <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
+                      <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-yellow-500" />
                     </div>
                   )}
                 {item.has_sari && (
@@ -234,27 +251,27 @@ export default function SampleViewAdmin() {
                       SARI:{" "}
                     </span>
                     Severe Acute Respiratory illness
-                    <WarningRoundedIcon className="text-orange-500"></WarningRoundedIcon>
+                    <CareIcon className="care-l-exclamation-triangle text-xl font-bold text-orange-500" />
                   </div>
                 )}
                 {item.has_ari && !item.has_sari && (
                   <div>
                     <span className="font-semibold leading-relaxed">ARI: </span>
                     Acute Respiratory illness
-                    <WarningRoundedIcon className="text-yellow-500"></WarningRoundedIcon>
+                    <CareIcon className=" care-l-exclamation-triangle text-xl font-bold text-yellow-500" />
                   </div>
                 )}
               </div>
 
               <div className="mt-4">
-                <div className="text-gray-600 text-sm font-bold">
+                <div className="text-sm font-bold text-gray-600">
                   <span className="text-gray-800">Date of Sample:</span>{" "}
                   {item.date_of_sample
                     ? formatDate(item.date_of_sample)
                     : "Not Available"}
                 </div>
 
-                <div className="text-gray-600 text-sm font-bold">
+                <div className="text-sm font-bold text-gray-600">
                   <span className="text-gray-800">Date of Result:</span>{" "}
                   {item.date_of_result
                     ? formatDate(item.date_of_result)
@@ -267,7 +284,7 @@ export default function SampleViewAdmin() {
                   <div className="mt-2">
                     <button
                       onClick={() => showUpdateStatus(item)}
-                      className="w-full text-sm bg-primary-500 hover:bg-primary-700 text-white font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                      className="w-full rounded border border-gray-400 bg-primary-500 px-4 py-2 text-center text-sm font-semibold text-white shadow hover:bg-primary-700"
                     >
                       UPDATE SAMPLE TEST STATUS
                     </button>
@@ -276,7 +293,7 @@ export default function SampleViewAdmin() {
 
                 <button
                   onClick={() => navigate(`/sample/${item.id}`)}
-                  className="mt-2 w-full text-sm bg-white hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow text-center"
+                  className="mt-2 w-full rounded border border-gray-400 bg-white px-4 py-2 text-center text-sm font-semibold text-gray-800 shadow hover:bg-gray-400"
                 >
                   Sample Details
                 </button>
@@ -289,7 +306,11 @@ export default function SampleViewAdmin() {
   }
 
   if (isLoading || !sample) {
-    manageSamples = <Loading />;
+    manageSamples = (
+      <div className="flex w-full justify-center">
+        <Loading />
+      </div>
+    );
   } else if (sample && sample.length) {
     manageSamples = (
       <>
@@ -299,8 +320,8 @@ export default function SampleViewAdmin() {
     );
   } else if (sample && sample.length === 0) {
     manageSamples = (
-      <div className="w-full bg-white rounded-lg p-3">
-        <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+      <div className="w-full rounded-lg bg-white p-3">
+        <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-gray-600">
           No Sample Tests Found
         </div>
       </div>
@@ -308,7 +329,18 @@ export default function SampleViewAdmin() {
   }
 
   return (
-    <div className="px-6">
+    <Page
+      title="Sample Management System"
+      hideBack={true}
+      breadcrumbs={false}
+      componentRight={
+        <ExportButton
+          action={() => downloadSampleTests({ ...qParams })}
+          parse={parseExportData}
+          filenamePrefix="samples"
+        />
+      }
+    >
       {statusDialog.show && (
         <UpdateStatusDialog
           sample={statusDialog.sample}
@@ -317,46 +349,26 @@ export default function SampleViewAdmin() {
           userType={userType}
         />
       )}
-      <PageTitle
-        title="Sample Management System"
-        hideBack={true}
-        breadcrumbs={false}
-        componentRight={
-          <ExportButton
-            action={() => downloadSampleTests({ ...qParams })}
-            filenamePrefix="samples"
-          />
-        }
-      />
-      <div className="mt-5 lg:grid lg:grid-cols-1 gap-5">
-        <div className="flex flex-col lg:flex-row gap-6 justify-between">
-          <div className="bg-white overflow-hidden shadow rounded-lg px-4 py-5 sm:p-6 w-full">
-            <dl>
-              <dt className="text-sm leading-5 font-medium text-gray-500 truncate">
-                Total Samples Taken
-              </dt>
-              {/* Show spinner until count is fetched from server */}
-              {isLoading ? (
-                <dd className="mt-4 text-5xl leading-9">
-                  <CircularProgress className="text-primary-500" />
-                </dd>
-              ) : (
-                <dd className="mt-4 text-5xl leading-9 font-semibold text-gray-900">
-                  {totalCount}
-                </dd>
-              )}
-            </dl>
+      <div className="mt-5 gap-5 lg:grid lg:grid-cols-1">
+        <div className="flex flex-col justify-between gap-6 lg:flex-row">
+          <div className="w-full">
+            <CountBlock
+              text="Total Samples Taken"
+              count={totalCount}
+              loading={isLoading}
+              icon={"thermometer"}
+            />
           </div>
 
-          <div className="w-full flex flex-col gap-3 p-2">
+          <div className="flex w-full flex-col gap-3">
             <SearchInput
-              name="patient_name_search"
+              name="patient_name"
               value={qParams.patient_name}
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder="Search patient"
             />
             <SearchInput
-              name="district_name_search"
+              name="district_name"
               value={qParams.district_name}
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               placeholder="Search by district"
@@ -364,50 +376,8 @@ export default function SampleViewAdmin() {
             />
           </div>
 
-          <div>
-            <div className="flex items-start mt-2 mb-2 ">
-              <button
-                className="btn btn-primary-ghost md:mt-7 w-full"
-                onClick={() => advancedFilter.setShow(true)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="fill-current w-4 h-4 mr-2"
-                >
-                  <line x1="8" y1="6" x2="21" y2="6"></line>
-                  <line x1="8" y1="12" x2="21" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="8" y1="18" x2="21" y2="18">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="6" x2="3.01" y2="6">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="12" x2="3.01" y2="12">
-                    {" "}
-                  </line>
-                  <line x1="3" y1="18" x2="3.01" y2="18">
-                    {" "}
-                  </line>
-                </svg>
-                <span>Advanced Filters</span>
-              </button>
-            </div>
-            <SlideOver {...advancedFilter}>
-              <div className="bg-white min-h-screen p-4">
-                <SampleFilter {...advancedFilter} />
-              </div>
-            </SlideOver>
-          </div>
+          <AdvancedFilterButton onClick={() => advancedFilter.setShow(true)} />
+          <SampleFilter {...advancedFilter} key={window.location.search} />
         </div>
         <FilterBadges
           badges={({ badge, value }) => [
@@ -430,7 +400,7 @@ export default function SampleViewAdmin() {
               "Sample Test Type",
               "sample_type",
               SAMPLE_TYPE_CHOICES.find(
-                (type) => type.id.toString() === qParams.sample_type
+                (type) => type.id === qParams.sample_type
               )?.text || ""
             ),
             value("Facility", "facility", facilityName),
@@ -440,6 +410,6 @@ export default function SampleViewAdmin() {
       <div className="md:px-2">
         <div className="flex flex-wrap md:-mx-2 lg:-mx-6">{manageSamples}</div>
       </div>
-    </div>
+    </Page>
   );
 }

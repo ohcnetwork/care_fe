@@ -1,5 +1,7 @@
-import React from "react";
 import { Dialog, Transition } from "@headlessui/react";
+
+import React from "react";
+import { classNames } from "../../Utils/utils";
 
 type DialogProps = {
   title: React.ReactNode;
@@ -8,10 +10,20 @@ type DialogProps = {
   onClose: () => void;
   children: React.ReactNode;
   className?: string;
+  titleAction?: React.ReactNode;
+  fixedWidth?: boolean;
 };
 
 const DialogModal = (props: DialogProps) => {
-  const { title, description, show, onClose, children, className } = props;
+  const {
+    title,
+    description,
+    show,
+    onClose,
+    children,
+    className,
+    fixedWidth = true,
+  } = props;
   return (
     <div>
       <Transition appear show={show} as={React.Fragment}>
@@ -25,7 +37,7 @@ const DialogModal = (props: DialogProps) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-all" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
@@ -40,17 +52,24 @@ const DialogModal = (props: DialogProps) => {
                 leaveTo="opacity-0 scale-95"
               >
                 <Dialog.Panel
-                  className={`w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all ${className}`}
+                  className={classNames(
+                    className,
+                    fixedWidth && "w-full max-w-md",
+                    "transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                  )}
                 >
                   <Dialog.Title
                     as="h4"
-                    className="text-lg font-medium leading-6 text-gray-900"
+                    className="flex w-full flex-col text-lg font-medium leading-6 text-gray-900"
                   >
-                    <h4>{title}</h4>
+                    <div className="w-full">
+                      <h4>{title}</h4>
+                      <p className="mt-2 text-sm text-gray-600">
+                        {description}
+                      </p>
+                    </div>
+                    {props.titleAction}
                   </Dialog.Title>
-                  <div className="mt-2">
-                    <p className="text-sm text-gray-500">{description}</p>
-                  </div>
                   {children}
                 </Dialog.Panel>
               </Transition.Child>

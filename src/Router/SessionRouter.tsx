@@ -1,9 +1,8 @@
-import loadable from "@loadable/component";
 import { Login, ResetPassword } from "../Components/Auth";
 import { useRoutes } from "raviger";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
 import InvalidReset from "../Components/ErrorPages/InvalidReset";
-const TopBar = loadable(() => import("../Components/Common/TopBar"));
+import TopBar from "../Components/Common/TopBar";
 
 const routes = {
   "/": () => <Login />,
@@ -27,7 +26,7 @@ export default function SessionRouter() {
   return (
     <div className={!login ? "bg-primary-100" : ""}>
       {!login && <TopBar />}
-      <div className={!login ? "p-4 container max-w-5xl mx-auto" : ""}>
+      <div className={!login ? "container mx-auto max-w-5xl p-4" : ""}>
         {content}
       </div>
     </div>

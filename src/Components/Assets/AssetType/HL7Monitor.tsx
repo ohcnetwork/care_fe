@@ -10,10 +10,11 @@ import MonitorConfigure from "../configure/MonitorConfigure";
 import Loading from "../../Common/Loading";
 import { checkIfValidIP } from "../../../Common/validation";
 import Card from "../../../CAREUI/display/Card";
-import TextInputFieldV2 from "../../Common/components/TextInputFieldV2";
 import { Submit } from "../../Common/components/ButtonV2";
-import PatientVitalsCard from "../../Patient/PatientVitalsCard";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
+import TextFormField from "../../Form/FormFields/TextFormField";
+import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
+import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
 
 interface HL7MonitorProps {
   assetId: string;
@@ -80,47 +81,59 @@ const HL7Monitor = (props: HL7MonitorProps) => {
     }
   };
 
+  const middleware = middlewareHostname || facilityMiddlewareHostname;
+
   if (isLoading) return <Loading />;
   return (
-    <>
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="w-full md:w-[350px] shrink-0 flex flex-col gap-4">
-          <Card className="w-full flex flex-col">
+    <div className="mx-auto flex w-full xl:mt-8">
+      <div className="mx-auto flex flex-col gap-4 xl:flex-row-reverse">
+        <div className="flex w-full shrink-0 flex-col gap-4 xl:max-w-xs">
+          <Card className="flex w-full flex-col">
             <form onSubmit={handleSubmit}>
-              <h2 className="text-lg font-bold mb-2">Connection</h2>
-              <div>
-                <TextInputFieldV2
+              <h2 className="mb-2 text-lg font-bold">Connection</h2>
+              <div className="flex flex-col">
+                <TextFormField
+                  name="middlewareHostname"
                   label="Middleware Hostname"
+                  placeholder={facilityMiddlewareHostname}
                   value={middlewareHostname}
-                  onChange={(e) => setMiddlewareHostname(e.target.value)}
+                  onChange={(e) => setMiddlewareHostname(e.value)}
+                  errorClassName="hidden"
                 />
-                <TextInputFieldV2
+                <TextFormField
+                  name="localipAddress"
                   label="Local IP Address"
                   value={localipAddress}
-                  onChange={(e) => setLocalIPAddress(e.target.value)}
+                  onChange={(e) => setLocalIPAddress(e.value)}
                   required
                   error={ipadrdress_error}
                 />
+                <Submit className="w-full">
+                  <CareIcon className="care-l-save" />
+                  <span>Save Configuration</span>
+                </Submit>
               </div>
-              <Submit className="w-full">
-                <CareIcon className="care-l-save" />
-                <span>Save Configuration</span>
-              </Submit>
             </form>
           </Card>
-          <Card className="">
-            {assetType === "HL7MONITOR" ? (
+          <Card>
+            {["HL7MONITOR", "VENTILATOR"].includes(assetType) && (
               <MonitorConfigure asset={asset as AssetData} />
-            ) : null}
+            )}
           </Card>
         </div>
-        <div className="w-full grow-0 overflow-hidden relative rounded-xl bg-white shadow">
-          <PatientVitalsCard
-            socketUrl={`wss://${facilityMiddlewareHostname}/observations/${localipAddress}`}
+
+        {assetType === "HL7MONITOR" && (
+          <HL7PatientVitalsMonitor
+            socketUrl={`wss://${middleware}/observations/${localipAddress}`}
           />
-        </div>
+        )}
+        {assetType === "VENTILATOR" && (
+          <VentilatorPatientVitalsMonitor
+            socketUrl={`wss://${middleware}/observations/${localipAddress}`}
+          />
+        )}
       </div>
-    </>
+    </div>
   );
 };
 export default HL7Monitor;

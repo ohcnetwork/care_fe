@@ -10,8 +10,6 @@ type editor =
   | DialysisEditor
   | PressureSoreEditor
   | NursingCareEditor
-  | MedicineEditor
-  | OthersEditor
 
 type state = {
   visibleEditor: option<editor>,
@@ -47,15 +45,13 @@ let editorNameToString = editor => {
   switch editor {
   | NeurologicalMonitoringEditor => "Neurological Monitoring"
   | HemodynamicParametersEditor => "Vitals"
-  | VentilatorParametersEditor => "Ventilator Parameters"
+  | VentilatorParametersEditor => "Respiratory Support"
   | ArterialBloodGasAnalysisEditor => "Arterial Blood Gas Analysis"
   | BloodSugarEditor => "Blood Sugar"
   | IOBalanceEditor => "I/O Balance"
   | DialysisEditor => "Dialysis"
   | PressureSoreEditor => "Pressure Sore"
   | NursingCareEditor => "Nursing Care"
-  | MedicineEditor => "Medicine"
-  | OthersEditor => "Others"
   }
 }
 
@@ -214,20 +210,6 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
                 id
                 consultationId
               />
-            | MedicineEditor =>
-              <CriticalCare__MedicineEditor
-                medicines={CriticalCare__DailyRound.medicine(state.dailyRound)}
-                updateCB={updateDailyRound(send, MedicineEditor)}
-                id
-                consultationId
-              />
-            | OthersEditor =>
-              <CriticalCare__OthersEditor
-                others={CriticalCare__DailyRound.others(state.dailyRound)}
-                updateCB={updateDailyRound(send, OthersEditor)}
-                id
-                consultationId
-              />
             }}
           </div>
         </div>
@@ -248,13 +230,16 @@ let make = (~id, ~facilityId, ~patientId, ~consultationId, ~dailyRound) => {
               DialysisEditor,
               PressureSoreEditor,
               NursingCareEditor,
-              MedicineEditor,
-              OthersEditor,
             ])->React.array}
           </div>
           <Link
             href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`}>
-            <div className="btn btn-primary w-full mt-6"> {str("Complete")} </div>
+            <button
+              onClick={_ =>
+                Notifications.success({msg: "Critical care log updates are filed successfully"})}
+              className="btn btn-primary w-full mt-6">
+              {str("Complete")}
+            </button>
           </Link>
         </div>
       }}

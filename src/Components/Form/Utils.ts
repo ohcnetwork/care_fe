@@ -1,19 +1,20 @@
-import { ChangeEventHandler } from "react";
 import { FieldError } from "./FieldValidators";
 
-export type FormDetails = Record<string, unknown>;
+export type FormDetails = { [key: string]: any };
 export type FormErrors<T = FormDetails> = Partial<Record<keyof T, FieldError>>;
 export type FormState<T = FormDetails> = { form: T; errors: FormErrors<T> };
 export type FormAction<T = FormDetails> =
   | { type: "set_form"; form: T }
   | { type: "set_errors"; errors: FormErrors<T> }
-  | { type: "set_field"; name: keyof T; value: any; error: FieldError };
+  | { type: "set_field"; name: keyof T; value: any; error: FieldError }
+  | { type: "set_state"; state: FormState<T> };
 export type FormReducer<T = FormDetails> = (
   prevState: FormState<T>,
   action: FormAction<T>
 ) => FormState<T>;
+export type FormDraft = { timestamp: number; form: FormDetails };
 
-export const formReducer: FormReducer = <T = FormDetails>(
+export const formReducer = <T = FormDetails>(
   state: FormState<T>,
   action: FormAction<T>
 ): FormState<T> => {
@@ -27,10 +28,7 @@ export const formReducer: FormReducer = <T = FormDetails>(
         form: { ...state.form, [action.name]: action.value },
         errors: { ...state.errors, [action.name]: action.error },
       };
+    case "set_state":
+      return action.state;
   }
-};
-
-export type FormFieldCompatibilityProps<T = Element> = {
-  onChange?: ChangeEventHandler<T>;
-  hasError?: boolean;
 };
