@@ -26,7 +26,6 @@ const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 interface Props extends FormFieldBaseProps<string> {
   placeholder?: string;
   autoComplete?: string;
-  disableCountry?: boolean;
   disableValidation?: boolean;
 }
 
@@ -96,42 +95,40 @@ export default function PhoneNumberFormField(props: Props) {
           )}
           maxLength={field.value?.startsWith("1800") ? 11 : 15}
           placeholder={props.placeholder}
-          value={formatPhoneNumber(field.value, props.disableCountry)}
+          value={formatPhoneNumber(field.value)}
           onChange={(e) => setValue(e.target.value)}
           disabled={field.disabled}
           onBlur={() => setError(validate(field.value, "blur"))}
         />
-        {!props.disableCountry && (
-          <div className="absolute inset-y-0 right-0 flex items-center">
-            <label htmlFor={field.id + "__country"} className="sr-only">
-              Country
-            </label>
-            <select
-              disabled={field.disabled}
-              id={field.id + "__country"}
-              name="country"
-              autoComplete="country"
-              className="cui-input-base h-full border-0 bg-transparent pl-2 pr-8 text-end font-medium tracking-wider text-gray-700 focus:ring-2 focus:ring-inset"
-              value={
-                asYouType.getCountry() ??
-                (field.value?.startsWith("1800") ? "1800" : "Other")
-              }
-              onChange={(e) => {
-                if (e.target.value === "1800") return setValue("1800");
-                if (e.target.value === "Other") return setValue("");
-                setValue(conditionPhoneCode(phoneCodes[e.target.value].code));
-              }}
-            >
-              {Object.entries(phoneCodes).map(([country, { flag }]) => (
-                <option key={country} value={country}>
-                  {flag} {country}
-                </option>
-              ))}
-              <option value="Other">Other</option>
-              <option value="1800">Support</option>
-            </select>
-          </div>
-        )}
+        <div className="absolute inset-y-0 right-0 flex items-center">
+          <label htmlFor={field.id + "__country"} className="sr-only">
+            Country
+          </label>
+          <select
+            disabled={field.disabled}
+            id={field.id + "__country"}
+            name="country"
+            autoComplete="country"
+            className="cui-input-base h-full border-0 bg-transparent pl-2 pr-8 text-end font-medium tracking-wider text-gray-700 focus:ring-2 focus:ring-inset"
+            value={
+              asYouType.getCountry() ??
+              (field.value?.startsWith("1800") ? "1800" : "Other")
+            }
+            onChange={(e) => {
+              if (e.target.value === "1800") return setValue("1800");
+              if (e.target.value === "Other") return setValue("");
+              setValue(conditionPhoneCode(phoneCodes[e.target.value].code));
+            }}
+          >
+            {Object.entries(phoneCodes).map(([country, { flag }]) => (
+              <option key={country} value={country}>
+                {flag} {country}
+              </option>
+            ))}
+            <option value="Other">Other</option>
+            <option value="1800">Support</option>
+          </select>
+        </div>
       </div>
     </FormField>
   );
@@ -142,12 +139,12 @@ const conditionPhoneCode = (code: string) => {
   return code.startsWith("+") ? code : "+" + code;
 };
 
-const formatPhoneNumber = (value: string, disableCountry?: boolean) => {
+const formatPhoneNumber = (value: string) => {
   if (value === undefined || value === null) {
-    return disableCountry ? "" : "+91 ";
+    return "+91 ";
   }
 
-  if (!isValidPhoneNumber(value) || disableCountry) {
+  if (!isValidPhoneNumber(value)) {
     return value;
   }
 
