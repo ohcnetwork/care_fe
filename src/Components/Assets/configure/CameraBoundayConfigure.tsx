@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { BedModel } from "../../Facility/models";
-import ButtonV2 from "../../Common/components/ButtonV2";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { direction } from "../../Facility/Consultations/LiveFeed";
+import { direction } from "../../../Common/constants";
 interface CameraBoundaryConfigureProps {
   addBoundaryPreset: () => void;
   deleteBoundaryPreset: () => void;
@@ -68,72 +67,67 @@ export default function CameraBoundaryConfigure(
           }}
         />
       )}
-      {bed?.id && (
+
+      {bed?.id && !boundaryPreset ? (
         <div className="my-4 flex flex-col">
-          <div className="flex-initial">
-            <div className="text-md font-semibold">
-              {`${!boundaryPreset ? "Add" : ""}`} Boundary Preset
-            </div>
-            <div className="">
-              <label id="asset-name">Name</label>
-              <div className="text-md">{`${
-                !boundaryPreset ? bed?.name : boundaryPreset?.meta?.preset_name
-              } ${!boundaryPreset ? "boundary" : ""}`}</div>
-            </div>
-          </div>
-          {!boundaryPreset ? (
-            <div className="mt-1 flex-initial">
-              <ButtonV2
-                variant="primary"
-                onClick={addBoundaryPreset}
-                disabled={loadingAddBoundaryPreset}
-                id="add-boundary-preset"
-                size="small"
-              >
-                <CareIcon className="care-l-plus-circle" />
-                Add
-              </ButtonV2>
-            </div>
-          ) : (
-            <>
-              {!toUpdateBoundary && (
-                <div className="mt-1 flex flex-initial justify-start gap-1">
-                  <button
-                    className="items-center rounded-md  bg-green-200 p-2 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
-                    onClick={() => {
-                      setToUpdateBoundary(true);
-                      setDirection("left");
-                    }}
-                    id="update-boundary-preset"
-                    disabled={toAddPreset || isPreview}
-                  >
-                    <CareIcon className="care-l-pen" />
-                  </button>
-                  <button
-                    className="items-center gap-2 rounded-md bg-red-200 p-2 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200"
-                    onClick={() => {
-                      setToDeleteBoundary(boundaryPreset);
-                    }}
-                    id="delete-boundary-preset"
-                    disabled={isPreview}
-                  >
-                    <CareIcon className="care-l-trash" />
-                  </button>
-                  <button
-                    className="items-center gap-2 rounded-md bg-gray-200 p-2 py-1 text-sm text-gray-800 hover:bg-gray-800 hover:text-gray-200"
-                    onClick={() => {
-                      previewBoundary();
-                    }}
-                    id="delete-boundary-preset"
-                    disabled={isPreview}
-                  >
-                    <CareIcon className="care-l-eye" />
-                  </button>
-                </div>
-              )}
-            </>
-          )}
+          <button
+            className="w-full rounded-md border border-white bg-green-100 px-3 py-2 text-black hover:bg-green-500 hover:text-white"
+            onClick={addBoundaryPreset}
+            disabled={loadingAddBoundaryPreset}
+            id="add-boundary-preset"
+          >
+            <CareIcon className="care-l-plus-circle" />
+            Add boundary preset
+          </button>
         </div>
+      ) : (
+        <>
+          {bed?.id && !toUpdateBoundary && (
+            <div className="my-4 flex flex-col">
+              <div className="flex-initial">
+                <label id="asset-name">Boundary Preset Name</label>
+                <div className="text-sm">{`${
+                  !boundaryPreset
+                    ? bed?.name
+                    : boundaryPreset?.meta?.preset_name
+                } ${!boundaryPreset ? "boundary" : ""}`}</div>
+              </div>
+              <div className="mt-1 flex flex-initial justify-start gap-1">
+                <button
+                  className="items-center rounded-md  bg-green-200 p-2 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
+                  onClick={() => {
+                    setToUpdateBoundary(true);
+                    setDirection("left");
+                  }}
+                  id="update-boundary-preset"
+                  disabled={toAddPreset || isPreview}
+                >
+                  <CareIcon className="care-l-pen" />
+                </button>
+                <button
+                  className="items-center gap-2 rounded-md bg-red-200 p-2 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200"
+                  onClick={() => {
+                    setToDeleteBoundary(boundaryPreset);
+                  }}
+                  id="delete-boundary-preset"
+                  disabled={isPreview}
+                >
+                  <CareIcon className="care-l-trash" />
+                </button>
+                <button
+                  className="items-center gap-2 rounded-md bg-gray-200 p-2 py-1 text-sm text-gray-800 hover:bg-gray-800 hover:text-gray-200"
+                  onClick={() => {
+                    previewBoundary();
+                  }}
+                  id="delete-boundary-preset"
+                  disabled={isPreview}
+                >
+                  <CareIcon className="care-l-eye" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </>
   );
@@ -237,8 +231,8 @@ export function UpdateCameraBoundaryConfigure(
 
   return (
     <div className="mt-4 flex flex-col flex-wrap">
-      <div className="text-l  flex-1 bg-gray-200  p-4 text-center text-gray-800">
-        Updating boundary
+      <div className="text-md flex-1 bg-gray-200  p-2 text-center">
+        Update boundary
       </div>
       <div className="flex flex-1 flex-col gap-2 py-4">
         {["left", "right", "up", "down"].map((dir) => {

@@ -20,18 +20,12 @@ import { Submit } from "../../Common/components/ButtonV2";
 import { SyntheticEvent } from "react";
 import LiveFeed from "../../Facility/Consultations/LiveFeed";
 import Card from "../../../CAREUI/display/Card";
+import { BoundaryRange } from "../../../Common/constants";
 
 interface ONVIFCameraProps {
   assetId: string;
   facilityId: string;
   asset: any;
-}
-
-export interface BoundaryRange {
-  max_x: number;
-  min_x: number;
-  max_y: number;
-  min_y: number;
 }
 
 const ONVIFCamera = (props: ONVIFCameraProps) => {
@@ -426,25 +420,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
 
       {assetType === "ONVIF" ? (
         <>
-          {/* <CameraConfigure
-            asset={asset as AssetData}
-            bed={bed}
-            setBed={setBed}
-            newPreset={newPreset}
-            setNewPreset={setNewPreset}
-            addPreset={addPreset}
-            isLoading={loadingAddPreset}
-            refreshPresetsHash={refreshPresetsHash}
-            facilityMiddlewareHostname={facilityMiddlewareHostname}
-            boundaryPreset={boundaryPreset}
-            setBoundaryPreset={setBoundaryPreset}
-            addBoundaryPreset={addBoundaryPreset}
-            updateBoundaryPreset={updateBoundaryPreset}
-            deleteBoundaryPreset={deleteBoundaryPreset}
-            toUpdateBoundary={toUpdateBoundary}
-            setToUpdateBoundary={setToUpdateBoundary}
-            loadingAddBoundaryPreset={loadingAddBoundaryPreset}
-          /> */}
           <Card className="mt-4" title="Live Feed">
             <LiveFeed
               middlewareHostname={facilityMiddlewareHostname}

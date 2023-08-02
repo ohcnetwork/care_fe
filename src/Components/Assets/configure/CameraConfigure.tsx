@@ -13,7 +13,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
 
   return (
     <div className="mt-2 flex flex-col flex-wrap">
-      <div className="flex-1 rounded-lg  bg-gray-300 p-4  text-center text-2xl font-bold text-gray-700 hover:text-gray-800">
+      <div className="text-md flex-1 bg-gray-200  p-2 text-center">
         Add preset
       </div>
       <div className="flex-1 py-4">
@@ -29,7 +29,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
         />
         <div className="flex flex-row justify-center gap-2">
           <button
-            className="flex-1 rounded-md  bg-gray-200 p-4  text-center font-bold text-gray-800 hover:bg-gray-500 hover:text-white"
+            className="flex-1 rounded-md  bg-gray-200 p-2  text-center font-bold text-gray-800 hover:bg-gray-500 hover:text-white"
             disabled={isLoading}
             onClick={() => {
               setToAddPreset(false);
@@ -39,7 +39,7 @@ export default function CameraConfigure(props: CameraConfigureProps) {
             Cancel
           </button>
           <button
-            className="tex-gray-800 flex-1  rounded-md bg-green-200  p-4 text-center font-bold hover:bg-green-500 hover:text-white"
+            className="tex-gray-800 flex-1  rounded-md bg-green-200  p-2 text-center font-bold hover:bg-green-500 hover:text-white"
             disabled={isLoading}
             onClick={async () => {
               await addPreset();

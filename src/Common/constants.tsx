@@ -995,3 +995,11 @@ export const XLSXAssetImportSchema = {
     },
   },
 };
+
+export type direction = "left" | "right" | "up" | "down" | null;
+export interface BoundaryRange {
+  max_x: number;
+  min_x: number;
+  max_y: number;
+  min_y: number;
+}

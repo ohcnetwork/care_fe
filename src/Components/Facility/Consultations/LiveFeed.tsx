@@ -24,11 +24,10 @@ import ConfirmDialog from "../../Common/ConfirmDialog";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import useFullscreen from "../../../Common/hooks/useFullscreen";
 import { UpdateCameraBoundaryConfigure } from "../../Assets/configure/CameraBoundayConfigure";
-import { BoundaryRange } from "../../Assets/AssetType/ONVIFCamera";
+import { BoundaryRange } from "../../../Common/constants";
 import CameraConfigure from "../../Assets/configure/CameraConfigure";
 import CameraBoundaryConfigure from "../../Assets/configure/CameraBoundayConfigure";
-
-export type direction = "left" | "right" | "up" | "down" | null;
+import { direction } from "../../../Common/constants";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -79,11 +78,11 @@ const LiveFeed = (props: any) => {
     up: false,
     down: false,
   });
-  props.updateBoundaryPreset;
   const setToUpdateBoundary: (toUpdate: boolean) => void =
     props.setToUpdateBoundary;
   const loadingAddBoundaryPreset: boolean = props.loadingAddBoundaryPreset;
   const toUpdateBoundary: boolean = props.toUpdateBoundary;
+
   const { width } = useWindowDimensions();
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
@@ -241,17 +240,17 @@ const LiveFeed = (props: any) => {
       }
       absoluteMove(position, {
         onSuccess: () => setLoading(undefined),
+        onError: () => {
+          Notification.Error({ msg: "Something went wrong" });
+          setLoading(undefined);
+        },
       });
-    } else if (boundaryPreset?.meta?.range && !direction) {
-      Notification.Error({ msg: "Please select a direction" });
-    } else if (!boundaryPreset?.meta?.range && direction) {
-      Notification.Error({ msg: "Please set boundary" });
     } else {
       Notification.Error({ msg: "Something went wrong" });
     }
   };
 
-  const disableButton: (action: string) => boolean = (action) => {
+  const disableFeedButton: (action: string) => boolean = (action) => {
     if (
       (direction == "left" || direction == "right") &&
       (action == "left" || action == "right")
@@ -424,12 +423,31 @@ const LiveFeed = (props: any) => {
     setBedTransfer(toUpdate?.bed_object);
   }, [toUpdate]);
 
-  //change this function
   useEffect(() => {
     getBedPresets(cameraAsset.id);
     setToUpdateBoundary(false);
     setDirection(null);
   }, [page.offset, cameraAsset.id, refreshPresetsHash, bed]);
+
+  useEffect(() => {
+    const position = bedPresets?.filter((preset: any) => {
+      if (preset?.meta?.position && preset?.meta?.type != "boundary") {
+        return true;
+      }
+      return false;
+    })?.[0]?.meta?.position;
+    if (position) {
+      console.log(position);
+      setLoading("Moving to default preset");
+      absoluteMove(position, {
+        onSuccess: () => setLoading(undefined),
+        onError: () => {
+          Notification.Error({ msg: "Something went wrong" });
+          setLoading(undefined);
+        },
+      });
+    }
+  }, [bedPresets]);
 
   useEffect(() => {
     if (boundaryPreset?.meta?.range && direction) {
@@ -462,7 +480,6 @@ const LiveFeed = (props: any) => {
         });
       }, 500);
     }
-
     return () => {
       clearTimeout(tId);
     };
@@ -482,7 +499,6 @@ const LiveFeed = (props: any) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKeyboardShortcut(option.shortcutKey, option.callback);
   }
-
   return (
     <Page title="Live Feed" hideBack>
       {toDelete && (
@@ -609,7 +625,9 @@ const LiveFeed = (props: any) => {
                   <button
                     className="tooltip flex-1 border border-green-100 bg-green-100 p-2 hover:bg-green-200"
                     onClick={option.callback}
-                    disabled={toUpdateBoundary && disableButton(option.action)}
+                    disabled={
+                      toUpdateBoundary && disableFeedButton(option.action)
+                    }
                   >
                     <span className="sr-only">{option.label}</span>
                     {option.icon ? (
@@ -623,57 +641,11 @@ const LiveFeed = (props: any) => {
                   </button>
                 );
               })}
-              {!toAddPreset ? (
-                <button
-                  className="tooltip flex-1 border border-green-100 bg-green-100 p-2 hover:bg-green-200"
-                  onClick={() => {
-                    setToAddPreset(true);
-                  }}
-                  disabled={toUpdateBoundary}
-                >
-                  <span className="sr-only">Add Preset</span>
-
-                  <CareIcon className={"care-l-plus}"} />
-
-                  <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">
-                    Add Preset (Ctrl + A)
-                  </span>
-                </button>
-              ) : (
-                <button
-                  className="tooltip flex-1 border border-green-100 bg-green-100 p-2 hover:bg-green-200"
-                  onClick={() => {
-                    setToAddPreset(false);
-                  }}
-                >
-                  <span className="sr-only">Cancel</span>
-
-                  <CareIcon className={"care-l-times-circle}"} />
-
-                  <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">
-                    Cancel (Cntrl + A)
-                  </span>
-                </button>
-              )}
 
               <div className="hideonmobilescreen pl-3">
                 <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
               </div>
             </div>
-
-            <CameraBoundaryConfigure
-              addBoundaryPreset={addBoundaryPreset}
-              deleteBoundaryPreset={deleteBoundaryPreset}
-              boundaryPreset={boundaryPreset}
-              bed={bed}
-              toUpdateBoundary={toUpdateBoundary}
-              setToUpdateBoundary={setToUpdateBoundary}
-              loadingAddBoundaryPreset={loadingAddBoundaryPreset}
-              toAddPreset={toAddPreset}
-              setDirection={setDirection}
-              previewBoundary={previewBoundary}
-              isPreview={isPreview}
-            />
           </div>
           <div className="mx-4 flex max-w-sm flex-col">
             <div className={`${isPreview ? "disabled-select-form" : null}`}>
@@ -709,9 +681,23 @@ const LiveFeed = (props: any) => {
                   />
                 ) : (
                   <>
+                    <CameraBoundaryConfigure
+                      addBoundaryPreset={addBoundaryPreset}
+                      deleteBoundaryPreset={deleteBoundaryPreset}
+                      boundaryPreset={boundaryPreset}
+                      bed={bed}
+                      toUpdateBoundary={toUpdateBoundary}
+                      setToUpdateBoundary={setToUpdateBoundary}
+                      loadingAddBoundaryPreset={loadingAddBoundaryPreset}
+                      toAddPreset={toAddPreset}
+                      setDirection={setDirection}
+                      previewBoundary={previewBoundary}
+                      isPreview={isPreview}
+                    />
+
                     <nav className="flex flex-wrap">
                       <button
-                        className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
+                        className={`flex-1 p-4 text-center text-sm font-semibold  text-gray-700 hover:text-gray-800  ${
                           showDefaultPresets
                             ? "border-b-2 border-primary-500 text-primary-600"
                             : ""
@@ -723,7 +709,7 @@ const LiveFeed = (props: any) => {
                         Default Presets
                       </button>
                       <button
-                        className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
+                        className={`flex-1 p-4  text-center text-sm font-semibold  text-gray-700 hover:text-gray-800  ${
                           !showDefaultPresets
                             ? "border-b-2 border-primary-500 text-primary-600"
                             : ""
@@ -818,7 +804,7 @@ const LiveFeed = (props: any) => {
                       {showDefaultPresets ? (
                         <div className="flex flex-row gap-1">
                           <button
-                            className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                            className="flex-1 p-2  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
                             disabled={presetsPage < 10}
                             onClick={() => {
                               setPresetsPage(presetsPage - 10);
@@ -827,7 +813,7 @@ const LiveFeed = (props: any) => {
                             <i className="fas fa-arrow-left"></i>
                           </button>
                           <button
-                            className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                            className="flex-1 p-2  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
                             disabled={presetsPage >= presets?.length}
                             onClick={() => {
                               setPresetsPage(presetsPage + 10);
@@ -839,7 +825,7 @@ const LiveFeed = (props: any) => {
                       ) : (
                         <div className="flex flex-row gap-1">
                           <button
-                            className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                            className="flex-1 p-2 text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
                             disabled={page.offset === 0}
                             onClick={() => {
                               handlePagination(page.offset - page.limit);
@@ -848,7 +834,7 @@ const LiveFeed = (props: any) => {
                             <i className="fas fa-arrow-left"></i>
                           </button>
                           <button
-                            className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                            className="flex-1 p-2 text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
                             disabled={page.offset + page.limit >= page.count}
                             onClick={() => {
                               handlePagination(page.offset + page.limit);
@@ -858,18 +844,28 @@ const LiveFeed = (props: any) => {
                           </button>
                         </div>
                       )}
-                      {props?.showRefreshButton && (
+                      <div className="flex flex-row gap-1">
                         <button
-                          className="w-full rounded-md border border-white bg-green-100 px-3 py-2 font-semibold text-black hover:bg-green-500 hover:text-white"
+                          className="w-full rounded-md border border-white bg-green-100 p-2  text-black hover:bg-green-500 hover:text-white"
                           onClick={() => {
-                            getBedPresets(cameraAsset?.id);
-                            fetchCameraPresets();
+                            setToAddPreset(true);
                           }}
+                          disabled={toUpdateBoundary}
                         >
-                          <CareIcon className="care-l-redo h-4 text-lg" />{" "}
-                          Refresh
+                          <CareIcon className="care-l-plus" /> Add Preset
                         </button>
-                      )}
+                        {props?.showRefreshButton && (
+                          <button
+                            className="w-full rounded-md border border-white bg-green-100 p-2 text-black hover:bg-green-500 hover:text-white"
+                            onClick={() => {
+                              getBedPresets(cameraAsset?.id);
+                              fetchCameraPresets();
+                            }}
+                          >
+                            <CareIcon className="care-l-redo" /> Refresh
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </>
                 )}
