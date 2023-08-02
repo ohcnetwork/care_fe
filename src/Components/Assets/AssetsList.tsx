@@ -6,9 +6,9 @@ import {
   getAnyFacility,
   listAssets,
   getFacilityAssetLocation,
+  getAsset,
 } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
-import { getAsset } from "../../Redux/actions";
 import { useState, useCallback, useEffect } from "react";
 import { Link, navigate } from "raviger";
 import loadable from "@loadable/component";
@@ -70,11 +70,11 @@ const AssetsList = () => {
         page: qParams.page,
         offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
         search_text: qParams.search || "",
-        facility: qParams.facility,
-        asset_type: qParams.asset_type,
-        asset_class: qParams.asset_class,
-        location: qParams.location,
-        status: qParams.status,
+        facility: qParams.facility || "",
+        asset_type: qParams.asset_type || "",
+        asset_class: qParams.asset_class || "",
+        location: qParams.facility ? qParams.location || "" : "",
+        status: qParams.status || "",
       };
       const { data } = await dispatch(listAssets(params));
       if (!status.aborted) {
@@ -149,7 +149,8 @@ const AssetsList = () => {
   );
   const fetchLocationName = useCallback(
     async (status: statusType) => {
-      if (!qParams.location) return setLocationName("");
+      if (!qParams.location || !qParams.facility)
+        return setLocationName(undefined);
       setIsLoading(true);
       const res = await dispatch(
         getFacilityAssetLocation(qParams.facility, qParams.location)
@@ -209,7 +210,7 @@ const AssetsList = () => {
 
   if (isScannerActive)
     return (
-      <div className="md:w-1/2 w-full my-2 mx-auto flex flex-col justify-start items-end">
+      <div className="mx-auto my-2 flex w-full flex-col items-end justify-start md:w-1/2">
         <button
           onClick={() => setIsScannerActive(false)}
           className="btn btn-default mb-2"
@@ -231,25 +232,27 @@ const AssetsList = () => {
           }
           style={{ width: "100%" }}
         />
-        <h2 className="text-center text-lg self-center">Scan Asset QR!</h2>
+        <h2 className="self-center text-center text-lg">Scan Asset QR!</h2>
       </div>
     );
 
   let manageAssets = null;
   if (assetsExist) {
     manageAssets = (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:-mx-8 gap-2">
+      <div className="grid grid-cols-1 gap-2 md:-mx-8 md:grid-cols-2 lg:grid-cols-3">
         {assets.map((asset: AssetData) => (
           <Link
+            key={asset.id}
             href={`/facility/${asset?.location_object.facility.id}/assets/${asset.id}`}
             className="text-inherit"
+            data-testid="created-asset-list"
           >
             <div
               key={asset.id}
-              className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
+              className="border-1 w-full cursor-pointer items-center justify-center rounded-lg border border-transparent bg-white p-5 shadow hover:border-primary-500"
             >
               <div className="md:flex">
-                <p className="text-xl flex font-medium capitalize break-words">
+                <p className="flex break-words text-xl font-medium capitalize">
                   <span className="mr-2 text-primary-500">
                     <CareIcon
                       className={`care-l-${
@@ -261,21 +264,26 @@ const AssetsList = () => {
                       } text-2xl`}
                     />
                   </span>
-                  <p className="truncate w-48">{asset.name}</p>
+                  <p
+                    className="w-48 truncate"
+                    data-testid="created-asset-list-name"
+                  >
+                    {asset.name}
+                  </p>
                 </p>
               </div>
-              <p className="font-normal text-sm">
+              <p className="text-sm font-normal">
                 <span className="text-sm font-medium">
                   <CareIcon className="care-l-location-point mr-1 text-primary-500" />
                   {asset?.location_object?.name}
                 </span>
-                <span className="text-sm font-medium ml-2">
+                <span className="ml-2 text-sm font-medium">
                   <CareIcon className="care-l-hospital mr-1 text-primary-500" />
                   {asset?.location_object?.facility?.name}
                 </span>
               </p>
 
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="mt-2 flex flex-wrap gap-2">
                 {asset.is_working ? (
                   <Chip color="green" startIcon="cog" text="Working" />
                 ) : (
@@ -289,7 +297,7 @@ const AssetsList = () => {
     );
   } else {
     manageAssets = (
-      <div className="w-full bg-white rounded-lg p-2 text-center col-span-3 py-8 pt-4">
+      <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
         <p className="text-2xl font-bold text-gray-600">No Assets Found</p>
       </div>
     );
@@ -337,7 +345,7 @@ const AssetsList = () => {
         </>
       }
     >
-      <div className="lg:flex mt-5 space-y-2 gap-3">
+      <div className="mt-5 gap-3 space-y-2 lg:flex">
         <CountBlock
           text="Total Assets"
           count={totalCount}
@@ -352,24 +360,27 @@ const AssetsList = () => {
             placeholder="Search by name/serial no./QR code ID"
           />
         </div>
-        <div className="flex flex-col lg:ml-2 justify-start items-start gap-2">
-          <div className="flex flex-col md:flex-row gap-2 w-full lg:w-auto">
+        <div className="flex flex-col items-start justify-start gap-2 lg:ml-2">
+          <div className="flex w-full flex-col gap-2 md:flex-row lg:w-auto">
             <div className="w-full">
               <AdvancedFilterButton
                 onClick={() => advancedFilter.setShow(true)}
               />
             </div>
             <ButtonV2
-              className="w-full"
+              className="w-full py-[11px]"
               onClick={() => setIsScannerActive(true)}
             >
               <i className="fas fa-search mr-1"></i> Scan Asset QR
             </ButtonV2>
           </div>
-          <div className="flex flex-col md:flex-row w-full">
+          <div
+            className="flex w-full flex-col md:flex-row"
+            data-testid="create-asset-buttom"
+          >
             <ButtonV2
               authorizeFor={NonReadOnlyUsers}
-              className="w-full inline-flex items-center justify-center"
+              className="inline-flex w-full items-center justify-center"
               onClick={() => {
                 if (qParams.facility) {
                   navigate(`/facility/${qParams.facility}/assets/new`);
@@ -391,12 +402,12 @@ const AssetsList = () => {
         <>
           <FilterBadges
             badges={({ badge, value }) => [
-              value("Facility", "facility", facilityName || ""),
+              value("Facility", "facility", facilityName ?? ""),
               badge("Name/Serial No./QR ID", "search"),
-              value("Asset Type", "asset_type", asset_type || ""),
-              value("Asset Class", "asset_class", asset_class || ""),
-              value("Status", "status", status?.replace(/_/g, " ") || ""),
-              value("Location", "location", locationName || ""),
+              value("Asset Type", "asset_type", asset_type ?? ""),
+              value("Asset Class", "asset_class", asset_class ?? ""),
+              value("Status", "status", status?.replace(/_/g, " ") ?? ""),
+              value("Location", "location", locationName ?? ""),
             ]}
           />
           <div className="grow">

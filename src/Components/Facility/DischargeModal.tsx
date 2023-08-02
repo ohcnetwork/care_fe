@@ -4,7 +4,6 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { useCallback, useEffect, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { CircularProgress } from "@material-ui/core";
 import ClaimDetailCard from "../HCX/ClaimDetailCard";
 import { ConsultationModel } from "./models";
 import CreateClaimCard from "../HCX/CreateClaimCard";
@@ -24,13 +23,14 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
+import CircularProgress from "../Common/components/CircularProgress";
 
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
-  discharge_date: string | null;
-  death_datetime: string | null;
-  death_confirmed_doctor: string | null;
+  discharge_date?: string;
+  death_datetime?: string;
+  death_confirmed_doctor?: string;
 }
 
 interface IProps {
@@ -40,8 +40,8 @@ interface IProps {
   afterSubmit?: () => void;
   discharge_reason?: string;
   discharge_notes?: string;
-  discharge_date?: string | null;
-  death_datetime?: string | null;
+  discharge_date?: string;
+  death_datetime?: string;
 }
 
 const DischargeModal = ({
@@ -54,8 +54,8 @@ const DischargeModal = ({
   },
   discharge_reason = "",
   discharge_notes = "",
-  discharge_date = new Date().toISOString(),
-  death_datetime = null,
+  discharge_date = moment().format("YYYY-MM-DDTHH:mm"),
+  death_datetime = moment().format("YYYY-MM-DDTHH:mm"),
 }: IProps) => {
   const { enable_hcx } = useConfig();
   const dispatch: any = useDispatch();
@@ -65,7 +65,7 @@ const DischargeModal = ({
       discharge_notes,
       discharge_date,
       death_datetime,
-      death_confirmed_doctor: null,
+      death_confirmed_doctor: undefined,
     });
   const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
   const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
@@ -167,14 +167,14 @@ const DischargeModal = ({
     });
   };
 
-  const prescriptionActions = PrescriptionActions(consultationData.id);
+  const prescriptionActions = PrescriptionActions(consultationData.id ?? "");
 
   return (
     <DialogModal
       title={
         <div>
           <p>Discharge patient from CARE</p>
-          <span className="mt-1 flex gap-1 text-sm text-warning-500 font-medium">
+          <span className="mt-1 flex gap-1 text-sm font-medium text-warning-500">
             <CareIcon className="care-l-exclamation-triangle text-base" />
             <p>Caution: this action is irreversible.</p>
           </span>
@@ -225,11 +225,12 @@ const DischargeModal = ({
         {preDischargeForm.discharge_reason === "REC" && (
           <div>
             <DateFormField
+              position="LEFT"
               label="Discharge Date"
               name="discharge_date"
               value={moment(preDischargeForm?.discharge_date).toDate()}
               min={moment(
-                consultationData?.admission_date ||
+                consultationData?.admission_date ??
                   consultationData?.created_date
               ).toDate()}
               disableFuture={true}
@@ -256,30 +257,29 @@ const DischargeModal = ({
         )}
         {preDischargeForm.discharge_reason === "EXP" && (
           <div>
-            <div>
-              Death Date and Time
-              <span className="text-danger-500">{" *"}</span>
-              <input
-                type="datetime-local"
-                className="w-[calc(100%-5px)] focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                value={preDischargeForm.death_datetime || ""}
-                required
-                min={consultationData?.admission_date?.substring(0, 16)}
-                max={moment(new Date()).format("YYYY-MM-DDThh:mm")}
-                onChange={(e) => {
-                  setPreDischargeForm((form) => {
-                    return {
-                      ...form,
-                      death_datetime: e.target.value,
-                    };
-                  });
-                }}
-              />
-            </div>
+            <TextFormField
+              name="death_datetime"
+              label="Death Date and Time"
+              type="datetime-local"
+              value={preDischargeForm.death_datetime}
+              onChange={(e) => {
+                setPreDischargeForm((form) => {
+                  return {
+                    ...form,
+                    death_datetime: e.value,
+                  };
+                });
+              }}
+              required
+              min={moment(consultationData?.admission_date).format(
+                "YYYY-MM-DDTHH:mm"
+              )}
+              max={moment().format("YYYY-MM-DDTHH:mm")}
+            />
             <TextFormField
               name="death_confirmed_by"
               label="Confirmed By"
-              value={preDischargeForm.death_confirmed_doctor || ""}
+              value={preDischargeForm.death_confirmed_doctor ?? ""}
               onChange={(e) => {
                 setPreDischargeForm((form) => {
                   return {
@@ -300,7 +300,7 @@ const DischargeModal = ({
               name="discharge_date"
               value={moment(preDischargeForm.discharge_date).toDate()}
               min={moment(
-                consultationData?.admission_date ||
+                consultationData?.admission_date ??
                   consultationData?.created_date
               ).toDate()}
               disableFuture={true}
@@ -313,14 +313,14 @@ const DischargeModal = ({
 
       {enable_hcx && (
         // TODO: if policy and approved pre-auth exists
-        <div className="my-5 shadow rounded p-5">
+        <div className="my-5 rounded p-5 shadow">
           <h2 className="mb-2">Claim Insurance</h2>
           {latestClaim ? (
             <ClaimDetailCard claim={latestClaim} />
           ) : (
             <CreateClaimCard
-              consultationId={consultationData.id}
-              patientId={consultationData.patient}
+              consultationId={consultationData.id ?? ""}
+              patientId={consultationData.patient ?? ""}
               use="claim"
               isCreating={isCreateClaimLoading}
               setIsCreating={setIsCreateClaimLoading}
@@ -329,10 +329,10 @@ const DischargeModal = ({
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
+      <div className="flex flex-col gap-2 pt-4 md:flex-row md:justify-end">
         <Cancel onClick={onClose} />
         {isSendingDischargeApi ? (
-          <CircularProgress size={20} />
+          <CircularProgress />
         ) : (
           <Submit
             onClick={() => handlePatientDischarge(false)}

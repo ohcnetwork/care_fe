@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
 import PaginationComponent from "../../Components/Common/Pagination";
 import useConfig from "./useConfig";
+import { classNames } from "../../Utils/utils";
 
 export type FilterState = Record<string, unknown>;
 export type FilterParamKeys = string | string[];
@@ -131,7 +132,7 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     const compiledBadges = badges(badgeUtils);
     const { t } = useTranslation();
     return (
-      <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3">
+      <div className="col-span-3 my-2 flex w-full flex-wrap items-center gap-2">
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
@@ -140,16 +141,24 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     );
   };
 
-  const Pagination = ({ totalCount }: { totalCount: number }) => {
+  const Pagination = ({
+    totalCount,
+    noMargin,
+  }: {
+    totalCount: number;
+    noMargin?: boolean;
+  }) => {
     if (!hasPagination) {
       const errorMsg = "Do not render Pagination component, when limit is <= 0";
       return <span className="bg-red-500 text-white">{errorMsg}</span>;
     }
     return (
       <div
-        className={`mt-4 flex w-full justify-center ${
-          totalCount > limit ? "visible" : "invisible"
-        }`}
+        className={classNames(
+          "flex w-full justify-center",
+          totalCount > limit ? "visible" : "invisible",
+          !noMargin && "mt-4"
+        )}
       >
         <PaginationComponent
           cPage={qParams.page}

@@ -189,7 +189,7 @@ const parts = [
 export default function PressureSore() {
   const [selected, setSelected] = useState();
   return (
-    <div className="flex justify-center max-w-2xl mx-auto">
+    <div className="mx-auto flex max-w-2xl justify-center">
       <svg
         className=" h-screen py-4"
         xmlns="http://www.w3.org/2000/svg"

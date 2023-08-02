@@ -41,9 +41,9 @@ export const VoiceRecorder = (props: any) => {
       <div>
         {isRecording ? (
           <>
-            <div className="space-x-2 flex">
+            <div className="flex space-x-2">
               <div className="bg-gray-100 p-2 text-primary-700">
-                <CareIcon className="care-l-record-audio animate-pulse mr-2" />
+                <CareIcon className="care-l-record-audio mr-2 animate-pulse" />
                 {t("recording") + "..."}
               </div>
               <ButtonV2
@@ -67,6 +67,7 @@ export const VoiceRecorder = (props: any) => {
               <ButtonV2
                 onClick={startRecording}
                 authorizeFor={NonReadOnlyUsers}
+                className="w-full md:w-fit"
               >
                 <CareIcon className="care-l-microphone text-lg" />
                 {t("record")}
@@ -78,7 +79,7 @@ export const VoiceRecorder = (props: any) => {
       {audioURL && (
         <div className="my-4">
           <audio
-            className="max-h-full max-w-full m-auto object-contain"
+            className="m-auto max-h-full max-w-full object-contain"
             src={audioURL}
             controls
           />{" "}

@@ -37,16 +37,15 @@ export const ExportMenu = ({
   disabled,
   exportItems,
 }: ExportMenuProps) => {
-  const { isExporting, exportFile, _CSVLink } = useExport();
+  const { isExporting, exportFile } = useExport();
 
   return (
     <div key="export-menu">
-      <_CSVLink />
       <DropdownMenu
         disabled={isExporting || disabled}
         title={isExporting ? "Exporting..." : label}
         icon={<CareIcon className="care-l-import" />}
-        className="bg-white hover:bg-primary-100 text-primary-500 enabled:border border-primary-500 tooltip"
+        className="tooltip border-primary-500 bg-white text-primary-500 hover:bg-primary-100 enabled:border"
       >
         {exportItems.map((item) => (
           <DropdownItem
@@ -70,17 +69,16 @@ export const ExportButton = ({
   parse,
   ...props
 }: ExportButtonProps) => {
-  const { isExporting, exportFile, _CSVLink } = useExport();
+  const { isExporting, exportFile } = useExport();
 
   return (
     <>
-      <_CSVLink />
       <ButtonV2
         disabled={isExporting || props.disabled}
         onClick={() =>
           exportFile(props.action, props.filenamePrefix, type, parse)
         }
-        className="mx-2 tooltip p-4 text-lg text-secondary-800 disabled:text-secondary-500 disabled:bg-transparent"
+        className="tooltip mx-2 p-4 text-lg text-secondary-800 disabled:bg-transparent disabled:text-secondary-500"
         variant="secondary"
         ghost
         circle

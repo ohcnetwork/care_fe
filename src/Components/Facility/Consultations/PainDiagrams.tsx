@@ -76,11 +76,11 @@ export const PainDiagrams = (props: any) => {
 
   const dropdown = (dates: Array<any>) => {
     return dates && dates.length > 0 ? (
-      <div className="flex mx-auto flex-wrap">
+      <div className="mx-auto flex flex-wrap">
         <div className="p-2">Choose Date and Time</div>
         <select
           title="date"
-          className="pl-3 pr-8 py-2 text-slate-600 relative bg-white rounded border-gray-200 shadow outline-none focus:outline-none  focus:ring-gray-300 focus:border-gray-300 focus:ring-1"
+          className="relative rounded border-gray-200 bg-white py-2 pl-3 pr-8 text-slate-600 shadow outline-none focus:border-gray-300  focus:outline-none focus:ring-1 focus:ring-gray-300"
           onChange={(e) => {
             setSelectedDateData(results, e.target.value);
           }}
@@ -98,7 +98,7 @@ export const PainDiagrams = (props: any) => {
       <div>
         <select
           title="date"
-          className="border-2 border-gray-400 pl-3 pr-8 py-2"
+          className="border-2 border-gray-400 py-2 pl-3 pr-8"
           disabled={true}
         >
           <option>No Data Found</option>

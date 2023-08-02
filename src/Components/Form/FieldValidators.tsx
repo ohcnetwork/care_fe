@@ -29,6 +29,19 @@ export const MultiValidator = <T,>(
   return validator;
 };
 
+export const AnyValidator = <T,>(
+  validators: FieldValidator<T>[]
+): FieldValidator<T> => {
+  const validator = (value: T) => {
+    for (const validate of validators) {
+      const error = validate(value);
+      if (!error) return;
+    }
+    return validators[0](value);
+  };
+  return validator;
+};
+
 export const RequiredFieldValidator = (message = "Field is required") => {
   return <T,>(value: T): FieldError => {
     if (!value) return message;
@@ -36,10 +49,30 @@ export const RequiredFieldValidator = (message = "Field is required") => {
   };
 };
 
-export const EmailValidator = (message = "Invalid email address") => {
+export const RegexValidator = (regex: RegExp, message = "Invalid input") => {
   return (value: string): FieldError => {
-    const pattern =
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return pattern.test(value) ? undefined : message;
+    return regex.test(value) ? undefined : message;
   };
+};
+
+const EMAIL_REGEX =
+  /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+export const EmailValidator = (message = "Invalid email address") => {
+  return RegexValidator(EMAIL_REGEX, message);
+};
+
+const PHONE_NUMBER_REGEX =
+  /^(?:(?:(?:\+|0{0,2})91|0{0,2})(?:\()?\d{3}(?:\))?[-]?\d{3}[-]?\d{4})$/;
+
+export const PhoneNumberValidator = (message = "Invalid phone number") => {
+  return RegexValidator(PHONE_NUMBER_REGEX, message);
+};
+
+const SUPPORT_PHONE_NUMBER_REGEX = /^1800[-]?\d{3}[-]?\d{3,4}$/;
+
+export const SupportPhoneNumberValidator = (
+  message = "Invalid support phone number"
+) => {
+  return RegexValidator(SUPPORT_PHONE_NUMBER_REGEX, message);
 };

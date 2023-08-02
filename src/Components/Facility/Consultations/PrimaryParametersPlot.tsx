@@ -11,6 +11,7 @@ import { formatDate } from "../../../Utils/utils";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { PainDiagrams } from "./PainDiagrams";
 import PageTitle from "../../Common/PageTitle";
+
 interface PrimaryParametersPlotProps {
   facilityId: string;
   patientId: string;
@@ -142,11 +143,11 @@ export const PrimaryParametersPlot = ({
 
   return (
     <div>
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="md:w-full overflow-x-auto m-2 pt-4 px-4 bg-white border rounded-lg shadow">
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <StackedLinePlot title="BP" xData={dates} yData={BPData} />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <LinePlot
             title="Pulse"
             name="Pulse"
@@ -156,7 +157,7 @@ export const PrimaryParametersPlot = ({
             high={100}
           />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <LinePlot
             title="Temperature (F)"
             name="Temperature"
@@ -164,7 +165,7 @@ export const PrimaryParametersPlot = ({
             yData={yAxisData("temperature")}
           />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <LinePlot
             title="Resp"
             name="Resp"
@@ -172,10 +173,10 @@ export const PrimaryParametersPlot = ({
             yData={yAxisData("resp")}
           />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <StackedLinePlot title="Insulin" xData={dates} yData={InsulinData} />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <LinePlot
             title="SPO2 (%)"
             name="spo2"
@@ -185,7 +186,7 @@ export const PrimaryParametersPlot = ({
             high={100}
           />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow">
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
           <LinePlot
             title="Ventilator FIO2 (%)"
             name="fio2"
@@ -195,66 +196,72 @@ export const PrimaryParametersPlot = ({
             high={60}
           />
         </div>
-        <div className="md:w-full overflow-x-auto pt-4 m-2 px-4 bg-white border rounded-lg shadow h-80">
-          <h3 className="text-sm px-3 mb-2">Rhythm</h3>
-          <div className="flow-root m-2 overflow-y-scroll h-64">
-            <ul role="list" className="-mb-8">
-              {Object.entries(rhythmValues).map((obj: any) =>
-                obj[1].map((rhythmDetails: any, rhythmIdx: number) => (
-                  <li key={rhythmIdx}>
-                    <div className="relative pb-8">
-                      {rhythmIdx !== obj[1].length ? (
-                        <span
-                          className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
-                          aria-hidden="true"
-                        />
-                      ) : null}
-                      <div className="relative flex space-x-3">
-                        <div>
+        <div className="m-2 overflow-x-auto rounded-lg border bg-white px-4 pt-4 shadow md:w-full">
+          <h3 className="text-sm">Rhythm</h3>
+          {Object.keys(rhythmValues).length === 0 ? (
+            <div className="flex h-64 items-center justify-center">
+              <p className="text-center">No Rhythm data available.</p>
+            </div>
+          ) : (
+            <div className="m-2 flow-root h-64 overflow-y-scroll">
+              <ul role="list" className="-mb-8">
+                {Object.entries(rhythmValues).map((obj: any) =>
+                  obj[1].map((rhythmDetails: any, rhythmIdx: number) => (
+                    <li key={rhythmIdx}>
+                      <div className="relative pb-8">
+                        {rhythmIdx !== obj[1].length ? (
                           <span
-                            className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${
-                              rhythmDetails.rhythm === 5
-                                ? " text-green-500 "
-                                : " text-red-500 "
-                            }`}
-                          >
-                            {rhythmDetails.rhythm === 5 ? (
-                              <CareIcon className="care-l-check-circle text-xl" />
-                            ) : (
-                              <CareIcon className="care-l-times-circle text-xl" />
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+                            className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200"
+                            aria-hidden="true"
+                          />
+                        ) : null}
+                        <div className="relative flex space-x-3">
                           <div>
-                            <p
-                              className={`text-sm ${
+                            <span
+                              className={`flex h-8 w-8 items-center justify-center rounded-full ring-8 ring-white ${
                                 rhythmDetails.rhythm === 5
                                   ? " text-green-500 "
                                   : " text-red-500 "
                               }`}
                             >
-                              <span className="mr-5">
-                                {rhythmDetails.rhythm === 5
-                                  ? "Regular"
-                                  : "Irregular"}
-                              </span>
-                              <span>{rhythmDetails.rhythm_detail}</span>
-                            </p>
+                              {rhythmDetails.rhythm === 5 ? (
+                                <CareIcon className="care-l-check-circle text-xl" />
+                              ) : (
+                                <CareIcon className="care-l-times-circle text-xl" />
+                              )}
+                            </span>
                           </div>
-                          <div className="whitespace-nowrap text-right text-sm text-gray-500">
-                            <p>
-                              {rhythmDetails.time}, {obj[0]}
-                            </p>
+                          <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+                            <div>
+                              <p
+                                className={`text-sm ${
+                                  rhythmDetails.rhythm === 5
+                                    ? " text-green-500 "
+                                    : " text-red-500 "
+                                }`}
+                              >
+                                <span className="mr-5">
+                                  {rhythmDetails.rhythm === 5
+                                    ? "Regular"
+                                    : "Irregular"}
+                                </span>
+                                <span>{rhythmDetails.rhythm_detail}</span>
+                              </p>
+                            </div>
+                            <div className="whitespace-nowrap text-right text-sm text-gray-500">
+                              <p>
+                                {rhythmDetails.time}, {obj[0]}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
+                    </li>
+                  ))
+                )}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
       <div>

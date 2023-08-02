@@ -1,3 +1,4 @@
+import { AssetBedModel, AssetClass, AssetData } from "../Assets/AssetTypes";
 import {
   CONSULTATION_TABS,
   DISCHARGE_REASONS,
@@ -5,11 +6,21 @@ import {
   OptionsType,
   SYMPTOM_CHOICES,
 } from "../../Common/constants";
-import { ConsultationModel, ICD11DiagnosisModel } from "./models";
-import { getConsultation, getPatient } from "../../Redux/actions";
+import {
+  BedModel,
+  ConsultationModel,
+  FacilityModel,
+  ICD11DiagnosisModel,
+} from "./models";
+import {
+  getConsultation,
+  getPatient,
+  getPermittedFacility,
+  listAssetBeds,
+} from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useCallback, useEffect, useState } from "react";
+
 import { ABGPlots } from "./Consultations/ABGPlots";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -17,30 +28,35 @@ import Chip from "../../CAREUI/display/Chip";
 import { DailyRoundsList } from "./Consultations/DailyRoundsList";
 import { DialysisPlots } from "./Consultations/DialysisPlots";
 import DischargeModal from "./DischargeModal";
+import DischargeSummaryModal from "./DischargeSummaryModal";
 import DoctorVideoSlideover from "./DoctorVideoSlideover";
 import { Feed } from "./Consultations/Feed";
 import { FileUpload } from "../Patient/FileUpload";
+import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import InvestigationTab from "./Investigations/investigationsTab";
-import { make as Link } from "../Common/components/Link.gen";
+import { make as Link } from "../Common/components/Link.bs";
+import MedicineAdministrationsTable from "../Medicine/MedicineAdministrationsTable";
 import { NeurologicalTable } from "./Consultations/NeurologicalTables";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { NursingPlot } from "./Consultations/NursingPlot";
 import { NutritionPlots } from "./Consultations/NutritionPlots";
 import PatientInfoCard from "../Patient/PatientInfoCard";
 import { PatientModel } from "../Patient/models";
-import PatientVitalsCard from "../Patient/PatientVitalsCard";
+import PrescriptionsTable from "../Medicine/PrescriptionsTable";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 import ReadMore from "../Common/components/Readmore";
+import VentilatorPatientVitalsMonitor from "../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { formatDate } from "../../Utils/utils";
 import loadable from "@loadable/component";
 import moment from "moment";
 import { navigate } from "raviger";
+import { useDispatch } from "react-redux";
+import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import PrescriptionsTable from "../Medicine/PrescriptionsTable";
-import MedicineAdministrationsTable from "../Medicine/MedicineAdministrationsTable";
-import DischargeSummaryModal from "./DischargeSummaryModal";
+import useBreakpoints from "../../Common/hooks/useBreakpoints";
+import { getVitalsCanvasSizeAndDuration } from "../VitalsMonitor/utils";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -54,6 +70,7 @@ export const ConsultationDetails = (props: any) => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
+  const [qParams, _] = useQueryParams();
 
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {} as ConsultationModel
@@ -71,11 +88,7 @@ export const ConsultationDetails = (props: any) => {
     `${patientData.address},\n${patientData.ward_object?.name},\n${patientData.local_body_object?.name},\n${patientData.district_object?.name},\n${patientData.state_object?.name}`;
 
   const getPatientComorbidities = (patientData: any) => {
-    if (
-      patientData &&
-      patientData.medical_history &&
-      patientData.medical_history.length
-    ) {
+    if (patientData?.medical_history?.length) {
       const medHis = patientData.medical_history;
       return medHis.map((item: any) => item.disease).join(", ");
     } else {
@@ -83,17 +96,81 @@ export const ConsultationDetails = (props: any) => {
     }
   };
 
+  const [hl7SocketUrl, setHL7SocketUrl] = useState<string>();
+  const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
+  const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
+  const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
+
+  useEffect(() => {
+    if (
+      !consultationData.facility ||
+      !consultationData.current_bed?.bed_object.id
+    )
+      return;
+
+    const fetchData = async () => {
+      const [facilityRes, assetBedRes] = await Promise.all([
+        dispatch(getPermittedFacility(consultationData.facility as any)),
+        dispatch(
+          listAssetBeds({
+            facility: consultationData.facility as any,
+            bed: consultationData.current_bed?.bed_object.id,
+          })
+        ),
+      ]);
+
+      const { middleware_address } = facilityRes.data as FacilityModel;
+      const assetBeds = assetBedRes.data.results as AssetBedModel[];
+
+      const monitorBedData = assetBeds.find(
+        (i) => i.asset_object.asset_class === AssetClass.HL7MONITOR
+      );
+      setMonitorBedData(monitorBedData);
+      const assetDataForMonitor = monitorBedData?.asset_object;
+      const hl7Meta = assetDataForMonitor?.meta;
+      const hl7Middleware = hl7Meta?.middleware_hostname || middleware_address;
+      if (hl7Middleware && hl7Meta?.local_ip_address) {
+        setHL7SocketUrl(
+          `wss://${hl7Middleware}/observations/${hl7Meta.local_ip_address}`
+        );
+      }
+
+      const ventilatorBedData = assetBeds.find(
+        (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
+      );
+      setVentilatorBedData(ventilatorBedData);
+      const ventilatorMeta = ventilatorBedData?.asset_object?.meta;
+      const ventilatorMiddleware =
+        ventilatorMeta?.middleware_hostname || middleware_address;
+      if (ventilatorMiddleware && ventilatorMeta?.local_ip_address) {
+        setVentilatorSocketUrl(
+          `wss://${ventilatorMiddleware}/observations/${ventilatorMeta?.local_ip_address}`
+        );
+      }
+
+      if (
+        !(hl7Middleware && hl7Meta?.local_ip_address) &&
+        !(ventilatorMiddleware && ventilatorMeta?.local_ip_address)
+      ) {
+        setHL7SocketUrl(undefined);
+        setVentilatorSocketUrl(undefined);
+      }
+    };
+
+    fetchData();
+  }, [consultationData]);
+
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatch(getConsultation(consultationId));
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           const data: ConsultationModel = {
             ...res.data,
             symptoms_text: "",
           };
-          if (res.data.symptoms && res.data.symptoms.length) {
+          if (res.data.symptoms?.length) {
             const symptoms = res.data.symptoms
               .filter((symptom: number) => symptom !== 9)
               .map((symptom: number) => {
@@ -105,7 +182,7 @@ export const ConsultationDetails = (props: any) => {
           setConsultationData(data);
           const id = res.data.patient;
           const patientRes = await dispatch(getPatient({ id }));
-          if (patientRes && patientRes.data) {
+          if (patientRes?.data) {
             const patientGender = getPatientGender(patientRes.data);
             const patientAddress = getPatientAddress(patientRes.data);
             const patientComorbidities = getPatientComorbidities(
@@ -136,6 +213,18 @@ export const ConsultationDetails = (props: any) => {
     fetchData(status);
   }, []);
 
+  const vitalsAspectRatio = useBreakpoints({
+    default: undefined,
+    md: 8 / 11,
+    lg: 15 / 11,
+    xl: 13 / 11,
+    "2xl": 19 / 11,
+    "3xl": 23 / 11,
+  });
+
+  const vitalsConfig = getVitalsCanvasSizeAndDuration(vitalsAspectRatio);
+  const vitalsConfigHash = JSON.stringify(vitalsConfig);
+
   if (isLoading) {
     return <Loading />;
   }
@@ -157,7 +246,7 @@ export const ConsultationDetails = (props: any) => {
     const [showMore, setShowMore] = useState(false);
 
     return diagnoses.length ? (
-      <div className="text-sm w-full">
+      <div className="w-full text-sm">
         <p className="font-semibold leading-relaxed">{label}</p>
 
         {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) => (
@@ -168,14 +257,14 @@ export const ConsultationDetails = (props: any) => {
             {!showMore ? (
               <a
                 onClick={() => setShowMore(true)}
-                className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+                className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
               >
                 show more
               </a>
             ) : (
               <a
                 onClick={() => setShowMore(false)}
-                className="text-sm text-blue-600 hover:text-blue-300 cursor-pointer"
+                className="cursor-pointer text-sm text-blue-600 hover:text-blue-300"
               >
                 show less
               </a>
@@ -201,7 +290,7 @@ export const ConsultationDetails = (props: any) => {
       />
 
       <div className="px-2 pb-2">
-        <nav className="flex justify-between flex-wrap relative">
+        <nav className="relative flex flex-wrap justify-between">
           <PageTitle
             title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
@@ -209,83 +298,86 @@ export const ConsultationDetails = (props: any) => {
               [facilityId]: { name: patientData?.facility_object?.name },
               [patientId]: { name: patientData?.name },
               [consultationId]: {
-                name: `Admitted on ${formatDate(
-                  consultationData.admission_date
-                    ? consultationData.admission_date
-                    : "00:00"
-                )}`,
+                name:
+                  consultationData.suggestion === "A"
+                    ? `Admitted on ${formatDate(
+                        consultationData.admission_date!
+                      )}`
+                    : consultationData.suggestion_text,
               },
             }}
             breadcrumbs={true}
             backUrl="/patients"
           />
-          <div className="w-full sm:w-min lg:absolute xl:right-0 -right-6 top-0 flex sm:flex-row sm:items-center flex-col space-y-1 sm:space-y-0 sm:divide-x-2">
+          <div className="-right-6 top-0 flex w-full flex-col space-y-1 sm:w-min sm:flex-row sm:items-center sm:space-y-0 sm:divide-x-2 lg:absolute xl:right-0">
             {!consultationData.discharge_date && (
-              <div className="w-full flex flex-col sm:flex-row px-2">
+              <div className="flex w-full flex-col px-2 sm:flex-row">
                 <ButtonV2
                   onClick={() =>
                     navigate(
                       `/facility/${patientData.facility}/patient/${patientData.id}/shift/new`
                     )
                   }
-                  className="w-full btn m-1 btn-primary hover:text-white"
+                  className="btn btn-primary m-1 w-full hover:text-white"
                 >
-                  <CareIcon className="care-l-ambulance w-5 h-5" />
+                  <CareIcon className="care-l-ambulance h-5 w-5" />
                   Shift Patient
                 </ButtonV2>
                 <button
                   onClick={() => setShowDoctors(true)}
-                  className="w-full btn m-1 btn-primary hover:text-white"
+                  className="btn btn-primary m-1 w-full hover:text-white"
                 >
                   Doctor Connect
                 </button>
                 {patientData.last_consultation?.id && (
                   <Link
                     href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
-                    className="w-full btn m-1 btn-primary hover:text-white"
+                    className="btn btn-primary m-1 w-full hover:text-white"
                   >
                     Camera Feed
                   </Link>
                 )}
               </div>
             )}
-            <div className="w-full flex flex-col sm:flex-row px-2">
+            <div className="flex w-full flex-col px-2 sm:flex-row">
               <Link
                 href={`/facility/${patientData.facility}/patient/${patientData.id}`}
-                className="w-full btn m-1 btn-primary hover:text-white"
+                className="btn btn-primary m-1 w-full hover:text-white"
               >
                 Patient Details
               </Link>
               <Link
                 href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
-                className="w-full btn m-1 btn-primary hover:text-white"
+                className="btn btn-primary m-1 w-full hover:text-white"
               >
                 Doctor&apos;s Notes
               </Link>
             </div>
           </div>
         </nav>
-        <div className="flex md:flex-row flex-col w-full mt-2">
-          <div className="border rounded-lg bg-white shadow h-full text-black w-full">
+        <div className="mt-2 flex w-full flex-col md:flex-row">
+          <div className="h-full w-full rounded-lg border bg-white text-black shadow">
             <PatientInfoCard
               patient={patientData}
               consultation={consultationData}
               fetchPatientData={fetchData}
+              consultationId={consultationId}
+              showAbhaProfile={qParams["show-abha-profile"] === "true"}
             />
 
-            <div className="flex md:flex-row flex-col justify-between border-t px-4 pt-5">
+            <div className="flex flex-col justify-between border-t px-4 pt-5 md:flex-row">
               {consultationData.admitted_to && (
-                <div className="border rounded-lg bg-gray-100 p-2 md:mt-0 mt-2">
+                <div className="mt-2 rounded-lg border bg-gray-100 p-2 md:mt-0">
                   <div className="border-b-2 py-1">
                     Patient
                     {consultationData.discharge_date
                       ? " Discharged from"
                       : " Admitted to"}
-                    <span className="badge badge-pill badge-warning font-bold ml-2">
+                    <span className="badge badge-pill badge-warning ml-2 font-bold">
                       {consultationData.admitted_to}
                     </span>
                   </div>
-                  {(consultationData.admission_date ||
+                  {(consultationData.admission_date ??
                     consultationData.discharge_date) && (
                     <div className="text-3xl font-bold">
                       {moment(
@@ -295,7 +387,7 @@ export const ConsultationDetails = (props: any) => {
                       ).fromNow()}
                     </div>
                   )}
-                  <div className="text-xs -mt-2">
+                  <div className="-mt-2 text-xs">
                     {consultationData.admission_date &&
                       formatDate(consultationData.admission_date)}
                     {consultationData.discharge_date &&
@@ -305,8 +397,8 @@ export const ConsultationDetails = (props: any) => {
               )}
             </div>
 
-            <div className="flex px-4 flex-col-reverse lg:flex-row gap-2">
-              <div className="flex flex-col w-3/4 h-full">
+            <div className="flex flex-col-reverse gap-2 px-4 lg:flex-row">
+              <div className="flex h-full w-3/4 flex-col">
                 {/*consultationData.other_symptoms && (
                   <div className="capitalize">
                     <span className="font-semibold leading-relaxed">
@@ -334,42 +426,38 @@ export const ConsultationDetails = (props: any) => {
                           },
                         ]
                       : []),
-                    ...(consultationData?.icd11_diagnoses_object || []),
+                    ...(consultationData?.icd11_diagnoses_object ?? []),
                   ]}
                   label="Diagnosis (as per ICD-11 recommended by WHO)"
                 />
 
                 {consultationData.verified_by && (
-                  <div className="text-sm mt-2">
+                  <div className="mt-2 text-sm">
                     <span className="font-semibold leading-relaxed">
                       Verified By:{" "}
                     </span>
                     {consultationData.verified_by}
-                    <i className="fas fa-check fill-current text-lg text-green-500 ml-2"></i>
+                    <i className="fas fa-check ml-2 fill-current text-lg text-green-500"></i>
                   </div>
                 )}
               </div>
-              <div className="flex flex-col lg:flex-row gap-2 text-right h-full">
-                <button
-                  className="btn btn-primary"
-                  onClick={() => setOpenDischargeSummaryDialog(true)}
-                >
+              <div className="flex h-full w-full flex-col justify-end gap-2 text-right lg:flex-row">
+                <ButtonV2 onClick={() => setOpenDischargeSummaryDialog(true)}>
                   <i className="fas fa-clipboard-list"></i>
-                  &nbsp; Discharge Summary
-                </button>
+                  <span>{t("discharge_summary")}</span>
+                </ButtonV2>
 
-                <button
-                  className="btn btn-primary"
+                <ButtonV2
                   onClick={() => setOpenDischargeDialog(true)}
                   disabled={!!consultationData.discharge_date}
                 >
                   <i className="fas fa-hospital-user"></i>
-                  &nbsp; Discharge from CARE
-                </button>
+                  <span>{t("discharge_from_care")}</span>
+                </ButtonV2>
               </div>
             </div>
-            <div className="flex md:flex-row flex-col gap-2 justify-between p-4">
-              <div className="flex flex-col text-xs text-gray-700 font-base leading-relaxed">
+            <div className="flex flex-col justify-between gap-2 p-4 md:flex-row">
+              <div className="font-base flex flex-col text-xs leading-relaxed text-gray-700">
                 <div>
                   <span className="text-gray-900">Created: </span>
                   {consultationData.created_date
@@ -384,7 +472,7 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )}
               </div>
-              <div className="flex flex-col text-xs md:text-right text-gray-700 font-base leading-relaxed">
+              <div className="font-base flex flex-col text-xs leading-relaxed text-gray-700 md:text-right">
                 <div>
                   <span className="text-gray-900">Last Modified: </span>
                   {consultationData.modified_date
@@ -403,14 +491,14 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </div>
 
-        <div className="border-b-2 border-gray-200 mt-4 w-full">
-          <div className="sm:flex sm:items-baseline overflow-x-auto">
+        <div className="mt-4 w-full border-b-2 border-gray-200">
+          <div className="overflow-x-auto sm:flex sm:items-baseline">
             <div className="mt-4 sm:mt-0">
-              <nav className="pl-2 flex space-x-6 overflow-x-auto pb-2 ">
+              <nav className="flex space-x-6 overflow-x-auto pb-2 pl-2 ">
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
                     if (
-                      !consultationData?.current_bed?.bed_object?.id ||
+                      !consultationData?.current_bed?.bed_object?.id ??
                       consultationData?.discharge_date !== null
                     )
                       return null;
@@ -430,505 +518,578 @@ export const ConsultationDetails = (props: any) => {
           </div>
         </div>
         {tab === "UPDATES" && (
-          <div className="flex xl:flex-row flex-col">
-            <div className="xl:w-2/3 w-full">
-              <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
-              {!consultationData.discharge_date && (
-                <section className="bg-white shadow-sm rounded-md flex items-stretch w-full flex-col lg:flex-row overflow-hidden">
-                  <PatientVitalsCard
-                    patient={patientData}
-                    facilityId={patientData.facility}
-                  />
+          <div className="flex flex-col gap-2">
+            {!consultationData.discharge_date &&
+              hl7SocketUrl &&
+              ventilatorSocketUrl && (
+                <section className="flex w-full flex-col items-stretch overflow-auto rounded-md bg-white shadow-sm lg:flex-row">
+                  <div className="mx-auto flex w-full flex-col justify-between gap-1 rounded bg-[#020617] lg:w-auto lg:min-w-[1280px] lg:flex-row">
+                    <div className="min-h-[400px] flex-1">
+                      <HL7PatientVitalsMonitor
+                        patientAssetBed={{
+                          asset: monitorBedData?.asset_object as AssetData,
+                          bed: monitorBedData?.bed_object as BedModel,
+                          patient: patientData,
+                          meta: monitorBedData?.asset_object?.meta,
+                        }}
+                        socketUrl={hl7SocketUrl}
+                      />
+                    </div>
+                    <div className="min-h-[400px] flex-1">
+                      <VentilatorPatientVitalsMonitor
+                        patientAssetBed={{
+                          asset: ventilatorBedData?.asset_object as AssetData,
+                          bed: ventilatorBedData?.bed_object as BedModel,
+                          patient: patientData,
+                          meta: ventilatorBedData?.asset_object?.meta,
+                        }}
+                        socketUrl={ventilatorSocketUrl}
+                      />
+                    </div>
+                  </div>
                 </section>
               )}
-              <div className="grid lg:grid-cols-2 gap-4 mt-4">
-                {consultationData.discharge_date && (
-                  <div
-                    className={`bg-white overflow-hidden shadow rounded-lg gap-4 ${
-                      consultationData.discharge_reason === "REC" &&
-                      "lg:col-span-2"
-                    }`}
-                  >
-                    <div className="px-4 py-5 sm:p-6">
-                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                        Discharge Information
-                      </h3>
-                      <div className="grid gap-4 mt-2">
-                        <div>
-                          Reason {" - "}
-                          <span className="font-semibold">
-                            {DISCHARGE_REASONS.find(
-                              (d) => d.id === consultationData.discharge_reason
-                            )?.text || "--"}
-                          </span>
-                        </div>
-                        {consultationData.discharge_reason === "REC" && (
-                          <div className="grid gap-4">
-                            <div>
-                              Discharge Date {" - "}
-                              <span className="font-semibold">
-                                {consultationData.discharge_date
-                                  ? formatDate(
-                                      consultationData.discharge_date,
-                                      "DD/MM/YYYY"
-                                    )
-                                  : "--:--"}
-                              </span>
-                            </div>
-                            <div>
-                              Advice {" - "}
-                              <span className="font-semibold">
-                                {consultationData.discharge_notes || "--"}
-                              </span>
-                            </div>
-                            <div className="overflow-x-auto overflow-y-hidden">
-                              <PrescriptionsTable
-                                consultation_id={consultationData.id}
-                                is_prn={false}
-                                readonly
-                                prescription_type="DISCHARGE"
-                              />
-                            </div>
-                            <hr className="border border-gray-300 my-2"></hr>
-                            <div className="overflow-x-auto overflow-y-hidden">
-                              <PrescriptionsTable
-                                consultation_id={consultationData.id}
-                                is_prn
-                                readonly
-                                prescription_type="DISCHARGE"
-                              />
-                            </div>
-                          </div>
-                        )}
-                        {consultationData.discharge_reason === "EXP" && (
-                          <div className="grid gap-4">
-                            <div>
-                              Date of Death {" - "}
-                              <span className="font-semibold">
-                                {consultationData.death_datetime
-                                  ? formatDate(consultationData.death_datetime)
-                                  : "--:--"}
-                              </span>
-                            </div>
-                            <div>
-                              Cause of death {" - "}
-                              <span className="font-semibold">
-                                {consultationData.discharge_notes || "--"}
-                              </span>
-                            </div>
-                            <div>
-                              Confirmed By {" - "}
-                              <span className="font-semibold">
-                                {consultationData.death_confirmed_doctor ||
-                                  "--"}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                        {["REF", "LAMA"].includes(
-                          consultationData.discharge_reason || ""
-                        ) && (
-                          <div className="grid gap-4">
-                            <div>
-                              Discharge Date {" - "}
-                              <span className="font-semibold">
-                                {consultationData.discharge_date
-                                  ? formatDate(
-                                      consultationData.discharge_date,
-                                      "DD/MM/YYYY"
-                                    )
-                                  : "--:--"}
-                              </span>
-                            </div>
-                            <div>
-                              Notes {" - "}
-                              <span className="font-semibold">
-                                {consultationData.discharge_notes || "--"}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {consultationData.symptoms_text && (
-                  <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="px-4 py-5 sm:p-6">
-                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900 mb-4">
-                        Symptoms
-                      </h3>
-                      <div className="">
-                        <div className="font-semibold uppercase text-sm">
-                          Last Daily Update
-                        </div>
-                        {consultationData.last_daily_round
-                          ?.additional_symptoms && (
-                          <>
-                            <div className="flex flex-wrap items-center gap-2 my-4">
-                              {consultationData.last_daily_round?.additional_symptoms.map(
-                                (symptom: any, index: number) => (
-                                  <Chip
-                                    key={index}
-                                    text={
-                                      SYMPTOM_CHOICES.find(
-                                        (choice) => choice.id === symptom
-                                      )?.text || "Err. Unknown"
-                                    }
-                                    color={"primary"}
-                                    size={"small"}
-                                  />
-                                )
-                              )}
-                            </div>
-                            {consultationData.last_daily_round
-                              ?.other_symptoms && (
-                              <div className="capitalize">
-                                <div className="font-semibold text-xs">
-                                  Other Symptoms:
-                                </div>
-                                {
-                                  consultationData.last_daily_round
-                                    ?.other_symptoms
-                                }
+            <div className="flex flex-col xl:flex-row">
+              <div className="w-full xl:w-2/3">
+                <PageTitle title="Info" hideBack={true} breadcrumbs={false} />
+                <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                  {!consultationData.discharge_date &&
+                    ((hl7SocketUrl && !ventilatorSocketUrl) ||
+                      (!hl7SocketUrl && ventilatorSocketUrl)) && (
+                      <section className="flex w-full flex-col items-stretch overflow-hidden rounded-md bg-white shadow-sm lg:col-span-2 lg:flex-row">
+                        {(hl7SocketUrl || ventilatorSocketUrl) && (
+                          <div className="mx-auto flex w-full flex-col justify-between gap-1 rounded bg-[#020617] lg:w-auto lg:min-w-[640px] lg:flex-row">
+                            {hl7SocketUrl && (
+                              <div className="min-h-[400px] flex-1">
+                                <HL7PatientVitalsMonitor
+                                  key={`hl7-${hl7SocketUrl}-${vitalsConfigHash}`}
+                                  patientAssetBed={{
+                                    asset:
+                                      monitorBedData?.asset_object as AssetData,
+                                    bed: monitorBedData?.bed_object as BedModel,
+                                    patient: patientData,
+                                    meta: monitorBedData?.asset_object?.meta,
+                                  }}
+                                  socketUrl={hl7SocketUrl}
+                                  config={vitalsConfig}
+                                />
                               </div>
                             )}
-                            <span className="font-semibold leading-relaxed text-gray-800 text-xs">
-                              from{" "}
-                              {moment(
-                                consultationData.last_daily_round.created_at
-                              ).format("DD/MM/YYYY")}
-                            </span>
-                          </>
-                        )}
-                        <hr className="border border-gray-300 my-4" />
-                        <div className="font-semibold uppercase text-sm">
-                          Consultation Update
-                        </div>
-                        <div className="flex flex-wrap items-center gap-2 my-4">
-                          {consultationData.symptoms?.map((symptom, index) => (
-                            <Chip
-                              key={index}
-                              text={
-                                SYMPTOM_CHOICES.find(
-                                  (choice) => choice.id === symptom
-                                )?.text || "Err. Unknown"
-                              }
-                              color={"primary"}
-                              size={"small"}
-                            />
-                          ))}
-                        </div>
-                        {consultationData.other_symptoms && (
-                          <div className="capitalize">
-                            <div className="font-semibold text-xs">
-                              Other Symptoms:
-                            </div>
-                            {consultationData.other_symptoms}
+                            {ventilatorSocketUrl && (
+                              <div className="min-h-[400px] flex-1">
+                                <VentilatorPatientVitalsMonitor
+                                  key={`ventilator-${ventilatorSocketUrl}-${vitalsConfigHash}`}
+                                  patientAssetBed={{
+                                    asset:
+                                      ventilatorBedData?.asset_object as AssetData,
+                                    bed: ventilatorBedData?.bed_object as BedModel,
+                                    patient: patientData,
+                                    meta: ventilatorBedData?.asset_object?.meta,
+                                  }}
+                                  socketUrl={ventilatorSocketUrl}
+                                  config={vitalsConfig}
+                                />
+                              </div>
+                            )}
                           </div>
                         )}
-                        <span className="font-semibold leading-relaxed text-gray-800 text-xs">
-                          from{" "}
-                          {consultationData.symptoms_onset_date
-                            ? moment(
-                                consultationData.symptoms_onset_date
-                              ).format("DD/MM/YYYY")
-                            : "--:--"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {consultationData.history_of_present_illness && (
-                  <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="px-4 py-5 sm:p-6">
-                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                        History of Present Illness
-                      </h3>
-                      <div className="mt-2">
-                        <ReadMore
-                          text={consultationData.history_of_present_illness}
-                          minChars={250}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {consultationData.examination_details && (
-                  <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="px-4 py-5 sm:p-6">
-                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                        Examination details and Clinical conditions:{" "}
-                      </h3>
-                      <div className="mt-2">
-                        <ReadMore
-                          text={consultationData.examination_details}
-                          minChars={250}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {consultationData.prescribed_medication && (
-                  <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="px-4 py-5 sm:p-6">
-                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                        Treatment Summary
-                      </h3>
-                      <div className="mt-2">
-                        <ReadMore
-                          text={consultationData.prescribed_medication}
-                          minChars={250}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {consultationData.consultation_notes && (
-                  <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="px-4 py-5 sm:p-6">
-                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                        General Instructions
-                      </h3>
-                      <div className="mt-2">
-                        <ReadMore
-                          text={consultationData.consultation_notes}
-                          minChars={250}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {(consultationData.operation ||
-                  consultationData.special_instruction) && (
-                  <div className="bg-white overflow-hidden shadow rounded-lg">
-                    <div className="px-4 py-5 sm:p-6">
-                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                        Notes
-                      </h3>
-                      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                        {consultationData.operation && (
-                          <div className="mt-4">
-                            <h5>Operation</h5>
-                            <ReadMore
-                              text={consultationData.operation}
-                              minChars={250}
-                            />
-                          </div>
-                        )}
-
-                        {consultationData.special_instruction && (
-                          <div className="mt-4">
-                            <h5>Special Instruction</h5>
-                            <ReadMore
-                              text={consultationData.special_instruction}
-                              minChars={250}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              {consultationData.procedure &&
-                consultationData.procedure.length > 0 && (
-                  <div className="bg-white rounded-lg shadow my-4 p-4">
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead>
-                          <tr>
-                            <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-                              Procedure
-                            </th>
-                            <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-                              Notes
-                            </th>
-                            <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-                              Repetitive
-                            </th>
-                            <th className="py-3 px-4 bg-gray-100 text-left text-sm font-medium text-gray-600 uppercase tracking-wider">
-                              Time / Frequency
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {consultationData.procedure?.map(
-                            (procedure, index) => (
-                              <tr key={index}>
-                                <td className="p-4 whitespace-nowrap overflow-hidden">
-                                  {procedure.procedure}
-                                </td>
-                                <td className="p-4 whitespace-normal overflow-hidden">
-                                  {procedure.notes}
-                                </td>
-                                <td className="p-4 whitespace-normal overflow-hidden">
-                                  {procedure.repetitive ? "Yes" : "No"}
-                                </td>
-                                <td className="p-4 whitespace-nowrap">
-                                  {procedure.repetitive
-                                    ? procedure.frequency
-                                    : formatDate(String(procedure.time))}
-                                </td>
-                              </tr>
-                            )
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
-              {consultationData.intubation_start_date && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Date/Size/LL:{" "}
-                    </h3>
-                    <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                      <div className="">
-                        Intubation Date{" - "}
-                        <span className="font-semibold">
-                          {formatDate(consultationData.intubation_start_date)}
-                        </span>
-                      </div>
-                      <div className="">
-                        Extubation Date{" - "}
-                        <span className="font-semibold">
-                          {consultationData.intubation_end_date &&
-                            formatDate(consultationData.intubation_end_date)}
-                        </span>
-                      </div>
-                      <div className="">
-                        ETT/TT (mmid){" - "}
-                        <span className="font-semibold">
-                          {consultationData.ett_tt}
-                        </span>
-                      </div>
-                      <div className="">
-                        Cuff Pressure (mmhg){" - "}
-                        <span className="font-semibold">
-                          {consultationData.cuff_pressure}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {consultationData.lines?.length > 0 && (
-                <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                  <div className="px-4 py-5 sm:p-6">
-                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                      Lines and Catheters
-                    </h3>
-                    <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                      {consultationData.lines?.map((line: any, idx: number) => (
-                        <div key={idx} className="mt-4">
-                          <h5>{line.type}</h5>
-                          <p className="text-justify break-word">
-                            Details:
-                            <br />
-                            <span>{line.other_type}</span>
-                          </p>
-                          <p>
-                            Insertion Date:{" "}
+                      </section>
+                    )}
+                  {consultationData.discharge_date && (
+                    <div
+                      className={`gap-4 overflow-hidden rounded-lg bg-white shadow ${
+                        consultationData.discharge_reason === "REC" &&
+                        "lg:col-span-2"
+                      }`}
+                    >
+                      <div className="px-4 py-5 sm:p-6">
+                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                          Discharge Information
+                        </h3>
+                        <div className="mt-2 grid gap-4">
+                          <div>
+                            Reason {" - "}
                             <span className="font-semibold">
-                              {formatDate(line.start_date)}
+                              {DISCHARGE_REASONS.find(
+                                (d) =>
+                                  d.id === consultationData.discharge_reason
+                              )?.text ?? "--"}
                             </span>
-                          </p>
-                          <p>
-                            Site/Level of Fixation: <br />
-                            <span className="text-justify break-word">
-                              {line.site}
-                            </span>
-                          </p>
+                          </div>
+                          {consultationData.discharge_reason === "REC" && (
+                            <div className="grid gap-4">
+                              <div>
+                                Discharge Date {" - "}
+                                <span className="font-semibold">
+                                  {consultationData.discharge_date
+                                    ? formatDate(
+                                        consultationData.discharge_date,
+                                        "DD/MM/YYYY"
+                                      )
+                                    : "--:--"}
+                                </span>
+                              </div>
+                              <div>
+                                Advice {" - "}
+                                <span className="font-semibold">
+                                  {consultationData.discharge_notes ?? "--"}
+                                </span>
+                              </div>
+                              <div className="overflow-x-auto overflow-y-hidden">
+                                <PrescriptionsTable
+                                  consultation_id={consultationData.id ?? ""}
+                                  is_prn={false}
+                                  readonly
+                                  prescription_type="DISCHARGE"
+                                />
+                              </div>
+                              <hr className="my-2 border border-gray-300"></hr>
+                              <div className="overflow-x-auto overflow-y-hidden">
+                                <PrescriptionsTable
+                                  consultation_id={consultationData.id ?? ""}
+                                  is_prn
+                                  readonly
+                                  prescription_type="DISCHARGE"
+                                />
+                              </div>
+                            </div>
+                          )}
+                          {consultationData.discharge_reason === "EXP" && (
+                            <div className="grid gap-4">
+                              <div>
+                                Date of Death {" - "}
+                                <span className="font-semibold">
+                                  {consultationData.death_datetime
+                                    ? formatDate(
+                                        consultationData.death_datetime
+                                      )
+                                    : "--:--"}
+                                </span>
+                              </div>
+                              <div>
+                                Cause of death {" - "}
+                                <span className="font-semibold">
+                                  {consultationData.discharge_notes ?? "--"}
+                                </span>
+                              </div>
+                              <div>
+                                Confirmed By {" - "}
+                                <span className="font-semibold">
+                                  {consultationData.death_confirmed_doctor ??
+                                    "--"}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                          {["REF", "LAMA"].includes(
+                            consultationData.discharge_reason ?? ""
+                          ) && (
+                            <div className="grid gap-4">
+                              <div>
+                                Discharge Date {" - "}
+                                <span className="font-semibold">
+                                  {consultationData.discharge_date
+                                    ? formatDate(
+                                        consultationData.discharge_date,
+                                        "DD/MM/YYYY"
+                                      )
+                                    : "--:--"}
+                                </span>
+                              </div>
+                              <div>
+                                Notes {" - "}
+                                <span className="font-semibold">
+                                  {consultationData.discharge_notes ?? "--"}
+                                </span>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      ))}
+                      </div>
                     </div>
-                  </div>
-                </div>
-              )}
+                  )}
+                  {consultationData.symptoms_text && (
+                    <div className="overflow-hidden rounded-lg bg-white shadow">
+                      <div className="px-4 py-5 sm:p-6">
+                        <h3 className="mb-4 text-lg font-semibold leading-relaxed text-gray-900">
+                          Symptoms
+                        </h3>
+                        <div className="">
+                          <div className="text-sm font-semibold uppercase">
+                            Last Daily Update
+                          </div>
+                          {consultationData.last_daily_round
+                            ?.additional_symptoms && (
+                            <>
+                              <div className="my-4 flex flex-wrap items-center gap-2">
+                                {consultationData.last_daily_round?.additional_symptoms.map(
+                                  (symptom: any, index: number) => (
+                                    <Chip
+                                      key={index}
+                                      text={
+                                        SYMPTOM_CHOICES.find(
+                                          (choice) => choice.id === symptom
+                                        )?.text ?? "Err. Unknown"
+                                      }
+                                      color={"primary"}
+                                      size={"small"}
+                                    />
+                                  )
+                                )}
+                              </div>
+                              {consultationData.last_daily_round
+                                ?.other_symptoms && (
+                                <div className="capitalize">
+                                  <div className="text-xs font-semibold">
+                                    Other Symptoms:
+                                  </div>
+                                  {
+                                    consultationData.last_daily_round
+                                      ?.other_symptoms
+                                  }
+                                </div>
+                              )}
+                              <span className="text-xs font-semibold leading-relaxed text-gray-800">
+                                from{" "}
+                                {moment(
+                                  consultationData.last_daily_round.created_at
+                                ).format("DD/MM/YYYY")}
+                              </span>
+                            </>
+                          )}
+                          <hr className="my-4 border border-gray-300" />
+                          <div className="text-sm font-semibold uppercase">
+                            Consultation Update
+                          </div>
+                          <div className="my-4 flex flex-wrap items-center gap-2">
+                            {consultationData.symptoms?.map(
+                              (symptom, index) => (
+                                <Chip
+                                  key={index}
+                                  text={
+                                    SYMPTOM_CHOICES.find(
+                                      (choice) => choice.id === symptom
+                                    )?.text ?? "Err. Unknown"
+                                  }
+                                  color={"primary"}
+                                  size={"small"}
+                                />
+                              )
+                            )}
+                          </div>
+                          {consultationData.other_symptoms && (
+                            <div className="capitalize">
+                              <div className="text-xs font-semibold">
+                                Other Symptoms:
+                              </div>
+                              {consultationData.other_symptoms}
+                            </div>
+                          )}
+                          <span className="text-xs font-semibold leading-relaxed text-gray-800">
+                            from{" "}
+                            {consultationData.symptoms_onset_date
+                              ? moment(
+                                  consultationData.symptoms_onset_date
+                                ).format("DD/MM/YYYY")
+                              : "--:--"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-              <div className="bg-white overflow-hidden shadow rounded-lg mt-4">
-                <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
-                    Body Details
-                  </h3>
-                  <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                    <div>
-                      Gender {" - "}
-                      <span className="font-semibold">
-                        {patientData.gender || "-"}
-                      </span>
+                  {consultationData.history_of_present_illness && (
+                    <div className="overflow-hidden rounded-lg bg-white shadow">
+                      <div className="px-4 py-5 sm:p-6">
+                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                          History of Present Illness
+                        </h3>
+                        <div className="mt-2">
+                          <ReadMore
+                            text={consultationData.history_of_present_illness}
+                            minChars={250}
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      Age {" - "}
-                      <span className="font-semibold">
-                        {patientData.age || "-"}
-                      </span>
+                  )}
+
+                  {consultationData.examination_details && (
+                    <div className="overflow-hidden rounded-lg bg-white shadow">
+                      <div className="px-4 py-5 sm:p-6">
+                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                          Examination details and Clinical conditions:{" "}
+                        </h3>
+                        <div className="mt-2">
+                          <ReadMore
+                            text={consultationData.examination_details}
+                            minChars={250}
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      Weight {" - "}
-                      <span className="font-semibold">
-                        {consultationData.weight || "-"} Kg
-                      </span>
+                  )}
+                  {consultationData.prescribed_medication && (
+                    <div className="overflow-hidden rounded-lg bg-white shadow">
+                      <div className="px-4 py-5 sm:p-6">
+                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                          Treatment Summary
+                        </h3>
+                        <div className="mt-2">
+                          <ReadMore
+                            text={consultationData.prescribed_medication}
+                            minChars={250}
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      Height {" - "}
-                      <span className="font-semibold">
-                        {consultationData.height || "-"} cm
-                      </span>
+                  )}
+                  {consultationData.consultation_notes && (
+                    <div className="overflow-hidden rounded-lg bg-white shadow">
+                      <div className="px-4 py-5 sm:p-6">
+                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                          General Instructions
+                        </h3>
+                        <div className="mt-2">
+                          <ReadMore
+                            text={consultationData.consultation_notes}
+                            minChars={250}
+                          />
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      Body Surface Area {" - "}
-                      <span className="font-semibold">
-                        {Math.sqrt(
-                          (Number(consultationData.weight) *
-                            Number(consultationData.height)) /
-                            3600
-                        ).toFixed(2)}{" "}
-                        m<sup>2</sup>
-                      </span>
+                  )}
+
+                  {(consultationData.operation ??
+                    consultationData.special_instruction) && (
+                    <div className="overflow-hidden rounded-lg bg-white shadow">
+                      <div className="px-4 py-5 sm:p-6">
+                        <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                          Notes
+                        </h3>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          {consultationData.operation && (
+                            <div className="mt-4">
+                              <h5>Operation</h5>
+                              <ReadMore
+                                text={consultationData.operation}
+                                minChars={250}
+                              />
+                            </div>
+                          )}
+
+                          {consultationData.special_instruction && (
+                            <div className="mt-4">
+                              <h5>Special Instruction</h5>
+                              <ReadMore
+                                text={consultationData.special_instruction}
+                                minChars={250}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      Blood Group {" - "}
-                      <span className="font-semibold">
-                        {patientData.blood_group || "-"}
-                      </span>
+                  )}
+                </div>
+                {consultationData.procedure &&
+                  consultationData.procedure.length > 0 && (
+                    <div className="my-4 rounded-lg bg-white p-4 shadow">
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead>
+                            <tr>
+                              <th className="bg-gray-100 px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-600">
+                                Procedure
+                              </th>
+                              <th className="bg-gray-100 px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-600">
+                                Notes
+                              </th>
+                              <th className="bg-gray-100 px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-600">
+                                Repetitive
+                              </th>
+                              <th className="bg-gray-100 px-4 py-3 text-left text-sm font-medium uppercase tracking-wider text-gray-600">
+                                Time / Frequency
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-200 bg-white">
+                            {consultationData.procedure?.map(
+                              (procedure, index) => (
+                                <tr key={index}>
+                                  <td className="overflow-hidden whitespace-nowrap p-4">
+                                    {procedure.procedure}
+                                  </td>
+                                  <td className="overflow-hidden whitespace-normal p-4">
+                                    {procedure.notes}
+                                  </td>
+                                  <td className="overflow-hidden whitespace-normal p-4">
+                                    {procedure.repetitive ? "Yes" : "No"}
+                                  </td>
+                                  <td className="whitespace-nowrap p-4">
+                                    {procedure.repetitive
+                                      ? procedure.frequency
+                                      : formatDate(String(procedure.time))}
+                                  </td>
+                                </tr>
+                              )
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                {consultationData.intubation_start_date && (
+                  <div className="mt-4 overflow-hidden rounded-lg bg-white shadow">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Date/Size/LL:{" "}
+                      </h3>
+                      <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div className="">
+                          Intubation Date{" - "}
+                          <span className="font-semibold">
+                            {formatDate(consultationData.intubation_start_date)}
+                          </span>
+                        </div>
+                        <div className="">
+                          Extubation Date{" - "}
+                          <span className="font-semibold">
+                            {consultationData.intubation_end_date &&
+                              formatDate(consultationData.intubation_end_date)}
+                          </span>
+                        </div>
+                        <div className="">
+                          ETT/TT (mmid){" - "}
+                          <span className="font-semibold">
+                            {consultationData.ett_tt}
+                          </span>
+                        </div>
+                        <div className="">
+                          Cuff Pressure (mmhg){" - "}
+                          <span className="font-semibold">
+                            {consultationData.cuff_pressure}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {consultationData.lines?.length > 0 && (
+                  <div className="mt-4 overflow-hidden rounded-lg bg-white shadow">
+                    <div className="px-4 py-5 sm:p-6">
+                      <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                        Lines and Catheters
+                      </h3>
+                      <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
+                        {consultationData.lines?.map(
+                          (line: any, idx: number) => (
+                            <div key={idx} className="mt-4">
+                              <h5>{line.type}</h5>
+                              <p className="break-word text-justify">
+                                Details:
+                                <br />
+                                <span>{line.other_type}</span>
+                              </p>
+                              <p>
+                                Insertion Date:{" "}
+                                <span className="font-semibold">
+                                  {formatDate(line.start_date)}
+                                </span>
+                              </p>
+                              <p>
+                                Site/Level of Fixation: <br />
+                                <span className="break-word text-justify">
+                                  {line.site}
+                                </span>
+                              </p>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-4 overflow-hidden rounded-lg bg-white shadow">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
+                      Body Details
+                    </h3>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <div>
+                        Gender {" - "}
+                        <span className="font-semibold">
+                          {patientData.gender ?? "-"}
+                        </span>
+                      </div>
+                      <div>
+                        Age {" - "}
+                        <span className="font-semibold">
+                          {patientData.age ?? "-"}
+                        </span>
+                      </div>
+                      <div>
+                        Weight {" - "}
+                        <span className="font-semibold">
+                          {consultationData.weight ?? "-"} Kg
+                        </span>
+                      </div>
+                      <div>
+                        Height {" - "}
+                        <span className="font-semibold">
+                          {consultationData.height ?? "-"} cm
+                        </span>
+                      </div>
+                      <div>
+                        Body Surface Area {" - "}
+                        <span className="font-semibold">
+                          {Math.sqrt(
+                            (Number(consultationData.weight) *
+                              Number(consultationData.height)) /
+                              3600
+                          ).toFixed(2)}{" "}
+                          m<sup>2</sup>
+                        </span>
+                      </div>
+                      <div>
+                        Blood Group {" - "}
+                        <span className="font-semibold">
+                          {patientData.blood_group ?? "-"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="xl:w-1/3 w-full pl-4">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                <PageTitle title="Update Log" hideBack breadcrumbs={false} />
-                <div className="md:mb-[0.125rem] mb-[2rem] pl-[1.5rem]">
-                  <input
-                    className="relative float-left mt-[0.15rem] mr-[6px] -ml-[1.5rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-[0.125rem] border-solid border-[rgba(0,0,0,0.25)] bg-white outline-none before:pointer-events-none before:absolute before:h-[0.875rem] before:w-[0.875rem] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] checked:border-primary checked:bg-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:ml-[0.25rem] checked:after:-mt-px checked:after:block checked:after:h-[0.8125rem] checked:after:w-[0.375rem] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-t-0 checked:after:border-l-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:transition-[border-color_0.2s] focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] focus:after:absolute focus:after:z-[1] focus:after:block focus:after:h-[0.875rem] focus:after:w-[0.875rem] focus:after:rounded-[0.125rem] focus:after:bg-white focus:after:content-[''] checked:focus:border-primary checked:focus:bg-primary checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:after:ml-[0.25rem] checked:focus:after:-mt-px checked:focus:after:h-[0.8125rem] checked:focus:after:w-[0.375rem] checked:focus:after:rotate-45 checked:focus:after:rounded-none checked:focus:after:border-[0.125rem] checked:focus:after:border-t-0 checked:focus:after:border-l-0 checked:focus:after:border-solid checked:focus:after:border-white checked:focus:after:bg-transparent"
-                    type="checkbox"
-                    id="automated-rounds-visible-checkbox"
-                    checked={showAutomatedRounds}
-                    onChange={() => setShowAutomatedRounds((s) => !s)}
-                  />
-                  <label
-                    className="inline-block pl-[0.15rem] hover:cursor-pointer"
-                    htmlFor="automated-rounds-visible-checkbox"
-                  >
-                    Show Automated Rounds
-                  </label>
+              <div className="w-full pl-4 xl:w-1/3">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+                  <PageTitle title="Update Log" hideBack breadcrumbs={false} />
+                  <div className="mb-[2rem] pl-[1.5rem] md:mb-[0.125rem]">
+                    <input
+                      className="relative float-left ml-[-1.5rem] mr-[6px] mt-[0.15rem] h-[1.125rem] w-[1.125rem] appearance-none rounded-[0.25rem] border-[0.125rem] border-solid border-[rgba(0,0,0,0.25)] bg-white outline-none before:pointer-events-none before:absolute before:h-[0.875rem] before:w-[0.875rem] before:scale-0 before:rounded-full before:bg-transparent before:opacity-0 before:shadow-[0px_0px_0px_13px_transparent] before:content-[''] checked:border-primary checked:bg-primary checked:before:opacity-[0.16] checked:after:absolute checked:after:-mt-px checked:after:ml-[0.25rem] checked:after:block checked:after:h-[0.8125rem] checked:after:w-[0.375rem] checked:after:rotate-45 checked:after:border-[0.125rem] checked:after:border-l-0 checked:after:border-t-0 checked:after:border-solid checked:after:border-white checked:after:bg-transparent checked:after:content-[''] hover:cursor-pointer hover:before:opacity-[0.04] hover:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:shadow-none focus:transition-[border-color_0.2s] focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[0px_0px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] focus:after:absolute focus:after:z-[1] focus:after:block focus:after:h-[0.875rem] focus:after:w-[0.875rem] focus:after:rounded-[0.125rem] focus:after:bg-white focus:after:content-[''] checked:focus:border-primary checked:focus:bg-primary checked:focus:before:scale-100 checked:focus:before:shadow-[0px_0px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] checked:focus:after:-mt-px checked:focus:after:ml-[0.25rem] checked:focus:after:h-[0.8125rem] checked:focus:after:w-[0.375rem] checked:focus:after:rotate-45 checked:focus:after:rounded-none checked:focus:after:border-[0.125rem] checked:focus:after:border-l-0 checked:focus:after:border-t-0 checked:focus:after:border-solid checked:focus:after:border-white checked:focus:after:bg-transparent"
+                      type="checkbox"
+                      id="automated-rounds-visible-checkbox"
+                      checked={showAutomatedRounds}
+                      onChange={() => setShowAutomatedRounds((s) => !s)}
+                    />
+                    <label
+                      className="inline-block pl-[0.15rem] hover:cursor-pointer"
+                      htmlFor="automated-rounds-visible-checkbox"
+                    >
+                      Show Automated Rounds
+                    </label>
+                  </div>
                 </div>
+                <DailyRoundsList
+                  facilityId={facilityId}
+                  patientId={patientId}
+                  consultationId={consultationId}
+                  consultationData={consultationData}
+                  showAutomatedRounds={showAutomatedRounds}
+                />
               </div>
-              <DailyRoundsList
-                facilityId={facilityId}
-                patientId={patientId}
-                consultationId={consultationId}
-                consultationData={consultationData}
-                showAutomatedRounds={showAutomatedRounds}
-              />
             </div>
           </div>
         )}
@@ -1090,7 +1251,7 @@ export const ConsultationDetails = (props: any) => {
         )}
         {tab === "INVESTIGATIONS" && (
           <div>
-            <div className="sm:flex justify-between">
+            <div className="justify-between sm:flex">
               <PageTitle
                 title="Investigations"
                 hideBack={true}

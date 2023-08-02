@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { PrescriptionActions } from "../../Redux/actions";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import { Prescription } from "./models";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Success } from "../../Utils/Notifications";
@@ -23,7 +23,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
   const [notes, setNotes] = useState<string>("");
 
   return (
-    <ConfirmDialogV2
+    <ConfirmDialog
       action={
         <>
           <CareIcon className="care-l-syringe text-lg" />
@@ -32,7 +32,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
       }
       title={t("administer_medicine")}
       description={
-        <div className="text-gray-600 font-semibold leading-relaxed text-sm">
+        <div className="text-sm font-semibold leading-relaxed text-gray-600">
           <CareIcon className="care-l-history-alt pr-1" /> Last administered
           <span className="pl-1">
             {prescription.last_administered_on
@@ -53,9 +53,9 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
         setIsLoading(false);
         props.onClose(true);
       }}
-      className="max-w-4xl w-full"
+      className="w-full max-w-4xl"
     >
-      <div className="flex flex-col gap-8 mt-4">
+      <div className="mt-4 flex flex-col gap-8">
         <PrescriptionDetailCard
           prescription={prescription}
           readonly
@@ -71,6 +71,6 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
           disabled={isLoading}
         />
       </div>
-    </ConfirmDialogV2>
+    </ConfirmDialog>
   );
 }

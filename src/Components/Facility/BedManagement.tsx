@@ -8,7 +8,6 @@ import {
   listFacilityBeds,
   deleteFacilityBed,
 } from "../../Redux/actions";
-import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { BedModel } from "./models";
@@ -16,8 +15,9 @@ import { ReactElement } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import BedDeleteDialog from "./BedDeleteDialog";
-
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import Page from "../Common/components/Page";
 const Loading = loadable(() => import("../Common/Loading"));
 
 interface BedManagementProps {
@@ -81,71 +81,71 @@ const BedRow = (props: BedRowProps) => {
   };
 
   return (
-    <div
-      key={id}
-      className="w-full border-b lg:flex justify-between items-center py-6"
-    >
-      <div className="px-4 lg:w-3/4 space-y-2 mt-2">
-        <div className="flex flex-col sm:flex-row">
-          <p className="inline text-xl capitalize break-words">{name}</p> &nbsp;
-          <div>
-            {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
-              <p className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit capitalize mb-1">
-                {LOCATION_BED_TYPES.find(
-                  (item) => item.id === bedType
-                )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
-              </p>
-            )}
-            <p
-              className={`${
-                isOccupied
-                  ? "bg-warning-100 text-warning-600"
-                  : "bg-primary-100 text-primary-600"
-              } inline-flex ml-1 items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 w-fit capitalize mb-1`}
-            >
-              {isOccupied ? "Occupied" : "Vacant"}
-            </p>
-          </div>
-        </div>
-        <p className="break-all">{description}</p>
-      </div>
-      <div className="sm:flex">
-        <div className="px-2 py-2 w-full">
-          <button
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/location/${locationId}/beds/${id}/update`
-              )
-            }
-            className="btn btn-default bg-white w-full border-gray-700 transition ease-in-out duration-150 hover:shadow"
-          >
-            <i className="fas fa-pencil-alt mr-2"></i>
-            Edit
-          </button>
-        </div>
-        <div className="px-2 py-2 w-full">
-          <ButtonV2
-            onClick={() => handleDelete(name, id)}
-            variant="danger"
-            border
-            ghost
-            className="w-full lg:w-auto"
-            disabled={isOccupied}
-            tooltip={isOccupied ? "Bed is occupied" : ""}
-            tooltipClassName="w-full lg:w-auto"
-          >
-            <i className="fas fa-trash mr-2"></i>
-            Delete
-          </ButtonV2>
-        </div>
-      </div>
+    <>
       <BedDeleteDialog
         name={bedData.name}
         show={bedData.show}
         handleCancel={handleDeleteCancel}
         handleOk={handleDeleteConfirm}
       />
-    </div>
+      <div
+        key={id}
+        className="w-full items-center justify-between border-b py-4 lg:flex"
+      >
+        <div className="mt-2 space-y-2 px-4 lg:w-3/4">
+          <div className="flex flex-col sm:flex-row">
+            <p className="inline break-words text-xl capitalize">{name}</p>{" "}
+            &nbsp;
+            <div>
+              {LOCATION_BED_TYPES.find((item) => item.id === bedType) && (
+                <p className="mb-1 inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium capitalize leading-5 text-blue-800">
+                  {LOCATION_BED_TYPES.find(
+                    (item) => item.id === bedType
+                  )?.name?.slice(0, 25) + (bedType.length > 25 ? "..." : "")}
+                </p>
+              )}
+              <p
+                className={`${
+                  isOccupied
+                    ? "bg-warning-100 text-warning-600"
+                    : "bg-primary-100 text-primary-600"
+                } mb-1 ml-1 inline-flex w-fit items-center rounded-md px-2.5 py-0.5 text-sm font-medium capitalize leading-5`}
+              >
+                {isOccupied ? "Occupied" : "Vacant"}
+              </p>
+            </div>
+          </div>
+          <p className="break-all">{description}</p>
+        </div>
+        <div className="mt-4 flex flex-col gap-2 lg:mt-0 lg:flex-row">
+          <ButtonV2
+            href={`/facility/${facilityId}/location/${locationId}/beds/${id}/update`}
+            authorizeFor={NonReadOnlyUsers}
+            className="w-full lg:w-auto"
+            variant="secondary"
+            border
+            ghost
+          >
+            <CareIcon className="care-l-pen text-lg" />
+            Edit
+          </ButtonV2>
+          <ButtonV2
+            onClick={() => handleDelete(name, id)}
+            authorizeFor={NonReadOnlyUsers}
+            variant="danger"
+            border
+            ghost
+            className="w-full lg:w-auto"
+            disabled={isOccupied}
+            tooltip={isOccupied ? "Bed is occupied" : undefined}
+            tooltipClassName="w-full lg:w-auto"
+          >
+            <CareIcon className="care-l-trash-alt text-lg" />
+            Delete
+          </ButtonV2>
+        </div>
+      </div>
+    </>
   );
 };
 
@@ -190,7 +190,7 @@ export const BedManagement = (props: BedManagementProps) => {
         })
       );
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setBeds(res.data.results);
           setTotalCount(res.data.count);
         }
@@ -216,20 +216,20 @@ export const BedManagement = (props: BedManagementProps) => {
   if (beds && beds.length) {
     BedList = beds.map((bedItem: BedModel) => (
       <BedRow
-        id={bedItem.id || ""}
-        facilityId={facilityId || ""}
-        name={bedItem.name || ""}
-        description={bedItem.description || ""}
-        bedType={bedItem.bed_type || ""}
+        id={bedItem.id ?? ""}
+        facilityId={facilityId ?? ""}
+        name={bedItem.name ?? ""}
+        description={bedItem.description ?? ""}
+        bedType={bedItem.bed_type ?? ""}
         triggerRerender={triggerRerender}
-        key={locationId || ""}
-        locationId={locationId || ""}
-        isOccupied={bedItem.is_occupied || false}
+        key={locationId ?? ""}
+        locationId={locationId ?? ""}
+        isOccupied={bedItem.is_occupied ?? false}
       />
     ));
   } else if (beds && beds.length === 0) {
     BedList = (
-      <p className="bg-white text-2xl w-full flex justify-center font-bold px-5 py-5 border-b border-gray-200 text-center text-gray-500">
+      <p className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
         No beds available in this location
       </p>
     );
@@ -238,7 +238,7 @@ export const BedManagement = (props: BedManagementProps) => {
   if (beds) {
     bed = (
       <>
-        <div className="grow mt-5 bg-white px-2 flex flex-wrap">{BedList}</div>
+        <div className="mt-5 flex grow flex-wrap bg-white p-4">{BedList}</div>
         {totalCount > limit && (
           <div className="mt-4 flex w-full justify-center">
             <Pagination
@@ -258,36 +258,29 @@ export const BedManagement = (props: BedManagementProps) => {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Bed Management"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [locationId]: {
-            name: locationName,
-            uri: `/facility/${facilityId}/location`,
-          },
-        }}
-        backUrl={`/facility/${facilityId}/location/${locationId}`}
-      />
-      <div className="container px-4 py-2 sm:px-8">
+    <Page
+      title="Bed Management"
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [locationId]: {
+          name: locationName,
+          uri: `/facility/${facilityId}/location`,
+        },
+      }}
+      backUrl={`/facility/${facilityId}/location/${locationId}`}
+    >
+      <div className="container mx-auto px-4 py-2 sm:px-8">
         <div className="flex justify-end">
-          <button
-            className="px-4 py-1 rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
-            onClick={() =>
-              navigate(
-                `/facility/${facilityId}/location/${locationId}/beds/add`,
-                { replace: true }
-              )
-            }
+          <ButtonV2
+            href={`/facility/${facilityId}/location/${locationId}/beds/add`}
+            authorizeFor={NonReadOnlyUsers}
           >
-            <i className="fas fa-plus mr-2"></i>
-            Add New Bed
-          </button>
+            <CareIcon className="care-l-plus text-lg" />
+            Add New Bed(s)
+          </ButtonV2>
         </div>
         {bed}
       </div>
-    </div>
+    </Page>
   );
 };

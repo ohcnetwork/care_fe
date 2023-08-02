@@ -25,11 +25,11 @@ const SidebarItemBase = ({
 
   return (
     <Link
-      className={`relative mr-3 ml-1  h-full rounded-lg flex-1 min-h-[40px] md:flex-none md:h-11 text-white tooltip transition-all duration-200 ease-in-out cursor-pointer
+      className={`tooltip relative ml-1  mr-3 h-full min-h-[40px] flex-1 cursor-pointer rounded-lg text-white transition-all duration-200 ease-in-out md:h-11 md:flex-none
         ${
           props.selected
-            ? "font-bold bg-primary-900"
-            : "font-normal bg-primary-800 hover:bg-primary-700"
+            ? "bg-primary-900 font-bold"
+            : "bg-primary-800 font-normal hover:bg-primary-700"
         }`}
       target={external && "_blank"}
       rel={external && "noreferrer"}
@@ -46,7 +46,7 @@ const SidebarItemBase = ({
         {t(props.text)}
       </span>
       <div
-        className={`flex items-center h-full ${
+        className={`flex h-full items-center ${
           shrinked ? "justify-center" : "justify-start pl-5 pr-4"
         } transition-all duration-200 ease-in-out`}
       >
@@ -54,7 +54,7 @@ const SidebarItemBase = ({
         <span
           className={`${
             shrinked ? "hidden" : "grow"
-          } w-full flex items-center text-sm pl-4 tracking-wide`}
+          } flex w-full items-center pl-4 text-sm tracking-wide`}
         >
           {t(props.text)}
         </span>
@@ -65,11 +65,11 @@ const SidebarItemBase = ({
 
       {!!props.badgeCount && (
         <span
-          className={`absolute flex items-center justify-center text-white font-semibold bg-primary-500 ${
+          className={`absolute flex items-center justify-center bg-primary-500 font-semibold text-white ${
             shrinked
-              ? "right-3 top-0.5 h-4 w-5 text-[9px] rounded-md"
-              : "right-4 inset-y-0 h-6 my-auto text-xs px-2 rounded-md"
-          } z-10 transition-all duration-200 ease-in-out animate-pulse`}
+              ? "right-3 top-0.5 h-4 w-5 rounded-md text-[9px]"
+              : "inset-y-0 right-4 my-auto h-6 rounded-md px-2 text-xs"
+          } z-10 animate-pulse transition-all duration-200 ease-in-out`}
         >
           {props.badgeCount > 9 ? "9+" : props.badgeCount}
         </span>

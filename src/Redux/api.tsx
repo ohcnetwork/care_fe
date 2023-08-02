@@ -235,6 +235,12 @@ const routes: Routes = {
     method: "POST",
   },
 
+  // Patient Asset Beds (for CNS and Monitoring Hub)
+  listPatientAssetBeds: {
+    path: "/api/v1/facility/{facility_external_id}/patient_asset_beds/",
+    method: "GET",
+  },
+
   // Facility Beds
   listFacilityBeds: {
     path: "/api/v1/bed/",
@@ -727,6 +733,10 @@ const routes: Routes = {
   listICD11Diagnosis: {
     path: "/api/v1/icd/",
   },
+  // Medibase
+  listMedibaseMedicines: {
+    path: "/api/v1/medibase/",
+  },
 
   // Resource
   createResource: {
@@ -804,6 +814,88 @@ const routes: Routes = {
   },
   getAssetTransaction: {
     path: "/api/v1/asset_transaction/{id}",
+    method: "GET",
+  },
+
+  // ABDM HealthID endpoints
+  generateAadhaarOtp: {
+    path: "/api/v1/abdm/healthid/generate_aadhaar_otp/",
+    method: "POST",
+  },
+
+  resendAadhaarOtp: {
+    path: "/api/v1/abdm/healthid/resend_aadhaar_otp/",
+    method: "POST",
+  },
+
+  verifyAadhaarOtp: {
+    path: "/api/v1/abdm/healthid/verify_aadhaar_otp/",
+    method: "POST",
+  },
+
+  generateMobileOtp: {
+    path: "/api/v1/abdm/healthid/generate_mobile_otp/",
+    method: "POST",
+  },
+
+  checkAndGenerateMobileOtp: {
+    path: "/api/v1/abdm/healthid/check_and_generate_mobile_otp/",
+    method: "POST",
+  },
+
+  // TODO: resend mobile otp
+  verifyMobileOtp: {
+    path: "/api/v1/abdm/healthid/verify_mobile_otp/",
+    method: "POST",
+  },
+
+  createHealthId: {
+    path: "/api/v1/abdm/healthid/create_health_id/",
+    method: "POST",
+  },
+
+  searchByHealthId: {
+    path: "/api/v1/abdm/healthid/search_by_health_id/",
+    method: "POST",
+  },
+
+  initiateAbdmAuthentication: {
+    path: "/api/v1/abdm/healthid/auth_init/",
+    method: "POST",
+  },
+
+  confirmWithAadhaarOtp: {
+    path: "/api/v1/abdm/healthid/confirm_with_aadhaar_otp/",
+    method: "POST",
+  },
+
+  confirmWithMobileOtp: {
+    path: "/api/v1/abdm/healthid/confirm_with_mobile_otp/",
+    method: "POST",
+  },
+
+  linkViaQR: {
+    path: "/api/v1/abdm/healthid/link_via_qr/",
+    method: "POST",
+  },
+
+  linkCareContext: {
+    path: "/api/v1/abdm/healthid/add_care_context/",
+    method: "POST",
+  },
+
+  getAbhaCard: {
+    path: "/api/v1/abdm/healthid/get_abha_card/",
+    method: "POST",
+  },
+  // Asset Availability endpoints
+
+  listAssetAvailability: {
+    path: "/api/v1/asset_availability/",
+    method: "GET",
+  },
+  getAssetAvailability: {
+    path: "/api/v1/asset_availability/{id}",
     method: "GET",
   },
 

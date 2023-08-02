@@ -7,7 +7,7 @@ const PatientCategoryBadge = (props: { category?: PatientCategory }) => {
     : "patient-unknown";
   return (
     <span
-      className={`px-2 py-0.5 text-sm rounded-full ${categoryClass} font-medium`}
+      className={`rounded-full px-2 py-0.5 text-sm ${categoryClass} font-medium`}
     >
       {props.category}
     </span>

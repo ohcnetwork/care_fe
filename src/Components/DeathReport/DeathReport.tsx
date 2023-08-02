@@ -11,7 +11,6 @@ import moment from "moment";
 import { formatDate } from "../../Utils/utils";
 import Page from "../Common/components/Page";
 import Form from "../Form/Form";
-import { createFormContext } from "../Form/FormContext";
 import { useTranslation } from "react-i18next";
 import { navigate } from "raviger";
 
@@ -41,8 +40,6 @@ type DeathReport = {
   cause_of_death: string;
   facility: string;
 };
-
-const deathReportContext = createFormContext<DeathReport>();
 
 export default function PrintDeathReport(props: { id: string }) {
   const initialState = {
@@ -175,11 +172,11 @@ export default function PrintDeathReport(props: { id: string }) {
 
       <div id="section-to-print" className="print bg-white">
         <div></div>
-        <div className="md:mx-20 p-4">
-          <div className="font-bold text-xl text-center mt-6 mb-6">
+        <div className="p-4 md:mx-20">
+          <div className="my-6 text-center text-xl font-bold">
             Covid-19 Death Reporting: Form 1
           </div>
-          <div className="grid gap-2 grid-cols-1">
+          <div className="grid grid-cols-1 gap-2">
             <div>
               <span className="font-semibold leading-relaxed">Name: </span>
               {patientData.name}
@@ -355,9 +352,8 @@ export default function PrintDeathReport(props: { id: string }) {
           backUrl={`/facility/${patientData.facility}/patient/${id}`}
           className="w-full"
         >
-          <Form
+          <Form<DeathReport>
             disabled={isPrintMode}
-            context={deathReportContext}
             defaults={patientData}
             asyncGetDefaults={async () => patientData}
             submitLabel="Preview"
@@ -368,13 +364,13 @@ export default function PrintDeathReport(props: { id: string }) {
             onCancel={() =>
               navigate(`/facility/${patientData.facility}/patient/${id}`)
             }
-            className="px-4 md:px-6 py-5"
+            className="px-4 py-5 md:px-6"
             noPadding
           >
             {(field) => (
               <div>
-                <div className="grid grid-rows-13">
-                  <div className="md:grid md:grid-cols-1 md:mt-4 md:gap-10">
+                <div className="grid-rows-13 grid">
+                  <div className="md:mt-4 md:grid md:grid-cols-1 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("name")}
@@ -383,7 +379,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:mt-4 md:gap-10">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("age")}
@@ -406,7 +402,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       rows={5}
                     />
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <PhoneNumberFormField
                         {...field("phone_number")}
@@ -421,7 +417,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <DateFormField
                         {...field("date_declared_positive")}
@@ -439,7 +435,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <DateFormField
                         {...field("date_of_test")}
@@ -456,7 +452,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("srf_id")}
@@ -472,7 +468,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("hospital_tested_in")}
@@ -488,7 +484,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <DateFormField
                         {...field("date_of_admission")}
@@ -506,7 +502,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("comorbidities")}
@@ -522,7 +518,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("brought_dead")}
@@ -538,7 +534,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("kottayam_confirmation_sent")}
@@ -554,7 +550,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       />
                     </div>
                   </div>
-                  <div className="md:grid md:grid-cols-2 md:gap-10 md:mt-4">
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
                     <div>
                       <TextFormField
                         {...field("cause_of_death")}

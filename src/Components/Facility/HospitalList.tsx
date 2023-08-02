@@ -184,7 +184,7 @@ export const HospitalList = () => {
   } else if (data && data.length) {
     manageFacilities = (
       <>
-        <div className="grid lg:grid-cols-2 md:grid-cols-1 gap-4">
+        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2">
           {facilityList}
         </div>
         <Pagination totalCount={totalCount} />
@@ -192,20 +192,20 @@ export const HospitalList = () => {
     );
   } else if (data && data.length === 0) {
     manageFacilities = hasFiltersApplied(qParams) ? (
-      <div className="w-full bg-white rounded-lg p-3">
-        <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+      <div className="w-full rounded-lg bg-white p-3">
+        <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-gray-600">
           {t("no_facilities")}
         </div>
       </div>
     ) : (
       <div>
         <div
-          className="p-16 mt-4 bg-white shadow rounded-md border border-grey-500 whitespace-nowrap text-sm font-semibold cursor-pointer hover:bg-gray-300 text-center"
+          className="border-grey-500 mt-4 cursor-pointer whitespace-nowrap rounded-md border bg-white p-16 text-center text-sm font-semibold shadow hover:bg-gray-300"
           onClick={() => navigate("/facility/create")}
         >
           <i className="fas fa-plus text-3xl"></i>
           <div className="mt-2 text-xl">{t("create_facility")}</div>
-          <div className="text-xs mt-1 text-red-700">
+          <div className="mt-1 text-xs text-red-700">
             {t("no_duplicate_facility")}
           </div>
         </div>
@@ -245,14 +245,14 @@ export const HospitalList = () => {
         />
       }
     >
-      <div className="lg:flex gap-2 mt-4">
+      <div className="mt-4 gap-2 lg:flex">
         <CountBlock
           text="Total Facilities"
           count={totalCount}
           loading={isLoading}
           icon={"hospital"}
         />
-        <div className="flex my-4 gap-2 flex-col sm:flex-row justify-between flex-grow">
+        <div className="my-4 flex grow flex-col justify-between gap-2 sm:flex-row">
           <SearchInput
             name="search"
             value={qParams.search}
