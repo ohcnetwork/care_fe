@@ -91,7 +91,7 @@
     "react-markdown": "^8.0.7",
     "react-player": "^2.12.0",
     "react-qr-reader": "^2.2.1",
-    "react-redux": "^8.1.1",
+    "react-redux": "^8.1.2",
     "react-swipeable-views": "^0.14.0",
     "react-transition-group": "^4.4.5",
     "react-webcam": "^7.1.1",
