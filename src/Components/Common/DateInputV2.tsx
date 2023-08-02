@@ -268,7 +268,12 @@ const DateInputV2: React.FC<Props> = ({
                     <div className="mt-4 flex">
                       <button
                         type="button"
-                        disabled={!isDateWithinConstraints()}
+                        disabled={
+                          !isDateWithinConstraints(
+                            getLastDay(),
+                            datePickerHeaderDate.getMonth() - 1
+                          )
+                        }
                         className="aspect-square inline-flex cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
                         onClick={decrement}
                       >
@@ -374,7 +379,7 @@ const DateInputV2: React.FC<Props> = ({
                               new Date(
                                 datePickerHeaderDate.getFullYear(),
                                 i,
-                                datePickerHeaderDate.getDate()
+                                1
                               ),
                               "MMM"
                             )}

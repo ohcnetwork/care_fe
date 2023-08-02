@@ -1,35 +1,26 @@
 import { useEffect } from "react";
-import { PatientAssetBed } from "../Assets/AssetTypes";
 import { Link } from "raviger";
 import { GENDER_TYPES } from "../../Common/constants";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import useVentilatorVitalsMonitor from "./useVentilatorVitalsMonitor";
-import { VitalsValueBase } from "./types";
+import { IVitalsComponentProps, VitalsValueBase } from "./types";
 import { classNames } from "../../Utils/utils";
 import WaveformLabels from "./WaveformLabels";
 
-interface Props {
-  patientAssetBed?: PatientAssetBed;
-  socketUrl: string;
-  size?: { width: number; height: number };
-}
-
-export default function VentilatorPatientVitalsMonitor({
-  patientAssetBed,
-  socketUrl,
-  size,
-}: Props) {
+export default function VentilatorPatientVitalsMonitor(
+  props: IVitalsComponentProps
+) {
   const { connect, waveformCanvas, data, isOnline } =
-    useVentilatorVitalsMonitor();
-  const { patient, bed, asset } = patientAssetBed ?? {};
+    useVentilatorVitalsMonitor(props.config);
+  const { patient, bed, asset } = props.patientAssetBed ?? {};
 
   useEffect(() => {
-    connect(socketUrl);
-  }, [socketUrl]);
+    connect(props.socketUrl);
+  }, [props.socketUrl]);
 
   return (
     <div className="flex flex-col gap-1 rounded bg-[#020617] p-2">
-      {patientAssetBed && (
+      {props.patientAssetBed && (
         <div className="flex items-center justify-between px-2 tracking-wide">
           <div className="flex items-center gap-2">
             {patient ? (
@@ -93,14 +84,14 @@ export default function VentilatorPatientVitalsMonitor({
               "flex flex-col items-center justify-center gap-1 p-1 text-center font-mono font-medium text-warning-500",
               isOnline && "hidden"
             )}
-            style={{ ...(size ?? waveformCanvas.size) }}
+            style={waveformCanvas.size}
           >
             <CareIcon className="care-l-cloud-times mb-2 animate-pulse text-4xl" />
             <span className="font-bold">No incoming data from Ventilator</span>
           </div>
           <div
             className={classNames("relative", !isOnline && "hidden")}
-            style={{ ...(size ?? waveformCanvas.size) }}
+            style={waveformCanvas.size}
           >
             <WaveformLabels
               labels={{
@@ -112,18 +103,18 @@ export default function VentilatorPatientVitalsMonitor({
             <canvas
               className="absolute left-0 top-0"
               ref={waveformCanvas.background.canvasRef}
-              style={{ ...(size ?? waveformCanvas.size) }}
+              style={waveformCanvas.size}
               {...waveformCanvas.size}
             />
             <canvas
               className="absolute left-0 top-0"
               ref={waveformCanvas.foreground.canvasRef}
-              style={{ ...(size ?? waveformCanvas.size) }}
+              style={waveformCanvas.size}
               {...waveformCanvas.size}
             />
           </div>
         </div>
-        <div className="z-10 grid grid-cols-3 divide-blue-600 bg-[#020617] tracking-wider text-white md:absolute md:inset-y-0 md:right-0 md:grid-cols-1 md:divide-y">
+        <div className="grid grid-cols-3 divide-blue-600 bg-[#020617] tracking-wider text-white md:inset-y-0 md:right-0 md:grid-cols-1 md:divide-y">
           <NonWaveformData
             label="PEEP"
             attr={data.peep}
