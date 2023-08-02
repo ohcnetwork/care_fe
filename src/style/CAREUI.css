@@ -25,7 +25,7 @@
 }
 
 .cui-dropdown-base {
-    @apply z-40 w-full rounded-b-md xl:rounded-b-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none
+    @apply z-40 w-full rounded-b-md xl:rounded-lg shadow-lg overflow-auto max-h-96 bg-gray-100 divide-y divide-gray-300 ring-1 ring-gray-400 focus:outline-none
 }
 
 .cui-card {
