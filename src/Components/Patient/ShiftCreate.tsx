@@ -272,15 +272,14 @@ export const ShiftCreate = (props: patientShiftProps) => {
       <Card className="mx-auto mt-4 flex w-full max-w-3xl flex-col px-8 py-5 md:px-16 md:py-11">
         <TextFormField
           {...field("refering_facility_contact_name")}
-          label="Contact person at the current facility"
+          label="Name of Contact person at the current facility"
           required
         />
 
         <PhoneNumberFormField
           {...field("refering_facility_contact_number")}
-          label="Contact person phone"
+          label="Contact person phone number"
           required
-          disableCountry
         />
 
         {wartime_shifting && (

@@ -12,6 +12,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import CircularProgress from "../Common/components/CircularProgress";
 import { LocalStorageKeys } from "../../Common/constants";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
@@ -211,7 +212,10 @@ export const Login = (props: { forgot?: boolean }) => {
             </h1>
             {custom_description ? (
               <div className="py-6">
-                <ReactMarkdown className="max-w-xl text-gray-400">
+                <ReactMarkdown
+                  rehypePlugins={[rehypeRaw]}
+                  className="max-w-xl text-gray-400"
+                >
                   {custom_description || t("goal")}
                 </ReactMarkdown>
               </div>
