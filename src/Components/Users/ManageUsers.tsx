@@ -221,7 +221,7 @@ export default function ManageUsers() {
           id={`usr_${idx}`}
           className=" mt-6 w-full md:px-4 lg:w-1/2 xl:w-1/3"
         >
-          <div className="relative block h-full cursor-pointer overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
+          <div className="relative block h-full overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
             <div className="flex h-full flex-col justify-between">
               <div className="px-6 py-4">
                 <div
@@ -277,6 +277,7 @@ export default function ManageUsers() {
                       variant="danger"
                       ghost
                       border
+                      className="float-right"
                       onClick={() => handleDelete(user)}
                     >
                       Delete
@@ -289,10 +290,10 @@ export default function ManageUsers() {
                     isExtremeSmallScreen
                       ? " flex-wrap "
                       : " flex-col justify-between md:flex-row "
-                  } gap-2 md:grid md:grid-cols-4`}
+                  } gap-2 md:grid md:grid-cols-2`}
                 >
                   {user.user_type && (
-                    <div className="col-span-2">
+                    <div className="col-span-1">
                       <UserDetails id="role" title="Role">
                         <div className="break-all font-semibold">
                           {user.user_type}
@@ -301,7 +302,7 @@ export default function ManageUsers() {
                     </div>
                   )}
                   {user.district_object && (
-                    <div className="col-span-2">
+                    <div className="col-span-1">
                       <UserDetails id="district" title="District">
                         <div className="font-semibold">
                           {user.district_object.name}
@@ -311,7 +312,7 @@ export default function ManageUsers() {
                   )}
                   {user.user_type === "Doctor" && (
                     <>
-                      <div className="col-span-2">
+                      <div className="col-span-1">
                         <UserDetails
                           id="doctor-qualification"
                           title="Qualification"
@@ -325,7 +326,7 @@ export default function ManageUsers() {
                           )}
                         </UserDetails>
                       </div>
-                      <div className="col-span-2">
+                      <div className="col-span-1">
                         <UserDetails id="doctor-experience" title="Experience">
                           {user.doctor_experience_commenced_on ? (
                             <span className="font-semibold">
@@ -369,11 +370,11 @@ export default function ManageUsers() {
                   className={`${
                     isExtremeSmallScreen
                       ? "flex flex-wrap "
-                      : "grid grid-cols-4 "
+                      : "grid grid-cols-2 "
                   }`}
                 >
                   {user.created_by && (
-                    <div className="col-span-2">
+                    <div className="col-span-1">
                       <UserDetails id="created_by" title="Created by">
                         <div className="break-all font-semibold">
                           {user.created_by}
@@ -382,7 +383,7 @@ export default function ManageUsers() {
                     </div>
                   )}
                   {user.username && (
-                    <div className="col-span-2">
+                    <div className="col-span-1">
                       <UserDetails id="home_facility" title="Home Facility">
                         <span className="block font-semibold">
                           {user.home_facility_object?.name ||
@@ -418,7 +419,7 @@ export default function ManageUsers() {
                       <CareIcon className="care-l-hospital text-lg" />
                       <p>Linked Facilities</p>
                     </ButtonV2>
-                    <div className="mx-1"></div>
+                    <div className="mx-1 my-2 sm:my-0"></div>
                     <ButtonV2
                       id="skills"
                       className="flex w-full items-center md:w-1/2"
@@ -431,20 +432,22 @@ export default function ManageUsers() {
                       <p>Linked Skills</p>
                     </ButtonV2>
                   </div>
-                  <div className="flex-col md:flex-row">
-                    <ButtonV2
-                      id="skills"
-                      className="flex w-full items-center md:w-full"
-                      onClick={() => {
-                        setExpandWorkingHours(true);
-                        setSelectedUser(user.username);
-                        setWeeklyHours(user.weekly_working_hours);
-                      }}
-                    >
-                      <CareIcon className="care-l-clock text-xl" />
-                      <p>Set weekly working hours</p>
-                    </ButtonV2>
-                  </div>
+                  {["DistrictAdmin", "StateAdmin"].includes(userType) && (
+                    <div className="flex-col md:flex-row">
+                      <ButtonV2
+                        id="skills"
+                        className="flex w-full items-center md:w-full"
+                        onClick={() => {
+                          setExpandWorkingHours(true);
+                          setSelectedUser(user.username);
+                          setWeeklyHours(user.weekly_working_hours);
+                        }}
+                      >
+                        <CareIcon className="care-l-clock text-xl" />
+                        <p>Set weekly working hours</p>
+                      </ButtonV2>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -723,7 +726,7 @@ function UserFacilities(props: { user: any }) {
           {user?.home_facility_object && (
             <div className="mt-2">
               <div className="mb-2 ml-2 text-lg font-bold">Home Facility</div>
-              <div className="relative cursor-pointer rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
+              <div className="relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
                 <div className="flex items-center justify-between">
                   <span>{user?.home_facility_object?.name}</span>
                   <div className="flex items-center gap-2">
@@ -767,7 +770,7 @@ function UserFacilities(props: { user: any }) {
                       id={`facility_${i}`}
                       key={`facility_${i}`}
                       className={classNames(
-                        "relative cursor-pointer rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg"
+                        "relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg"
                       )}
                     >
                       <div className="flex items-center justify-between">
