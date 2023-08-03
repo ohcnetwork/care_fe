@@ -15,17 +15,20 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import SearchInput from "../Form/SearchInput";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 const ScrollingComponent = withScrolling("div");
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
-const COMPLETED = ["COMPLETED", "REJECTED"];
+const COMPLETED = ["COMPLETED", "REJECTED", "TRANSFER IN PROGRESS"];
 const ACTIVE = resourceStatusOptions.filter((o) => !COMPLETED.includes(o));
 
 export default function BoardView() {
-  const { qParams, FilterBadges, advancedFilter } = useFilters({ limit: -1 });
+  const { qParams, updateQuery, FilterBadges, advancedFilter } = useFilters({
+    limit: -1,
+  });
   const [boardFilter, setBoardFilter] = useState(ACTIVE);
   // eslint-disable-next-line
   const [isLoading, setIsLoading] = useState(false);
@@ -42,7 +45,7 @@ export default function BoardView() {
       <div className="flex w-full flex-col items-center justify-between lg:flex-row">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
-            title="Resource"
+            title={t("resource")}
             hideBack
             className="mx-3 md:mx-5"
             componentRight={
@@ -58,7 +61,12 @@ export default function BoardView() {
         </div>
 
         <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 lg:flex-row lg:gap-4">
-          <div></div>
+          <SearchInput
+            name="resource_name"
+            value={qParams.resource_name}
+            onChange={(e) => updateQuery({ [e.name]: e.value })}
+            placeholder={t("search_resource")}
+          />
           <SwitchTabs
             Tab1="Active"
             Tab2="Completed"

@@ -17,14 +17,21 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import SearchInput from "../Form/SearchInput";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
 
 export default function ListView() {
   const dispatch: any = useDispatch();
-  const { qParams, Pagination, FilterBadges, advancedFilter, resultsPerPage } =
-    useFilters({});
+  const {
+    qParams,
+    Pagination,
+    FilterBadges,
+    updateQuery,
+    advancedFilter,
+    resultsPerPage,
+  } = useFilters({});
   const [data, setData] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -98,7 +105,7 @@ export default function ListView() {
                 <div>
                   {resource.emergency && (
                     <span className="inline-block shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium leading-4 text-red-800">
-                      Emergency
+                      {t("emergency")}
                     </span>
                   )}
                 </div>
@@ -106,7 +113,7 @@ export default function ListView() {
               <dl className="grid grid-cols-1 gap-x-1 gap-y-2 sm:grid-cols-1">
                 <div className="sm:col-span-1">
                   <dt
-                    title="Resource status"
+                    title={t("resource_status")}
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
                     <i className="fas fa-truck mr-2" />
@@ -117,7 +124,7 @@ export default function ListView() {
                 </div>
                 <div className="sm:col-span-1">
                   <dt
-                    title=" Origin facility"
+                    title={t("origin_facility")}
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
                     <i className="fas fa-plane-departure mr-2"></i>
@@ -128,7 +135,7 @@ export default function ListView() {
                 </div>
                 <div className="sm:col-span-1">
                   <dt
-                    title="Resource approving facility"
+                    title={t("resource_approving_facility")}
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
                     <i className="fas fa-user-check mr-2"></i>
@@ -139,7 +146,7 @@ export default function ListView() {
                 </div>
                 <div className="sm:col-span-1">
                   <dt
-                    title=" Assigned facility"
+                    title={t("assigned_facility")}
                     className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
                     <i className="fas fa-plane-arrival mr-2"></i>
@@ -153,7 +160,7 @@ export default function ListView() {
 
                 <div className="sm:col-span-1">
                   <dt
-                    title="  Last Modified"
+                    title={t("last_modified")}
                     className={
                       "flex items-center text-sm font-medium leading-5 " +
                       (moment()
@@ -190,7 +197,7 @@ export default function ListView() {
     <div className="flex h-screen flex-col px-2 pb-2">
       <div className="px-4 md:flex md:items-center md:justify-between">
         <PageTitle
-          title="Resource"
+          title={t("resource")}
           hideBack
           componentRight={
             <ExportButton
@@ -202,7 +209,12 @@ export default function ListView() {
           }
           breadcrumbs={false}
         />
-
+        <SearchInput
+          name="resource_name"
+          value={qParams.patient_name}
+          onChange={(e) => updateQuery({ [e.name]: e.value })}
+          placeholder={t("search_resource")}
+        />
         <div className="w-32" />
         <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
           <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>

@@ -237,7 +237,7 @@ export default function ListFilter(props: any) {
 
       <SelectFormField
         name="ordering"
-        label="Ordering"
+        label={t("ordering")}
         value={filterState.ordering}
         options={RESOURCE_FILTER_ORDER}
         optionLabel={(option) => option.desc}
@@ -249,7 +249,7 @@ export default function ListFilter(props: any) {
 
       <SelectFormField
         name="emergency"
-        label="Is emergency case"
+        label={t("emergency")}
         value={filterState.emergency}
         options={["yes", "no"]}
         optionLabel={(option) => option}
