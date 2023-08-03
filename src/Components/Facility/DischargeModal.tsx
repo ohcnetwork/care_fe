@@ -33,8 +33,8 @@ interface PreDischargeFormInterface {
   discharge_date?: string;
   death_datetime?: string;
   death_confirmed_doctor?: string;
-  referred_to?: string | null;
-  referred_to_external?: string | null;
+  referred_to?: number | null | undefined;
+  referred_to_external?: string | null | undefined;
 }
 
 interface IProps {
@@ -181,7 +181,7 @@ const DischargeModal = ({
     const isExternal = id === -1;
     setPreDischargeForm((prev) => ({
       ...prev,
-      referred_to: isExternal ? null : name,
+      referred_to: isExternal ? null : id,
       referred_to_external: isExternal ? name : null,
     }));
   };
