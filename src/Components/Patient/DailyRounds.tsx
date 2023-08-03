@@ -417,10 +417,10 @@ export const DailyRounds = (props: any) => {
               className="w-full"
               label="Measured at"
               type="datetime-local"
-              value={
-                state.form.taken_at ?? new Date().toISOString().slice(0, 16)
-              }
-              max={new Date().toISOString().slice(0, 16)}
+              value={moment(state.form.taken_at || undefined).format(
+                "YYYY-MM-DDTHH:mm"
+              )}
+              max={moment().format("YYYY-MM-DDTHH:mm")}
             />
           </div>
           <div className="w-full md:w-1/3">
@@ -561,7 +561,7 @@ export const DailyRounds = (props: any) => {
                   label="Respiratory Rate"
                   unit="bpm"
                   required
-                  start={10}
+                  start={0}
                   end={50}
                   step={1}
                   thresholds={[

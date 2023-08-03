@@ -194,6 +194,7 @@ export interface BedModel {
   facility?: string;
   location_object?: {
     name: string;
+    id?: string;
   };
   location?: string;
   is_occupied?: boolean;
