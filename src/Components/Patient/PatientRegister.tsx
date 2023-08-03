@@ -1249,6 +1249,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 duplicateCheck(event.value);
                                 field("phone_number").onChange(event);
                               }}
+                              types={["mobile", "landline"]}
                             />
                           </div>
                           <div
@@ -1259,6 +1260,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               {...field("emergency_phone_number")}
                               label="Emergency contact number"
                               required
+                              types={["mobile", "landline"]}
                             />
                           </div>
                           <div data-testid="name" id="name-div">

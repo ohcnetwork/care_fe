@@ -875,6 +875,7 @@ export const PatientManager = () => {
                 value={phone_number}
                 onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
+                types={["mobile", "landline"]}
               />
               <PhoneNumberFormField
                 label="Search by Emergency Number"
@@ -882,6 +883,7 @@ export const PatientManager = () => {
                 value={emergency_phone_number}
                 onChange={(e) => setEmergencyPhoneNum(e.value)}
                 error={emergencyPhoneNumberError}
+                types={["mobile", "landline"]}
               />
             </div>
           </div>

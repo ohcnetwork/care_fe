@@ -632,8 +632,8 @@ export const UserAdd = (props: UserProps) => {
       id: name,
       name,
       onChange: handleFieldChange,
-      value: state.form[name],
-      error: state.errors[name],
+      value: (state.form as any)[name],
+      error: (state.errors as any)[name],
     };
   };
 
@@ -722,6 +722,7 @@ export const UserAdd = (props: UserProps) => {
                 placeholder="Phone Number"
                 label="Phone Number"
                 required
+                types={["mobile", "landline"]}
               />
               <Checkbox
                 checked={state.form.phone_number_is_whatsapp}
@@ -740,6 +741,7 @@ export const UserAdd = (props: UserProps) => {
               placeholder="WhatsApp Phone Number"
               label="Whatsapp Number"
               disabled={state.form.phone_number_is_whatsapp}
+              types={["mobile"]}
             />
 
             <div>

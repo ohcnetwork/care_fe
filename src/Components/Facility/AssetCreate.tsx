@@ -793,6 +793,7 @@ const AssetCreate = (props: AssetProps) => {
                         value={support_phone}
                         onChange={(e) => setSupportPhone(e.value)}
                         error={state.errors.support_phone}
+                        types={["mobile", "landline", "support"]}
                       />
                     </div>
 

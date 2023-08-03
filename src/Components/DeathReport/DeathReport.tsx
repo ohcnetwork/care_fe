@@ -407,6 +407,7 @@ export default function PrintDeathReport(props: { id: string }) {
                       <PhoneNumberFormField
                         {...field("phone_number")}
                         label={t("phone_number")}
+                        types={["mobile", "landline"]}
                       />
                     </div>
                     <div>
