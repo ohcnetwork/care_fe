@@ -33,8 +33,8 @@ interface PreDischargeFormInterface {
   discharge_date?: string;
   death_datetime?: string;
   death_confirmed_doctor?: string;
+  referred_to?: string | null;
   referred_to_external?: string | null;
-
 }
 
 interface IProps {
@@ -53,8 +53,8 @@ const DischargeModal = ({
   onClose,
   consultationData,
   afterSubmit = () => {
-    onClose();
-    window.location.reload();
+    // onClose();
+    // window.location.reload();
   },
   discharge_reason = "",
   discharge_notes = "",
@@ -177,10 +177,12 @@ const DischargeModal = ({
 
   const handleFacilitySelect = (selected: FacilityModel) => {
     setFacility(selected ? selected : facility);
-    const { name } = selected;
+    const { id, name } = selected;
+    const isExternal = id === -1;
     setPreDischargeForm((prev) => ({
       ...prev,
-      referred_to_external: name || "",
+      referred_to: isExternal ? null : name,
+      referred_to_external: isExternal ? name : null,
     }));
   };
 
@@ -222,7 +224,7 @@ const DischargeModal = ({
           <>
             <FieldLabel>Referred to</FieldLabel>
             <FacilitySelect
-              name="referred_to_external"
+              name="referred_to"
               setSelected={(selected) =>
                 handleFacilitySelect(selected as FacilityModel)
               }
@@ -230,7 +232,7 @@ const DischargeModal = ({
               showAll={true}
               freeText={true}
               multiple={false}
-              errors={errors?.referred_to_external}
+              errors={errors?.referred_to}
               className="mb-4"
             />
           </>
