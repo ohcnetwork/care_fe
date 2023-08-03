@@ -620,8 +620,8 @@ export const ConsultationDetails = (props: any) => {
                             <div>
                               Referred Facility {" - "}
                               <span className="font-semibold">
-                                {consultationData.referred_to_external ??
-                                  consultationData.referred_to_object?.name ??
+                                {consultationData.referred_to_external ||
+                                  consultationData.referred_to_object?.name ||
                                   "--"}
                               </span>
                             </div>

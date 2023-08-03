@@ -136,17 +136,20 @@ const DischargeModal = ({
       return;
     }
 
+    const dischargeDetails = {
+      ...preDischargeForm,
+      discharge: value,
+      discharge_date: moment(preDischargeForm.discharge_date).toISOString(true),
+    };
+
+    if (dischargeDetails.referred_to != undefined)
+      delete dischargeDetails.referred_to_external;
+
+    if (dischargeDetails.referred_to_external != undefined)
+      delete dischargeDetails.referred_to;
+
     const dischargeResponse = await dispatch(
-      dischargePatient(
-        {
-          ...preDischargeForm,
-          discharge: value,
-          discharge_date: moment(preDischargeForm.discharge_date).toISOString(
-            true
-          ),
-        },
-        { id: consultationData.id }
-      )
+      dischargePatient(dischargeDetails, { id: consultationData.id })
     );
 
     setIsSendingDischargeApi(false);
@@ -181,8 +184,7 @@ const DischargeModal = ({
     const isExternal = id === -1;
     setPreDischargeForm((prev) => ({
       ...prev,
-      referred_to: isExternal ? null : id,
-      referred_to_external: isExternal ? name : null,
+      ...(isExternal ? { referred_to_external: name } : { referred_to: id }),
     }));
   };
 
