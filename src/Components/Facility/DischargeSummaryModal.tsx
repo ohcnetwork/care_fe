@@ -167,16 +167,13 @@ export default function DischargeSummaryModal(props: Props) {
           onChange={(e) => setEmail(e.value)}
           error={emailError}
         />
-        <div className="mt-6">
-          {!props.consultation.discharge_date && (
-            <CheckBoxFormField
-              name="regenDischargeSummary"
-              className="flex-1"
-              label={"Regenerate discharge summary"}
-              onChange={(e) => setRegenDischargeSummary(e.value)}
-            />
-          )}
-        </div>
+        {!props.consultation.discharge_date && (
+          <CheckBoxFormField
+            name="regenDischargeSummary"
+            label={"Regenerate discharge summary"}
+            onChange={(e) => setRegenDischargeSummary(e.value)}
+          />
+        )}
         <div className="flex flex-col-reverse gap-2 lg:flex-row lg:justify-end">
           <Cancel onClick={props.onClose} />
           <Submit onClick={handleDownload} disabled={downloading}>
