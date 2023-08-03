@@ -13,7 +13,6 @@ import {
   PhoneNumberValidator,
   PhoneNumberType,
 } from "../FieldValidators";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 interface CountryData {
   flag: string;
@@ -88,9 +87,9 @@ export default function PhoneNumberFormField(props: Props) {
       field={{
         ...field,
         error: field.error || error,
-        labelSuffix: field.labelSuffix || (
-          <PhoneNumberTypesHelp types={props.types} />
-        ),
+        // labelSuffix: field.labelSuffix || (
+        //   <PhoneNumberTypesHelp types={props.types} />
+        // ),
       }}
     >
       <div className="relative rounded-md shadow-sm">
@@ -145,31 +144,31 @@ export default function PhoneNumberFormField(props: Props) {
   );
 }
 
-const phoneNumberTypeIcons: Record<PhoneNumberType, string> = {
-  international_mobile: "globe",
-  indian_mobile: "mobile-android",
-  mobile: "mobile-android",
-  landline: "phone",
-  support: "question-circle",
-};
+// const phoneNumberTypeIcons: Record<PhoneNumberType, string> = {
+//   international_mobile: "globe",
+//   indian_mobile: "mobile-android",
+//   mobile: "mobile-android",
+//   landline: "phone",
+//   support: "question-circle",
+// };
 
-const PhoneNumberTypesHelp = ({ types }: { types: PhoneNumberType[] }) => (
-  <div className="flex gap-1">
-    {types.map((type) => (
-      <span className="tooltip mt-1">
-        <CareIcon
-          className={classNames(
-            `care-l-${phoneNumberTypeIcons[type]}`,
-            "text-lg text-gray-400"
-          )}
-        />
-        <span className="tooltip-text tooltip-bottom -translate-x-1/2 translate-y-1 text-xs capitalize">
-          {type.replace("_", " ")}
-        </span>
-      </span>
-    ))}
-  </div>
-);
+// const PhoneNumberTypesHelp = ({ types }: { types: PhoneNumberType[] }) => (
+//   <div className="flex gap-1">
+//     {types.map((type) => (
+//       <span className="tooltip mt-1">
+//         <CareIcon
+//           className={classNames(
+//             `care-l-${phoneNumberTypeIcons[type]}`,
+//             "text-lg text-gray-400"
+//           )}
+//         />
+//         <span className="tooltip-text tooltip-bottom -translate-x-1/2 translate-y-1 text-xs capitalize">
+//           {type.replace("_", " ")}
+//         </span>
+//       </span>
+//     ))}
+//   </div>
+// );
 
 const conditionPhoneCode = (code: string) => {
   code = code.split(" ")[0];
