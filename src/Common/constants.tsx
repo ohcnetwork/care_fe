@@ -312,7 +312,7 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
 export const GENDER_TYPES = [
   { id: 1, text: "Male", icon: "M" },
   { id: 2, text: "Female", icon: "F" },
-  { id: 3, text: "Non-binary", icon: "NB" },
+  { id: 3, text: "Transgender", icon: "TRANS" },
 ];
 
 export const SAMPLE_TEST_RESULT = [
@@ -323,7 +323,7 @@ export const SAMPLE_TEST_RESULT = [
 ];
 
 export const CONSULTATION_SUGGESTION = [
-  { id: "HI", text: "Home Isolation" },
+  { id: "HI", text: "Home Isolation", deprecated: true }, // # Deprecated. Preserving option for backward compatibility (use only for readonly operations)
   { id: "A", text: "Admission" },
   { id: "R", text: "Refer to another Hospital" },
   { id: "OP", text: "OP Consultation" },

@@ -12,6 +12,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import CircularProgress from "../Common/components/CircularProgress";
 import { LocalStorageKeys } from "../../Common/constants";
 import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
@@ -177,19 +178,19 @@ export const Login = (props: { forgot?: boolean }) => {
   };
 
   return (
-    <div className="flex flex-col-reverse md:flex-row md:h-screen relative overflow-hidden">
-      <div className="flex p-6 md:p-0 md:px-16 md:pr-[calc(4rem+130px)] flex-col justify-between md:w-[calc(50%+130px)] md:h-full flex-auto md:flex-none login-hero relative">
+    <div className="relative flex flex-col-reverse overflow-hidden md:h-screen md:flex-row">
+      <div className="login-hero relative flex flex-auto flex-col justify-between p-6 md:h-full md:w-[calc(50%+130px)] md:flex-none md:p-0 md:px-16 md:pr-[calc(4rem+130px)]">
         <div></div>
-        <div className="mt-4 md:mt-12 rounded-lg py-4 flex flex-col items-start">
-          <div className="hidden md:flex items-center gap-6 mb-4">
+        <div className="mt-4 flex flex-col items-start rounded-lg py-4 md:mt-12">
+          <div className="mb-4 hidden items-center gap-6 md:flex">
             {(custom_logo || state_logo) && (
               <>
                 <img
                   src={custom_logo?.light ?? state_logo?.light}
-                  className="rounded-lg py-3 h-16"
+                  className="h-16 rounded-lg py-3"
                   alt="state logo"
                 />
-                <div className="w-0.5 bg-white/50 h-10 rounded-full" />
+                <div className="h-10 w-0.5 rounded-full bg-white/50" />
               </>
             )}
             <a
@@ -206,25 +207,28 @@ export const Login = (props: { forgot?: boolean }) => {
             </a>
           </div>
           <div className="max-w-lg">
-            <h1 className="text-4xl lg:text-5xl font-black text-white leading-tight tracking-wider">
+            <h1 className="text-4xl font-black leading-tight tracking-wider text-white lg:text-5xl">
               {t("care")}
             </h1>
             {custom_description ? (
               <div className="py-6">
-                <ReactMarkdown className="max-w-xl text-gray-400">
+                <ReactMarkdown
+                  rehypePlugins={[rehypeRaw]}
+                  className="max-w-xl text-gray-400"
+                >
                   {custom_description || t("goal")}
                 </ReactMarkdown>
               </div>
             ) : (
-              <div className="text-base md:text-lg lg:text-xl font-semibold py-6 max-w-xl text-gray-400 pl-1">
+              <div className="max-w-xl py-6 pl-1 text-base font-semibold text-gray-400 md:text-lg lg:text-xl">
                 {t("goal")}
               </div>
             )}
           </div>
         </div>
-        <div className="flex items-center mb-6">
-          <div className="text-xs md:text-sm max-w-lg">
-            <div className="ml-1 flex items-center gap-4 mb-2">
+        <div className="mb-6 flex items-center">
+          <div className="max-w-lg text-xs md:text-sm">
+            <div className="mb-2 ml-1 flex items-center gap-4">
               <a
                 href="https://digitalpublicgoods.net/registry/coronasafe-care.html"
                 rel="noopener noreferrer"
@@ -236,7 +240,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   alt="Logo of Digital Public Goods Alliance"
                 />
               </a>
-              <div className="ml-2 w-[1px] bg-white/50 h-8 rounded-full" />
+              <div className="ml-2 h-8 w-[1px] rounded-full bg-white/50" />
               <a
                 href={coronasafe_url}
                 rel="noopener noreferrer"
@@ -244,7 +248,7 @@ export const Login = (props: { forgot?: boolean }) => {
               >
                 <img
                   src="https://cdn.coronasafe.network/ohc_logo_light.png"
-                  className="h-10 inline-block"
+                  className="inline-block h-10"
                   alt="coronasafe logo"
                 />
               </a>
@@ -271,14 +275,14 @@ export const Login = (props: { forgot?: boolean }) => {
         </div>
       </div>
 
-      <div className="w-full my-4 md:mt-0 md:w-1/2 md:h-full login-hero-form">
-        <div className="flex items-center justify-center h-full relative">
+      <div className="login-hero-form my-4 w-full md:mt-0 md:h-full md:w-1/2">
+        <div className="relative flex h-full items-center justify-center">
           <div
             className={
-              "w-full p-8 md:p-0 md:w-4/5 lg:w-[400px] transition-all " +
+              "w-full p-8 transition-all md:w-4/5 md:p-0 lg:w-[400px] " +
               (forgotPassword
-                ? "invisible opacity-0 -translate-x-5"
-                : "visible opacity-100 -translate-x-0")
+                ? "invisible -translate-x-5 opacity-0"
+                : "visible -translate-x-0 opacity-100")
             }
           >
             <div className="flex items-center gap-1">
@@ -286,10 +290,10 @@ export const Login = (props: { forgot?: boolean }) => {
                 <>
                   <img
                     src={custom_logo?.dark ?? state_logo?.dark}
-                    className="rounded-lg py-3 h-14 md:hidden"
+                    className="h-14 rounded-lg py-3 md:hidden"
                     alt="state logo"
                   />
-                  <div className="mx-4 w-[1px] md:hidden bg-gray-600 h-8 rounded-full" />
+                  <div className="mx-4 h-8 w-[1px] rounded-full bg-gray-600 md:hidden" />
                 </>
               )}
               <img
@@ -298,7 +302,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 alt="care logo"
               />
             </div>{" "}
-            <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">
+            <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
               {t("auth_login_title")}
             </div>
             <form onSubmit={handleSubmit}>
@@ -328,7 +332,7 @@ export const Login = (props: { forgot?: boolean }) => {
                 />
                 <div className="justify-start">
                   {isCaptchaEnabled && (
-                    <div className="px-8 py-4 grid">
+                    <div className="grid px-8 py-4">
                       <ReCaptcha
                         sitekey={recaptcha_site_key}
                         onChange={onCaptchaChange}
@@ -337,7 +341,7 @@ export const Login = (props: { forgot?: boolean }) => {
                     </div>
                   )}
 
-                  <div className="w-full flex justify-between items-center py-4">
+                  <div className="flex w-full items-center justify-between py-4">
                     <button
                       onClick={() => {
                         setForgotPassword(true);
@@ -356,7 +360,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   ) : (
                     <button
                       type="submit"
-                      className="w-full bg-primary-500 inline-flex items-center justify-center text-sm font-semibold py-2 px-4 rounded cursor-pointer text-white"
+                      className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white"
                     >
                       {t("login")}
                     </button>
@@ -368,15 +372,15 @@ export const Login = (props: { forgot?: boolean }) => {
           </div>
           <div
             className={
-              "w-full p-8 md:p-0 md:w-4/5 lg:w-[400px] absolute transition-all " +
+              "absolute w-full p-8 transition-all md:w-4/5 md:p-0 lg:w-[400px] " +
               (!forgotPassword
-                ? "invisible opacity-0 translate-x-5"
-                : "visible opacity-100 translate-x-0")
+                ? "invisible translate-x-5 opacity-0"
+                : "visible translate-x-0 opacity-100")
             }
           >
             <img
               src={main_logo.dark}
-              className="h-8 w-auto mb-4 md:hidden"
+              className="mb-4 h-8 w-auto md:hidden"
               alt="care logo"
             />{" "}
             <button
@@ -384,14 +388,14 @@ export const Login = (props: { forgot?: boolean }) => {
                 setForgotPassword(false);
               }}
               type="button"
-              className="text-sm text-primary-400 hover:text-primary-500 mb-4"
+              className="mb-4 text-sm text-primary-400 hover:text-primary-500"
             >
               <div className="flex justify-center">
                 <CareIcon className="care-l-arrow-left text-lg" />
                 <span>{t("back_to_login")}</span>
               </div>
             </button>
-            <div className="text-4xl w-[300px] font-black mb-8 text-primary-600">
+            <div className="mb-8 w-[300px] text-4xl font-black text-primary-600">
               {t("forget_password")}
             </div>
             <form onSubmit={handleForgetSubmit}>
@@ -417,7 +421,7 @@ export const Login = (props: { forgot?: boolean }) => {
                   ) : (
                     <button
                       type="submit"
-                      className="w-full bg-primary-500 inline-flex items-center justify-center text-sm font-semibold py-2 px-4 rounded cursor-pointer text-white"
+                      className="inline-flex w-full cursor-pointer items-center justify-center rounded bg-primary-500 px-4 py-2 text-sm font-semibold text-white"
                     >
                       {t("send_reset_link")}
                     </button>

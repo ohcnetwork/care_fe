@@ -643,7 +643,7 @@ export const UserAdd = (props: UserProps) => {
       options={
         <Link
           href="https://school.coronasafe.network/targets/12953"
-          className="text-gray-600 border border-gray-600 bg-gray-50 hover:bg-gray-100 transition rounded px-4 py-2 inline-block"
+          className="inline-block rounded border border-gray-600 bg-gray-50 px-4 py-2 text-gray-600 transition hover:bg-gray-100"
           target="_blank"
         >
           <i className="fas fa-info-circle" /> &nbsp;Need Help?
@@ -659,7 +659,7 @@ export const UserAdd = (props: UserProps) => {
             }}
             formData={state.form}
           />
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
               <FieldLabel>Facilities</FieldLabel>
               <FacilitySelect
@@ -722,7 +722,6 @@ export const UserAdd = (props: UserProps) => {
                 placeholder="Phone Number"
                 label="Phone Number"
                 required
-                disableCountry
               />
               <Checkbox
                 checked={state.form.phone_number_is_whatsapp}
@@ -741,7 +740,6 @@ export const UserAdd = (props: UserProps) => {
               placeholder="WhatsApp Phone Number"
               label="Whatsapp Number"
               disabled={state.form.phone_number_is_whatsapp}
-              disableCountry
             />
 
             <div>
@@ -762,7 +760,7 @@ export const UserAdd = (props: UserProps) => {
                 }}
               />
               {usernameInputInFocus && (
-                <div className="pl-2 text-small text-gray-500">
+                <div className="text-small pl-2 text-gray-500">
                   <div>
                     {usernameExists !== userExistsEnums.idle && (
                       <>
@@ -832,7 +830,7 @@ export const UserAdd = (props: UserProps) => {
                 onBlur={() => setPasswordInputInFocus(false)}
               />
               {passwordInputInFocus && (
-                <div className="pl-2 text-small text-gray-500">
+                <div className="text-small pl-2 text-gray-500">
                   {validateRule(
                     state.form.password?.length >= 8,
                     "Password should be atleast 8 characters long"
@@ -950,7 +948,7 @@ export const UserAdd = (props: UserProps) => {
                 />
               ))}
           </div>
-          <div className="flex flex-col md:flex-row gap-2 justify-end mt-4">
+          <div className="mt-4 flex flex-col justify-end gap-2 md:flex-row">
             <Cancel onClick={() => goBack()} />
             <Submit onClick={handleSubmit} label={buttonText} />
           </div>

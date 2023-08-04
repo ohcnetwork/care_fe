@@ -145,11 +145,11 @@ export const UpdateFacilityMiddleware = (props: any) => {
       crumbsReplacements={{
         [facilityId]: { name: state.form.name },
       }}
-      className="max-w-3xl mx-auto"
+      className="mx-auto max-w-3xl"
     >
       <div className="cui-card mt-4">
         <form onSubmit={(e) => handleSubmit(e)}>
-          <div className="mt-2 grid gap-4 grid-cols-1">
+          <div className="mt-2 grid grid-cols-1 gap-4">
             <div>
               <TextFormField
                 name="middleware_address"

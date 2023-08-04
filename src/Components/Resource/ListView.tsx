@@ -77,7 +77,7 @@ export default function ListView() {
   const showResourceCardList = (data: any) => {
     if (data && !data.length) {
       return (
-        <div className="flex flex-1 justify-center text-gray-600 mt-64">
+        <div className="mt-64 flex flex-1 justify-center text-gray-600">
           No requests to show.
         </div>
       );
@@ -86,18 +86,18 @@ export default function ListView() {
     return data.map((resource: any) => (
       <div
         key={`resource_${resource.id}`}
-        className="w-full md:w-1/2 mt-6 md:px-7"
+        className="mt-6 w-full md:w-1/2 md:px-7"
       >
-        <div className="overflow-hidden shadow rounded-lg bg-white h-full">
-          <div className={"p-4 h-full flex flex-col justify-between"}>
+        <div className="h-full overflow-hidden rounded-lg bg-white shadow">
+          <div className={"flex h-full flex-col justify-between p-4"}>
             <div>
               <div className="flex justify-between">
-                <div className="font-bold text-xl capitalize mb-2">
+                <div className="mb-2 text-xl font-bold capitalize">
                   {resource.title}
                 </div>
                 <div>
                   {resource.emergency && (
-                    <span className="shrink-0 inline-block px-2 py-0.5 text-red-800 text-xs leading-4 font-medium bg-red-100 rounded-full">
+                    <span className="inline-block shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium leading-4 text-red-800">
                       Emergency
                     </span>
                   )}
@@ -107,10 +107,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title="Resource status"
-                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
                     <i className="fas fa-truck mr-2" />
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-gray-900">
                       {resource.status}
                     </dd>
                   </dt>
@@ -118,10 +118,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title=" Origin facility"
-                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
                     <i className="fas fa-plane-departure mr-2"></i>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-gray-900">
                       {(resource.origin_facility_object || {}).name}
                     </dd>
                   </dt>
@@ -129,10 +129,10 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title="Resource approving facility"
-                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
                     <i className="fas fa-user-check mr-2"></i>
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-gray-900">
                       {(resource.approving_facility_object || {}).name}
                     </dd>
                   </dt>
@@ -140,11 +140,11 @@ export default function ListView() {
                 <div className="sm:col-span-1">
                   <dt
                     title=" Assigned facility"
-                    className="text-sm leading-5 font-medium text-gray-500 flex items-center"
+                    className="flex items-center text-sm font-medium leading-5 text-gray-500"
                   >
                     <i className="fas fa-plane-arrival mr-2"></i>
 
-                    <dd className="font-bold text-sm leading-5 text-gray-900">
+                    <dd className="text-sm font-bold leading-5 text-gray-900">
                       {(resource.assigned_facility_object || {}).name ||
                         "Yet to be decided"}
                     </dd>
@@ -155,16 +155,16 @@ export default function ListView() {
                   <dt
                     title="  Last Modified"
                     className={
-                      "text-sm leading-5 font-medium flex items-center " +
+                      "flex items-center text-sm font-medium leading-5 " +
                       (moment()
                         .subtract(2, "hours")
                         .isBefore(resource.modified_date)
                         ? "text-gray-900"
-                        : "rounded p-1 bg-red-400 text-white")
+                        : "rounded bg-red-400 p-1 text-white")
                     }
                   >
                     <i className="fas fa-stopwatch mr-2"></i>
-                    <dd className="font-bold text-sm leading-5">
+                    <dd className="text-sm font-bold leading-5">
                       {formatDate(resource.modified_date) || "--"}
                     </dd>
                   </dt>
@@ -175,7 +175,7 @@ export default function ListView() {
             <div className="mt-2 flex">
               <button
                 onClick={(_) => navigate(`/resource/${resource.external_id}`)}
-                className="btn w-full btn-default bg-white mr-2"
+                className="btn btn-default mr-2 w-full bg-white"
               >
                 <i className="fas fa-eye mr-2" /> All Details
               </button>
@@ -187,8 +187,8 @@ export default function ListView() {
   };
 
   return (
-    <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="md:flex md:items-center md:justify-between px-4">
+    <div className="flex h-screen flex-col px-2 pb-2">
+      <div className="px-4 md:flex md:items-center md:justify-between">
         <PageTitle
           title="Resource"
           hideBack
@@ -204,9 +204,9 @@ export default function ListView() {
         />
 
         <div className="w-32" />
-        <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 w-full lg:w-fit">
+        <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
           <ButtonV2 className="py-[11px]" onClick={onBoardViewBtnClick}>
-            <CareIcon className="care-l-list-ul transform rotate-90" />
+            <CareIcon className="care-l-list-ul rotate-90" />
             {t("board_view")}
           </ButtonV2>
 
@@ -221,7 +221,7 @@ export default function ListView() {
           <Loading />
         ) : (
           <div>
-            <div className="flex justify-end mt-4 mr-2 -mb-4">
+            <div className="-mb-4 mr-2 mt-4 flex justify-end">
               <button
                 className="text-xs hover:text-blue-800"
                 onClick={refreshList}
@@ -231,7 +231,7 @@ export default function ListView() {
               </button>
             </div>
 
-            <div className="flex flex-wrap md:-mx-4 mb-5">
+            <div className="mb-5 flex flex-wrap md:-mx-4">
               {showResourceCardList(data)}
             </div>
             <Pagination totalCount={totalCount} />

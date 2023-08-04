@@ -26,10 +26,10 @@ const QRScannerModal = ({
       title=""
       show={!disabled && show}
       onClose={onClose}
-      className="!max-w-full w-3/5"
+      className="w-3/5 !max-w-full"
     >
-      <div className="md:w-1/2 w-full my-2 mx-auto flex flex-col justify-start items-end">
-        <h2 className="text-center text-lg self-center mb-4">
+      <div className="mx-auto my-2 flex w-full flex-col items-end justify-start md:w-1/2">
+        <h2 className="mb-4 self-center text-center text-lg">
           {description || "Scan QR code!"}
         </h2>
         <QrReader
@@ -74,7 +74,7 @@ const QRScanner = ({
         trailing={
           <CareIcon
             onClick={() => setShowScanner(true)}
-            className="care-l-focus text-black cursor-pointer z-50"
+            className="care-l-focus z-50 cursor-pointer text-black"
           />
         }
         error={error}

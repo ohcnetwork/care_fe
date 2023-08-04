@@ -13,7 +13,7 @@ const Spinner = ({
 }) => {
   return (
     <svg
-      className={"animate-spin h-5 w-5 mr-3 z-40 " + className}
+      className={"z-40 mr-3 h-5 w-5 animate-spin " + className}
       viewBox="0 0 24 24"
     >
       <circle

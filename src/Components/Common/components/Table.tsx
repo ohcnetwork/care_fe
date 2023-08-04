@@ -17,18 +17,18 @@ export default function Table(props: {
           display: "grid",
           gridTemplateColumns: `repeat(${props.headings.length}, minmax(0, 1fr))`,
         }}
-        className="border border-[#D2D6DC] rounded-sm h-fit"
+        className="h-fit rounded-sm border border-[#D2D6DC]"
       >
         {props.headings.map((heading, i) => {
           if (i === 0) {
             return (
-              <div className="text-sm font-medium text-[#808080] flex items-center py-[14px] pl-4 min-w-[24px]">
+              <div className="flex min-w-[24px] items-center py-[14px] pl-4 text-sm font-medium text-[#808080]">
                 {heading}
               </div>
             );
           }
           return (
-            <div className="text-sm font-medium text-[#808080] flex justify-center items-center text-center py-[14px] min-w-[24px]">
+            <div className="flex min-w-[24px] items-center justify-center py-[14px] text-center text-sm font-medium text-[#808080]">
               {heading}
             </div>
           );
@@ -44,18 +44,18 @@ export default function Table(props: {
               overflowX: "auto",
               minWidth: "1000px",
             }}
-            className="border border-[#D2D6DC] rounded-sm"
+            className="rounded-sm border border-[#D2D6DC]"
           >
             {row.map((item, i) => {
               if (i === 0) {
                 return (
-                  <div className="text-sm text-[#808080] font-medium flex items-center py-[14px] pl-4 min-w-[24px]">
+                  <div className="flex min-w-[24px] items-center py-[14px] pl-4 text-sm font-medium text-[#808080]">
                     {item}
                   </div>
                 );
               }
               return (
-                <div className="text-sm text-gray-900 font-bold flex justify-center items-center text-center py-[14px] min-w-[24px]">
+                <div className="flex min-w-[24px] items-center justify-center py-[14px] text-center text-sm font-bold text-gray-900">
                   <>{item}</>
                 </div>
               );

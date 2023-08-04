@@ -132,7 +132,7 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     const compiledBadges = badges(badgeUtils);
     const { t } = useTranslation();
     return (
-      <div className="flex items-center gap-2 my-2 flex-wrap w-full col-span-3">
+      <div className="col-span-3 my-2 flex w-full flex-wrap items-center gap-2">
         {compiledBadges.map((props) => (
           <FilterBadge {...props} name={t(props.name)} key={props.name} />
         ))}
