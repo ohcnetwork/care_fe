@@ -6,6 +6,7 @@ import useVentilatorVitalsMonitor from "./useVentilatorVitalsMonitor";
 import { IVitalsComponentProps, VitalsValueBase } from "./types";
 import { classNames } from "../../Utils/utils";
 import WaveformLabels from "./WaveformLabels";
+import { VitalsNonWaveformContent } from "./HL7PatientVitalsMonitor";
 
 export default function VentilatorPatientVitalsMonitor(
   props: IVitalsComponentProps
@@ -114,7 +115,7 @@ export default function VentilatorPatientVitalsMonitor(
             />
           </div>
         </div>
-        <div className="grid grid-cols-3 divide-blue-600 bg-[#020617] tracking-wider text-white md:inset-y-0 md:right-0 md:grid-cols-1 md:divide-y">
+        <VitalsNonWaveformContent>
           <NonWaveformData
             label="PEEP"
             attr={data.peep}
@@ -135,7 +136,7 @@ export default function VentilatorPatientVitalsMonitor(
             attr={data.fio2}
             className="text-yellow-300"
           />
-        </div>
+        </VitalsNonWaveformContent>
       </div>
     </div>
   );
