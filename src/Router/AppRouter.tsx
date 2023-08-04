@@ -55,7 +55,6 @@ import AssetsList from "../Components/Assets/AssetsList";
 import AssetManage from "../Components/Assets/AssetManage";
 import AssetConfigure from "../Components/Assets/AssetConfigure";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
-import HubDashboard from "../Components/Dashboard/HubDashboard";
 import Error404 from "../Components/ErrorPages/404";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -79,7 +78,6 @@ export default function AppRouter() {
   const { main_logo, enable_hcx } = useConfig();
 
   const routes = {
-    "/hub": () => <HubDashboard />,
     "/": () => <HospitalList />,
     "/users": () => <ManageUsers />,
     "/users/add": () => <UserAdd />,
