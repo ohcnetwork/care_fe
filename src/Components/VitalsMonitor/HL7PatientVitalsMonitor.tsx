@@ -114,7 +114,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-x-8 gap-y-4 divide-blue-600 bg-[#020617] tracking-wider text-white md:inset-y-0 md:right-0 md:grid-cols-1 md:gap-0 md:divide-y">
+        <VitalsNonWaveformContent>
           {/* Pulse Rate */}
           <NonWaveformData
             label="ECG"
@@ -196,11 +196,21 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
               </div>
             </div>
           </div>
-        </div>
+        </VitalsNonWaveformContent>
       </div>
     </div>
   );
 }
+
+export const VitalsNonWaveformContent = ({
+  children,
+}: {
+  children: JSX.Element | JSX.Element[];
+}) => (
+  <div className="grid grid-cols-2 gap-x-8 gap-y-4 divide-blue-600 bg-[#020617] tracking-wider text-white md:absolute md:inset-y-0 md:right-0 md:grid-cols-1 md:gap-0 md:divide-y">
+    {children}
+  </div>
+);
 
 interface NonWaveformDataProps {
   label: string;
