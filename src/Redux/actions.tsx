@@ -3,12 +3,12 @@ import {
   MedicineAdministrationRecord,
   Prescription,
 } from "../Components/Medicine/models";
-import { fireRequest, fireRequestForFiles } from "./fireRequest";
+import { fireRequest } from "./fireRequest";
 
 import { ICreateHealthIdRequest } from "../Components/ABDM/models";
 
 export const getConfig = () => {
-  return fireRequestForFiles("config");
+  return fireRequest("config");
 };
 // User
 export const postLogin = (params: object) => {
@@ -721,10 +721,6 @@ export const viewUpload = (params: object) => {
 
 export const retrieveUpload = (params: object, fileId: string) => {
   return fireRequest("retrieveUpload", [], params, { fileId: fileId });
-};
-
-export const retrieveUploadFilesURL = (params: object, fileId: string) => {
-  return fireRequestForFiles("retrieveUpload", [], params, { fileId: fileId });
 };
 
 export const editUpload = (

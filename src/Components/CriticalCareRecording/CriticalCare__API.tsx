@@ -1,4 +1,4 @@
-import { fireRequestV2 } from "../../Redux/fireRequest";
+import { legacyFireRequest } from "../../Redux/fireRequest";
 
 export const loadDailyRound = (
   consultationId: string,
@@ -6,7 +6,7 @@ export const loadDailyRound = (
   successCB: any = () => null,
   errorCB: any = () => null
 ) => {
-  fireRequestV2("getDailyReport", [], {}, successCB, errorCB, {
+  legacyFireRequest("getDailyReport", [], {}, successCB, errorCB, {
     consultationId,
     id,
   });
@@ -19,7 +19,7 @@ export const updateDailyRound = (
   successCB: any = () => null,
   errorCB: any = () => null
 ) => {
-  fireRequestV2("updateDailyRound", [], params, successCB, errorCB, {
+  legacyFireRequest("updateDailyRound", [], params, successCB, errorCB, {
     consultationId,
     id,
   });

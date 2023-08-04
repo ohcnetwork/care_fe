@@ -14,7 +14,6 @@ import {
 import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import * as Notification from "../../../Utils/Notifications.js";
 import { FeedCameraPTZHelpButton } from "./Feed";
-import { AxiosError } from "axios";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../models";
 import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
@@ -93,10 +92,9 @@ const LiveFeed = (props: any) => {
         setPresets(resp);
       },
       onError: (resp) => {
-        resp instanceof AxiosError &&
-          Notification.Error({
-            msg: "Camera is offline",
-          });
+        Notification.Error({
+          msg: "Camera is offline",
+        });
       },
     });
 

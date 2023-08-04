@@ -11,7 +11,6 @@ import { IConfig } from "./Common/hooks/useConfig";
 import { LocalStorageKeys } from "./Common/constants";
 import Plausible from "./Components/Common/Plausible";
 import SessionRouter from "./Router/SessionRouter";
-import axios from "axios";
 import loadable from "@loadable/component";
 
 const Loading = loadable(() => import("./Components/Common/Loading"));
@@ -40,23 +39,21 @@ const App: React.FC = () => {
 
   const updateRefreshToken = () => {
     const refresh = localStorage.getItem(LocalStorageKeys.refreshToken);
-    // const access = localStorage.getItem(LocalStorageKeys.accessToken);
-    // if (!access && refresh) {
-    //   localStorage.removeItem(LocalStorageKeys.refreshToken);
-    //   document.location.reload();
-    //   return;
-    // }
-    if (!refresh) {
-      return;
-    }
-    axios
-      .post("/api/v1/auth/token/refresh/", {
-        refresh,
+    if (refresh) {
+      fetch("/api/v1/auth/token/refresh/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ refresh }),
       })
-      .then((resp) => {
-        localStorage.setItem(LocalStorageKeys.accessToken, resp.data.access);
-        localStorage.setItem(LocalStorageKeys.refreshToken, resp.data.refresh);
-      });
+        .then((res) => res.json())
+        .then((resp) => {
+          localStorage.setItem(LocalStorageKeys.accessToken, resp.access);
+          localStorage.setItem(LocalStorageKeys.refreshToken, resp.refresh);
+        });
+    }
   };
   useEffect(() => {
     updateRefreshToken();

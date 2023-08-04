@@ -23,12 +23,13 @@ const routes: Routes = {
   },
 
   token_refresh: {
-    path: "/api/v1/auth/token/refresh",
+    path: "/api/v1/auth/token/refresh/",
     method: "POST",
+    noAuth: true,
   },
 
   token_verify: {
-    path: "/api/v1/auth/token/verify",
+    path: "/api/v1/auth/token/verify/",
     method: "POST",
   },
 
@@ -100,7 +101,7 @@ const routes: Routes = {
   },
 
   updateUser: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/",
     method: "PUT",
   },
 
@@ -110,7 +111,7 @@ const routes: Routes = {
   },
 
   deleteUser: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/",
     method: "DELETE",
   },
 
@@ -149,7 +150,7 @@ const routes: Routes = {
   },
 
   getAllFacilities: {
-    path: "/api/v1/getallfacilities",
+    path: "/api/v1/getallfacilities/",
   },
 
   createFacility: {
@@ -166,12 +167,12 @@ const routes: Routes = {
   },
 
   updateFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/",
     method: "PUT",
   },
 
   partialUpdateFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/",
     method: "PATCH",
   },
 
@@ -284,7 +285,7 @@ const routes: Routes = {
 
   // Download Api
   deleteFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/",
     method: "DELETE",
   },
 
@@ -388,17 +389,17 @@ const routes: Routes = {
   },
 
   updateCapacity: {
-    path: "/api/v1/facility/{facilityId}/capacity",
+    path: "/api/v1/facility/{facilityId}/capacity/",
     method: "PUT",
   },
 
   updateDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor",
+    path: "/api/v1/facility/{facilityId}/hospital_doctor/",
     method: "PUT",
   },
 
   deleteDoctor: {
-    path: "/api/v1/facility/{facilityId}/hospital_doctor",
+    path: "/api/v1/facility/{facilityId}/hospital_doctor/",
     method: "DELETE",
   },
 
@@ -415,16 +416,10 @@ const routes: Routes = {
     path: "/api/v1/facility/{facilityId}/patient_stats/{id}/",
   },
 
-  // //Care Center
-  // createCenter: {
-  //     path: "/api/v1/carecenter/",
-  //     method: 'POST'
-  // }
-
   // Patient
 
   searchPatient: {
-    path: "/api/v1/patient/search",
+    path: "/api/v1/patient/search/",
   },
   patientList: {
     path: "/api/v1/patient/",
@@ -480,7 +475,7 @@ const routes: Routes = {
   },
 
   deleteExternalResult: {
-    path: "/api/v1/external_result",
+    path: "/api/v1/external_result/",
     method: "DELETE",
   },
 
@@ -548,7 +543,7 @@ const routes: Routes = {
     path: "/api/v1/test_sample/",
   },
   getTestSample: {
-    path: "/api/v1/test_sample",
+    path: "/api/v1/test_sample/",
   },
   patchSample: {
     path: "/api/v1/test_sample/{id}/",
@@ -564,26 +559,26 @@ const routes: Routes = {
     method: "POST",
   },
   getInventoryLog: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/",
   },
   setMinQuantity: {
     path: "/api/v1/facility/{facilityId}/min_quantity/",
     method: "POST",
   },
   getMinQuantity: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/",
     method: "GET",
   },
   updateMinQuantity: {
-    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
+    path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}/",
     method: "PATCH",
   },
   getInventorySummary: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/",
     method: "GET",
   },
   getItemName: {
-    path: "/api/v1/items",
+    path: "/api/v1/items/",
     method: "GET",
   },
   flagInventoryItem: {
@@ -599,7 +594,7 @@ const routes: Routes = {
     method: "POST",
   },
   dischargeSummaryPreview: {
-    path: "/api/v1/consultation/{external_id}/preview_discharge_summary",
+    path: "/api/v1/consultation/{external_id}/preview_discharge_summary/",
     method: "GET",
   },
   dischargeSummaryEmail: {
@@ -622,7 +617,7 @@ const routes: Routes = {
     method: "GET",
   },
   updateUserDetails: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/",
     method: "PUT",
   },
 
@@ -632,11 +627,11 @@ const routes: Routes = {
     method: "POST",
   },
   updateShift: {
-    path: "/api/v1/shift",
+    path: "/api/v1/shift/",
     method: "PUT",
   },
   deleteShiftRecord: {
-    path: "/api/v1/shift",
+    path: "/api/v1/shift/",
     method: "DELETE",
   },
   listShiftRequests: {
@@ -705,7 +700,7 @@ const routes: Routes = {
     method: "GET",
   },
   listInvestigationGroups: {
-    path: "/api/v1/investigation/group",
+    path: "/api/v1/investigation/group/",
     method: "GET",
   },
   createInvestigation: {
@@ -744,11 +739,11 @@ const routes: Routes = {
     method: "POST",
   },
   updateResource: {
-    path: "/api/v1/resource",
+    path: "/api/v1/resource/",
     method: "PUT",
   },
   deleteResourceRecord: {
-    path: "/api/v1/resource",
+    path: "/api/v1/resource/",
     method: "DELETE",
   },
   listResourceRequests: {
@@ -774,7 +769,7 @@ const routes: Routes = {
   // Assets endpoints
 
   listAssets: {
-    path: "/api/v1/asset",
+    path: "/api/v1/asset/",
     method: "GET",
   },
   createAsset: {
@@ -813,7 +808,7 @@ const routes: Routes = {
     method: "GET",
   },
   getAssetTransaction: {
-    path: "/api/v1/asset_transaction/{id}",
+    path: "/api/v1/asset_transaction/{id}/",
     method: "GET",
   },
 
@@ -895,7 +890,7 @@ const routes: Routes = {
     method: "GET",
   },
   getAssetAvailability: {
-    path: "/api/v1/asset_availability/{id}",
+    path: "/api/v1/asset_availability/{id}/",
     method: "GET",
   },
 

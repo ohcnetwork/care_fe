@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useReducer } from "react";
-import axios from "axios";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
@@ -9,7 +8,7 @@ import { SampleTestModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
 import { createUpload, editUpload } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
+import { FileUpload, header_content_type, LinearProgressWithLabel } from "./FileUpload";
 import { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ConfirmDialog from "../Common/ConfirmDialog";
@@ -18,6 +17,7 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
+import { uploadFile } from "../../Redux/fireRequest";
 
 interface Props {
   sample: SampleTestModel;
@@ -105,38 +105,23 @@ const UpdateStatusDialog = (props: Props) => {
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`);
 
-    const config = {
-      headers: {
-        "Content-type": contentType,
-        "Content-disposition": "inline",
-      },
-      onUploadProgress: (progressEvent: any) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setUploadPercent(percentCompleted);
-      },
-    };
-    axios
-      .put(url, newFile, config)
-      .then(() => {
-        setUploadStarted(false);
-        setUploadDone(true);
-        redux_dispatch(
-          editUpload(
-            { upload_completed: true },
-            response.data.id,
-            "SAMPLE_MANAGEMENT",
-            sample.id?.toString() ?? ""
-          )
-        );
-        Notification.Success({
-          msg: "File Uploaded Successfully",
-        });
-      })
-      .catch(() => {
-        setUploadStarted(false);
+    uploadFile(url, newFile, contentType, setUploadPercent).then(() => {
+      setUploadStarted(false);
+      setUploadDone(true);
+      redux_dispatch(
+        editUpload(
+          { upload_completed: true },
+          response.data.id,
+          "SAMPLE_MANAGEMENT",
+          sample.id?.toString() ?? ""
+        )
+      );
+      Notification.Success({
+        msg: "File Uploaded Successfully",
       });
+    }).catch(() => {
+      setUploadStarted(false);
+    });
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {

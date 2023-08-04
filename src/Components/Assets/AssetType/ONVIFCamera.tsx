@@ -8,7 +8,6 @@ import {
 } from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
 import { BedModel } from "../../Facility/models";
-import axios from "axios";
 import { getCameraConfig } from "../../../Utils/transformUtils";
 import CameraConfigure from "../configure/CameraConfigure";
 import Loading from "../../Common/Loading";
@@ -110,13 +109,15 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     };
     try {
       setLoadingAddPreset(true);
-      const presetData = await axios.get(
-        `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
-      );
+      const preset = await fetch(
+        `https://${facilityMiddlewareHostname}/preset?hostname=${config.hostname}\
+        &port=${config.port}&username=${config.username}&password=${config.password}\
+        &preset_name=${newPreset}`
+      ).then((res) => res.json());
       const res: any = await Promise.resolve(
         dispatch(
           createAssetBed(
-            { meta: { ...data, ...presetData.data } },
+            { meta: { ...data, ...preset.data } },
             assetId,
             bed?.id as string
           )

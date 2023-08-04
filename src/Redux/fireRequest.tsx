@@ -1,12 +1,9 @@
 import * as Notification from "../Utils/Notifications.js";
 
-import { isEmpty, omitBy } from "lodash";
+import { LocalStorageKeys } from "../Common/constants.js";
+import api from "./api.js";
 
-import { LocalStorageKeys } from "../Common/constants";
-import api from "./api";
-import axios from "axios";
-
-const requestMap: any = api;
+const requestMap = api;
 export const actions = {
   FETCH_REQUEST: "FETCH_REQUEST",
   FETCH_REQUEST_SUCCESS: "FETCH_REQUEST_SUCCESS",
@@ -14,6 +11,7 @@ export const actions = {
   SET_DATA: "SET_DATA",
 };
 
+// const isRunning: { [key: string]: AbortController } = {};
 const isRunning: any = {};
 
 export const setStoreData = (key: string, value: any) => {
@@ -47,29 +45,30 @@ export const fetchResponseSuccess = (key: string, data: any) => {
   };
 };
 
+export interface ResponseWrapper extends Response {
+  data: any;
+}
+
 export const fireRequest = (
   key: string,
   path: any = [],
   params: any = {},
   pathParam?: any,
   altKey?: string,
-  suppressNotif?: boolean
+  suppressNotif: boolean = false
 ) => {
   return (dispatch: any) => {
     // cancel previous api call
-    if (isRunning[altKey ? altKey : key]) {
-      isRunning[altKey ? altKey : key].cancel();
+    const requestKey = altKey || key;
+    if (isRunning[requestKey]) {
+      isRunning[requestKey].abort();
     }
-    isRunning[altKey ? altKey : key] = axios.CancelToken.source();
+    const controller = new AbortController();
+    isRunning[requestKey] = controller;
+
     // get api url / method
     const request = Object.assign({}, requestMap[key]);
-    if (path.length > 0) {
-      request.path += "/" + path.join("/");
-    }
-    // add trailing slash to path before query paramaters
-    if (request.path.slice(-1) !== "/" && request.path.indexOf("?") === -1) {
-      request.path += "/";
-    }
+
     if (request.method === undefined || request.method === "GET") {
       request.method = "GET";
       let qString = "";
@@ -82,103 +81,94 @@ export const fireRequest = (
         request.path += `?${qString}`;
       }
     }
+
     // set dynamic params in the URL
     if (pathParam) {
       Object.keys(pathParam).forEach((param: any) => {
         request.path = request.path.replace(`{${param}}`, pathParam[param]);
       });
     }
-
-    // set authorization header in the request header
-    const config: any = {
-      headers: {},
+    const headers: { [key: string]: string } = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
     };
-    if (!request.noAuth && localStorage.getItem(LocalStorageKeys.accessToken)) {
-      config.headers["Authorization"] =
+    if (!request.noAuth) {
+      headers["Authorization"] =
         "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken);
-    } else {
-      // TODO: get access token
     }
-    const axiosApiCall: any = axios.create(config);
 
     dispatch(fetchDataRequest(key));
-    return axiosApiCall[request.method.toLowerCase()](request.path, {
-      ...params,
-      cancelToken: isRunning[altKey ? altKey : key].token,
+    return fetch(request.path, {
+      method: request.method,
+      headers,
+      credentials: "include",
+      cache: "default",
+      redirect: "follow",
+      signal: controller.signal,
+      body: request.method === "GET" ? undefined : JSON.stringify(params),
     })
-      .then((response: any) => {
-        dispatch(fetchResponseSuccess(key, response.data));
+      .then(async (res: Response) => {
+        const response: ResponseWrapper = res as ResponseWrapper;
+        try {
+          response.data = await response.json();
+        } catch (error) {
+          console.error(error);
+          response.data = {};
+        }
+
+        if (response.ok) {
+          dispatch(fetchResponseSuccess(key, response.data));
+          return response;
+        }
+
+        dispatch(fetchDataRequestError(key, response));
+        if (suppressNotif) {
+          return response;
+        }
+
+        if (response.status === 400 || response.status === 406) {
+          Notification.BadRequest({
+            errs: response.data,
+          });
+          return response;
+        }
+
+        if (response.status === 403 && key === "currentUser") {
+          localStorage.removeItem(LocalStorageKeys.accessToken);
+          return;
+        }
+
+        if (response.status === 404 && key === "deleteUser") {
+          Notification.Error({
+            msg: "Permission denied!",
+          });
+          return response;
+        }
+
+        if (response.status === 429) {
+          return response;
+        }
+
+        if (response.status > 400 && response.status < 500) {
+          if (response?.data?.code === "token_not_valid") {
+            window.location.href = "/session-expired";
+          }
+          Notification.Error({
+            msg: response?.data?.detail || "Something went wrong...!",
+          });
+        }
         return response;
       })
       .catch((error: any) => {
+        console.error(error);
         dispatch(fetchDataRequestError(key, error));
 
-        if (!(suppressNotif ?? false) && error.response) {
-          // temporarily don't show invalid phone number error on duplicate patient check
-          if (error.response.status === 400 && key === "searchPatient") {
-            return;
-          }
-
-          // deleteUser: 404 is for permission denied
-          if (error.response.status === 404 && key === "deleteUser") {
-            Notification.Error({
-              msg: "Permission denied!",
-            });
-            return;
-          }
-
-          // currentUser is ignored because on the first page load
-          // 403 error is displayed for invalid credential.
-          if (error.response.status === 403 && key === "currentUser") {
-            if (localStorage.getItem(LocalStorageKeys.accessToken)) {
-              localStorage.removeItem(LocalStorageKeys.accessToken);
-            }
-            return;
-          }
-
-          // 400 Bad Request Error
-          if (error.response.status === 400 || error.response.status === 406) {
-            Notification.BadRequest({
-              errs: error.response.data,
-            });
-            return error.response;
-          }
-
-          // 4xx Errors
-          if (error.response.status > 400 && error.response.status < 500) {
-            if (error.response.data && error.response.data.detail) {
-              if (error.response.data.code === "token_not_valid") {
-                window.location.href = "/session-expired";
-              }
-              Notification.Error({
-                msg: error.response.data.detail,
-              });
-            } else {
-              Notification.Error({
-                msg: "Something went wrong...!",
-              });
-            }
-            if (error.response.status === 429) {
-              return error.response;
-            }
-            return;
-          }
-
-          // 5xx Errors
-          if (error.response.status >= 500 && error.response.status <= 599) {
-            Notification.Error({
-              msg: "Something went wrong...!",
-            });
-            return;
-          }
-        } else {
-          return error.response;
-        }
+        return;
       });
   };
 };
 
-export const fireRequestV2 = (
+export const legacyFireRequest = (
   key: string,
   path: any = [],
   params: any = {},
@@ -187,131 +177,31 @@ export const fireRequestV2 = (
   pathParam?: any,
   altKey?: string
 ) => {
-  // cancel previous api call
-  if (isRunning[altKey ? altKey : key]) {
-    isRunning[altKey ? altKey : key].cancel();
-  }
-  isRunning[altKey ? altKey : key] = axios.CancelToken.source();
-  // get api url / method
-  const request = Object.assign({}, requestMap[key]);
-  if (path.length > 0) {
-    request.path += "/" + path.join("/");
-  }
-  if (request.method === undefined || request.method === "GET") {
-    request.method = "GET";
-    const qs = new URLSearchParams(omitBy(params, isEmpty)).toString();
-    if (qs !== "") {
-      request.path += `?${qs}`;
-    }
-  }
-  // set dynamic params in the URL
-  if (pathParam) {
-    Object.keys(pathParam).forEach((param: any) => {
-      request.path = request.path.replace(`{${param}}`, pathParam[param]);
-    });
-  }
-
-  // set authorization header in the request header
-  const config: any = {
-    headers: {},
-  };
-  if (!request.noAuth && localStorage.getItem(LocalStorageKeys.accessToken)) {
-    config.headers["Authorization"] =
-      "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken);
-  }
-  const axiosApiCall: any = axios.create(config);
-
-  fetchDataRequest(key);
-  return axiosApiCall[request.method.toLowerCase()](request.path, {
-    ...params,
-    cancelToken: isRunning[altKey ? altKey : key].token,
-  })
-    .then((response: any) => {
-      successCallback(response.data);
-    })
-    .catch((error: any) => {
-      errorCallback(error);
-      if (error.response) {
-        // temporarily don't show invalid phone number error on duplicate patient check
-        if (error.response.status === 400 && key === "searchPatient") {
-          return;
-        }
-
-        // deleteUser: 404 is for permission denied
-        if (error.response.status === 404 && key === "deleteUser") {
-          Notification.Error({
-            msg: "Permission denied!",
-          });
-        }
-
-        // currentUser is ignored because on the first page load
-        // 403 error is displayed for invalid credential.
-        if (error.response.status === 403 && key === "currentUser") {
-          if (localStorage.getItem(LocalStorageKeys.accessToken)) {
-            localStorage.removeItem(LocalStorageKeys.accessToken);
-          }
-        }
-
-        // 400 Bad Request Error
-        if (error.response.status === 400 || error.response.status === 406) {
-          Notification.BadRequest({
-            errs: error.response.data,
-          });
-        }
-
-        // 4xx Errors
-        if (error.response.status > 400 && error.response.status < 500) {
-          if (error.response.data && error.response.data.detail) {
-            Notification.Error({
-              msg: error.response.data.detail,
-            });
-          } else {
-            Notification.Error({
-              msg: "Something went wrong...!",
-            });
-          }
-          if (error.response.status === 429) {
-            return error.response;
-          }
-          return;
-        }
-
-        // 5xx Errors
-        if (error.response.status >= 500 && error.response.status <= 599) {
-          Notification.Error({
-            msg: "Something went wrong...!",
-          });
-          return;
-        }
-      }
-    });
-};
-
-export const fireRequestForFiles = (
-  key: string,
-  path: any = [],
-  params: any = {},
-  pathParam?: any,
-  altKey?: string
-) => {
   return (dispatch: any) => {
     // cancel previous api call
-    if (isRunning[altKey ? altKey : key]) {
-      isRunning[altKey ? altKey : key].cancel();
+    const requestKey = altKey || key;
+    if (isRunning[requestKey]) {
+      isRunning[requestKey].abort();
     }
-    isRunning[altKey ? altKey : key] = axios.CancelToken.source();
+    const controller = new AbortController();
+    isRunning[requestKey] = controller;
+
     // get api url / method
     const request = Object.assign({}, requestMap[key]);
-    if (path.length > 0) {
-      request.path += "/" + path.join("/");
-    }
+
     if (request.method === undefined || request.method === "GET") {
       request.method = "GET";
-      const qs = new URLSearchParams(omitBy(params, isEmpty)).toString();
-      if (qs !== "") {
-        request.path += `?${qs}`;
+      let qString = "";
+      Object.keys(params).forEach((param: any) => {
+        if (params[param] !== undefined && params[param] !== "") {
+          qString += `${param}=${encodeURIComponent(params[param])}&`;
+        }
+      });
+      if (qString !== "") {
+        request.path += `?${qString}`;
       }
     }
+
     // set dynamic params in the URL
     if (pathParam) {
       Object.keys(pathParam).forEach((param: any) => {
@@ -319,80 +209,105 @@ export const fireRequestForFiles = (
       });
     }
 
-    // set authorization header in the request header
-    const config: any = {
-      headers: {
-        "Content-type": "application/pdf",
-        "Content-disposition": "inline",
-      },
+    const headers: { [key: string]: string } = {
+      "Content-Type": "application/json",
+      Accept: "application/json",
     };
-    // Content-Type: application/pdf
-    // Content-Disposition: inline; filename="filename.pdf"
-    if (!request.noAuth && localStorage.getItem(LocalStorageKeys.accessToken)) {
-      config.headers["Authorization"] =
+    if (!request.noAuth) {
+      headers["Authorization"] =
         "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken);
     }
-    const axiosApiCall: any = axios.create(config);
 
-    dispatch(fetchDataRequest(key));
-    return axiosApiCall[request.method.toLowerCase()](request.path, {
-      ...params,
-      cancelToken: isRunning[altKey ? altKey : key].token,
+    fetchDataRequest(key);
+    return fetch(request.path, {
+      method: request.method,
+      headers,
+      credentials: "include",
+      cache: "default",
+      redirect: "follow",
+      signal: controller.signal,
+      body: request.method === "POST" ? JSON.stringify(params) : undefined,
     })
-      .then((response: any) => {
-        dispatch(fetchResponseSuccess(key, response.data));
+      .then(async (res: Response) => {
+        const response: ResponseWrapper = res as ResponseWrapper;
+
+        try {
+          response.data = await response.json();
+        } catch (error) {
+          console.error(error);
+          response.data = {};
+        }
+
+        if (response.ok) {
+          successCallback(response.data);
+          return response;
+        }
+
+        errorCallback(response);
+
+        if (response.status === 400 || response.status === 406) {
+          Notification.BadRequest({
+            errs: response.data,
+          });
+          return response;
+        }
+
+        if (response.status === 403 && key === "currentUser") {
+          localStorage.removeItem(LocalStorageKeys.accessToken);
+          return;
+        }
+
+        if (response.status === 404 && key === "deleteUser") {
+          Notification.Error({
+            msg: "Permission denied!",
+          });
+          return response;
+        }
+
+        if (response.status === 429) {
+          return response;
+        }
+
+        if (response.status > 400 && response.status < 500) {
+          if (response?.data?.code === "token_not_valid") {
+            window.location.href = "/session-expired";
+          }
+          Notification.Error({
+            msg: response?.data?.detail || "Something went wrong...!",
+          });
+        }
         return response;
       })
       .catch((error: any) => {
-        dispatch(fetchDataRequestError(key, error));
+        console.error(error);
+        errorCallback(error);
 
-        if (error.response) {
-          // temporarily don't show invalid phone number error on duplicate patient check
-          if (error.response.status === 400 && key === "searchPatient") {
-            return;
-          }
-
-          // currentUser is ignored because on the first page load
-          // 403 error is displayed for invalid credential.
-          if (error.response.status === 403 && key === "currentUser") {
-            if (localStorage.getItem(LocalStorageKeys.accessToken)) {
-              localStorage.removeItem(LocalStorageKeys.accessToken);
-            }
-            return;
-          }
-
-          // 400 Bad Request Error
-          if (error.response.status === 400 || error.response.status === 406) {
-            Notification.BadRequest({
-              errs: error.response.data,
-            });
-            return error.response;
-          }
-
-          // 4xx Errors
-          if (error.response.status > 400 && error.response.status < 500) {
-            if (error.response.status === 429) {
-              return error.response;
-            } else if (error.response.data && error.response.data.detail) {
-              Notification.Error({
-                msg: error.response.data.detail,
-              });
-            } else {
-              Notification.Error({
-                msg: "Something went wrong...!",
-              });
-            }
-            return;
-          }
-
-          // 5xx Errors
-          if (error.response.status >= 500 && error.response.status <= 599) {
-            Notification.Error({
-              msg: "Something went wrong...!",
-            });
-            return;
-          }
-        }
+        return;
       });
   };
+};
+
+export const uploadFile = async (
+  url: string,
+  file: File,
+  contentType: string,
+  uploadProgressCB: (progress: number) => void
+) => {
+  const xhr = new XMLHttpRequest();
+  return new Promise((resolve, reject) => {
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        uploadProgressCB((event.loaded / event.total) * 100);
+      }
+    };
+    xhr.onloadend = () => {
+      if (xhr.readyState === 4 && xhr.status === 200){
+        return resolve(xhr.response);
+      }
+      reject("failed to upload file");
+    };
+    xhr.open("PUT", url, true);
+    xhr.setRequestHeader("Content-Type", contentType);
+    xhr.send(file);
+  });
 };

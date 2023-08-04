@@ -1,4 +1,3 @@
-import axios from "axios";
 import CircularProgress from "../Common/components/CircularProgress";
 import loadable from "@loadable/component";
 import React, { useCallback, useState, useEffect, useRef } from "react";
@@ -32,6 +31,7 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
 import Page from "../Common/components/Page";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
+import { uploadFile } from "../../Redux/fireRequest";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -928,24 +928,10 @@ export const FileUpload = (props: FileUploadProps) => {
     if (!f) return;
     const newFile = new File([f], `${internal_name}`);
 
-    const config = {
-      headers: {
-        "Content-type": contentType,
-        "Content-disposition": "inline",
-      },
-      onUploadProgress: (progressEvent: any) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setUploadPercent(percentCompleted);
-      },
-    };
     return new Promise<void>((resolve, reject) => {
-      axios
-        .put(url, newFile, config)
+      uploadFile(url, newFile, contentType, setUploadPercent)
         .then(() => {
           setUploadStarted(false);
-          // setUploadSuccess(true);
           setFile(null);
           setUploadFileName("");
           setReload(!reload);
@@ -1049,8 +1035,7 @@ export const FileUpload = (props: FileUploadProps) => {
       },
     };
 
-    axios
-      .put(url, newFile, config)
+    uploadFile(url, newFile, "audio/mpeg", setUploadPercent)
       .then(() => {
         setAudioUploadStarted(false);
         // setUploadSuccess(true);
