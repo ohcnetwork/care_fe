@@ -199,7 +199,7 @@ export default function FacilityUsers(props: any) {
   };
 
   const facilityClassname = classNames(
-    "align-baseline font-bold text-sm",
+    "align-baseline text-sm font-bold",
     isFacilityLoading ? "text-gray-500" : "text-blue-500 hover:text-blue-800"
   );
 
@@ -225,12 +225,12 @@ export default function FacilityUsers(props: any) {
       );
     }
     return (
-      <div className="sm:col-start-2 col-span-full sm:col-span-3">
+      <div className="col-span-full sm:col-span-3 sm:col-start-2">
         <div className="mb-2">
           {facilities.map((facility, i) => (
             <div
               key={`facility_${i}`}
-              className="border-2 font-gbold inline-block rounded-md pl-3 py-1 mr-3 mt-2"
+              className="font-gbold mr-3 mt-2 inline-block rounded-md border-2 py-1 pl-3"
             >
               <div className="flex items-center  space-x-1">
                 <div className="font-semibold">{facility.name}</div>
@@ -303,23 +303,23 @@ export default function FacilityUsers(props: any) {
       return (
         <div
           key={`usr_${user.id}`}
-          className=" w-full lg:w-1/2 xl:w-1/3 mt-6 md:px-4"
+          className=" mt-6 w-full md:px-4 lg:w-1/2 xl:w-1/3"
         >
-          <div className="block rounded-lg bg-white shadow h-full cursor-pointer hover:border-primary-500 overflow-hidden">
-            <div className="h-full flex flex-col justify-between">
+          <div className="block h-full cursor-pointer overflow-hidden rounded-lg bg-white shadow hover:border-primary-500">
+            <div className="flex h-full flex-col justify-between">
               <div className="px-6 py-4">
-                <div className="flex lg:flex-row flex-col justify-between">
+                <div className="flex flex-col justify-between lg:flex-row">
                   {user.username && (
-                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium leading-5 bg-blue-100 text-blue-800 w-fit">
+                    <div className="inline-flex w-fit items-center rounded-md bg-blue-100 px-2.5 py-0.5 text-sm font-medium leading-5 text-blue-800">
                       {user.username}
                     </div>
                   )}
-                  <div className="flex-shrink-0 text-sm text-gray-600 min-width-50">
+                  <div className="min-width-50 shrink-0 text-sm text-gray-600">
                     Last Online:{" "}
                     <span
                       aria-label="Online"
                       className={
-                        "shrink-0 inline-block h-2 w-2 rounded-full " +
+                        "inline-block h-2 w-2 shrink-0 rounded-full " +
                         (moment()
                           .subtract(5, "minutes")
                           .isBefore(user.last_login)
@@ -334,20 +334,20 @@ export default function FacilityUsers(props: any) {
                     </span>
                   </div>
                 </div>
-                <div className="font-bold text-2xl capitalize mt-2">
+                <div className="mt-2 text-2xl font-bold capitalize">
                   {`${user.first_name} ${user.last_name}`}
 
                   {user.last_login &&
                   moment().subtract(5, "minutes").isBefore(user.last_login) ? (
                     <i
-                      className="animate-pulse text-primary-500 fas fa-circle ml-1 opacity-75"
+                      className="fas fa-circle ml-1 animate-pulse text-primary-500 opacity-75"
                       aria-label="Online"
                     ></i>
                   ) : null}
                   {showDelete(user) && (
                     <button
                       type="button"
-                      className="m-3 px-3 py-2 self-end w-20 border border-red-500 text-center text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:text-red-500 focus:outline-none focus:border-red-300 focus:ring-blue active:text-red-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                      className="focus:ring-blue m-3 w-20 self-end rounded-md border border-red-500 bg-white px-3 py-2 text-center text-sm font-medium leading-4 text-red-700 transition duration-150 ease-in-out hover:text-red-500 hover:shadow focus:border-red-300 focus:outline-none active:bg-gray-50 active:text-red-800"
                       onClick={() => handleDelete(user)}
                     >
                       Delete
@@ -383,10 +383,10 @@ export default function FacilityUsers(props: any) {
                     </UserDetails>
                   )}
                   {user.phone_number && (
-                    <div className="mt-2 bg-gray-50 border-t px-6 py-2">
-                      <div className="flex py-4 justify-between">
+                    <div className="mt-2 border-t bg-gray-50 px-6 py-2">
+                      <div className="flex justify-between py-4">
                         <div>
-                          <div className="text-gray-500 leading-relaxed">
+                          <div className="leading-relaxed text-gray-500">
                             Phone:
                           </div>
                           <a
@@ -466,7 +466,7 @@ export default function FacilityUsers(props: any) {
         />
       )}
 
-      <div className="mt-5 grid grid-cols-1 md:gap-5 sm:grid-cols-3 m-4 md:px-4">
+      <div className="m-4 mt-5 grid grid-cols-1 sm:grid-cols-3 md:gap-5 md:px-4">
         <CountBlock
           text="Total Users"
           count={totalCount}

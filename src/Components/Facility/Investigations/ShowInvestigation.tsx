@@ -160,7 +160,7 @@ export default function ShowInvestigation(props: any) {
   }, [state.initialValues]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
+    <div className="mx-auto max-w-7xl px-4">
       <PageTitle
         title="Investigation"
         className="mx-3 md:mx-4"

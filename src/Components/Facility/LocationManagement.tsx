@@ -1,11 +1,10 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, ReactElement } from "react";
 import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { listFacilityAssetLocation, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { LocationModel } from "./models";
-import { ReactElement } from "react";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -29,15 +28,15 @@ const LocationRow = (props: LocationRowProps) => {
   return (
     <div
       key={id}
-      className="w-full border-b lg:flex justify-between items-center py-4"
+      className="w-full items-center justify-between border-b py-4 lg:flex"
     >
       <div className="px-4 lg:w-3/4">
-        <div className="lg:flex items-baseline w-full">
-          <p className="text-xl break-words lg:w-1/4 lg:mr-4">{name}</p>
-          <p className="text-sm break-all lg:w-3/4">{description}</p>
+        <div className="w-full items-baseline lg:flex">
+          <p className="break-words text-xl lg:mr-4 lg:w-1/4">{name}</p>
+          <p className="break-all text-sm lg:w-3/4">{description}</p>
         </div>
       </div>
-      <div className="flex flex-col lg:flex-row gap-2 mt-4 lg:mt-0">
+      <div className="mt-4 flex flex-col gap-2 lg:mt-0 lg:flex-row">
         <ButtonV2
           variant="secondary"
           border
@@ -89,7 +88,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
         )
       );
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setLocations(res.data.results);
           setTotalCount(res.data.count);
         }
@@ -112,9 +111,10 @@ export const LocationManagement = (props: LocationManagementProps) => {
     setOffset(offset);
   };
 
-  if (locations && locations.length) {
+  if (locations?.length) {
     locationsList = locations.map((locationItem: LocationModel) => (
       <LocationRow
+        key={locationItem.id}
         id={locationItem.id || ""}
         facilityId={facilityId || ""}
         name={locationItem.name || ""}
@@ -123,7 +123,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
     ));
   } else if (locations && locations.length === 0) {
     locationsList = (
-      <p className="bg-white flex justify-center text-2xl w-full font-bold px-5 py-5 border-b border-gray-200 text-center text-gray-500">
+      <p className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
         No locations available
       </p>
     );
@@ -132,7 +132,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
   if (locations) {
     location = (
       <>
-        <div className="grow mt-5 bg-white p-4 flex flex-wrap">
+        <div className="mt-5 flex grow flex-wrap bg-white p-4">
           {locationsList}
         </div>
         {totalCount > limit && (

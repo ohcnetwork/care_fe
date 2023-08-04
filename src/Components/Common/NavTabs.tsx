@@ -15,9 +15,9 @@ export default function NavTabs(props: NavTabsProps) {
   const { active, options, onChange } = props;
   return (
     <div>
-      <div className="sm:hidden p-2">
+      <div className="p-2 sm:hidden">
         <select
-          className="mt-1 form-select block w-full pl-3 pr-10 py-2 text-base leading-6 border-gray-300 focus:outline-none focus:ring-blue focus:border-blue-300 sm:text-sm sm:leading-5 transition ease-in-out duration-150"
+          className="focus:ring-blue form-select mt-1 block w-full border-gray-300 py-2 pl-3 pr-10 text-base leading-6 transition duration-150 ease-in-out focus:border-blue-300 focus:outline-none sm:text-sm sm:leading-5"
           value={active}
           onChange={(e) => onChange(Number(e.target.value))}
         >
@@ -36,8 +36,8 @@ export default function NavTabs(props: NavTabsProps) {
                 key={option.value}
                 className={
                   option.value === active
-                    ? "whitespace-nowrap ml-8 py-4 px-1 border-b-2 border-indigo-500 font-medium text-sm leading-5 text-indigo-600 focus:outline-none focus:text-indigo-800 focus:border-indigo-700"
-                    : "whitespace-nowrap py-4 px-1 border-b-2 border-transparent font-medium text-sm leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300"
+                    ? "ml-8 whitespace-nowrap border-b-2 border-indigo-500 px-1 py-4 text-sm font-medium leading-5 text-indigo-600 focus:border-indigo-700 focus:text-indigo-800 focus:outline-none"
+                    : "whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-sm font-medium leading-5 text-gray-500 hover:border-gray-300 hover:text-gray-700 focus:border-gray-300 focus:text-gray-700 focus:outline-none"
                 }
                 onClick={(_) => onChange(option.value)}
               >

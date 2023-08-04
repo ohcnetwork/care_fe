@@ -49,7 +49,7 @@ const OptionDescription = ({ medicine }: { medicine: MedibaseMedicine }) => {
           ATC Class: {medicine.atc_classification}
         </span>
       )}
-      <div className="mt-2 flex flex-wrap w-full gap-2">
+      <div className="mt-2 flex w-full flex-wrap gap-2">
         <OptionChip name="CIMS Class" value={medicine.cims_class} />
         {medicine.generic && (
           <OptionChip name="Generic" value={medicine.generic} />
@@ -61,11 +61,11 @@ const OptionDescription = ({ medicine }: { medicine: MedibaseMedicine }) => {
 
 const OptionChip = (props: { name?: string; value: string }) => {
   return (
-    <div className="flex gap-1 px-2 mt-1 sm:mt-0 uppercase text-center bg-secondary-100 h-fit max-w-fit rounded-full text-xs border border-secondary-400 whitespace-nowrap">
-      <span className="text-gray-800 font-normal">
+    <div className="mt-1 flex h-fit max-w-fit gap-1 whitespace-nowrap rounded-full border border-secondary-400 bg-secondary-100 px-2 text-center text-xs uppercase sm:mt-0">
+      <span className="font-normal text-gray-800">
         {props.name && props.name + ":"}
       </span>
-      <span className="text-gray-900 font-medium">{props.value}</span>
+      <span className="font-medium text-gray-900">{props.value}</span>
     </div>
   );
 };

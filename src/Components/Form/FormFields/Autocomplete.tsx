@@ -166,7 +166,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                 {value && !props.isLoading && !props.required && (
                   <div className="tooltip">
                     <CareIcon
-                      className="care-l-times-circle h-4 w-4 text-gray-800 hover:text-gray-500 transition-colors duration-200 ease-in-out"
+                      className="care-l-times-circle h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
                       onClick={(e) => {
                         e.preventDefault();
                         props.onChange(undefined);
@@ -196,8 +196,8 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
               )}
               {filteredOptions.map((option, index) => (
                 <Combobox.Option
-                  id={`${props.id}-option-${option.value}`}
-                  key={index}
+                  id={`${props.id}-option-${option.label}-value-${index}`}
+                  key={`${props.id}-option-${option.label}-value-${index}`}
                   className={dropdownOptionClassNames}
                   value={option}
                 >

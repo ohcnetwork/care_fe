@@ -1,4 +1,4 @@
-export type t = {
+type t = {
   bilateral_air_entry: option<bool>,
   etco2: option<int>,
   physical_examination_info: option<string>,

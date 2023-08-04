@@ -105,7 +105,7 @@ const ButtonV2 = ({
 }: ButtonProps) => {
   const className = classNames(
     props.className,
-    "font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
+    "inline-flex h-min cursor-pointer items-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500",
     `button-size-${size}`,
     `justify-${align}`,
     `button-shape-${circle ? "circle" : "square"}`,

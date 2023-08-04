@@ -26,14 +26,14 @@ export default function ToolTip(props: TooltipProps) {
   const [status, show] = useState(false);
 
   const style = classNames(
-    "absolute bg-black/50 backdrop-blur rounded text-white transition px-2 py-1 z-50 w-[150px] text-center block",
+    "absolute z-50 block w-[150px] rounded bg-black/50 px-2 py-1 text-center text-white backdrop-blur transition",
     position === "TOP" && "bottom-[calc(100%+5px)] left-[calc(50%-75px)]",
-    position === "BOTTOM" && "top-[calc(100%+5px)] left-[calc(50%-75px)]",
+    position === "BOTTOM" && "left-[calc(50%-75px)] top-[calc(100%+5px)]",
     position === "LEFT" && "right-[calc(100%+5px)] top-[calc(50%-75px)]",
     position === "RIGHT" && "left-[calc(100%+5px)] top-[calc(50%-75px)]",
     status === true
-      ? "visible opacity-100 -translate-y-1"
-      : "invisible opacity-0 translate-y-0",
+      ? "visible -translate-y-1 opacity-100"
+      : "invisible translate-y-0 opacity-0",
     props.className && props.className
   );
 
