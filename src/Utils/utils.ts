@@ -220,7 +220,7 @@ export const getExperienceSuffix = (date?: Date) => {
 };
 
 export const formatCurrency = (price: number) =>
-  price.toLocaleString("en-IN", {
+  price?.toLocaleString("en-IN", {
     style: "currency",
     currency: "INR",
   });
