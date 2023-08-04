@@ -30,7 +30,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
   const [presets, setPresets] = useState<CameraPreset[]>([]);
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [showControls, setShowControls] = useState<boolean>(false);
+  // const [showControls, setShowControls] = useState<boolean>(false);
   const [showDefaultPresets, setShowDefaultPresets] = useState<boolean>(false);
   const [position, setPosition] = useState<CameraPosition>({
     x: 0,
@@ -132,7 +132,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
         console.log("PRESETS", resp.data);
       })
       .catch((_ex: any) => {
-        // console.error('Error while refreshing',ex);
+        // console.error("Error while refreshing", ex);
       });
   };
   const getBedPresets = async (_asset: any) => {
@@ -274,15 +274,12 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
   ];
 
   return (
-    <div className="mt-4 px-6 mb-20">
+    <div className="mt-4 px-6 mb-2">
       <div className="mt-4 flex flex-col">
-        <div className="mt-4 relative flex flex-col md:flex-row">
+        <div className="mt-4 relative flex flex-col group">
           <div>
             {sourceUrl ? (
-              <div
-                onMouseEnter={(_) => setShowControls(true)}
-                onMouseLeave={(_) => setShowControls(false)}
-              >
+              <div>
                 <ReactPlayer
                   url={sourceUrl}
                   ref={liveFeedPlayerRef}
@@ -307,12 +304,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
                 />
               </div>
             ) : (
-              <div
-                onMouseEnter={(_) => setShowControls(true)}
-                onMouseLeave={(_) => setShowControls(false)}
-                className="bg-gray-500 flex flex-col justify-center items-center"
-                style={{ height: "360px", width: "640px" }}
-              >
+              <div className="bg-gray-500 w-[88vw] h-[50vw] xl:w-[44vw] xl:h-[25vw] 3xl:w-[32vw] 3xl:h-[18vw] flex flex-col justify-center items-center">
                 <p className="font-bold text-black">
                   STATUS: <span className="text-red-600">OFFLINE</span>
                 </p>
@@ -322,13 +314,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
               </div>
             )}
           </div>
-          <div
-            className={
-              (showControls ? "absolute" : "hidden") +
-              " absolute bg-gray-500 bg-opacity-75 z-5 transition-opacity"
-            }
-            style={{ height: "360px", width: "640px" }}
-          >
+          <div className="absolute w-[88vw] h-[50vw] xl:w-[44vw] xl:h-[25vw] 3xl:w-[32vw] 3xl:h-[18vw] invisible group-hover:visible">
             <div className="flex justify-center items-end h-full">
               <div className="flex flex-row justify-between">
                 <div className="mt-5 p-2 flex flex-row bg-green-100 border border-white rounded flex-1 justify-evenly">
@@ -364,9 +350,8 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
           <div
             className={
               (loading ? "absolute" : "hidden") +
-              " bg-gray-500 bg-opacity-75 z-5 transition-opacity"
+              " w-[88vw] h-[50vw] xl:w-[44vw] xl:h-[25vw] 3xl:w-[32vw] 3xl:h-[18vw] bg-gray-500 bg-opacity-75 z-10 transition-opacity"
             }
-            style={{ height: "360px", width: "640px" }}
           >
             {/* div with "Loading" at the center */}
             <div className="flex justify-center items-center h-full">
@@ -394,7 +379,7 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap my-auto gap-4 mt-4 max-w-[640px]">
+        <div className="flex flex-wrap my-auto gap-4 mt-4 max-w-[86vw] xl:max-w-[43vw] 3xl:max-w-[30vw]">
           <button
             className="bg-green-200 border border-white rounded-md px-3 py-2 text-black font-semibold hover:bg-green-300"
             onClick={() => {
