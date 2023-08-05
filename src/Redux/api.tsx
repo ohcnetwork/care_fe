@@ -281,6 +281,10 @@ const routes: Routes = {
     path: "/api/v1/consultationbed/{external_id}/",
     method: "PUT",
   },
+  togglePatientPrivacy: {
+    path: "/api/v1/consultationbed/{external_id}/toggle_patient_privacy/",
+    method: "PATCH",
+  },
 
   // Download Api
   deleteFacility: {

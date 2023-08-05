@@ -328,6 +328,16 @@ export const updateConsultationBed = (
     }
   );
 
+export const togglePatientPrivacy = (external_id: string) =>
+  fireRequest(
+    "togglePatientPrivacy",
+    [],
+    {},
+    {
+      external_id: external_id,
+    }
+  );
+
 // Download Actions
 export const downloadFacility = () => {
   return fireRequest("downloadFacility");

@@ -7,6 +7,7 @@ import {
   RESPIRATORY_SUPPORT,
 } from "../../Common/constants";
 import { ConsultationModel, PatientCategory } from "../Facility/models";
+import { useDispatch } from "react-redux";
 
 import ABHAProfileModal from "../ABDM/ABHAProfileModal";
 import Beds from "../Facility/Consultations/Beds";
@@ -20,7 +21,11 @@ import { PatientModel } from "./models";
 import { getDimensionOrDash } from "../../Common/utils";
 import moment from "moment";
 import useConfig from "../../Common/hooks/useConfig";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import {
+  togglePatientPrivacy,
+  getConsultationBed,
+} from "../../Redux/actions.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -34,11 +39,13 @@ export default function PatientInfoCard(props: {
   const [showABHAProfile, setShowABHAProfile] = useState(
     !!props.showAbhaProfile
   );
-
+  const [privacy, setPrivacy] = useState<boolean>(false);
+  const dispatch: any = useDispatch();
   const { enable_hcx, enable_abdm } = useConfig();
   const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
   const patient = props.patient;
+  const consultationId = props.consultationId;
   const consultation = props.consultation;
   const ip_no = consultation?.ip_no;
   const op_no = consultation?.op_no;
@@ -54,6 +61,74 @@ export default function PatientInfoCard(props: {
     : !consultation?.current_bed
     ? "Assign Bed"
     : "Switch Bed";
+
+  useEffect(() => {
+    const getPrivacyInfo = async () => {
+      const bedId = consultation?.current_bed?.bed_object?.id;
+      const consultationBedID = consultation?.current_bed?.id;
+      try {
+        const res = await dispatch(
+          getConsultationBed(
+            consultationId,
+            bedId as string,
+            consultationBedID as string
+          )
+        );
+        if (
+          res &&
+          res.status === 200 &&
+          res?.data &&
+          (res.data?.privacy == true || res.data?.privacy == false)
+        ) {
+          setPrivacy(res.data.privacy);
+        } else {
+          Notification.Error({
+            msg: "Failed to fetch privacy",
+          });
+        }
+      } catch (e) {
+        Notification.Error({
+          msg: "Something went wrong..!",
+        });
+      }
+    };
+    if (
+      consultation &&
+      consultationId &&
+      consultation?.current_bed?.id &&
+      consultation?.current_bed?.bed_object?.id
+    ) {
+      getPrivacyInfo();
+    }
+  }, [consultation]);
+
+  const togglePrivacy = async () => {
+    try {
+      if (consultation?.current_bed?.id) {
+        const res = await dispatch(
+          togglePatientPrivacy(consultation?.current_bed?.id as string)
+        );
+        if (res && res.status === 200) {
+          setPrivacy(!privacy);
+          Notification.Success({
+            msg: "Privacy updated successfully",
+          });
+        } else if (res && res.status === 403) {
+          Notification.Error({
+            msg: res.data.detail,
+          });
+        } else {
+          Notification.Error({
+            msg: "Failed to update privacy",
+          });
+        }
+      }
+    } catch (e) {
+      Notification.Error({
+        msg: "Something went wrong..!",
+      });
+    }
+  };
 
   return (
     <>
@@ -119,8 +194,14 @@ export default function PatientInfoCard(props: {
             <ButtonV2 ghost onClick={() => setOpen(true)} className="mt-1">
               {bedDialogTitle}
             </ButtonV2>
+            <ButtonV2
+              onClick={togglePrivacy}
+              variant={privacy ? "secondary" : "primary"}
+            >
+              {privacy ? "turn off" : "turn on"}
+            </ButtonV2>
           </div>
-          <div className="flex flex-col items-center gap-4 lg:items-start lg:gap-0 lg:pl-6">
+          <div className="item-center flex flex-col gap-4 lg:items-start lg:gap-0 lg:pl-6">
             <div className="mb-1 font-semibold sm:text-xl md:text-4xl">
               {patient.name}
             </div>

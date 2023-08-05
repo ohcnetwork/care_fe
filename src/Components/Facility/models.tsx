@@ -196,6 +196,7 @@ export interface BedModel {
   };
   location?: string;
   is_occupied?: boolean;
+  meta?: object;
 }
 
 export interface CurrentBed {
