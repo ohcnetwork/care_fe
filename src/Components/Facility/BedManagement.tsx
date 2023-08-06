@@ -276,7 +276,7 @@ export const BedManagement = (props: BedManagementProps) => {
             authorizeFor={NonReadOnlyUsers}
           >
             <CareIcon className="care-l-plus text-lg" />
-            Add New Bed
+            Add New Bed(s)
           </ButtonV2>
         </div>
         {bed}
