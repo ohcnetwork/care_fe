@@ -56,7 +56,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [boundaryPreset, setBoundaryPreset] = useState<any>();
   const [isFullscreen, setFullscreen] = useFullscreen();
   const [borderAlert, setBorderAlert] = useState<any>(null);
-
+  const [privacy, setPrivacy] = useState<boolean>(false);
   useEffect(() => {
     const fetchFacility = async () => {
       const res = await dispatch(getPermittedFacility(facilityId));
@@ -137,6 +137,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                 precision: 1,
               });
             }
+          }
+          if (consultation?.current_bed?.privacy) {
+            setPrivacy(consultation?.current_bed?.privacy);
           }
         }
 
@@ -463,6 +466,18 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     if (!option.shortcutKey) continue;
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKeyboardShortcut(option.shortcutKey, option.callback);
+  }
+
+  const PrivacyOnCard = () => {
+    return (
+      <div className="flex h-[calc(100vh-1.5rem)] flex-col justify-center px-2">
+        <div className="text-center text-3xl font-semibold">Privacy is On</div>
+      </div>
+    );
+  };
+
+  if (privacy) {
+    return <PrivacyOnCard />;
   }
 
   if (isLoading) return <Loading />;

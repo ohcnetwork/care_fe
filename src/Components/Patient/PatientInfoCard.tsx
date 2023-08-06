@@ -7,8 +7,8 @@ import {
   RESPIRATORY_SUPPORT,
 } from "../../Common/constants";
 import { ConsultationModel, PatientCategory } from "../Facility/models";
-import { useDispatch } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
+import SwitchTabs from "../Common/components/SwitchTabs.js";
 import ABHAProfileModal from "../ABDM/ABHAProfileModal";
 import Beds from "../Facility/Consultations/Beds";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -26,6 +26,7 @@ import {
   togglePatientPrivacy,
   getConsultationBed,
 } from "../../Redux/actions.js";
+import { UserRole } from "../../Common/constants";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -61,6 +62,25 @@ export default function PatientInfoCard(props: {
     : !consultation?.current_bed
     ? "Assign Bed"
     : "Switch Bed";
+
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+  const allowPrivacyToggle = () => {
+    const currentUserType: UserRole = currentUser.data.user_type;
+    if (
+      currentUserType == "DistrictAdmin" ||
+      currentUserType == "StateAdmin" ||
+      currentUserType == "DistrictLabAdmin" ||
+      currentUserType == "StateLabAdmin" ||
+      currentUserType == "LocalBodyAdmin" ||
+      currentUserType == "Doctor" ||
+      currentUserType == "Staff" ||
+      currentUserType == "WardAdmin"
+    )
+      return true;
+
+    return false;
+  };
 
   useEffect(() => {
     const getPrivacyInfo = async () => {
@@ -113,6 +133,8 @@ export default function PatientInfoCard(props: {
           Notification.Success({
             msg: "Privacy updated successfully",
           });
+          if (props.fetchPatientData)
+            props.fetchPatientData({ aborted: false });
         } else if (res && res.status === 403) {
           Notification.Error({
             msg: res.data.detail,
@@ -194,12 +216,20 @@ export default function PatientInfoCard(props: {
             <ButtonV2 ghost onClick={() => setOpen(true)} className="mt-1">
               {bedDialogTitle}
             </ButtonV2>
-            <ButtonV2
-              onClick={togglePrivacy}
-              variant={privacy ? "secondary" : "primary"}
-            >
-              {privacy ? "turn off" : "turn on"}
-            </ButtonV2>
+            {allowPrivacyToggle() && consultation?.current_bed?.id && (
+              <SwitchTabs
+                onClickTab1={() => {
+                  if (!privacy) togglePrivacy();
+                }}
+                onClickTab2={() => {
+                  if (privacy) togglePrivacy();
+                }}
+                Tab1={"on"}
+                Tab2={"off"}
+                activeTab={!privacy}
+              />
+            )}
+            {privacy ? "true" : "false"}
           </div>
           <div className="item-center flex flex-col gap-4 lg:items-start lg:gap-0 lg:pl-6">
             <div className="mb-1 font-semibold sm:text-xl md:text-4xl">
