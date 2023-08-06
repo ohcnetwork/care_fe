@@ -5,22 +5,12 @@ import HL7DeviceClient, {
 } from "./HL7DeviceClient";
 import HL7VitalsRenderer from "./HL7VitalsRenderer";
 import useCanvas from "../../Common/hooks/useCanvas";
-import { ChannelOptions, VitalsValueBase as VitalsValue } from "./types";
-import { getChannel } from "./utils";
-
-export const MONITOR_RATIO = {
-  w: 13,
-  h: 11,
-};
-const MONITOR_SCALE = 38;
-const MONITOR_WAVEFORMS_CANVAS_SIZE = {
-  width: MONITOR_RATIO.h * MONITOR_SCALE,
-  height: MONITOR_RATIO.h * MONITOR_SCALE,
-};
-// const MONITOR_SIZE = {
-//   width: MONITOR_RATIO.w * MONITOR_SCALE,
-//   height: MONITOR_RATIO.h * MONITOR_SCALE,
-// };
+import {
+  ChannelOptions,
+  IVitalsComponentProps,
+  VitalsValueBase as VitalsValue,
+} from "./types";
+import { getChannel, getVitalsCanvasSizeAndDuration } from "./utils";
 
 interface VitalsBPValue {
   systolic: VitalsValue;
@@ -28,9 +18,12 @@ interface VitalsBPValue {
   map: VitalsValue;
 }
 
-export default function useHL7VitalsMonitor() {
+export default function useHL7VitalsMonitor(
+  config?: IVitalsComponentProps["config"]
+) {
   const waveformForegroundCanvas = useCanvas();
   const waveformBackgroundCanvas = useCanvas();
+  const rendererConfig = config ?? getVitalsCanvasSizeAndDuration();
 
   // Non waveform data states.
   const [isOnline, setIsOnline] = useState<boolean>(false);
@@ -73,11 +66,11 @@ export default function useHL7VitalsMonitor() {
         renderer.current = new HL7VitalsRenderer({
           foregroundRenderContext: waveformForegroundCanvas.contextRef.current,
           backgroundRenderContext: waveformBackgroundCanvas.contextRef.current,
-          size: MONITOR_WAVEFORMS_CANVAS_SIZE,
           animationInterval: 50,
           ecg: ecgOptionsRef.current,
           pleth: plethOptionsRef.current,
           spo2: spo2OptionsRef.current,
+          ...rendererConfig,
         });
 
         const _renderer = renderer.current;
@@ -125,7 +118,7 @@ export default function useHL7VitalsMonitor() {
     waveformCanvas: {
       foreground: waveformForegroundCanvas,
       background: waveformBackgroundCanvas,
-      size: MONITOR_WAVEFORMS_CANVAS_SIZE,
+      size: rendererConfig.size,
     },
     data: {
       pulseRate,

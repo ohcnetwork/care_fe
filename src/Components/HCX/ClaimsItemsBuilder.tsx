@@ -142,7 +142,7 @@ export default function ClaimsItemsBuilder(props: Props) {
                       min={0}
                       label="Price"
                       placeholder="0.00"
-                      value={obj.price.toString()}
+                      value={obj.price?.toString()}
                       onChange={(event) =>
                         handleUpdate(index)({
                           name: event.name,
