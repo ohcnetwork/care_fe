@@ -84,6 +84,13 @@ export default function PatientInfoCard(props: {
 
   useEffect(() => {
     const getPrivacyInfo = async () => {
+      if (
+        consultation?.current_bed?.privacy == true ||
+        consultation?.current_bed?.privacy == false
+      ) {
+        setPrivacy(consultation?.current_bed?.privacy);
+        return;
+      }
       const bedId = consultation?.current_bed?.bed_object?.id;
       const consultationBedID = consultation?.current_bed?.id;
       try {
@@ -229,7 +236,6 @@ export default function PatientInfoCard(props: {
                 activeTab={!privacy}
               />
             )}
-            {privacy ? "true" : "false"}
           </div>
           <div className="item-center flex flex-col gap-4 lg:items-start lg:gap-0 lg:pl-6">
             <div className="mb-1 font-semibold sm:text-xl md:text-4xl">
