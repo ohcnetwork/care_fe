@@ -223,19 +223,6 @@ export default function PatientInfoCard(props: {
             <ButtonV2 ghost onClick={() => setOpen(true)} className="mt-1">
               {bedDialogTitle}
             </ButtonV2>
-            {allowPrivacyToggle() && consultation?.current_bed?.id && (
-              <SwitchTabs
-                onClickTab1={() => {
-                  if (!privacy) togglePrivacy();
-                }}
-                onClickTab2={() => {
-                  if (privacy) togglePrivacy();
-                }}
-                Tab1={"on"}
-                Tab2={"off"}
-                activeTab={!privacy}
-              />
-            )}
           </div>
           <div className="item-center flex flex-col gap-4 lg:items-start lg:gap-0 lg:pl-6">
             <div className="mb-1 font-semibold sm:text-xl md:text-4xl">
@@ -376,6 +363,7 @@ export default function PatientInfoCard(props: {
               </div>
             )}
           </div>
+          <div></div>
         </div>
 
         <div className="flex w-full flex-col gap-2 px-4 py-1 lg:w-fit lg:p-6">
@@ -544,6 +532,20 @@ export default function PatientInfoCard(props: {
                 />
               </>
             ))}
+          {allowPrivacyToggle() && consultation?.current_bed?.id && (
+            <SwitchTabs
+              onClickTab1={() => {
+                if (!privacy) togglePrivacy();
+              }}
+              onClickTab2={() => {
+                if (privacy) togglePrivacy();
+              }}
+              Tab1={" Privacy on"}
+              Tab2={" Privacy off"}
+              className="lg:w-full"
+              activeTab={!privacy}
+            />
+          )}
         </div>
       </section>
     </>
