@@ -50,15 +50,6 @@ export default defineConfig({
   ],
   build: {
     outDir: "build",
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes("node_modules")) {
-            return "vendor";
-          }
-        },
-      },
-    },
     commonjsOptions: {
       // workaround for react-phone-input-2 https://github.com/vitejs/vite/issues/2139#issuecomment-1405624744
       defaultIsModuleExports(id) {
