@@ -51,9 +51,12 @@ import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { formatDate, formatDateTime, relativeTime } from "../../Utils/utils";
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
+import useBreakpoints from "../../Common/hooks/useBreakpoints";
+import { getVitalsCanvasSizeAndDuration } from "../VitalsMonitor/utils";
+import { triggerGoal } from "../Common/Plausible";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -97,6 +100,8 @@ export const ConsultationDetails = (props: any) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
 
   useEffect(() => {
     if (
@@ -208,7 +213,25 @@ export const ConsultationDetails = (props: any) => {
 
   useAbortableEffect((status: statusType) => {
     fetchData(status);
+    triggerGoal("Patient Consultation Viewed", {
+      facilityId: facilityId,
+      patientId: patientId,
+      consultationId: consultationId,
+      userID: currentUser.data.id,
+    });
   }, []);
+
+  const vitalsAspectRatio = useBreakpoints({
+    default: undefined,
+    md: 8 / 11,
+    lg: 15 / 11,
+    xl: 13 / 11,
+    "2xl": 19 / 11,
+    "3xl": 23 / 11,
+  });
+
+  const vitalsConfig = getVitalsCanvasSizeAndDuration(vitalsAspectRatio);
+  const vitalsConfigHash = JSON.stringify(vitalsConfig);
 
   if (isLoading) {
     return <Loading />;
@@ -309,7 +332,16 @@ export const ConsultationDetails = (props: any) => {
                   Shift Patient
                 </ButtonV2>
                 <button
-                  onClick={() => setShowDoctors(true)}
+                  onClick={() => {
+                    triggerGoal("Doctor Connect Clicked", {
+                      consultationId,
+                      facilityId: patientData.facility,
+                      patientId: patientData.id,
+                      userId: currentUser.data.id,
+                      page: "ConsultationDetails",
+                    });
+                    setShowDoctors(true);
+                  }}
                   className="btn btn-primary m-1 w-full hover:text-white"
                 >
                   Doctor Connect
@@ -547,6 +579,7 @@ export const ConsultationDetails = (props: any) => {
                             {hl7SocketUrl && (
                               <div className="min-h-[400px] flex-1">
                                 <HL7PatientVitalsMonitor
+                                  key={`hl7-${hl7SocketUrl}-${vitalsConfigHash}`}
                                   patientAssetBed={{
                                     asset:
                                       monitorBedData?.asset_object as AssetData,
@@ -555,12 +588,14 @@ export const ConsultationDetails = (props: any) => {
                                     meta: monitorBedData?.asset_object?.meta,
                                   }}
                                   socketUrl={hl7SocketUrl}
+                                  config={vitalsConfig}
                                 />
                               </div>
                             )}
                             {ventilatorSocketUrl && (
                               <div className="min-h-[400px] flex-1">
                                 <VentilatorPatientVitalsMonitor
+                                  key={`ventilator-${ventilatorSocketUrl}-${vitalsConfigHash}`}
                                   patientAssetBed={{
                                     asset:
                                       ventilatorBedData?.asset_object as AssetData,
@@ -569,6 +604,7 @@ export const ConsultationDetails = (props: any) => {
                                     meta: ventilatorBedData?.asset_object?.meta,
                                   }}
                                   socketUrl={ventilatorSocketUrl}
+                                  config={vitalsConfig}
                                 />
                               </div>
                             )}

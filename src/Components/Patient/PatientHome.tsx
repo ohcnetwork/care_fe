@@ -31,6 +31,7 @@ import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import dayjs from "dayjs";
+import { triggerGoal } from "../Common/Plausible";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -222,6 +223,11 @@ export const PatientHome = (props: any) => {
   useAbortableEffect(
     (status: statusType) => {
       fetchpatient(status);
+      triggerGoal("Patient Profile Viewed", {
+        facilityId: facilityId,
+        patientId: patientData.id,
+        userID: currentUser.data.id,
+      });
     },
     [dispatch, fetchpatient]
   );

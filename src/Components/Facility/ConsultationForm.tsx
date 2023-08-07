@@ -218,6 +218,7 @@ export const ConsultationForm = (props: any) => {
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
   const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
   const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
+  const [disabledFields, setDisabledFields] = useState<string[]>([]);
 
   const sections = {
     "Consultation Details": {
@@ -327,6 +328,10 @@ export const ConsultationForm = (props: any) => {
           };
           dispatch({ type: "set_form", form: formData });
           setBed(formData.bed);
+
+          if (res.data.last_daily_round) {
+            setDisabledFields((fields) => [...fields, "category"]);
+          }
         } else {
           goBack();
         }
@@ -774,6 +779,7 @@ export const ConsultationForm = (props: any) => {
       value: (state.form as any)[name],
       error: (state.errors as any)[name],
       onChange: handleFormFieldChange,
+      disabled: disabledFields.includes(name),
     };
   };
 
@@ -963,6 +969,13 @@ export const ConsultationForm = (props: any) => {
                   {String(state.form.consultation_status) !== "1" && (
                     <div className="col-span-6" ref={fieldRef["category"]}>
                       <PatientCategorySelect
+                        labelSuffix={
+                          disabledFields.includes("category") && (
+                            <p className="text-xs font-medium text-warning-500">
+                              A daily round already exists.
+                            </p>
+                          )
+                        }
                         required
                         label="Category"
                         {...field("category")}
@@ -977,8 +990,8 @@ export const ConsultationForm = (props: any) => {
                     <SelectFormField
                       required
                       label="Decision after consultation"
-                      disabled={String(state.form.consultation_status) === "1"}
                       {...selectField("suggestion")}
+                      disabled={String(state.form.consultation_status) === "1"}
                       options={CONSULTATION_SUGGESTION.filter(
                         ({ deprecated }) => !deprecated
                       )}
