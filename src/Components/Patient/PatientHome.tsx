@@ -30,7 +30,7 @@ import CircularProgress from "../Common/components/CircularProgress";
 import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
-import dayjs from "dayjs";
+import dayjs from "../../Utils/dayjs";
 import { triggerGoal } from "../Common/Plausible";
 
 const Loading = loadable(() => import("../Common/Loading"));

@@ -10,7 +10,7 @@ import { useState } from "react";
 import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
 import { useTranslation } from "react-i18next";
 import MedibaseAutocompleteFormField from "./MedibaseAutocompleteFormField";
-import dayjs from "dayjs";
+import dayjs from "../../Utils/dayjs";
 
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;

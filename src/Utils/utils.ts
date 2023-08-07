@@ -1,6 +1,6 @@
 import { navigate } from "raviger";
 import { LocalStorageKeys } from "../Common/constants";
-import dayjs from "dayjs";
+import dayjs from "./dayjs";
 
 interface ApacheParams {
   age: number;

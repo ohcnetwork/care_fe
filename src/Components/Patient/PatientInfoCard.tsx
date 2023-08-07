@@ -21,7 +21,7 @@ import { getDimensionOrDash } from "../../Common/utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { useState } from "react";
 import { formatDate } from "../../Utils/utils.js";
-import dayjs from "dayjs";
+import dayjs from "../../Utils/dayjs";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;

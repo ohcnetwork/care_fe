@@ -6,7 +6,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { AssetStatus, AssetUptimeRecord } from "../Assets/AssetTypes";
 import { reverse } from "lodash";
 import { classNames } from "../../Utils/utils";
-import dayjs from "dayjs";
+import dayjs from "../../Utils/dayjs";
 
 const STATUS_COLORS = {
   Operational: "bg-green-500",

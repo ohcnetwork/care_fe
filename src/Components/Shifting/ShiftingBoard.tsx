@@ -14,7 +14,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { ExportButton } from "../Common/Export";
-import dayjs from "dayjs";
+import dayjs from "../../Utils/dayjs";
 
 const limit = 14;
 

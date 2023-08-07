@@ -9,7 +9,7 @@ import { classNames } from "../../Utils/utils";
 import { useDrag, useDrop } from "react-dnd";
 import { formatDateTime } from "../../Utils/utils";
 import { ExportButton } from "../Common/Export";
-import dayjs from "dayjs";
+import dayjs from "../../Utils/dayjs";
 
 const limit = 14;
 
