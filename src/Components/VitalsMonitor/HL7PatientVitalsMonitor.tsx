@@ -6,12 +6,27 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import WaveformLabels from "./WaveformLabels";
 import { classNames } from "../../Utils/utils";
 import { IVitalsComponentProps, VitalsValueBase } from "./types";
+import { triggerGoal } from "../Common/Plausible";
+import { useSelector } from "react-redux";
 
 export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   const { connect, waveformCanvas, data, isOnline } = useHL7VitalsMonitor(
     props.config
   );
   const { patient, bed, asset } = props.patientAssetBed ?? {};
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+
+  useEffect(() => {
+    if (isOnline) {
+      triggerGoal("DeviceView", {
+        patientId: patient?.id,
+        bedId: bed?.id,
+        assetId: asset?.id,
+        userId: currentUser?.id,
+      });
+    }
+  }, [isOnline]);
 
   useEffect(() => {
     connect(props.socketUrl);
