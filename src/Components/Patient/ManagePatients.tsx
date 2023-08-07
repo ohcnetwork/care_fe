@@ -41,10 +41,11 @@ import loadable from "@loadable/component";
 import moment from "moment";
 import { parseOptionId } from "../../Common/utils";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
+import { triggerGoal } from "../Common/Plausible.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -97,6 +98,8 @@ export const PatientManager = () => {
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
   const [showDialog, setShowDialog] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
   const [showDoctorConnect, setShowDoctorConnect] = useState(false);
@@ -763,6 +766,11 @@ export const PatientManager = () => {
             {showDoctorConnect && (
               <ButtonV2
                 onClick={() => {
+                  triggerGoal("Doctor Connect Clicked", {
+                    facilityId: qParams.facility,
+                    userId: currentUser.data.id,
+                    page: "FacilityPatientsList",
+                  });
                   setShowDoctors(true);
                 }}
               >
