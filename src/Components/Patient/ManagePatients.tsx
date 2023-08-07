@@ -41,10 +41,11 @@ import loadable from "@loadable/component";
 import moment from "moment";
 import { parseOptionId } from "../../Common/utils";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
+import { triggerGoal } from "../Common/Plausible.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -97,6 +98,8 @@ export const PatientManager = () => {
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
   const [showDialog, setShowDialog] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
   const [showDoctorConnect, setShowDoctorConnect] = useState(false);
@@ -152,7 +155,7 @@ export const PatientManager = () => {
     page: qParams.page || 1,
     limit: resultsPerPage,
     name: qParams.name || undefined,
-    ip_no: qParams.ip_no || undefined,
+    ip_or_op_no: qParams.ip_or_op_no || undefined,
     is_active:
       !qParams.last_consultation_discharge_reason &&
       (qParams.is_active || "True"),
@@ -354,7 +357,7 @@ export const PatientManager = () => {
     qParams.is_active,
     qParams.disease_status,
     qParams.name,
-    qParams.ip_no,
+    qParams.ip_or_op_no,
     qParams.page,
     qParams.phone_number,
     qParams.emergency_phone_number,
@@ -514,8 +517,7 @@ export const PatientManager = () => {
           </div>
           <div className="flex flex-col items-start gap-4 md:flex-row">
             <div className="h-20 w-full min-w-[5rem] rounded-lg border border-gray-300 bg-gray-50 md:w-20">
-              {patient?.last_consultation &&
-              patient?.last_consultation?.current_bed &&
+              {patient?.last_consultation?.current_bed &&
               patient?.last_consultation?.discharge_date === null ? (
                 <div className="flex h-full flex-col items-center justify-center">
                   <span className="tooltip w-full truncate px-1 text-center text-sm text-gray-900">
@@ -540,6 +542,15 @@ export const PatientManager = () => {
                     </span>
                   </span>
                 </div>
+              ) : patient.last_consultation?.suggestion === "DC" ? (
+                <div className="flex h-full flex-col items-center justify-center">
+                  <div className="tooltip">
+                    <CareIcon className="care-l-estate text-3xl text-gray-500" />
+                    <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-sm font-medium">
+                      Domiciliary Care
+                    </span>
+                  </div>
+                </div>
               ) : (
                 <div className="flex min-h-[5rem] items-center justify-center">
                   <i className="fas fa-user-injured text-3xl text-gray-500"></i>
@@ -548,21 +559,20 @@ export const PatientManager = () => {
             </div>
             <div className="flex w-full flex-col gap-2 pl-2 md:block md:flex-row">
               <div className="flex w-full justify-between gap-2">
-                <div className="text-xl font-semibold capitalize">
-                  <span>{patient.name}</span>
-                  <span className="text-gray-800">{" - " + patient.age}</span>
-                  {patient.action && patient.action != 10 && (
-                    <span className="ml-2 font-semibold text-gray-700">
-                      -{" "}
-                      {
-                        TELEMEDICINE_ACTIONS.find(
-                          (i) => i.id === patient.action
-                        )?.desc
-                      }
-                    </span>
-                  )}
+                <div className="font-semibold">
+                  <span className="text-xl capitalize">{patient.name}</span>
+                  <span className="ml-4 text-gray-800">{`${patient.age} yrs.`}</span>
                 </div>
               </div>
+
+              {patient.action && patient.action != 10 && (
+                <span className="text-sm font-semibold text-gray-700">
+                  {
+                    TELEMEDICINE_ACTIONS.find((i) => i.id === patient.action)
+                      ?.desc
+                  }
+                </span>
+              )}
 
               {patient.facility_object && (
                 <div className="mb-2">
@@ -756,6 +766,11 @@ export const PatientManager = () => {
             {showDoctorConnect && (
               <ButtonV2
                 onClick={() => {
+                  triggerGoal("Doctor Connect Clicked", {
+                    facilityId: qParams.facility,
+                    userId: currentUser.data.id,
+                    page: "FacilityPatientsList",
+                  });
                   setShowDoctors(true);
                 }}
               >
@@ -855,10 +870,10 @@ export const PatientManager = () => {
                 {...queryField("name")}
               />
               <SearchInput
-                label="Search by IP Number"
-                placeholder="Enter IP Number"
+                label="Search by IP/OP Number"
+                placeholder="Enter IP/OP Number"
                 secondary
-                {...queryField("ip_no")}
+                {...queryField("ip_or_op_no")}
               />
             </div>
             <div className="md:flex md:gap-4">
@@ -894,7 +909,7 @@ export const PatientManager = () => {
             phoneNumber("Primary number", "phone_number"),
             phoneNumber("Emergency number", "emergency_phone_number"),
             badge("Patient name", "name"),
-            badge("IP number", "ip_no"),
+            badge("IP/OP number", "ip_or_op_no"),
             ...dateRange("Modified", "modified_date"),
             ...dateRange("Created", "created_date"),
             ...dateRange("Admitted", "last_consultation_admission_date"),

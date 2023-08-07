@@ -722,7 +722,6 @@ export const UserAdd = (props: UserProps) => {
                 placeholder="Phone Number"
                 label="Phone Number"
                 required
-                disableCountry
               />
               <Checkbox
                 checked={state.form.phone_number_is_whatsapp}
@@ -741,7 +740,6 @@ export const UserAdd = (props: UserProps) => {
               placeholder="WhatsApp Phone Number"
               label="Whatsapp Number"
               disabled={state.form.phone_number_is_whatsapp}
-              disableCountry
             />
 
             <div>

@@ -218,6 +218,7 @@ export const ConsultationForm = (props: any) => {
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
   const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
   const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
+  const [disabledFields, setDisabledFields] = useState<string[]>([]);
 
   const sections = {
     "Consultation Details": {
@@ -327,6 +328,10 @@ export const ConsultationForm = (props: any) => {
           };
           dispatch({ type: "set_form", form: formData });
           setBed(formData.bed);
+
+          if (res.data.last_daily_round) {
+            setDisabledFields((fields) => [...fields, "category"]);
+          }
         } else {
           goBack();
         }
@@ -398,8 +403,11 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "admission_date":
-          if (state.form.suggestion === "A" && !state.form[field]) {
-            errors[field] = "Field is required as person is admitted";
+          if (
+            ["A", "DC"].includes(state.form.suggestion) &&
+            !state.form[field]
+          ) {
+            errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
@@ -587,8 +595,9 @@ export const ConsultationForm = (props: any) => {
         suggestion: state.form.suggestion,
         consultation_status: Number(state.form.consultation_status),
         admitted: state.form.suggestion === "A",
-        admission_date:
-          state.form.suggestion === "A" ? state.form.admission_date : undefined,
+        admission_date: ["A", "DC"].includes(state.form.suggestion)
+          ? state.form.admission_date
+          : undefined,
         category: state.form.category,
         is_kasp: state.form.is_kasp,
         kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
@@ -770,6 +779,7 @@ export const ConsultationForm = (props: any) => {
       value: (state.form as any)[name],
       error: (state.errors as any)[name],
       onChange: handleFormFieldChange,
+      disabled: disabledFields.includes(name),
     };
   };
 
@@ -959,6 +969,13 @@ export const ConsultationForm = (props: any) => {
                   {String(state.form.consultation_status) !== "1" && (
                     <div className="col-span-6" ref={fieldRef["category"]}>
                       <PatientCategorySelect
+                        labelSuffix={
+                          disabledFields.includes("category") && (
+                            <p className="text-xs font-medium text-warning-500">
+                              A daily round already exists.
+                            </p>
+                          )
+                        }
                         required
                         label="Category"
                         {...field("category")}
@@ -973,9 +990,11 @@ export const ConsultationForm = (props: any) => {
                     <SelectFormField
                       required
                       label="Decision after consultation"
-                      disabled={String(state.form.consultation_status) === "1"}
                       {...selectField("suggestion")}
-                      options={CONSULTATION_SUGGESTION}
+                      disabled={String(state.form.consultation_status) === "1"}
+                      options={CONSULTATION_SUGGESTION.filter(
+                        ({ deprecated }) => !deprecated
+                      )}
                     />
                   </div>
 
@@ -1040,7 +1059,7 @@ export const ConsultationForm = (props: any) => {
                     </>
                   )}
 
-                  {state.form.suggestion === "A" && (
+                  {["A", "DC"].includes(state.form.suggestion) && (
                     <>
                       <div
                         className="col-span-6"
@@ -1050,7 +1069,11 @@ export const ConsultationForm = (props: any) => {
                           {...field("admission_date")}
                           required
                           disableFuture
-                          label="Admission date"
+                          label={
+                            state.form.suggestion === "A"
+                              ? "Date of Admission"
+                              : "Domiciliary Care Start Date"
+                          }
                           position="LEFT"
                         />
                       </div>

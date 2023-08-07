@@ -17,6 +17,7 @@ import {
 import { Error, Success } from "../../Utils/Notifications";
 import { previewDischargeSummary } from "../../Redux/actions";
 import { useTranslation } from "react-i18next";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 
 interface Props {
   show: boolean;
@@ -32,27 +33,15 @@ export default function DischargeSummaryModal(props: Props) {
   const [emailing, setEmailing] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [regenDischargeSummary, setRegenDischargeSummary] = useState(false);
 
-  const handleDownload = async () => {
-    setDownloading(true);
+  const popup = (url: string) => {
+    window.open(url, "_blank");
+    setDownloading(false);
+    props.onClose();
+  };
 
-    if (props.consultation.discharge_date) {
-      const res = await dispatch(
-        previewDischargeSummary({ external_id: props.consultation.id })
-      );
-
-      if (res.status === 200) {
-        window.open(res.data.read_signed_url, "_blank");
-        setDownloading(false);
-        props.onClose();
-        return;
-      }
-    }
-
-    await dispatch(
-      generateDischargeSummary({ external_id: props.consultation.id })
-    );
-
+  const waitForDischargeSummary = async () => {
     setGenerating(true);
     Success({ msg: t("generating_discharge_summary") + "..." });
 
@@ -64,9 +53,7 @@ export default function DischargeSummaryModal(props: Props) {
       );
 
       if (res.status === 200) {
-        window.open(res.data.read_signed_url, "_blank");
-        setDownloading(false);
-        props.onClose();
+        popup(res.data.read_signed_url);
         return;
       }
 
@@ -74,7 +61,59 @@ export default function DischargeSummaryModal(props: Props) {
         msg: t("discharge_summary_not_ready") + " " + t("try_again_later"),
       });
       setDownloading(false);
-    }, 5000);
+    }, 7000);
+  };
+
+  const handleRegenDischargeSummary = async () => {
+    setDownloading(true);
+    const res = await dispatch(
+      generateDischargeSummary({ external_id: props.consultation.id })
+    );
+    if (res.status === 406) {
+      Error({
+        msg:
+          res.data?.message ||
+          t("discharge_summary_not_ready") + " " + t("try_again_later"),
+      });
+      setDownloading(false);
+      return;
+    }
+    setRegenDischargeSummary(false);
+    waitForDischargeSummary();
+  };
+
+  const downloadDischargeSummary = async () => {
+    // returns summary or 202 if new create task started
+    const res = await dispatch(
+      previewDischargeSummary({ external_id: props.consultation.id })
+    );
+
+    if (res.status === 202) {
+      // wait for the automatic task to finish
+      waitForDischargeSummary();
+      return;
+    }
+
+    if (res.status === 200) {
+      popup(res.data.read_signed_url);
+      return;
+    }
+
+    Error({
+      msg: t("discharge_summary_not_ready") + " " + t("try_again_later"),
+    });
+    setDownloading(false);
+  };
+
+  const handleDownload = async () => {
+    setDownloading(true);
+
+    if (regenDischargeSummary) {
+      await handleRegenDischargeSummary();
+      return;
+    }
+
+    downloadDischargeSummary();
   };
 
   const handleEmail = async () => {
@@ -95,7 +134,7 @@ export default function DischargeSummaryModal(props: Props) {
       emailDischargeSummary({ email }, { external_id: props.consultation.id })
     );
 
-    if (res.status === 200) {
+    if (res.status === 202) {
       Success({ msg: t("email_success") });
       props.onClose();
     }
@@ -128,7 +167,14 @@ export default function DischargeSummaryModal(props: Props) {
           onChange={(e) => setEmail(e.value)}
           error={emailError}
         />
-        <div className="mt-6 flex flex-col-reverse gap-2 lg:flex-row lg:justify-end">
+        {!props.consultation.discharge_date && (
+          <CheckBoxFormField
+            name="regenDischargeSummary"
+            label={"Regenerate discharge summary"}
+            onChange={(e) => setRegenDischargeSummary(e.value)}
+          />
+        )}
+        <div className="flex flex-col-reverse gap-2 lg:flex-row lg:justify-end">
           <Cancel onClick={props.onClose} />
           <Submit onClick={handleDownload} disabled={downloading}>
             {downloading ? (

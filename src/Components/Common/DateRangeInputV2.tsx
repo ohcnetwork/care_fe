@@ -28,7 +28,7 @@ const DateRangeInputV2 = ({ value, onChange, ...props }: Props) => {
           className={props.className}
           value={start}
           onChange={(start) => {
-            onChange({ start, end: start });
+            onChange({ start, end });
             setShowEndPicker(true);
           }}
           min={props.min}
