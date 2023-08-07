@@ -223,7 +223,7 @@ export const PatientHome = (props: any) => {
   useAbortableEffect(
     (status: statusType) => {
       fetchpatient(status);
-      triggerGoal("Patient Consultation Viewed", {
+      triggerGoal("Patient Profile Viewed", {
         facilityId: facilityId,
         patientId: patientData.id,
         userID: currentUser.data.id,
