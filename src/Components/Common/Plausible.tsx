@@ -13,7 +13,7 @@ export default function Plausible() {
     <Script
       defer
       data-domain={site_url}
-      src={`${analytics_server_url}/js/script.manual.js`}
+      src={`${analytics_server_url}/js/script.tagged-events.js`}
     />
   );
 }
@@ -44,4 +44,9 @@ const triggerPageView = () => {
 
   // Send the pageview event to Plausible
   plausible("pageview", { u: redactedUrl });
+};
+
+export const triggerGoal = (name: string, props: any) => {
+  const plausible = (window as any).plausible;
+  plausible(name, { props });
 };

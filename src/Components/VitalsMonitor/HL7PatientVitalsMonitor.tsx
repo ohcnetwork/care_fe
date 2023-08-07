@@ -6,12 +6,27 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import WaveformLabels from "./WaveformLabels";
 import { classNames } from "../../Utils/utils";
 import { IVitalsComponentProps, VitalsValueBase } from "./types";
+import { triggerGoal } from "../Common/Plausible";
+import { useSelector } from "react-redux";
 
 export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   const { connect, waveformCanvas, data, isOnline } = useHL7VitalsMonitor(
     props.config
   );
   const { patient, bed, asset } = props.patientAssetBed ?? {};
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
+
+  useEffect(() => {
+    if (isOnline) {
+      triggerGoal("DeviceView", {
+        patientId: patient?.id,
+        bedId: bed?.id,
+        assetId: asset?.id,
+        userId: currentUser?.id,
+      });
+    }
+  }, [isOnline]);
 
   useEffect(() => {
     connect(props.socketUrl);
@@ -114,7 +129,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
             />
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-x-8 gap-y-4 divide-blue-600 bg-[#020617] tracking-wider text-white md:inset-y-0 md:right-0 md:grid-cols-1 md:gap-0 md:divide-y">
+        <VitalsNonWaveformContent>
           {/* Pulse Rate */}
           <NonWaveformData
             label="ECG"
@@ -196,11 +211,21 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
               </div>
             </div>
           </div>
-        </div>
+        </VitalsNonWaveformContent>
       </div>
     </div>
   );
 }
+
+export const VitalsNonWaveformContent = ({
+  children,
+}: {
+  children: JSX.Element | JSX.Element[];
+}) => (
+  <div className="grid grid-cols-2 gap-x-8 gap-y-4 divide-blue-600 bg-[#020617] tracking-wider text-white md:absolute md:inset-y-0 md:right-0 md:grid-cols-1 md:gap-0 md:divide-y">
+    {children}
+  </div>
+);
 
 interface NonWaveformDataProps {
   label: string;

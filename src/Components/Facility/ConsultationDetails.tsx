@@ -52,10 +52,16 @@ import { NutritionPlots } from "./Consultations/NutritionPlots";
 import { PressureSoreDiagrams } from "./Consultations/PressureSoreDiagrams";
 import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
-import DischargeModal from "./DischargeModal";
-import DischargeSummaryModal from "./DischargeSummaryModal";
-import DoctorVideoSlideover from "./DoctorVideoSlideover";
-import InvestigationTab from "./Investigations/investigationsTab";
+import { formatDate } from "../../Utils/utils";
+import loadable from "@loadable/component";
+import moment from "moment";
+import { navigate } from "raviger";
+import { useDispatch, useSelector } from "react-redux";
+import { useQueryParams } from "raviger";
+import { useTranslation } from "react-i18next";
+import useBreakpoints from "../../Common/hooks/useBreakpoints";
+import { getVitalsCanvasSizeAndDuration } from "../VitalsMonitor/utils";
+import { triggerGoal } from "../Common/Plausible";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -99,6 +105,8 @@ export const ConsultationDetails = (props: any) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
 
   useEffect(() => {
     if (
@@ -210,6 +218,12 @@ export const ConsultationDetails = (props: any) => {
 
   useAbortableEffect((status: statusType) => {
     fetchData(status);
+    triggerGoal("ConsultationView", {
+      facilityId: facilityId,
+      patientId: patientId,
+      consultationId: consultationId,
+      userID: currentUser.data.id,
+    });
   }, []);
 
   const vitalsAspectRatio = useBreakpoints({
@@ -322,7 +336,16 @@ export const ConsultationDetails = (props: any) => {
                   Shift Patient
                 </ButtonV2>
                 <button
-                  onClick={ () => setShowDoctors(true) }
+                  onClick={() => {
+                    triggerGoal("DoctorConnectClick", {
+                      consultationId,
+                      facilityId: patientData.facility,
+                      patientId: patientData.id,
+                      userId: currentUser.data.id,
+                      page: "ConsultationDetails",
+                    });
+                    setShowDoctors(true);
+                  }}
                   className="btn btn-primary m-1 w-full hover:text-white"
                 >
                   Doctor Connect
