@@ -214,7 +214,7 @@ export const ConsultationDetails = (props: any) => {
 
   useAbortableEffect((status: statusType) => {
     fetchData(status);
-    triggerGoal("ConsultationView", {
+    triggerGoal("Patient Consultation Viewed", {
       facilityId: facilityId,
       patientId: patientId,
       consultationId: consultationId,
@@ -334,7 +334,7 @@ export const ConsultationDetails = (props: any) => {
                 </ButtonV2>
                 <button
                   onClick={() => {
-                    triggerGoal("DoctorConnectClick", {
+                    triggerGoal("Doctor Connect Clicked", {
                       consultationId,
                       facilityId: patientData.facility,
                       patientId: patientData.id,

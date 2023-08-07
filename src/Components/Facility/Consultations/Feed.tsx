@@ -388,7 +388,7 @@ export const Feed: React.FC<IFeedProps> = ({
                       console.log(
                         "onSuccess: Set Preset to " + preset?.meta?.preset_name
                       );
-                      triggerGoal("CameraPresetClick", {
+                      triggerGoal("Camera Preset Clicked", {
                         presetName: preset?.meta?.preset_name,
                         consultationId,
                         patientId,
@@ -402,7 +402,7 @@ export const Feed: React.FC<IFeedProps> = ({
                       console.log(
                         "onError: Set Preset to " + preset?.meta?.preset_name
                       );
-                      triggerGoal("CameraPresetClick", {
+                      triggerGoal("Camera Preset Clicked", {
                         presetName: preset?.meta?.preset_name,
                         consultationId,
                         patientId,
@@ -552,7 +552,7 @@ export const Feed: React.FC<IFeedProps> = ({
                   camProp={button}
                   styleType="BUTTON"
                   clickAction={() => {
-                    triggerGoal("CameraFeedMove", {
+                    triggerGoal("Camera Feed Moved", {
                       direction: button.action,
                       consultationId,
                       patientId,
