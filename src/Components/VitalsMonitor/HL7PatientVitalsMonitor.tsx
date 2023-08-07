@@ -19,7 +19,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
 
   useEffect(() => {
     if (isOnline) {
-      triggerGoal("DeviceView", {
+      triggerGoal("Device Viewed", {
         patientId: patient?.id,
         bedId: bed?.id,
         assetId: asset?.id,
