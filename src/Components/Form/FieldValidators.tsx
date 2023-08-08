@@ -77,7 +77,7 @@ export const EmailValidator = (message = "Invalid email address") => {
 //   return RegexValidator(SUPPORT_PHONE_NUMBER_REGEX, message);
 // };
 
-const INDIAN_MOBILE_NUMBER_REGEX = /^(?=^\+91)(^\+91\d{10}$)/;
+const INDIAN_MOBILE_NUMBER_REGEX = /^(?=^\+91)(^\+91[6-9]\d{9}$)/;
 const INTERNATIONAL_MOBILE_NUMBER_REGEX = /^(?!^\+91)(^\+\d{1,3}\d{8,14}$)/;
 const MOBILE_NUMBER_REGEX = new RegExp(
   `(${INDIAN_MOBILE_NUMBER_REGEX.source})|(${INTERNATIONAL_MOBILE_NUMBER_REGEX.source})`
