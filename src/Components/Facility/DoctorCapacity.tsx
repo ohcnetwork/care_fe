@@ -131,6 +131,10 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
         errors[field] = "Field is required";
         invalidForm = true;
       }
+      if (field === "count" && state.form[field] < 0) {
+        errors[field] = "Doctor count cannot be negative";
+        invalidForm = true;
+      }
     });
     if (invalidForm) {
       dispatch({ type: "set_error", errors });

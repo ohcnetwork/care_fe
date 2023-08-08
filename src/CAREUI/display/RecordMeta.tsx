@@ -22,7 +22,7 @@ const RecordMeta = ({ time, user, prefix, className }: Props) => {
   let child = (
     <div className="tooltip">
       <span className="underline">{relativeTime(time)}</span>
-      <span className="tooltip-text flex -translate-x-1/3 gap-1 text-xs font-medium tracking-wider">
+      <span className="tooltip-text flex gap-1 text-xs font-medium tracking-wider">
         {formatDateTime(time)}
         {user && (
           <>
