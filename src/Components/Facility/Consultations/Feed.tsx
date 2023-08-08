@@ -480,8 +480,9 @@ export const Feed: React.FC<IFeedProps> = ({
 
   const PrivacyOnCard = () => {
     return (
-      <div className="flex h-[calc(100vh-1.5rem)] flex-col justify-center px-2">
-        <div className="text-center text-3xl font-semibold">Privacy is On</div>
+      <div className="flex h-[calc(90vh-1.5rem)] flex-col items-center justify-center px-2">
+        <CareIcon className="care-l-lock text-center text-9xl text-gray-500 " />
+        <div className="text-lg font-semibold">Privacy Mode: ON</div>
       </div>
     );
   };

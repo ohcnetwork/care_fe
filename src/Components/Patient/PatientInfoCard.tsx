@@ -8,7 +8,6 @@ import {
 } from "../../Common/constants";
 import { ConsultationModel, PatientCategory } from "../Facility/models";
 import { useDispatch, useSelector } from "react-redux";
-import SwitchTabs from "../Common/components/SwitchTabs.js";
 import ABHAProfileModal from "../ABDM/ABHAProfileModal";
 import Beds from "../Facility/Consultations/Beds";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -70,10 +69,9 @@ export default function PatientInfoCard(props: {
     if (
       currentUserType == "DistrictAdmin" ||
       currentUserType == "StateAdmin" ||
-      currentUserType == "DistrictLabAdmin" ||
-      currentUserType == "StateLabAdmin" ||
       currentUserType == "LocalBodyAdmin" ||
-      currentUserType == "Doctor" ||
+      (currentUserType == "Doctor" &&
+        currentUser?.data?.home_facility === consultation?.facility) ||
       currentUserType == "Staff" ||
       currentUserType == "WardAdmin"
     )
@@ -533,18 +531,35 @@ export default function PatientInfoCard(props: {
               </>
             ))}
           {allowPrivacyToggle() && consultation?.current_bed?.id && (
-            <SwitchTabs
-              onClickTab1={() => {
-                if (!privacy) togglePrivacy();
-              }}
-              onClickTab2={() => {
-                if (privacy) togglePrivacy();
-              }}
-              Tab1={" Privacy on"}
-              Tab2={" Privacy off"}
-              className="lg:w-full"
-              activeTab={!privacy}
-            />
+            <div className="flex flex-row justify-start gap-2">
+              <div className="tooltip bg-gray-200 px-3 py-2 font-semibold">
+                Privacy Mode: {privacy ? "ON" : "OFF"}
+                <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm">
+                  privacy setting for camera feed visual
+                </span>
+              </div>
+              {!privacy ? (
+                <button
+                  className=" tooltip items-center rounded-md bg-red-500 p-1 text-gray-200 hover:bg-gray-200 hover:text-red-500"
+                  onClick={togglePrivacy}
+                >
+                  <CareIcon className="care-l-lock text-3xl" />
+                  <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm">
+                    Lock Privacy
+                  </span>
+                </button>
+              ) : (
+                <div
+                  className="tooltip items-center rounded-md bg-gray-500 p-1 text-gray-200 hover:bg-gray-200 hover:text-black"
+                  onClick={togglePrivacy}
+                >
+                  <CareIcon className="care-l-unlock text-3xl" />
+                  <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm">
+                    Unlock Privacy
+                  </span>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </section>
