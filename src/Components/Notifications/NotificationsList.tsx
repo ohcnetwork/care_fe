@@ -11,7 +11,7 @@ import {
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
 import { Error } from "../../Utils/Notifications.js";
-import { classNames, formatDate } from "../../Utils/utils";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import * as Sentry from "@sentry/browser";
 import {
@@ -100,7 +100,7 @@ const NotificationTile = ({
       <div className="py-1 text-sm">{result.message}</div>
       <div className="flex flex-col justify-end gap-2">
         <div className="py-1 text-right text-xs text-secondary-700">
-          {formatDate(result.created_date)}
+          {formatDateTime(result.created_date)}
         </div>
         <div className="flex justify-end gap-2">
           <ButtonV2

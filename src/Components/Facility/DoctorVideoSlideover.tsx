@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
@@ -6,6 +5,7 @@ import { getFacilityUsers } from "../../Redux/actions";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { relativeTime } from "../../Utils/utils";
 
 export default function DoctorVideoSlideover(props: {
   show: boolean;
@@ -207,9 +207,7 @@ function UserListItem(props: { user: UserAssignedModel }) {
                 </div>
               </a>
               <span>{user.alt_phone_number}</span>
-              {user.last_login && (
-                <span>{moment(user.last_login).fromNow()}</span>
-              )}
+              {user.last_login && <span>{relativeTime(user.last_login)}</span>}
             </p>
           </div>
         </a>

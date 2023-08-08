@@ -3,7 +3,7 @@ import { getColorIndex, rowColor, transformData } from "./utils";
 import ButtonV2 from "../../../Common/components/ButtonV2";
 import { InvestigationResponse } from "./types";
 import React from "react";
-import { formatDate } from "../../../../Utils/utils";
+import { formatDateTime } from "../../../../Utils/utils";
 
 const ReportRow = ({ data, name, min, max }: any) => {
   return (
@@ -118,7 +118,7 @@ const ReportTable: React.FC<ReportTableProps> = ({
                     key={session.session_external_id}
                     className="bg-[#4B5563] px-6 py-3 text-center text-xs font-semibold uppercase  tracking-wider text-[#F9FAFB]"
                   >
-                    {formatDate(session.session_created_date)}
+                    {formatDateTime(session.session_created_date)}
                   </th>
                 ))}
                 <th

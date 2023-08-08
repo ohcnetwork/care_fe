@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
-import moment from "moment";
 import {
   listResourceRequests,
   downloadResourceRequests,
@@ -10,13 +9,14 @@ import {
 import ListFilter from "./ListFilter";
 import { formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import dayjs from "../../Utils/dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -156,7 +156,7 @@ export default function ListView() {
                     title="  Last Modified"
                     className={
                       "flex items-center text-sm font-medium leading-5 " +
-                      (moment()
+                      (dayjs()
                         .subtract(2, "hours")
                         .isBefore(resource.modified_date)
                         ? "text-gray-900"
@@ -165,7 +165,7 @@ export default function ListView() {
                   >
                     <i className="fas fa-stopwatch mr-2"></i>
                     <dd className="text-sm font-bold leading-5">
-                      {formatDate(resource.modified_date) || "--"}
+                      {formatDateTime(resource.modified_date) || "--"}
                     </dd>
                   </dt>
                 </div>
