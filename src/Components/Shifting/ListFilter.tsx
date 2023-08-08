@@ -18,7 +18,6 @@ import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import moment from "moment";
 import { navigate } from "raviger";
 import parsePhoneNumberFromString from "libphonenumber-js";
 import useConfig from "../../Common/hooks/useConfig";
@@ -26,6 +25,8 @@ import { useDispatch } from "react-redux";
 import useMergeState from "../../Common/hooks/useMergeState";
 import { useTranslation } from "react-i18next";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+import { dateQueryString } from "../../Utils/utils";
+import dayjs from "dayjs";
 
 const clearFilterState = {
   origin_facility: "",
@@ -52,7 +53,7 @@ const clearFilterState = {
 };
 
 const getDate = (value: any) =>
-  value && moment(value).isValid() && moment(value).toDate();
+  value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function ListFilter(props: any) {
   const { kasp_enabled, kasp_string, wartime_shifting } = useConfig();
@@ -210,22 +211,10 @@ export default function ListFilter(props: any) {
         ? parsePhoneNumberFromString(patient_phone_number)?.format("E.164") ??
           ""
         : "",
-      created_date_before:
-        created_date_before && moment(created_date_before).isValid()
-          ? moment(created_date_before).format("YYYY-MM-DD")
-          : "",
-      created_date_after:
-        created_date_after && moment(created_date_after).isValid()
-          ? moment(created_date_after).format("YYYY-MM-DD")
-          : "",
-      modified_date_before:
-        modified_date_before && moment(modified_date_before).isValid()
-          ? moment(modified_date_before).format("YYYY-MM-DD")
-          : "",
-      modified_date_after:
-        modified_date_after && moment(modified_date_after).isValid()
-          ? moment(modified_date_after).format("YYYY-MM-DD")
-          : "",
+      created_date_before: dateQueryString(created_date_before),
+      created_date_after: dateQueryString(created_date_after),
+      modified_date_before: dateQueryString(modified_date_before),
+      modified_date_after: dateQueryString(modified_date_after),
       ordering: ordering || "",
       is_kasp: is_kasp || "",
       status: status || "",

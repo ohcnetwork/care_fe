@@ -1,6 +1,6 @@
 import { navigate } from "raviger";
 import { ConsultationModel } from "./models";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
@@ -56,7 +56,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
               </div>
               <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
                 {itemData.kasp_enabled_date
-                  ? formatDate(itemData.kasp_enabled_date)
+                  ? formatDateTime(itemData.kasp_enabled_date)
                   : "-"}
               </div>
             </div>
@@ -69,7 +69,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                 Admitted on
               </div>
               <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-                {formatDate(itemData.admission_date)}
+                {formatDateTime(itemData.admission_date)}
               </div>
             </div>
           </div>
@@ -93,7 +93,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
                 Discharged on{" "}
               </div>
               <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-                {formatDate(itemData.discharge_date)}
+                {formatDateTime(itemData.discharge_date)}
               </div>
             </div>
           </div>

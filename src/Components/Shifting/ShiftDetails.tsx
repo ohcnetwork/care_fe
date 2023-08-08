@@ -18,7 +18,7 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "../Common/components/Page";
 import QRCode from "qrcode.react";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import loadable from "@loadable/component";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
@@ -359,7 +359,7 @@ export default function ShiftDetails(props: { id: string }) {
               {" "}
               {t("date_and_time")}{" "}
             </span>
-            {formatDate(data.created_date) || "--"}
+            {formatDateTime(data.created_date) || "--"}
           </div>
           <div className="mt-2 text-left">
             <span className="font-semibold leading-relaxed">
@@ -422,7 +422,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("date_of_admission")}:{" "}
               </span>
-              {formatDate(
+              {formatDateTime(
                 consultation.admission_date || consultation.created_date
               ) || "-"}
             </div>
@@ -439,7 +439,7 @@ export default function ShiftDetails(props: { id: string }) {
                 {t("date_of_positive_covid_19_swab")}:{" "}
               </span>
               {(patientData?.date_of_test &&
-                formatDate(patientData?.date_of_test)) ||
+                formatDateTime(patientData?.date_of_test)) ||
                 "-"}
             </div>
             <div>
@@ -830,7 +830,7 @@ export default function ShiftDetails(props: { id: string }) {
                       {data?.created_by_object?.last_name}
                     </div>
                     <div className="text-xs">
-                      {data.created_date && formatDate(data.created_date)}
+                      {data.created_date && formatDateTime(data.created_date)}
                     </div>
                   </div>
                 </div>
@@ -844,7 +844,7 @@ export default function ShiftDetails(props: { id: string }) {
                       {data?.last_edited_by_object?.last_name}
                     </div>
                     <div className="text-xs">
-                      {data.modified_date && formatDate(data.modified_date)}
+                      {data.modified_date && formatDateTime(data.modified_date)}
                     </div>
                   </div>
                 </div>
