@@ -22,8 +22,10 @@ if (import.meta.env.PROD) {
 }
 
 const root = createRoot(document.getElementById("root") as HTMLElement);
-root.render(
-  <Provider store={store}>
-    <App />
-  </Provider>
-);
+document.addEventListener("DOMContentLoaded", () => {
+  root.render(
+    <Provider store={store}>
+      <App />
+    </Provider>
+  );
+});
