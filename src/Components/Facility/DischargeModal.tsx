@@ -23,7 +23,7 @@ import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
 import CircularProgress from "../Common/components/CircularProgress";
-import dayjs from "dayjs";
+import dayjs from "../../Utils/dayjs";
 
 interface PreDischargeFormInterface {
   discharge_reason: string;

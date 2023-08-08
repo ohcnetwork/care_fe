@@ -7,7 +7,7 @@ import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DailyRoundsModel } from "./models";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
-import dayjs from "dayjs";
+import dayjs from "../../Utils/dayjs";
 const Loading = loadable(() => import("../Common/Loading"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];

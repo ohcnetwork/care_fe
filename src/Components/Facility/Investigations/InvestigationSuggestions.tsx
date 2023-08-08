@@ -5,7 +5,7 @@ import { getConsultation } from "../../../Redux/actions";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import { InvestigationType } from "../../Common/prescription-builder/InvestigationBuilder";
 import { InvestigationResponse } from "./Reports/types";
-import dayjs from "dayjs";
+import dayjs from "../../../Utils/dayjs";
 
 export default function ViewInvestigationSuggestions(props: {
   consultationId: any;

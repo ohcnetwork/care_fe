@@ -41,7 +41,7 @@ import Page from "../Common/components/Page";
 import Card from "../../CAREUI/display/Card";
 import CircularProgress from "../Common/components/CircularProgress";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-import dayjs from "dayjs";
+import dayjs from "../../Utils/dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 

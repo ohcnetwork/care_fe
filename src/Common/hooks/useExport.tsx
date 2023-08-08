@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "../../Utils/dayjs";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 

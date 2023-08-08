@@ -1,4 +1,4 @@
-import dayjs from "dayjs";
+import dayjs from "../../../../Utils/dayjs";
 import CareIcon from "../../../../CAREUI/icons/CareIcon";
 
 export default function BinaryChronologicalChart(props: {

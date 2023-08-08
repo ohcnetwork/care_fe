@@ -17,7 +17,7 @@ import Loading from "../../Common/Loading";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import { formatDateTime } from "../../../Utils/utils";
 import { useDispatch } from "react-redux";
-import dayjs from "dayjs";
+import dayjs from "../../../Utils/dayjs";
 
 interface BedsProps {
   facilityId: string;

@@ -10,7 +10,7 @@ import { formatDateTime } from "../../../Utils/utils";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { PainDiagrams } from "./PainDiagrams";
 import PageTitle from "../../Common/PageTitle";
-import dayjs from "dayjs";
+import dayjs from "../../../Utils/dayjs";
 
 interface PrimaryParametersPlotProps {
   facilityId: string;

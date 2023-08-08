@@ -13,7 +13,7 @@ import {
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Popover } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
-import dayjs from "dayjs";
+import dayjs from "../../Utils/dayjs";
 
 type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
@@ -254,14 +254,10 @@ const DateInputV2: React.FC<Props> = ({
                       defaultValue={value && dayjs(value).format("DD/MM/YYYY")}
                       placeholder="DD/MM/YYYY"
                       onChange={(e) => {
-                        const momentObj = dayjs(
-                          e.target.value,
-                          "DD/MM/YYYY",
-                          true
-                        );
+                        const value = dayjs(e.target.value, "DD/MM/YYYY", true);
 
-                        if (momentObj.isValid()) {
-                          onChange(momentObj.toDate());
+                        if (value.isValid()) {
+                          onChange(value.toDate());
                           close();
                         }
                       }}

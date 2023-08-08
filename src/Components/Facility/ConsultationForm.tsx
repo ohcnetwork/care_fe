@@ -49,7 +49,7 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
-import dayjs from "dayjs";
+import dayjs from "../../Utils/dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
