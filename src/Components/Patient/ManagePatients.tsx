@@ -851,13 +851,12 @@ export const PatientManager = () => {
 
       <div className="manualGrid my-4 mb-[-12px] mt-5 grid-cols-1 gap-3 px-2 sm:grid-cols-4 md:px-0">
         <div className="mt-2 flex h-full flex-col gap-3 xl:flex-row">
-          <div className="flex-1">
+          <div className="flex-1 pb-10">
             <CountBlock
               text="Total Patients"
               count={totalCount}
               loading={isLoading}
               icon={"user-injured"}
-              containerClass="pb-10"
             />
           </div>
         </div>
