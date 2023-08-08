@@ -1,5 +1,4 @@
 import { navigate } from "raviger";
-import moment from "moment";
 import loadable from "@loadable/component";
 import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -18,7 +17,7 @@ import {
   getPatient,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -35,6 +34,7 @@ import BloodPressureFormField, {
   meanArterialPressure,
 } from "../Common/BloodPressureFormField";
 import TemperatureFormField from "../Common/TemperatureFormField";
+import dayjs from "dayjs";
 const Loading = loadable(() => import("../Common/Loading"));
 
 const initForm: any = {
@@ -377,7 +377,7 @@ export const DailyRounds = (props: any) => {
       state.form.review_interval || prevReviewInterval
     );
     if (nextReviewTime > 0)
-      return formatDate(moment().add(nextReviewTime, "minutes").toDate());
+      return formatDateTime(dayjs().add(nextReviewTime, "minutes").toDate());
     return "No Reviews Planned!";
   };
 
@@ -417,10 +417,10 @@ export const DailyRounds = (props: any) => {
               className="w-full"
               label="Measured at"
               type="datetime-local"
-              value={moment(state.form.taken_at || undefined).format(
+              value={dayjs(state.form.taken_at || undefined).format(
                 "YYYY-MM-DDTHH:mm"
               )}
-              max={moment().format("YYYY-MM-DDTHH:mm")}
+              max={dayjs().format("YYYY-MM-DDTHH:mm")}
             />
           </div>
           <div className="w-full md:w-1/3">

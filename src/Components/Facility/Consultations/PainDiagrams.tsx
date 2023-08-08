@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { make as CriticalCare__PainViewer } from "../../CriticalCareRecording/Pain/CriticalCare__PainViewer.bs";
-import { formatDate } from "../../../Utils/utils";
+import { formatDateTime } from "../../../Utils/utils";
 
 export const PainDiagrams = (props: any) => {
   const { consultationId } = props;
@@ -88,7 +88,7 @@ export const PainDiagrams = (props: any) => {
           {dates.map((key) => {
             return (
               <option key={key} value={key}>
-                {formatDate(key)}
+                {formatDateTime(key)}
               </option>
             );
           })}

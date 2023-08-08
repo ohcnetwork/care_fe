@@ -44,12 +44,12 @@ import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import { UserModel } from "../Users/models";
 import { dischargePatient } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import moment from "moment";
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
+import dayjs from "../../Utils/dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -152,7 +152,7 @@ const initError = Object.assign(
 );
 
 const isoStringToDate = (isoDate: string) =>
-  (moment(isoDate).isValid() && moment(isoDate).toDate()) || undefined;
+  (dayjs(isoDate).isValid() && dayjs(isoDate).toDate()) || undefined;
 
 const initialState = {
   form: { ...initForm },
@@ -1038,7 +1038,7 @@ export const ConsultationForm = (props: any) => {
                         <TextFormField
                           {...field("death_datetime")}
                           type="datetime-local"
-                          max={moment().format("YYYY-MM-DDTHH:mm")}
+                          max={dayjs().format("YYYY-MM-DDTHH:mm")}
                           required={state.form.suggestion === "DD"}
                           label="Date & Time of Death"
                           value={state.form.death_datetime}

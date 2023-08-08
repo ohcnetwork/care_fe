@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { RESOURCE_FILTER_ORDER } from "../../Common/constants";
-import moment from "moment";
 import { getAnyFacility } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { RESOURCE_CHOICES } from "../../Common/constants";
@@ -14,6 +13,8 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { DateRange } from "../Common/DateRangeInputV2";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
+import dayjs from "dayjs";
+import { dateQueryString } from "../../Utils/utils";
 
 const clearFilterState = {
   origin_facility: "",
@@ -32,7 +33,7 @@ const clearFilterState = {
 };
 
 const getDate = (value: any) =>
-  value && moment(value).isValid() && moment(value).toDate();
+  value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter } = props;
@@ -134,22 +135,10 @@ export default function ListFilter(props: any) {
       approving_facility: approving_facility || "",
       assigned_facility: assigned_facility || "",
       emergency: emergency || "",
-      created_date_before:
-        created_date_before && moment(created_date_before).isValid()
-          ? moment(created_date_before).format("YYYY-MM-DD")
-          : "",
-      created_date_after:
-        created_date_after && moment(created_date_after).isValid()
-          ? moment(created_date_after).format("YYYY-MM-DD")
-          : "",
-      modified_date_before:
-        modified_date_before && moment(modified_date_before).isValid()
-          ? moment(modified_date_before).format("YYYY-MM-DD")
-          : "",
-      modified_date_after:
-        modified_date_after && moment(modified_date_after).isValid()
-          ? moment(modified_date_after).format("YYYY-MM-DD")
-          : "",
+      created_date_before: dateQueryString(created_date_before),
+      created_date_after: dateQueryString(created_date_after),
+      modified_date_before: dateQueryString(modified_date_before),
+      modified_date_after: dateQueryString(modified_date_after),
       ordering: ordering || "",
       status: status || "",
     };
