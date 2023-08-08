@@ -611,12 +611,14 @@ export default function UserProfile() {
                           className="col-span-6 sm:col-span-3"
                           required
                           placeholder="Phone Number"
+                          types={["mobile", "landline"]}
                         />
                         <PhoneNumberFormField
                           {...fieldProps("altPhoneNumber")}
                           label="Whatsapp Number"
                           className="col-span-6 sm:col-span-3"
                           placeholder="WhatsApp Number"
+                          types={["mobile"]}
                         />
                         <TextFormField
                           {...fieldProps("email")}

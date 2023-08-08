@@ -9,11 +9,11 @@ import { useMemo, useState } from "react";
 import { classNames } from "../../../Utils/utils";
 import phoneCodesJson from "../../../Common/static/countryPhoneAndFlags.json";
 import {
-  AnyValidator,
   FieldError,
   PhoneNumberValidator,
-  SupportPhoneNumberValidator,
+  PhoneNumberType,
 } from "../FieldValidators";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 
 interface CountryData {
   flag: string;
@@ -24,6 +24,7 @@ interface CountryData {
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
 interface Props extends FormFieldBaseProps<string> {
+  types: PhoneNumberType[];
   placeholder?: string;
   autoComplete?: string;
   disableValidation?: boolean;
@@ -32,6 +33,11 @@ interface Props extends FormFieldBaseProps<string> {
 export default function PhoneNumberFormField(props: Props) {
   const field = useFormFieldPropsResolver(props as any);
   const [error, setError] = useState<FieldError>();
+
+  const validator = useMemo(
+    () => PhoneNumberValidator(props.types),
+    [props.types]
+  );
 
   const asYouType = useMemo(() => {
     const asYouType = new AsYouType();
@@ -54,10 +60,7 @@ export default function PhoneNumberFormField(props: Props) {
         return;
       }
 
-      const newError = AnyValidator([
-        PhoneNumberValidator(),
-        SupportPhoneNumberValidator(),
-      ])(value);
+      const newError = validator(value);
 
       if (!newError) {
         return;
@@ -69,7 +72,7 @@ export default function PhoneNumberFormField(props: Props) {
   );
 
   const setValue = (value: string) => {
-    value = value.replaceAll(" ", "");
+    value = value.replaceAll(/[^0-9+]/g, "");
 
     asYouType.reset();
     asYouType.input(value);
@@ -81,7 +84,15 @@ export default function PhoneNumberFormField(props: Props) {
   };
 
   return (
-    <FormField field={{ ...field, error: field.error || error }}>
+    <FormField
+      field={{
+        ...field,
+        error: field.error || error,
+        labelSuffix: field.labelSuffix || (
+          <PhoneNumberTypesHelp types={props.types} />
+        ),
+      }}
+    >
       <div className="relative rounded-md shadow-sm">
         <input
           type="tel"
@@ -133,6 +144,32 @@ export default function PhoneNumberFormField(props: Props) {
     </FormField>
   );
 }
+
+const phoneNumberTypeIcons: Record<PhoneNumberType, string> = {
+  international_mobile: "globe",
+  indian_mobile: "mobile-android",
+  mobile: "mobile-android",
+  landline: "phone",
+  support: "headset",
+};
+
+const PhoneNumberTypesHelp = ({ types }: { types: PhoneNumberType[] }) => (
+  <div className="flex gap-1">
+    {types.map((type) => (
+      <span className="tooltip mt-1">
+        <CareIcon
+          className={classNames(
+            `care-l-${phoneNumberTypeIcons[type]}`,
+            "text-lg text-gray-500"
+          )}
+        />
+        <span className="tooltip-text tooltip-bottom -translate-x-1/2 translate-y-1 text-xs capitalize">
+          {type.replace("_", " ")}
+        </span>
+      </span>
+    ))}
+  </div>
+);
 
 const conditionPhoneCode = (code: string) => {
   code = code.split(" ")[0];
