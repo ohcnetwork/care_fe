@@ -13,7 +13,7 @@ import {
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Popover } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
-import moment from "moment";
+import dayjs from "../../Utils/dayjs";
 
 type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";
@@ -229,7 +229,7 @@ const DateInputV2: React.FC<Props> = ({
                   disabled={disabled}
                   className={`cui-input-base cursor-pointer disabled:cursor-not-allowed ${className}`}
                   placeholder={placeholder ?? "Select date"}
-                  value={value && moment(value).format("DD/MM/YYYY")}
+                  value={value && dayjs(value).format("DD/MM/YYYY")}
                 />
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 p-2">
                   <CareIcon className="care-l-calendar-alt text-lg text-gray-600" />
@@ -251,17 +251,13 @@ const DateInputV2: React.FC<Props> = ({
                     <input
                       // key={value && moment(value).format("DD/MM/YYYY")}
                       className="cui-input-base bg-gray-50"
-                      defaultValue={value && moment(value).format("DD/MM/YYYY")}
+                      defaultValue={value && dayjs(value).format("DD/MM/YYYY")}
                       placeholder="DD/MM/YYYY"
                       onChange={(e) => {
-                        const momentObj = moment(
-                          e.target.value,
-                          "DD/MM/YYYY",
-                          true
-                        );
+                        const value = dayjs(e.target.value, "DD/MM/YYYY", true);
 
-                        if (momentObj.isValid()) {
-                          onChange(momentObj.toDate());
+                        if (value.isValid()) {
+                          onChange(value.toDate());
                           close();
                         }
                       }}

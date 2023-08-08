@@ -1,4 +1,4 @@
-import { classNames, formatDate } from "../../Utils/utils";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useState } from "react";
 
@@ -175,7 +175,9 @@ export default function SampleReport(props: ISamplePreviewProps) {
                     {
                       title: "Collection Date",
                       value: sampleData?.specimen_details?.created_date
-                        ? formatDate(sampleData?.specimen_details?.created_date)
+                        ? formatDateTime(
+                            sampleData?.specimen_details?.created_date
+                          )
                         : "NA",
                     },
                     {

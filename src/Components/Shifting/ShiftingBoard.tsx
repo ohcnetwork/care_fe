@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { classNames, formatDate } from "../../Utils/utils";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import {
   completeTransfer,
   downloadShiftRequests,
@@ -9,12 +9,12 @@ import { useDrag, useDrop } from "react-dnd";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
-import moment from "moment";
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { ExportButton } from "../Common/Export";
+import dayjs from "../../Utils/dayjs";
 
 const limit = 14;
 
@@ -146,14 +146,14 @@ const ShiftCard = ({ shift, filter }: any) => {
                   title={t("last_modified")}
                   className={
                     "flex items-center text-sm font-medium leading-5 " +
-                    (moment().subtract(2, "hours").isBefore(shift.modified_date)
+                    (dayjs().subtract(2, "hours").isBefore(shift.modified_date)
                       ? "text-gray-900"
                       : "rounded bg-red-400 p-1 text-white")
                   }
                 >
                   <i className="fas fa-stopwatch mr-2"></i>
                   <dd className="break-normal text-sm font-bold leading-5">
-                    {formatDate(shift.modified_date) || "--"}
+                    {formatDateTime(shift.modified_date) || "--"}
                   </dd>
                 </dt>
               </div>

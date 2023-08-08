@@ -1,5 +1,4 @@
 import { navigate } from "raviger";
-import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
@@ -21,7 +20,7 @@ import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 import Chip from "../../CAREUI/display/Chip";
-import { classNames, formatDate } from "../../Utils/utils";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
@@ -31,6 +30,8 @@ import CircularProgress from "../Common/components/CircularProgress";
 import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+import dayjs from "../../Utils/dayjs";
+import { triggerGoal } from "../Common/Plausible";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -222,6 +223,11 @@ export const PatientHome = (props: any) => {
   useAbortableEffect(
     (status: statusType) => {
       fetchpatient(status);
+      triggerGoal("Patient Profile Viewed", {
+        facilityId: facilityId,
+        patientId: patientData.id,
+        userID: currentUser.data.id,
+      });
     },
     [dispatch, fetchpatient]
   );
@@ -608,7 +614,7 @@ export const PatientHome = (props: any) => {
                       Date of Return
                     </div>
                     <div className="mt-1 text-sm font-medium leading-5">
-                      {formatDate(patientData.date_of_return)}
+                      {formatDateTime(patientData.date_of_return)}
                     </div>
                   </div>
                 )}
@@ -639,7 +645,7 @@ export const PatientHome = (props: any) => {
                         Last Vaccinated on
                       </div>
                       <div className="mt-1 text-sm font-medium leading-5">
-                        {formatDate(patientData.last_vaccinated_date)}
+                        {formatDateTime(patientData.last_vaccinated_date)}
                       </div>
                     </div>
                   )}
@@ -670,17 +676,17 @@ export const PatientHome = (props: any) => {
                     <div
                       className={
                         "mb-6 mt-6 inline-flex w-full items-center justify-center rounded-md border p-3 text-xs font-semibold leading-4 shadow-sm lg:mt-0 " +
-                        (moment().isBefore(patientData.review_time)
+                        (dayjs().isBefore(patientData.review_time)
                           ? " bg-gray-100"
                           : " bg-red-600/5 p-1 text-sm font-normal text-red-600")
                       }
                     >
                       <i className="text-md fa-regular fa-clock mr-2" />
                       <p className="p-1">
-                        {(moment().isBefore(patientData.review_time)
+                        {(dayjs().isBefore(patientData.review_time)
                           ? "Review before: "
                           : "Review Missed: ") +
-                          formatDate(patientData.review_time)}
+                          formatDateTime(patientData.review_time)}
                       </p>
                     </div>
                   )}
@@ -888,7 +894,7 @@ export const PatientHome = (props: any) => {
                               title="  Last Modified"
                               className={
                                 "flex items-center text-sm font-medium leading-5 " +
-                                (moment()
+                                (dayjs()
                                   .subtract(2, "hours")
                                   .isBefore(shift.modified_date)
                                   ? "text-gray-900"
@@ -897,7 +903,7 @@ export const PatientHome = (props: any) => {
                             >
                               <CareIcon className="care-l-stopwatch mr-2 text-lg" />
                               <dd className="text-sm font-bold leading-5">
-                                {formatDate(shift.modified_date) || "--"}
+                                {formatDateTime(shift.modified_date) || "--"}
                               </dd>
                             </dt>
                           </div>
