@@ -16,7 +16,10 @@ export const NoticeBoard = () => {
   useEffect(() => {
     setIsLoading(true);
     dispatch(
-      getNotifications({ offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" })
+      getNotifications(
+        { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
+        new Date().getTime().toString()
+      )
     )
       .then((res: any) => {
         if (res && res.data) {
