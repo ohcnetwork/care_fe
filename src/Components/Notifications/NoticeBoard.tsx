@@ -7,7 +7,7 @@ import { formatDate } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
-export const NoticeBoard: any = () => {
+export const NoticeBoard = () => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<any[]>([]);
