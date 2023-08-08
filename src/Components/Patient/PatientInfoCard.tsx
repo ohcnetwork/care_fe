@@ -359,11 +359,12 @@ export default function PatientInfoCard(props: {
                           setOpen(true);
                         }
                       }}
-                      align="start"
                       className="w-full"
                     >
-                      <CareIcon className={`care-l-${action[2]} text-lg`} />
-                      <p className="font-semibold">{action[1]}</p>
+                      <span className="flex w-full items-center justify-start gap-2">
+                        <CareIcon className={`care-l-${action[2]} text-lg`} />
+                        <p className="font-semibold">{action[1]}</p>
+                      </span>
                     </ButtonV2>
                     {action[4] && action[4][0] && (
                       <>
@@ -380,19 +381,21 @@ export default function PatientInfoCard(props: {
               <>
                 <ButtonV2
                   className="flex justify-start gap-3 font-semibold hover:text-white"
-                  align="start"
                   onClick={() => setShowABHAProfile(true)}
                 >
-                  <CareIcon className="care-l-user-square" />
-                  <p>Show ABHA Profile</p>
+                  <span className="flex w-full items-center justify-start gap-2">
+                    <CareIcon className="care-l-user-square" />
+                    <p>Show ABHA Profile</p>
+                  </span>
                 </ButtonV2>
                 <ButtonV2
                   className="mt-0 flex justify-start gap-3 font-semibold hover:text-white"
-                  align="start"
                   onClick={() => setShowLinkCareContext(true)}
                 >
-                  <CareIcon className="care-l-link" />
-                  <p>Link Care Context</p>
+                  <span className="flex w-full items-center justify-start gap-2">
+                    <CareIcon className="care-l-link" />
+                    <p>Link Care Context</p>
+                  </span>
                 </ButtonV2>
                 <ABHAProfileModal
                   patientId={patient.id}
@@ -411,11 +414,12 @@ export default function PatientInfoCard(props: {
               <>
                 <ButtonV2
                   className="flex justify-start gap-3 font-semibold hover:text-white"
-                  align="start"
                   onClick={() => setShowLinkABHANumber(true)}
                 >
-                  <CareIcon className="care-l-link" />
-                  <p>Link ABHA Number</p>
+                  <span className="flex w-full items-center justify-start gap-2">
+                    <CareIcon className="care-l-link" />
+                    <p>Link ABHA Number</p>
+                  </span>
                 </ButtonV2>
                 <LinkABHANumberModal
                   show={showLinkABHANumber}

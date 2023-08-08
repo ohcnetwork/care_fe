@@ -1319,7 +1319,6 @@ export const PatientHome = (props: any) => {
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     disabled={
                       !(
                         patientData.is_active &&
@@ -1333,40 +1332,43 @@ export const PatientHome = (props: any) => {
                       )
                     }
                   >
-                    <CareIcon className="care-l-chat-bubble-user mr-2 text-5xl text-green-700" />
-                    Add Consultation
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-chat-bubble-user text-xl" />
+                      Add Consultation
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     onClick={() =>
                       navigate(`/patient/${id}/investigation_reports`)
                     }
                   >
-                    <CareIcon className="care-l-file-search-alt mr-2 text-5xl" />
-                    Investigations Summary
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-file-search-alt text-xl" />
+                      Investigations Summary
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/files`
                       )
                     }
                   >
-                    <CareIcon className="care-l-file-upload mr-2 text-5xl" />
-                    View/Upload Patient Files
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-file-upload text-xl" />
+                      View/Upload Patient Files
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
@@ -1375,14 +1377,15 @@ export const PatientHome = (props: any) => {
                     }
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-ambulance mr-2 text-5xl" />
-                    SHIFT PATIENT
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-ambulance text-xl" />
+                      Shift Patient
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
@@ -1391,34 +1394,38 @@ export const PatientHome = (props: any) => {
                     }
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-medkit mr-2 text-5xl" />
-                    Request Sample Test
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-medkit text-xl" />
+                      Request Sample Test
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/notes`
                       )
                     }
                   >
-                    <CareIcon className="care-l-clipboard-notes mr-2 text-5xl" />
-                    View Patient Notes
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-clipboard-notes text-xl" />
+                      View Patient Notes
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     onClick={() => setOpenAssignVolunteerDialog(true)}
                     disabled={false}
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-users-alt mr-2 text-5xl" />
-                    Assign to a volunteer
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-users-alt text-xl" />
+                      Assign to a volunteer
+                    </span>
                   </ButtonV2>
                 </div>
               </div>
