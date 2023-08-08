@@ -17,7 +17,7 @@ import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import HeadedTabs from "../Common/HeadedTabs";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -1401,7 +1401,7 @@ export const FileUpload = (props: FileUploadProps) => {
             </div>
             <div className="text-md text-center">
               <b>Time of Archive:</b>
-              {formatDate(modalDetails?.archiveTime)}
+              {formatDateTime(modalDetails?.archiveTime)}
             </div>
           </div>
           <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">

@@ -147,6 +147,12 @@ export const BedCapacity = (props: BedCapacityProps) => {
         invalidForm = true;
       } else if (
         field === "currentOccupancy" &&
+        Number(state.form[field] < 0)
+      ) {
+        errors[field] = "Occupied cannot be negative";
+        invalidForm = true;
+      } else if (
+        field === "currentOccupancy" &&
         Number(state.form[field]) > Number(state.form.totalCapacity)
       ) {
         errors[field] = "Occupied must be less than or equal to total capacity";
@@ -154,6 +160,9 @@ export const BedCapacity = (props: BedCapacityProps) => {
       }
       if (field === "totalCapacity" && Number(state.form[field]) === 0) {
         errors[field] = "Total capacity cannot be 0";
+        invalidForm = true;
+      } else if (field === "totalCapacity" && Number(state.form[field]) < 0) {
+        errors[field] = "Total capacity cannot be negative";
         invalidForm = true;
       }
     });

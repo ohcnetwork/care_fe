@@ -19,7 +19,7 @@ import {
 import * as Notification from "../../Utils/Notifications";
 import { SampleTestModel } from "./models";
 import UpdateStatusDialog from "./UpdateStatusDialog";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import { ExportButton } from "../Common/Export";
@@ -158,7 +158,7 @@ export default function SampleViewAdmin() {
           .map((field: string) =>
             new Date(field).toString() === "Invalid Date"
               ? field
-              : formatDate(field, "DD/MM/YYYY hh:mm A")
+              : formatDateTime(field)
           )
           .join(",")
       )
@@ -267,14 +267,14 @@ export default function SampleViewAdmin() {
                 <div className="text-sm font-bold text-gray-600">
                   <span className="text-gray-800">Date of Sample:</span>{" "}
                   {item.date_of_sample
-                    ? formatDate(item.date_of_sample)
+                    ? formatDateTime(item.date_of_sample)
                     : "Not Available"}
                 </div>
 
                 <div className="text-sm font-bold text-gray-600">
                   <span className="text-gray-800">Date of Result:</span>{" "}
                   {item.date_of_result
-                    ? formatDate(item.date_of_result)
+                    ? formatDateTime(item.date_of_result)
                     : "Not Available"}
                 </div>
               </div>

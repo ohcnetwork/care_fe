@@ -21,7 +21,6 @@ import SwitchV2 from "../Common/components/Switch";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import loadable from "@loadable/component";
-import moment from "moment";
 import { navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { parseQueryParams } from "../../Utils/primitives";
@@ -29,6 +28,8 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import { validateEmailAddress } from "../../Common/validation";
+import { dateQueryString } from "../../Utils/utils.js";
+import dayjs from "../../Utils/dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -328,10 +329,10 @@ const AssetCreate = (props: AssetProps) => {
         qr_code_id: qrCodeId !== "" ? qrCodeId : null,
         manufacturer: manufacturer,
         warranty_amc_end_of_validity: warranty_amc_end_of_validity
-          ? moment(warranty_amc_end_of_validity).format("YYYY-MM-DD")
+          ? dateQueryString(warranty_amc_end_of_validity)
           : null,
         last_serviced_on: last_serviced_on
-          ? moment(last_serviced_on).format("YYYY-MM-DD")
+          ? dateQueryString(last_serviced_on)
           : last_serviced_on,
         notes: notes,
       };
@@ -745,7 +746,7 @@ const AssetCreate = (props: AssetProps) => {
                         label="Warranty / AMC Expiry"
                         error={state.errors.warranty_amc_end_of_validity}
                         onChange={(event) => {
-                          const value = moment(event.value);
+                          const value = dayjs(event.value);
                           const date = new Date(value.toDate().toDateString());
                           const today = new Date(new Date().toDateString());
                           if (date < today) {
@@ -753,13 +754,11 @@ const AssetCreate = (props: AssetProps) => {
                               msg: "Warranty / AMC Expiry date can't be in past",
                             });
                           } else {
-                            setWarrantyAmcEndOfValidity(
-                              value.format("YYYY-MM-DD")
-                            );
+                            setWarrantyAmcEndOfValidity(dateQueryString(value));
                           }
                         }}
                         type="date"
-                        min={moment().format("YYYY-MM-DD")}
+                        min={dayjs().format("YYYY-MM-DD")}
                       />
                     </div>
 
@@ -865,7 +864,7 @@ const AssetCreate = (props: AssetProps) => {
                         error={state.errors.last_serviced_on}
                         onChange={(date) => {
                           if (
-                            moment(date.value).format("YYYY-MM-DD") >
+                            dayjs(date.value).format("YYYY-MM-DD") >
                             new Date().toLocaleDateString("en-ca")
                           ) {
                             Notification.Error({
@@ -873,12 +872,12 @@ const AssetCreate = (props: AssetProps) => {
                             });
                           } else {
                             setLastServicedOn(
-                              moment(date.value).format("YYYY-MM-DD")
+                              dayjs(date.value).format("YYYY-MM-DD")
                             );
                           }
                         }}
                         type="date"
-                        max={moment(new Date()).format("YYYY-MM-DD")}
+                        max={dayjs(new Date()).format("YYYY-MM-DD")}
                       />
                     </div>
 

@@ -4,7 +4,7 @@ import { AbhaObject } from "../Patient/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
 import QRCode from "qrcode.react";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { getAbhaCard } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { useRef } from "react";
@@ -138,13 +138,13 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
         {abha?.created_date && (
           <div className="flex items-center gap-1">
             <span className="">Created On: </span>
-            <span>{formatDate(abha.created_date)}</span>
+            <span>{formatDateTime(abha.created_date)}</span>
           </div>
         )}
         {abha?.modified_date && (
           <div className="flex items-center gap-1">
             <span className="">Last Modified On: </span>
-            <span>{formatDate(abha.modified_date)}</span>
+            <span>{formatDateTime(abha.modified_date)}</span>
           </div>
         )}
       </div>

@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { getNotifications } from "../../Redux/actions";
 import Page from "../Common/components/Page";
 import Loading from "../Common/Loading";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
@@ -48,7 +48,7 @@ export const NoticeBoard: any = () => {
                 </span>
               </div>
               <div className="text-xs text-gray-900">
-                {t("on")}: {formatDate(item.created_date)}
+                {t("on")}: {formatDateTime(item.created_date)}
               </div>
             </div>
           </div>
