@@ -465,7 +465,8 @@ export default function FacilityUsers(props: any) {
           text="Total Users"
           count={totalCount}
           loading={isLoading}
-          icon={"user-injured"}
+          icon="l-user-injured"
+          className="flex-1"
         />
       </div>
 

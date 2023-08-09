@@ -83,13 +83,14 @@ export default function PrescriptionBuilder({
         onClick={() => setShowCreate(true)}
         variant="secondary"
         className="mt-4 w-full bg-gray-200 text-gray-700 hover:bg-gray-300 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900"
-        align="start"
         disabled={disabled}
       >
-        <CareIcon className="care-l-plus text-lg" />
-        <span className="font-bold">
-          {t(is_prn ? "add_prn_prescription" : "add_prescription_medication")}
-        </span>
+        <div className="flex w-full justify-start gap-2">
+          <CareIcon className="care-l-plus text-lg" />
+          <span className="font-bold">
+            {t(is_prn ? "add_prn_prescription" : "add_prescription_medication")}
+          </span>
+        </div>
       </ButtonV2>
       {showCreate && (
         <DialogModal

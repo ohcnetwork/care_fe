@@ -356,7 +356,8 @@ export default function SampleViewAdmin() {
               text="Total Samples Taken"
               count={totalCount}
               loading={isLoading}
-              icon={"thermometer"}
+              icon="l-thermometer"
+              className="flex-1"
             />
           </div>
 
