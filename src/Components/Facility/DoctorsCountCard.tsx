@@ -65,7 +65,6 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
         <div className="flex justify-end gap-4 border-t border-[#D2D6DC] bg-[#FBF9FB] px-3 py-2">
           <ButtonV2
             variant="secondary"
-            data-cy="edit-button-doctor-count-cart"
             ghost
             onClick={() => {
               setSelectedId(props.area || 0);
