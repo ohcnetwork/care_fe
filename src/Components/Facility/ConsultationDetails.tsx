@@ -54,9 +54,8 @@ import { navigate } from "raviger";
 import { useDispatch, useSelector } from "react-redux";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
-import useBreakpoints from "../../Common/hooks/useBreakpoints";
-import { getVitalsCanvasSizeAndDuration } from "../VitalsMonitor/utils";
 import { triggerGoal } from "../Common/Plausible";
+import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -221,7 +220,7 @@ export const ConsultationDetails = (props: any) => {
     });
   }, []);
 
-  const vitalsAspectRatio = useBreakpoints({
+  const vitals = useVitalsAspectRatioConfig({
     default: undefined,
     md: 8 / 11,
     lg: 15 / 11,
@@ -229,9 +228,6 @@ export const ConsultationDetails = (props: any) => {
     "2xl": 19 / 11,
     "3xl": 23 / 11,
   });
-
-  const vitalsConfig = getVitalsCanvasSizeAndDuration(vitalsAspectRatio);
-  const vitalsConfigHash = JSON.stringify(vitalsConfig);
 
   if (isLoading) {
     return <Loading />;
@@ -579,7 +575,7 @@ export const ConsultationDetails = (props: any) => {
                             {hl7SocketUrl && (
                               <div className="min-h-[400px] flex-1">
                                 <HL7PatientVitalsMonitor
-                                  key={`hl7-${hl7SocketUrl}-${vitalsConfigHash}`}
+                                  key={`hl7-${hl7SocketUrl}-${vitals.hash}`}
                                   patientAssetBed={{
                                     asset:
                                       monitorBedData?.asset_object as AssetData,
@@ -588,14 +584,14 @@ export const ConsultationDetails = (props: any) => {
                                     meta: monitorBedData?.asset_object?.meta,
                                   }}
                                   socketUrl={hl7SocketUrl}
-                                  config={vitalsConfig}
+                                  config={vitals.config}
                                 />
                               </div>
                             )}
                             {ventilatorSocketUrl && (
                               <div className="min-h-[400px] flex-1">
                                 <VentilatorPatientVitalsMonitor
-                                  key={`ventilator-${ventilatorSocketUrl}-${vitalsConfigHash}`}
+                                  key={`ventilator-${ventilatorSocketUrl}-${vitals.hash}`}
                                   patientAssetBed={{
                                     asset:
                                       ventilatorBedData?.asset_object as AssetData,
@@ -604,7 +600,7 @@ export const ConsultationDetails = (props: any) => {
                                     meta: ventilatorBedData?.asset_object?.meta,
                                   }}
                                   socketUrl={ventilatorSocketUrl}
-                                  config={vitalsConfig}
+                                  config={vitals.config}
                                 />
                               </div>
                             )}
@@ -756,8 +752,7 @@ export const ConsultationDetails = (props: any) => {
                                           (choice) => choice.id === symptom
                                         )?.text ?? "Err. Unknown"
                                       }
-                                      color={"primary"}
-                                      size={"small"}
+                                      size="small"
                                     />
                                   )
                                 )}
@@ -796,8 +791,7 @@ export const ConsultationDetails = (props: any) => {
                                       (choice) => choice.id === symptom
                                     )?.text ?? "Err. Unknown"
                                   }
-                                  color={"primary"}
-                                  size={"small"}
+                                  size="small"
                                 />
                               )
                             )}

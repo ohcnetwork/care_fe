@@ -23,6 +23,7 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
 import { SortOption } from "../Common/SortDropdown";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
 
 const PER_PAGE_LIMIT = 6;
 
@@ -116,6 +117,17 @@ export default function CentralNursingStation({ facilityId }: Props) {
     qParams.ordering,
     qParams.bed_is_occupied,
   ]);
+
+  const { config, hash } = useVitalsAspectRatioConfig({
+    default: 6 / 11,
+    vs: 10 / 11,
+    sm: 17 / 11,
+    md: 19 / 11,
+    lg: 11 / 11,
+    xl: 13 / 11,
+    "2xl": 16 / 11,
+    "3xl": 12 / 11,
+  });
 
   return (
     <Page
@@ -257,12 +269,13 @@ export default function CentralNursingStation({ facilityId }: Props) {
           No Vitals Monitor present in this location or facility.
         </div>
       ) : (
-        <div className="mt-1 grid grid-cols-1 gap-1 xl:grid-cols-2 3xl:grid-cols-3">
+        <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 3xl:grid-cols-3">
           {data.map((props) => (
-            <div className="text-clip">
+            <div className="overflow-hidden text-clip">
               <HL7PatientVitalsMonitor
-                key={props.patientAssetBed?.bed.id}
+                key={`${props.patientAssetBed?.bed.id}-${hash}`}
                 {...props}
+                config={config}
               />
             </div>
           ))}

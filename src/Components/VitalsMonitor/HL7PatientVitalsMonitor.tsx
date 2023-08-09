@@ -51,42 +51,36 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
               </span>
             )}
             {patient && (
-              <span className="text-sm font-bold text-gray-400">
+              <span className="text-xs font-bold text-gray-400 md:text-sm">
                 {patient.age}y;{" "}
                 {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
               </span>
             )}
           </div>
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3 text-xs md:text-sm">
             {asset && (
-              <div className="flex items-center gap-2 text-sm">
-                <Link
-                  className="flex gap-2 text-gray-500"
-                  href={`/facility/${patient?.facility_object?.id}/assets/${asset?.id}`}
-                >
-                  <span className="flex items-center gap-1">
-                    <CareIcon className="care-l-monitor-heart-rate text-base" />
-                    {asset.name}
-                  </span>
-                </Link>
-              </div>
+              <Link
+                className="flex items-center gap-1 text-gray-500"
+                href={`/facility/${patient?.facility_object?.id}/assets/${asset?.id}`}
+              >
+                <CareIcon className="care-l-monitor-heart-rate text-sm md:text-base" />
+                <span>{asset.name}</span>
+              </Link>
             )}
             {bed && (
-              <div className="flex items-center gap-2 text-sm">
-                <Link
-                  className="flex gap-2 text-gray-500"
-                  href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
-                >
-                  <span className="flex items-center gap-1">
-                    <CareIcon className="care-l-bed text-base" />
-                    {bed.name}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <CareIcon className="care-l-location-point text-base" />
-                    {bed.location_object?.name}
-                  </span>
-                </Link>
-              </div>
+              <Link
+                className="flex items-center gap-2 text-gray-500"
+                href={`/facility/${patient?.facility_object?.id}/location/${bed?.location_object?.id}/beds`}
+              >
+                <span className="flex items-center gap-1">
+                  <CareIcon className="care-l-bed text-sm md:text-base" />
+                  <span>{bed.name}</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <CareIcon className="care-l-location-point text-sm md:text-base" />
+                  <span>{bed.location_object?.name}</span>
+                </span>
+              </Link>
             )}
           </div>
         </div>
