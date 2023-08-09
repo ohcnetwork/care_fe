@@ -428,6 +428,7 @@ export default function ListFilter(props: any) {
         value={filterState.patient_phone_number}
         onChange={handleFormFieldChange}
         errorClassName="hidden"
+        types={["mobile", "landline"]}
       />
       <DateRangeFormField
         labelClassName="text-sm"
