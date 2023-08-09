@@ -71,7 +71,6 @@
     "echarts": "^5.4.2",
     "echarts-for-react": "^3.0.2",
     "events": "^3.3.0",
-    "html2canvas": "^1.4.1",
     "i18next": "^23.2.7",
     "i18next-browser-languagedetector": "^7.1.0",
     "libphonenumber-js": "^1.10.37",
@@ -101,7 +100,6 @@
     "redux-thunk": "^2.4.2",
     "rehype-raw": "^6.1.1",
     "rescript-webapi": "^0.8.0",
-    "screenfull": "^6.0.2",
     "use-keyboard-shortcut": "^1.1.6",
     "uuid": "^9.0.0"
   },

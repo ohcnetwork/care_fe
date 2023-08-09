@@ -1,4 +1,5 @@
 import { PatientCategoryID, PATIENT_CATEGORIES } from "../../Common/constants";
+import { classNames } from "../../Utils/utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { FormFieldBaseProps } from "../Form/FormFields/Utils";
 
@@ -18,7 +19,17 @@ export default function PatientCategorySelect(
       optionLabel={(option) => option.text}
       optionSelectedLabel={(option) => (
         <span className="flex items-center gap-3">
-          <div className={`bg-${option.twClass} h-2 w-2 rounded-full`} />
+          <div
+            className={classNames(
+              "h-2 w-2 rounded-full",
+              {
+                Comfort: "bg-patient-comfort",
+                Stable: "bg-patient-stable",
+                Moderate: "bg-patient-abnormal",
+                Critical: "bg-patient-critical",
+              }[option.id]
+            )}
+          />
           <p>{option.text}</p>
         </span>
       )}

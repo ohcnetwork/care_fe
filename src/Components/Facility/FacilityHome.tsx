@@ -514,7 +514,6 @@ export const FacilityHome = (props: any) => {
                               (f) => f.id === feature
                             )[0]?.name
                           }
-                          color="primary"
                           startIcon={
                             FACILITY_FEATURE_TYPES.filter(
                               (f) => f.id === feature
