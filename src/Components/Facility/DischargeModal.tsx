@@ -27,7 +27,6 @@ import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "./models";
 import dayjs from "../../Utils/dayjs";
 
-
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
@@ -140,7 +139,7 @@ const DischargeModal = ({
     const dischargeDetails = {
       ...preDischargeForm,
       discharge: value,
-      discharge_date: moment(preDischargeForm.discharge_date).toISOString(true),
+      discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
     };
 
     if (dischargeDetails.referred_to != undefined)
