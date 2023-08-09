@@ -33,5 +33,7 @@ export default function useBreakpoints<T>(
     return acc;
   }, "default" as Breakpoints);
 
+  console.log("breakpoint", breakpoint);
+
   return map[breakpoint] ?? map.default;
 }
