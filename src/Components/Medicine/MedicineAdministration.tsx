@@ -8,7 +8,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useDispatch } from "react-redux";
 import { Error, Success } from "../../Utils/Notifications";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -92,7 +92,7 @@ export default function MedicineAdministration(props: Props) {
               {t("last_administered")}
               <span className="pl-1">
                 {obj.last_administered_on
-                  ? formatDate(obj.last_administered_on)
+                  ? formatDateTime(obj.last_administered_on)
                   : t("never")}
               </span>
             </div>
