@@ -18,7 +18,7 @@ export type UserModel = {
   age?: number;
   is_superuser?: boolean;
   verified?: boolean;
-  last_login?: Date;
+  last_login: string | undefined;
   home_facility_object?: HomeFacilityObjectModel;
   doctor_qualification?: string;
   doctor_experience_commenced_on?: string;

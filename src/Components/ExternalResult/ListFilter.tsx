@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { getAllLocalBodyByDistrict } from "../../Redux/actions";
 import { useDispatch, useSelector } from "react-redux";
-import moment from "moment";
 import useMergeState from "../../Common/hooks/useMergeState";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -9,6 +8,8 @@ import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { MultiSelectFormField } from "../Form/FormFields/SelectFormField";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
+import dayjs from "dayjs";
+import { dateQueryString } from "../../Utils/utils";
 
 const clearFilterState = {
   created_date_before: "",
@@ -19,6 +20,9 @@ const clearFilterState = {
   sample_collection_date_after: "",
   srf_id: "",
 };
+
+const getDate = (value: any) =>
+  value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter, dataList } = props;
@@ -68,12 +72,6 @@ export default function ListFilter(props: any) {
     errorClassName: "hidden",
   });
 
-  const formatDateTime = (dateTime: any) => {
-    return dateTime && moment(dateTime).isValid()
-      ? moment(dateTime).format("YYYY-MM-DD")
-      : "";
-  };
-
   const applyFilter = () => {
     const selectedWardIds = wards.map(function (obj) {
       return obj.id;
@@ -98,14 +96,14 @@ export default function ListFilter(props: any) {
       district: currentUser.data.district,
       wards: selectedWardIds.length ? selectedWardIds : "",
       local_bodies: selectedLsgIds.length ? selectedLsgIds : "",
-      created_date_before: formatDateTime(created_date_before),
-      created_date_after: formatDateTime(created_date_after),
-      result_date_before: formatDateTime(result_date_before),
-      result_date_after: formatDateTime(result_date_after),
-      sample_collection_date_after: formatDateTime(
+      created_date_before: dateQueryString(created_date_before),
+      created_date_after: dateQueryString(created_date_after),
+      result_date_before: dateQueryString(result_date_before),
+      result_date_after: dateQueryString(result_date_after),
+      sample_collection_date_after: dateQueryString(
         sample_collection_date_after
       ),
-      sample_collection_date_before: formatDateTime(
+      sample_collection_date_before: dateQueryString(
         sample_collection_date_before
       ),
       srf_id: srf_id,
@@ -191,9 +189,6 @@ export default function ListFilter(props: any) {
 
     setFilterState(filterData);
   };
-
-  const getDate = (value: any) =>
-    value && moment(value).isValid() && moment(value).toDate();
 
   return (
     <FiltersSlideover

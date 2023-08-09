@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { PrescriptionActions } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { MedicineAdministrationRecord } from "./models";
@@ -46,7 +46,7 @@ export default function MedicineAdministrationsTable({
           <div className="text-gray-600">
             <CareIcon className="care-l-history-alt pr-2" />
             <span className="text-xs">
-              {lastModified && formatDate(lastModified)}
+              {lastModified && formatDateTime(lastModified)}
             </span>
           </div>
         </div>

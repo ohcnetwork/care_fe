@@ -694,8 +694,8 @@ export const partialUpdateExternalResult = (id: number, params: object) => {
 };
 
 // Notifications
-export const getNotifications = (params: object) => {
-  return fireRequest("getNotifications", [], params);
+export const getNotifications = (params: object, altKey?: string) => {
+  return fireRequest("getNotifications", [], params, {}, altKey);
 };
 
 export const getNotificationData = (pathParam: object) => {

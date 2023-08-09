@@ -18,12 +18,12 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { dischargePatient } from "../../Redux/actions";
-import moment from "moment";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
 import CircularProgress from "../Common/components/CircularProgress";
+import dayjs from "../../Utils/dayjs";
 
 interface PreDischargeFormInterface {
   discharge_reason: string;
@@ -54,8 +54,8 @@ const DischargeModal = ({
   },
   discharge_reason = "",
   discharge_notes = "",
-  discharge_date = moment().format("YYYY-MM-DDTHH:mm"),
-  death_datetime = moment().format("YYYY-MM-DDTHH:mm"),
+  discharge_date = dayjs().format("YYYY-MM-DDTHH:mm"),
+  death_datetime = dayjs().format("YYYY-MM-DDTHH:mm"),
 }: IProps) => {
   const { enable_hcx } = useConfig();
   const dispatch: any = useDispatch();
@@ -135,9 +135,7 @@ const DischargeModal = ({
         {
           ...preDischargeForm,
           discharge: value,
-          discharge_date: moment(preDischargeForm.discharge_date).toISOString(
-            true
-          ),
+          discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
         },
         { id: consultationData.id }
       )
@@ -228,8 +226,8 @@ const DischargeModal = ({
               position="LEFT"
               label="Discharge Date"
               name="discharge_date"
-              value={moment(preDischargeForm?.discharge_date).toDate()}
-              min={moment(
+              value={dayjs(preDischargeForm?.discharge_date).toDate()}
+              min={dayjs(
                 consultationData?.admission_date ??
                   consultationData?.created_date
               ).toDate()}
@@ -271,10 +269,10 @@ const DischargeModal = ({
                 });
               }}
               required
-              min={moment(consultationData?.admission_date).format(
+              min={dayjs(consultationData?.admission_date).format(
                 "YYYY-MM-DDTHH:mm"
               )}
-              max={moment().format("YYYY-MM-DDTHH:mm")}
+              max={dayjs().format("YYYY-MM-DDTHH:mm")}
             />
             <TextFormField
               name="death_confirmed_by"
@@ -298,8 +296,8 @@ const DischargeModal = ({
             <DateFormField
               label="Date of Discharge"
               name="discharge_date"
-              value={moment(preDischargeForm.discharge_date).toDate()}
-              min={moment(
+              value={dayjs(preDischargeForm.discharge_date).toDate()}
+              min={dayjs(
                 consultationData?.admission_date ??
                   consultationData?.created_date
               ).toDate()}

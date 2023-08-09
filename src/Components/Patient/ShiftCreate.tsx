@@ -280,6 +280,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
           {...field("refering_facility_contact_number")}
           label="Contact person phone number"
           required
+          types={["mobile", "landline"]}
         />
 
         {wartime_shifting && (
@@ -381,6 +382,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
         <PhoneNumberFormField
           {...field("ambulance_phone_number")}
           label="Ambulance Phone Number"
+          types={["mobile", "landline"]}
         />
 
         <TextFormField {...field("ambulance_number")} label="Ambulance No." />
