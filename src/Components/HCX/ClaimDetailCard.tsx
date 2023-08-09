@@ -1,4 +1,4 @@
-import { classNames, formatCurrency, formatDate } from "../../Utils/utils";
+import { classNames, formatCurrency, formatDateTime } from "../../Utils/utils";
 import { HCXClaimModel } from "../HCX/models";
 
 interface IProps {
@@ -24,7 +24,7 @@ export default function ClaimDetailCard({ claim }: IProps) {
           <p className="mt-2 text-sm text-gray-700">
             Created on{" "}
             <time dateTime="2022-08-01">
-              {formatDate(claim.created_date ?? "")}
+              {formatDateTime(claim.created_date ?? "")}
             </time>
             .
           </p>

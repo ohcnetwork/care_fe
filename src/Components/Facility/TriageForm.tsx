@@ -2,7 +2,6 @@ import ConfirmDialog from "../Common/ConfirmDialog";
 import Card from "../../CAREUI/display/Card";
 import loadable from "@loadable/component";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import moment from "moment";
 import { useCallback, useReducer, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -21,6 +20,8 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 const Loading = loadable(() => import("../Common/Loading"));
 import Page from "../Common/components/Page";
+import dayjs from "dayjs";
+import { dateQueryString } from "../../Utils/utils";
 
 interface triageFormProps extends PatientStatsModel {
   facilityId: number;
@@ -89,7 +90,7 @@ export const TriageForm = (props: triageFormProps) => {
             type: "set_form",
             form: {
               entry_date: res.data.entry_date
-                ? moment(res.data.entry_date).toDate()
+                ? dayjs(res.data.entry_date).toDate()
                 : null,
               num_patients_visited: res.data.num_patients_visited,
               num_patients_home_quarantine:
@@ -192,7 +193,7 @@ export const TriageForm = (props: triageFormProps) => {
     const validForm = validateForm();
     if (validForm) {
       const data = {
-        entry_date: `${moment(state.form.entry_date).format("YYYY-MM-DD")}`,
+        entry_date: dateQueryString(state.form.entry_date),
         num_patients_visited: Number(state.form.num_patients_visited),
         num_patients_home_quarantine: Number(
           state.form.num_patients_home_quarantine
@@ -252,7 +253,7 @@ export const TriageForm = (props: triageFormProps) => {
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: {
-            name: moment(state.form.entry_date).format("YYYY-MM-DD"),
+            name: dateQueryString(state.form.entry_date),
           },
         }}
         backUrl={`/facility/${facilityId}`}

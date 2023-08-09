@@ -1,7 +1,7 @@
-import moment from "moment";
 import { useReducer, useEffect, useRef, useState, Dispatch } from "react";
 import ButtonV2 from "../Components/Common/components/ButtonV2";
 import { FormAction, FormReducer, FormState } from "../Components/Form/Utils";
+import { relativeTime } from "./utils";
 
 type Draft = {
   timestamp: number;
@@ -112,11 +112,11 @@ export function DraftSection(props: {
             <div className="mx-1 flex items-center">
               <p className="text-gray-500">
                 Last saved draft:{" "}
-                {moment(
+                {relativeTime(
                   draftStarted
                     ? drafts[0].timestamp
                     : drafts[drafts.length - 1].timestamp
-                ).fromNow()}
+                )}
               </p>
               <ButtonV2
                 type="button"

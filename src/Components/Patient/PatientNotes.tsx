@@ -59,14 +59,14 @@ const PatientNotes = (props: PatientNotesProps) => {
   return (
     <Page
       title="Patient Notes"
-      className="h-screen flex flex-col"
+      className="flex h-screen flex-col"
       crumbsReplacements={{
         [facilityId]: { name: facilityName },
         [patientId]: { name: patientName },
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
-      <div className="mx-3 my-2 px-2 py-2 sm:mx-10 sm:my-5 bg-white sm:px-5 sm:py-5 rounded-lg grow flex flex-col">
+      <div className="mx-3 my-2 flex grow flex-col rounded-lg bg-white p-2 sm:mx-10 sm:my-5 sm:p-5">
         <PatientNotesList
           patientId={patientId}
           facilityId={facilityId}
@@ -74,7 +74,7 @@ const PatientNotes = (props: PatientNotesProps) => {
           setReload={setReload}
         />
 
-        <div className="flex items-center mx-4 relative">
+        <div className="relative mx-4 flex items-center">
           <TextFormField
             name="note"
             value={noteField}
