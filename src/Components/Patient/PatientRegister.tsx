@@ -21,7 +21,11 @@ import {
   searchPatient,
   updatePatient,
 } from "../../Redux/actions";
-import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
+import {
+  dateQueryString,
+  getPincodeDetails,
+  includesIgnoreCase,
+} from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useEffect, useReducer, useState } from "react";
@@ -54,7 +58,6 @@ import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import countryList from "../../Common/static/countries.json";
 import { debounce } from "lodash";
 import loadable from "@loadable/component";
-import moment from "moment";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
@@ -732,7 +735,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       emergency_phone_number: parsePhoneNumberFromString(
         formData.emergency_phone_number
       )?.format("E.164"),
-      date_of_birth: moment(formData.date_of_birth).format("YYYY-MM-DD"),
+      date_of_birth: dateQueryString(formData.date_of_birth),
       disease_status: formData.disease_status,
       date_of_test: formData.date_of_test ? formData.date_of_test : undefined,
       date_of_result: formData.date_of_result
@@ -1249,6 +1252,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 duplicateCheck(event.value);
                                 field("phone_number").onChange(event);
                               }}
+                              types={["mobile", "landline"]}
                             />
                           </div>
                           <div
@@ -1259,6 +1263,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               {...field("emergency_phone_number")}
                               label="Emergency contact number"
                               required
+                              types={["mobile", "landline"]}
                             />
                           </div>
                           <div data-testid="name" id="name-div">

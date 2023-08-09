@@ -20,9 +20,9 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import moment from "moment";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
+import dayjs from "../../Utils/dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -147,8 +147,8 @@ export default function UserProfile() {
             phoneNumber: res.data.phone_number,
             altPhoneNumber: res.data.alt_phone_number,
             doctor_qualification: res.data.doctor_qualification,
-            doctor_experience_commenced_on: moment().diff(
-              moment(res.data.doctor_experience_commenced_on),
+            doctor_experience_commenced_on: dayjs().diff(
+              dayjs(res.data.doctor_experience_commenced_on),
               "years"
             ),
             doctor_medical_council_registration:
@@ -315,8 +315,14 @@ export default function UserProfile() {
             : undefined,
         doctor_experience_commenced_on:
           details.user_type === "Doctor"
-            ? moment()
-                .subtract(states.form.doctor_experience_commenced_on, "years")
+            ? dayjs()
+                .subtract(
+                  parseInt(
+                    (states.form.doctor_experience_commenced_on as string) ??
+                      "0"
+                  ),
+                  "years"
+                )
                 .format("YYYY-MM-DD")
             : undefined,
         doctor_medical_council_registration:
@@ -605,12 +611,14 @@ export default function UserProfile() {
                           className="col-span-6 sm:col-span-3"
                           required
                           placeholder="Phone Number"
+                          types={["mobile", "landline"]}
                         />
                         <PhoneNumberFormField
                           {...fieldProps("altPhoneNumber")}
                           label="Whatsapp Number"
                           className="col-span-6 sm:col-span-3"
                           placeholder="WhatsApp Number"
+                          types={["mobile"]}
                         />
                         <TextFormField
                           {...fieldProps("email")}

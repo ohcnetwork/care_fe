@@ -12,7 +12,7 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import Loading from "../Common/Loading";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
@@ -146,7 +146,7 @@ const PatientNotes = (props: PatientNotesProps) => {
                 </span>
                 <div className="mt-3">
                   <span className="text-xs text-gray-500">
-                    {formatDate(note.created_date) || "-"}
+                    {formatDateTime(note.created_date) || "-"}
                   </span>
                 </div>
 
