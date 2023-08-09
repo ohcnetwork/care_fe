@@ -8,7 +8,7 @@ import Card from "../../CAREUI/display/Card";
 import { FileUpload } from "./FileUpload";
 import Page from "../Common/components/Page";
 import _ from "lodash";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { getTestSample } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
@@ -100,7 +100,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
                 Date of Test:{" "}
               </span>
               {(patientData?.date_of_test &&
-                formatDate(patientData?.date_of_test)) ||
+                formatDateTime(patientData?.date_of_test)) ||
                 "-"}
             </div>
 
@@ -194,7 +194,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
                 <span className="font-semibold leading-relaxed">
                   Estimated contact date:{" "}
                 </span>
-                {formatDate(patientData?.estimated_contact_date)}
+                {formatDateTime(patientData?.estimated_contact_date)}
               </div>
             )}
             <div className="md:col-span-2">
@@ -270,11 +270,11 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Created On :</span>{" "}
-            {flow.created_date ? formatDate(flow.created_date) : "-"}
+            {flow.created_date ? formatDateTime(flow.created_date) : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Modified on:</span>{" "}
-            {flow.modified_date ? formatDate(flow.modified_date) : "-"}
+            {flow.modified_date ? formatDateTime(flow.modified_date) : "-"}
           </div>
         </div>
       </Card>
@@ -324,13 +324,13 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
           <div>
             <span className="font-semibold leading-relaxed">Tested on: </span>
             {sampleDetails.date_of_result
-              ? formatDate(sampleDetails.date_of_result)
+              ? formatDateTime(sampleDetails.date_of_result)
               : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Result on: </span>
             {sampleDetails.date_of_result
-              ? formatDate(sampleDetails.date_of_result)
+              ? formatDateTime(sampleDetails.date_of_result)
               : "-"}
           </div>
           {sampleDetails.fast_track && (

@@ -5,11 +5,11 @@ import {
   downloadResourceRequests,
 } from "../../Redux/actions";
 import { navigate } from "raviger";
-import moment from "moment";
 import { classNames } from "../../Utils/utils";
 import { useDrag, useDrop } from "react-dnd";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { ExportButton } from "../Common/Export";
+import dayjs from "../../Utils/dayjs";
 
 const limit = 14;
 
@@ -105,7 +105,7 @@ const ResourceCard = ({ resource }: any) => {
                   title="  Last Modified"
                   className={
                     "flex items-center text-sm font-medium leading-5 " +
-                    (moment()
+                    (dayjs()
                       .subtract(2, "hours")
                       .isBefore(resource.modified_date)
                       ? "text-gray-900"
@@ -114,7 +114,7 @@ const ResourceCard = ({ resource }: any) => {
                 >
                   <i className="fas fa-stopwatch mr-2"></i>
                   <dd className="text-sm font-bold leading-5">
-                    {formatDate(resource.modified_date) || "--"}
+                    {formatDateTime(resource.modified_date) || "--"}
                   </dd>
                 </dt>
               </div>

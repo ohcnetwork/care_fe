@@ -38,13 +38,14 @@ import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import SwipeableViews from "react-swipeable-views";
 import loadable from "@loadable/component";
-import moment from "moment";
 import { parseOptionId } from "../../Common/utils";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
+import dayjs from "dayjs";
+import { triggerGoal } from "../Common/Plausible.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -97,6 +98,8 @@ export const PatientManager = () => {
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
   const [showDialog, setShowDialog] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
   const [showDoctorConnect, setShowDoctorConnect] = useState(false);
@@ -152,7 +155,7 @@ export const PatientManager = () => {
     page: qParams.page || 1,
     limit: resultsPerPage,
     name: qParams.name || undefined,
-    ip_no: qParams.ip_no || undefined,
+    ip_or_op_no: qParams.ip_or_op_no || undefined,
     is_active:
       !qParams.last_consultation_discharge_reason &&
       (qParams.is_active || "True"),
@@ -247,7 +250,7 @@ export const PatientManager = () => {
       return -1;
     }
     if (field[0] && field[1]) {
-      return moment(field[0]).diff(moment(field[1]), "days");
+      return dayjs(field[0]).diff(dayjs(field[1]), "days");
     }
     return 0;
   });
@@ -354,7 +357,7 @@ export const PatientManager = () => {
     qParams.is_active,
     qParams.disease_status,
     qParams.name,
-    qParams.ip_no,
+    qParams.ip_or_op_no,
     qParams.page,
     qParams.phone_number,
     qParams.emergency_phone_number,
@@ -592,7 +595,7 @@ export const PatientManager = () => {
                   {patient.review_time &&
                     !patient.last_consultation?.discharge_date &&
                     Number(patient.last_consultation?.review_interval) > 0 &&
-                    moment().isAfter(patient.review_time) && (
+                    dayjs().isAfter(patient.review_time) && (
                       <Chip
                         size="small"
                         color="red"
@@ -658,7 +661,7 @@ export const PatientManager = () => {
                       patient.last_consultation?.discharge_date ||
                       !patient.is_active
                     ) &&
-                    moment(patient.last_consultation?.modified_date).isBefore(
+                    dayjs(patient.last_consultation?.modified_date).isBefore(
                       new Date().getTime() - 24 * 60 * 60 * 1000
                     ) && (
                       <span className="relative inline-flex">
@@ -763,6 +766,11 @@ export const PatientManager = () => {
             {showDoctorConnect && (
               <ButtonV2
                 onClick={() => {
+                  triggerGoal("Doctor Connect Clicked", {
+                    facilityId: qParams.facility,
+                    userId: currentUser.data.id,
+                    page: "FacilityPatientsList",
+                  });
                   setShowDoctors(true);
                 }}
               >
@@ -862,10 +870,10 @@ export const PatientManager = () => {
                 {...queryField("name")}
               />
               <SearchInput
-                label="Search by IP Number"
-                placeholder="Enter IP Number"
+                label="Search by IP/OP Number"
+                placeholder="Enter IP/OP Number"
                 secondary
-                {...queryField("ip_no")}
+                {...queryField("ip_or_op_no")}
               />
             </div>
             <div className="md:flex md:gap-4">
@@ -875,6 +883,7 @@ export const PatientManager = () => {
                 value={phone_number}
                 onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
+                types={["mobile", "landline"]}
               />
               <PhoneNumberFormField
                 label="Search by Emergency Number"
@@ -882,6 +891,7 @@ export const PatientManager = () => {
                 value={emergency_phone_number}
                 onChange={(e) => setEmergencyPhoneNum(e.value)}
                 error={emergencyPhoneNumberError}
+                types={["mobile", "landline"]}
               />
             </div>
           </div>
@@ -901,7 +911,7 @@ export const PatientManager = () => {
             phoneNumber("Primary number", "phone_number"),
             phoneNumber("Emergency number", "emergency_phone_number"),
             badge("Patient name", "name"),
-            badge("IP number", "ip_no"),
+            badge("IP/OP number", "ip_or_op_no"),
             ...dateRange("Modified", "modified_date"),
             ...dateRange("Created", "created_date"),
             ...dateRange("Admitted", "last_consultation_admission_date"),

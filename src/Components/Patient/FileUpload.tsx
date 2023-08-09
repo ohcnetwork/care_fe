@@ -17,7 +17,7 @@ import { VoiceRecorder } from "../../Utils/VoiceRecorder";
 import Pagination from "../Common/Pagination";
 import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import imageCompression from "browser-image-compression";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import HeadedTabs from "../Common/HeadedTabs";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -308,7 +308,7 @@ export const FileUpload = (props: FileUploadProps) => {
         if (res?.data) {
           audio_urls(res.data.results);
           setuploadedUnarchievedFiles(
-            res.data.results.filter(
+            res?.data?.results?.filter(
               (file: FileUploadModel) =>
                 file.upload_completed || file.file_category === "AUDIO"
             )
@@ -332,26 +332,28 @@ export const FileUpload = (props: FileUploadProps) => {
         }
         setIsLoading(false);
       }
-      const dischargeSummaryFileData = {
-        file_type: "DISCHARGE_SUMMARY",
-        associating_id: getAssociatedId(),
-        is_archived: false,
-        limit: limit,
-        offset: offset,
-      };
-      res = await dispatch(viewUpload(dischargeSummaryFileData));
-      if (!status.aborted) {
-        if (res?.data) {
-          setuploadedDischargeSummaryFiles(res.data.results);
-          setTotalDischargeSummaryFilesCount(res.data.count);
-          if (res?.data?.results?.length > 0) {
-            setTabs([
-              ...tabs,
-              {
-                name: "Discharge Summary",
-                value: "DISCHARGE_SUMMARY",
-              },
-            ]);
+      if (type === "CONSULTATION") {
+        const dischargeSummaryFileData = {
+          file_type: "DISCHARGE_SUMMARY",
+          associating_id: getAssociatedId(),
+          is_archived: false,
+          limit: limit,
+          offset: offset,
+        };
+        res = await dispatch(viewUpload(dischargeSummaryFileData));
+        if (!status.aborted) {
+          if (res?.data) {
+            setuploadedDischargeSummaryFiles(res.data.results);
+            setTotalDischargeSummaryFilesCount(res.data.count);
+            if (res?.data?.results?.length > 0) {
+              setTabs([
+                ...tabs,
+                {
+                  name: "Discharge Summary",
+                  value: "DISCHARGE_SUMMARY",
+                },
+              ]);
+            }
           }
         }
         setIsLoading(false);
@@ -1399,7 +1401,7 @@ export const FileUpload = (props: FileUploadProps) => {
             </div>
             <div className="text-md text-center">
               <b>Time of Archive:</b>
-              {formatDate(modalDetails?.archiveTime)}
+              {formatDateTime(modalDetails?.archiveTime)}
             </div>
           </div>
           <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
@@ -1571,7 +1573,7 @@ export const FileUpload = (props: FileUploadProps) => {
         {sortFileState === "UNARCHIVED" ? (
           // First it would check the filtered array contains any files or not else it would state the message
           <>
-            {uploadedUnarchievedFiles.length > 0 ? (
+            {uploadedUnarchievedFiles?.length > 0 ? (
               uploadedUnarchievedFiles.map((item: FileUploadModel) =>
                 renderFileUpload(item)
               )
@@ -1596,7 +1598,7 @@ export const FileUpload = (props: FileUploadProps) => {
         ) : sortFileState === "ARCHIVED" ? (
           // First it would check the filtered array contains any files or not else it would state the message
           <>
-            {uploadedArchievedFiles.length > 0 ? (
+            {uploadedArchievedFiles?.length > 0 ? (
               uploadedArchievedFiles.map((item: FileUploadModel) =>
                 renderFileUpload(item)
               )
