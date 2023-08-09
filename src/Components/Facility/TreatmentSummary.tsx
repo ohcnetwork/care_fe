@@ -359,10 +359,8 @@ const TreatmentSummary = (props: any) => {
 
               <div className="border-b-2 border-gray-800 px-5 py-2">
                 <b>Treatment :</b>
-                {consultationData.prescribed_medication ? (
-                  <p className="ml-4">
-                    {consultationData.prescribed_medication}
-                  </p>
+                {consultationData.treatment_plan ? (
+                  <p className="ml-4">{consultationData.treatment_plan}</p>
                 ) : (
                   <p className="ml-4">---</p>
                 )}

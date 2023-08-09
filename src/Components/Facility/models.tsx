@@ -99,7 +99,7 @@ export interface ConsultationModel {
   modified_date?: string;
   other_symptoms?: string;
   patient?: string;
-  prescribed_medication?: string;
+  treatment_plan?: string;
   referred_to?: number | null;
   suggestion?: string;
   ip_no?: string;
