@@ -243,6 +243,7 @@ export default function ResourceCreate(props: resourceProps) {
           value={state.form.refering_facility_contact_number}
           onChange={handleFormFieldChange}
           error={state.errors.refering_facility_contact_number}
+          types={["mobile", "landline"]}
         />
 
         <div>

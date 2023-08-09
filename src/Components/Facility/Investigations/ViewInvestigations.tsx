@@ -1,7 +1,7 @@
 import { navigate } from "raviger";
 import ReportTable from "./Reports/ReportTable";
 import loadable from "@loadable/component";
-import { formatDate } from "../../../Utils/utils";
+import { formatDateTime } from "../../../Utils/utils";
 import { InvestigationSessionType } from "./investigationsTab";
 const Loading = loadable(() => import("../../Common/Loading"));
 
@@ -49,7 +49,7 @@ export default function ViewInvestigations(props: {
                 className="flex cursor-pointer items-center justify-between rounded-lg border bg-white p-4 shadow hover:bg-gray-200"
               >
                 <div>
-                  {formatDate(investigationSession.session_created_date)}
+                  {formatDateTime(investigationSession.session_created_date)}
                 </div>
                 <button
                   onClick={() =>

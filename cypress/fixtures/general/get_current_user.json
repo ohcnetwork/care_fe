@@ -1,0 +1,39 @@
+{
+	"id": 202,
+	"username": "devdistrictadmin",
+	"first_name": "Bodhish",
+	"last_name": "Thomas",
+	"email": "",
+	"user_type": "DistrictAdmin",
+	"doctor_qualification": null,
+	"doctor_experience_commenced_on": null,
+	"doctor_medical_council_registration": null,
+	"home_facility": "d5e67684-b226-4516-ba52-66896c76adf1",
+	"weekly_working_hours": 4,
+	"local_body": null,
+	"district": 7,
+	"state": 1,
+	"phone_number": "+919894008120",
+	"alt_phone_number": "+919899999988",
+	"gender": "Female",
+	"age": 28,
+	"is_superuser": false,
+	"verified": true,
+	"home_facility_object": {
+			"id": "d5e67684-b226-4516-ba52-66896c76adf1",
+			"name": "test-shifting-0707"
+	},
+	"local_body_object": null,
+	"district_object": {
+			"id": 7,
+			"name": "Ernakulam",
+			"state": 1
+	},
+	"state_object": {
+			"id": 1,
+			"name": "Kerala"
+	},
+	"pf_endpoint": "https://fcm.googleapis.com/fcm/send/fGX5piegOO4:APA91bEqGaKvoydspiQ-y8CJCq2iU495_Qpa5PfEI4Wzvfa4K92y8J0WlsG2ONazIV27TK_tONQNESNTNWZCaoBrYltcy8kqKZzrarb8xikJOM40kZ4BlzFMZOwsTyI2OO29BDtd7-Hq",
+	"pf_p256dh": "BO1io2VkStbBgUb/0FRWBXY2k7EgD8FsaOVBmUTz2wV2TeFUoR5RzDcfCT9hMhLD5xXP13VPreeXDmuU1blIILY=",
+	"pf_auth": "BwEMEMXqNCmD6GxAzMPcLA=="
+}

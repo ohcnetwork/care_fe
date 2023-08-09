@@ -487,6 +487,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               handleFormFieldChange(event);
             }}
             error={state.errors.ambulance_phone_number}
+            types={["mobile", "landline"]}
           />
 
           <TextFormField
