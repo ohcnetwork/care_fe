@@ -478,64 +478,62 @@ export const PatientHome = (props: any) => {
                   <div className="ml-auto mr-9 flex flex-wrap gap-3">
                     {patientData.is_vaccinated ? (
                       <Chip
-                        color="blue"
-                        startIcon="syringe"
+                        variant="custom"
+                        className="bg-blue-100 text-blue-800"
+                        startIcon="l-syringe"
                         text="Vaccinated"
                       />
                     ) : (
                       <Chip
-                        color="yellow"
-                        startIcon="exclamation-triangle"
+                        variant="warning"
+                        startIcon="l-exclamation-triangle"
                         text="Not Vaccinated"
                       />
                     )}
                     {patientData.allow_transfer ? (
                       <Chip
-                        color="yellow"
-                        startIcon="unlock"
+                        variant="warning"
+                        startIcon="l-unlock"
                         text="Transfer Allowed"
                       />
                     ) : (
-                      <Chip
-                        color="primary"
-                        startIcon="lock"
-                        text="Transfer Blocked"
-                      />
+                      <Chip startIcon="l-lock" text="Transfer Blocked" />
                     )}
                     {patientData.gender === 2 &&
                       patientData.is_antenatal &&
                       patientData.is_active && (
                         <Chip
-                          color="blue"
-                          startIcon="baby-carriage"
+                          variant="custom"
+                          className="bg-pink-100 text-pink-800"
+                          startIcon="l-baby-carriage"
                           text="Antenatal"
                         />
                       )}
                     {patientData.contact_with_confirmed_carrier && (
                       <Chip
-                        color="red"
-                        startIcon="exclamation-triangle"
+                        variant="danger"
+                        startIcon="l-exclamation-triangle"
                         text="Contact with confirmed carrier"
                       />
                     )}
                     {patientData.contact_with_suspected_carrier && (
                       <Chip
-                        color="yellow"
-                        startIcon="exclamation-triangle"
+                        variant="warning"
+                        startIcon="l-exclamation-triangle"
                         text="Contact with suspected carrier"
                       />
                     )}
                     {patientData.past_travel && (
                       <Chip
-                        color="yellow"
-                        startIcon="exclamation-triangle"
+                        variant="warning"
+                        startIcon="l-exclamation-triangle"
                         text="Travel (within last 28 days)"
                       />
                     )}
                     {patientData.last_consultation?.is_telemedicine && (
                       <Chip
-                        color="purple"
-                        startIcon="phone"
+                        variant="alert"
+                        startIcon="l-phone"
                         text="Telemedicine"
                       />
                     )}

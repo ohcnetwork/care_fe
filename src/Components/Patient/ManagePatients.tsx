@@ -598,16 +598,16 @@ export const PatientManager = () => {
                     dayjs().isAfter(patient.review_time) && (
                       <Chip
                         size="small"
-                        color="red"
-                        startIcon="clock"
+                        variant="danger"
+                        startIcon="l-clock"
                         text="Review Missed"
                       />
                     )}
                   {patient.disease_status === "POSITIVE" && (
                     <Chip
                       size="small"
-                      color="red"
-                      startIcon="radiation"
+                      variant="danger"
+                      startIcon="l-coronavirus"
                       text="Positive"
                     />
                   )}
@@ -616,24 +616,26 @@ export const PatientManager = () => {
                     patient.is_active && (
                       <Chip
                         size="small"
-                        color="blue"
-                        startIcon="baby-carriage"
+                        variant="custom"
+                        className="bg-pink-100 text-pink-600"
+                        startIcon="l-baby-carriage"
                         text="Antenatal"
                       />
                     )}
                   {patient.is_medical_worker && patient.is_active && (
                     <Chip
                       size="small"
-                      color="blue"
-                      startIcon="user-md"
+                      variant="custom"
+                      className="bg-blue-100 text-blue-600"
+                      startIcon="l-user-md"
                       text="Medical Worker"
                     />
                   )}
                   {patient.disease_status === "EXPIRED" && (
                     <Chip
                       size="small"
-                      color="yellow"
-                      startIcon="exclamation-triangle"
+                      variant="warning"
+                      startIcon="l-exclamation-triangle"
                       text="Patient Expired"
                     />
                   )}
@@ -644,8 +646,8 @@ export const PatientManager = () => {
                     <span className="relative inline-flex">
                       <Chip
                         size="small"
-                        color="red"
-                        startIcon="notes-medical"
+                        variant="danger"
+                        startIcon="l-notes"
                         text="No Consultation Filed"
                       />
                       <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
@@ -667,8 +669,8 @@ export const PatientManager = () => {
                       <span className="relative inline-flex">
                         <Chip
                           size="small"
-                          color="red"
-                          startIcon="circle-exclamation"
+                          variant="danger"
+                          startIcon="l-exclamation-circle"
                           text="No update in 24 hours"
                         />
                         <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
@@ -856,7 +858,8 @@ export const PatientManager = () => {
               text="Total Patients"
               count={totalCount}
               loading={isLoading}
-              icon={"user-injured"}
+              icon="l-user-injured"
+              className="flex-1"
             />
           </div>
         </div>

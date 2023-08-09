@@ -746,8 +746,7 @@ export const ConsultationDetails = (props: any) => {
                                           (choice) => choice.id === symptom
                                         )?.text ?? "Err. Unknown"
                                       }
-                                      color={"primary"}
-                                      size={"small"}
+                                      size="small"
                                     />
                                   )
                                 )}
@@ -786,8 +785,7 @@ export const ConsultationDetails = (props: any) => {
                                       (choice) => choice.id === symptom
                                     )?.text ?? "Err. Unknown"
                                   }
-                                  color={"primary"}
-                                  size={"small"}
+                                  size="small"
                                 />
                               )
                             )}
