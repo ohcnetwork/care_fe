@@ -257,19 +257,17 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
               <div className="mt-2 flex w-full flex-row flex-wrap gap-2 sm:w-auto">
                 {!isLastOptionType && headerText === "Add Doctor Capacity" && (
                   <ButtonV2
-                    data-cy="update-button-doctor-capacity"
-                    className="w-full"
                     id="save-and-exit"
                     onClick={handleSubmit}
+                    className="w-full"
                   >
                     Save Doctor Capacity
                   </ButtonV2>
                 )}
                 <ButtonV2
-                  data-cy="update-button-doctor-capacity"
-                  className="w-full"
                   id="doctor-save"
                   onClick={handleSubmit}
+                  className="w-full"
                 >
                   {buttonText}
                 </ButtonV2>
