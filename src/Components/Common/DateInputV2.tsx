@@ -57,6 +57,9 @@ const DateInputV2: React.FC<Props> = ({
   const [datePickerHeaderDate, setDatePickerHeaderDate] = useState(new Date());
   const [type, setType] = useState<DatePickerType>("date");
   const [year, setYear] = useState(new Date());
+  const [displayValue, setDisplayValue] = useState<string>(
+    value ? dayjs(value).format("DDMMYYYY") : ""
+  );
 
   const decrement = () => {
     switch (type) {
@@ -249,13 +252,23 @@ const DateInputV2: React.FC<Props> = ({
                 >
                   <div className="mb-4 flex w-full flex-col items-center justify-between">
                     <input
-                      // key={value && moment(value).format("DD/MM/YYYY")}
+                      autoFocus
                       className="cui-input-base bg-gray-50"
-                      defaultValue={value && dayjs(value).format("DD/MM/YYYY")}
+                      value={
+                        displayValue.replace(
+                          /^(\d{2})(\d{0,2})(\d{0,4}).*/,
+                          (_, dd, mm, yyyy) =>
+                            [dd, mm, yyyy].filter(Boolean).join("/")
+                        ) || ""
+                      } // Display the value in DD/MM/YYYY format
                       placeholder="DD/MM/YYYY"
                       onChange={(e) => {
-                        const value = dayjs(e.target.value, "DD/MM/YYYY", true);
-
+                        setDisplayValue(e.target.value.replaceAll("/", ""));
+                        const value = dayjs(
+                          e.target.value,
+                          "DD/MM/YYYY",
+                          true
+                        );
                         if (value.isValid()) {
                           onChange(value.toDate());
                           close();

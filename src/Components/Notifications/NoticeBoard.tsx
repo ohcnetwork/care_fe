@@ -7,7 +7,7 @@ import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
-export const NoticeBoard: any = () => {
+export const NoticeBoard = () => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<any[]>([]);
@@ -16,7 +16,10 @@ export const NoticeBoard: any = () => {
   useEffect(() => {
     setIsLoading(true);
     dispatch(
-      getNotifications({ offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" })
+      getNotifications(
+        { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
+        new Date().getTime().toString()
+      )
     )
       .then((res: any) => {
         if (res && res.data) {
