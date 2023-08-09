@@ -22,7 +22,7 @@ export default function Chip({
   return (
     <span
       className={classNames(
-        "inline-flex items-center gap-2",
+        "inline-flex items-center gap-2 font-medium leading-4",
 
         {
           small: "rounded px-2 py-1 text-xs",
