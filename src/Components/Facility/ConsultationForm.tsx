@@ -44,12 +44,12 @@ import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import { UserModel } from "../Users/models";
 import { dischargePatient } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import moment from "moment";
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
+import dayjs from "../../Utils/dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -152,7 +152,7 @@ const initError = Object.assign(
 );
 
 const isoStringToDate = (isoDate: string) =>
-  (moment(isoDate).isValid() && moment(isoDate).toDate()) || undefined;
+  (dayjs(isoDate).isValid() && dayjs(isoDate).toDate()) || undefined;
 
 const initialState = {
   form: { ...initForm },
@@ -218,6 +218,7 @@ export const ConsultationForm = (props: any) => {
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
   const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
   const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
+  const [disabledFields, setDisabledFields] = useState<string[]>([]);
 
   const sections = {
     "Consultation Details": {
@@ -327,6 +328,10 @@ export const ConsultationForm = (props: any) => {
           };
           dispatch({ type: "set_form", form: formData });
           setBed(formData.bed);
+
+          if (res.data.last_daily_round) {
+            setDisabledFields((fields) => [...fields, "category"]);
+          }
         } else {
           goBack();
         }
@@ -774,6 +779,7 @@ export const ConsultationForm = (props: any) => {
       value: (state.form as any)[name],
       error: (state.errors as any)[name],
       onChange: handleFormFieldChange,
+      disabled: disabledFields.includes(name),
     };
   };
 
@@ -963,6 +969,13 @@ export const ConsultationForm = (props: any) => {
                   {String(state.form.consultation_status) !== "1" && (
                     <div className="col-span-6" ref={fieldRef["category"]}>
                       <PatientCategorySelect
+                        labelSuffix={
+                          disabledFields.includes("category") && (
+                            <p className="text-xs font-medium text-warning-500">
+                              A daily round already exists.
+                            </p>
+                          )
+                        }
                         required
                         label="Category"
                         {...field("category")}
@@ -977,8 +990,8 @@ export const ConsultationForm = (props: any) => {
                     <SelectFormField
                       required
                       label="Decision after consultation"
-                      disabled={String(state.form.consultation_status) === "1"}
                       {...selectField("suggestion")}
+                      disabled={String(state.form.consultation_status) === "1"}
                       options={CONSULTATION_SUGGESTION.filter(
                         ({ deprecated }) => !deprecated
                       )}
@@ -1025,7 +1038,7 @@ export const ConsultationForm = (props: any) => {
                         <TextFormField
                           {...field("death_datetime")}
                           type="datetime-local"
-                          max={moment().format("YYYY-MM-DDTHH:mm")}
+                          max={dayjs().format("YYYY-MM-DDTHH:mm")}
                           required={state.form.suggestion === "DD"}
                           label="Date & Time of Death"
                           value={state.form.death_datetime}

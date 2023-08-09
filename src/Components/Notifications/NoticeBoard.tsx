@@ -3,11 +3,11 @@ import { useDispatch } from "react-redux";
 import { getNotifications } from "../../Redux/actions";
 import Page from "../Common/components/Page";
 import Loading from "../Common/Loading";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
-export const NoticeBoard: any = () => {
+export const NoticeBoard = () => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<any[]>([]);
@@ -16,7 +16,10 @@ export const NoticeBoard: any = () => {
   useEffect(() => {
     setIsLoading(true);
     dispatch(
-      getNotifications({ offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" })
+      getNotifications(
+        { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
+        new Date().getTime().toString()
+      )
     )
       .then((res: any) => {
         if (res && res.data) {
@@ -48,7 +51,7 @@ export const NoticeBoard: any = () => {
                 </span>
               </div>
               <div className="text-xs text-gray-900">
-                {t("on")}: {formatDate(item.created_date)}
+                {t("on")}: {formatDateTime(item.created_date)}
               </div>
             </div>
           </div>

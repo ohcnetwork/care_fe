@@ -307,6 +307,7 @@ export default function ResultList() {
                 onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
                 placeholder="Search by Phone Number"
+                types={["mobile", "landline"]}
               />
             </div>
           </div>

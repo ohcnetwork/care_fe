@@ -26,10 +26,11 @@ import FeedButton from "./FeedButton";
 import Loading from "../../Common/Loading";
 import ReactPlayer from "react-player";
 import { classNames } from "../../../Utils/utils";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import useFullscreen from "../../../Common/hooks/useFullscreen.js";
+import { triggerGoal } from "../../Common/Plausible.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -38,7 +39,11 @@ interface IFeedProps {
 }
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
-export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
+export const Feed: React.FC<IFeedProps> = ({
+  patientId,
+  consultationId,
+  facilityId,
+}) => {
   const dispatch: any = useDispatch();
 
   const videoWrapper = useRef<HTMLDivElement>(null);
@@ -55,6 +60,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [precision, setPrecision] = useState(1);
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
   const [isFullscreen, setFullscreen] = useFullscreen();
+  const state: any = useSelector((state) => state);
+  const { currentUser } = state;
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -381,6 +388,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                       console.log(
                         "onSuccess: Set Preset to " + preset?.meta?.preset_name
                       );
+                      triggerGoal("Camera Preset Clicked", {
+                        presetName: preset?.meta?.preset_name,
+                        consultationId,
+                        patientId,
+                        userId: currentUser?.id,
+                        result: "success",
+                      });
                     },
                     onError: () => {
                       setLoading(CAMERA_STATES.IDLE);
@@ -388,6 +402,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                       console.log(
                         "onError: Set Preset to " + preset?.meta?.preset_name
                       );
+                      triggerGoal("Camera Preset Clicked", {
+                        presetName: preset?.meta?.preset_name,
+                        consultationId,
+                        patientId,
+                        userId: currentUser?.id,
+                        result: "error",
+                      });
                     },
                   });
                   getCameraStatus({});
@@ -531,6 +552,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                   camProp={button}
                   styleType="BUTTON"
                   clickAction={() => {
+                    triggerGoal("Camera Feed Moved", {
+                      direction: button.action,
+                      consultationId,
+                      patientId,
+                      userId: currentUser?.id,
+                    });
+
                     button.callback();
                     if (cameraState) {
                       let x = cameraState.x;

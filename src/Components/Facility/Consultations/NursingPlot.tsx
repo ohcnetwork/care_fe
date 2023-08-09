@@ -7,7 +7,7 @@ import {
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import Pagination from "../../Common/Pagination";
-import { formatDate } from "../../../Utils/utils";
+import { formatDateTime } from "../../../Utils/utils";
 
 export const NursingPlot = (props: any) => {
   const { consultationId } = props;
@@ -50,7 +50,7 @@ export const NursingPlot = (props: any) => {
 
   const data = Object.entries(results).map((key: any) => {
     return {
-      date: formatDate(key[0]),
+      date: formatDateTime(key[0]),
       nursing: key[1]["nursing"],
     };
   });

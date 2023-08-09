@@ -7,7 +7,7 @@ import { Success } from "../../Utils/Notifications";
 import { useDispatch } from "react-redux";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -36,7 +36,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
           <CareIcon className="care-l-history-alt pr-1" /> Last administered
           <span className="pl-1">
             {prescription.last_administered_on
-              ? formatDate(prescription.last_administered_on)
+              ? formatDateTime(prescription.last_administered_on)
               : t("never")}
           </span>
         </div>

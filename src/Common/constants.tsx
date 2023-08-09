@@ -1,8 +1,8 @@
 import { IConfig } from "./hooks/useConfig";
 import { PatientCategory } from "../Components/Facility/models";
 import { SortOption } from "../Components/Common/SortDropdown";
-import moment from "moment";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { dateQueryString } from "../Utils/utils";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -312,7 +312,7 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
 export const GENDER_TYPES = [
   { id: 1, text: "Male", icon: "M" },
   { id: 2, text: "Female", icon: "F" },
-  { id: 3, text: "Non-binary", icon: "NB" },
+  { id: 3, text: "Transgender", icon: "TRANS" },
 ];
 
 export const SAMPLE_TEST_RESULT = [
@@ -952,7 +952,7 @@ export const XLSXAssetImportSchema = {
         throw new Error("Invalid Warrenty End Date");
       }
 
-      return moment(parsed).format("YYYY-MM-DD");
+      return dateQueryString(parsed);
     },
   },
   "Last Service Date": {
@@ -965,7 +965,7 @@ export const XLSXAssetImportSchema = {
         throw new Error("Invalid Last Service Date");
       }
 
-      return moment(parsed).format("YYYY-MM-DD");
+      return dateQueryString(parsed);
     },
   },
   Notes: { prop: "notes", type: String },
