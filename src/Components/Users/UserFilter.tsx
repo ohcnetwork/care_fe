@@ -142,6 +142,7 @@ export default function UserFilter(props: any) {
         value={filterState.phone_number}
         onChange={handleChange}
         errorClassName="hidden"
+        types={["mobile", "landline"]}
       />
 
       <PhoneNumberFormField
@@ -151,6 +152,7 @@ export default function UserFilter(props: any) {
         value={filterState.alt_phone_number}
         onChange={handleChange}
         errorClassName="hidden"
+        types={["mobile"]}
       />
     </FiltersSlideover>
   );

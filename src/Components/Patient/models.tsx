@@ -1,4 +1,5 @@
 import { ConsultationModel, PatientCategory } from "../Facility/models";
+import { PerformedByModel } from "../HCX/misc";
 
 export interface FlowModel {
   id?: number;
@@ -121,18 +122,8 @@ export interface PatientModel {
   fit_for_blood_donation?: boolean;
   date_declared_positive?: string;
   is_declared_positive?: boolean;
-  last_edited?: {
-    first_name?: string;
-    username?: string;
-    last_name?: string;
-    user_type?: string;
-  };
-  created_by?: {
-    first_name?: string;
-    username?: string;
-    last_name?: string;
-    user_type?: string;
-  };
+  last_edited?: PerformedByModel;
+  created_by?: PerformedByModel;
   assigned_to?: { first_name?: string; username?: string; last_name?: string };
   assigned_to_object?: AssignedToObjectModel;
 

@@ -1,13 +1,13 @@
+import dayjs from "../../Utils/dayjs";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import moment from "moment";
 
 export default function useExport() {
   const dispatch: any = useDispatch();
   const [isExporting, setIsExporting] = useState(false);
 
   const getTimestamp = () => {
-    const now = moment();
+    const now = dayjs();
     const date = now.format("YYYY-MM-DD");
     const time = now.format("HH:mm:ss");
 

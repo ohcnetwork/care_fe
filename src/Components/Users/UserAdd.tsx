@@ -1,7 +1,6 @@
 import loadable from "@loadable/component";
 import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
-import moment from "moment";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -28,7 +27,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 
-import { classNames } from "../../Utils/utils";
+import { classNames, dateQueryString } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -42,6 +41,7 @@ import Page from "../Common/components/Page";
 import Card from "../../CAREUI/display/Card";
 import CircularProgress from "../Common/components/CircularProgress";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
+import dayjs from "../../Utils/dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -136,7 +136,7 @@ const user_create_reducer = (state = initialState, action: any) => {
 };
 
 const getDate = (value: any) =>
-  value && moment(value).isValid() && moment(value).toDate();
+  value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export const validateRule = (
   condition: boolean,
@@ -350,12 +350,12 @@ export const UserAdd = (props: UserProps) => {
   );
 
   const handleDateChange = (e: FieldChangeEvent<Date>) => {
-    if (moment(e.value).isValid()) {
+    if (dayjs(e.value).isValid()) {
       dispatch({
         type: "set_form",
         form: {
           ...state.form,
-          [e.name]: moment(e.value).format("YYYY-MM-DD"),
+          [e.name]: dayjs(e.value).format("YYYY-MM-DD"),
         },
       });
     }
@@ -582,16 +582,19 @@ export const UserAdd = (props: UserProps) => {
               ? state.form.phone_number
               : state.form.alt_phone_number
           )?.format("E.164") ?? "",
-        date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
-        age: Number(moment().diff(state.form.date_of_birth, "years", false)),
+        date_of_birth: dateQueryString(state.form.date_of_birth),
+        age: Number(dayjs().diff(state.form.date_of_birth, "years", false)),
         doctor_qualification:
           state.form.user_type === "Doctor"
             ? state.form.doctor_qualification
             : undefined,
         doctor_experience_commenced_on:
           state.form.user_type === "Doctor"
-            ? moment()
-                .subtract(state.form.doctor_experience_commenced_on, "years")
+            ? dayjs()
+                .subtract(
+                  parseInt(state.form.doctor_experience_commenced_on ?? "0"),
+                  "years"
+                )
                 .format("YYYY-MM-DD")
             : undefined,
         doctor_medical_council_registration:
@@ -632,8 +635,8 @@ export const UserAdd = (props: UserProps) => {
       id: name,
       name,
       onChange: handleFieldChange,
-      value: state.form[name],
-      error: state.errors[name],
+      value: (state.form as any)[name],
+      error: (state.errors as any)[name],
     };
   };
 
@@ -722,6 +725,7 @@ export const UserAdd = (props: UserProps) => {
                 placeholder="Phone Number"
                 label="Phone Number"
                 required
+                types={["mobile", "landline"]}
               />
               <Checkbox
                 checked={state.form.phone_number_is_whatsapp}
@@ -740,6 +744,7 @@ export const UserAdd = (props: UserProps) => {
               placeholder="WhatsApp Phone Number"
               label="Whatsapp Number"
               disabled={state.form.phone_number_is_whatsapp}
+              types={["mobile"]}
             />
 
             <div>
