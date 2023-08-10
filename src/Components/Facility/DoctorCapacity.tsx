@@ -81,7 +81,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
             const updatedDoctorTypes = initDoctorTypes.map(
               (type: OptionsType) => {
                 const isExisting = existingData.find(
-                  (i: DoctorModal) => i.area === type.idnpm
+                  (i: DoctorModal) => i.area === type.id
                 );
                 return {
                   ...type,
