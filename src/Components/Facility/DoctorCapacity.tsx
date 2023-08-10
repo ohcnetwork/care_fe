@@ -81,7 +81,7 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
             const updatedDoctorTypes = initDoctorTypes.map(
               (type: OptionsType) => {
                 const isExisting = existingData.find(
-                  (i: DoctorModal) => i.area === type.id
+                  (i: DoctorModal) => i.area === type.idnpm
                 );
                 return {
                   ...type,
@@ -249,30 +249,16 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
               min={0}
             />
           </div>
-          <div>
-            <div className="mt-4 flex flex-col justify-between md:flex-row">
-              <div className="mt-2 flex w-full flex-row gap-4 sm:w-auto">
-                <Cancel onClick={() => handleClose()} />
-              </div>
-              <div className="mt-2 flex w-full flex-row flex-wrap gap-2 sm:w-auto">
-                {!isLastOptionType && headerText === "Add Doctor Capacity" && (
-                  <ButtonV2
-                    id="save-and-exit"
-                    onClick={handleSubmit}
-                    className="w-full"
-                  >
-                    Save Doctor Capacity
-                  </ButtonV2>
-                )}
-                <ButtonV2
-                  id="doctor-save"
-                  onClick={handleSubmit}
-                  className="w-full"
-                >
-                  {buttonText}
-                </ButtonV2>
-              </div>
-            </div>
+          <div className="cui-form-button-group mt-4">
+            <Cancel onClick={() => handleClose()} />
+            {!isLastOptionType && headerText === "Add Doctor Capacity" && (
+              <ButtonV2 id="save-and-exit" onClick={handleSubmit}>
+                Save Doctor Capacity
+              </ButtonV2>
+            )}
+            <ButtonV2 id="doctor-save" onClick={handleSubmit}>
+              {buttonText}
+            </ButtonV2>
           </div>
         </div>
       )}
