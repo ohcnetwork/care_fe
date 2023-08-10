@@ -7,7 +7,6 @@ import {
   RESPIRATORY_SUPPORT,
 } from "../../Common/constants";
 import { ConsultationModel, PatientCategory } from "../Facility/models";
-import { useDispatch, useSelector } from "react-redux";
 import ABHAProfileModal from "../ABDM/ABHAProfileModal";
 import Beds from "../Facility/Consultations/Beds";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -19,14 +18,10 @@ import LinkCareContextModal from "../ABDM/LinkCareContextModal";
 import { PatientModel } from "./models";
 import { getDimensionOrDash } from "../../Common/utils";
 import useConfig from "../../Common/hooks/useConfig";
-import { useState, useEffect } from "react";
-import {
-  togglePatientPrivacy,
-  getConsultationBed,
-} from "../../Redux/actions.js";
-import { UserRole } from "../../Common/constants";
+import { useState } from "react";
 import { formatDate } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
+import PatientPricacyToggle from "./PatientPricacyToggle.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -40,8 +35,6 @@ export default function PatientInfoCard(props: {
   const [showABHAProfile, setShowABHAProfile] = useState(
     !!props.showAbhaProfile
   );
-  const [privacy, setPrivacy] = useState<boolean>(false);
-  const dispatch: any = useDispatch();
   const { enable_hcx, enable_abdm } = useConfig();
   const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
@@ -62,101 +55,6 @@ export default function PatientInfoCard(props: {
     : !consultation?.current_bed
     ? "Assign Bed"
     : "Switch Bed";
-
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-  const allowPrivacyToggle = () => {
-    const currentUserType: UserRole = currentUser.data.user_type;
-    if (
-      currentUserType == "DistrictAdmin" ||
-      currentUserType == "StateAdmin" ||
-      currentUserType == "LocalBodyAdmin" ||
-      (currentUserType == "Doctor" &&
-        currentUser?.data?.home_facility === consultation?.facility) ||
-      currentUserType == "Staff" ||
-      currentUserType == "WardAdmin"
-    )
-      return true;
-
-    return false;
-  };
-
-  useEffect(() => {
-    const getPrivacyInfo = async () => {
-      if (
-        consultation?.current_bed?.privacy == true ||
-        consultation?.current_bed?.privacy == false
-      ) {
-        setPrivacy(consultation?.current_bed?.privacy);
-        return;
-      }
-      const bedId = consultation?.current_bed?.bed_object?.id;
-      const consultationBedID = consultation?.current_bed?.id;
-      try {
-        const res = await dispatch(
-          getConsultationBed(
-            consultationId,
-            bedId as string,
-            consultationBedID as string
-          )
-        );
-        if (
-          res &&
-          res.status === 200 &&
-          res?.data &&
-          (res.data?.privacy == true || res.data?.privacy == false)
-        ) {
-          setPrivacy(res.data.privacy);
-        } else {
-          Notification.Error({
-            msg: "Failed to fetch privacy",
-          });
-        }
-      } catch (e) {
-        Notification.Error({
-          msg: "Something went wrong..!",
-        });
-      }
-    };
-    if (
-      consultation &&
-      consultationId &&
-      consultation?.current_bed?.id &&
-      consultation?.current_bed?.bed_object?.id
-    ) {
-      getPrivacyInfo();
-    }
-  }, [consultation]);
-
-  const togglePrivacy = async () => {
-    try {
-      if (consultation?.current_bed?.id) {
-        const res = await dispatch(
-          togglePatientPrivacy(consultation?.current_bed?.id as string)
-        );
-        if (res && res.status === 200) {
-          setPrivacy(!privacy);
-          Notification.Success({
-            msg: "Privacy updated successfully",
-          });
-          if (props.fetchPatientData)
-            props.fetchPatientData({ aborted: false });
-        } else if (res && res.status === 403) {
-          Notification.Error({
-            msg: res.data.detail,
-          });
-        } else {
-          Notification.Error({
-            msg: "Failed to update privacy",
-          });
-        }
-      }
-    } catch (e) {
-      Notification.Error({
-        msg: "Something went wrong..!",
-      });
-    }
-  };
 
   return (
     <>
@@ -525,37 +423,11 @@ export default function PatientInfoCard(props: {
                 />
               </>
             ))}
-          {allowPrivacyToggle() && consultation?.current_bed?.id && (
-            <div className="flex flex-row justify-start gap-2">
-              <div className="tooltip bg-gray-200 px-3 py-2 font-semibold">
-                Privacy Mode: {privacy ? "ON" : "OFF"}
-                <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm">
-                  privacy setting for camera feed visual
-                </span>
-              </div>
-              {!privacy ? (
-                <button
-                  className=" tooltip items-center rounded-md bg-red-500 p-1 text-gray-200 hover:bg-gray-200 hover:text-red-500"
-                  onClick={togglePrivacy}
-                >
-                  <CareIcon className="care-l-lock text-3xl" />
-                  <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm">
-                    Lock Privacy
-                  </span>
-                </button>
-              ) : (
-                <div
-                  className="tooltip items-center rounded-md bg-gray-500 p-1 text-gray-200 hover:bg-gray-200 hover:text-black"
-                  onClick={togglePrivacy}
-                >
-                  <CareIcon className="care-l-unlock text-3xl" />
-                  <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm">
-                    Unlock Privacy
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
+          <PatientPricacyToggle
+            consultation={consultation}
+            consultationId={consultationId}
+            fetchPatientData={props.fetchPatientData}
+          />
         </div>
       </section>
     </>
