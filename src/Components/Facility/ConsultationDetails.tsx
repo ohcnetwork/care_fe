@@ -629,6 +629,16 @@ export const ConsultationDetails = (props: any) => {
                               )?.text ?? "--"}
                             </span>
                           </div>
+                          {consultationData.discharge_reason === "REF" && (
+                            <div>
+                              Referred Facility {" - "}
+                              <span className="font-semibold">
+                                {consultationData.referred_to_external ||
+                                  consultationData.referred_to_object?.name ||
+                                  "--"}
+                              </span>
+                            </div>
+                          )}
                           {consultationData.discharge_reason === "REC" && (
                             <div className="grid gap-4">
                               <div>
