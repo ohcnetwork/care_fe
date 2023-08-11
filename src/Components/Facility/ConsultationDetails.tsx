@@ -51,11 +51,12 @@ import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { formatDate, formatDateTime, relativeTime } from "../../Utils/utils";
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { triggerGoal } from "../Common/Plausible";
 import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -99,8 +100,7 @@ export const ConsultationDetails = (props: any) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const authUser = useAuthUser();
 
   useEffect(() => {
     if (
@@ -216,7 +216,7 @@ export const ConsultationDetails = (props: any) => {
       facilityId: facilityId,
       patientId: patientId,
       consultationId: consultationId,
-      userID: currentUser.data.id,
+      userID: authUser.id,
     });
   }, []);
 
@@ -333,7 +333,7 @@ export const ConsultationDetails = (props: any) => {
                       consultationId,
                       facilityId: patientData.facility,
                       patientId: patientData.id,
-                      userId: currentUser.data.id,
+                      userId: authUser.id,
                       page: "ConsultationDetails",
                     });
                     setShowDoctors(true);
@@ -629,6 +629,16 @@ export const ConsultationDetails = (props: any) => {
                               )?.text ?? "--"}
                             </span>
                           </div>
+                          {consultationData.discharge_reason === "REF" && (
+                            <div>
+                              Referred Facility {" - "}
+                              <span className="font-semibold">
+                                {consultationData.referred_to_external ||
+                                  consultationData.referred_to_object?.name ||
+                                  "--"}
+                              </span>
+                            </div>
+                          )}
                           {consultationData.discharge_reason === "REC" && (
                             <div className="grid gap-4">
                               <div>

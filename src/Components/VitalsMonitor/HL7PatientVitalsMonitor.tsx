@@ -7,15 +7,14 @@ import WaveformLabels from "./WaveformLabels";
 import { classNames } from "../../Utils/utils";
 import { IVitalsComponentProps, VitalsValueBase } from "./types";
 import { triggerGoal } from "../Common/Plausible";
-import { useSelector } from "react-redux";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   const { connect, waveformCanvas, data, isOnline } = useHL7VitalsMonitor(
     props.config
   );
   const { patient, bed, asset } = props.patientAssetBed ?? {};
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const authUser = useAuthUser();
 
   useEffect(() => {
     if (isOnline) {
@@ -23,7 +22,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
         patientId: patient?.id,
         bedId: bed?.id,
         assetId: asset?.id,
-        userId: currentUser?.id,
+        userId: authUser.id,
       });
     }
   }, [isOnline]);

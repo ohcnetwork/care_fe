@@ -1,17 +1,13 @@
-import { get } from "lodash";
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { handleSignOut } from "../../../Utils/utils";
+import useAuthUser from "../../../Common/hooks/useAuthUser";
 
 const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
   const { t } = useTranslation();
-  const { currentUser } = useSelector((state) => state) as any;
-
-  const firstName = get(currentUser, "data.first_name", "");
-  const lastName = get(currentUser, "data.last_name", "");
-  const profileName = `${firstName} ${lastName}`.trim();
+  const user = useAuthUser();
+  const profileName = `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim();
 
   return (
     <div

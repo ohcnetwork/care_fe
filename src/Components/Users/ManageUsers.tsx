@@ -11,7 +11,7 @@ import {
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
@@ -37,6 +37,7 @@ import CircularProgress from "../Common/components/CircularProgress.js";
 import Page from "../Common/components/Page.js";
 import dayjs from "dayjs";
 import TextFormField from "../Form/FormFields/TextFormField.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -61,13 +62,10 @@ export default function ManageUsers() {
   const [expandFacilityList, setExpandFacilityList] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [expandWorkingHours, setExpandWorkingHours] = useState(false);
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-  const isSuperuser = currentUser.data.is_superuser;
-  const userType = currentUser.data.user_type;
+  const authUser = useAuthUser();
   const [weeklyHours, setWeeklyHours] = useState<any>(0);
-  const userIndex = USER_TYPES.indexOf(userType);
-  const userTypes = isSuperuser
+  const userIndex = USER_TYPES.indexOf(authUser.user_type);
+  const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
 
@@ -199,10 +197,9 @@ export default function ManageUsers() {
     if (user.is_superuser) return true;
 
     if (
-      USER_TYPES.indexOf(currentUser.data.user_type) >=
-      USER_TYPES.indexOf("StateAdmin")
+      USER_TYPES.indexOf(authUser.user_type) >= USER_TYPES.indexOf("StateAdmin")
     )
-      return user.state_object?.id === currentUser?.data?.state;
+      return user.state_object?.id === authUser.state;
 
     return false;
   };
@@ -430,7 +427,9 @@ export default function ManageUsers() {
                       <p>Linked Skills</p>
                     </ButtonV2>
                   </div>
-                  {["DistrictAdmin", "StateAdmin"].includes(userType) && (
+                  {["DistrictAdmin", "StateAdmin"].includes(
+                    authUser.user_type
+                  ) && (
                     <div className="flex-col md:flex-row">
                       <ButtonV2
                         id="skills"

@@ -23,7 +23,7 @@ import {
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
@@ -45,6 +45,7 @@ import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { useTranslation } from "react-i18next";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -75,6 +76,7 @@ export const FacilityHome = (props: any) => {
   >([]);
   const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
   const [doctorCapacityModalOpen, setDoctorCapacityModalOpen] = useState(false);
+  const authUser = useAuthUser();
   const config = useConfig();
 
   useMessageListener((data) => console.log(data));
@@ -153,9 +155,6 @@ export const FacilityHome = (props: any) => {
     }
     navigate("/facility");
   };
-
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
 
   if (isLoading) {
     return <Loading />;
@@ -320,8 +319,8 @@ export const FacilityHome = (props: any) => {
 
   const StaffUserTypeIndex = USER_TYPES.findIndex((type) => type === "Staff");
   const hasPermissionToEditCoverImage =
-    !(currentUser.data.user_type as string).includes("ReadOnly") &&
-    USER_TYPES.findIndex((type) => type == currentUser.data.user_type) >=
+    !(authUser.user_type as string).includes("ReadOnly") &&
+    USER_TYPES.findIndex((type) => type == authUser.user_type) >=
       StaffUserTypeIndex;
 
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (

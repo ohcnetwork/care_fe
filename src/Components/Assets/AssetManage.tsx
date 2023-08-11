@@ -8,7 +8,7 @@ import {
   AssetTransaction,
 } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   deleteAsset,
   getAsset,
@@ -31,6 +31,7 @@ const Loading = loadable(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Uptime from "../Common/Uptime";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 interface AssetManageProps {
   assetId: string;
@@ -58,8 +59,7 @@ const AssetManage = (props: AssetManageProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch<any>();
   const limit = 14;
-  const { currentUser }: any = useSelector((state) => state);
-  const user_type = currentUser.data.user_type;
+  const authUser = useAuthUser();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const fetchData = useCallback(
@@ -357,7 +357,7 @@ const AssetManage = (props: AssetManageProps) => {
                   {t("configure")}
                 </ButtonV2>
               )}
-              {checkAuthority(user_type, "DistrictAdmin") && (
+              {checkAuthority(authUser.user_type, "DistrictAdmin") && (
                 <ButtonV2
                   authorizeFor={NonReadOnlyUsers}
                   onClick={() => setShowDeleteDialog(true)}

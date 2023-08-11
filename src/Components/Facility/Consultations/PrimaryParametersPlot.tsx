@@ -125,7 +125,7 @@ export const PrimaryParametersPlot = ({
   const rhythmValues: any = {};
   Object.entries(results).forEach((obj: any) => {
     if (obj[1].rhythm && obj[1].rhythm > 0) {
-      const key: string = dayjs(obj[0]).format("LL");
+      const key: string = dayjs(obj[0]).format("MMMM D, YYYY");
       const lst: Array<any> = Object.prototype.hasOwnProperty.call(
         rhythmValues,
         key
@@ -133,7 +133,7 @@ export const PrimaryParametersPlot = ({
         ? rhythmValues[key]
         : [];
       const value: any = {};
-      value["time"] = dayjs(obj[0]).format("LT");
+      value["time"] = dayjs(obj[0]).format("h:mm A");
       value["rhythm"] = obj[1].rhythm;
       value["rhythm_detail"] = obj[1].rhythm_detail;
       lst.push(value);
