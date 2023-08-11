@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/browser";
 
-import { FC, lazy, useEffect, useState } from "react";
+import { FC, Suspense, lazy, useEffect, useState } from "react";
 import { getConfig, getCurrentUser } from "./Redux/actions";
 import { statusType, useAbortableEffect } from "./Common/utils";
 import { useDispatch, useSelector } from "react-redux";
@@ -93,10 +93,12 @@ const App: FC = () => {
   }
 
   return (
-    <HistoryAPIProvider>
-      {currentUser?.data ? <AppRouter /> : <SessionRouter />}
-      <Plausible />
-    </HistoryAPIProvider>
+    <Suspense fallback={<Loading />}>
+      <HistoryAPIProvider>
+        {currentUser?.data ? <AppRouter /> : <SessionRouter />}
+        <Plausible />
+      </HistoryAPIProvider>
+    </Suspense>
   );
 };
 
