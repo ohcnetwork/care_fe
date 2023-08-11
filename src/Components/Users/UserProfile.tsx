@@ -1,5 +1,4 @@
-import loadable from "@loadable/component";
-import React, { useState, useCallback, useReducer } from "react";
+import { useState, useCallback, useReducer, lazy, FormEvent } from "react";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,7 +23,7 @@ import { SkillModel, SkillObjectModel } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 import dayjs from "../../Utils/dayjs";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 type EditForm = {
   firstName: string;
@@ -291,7 +290,7 @@ export default function UserProfile() {
     };
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const validForm = validateForm();
     if (validForm) {

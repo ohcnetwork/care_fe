@@ -1,5 +1,5 @@
-import { useCallback, useState, ReactElement } from "react";
-import loadable from "@loadable/component";
+import { useCallback, useState, ReactElement, lazy } from "react";
+
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { listFacilityAssetLocation, getAnyFacility } from "../../Redux/actions";
@@ -9,7 +9,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Page from "../Common/components/Page";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface LocationManagementProps {
   facilityId: string;

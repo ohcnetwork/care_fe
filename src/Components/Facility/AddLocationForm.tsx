@@ -1,5 +1,4 @@
-import loadable from "@loadable/component";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, lazy, SyntheticEvent } from "react";
 import { useDispatch } from "react-redux";
 import {
   createFacilityAssetLocation,
@@ -14,7 +13,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import Page from "../Common/components/Page";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface LocationFormProps {
   facilityId: string;
@@ -58,7 +57,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
     fetchFacilityName();
   }, [dispatchAction, facilityId, locationId]);
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
+  const handleSubmit = async (e: SyntheticEvent) => {
     setErrors({
       name: "",
       description: "",

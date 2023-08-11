@@ -1,7 +1,9 @@
+import { HTMLAttributes, ReactNode } from "react";
+
 export default function Card(
   props: {
-    children?: React.ReactNode;
-  } & React.HTMLAttributes<HTMLDivElement>
+    children?: ReactNode;
+  } & HTMLAttributes<HTMLDivElement>
 ) {
   const { children, ...rest } = props;
   return (
