@@ -1,5 +1,5 @@
 import { navigate } from "raviger";
-import React, { useState } from "react";
+import { useState } from "react";
 import { SampleTestModel } from "./models";
 import { useDispatch, useSelector } from "react-redux";
 import { SAMPLE_TEST_STATUS } from "../../Common/constants";
