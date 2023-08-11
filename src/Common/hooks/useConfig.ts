@@ -1,9 +1,12 @@
-import { useSelector } from "react-redux";
+import { createContext, useContext } from "react";
+
+export const AppConfigContext = createContext<IConfig | null>(null);
 
 interface ILogo {
   light: string;
   dark: string;
 }
+
 export interface IConfig {
   dashboard_url: string;
   github_url: string;
@@ -68,9 +71,13 @@ export interface IConfig {
 }
 
 const useConfig = () => {
-  const state: any = useSelector((state) => state);
-  const { config } = state;
-  return config.data as IConfig;
+  const config = useContext(AppConfigContext);
+
+  if (!config) {
+    throw new Error("useConfig must be used within an AppConfigProvider");
+  }
+
+  return config;
 };
 
 export default useConfig;

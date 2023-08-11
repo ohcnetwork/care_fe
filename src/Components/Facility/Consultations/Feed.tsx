@@ -26,11 +26,12 @@ import FeedButton from "./FeedButton";
 import Loading from "../../Common/Loading";
 import ReactPlayer from "react-player";
 import { classNames } from "../../../Utils/utils";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import useFullscreen from "../../../Common/hooks/useFullscreen.js";
 import { triggerGoal } from "../../Common/Plausible.js";
+import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -60,8 +61,7 @@ export const Feed: React.FC<IFeedProps> = ({
   const [precision, setPrecision] = useState(1);
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
   const [isFullscreen, setFullscreen] = useFullscreen();
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const authUser = useAuthUser();
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -392,7 +392,7 @@ export const Feed: React.FC<IFeedProps> = ({
                         presetName: preset?.meta?.preset_name,
                         consultationId,
                         patientId,
-                        userId: currentUser?.id,
+                        userId: authUser.id,
                         result: "success",
                       });
                     },
@@ -406,7 +406,7 @@ export const Feed: React.FC<IFeedProps> = ({
                         presetName: preset?.meta?.preset_name,
                         consultationId,
                         patientId,
-                        userId: currentUser?.id,
+                        userId: authUser.id,
                         result: "error",
                       });
                     },
@@ -556,7 +556,7 @@ export const Feed: React.FC<IFeedProps> = ({
                       direction: button.action,
                       consultationId,
                       patientId,
-                      userId: currentUser?.id,
+                      userId: authUser.id,
                     });
 
                     button.callback();

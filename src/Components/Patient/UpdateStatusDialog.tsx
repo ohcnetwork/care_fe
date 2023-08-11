@@ -23,7 +23,6 @@ interface Props {
   sample: SampleTestModel;
   handleOk: (sample: SampleTestModel, status: number, result: number) => void;
   handleCancel: () => void;
-  userType: "Staff" | "DistrictAdmin" | "StateLabAdmin";
 }
 
 const statusChoices = [...SAMPLE_TEST_STATUS];

@@ -1,6 +1,6 @@
 import { navigate } from "raviger";
 import React, { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
 import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -32,6 +32,7 @@ import ConfirmDialog from "../Common/ConfirmDialog";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
 import { triggerGoal } from "../Common/Plausible";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -61,10 +62,7 @@ export const PatientHome = (props: any) => {
   const [isConsultationLoading, setIsConsultationLoading] = useState(false);
   const [isSampleLoading, setIsSampleLoading] = useState(false);
   const [sampleFlag, callSampleList] = useState(false);
-  const rootState: any = useSelector((rootState) => rootState);
-  const { currentUser } = rootState;
-  const userHomeFacilityId = currentUser.data.home_facility;
-  const userType = currentUser.data.user_type;
+  const authUser = useAuthUser();
   const { t } = useTranslation();
   const [selectedStatus, setSelectedStatus] = useState<{
     status: number;
@@ -226,7 +224,7 @@ export const PatientHome = (props: any) => {
       triggerGoal("Patient Profile Viewed", {
         facilityId: facilityId,
         patientId: patientData.id,
-        userID: currentUser.data.id,
+        userID: authUser.id,
       });
     },
     [dispatch, fetchpatient]
@@ -929,9 +927,10 @@ export const PatientHome = (props: any) => {
                                 !shift.patient_object.allow_transfer ||
                                 !(
                                   ["DistrictAdmin", "StateAdmin"].includes(
-                                    userType
+                                    authUser.user_type
                                   ) ||
-                                  userHomeFacilityId === shift.assigned_facility
+                                  authUser.home_facility_object?.id ===
+                                    shift.assigned_facility
                                 )
                               }
                               onClick={() => setModalFor(shift.external_id)}
