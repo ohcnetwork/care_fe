@@ -274,18 +274,22 @@ const AssetManage = (props: AssetManageProps) => {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {asset?.status === "ACTIVE" ? (
-                    <Chip color="green" text="Active" startIcon="check" />
+                    <Chip text="Active" startIcon="l-check" />
                   ) : (
                     <Chip
-                      color="yellow"
+                      variant="warning"
                       text="Transfer in progress"
-                      startIcon="exclamation"
+                      startIcon="l-exclamation"
                     />
                   )}
                   {asset?.is_working ? (
-                    <Chip color="green" text="Working" startIcon="check" />
+                    <Chip text="Working" startIcon="l-check" />
                   ) : (
-                    <Chip color="red" text="Not Working" startIcon="times" />
+                    <Chip
+                      variant="danger"
+                      text="Not Working"
+                      startIcon="l-times"
+                    />
                   )}
                 </div>
               </div>
