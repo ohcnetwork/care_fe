@@ -131,6 +131,10 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
         errors[field] = "Field is required";
         invalidForm = true;
       }
+      if (field === "count" && state.form[field] < 0) {
+        errors[field] = "Doctor count cannot be negative";
+        invalidForm = true;
+      }
     });
     if (invalidForm) {
       dispatch({ type: "set_error", errors });
@@ -245,22 +249,16 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
               min={0}
             />
           </div>
-          <div>
-            <div className="mt-4 flex flex-col justify-between md:flex-row">
-              <div className="mt-2 flex w-full flex-row gap-4 sm:w-auto">
-                <Cancel onClick={() => handleClose()} />
-              </div>
-              <div className="mt-2 flex w-full flex-row flex-wrap gap-2 sm:w-auto">
-                {!isLastOptionType && headerText === "Add Doctor Capacity" && (
-                  <ButtonV2 id="save-and-exit" onClick={handleSubmit}>
-                    Save Doctor Capacity
-                  </ButtonV2>
-                )}
-                <ButtonV2 id="doctor-save" onClick={handleSubmit}>
-                  {buttonText}
-                </ButtonV2>
-              </div>
-            </div>
+          <div className="cui-form-button-group mt-4">
+            <Cancel onClick={() => handleClose()} />
+            {!isLastOptionType && headerText === "Add Doctor Capacity" && (
+              <ButtonV2 id="save-and-exit" onClick={handleSubmit}>
+                Save Doctor Capacity
+              </ButtonV2>
+            )}
+            <ButtonV2 id="doctor-save" onClick={handleSubmit}>
+              {buttonText}
+            </ButtonV2>
           </div>
         </div>
       )}

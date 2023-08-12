@@ -9,7 +9,6 @@ import {
   ADMITTED_TO,
   DISCHARGE_REASONS,
 } from "../../Common/constants";
-import moment from "moment";
 import {
   getAllLocalBody,
   getAnyFacility,
@@ -33,9 +32,11 @@ import useMergeState from "../../Common/hooks/useMergeState";
 import useConfig from "../../Common/hooks/useConfig";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import AccordionV2 from "../Common/components/AccordionV2";
+import { dateQueryString } from "../../Utils/utils";
+import dayjs from "dayjs";
 
 const getDate = (value: any) =>
-  value && moment(value).isValid() && moment(value).toDate();
+  value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function PatientFilter(props: any) {
   const { kasp_enabled, kasp_string } = useConfig();
@@ -252,64 +253,31 @@ export default function PatientFilter(props: any) {
       lsgBody: lsgBody || "",
       facility: facility || "",
       facility_type: facility_type || "",
-      date_declared_positive_before:
-        date_declared_positive_before &&
-        moment(date_declared_positive_before).isValid()
-          ? moment(date_declared_positive_before).format("YYYY-MM-DD")
-          : "",
-      date_declared_positive_after:
-        date_declared_positive_after &&
-        moment(date_declared_positive_after).isValid()
-          ? moment(date_declared_positive_after).format("YYYY-MM-DD")
-          : "",
-      date_of_result_before:
-        date_of_result_before && moment(date_of_result_before).isValid()
-          ? moment(date_of_result_before).format("YYYY-MM-DD")
-          : "",
-      date_of_result_after:
-        date_of_result_after && moment(date_of_result_after).isValid()
-          ? moment(date_of_result_after).format("YYYY-MM-DD")
-          : "",
-      created_date_before:
-        created_date_before && moment(created_date_before).isValid()
-          ? moment(created_date_before).format("YYYY-MM-DD")
-          : "",
-      created_date_after:
-        created_date_after && moment(created_date_after).isValid()
-          ? moment(created_date_after).format("YYYY-MM-DD")
-          : "",
-      modified_date_before:
-        modified_date_before && moment(modified_date_before).isValid()
-          ? moment(modified_date_before).format("YYYY-MM-DD")
-          : "",
-      modified_date_after:
-        modified_date_after && moment(modified_date_after).isValid()
-          ? moment(modified_date_after).format("YYYY-MM-DD")
-          : "",
-      date_of_result:
-        date_of_result && moment(date_of_result).isValid()
-          ? moment(date_of_result).format("YYYY-MM-DD")
-          : "",
-      last_consultation_admission_date_before:
-        last_consultation_admission_date_before &&
-        moment(last_consultation_admission_date_before).isValid()
-          ? moment(last_consultation_admission_date_before).format("YYYY-MM-DD")
-          : "",
-      last_consultation_admission_date_after:
-        last_consultation_admission_date_after &&
-        moment(last_consultation_admission_date_after).isValid()
-          ? moment(last_consultation_admission_date_after).format("YYYY-MM-DD")
-          : "",
-      last_consultation_discharge_date_before:
-        last_consultation_discharge_date_before &&
-        moment(last_consultation_discharge_date_before).isValid()
-          ? moment(last_consultation_discharge_date_before).format("YYYY-MM-DD")
-          : "",
-      last_consultation_discharge_date_after:
-        last_consultation_discharge_date_after &&
-        moment(last_consultation_discharge_date_after).isValid()
-          ? moment(last_consultation_discharge_date_after).format("YYYY-MM-DD")
-          : "",
+      date_declared_positive_before: dateQueryString(
+        date_declared_positive_before
+      ),
+      date_declared_positive_after: dateQueryString(
+        date_declared_positive_after
+      ),
+      date_of_result_before: dateQueryString(date_of_result_before),
+      date_of_result_after: dateQueryString(date_of_result_after),
+      created_date_before: dateQueryString(created_date_before),
+      created_date_after: dateQueryString(created_date_after),
+      modified_date_before: dateQueryString(modified_date_before),
+      modified_date_after: dateQueryString(modified_date_after),
+      date_of_result: dateQueryString(date_of_result),
+      last_consultation_admission_date_before: dateQueryString(
+        last_consultation_admission_date_before
+      ),
+      last_consultation_admission_date_after: dateQueryString(
+        last_consultation_admission_date_after
+      ),
+      last_consultation_discharge_date_before: dateQueryString(
+        last_consultation_discharge_date_before
+      ),
+      last_consultation_discharge_date_after: dateQueryString(
+        last_consultation_discharge_date_after
+      ),
       category: category || "",
       gender: gender || "",
       disease_status:
@@ -325,30 +293,14 @@ export default function PatientFilter(props: any) {
       covin_id: covin_id || "",
       is_kasp: is_kasp || "",
       is_declared_positive: is_declared_positive || "",
-      last_consultation_symptoms_onset_date_before:
-        last_consultation_symptoms_onset_date_before &&
-        moment(last_consultation_symptoms_onset_date_before).isValid()
-          ? moment(last_consultation_symptoms_onset_date_before).format(
-              "YYYY-MM-DD"
-            )
-          : "",
-      last_consultation_symptoms_onset_date_after:
-        last_consultation_symptoms_onset_date_after &&
-        moment(last_consultation_symptoms_onset_date_after).isValid()
-          ? moment(last_consultation_symptoms_onset_date_after).format(
-              "YYYY-MM-DD"
-            )
-          : "",
-      last_vaccinated_date_before:
-        last_vaccinated_date_before &&
-        moment(last_vaccinated_date_before).isValid()
-          ? moment(last_vaccinated_date_before).format("YYYY-MM-DD")
-          : "",
-      last_vaccinated_date_after:
-        last_vaccinated_date_after &&
-        moment(last_vaccinated_date_after).isValid()
-          ? moment(last_vaccinated_date_after).format("YYYY-MM-DD")
-          : "",
+      last_consultation_symptoms_onset_date_before: dateQueryString(
+        last_consultation_symptoms_onset_date_before
+      ),
+      last_consultation_symptoms_onset_date_after: dateQueryString(
+        last_consultation_symptoms_onset_date_after
+      ),
+      last_vaccinated_date_before: dateQueryString(last_vaccinated_date_before),
+      last_vaccinated_date_after: dateQueryString(last_vaccinated_date_after),
       last_consultation_is_telemedicine:
         last_consultation_is_telemedicine || "",
       is_antenatal: is_antenatal || "",

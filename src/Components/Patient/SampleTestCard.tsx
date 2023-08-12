@@ -7,7 +7,7 @@ import { patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
 import _ from "lodash";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
@@ -141,13 +141,13 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             <div className="mb-2 text-sm text-gray-700">
               <span className="font-medium text-black">Date of Sample:</span>{" "}
               {itemData.date_of_sample
-                ? formatDate(itemData.date_of_sample)
+                ? formatDateTime(itemData.date_of_sample)
                 : "Not Available"}
             </div>
             <div className="text-sm text-gray-700">
               <span className="font-medium text-black">Date of Result:</span>{" "}
               {itemData.date_of_result
-                ? formatDate(itemData.date_of_result)
+                ? formatDateTime(itemData.date_of_result)
                 : "Not Available"}
             </div>
           </div>

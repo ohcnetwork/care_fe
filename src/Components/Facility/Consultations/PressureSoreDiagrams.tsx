@@ -5,7 +5,7 @@ import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { make as CriticalCare__PressureScoreViewer } from "../../CriticalCareRecording/PressureSore/CriticalCare__PressureSoreViewer.bs";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
-import { formatDate } from "../../../Utils/utils";
+import { formatDateTime } from "../../../Utils/utils";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;
@@ -97,7 +97,7 @@ export const PressureSoreDiagrams = (props: any) => {
           {dates.map((key) => {
             return (
               <option key={key} value={key}>
-                {formatDate(key)}
+                {formatDateTime(key)}
               </option>
             );
           })}

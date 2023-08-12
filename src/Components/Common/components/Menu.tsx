@@ -79,7 +79,21 @@ export function DropdownItem({
           className
         )}
       >
-        <i className={`text-${variant}-500 text-lg`}>{icon}</i>
+        <i
+          className={classNames(
+            "text-lg",
+            {
+              primary: "text-primary-500",
+              secondary: "text-secondary-500",
+              success: "text-success-500",
+              warning: "text-warning-500",
+              danger: "text-danger-500",
+              alert: "text-alert-500",
+            }[variant]
+          )}
+        >
+          {icon}
+        </i>
         {children}
       </div>
     </Menu.Item>

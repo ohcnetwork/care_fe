@@ -147,6 +147,12 @@ export const BedCapacity = (props: BedCapacityProps) => {
         invalidForm = true;
       } else if (
         field === "currentOccupancy" &&
+        Number(state.form[field] < 0)
+      ) {
+        errors[field] = "Occupied cannot be negative";
+        invalidForm = true;
+      } else if (
+        field === "currentOccupancy" &&
         Number(state.form[field]) > Number(state.form.totalCapacity)
       ) {
         errors[field] = "Occupied must be less than or equal to total capacity";
@@ -154,6 +160,9 @@ export const BedCapacity = (props: BedCapacityProps) => {
       }
       if (field === "totalCapacity" && Number(state.form[field]) === 0) {
         errors[field] = "Total capacity cannot be 0";
+        invalidForm = true;
+      } else if (field === "totalCapacity" && Number(state.form[field]) < 0) {
+        errors[field] = "Total capacity cannot be negative";
         invalidForm = true;
       }
     });
@@ -272,26 +281,21 @@ export const BedCapacity = (props: BedCapacityProps) => {
               max={state.form.totalCapacity}
             />
           </div>
-          <div>
-            <div className="mt-4 flex flex-col items-end justify-between gap-4 md:flex-row">
-              <div className="w-full md:w-auto">
-                <Cancel onClick={handleClose} />
-              </div>
-              <div className="flex w-full flex-col gap-4 md:w-auto md:flex-row">
-                {!isLastOptionType && headerText === "Add Bed Capacity" && (
-                  <Submit
-                    id="bed-capacity-save-and-exit"
-                    onClick={(e) => handleSubmit(e, "Save and Exit")}
-                    label="Save Bed Capacity"
-                  />
-                )}
-                <Submit
-                  id="bed-capacity-save"
-                  onClick={(e) => handleSubmit(e)}
-                  label={buttonText}
-                />
-              </div>
-            </div>
+
+          <div className="cui-form-button-group mt-4">
+            <Cancel onClick={handleClose} />
+            {!isLastOptionType && headerText === "Add Bed Capacity" && (
+              <Submit
+                id="bed-capacity-save-and-exit"
+                onClick={(e) => handleSubmit(e, "Save and Exit")}
+                label="Save Bed Capacity"
+              />
+            )}
+            <Submit
+              id="bed-capacity-save"
+              onClick={(e) => handleSubmit(e)}
+              label={buttonText}
+            />
           </div>
         </div>
       )}

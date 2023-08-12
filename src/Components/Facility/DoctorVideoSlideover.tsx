@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
@@ -6,6 +5,7 @@ import { getFacilityUsers } from "../../Redux/actions";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { relativeTime } from "../../Utils/utils";
 
 export default function DoctorVideoSlideover(props: {
   show: boolean;
@@ -19,7 +19,9 @@ export default function DoctorVideoSlideover(props: {
   useEffect(() => {
     const fetchUsers = async () => {
       if (facilityId) {
-        const res = await dispatchAction(getFacilityUsers(facilityId));
+        const res = await dispatchAction(
+          getFacilityUsers(facilityId, { limit: 50 })
+        );
         if (res && res.data) {
           setDoctors(
             res.data.results
@@ -72,7 +74,7 @@ export default function DoctorVideoSlideover(props: {
           </div>
 
           <ul
-            className="max-h-96 scroll-py-3 list-none overflow-y-auto"
+            className="max-h-96 scroll-py-3 list-none overflow-y-auto py-3"
             id="options"
             role="listbox"
           >
@@ -207,9 +209,7 @@ function UserListItem(props: { user: UserAssignedModel }) {
                 </div>
               </a>
               <span>{user.alt_phone_number}</span>
-              {user.last_login && (
-                <span>{moment(user.last_login).fromNow()}</span>
-              )}
+              {user.last_login && <span>{relativeTime(user.last_login)}</span>}
             </p>
           </div>
         </a>

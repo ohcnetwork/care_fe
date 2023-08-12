@@ -18,12 +18,11 @@ import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
 import AssetWarrantyCard from "./AssetWarrantyCard";
-import { formatDate } from "../../Utils/utils";
+import { formatDate, formatDateTime } from "../../Utils/utils";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { UserRole, USER_TYPES } from "../../Common/constants";
-import moment from "moment";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
@@ -157,7 +156,7 @@ const AssetManage = (props: AssetManageProps) => {
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
-                {formatDate(transaction.modified_date)}
+                {formatDateTime(transaction.modified_date)}
               </span>
             </td>
           </tr>
@@ -275,18 +274,22 @@ const AssetManage = (props: AssetManageProps) => {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {asset?.status === "ACTIVE" ? (
-                    <Chip color="green" text="Active" startIcon="check" />
+                    <Chip text="Active" startIcon="l-check" />
                   ) : (
                     <Chip
-                      color="yellow"
+                      variant="warning"
                       text="Transfer in progress"
-                      startIcon="exclamation"
+                      startIcon="l-exclamation"
                     />
                   )}
                   {asset?.is_working ? (
-                    <Chip color="green" text="Working" startIcon="check" />
+                    <Chip text="Working" startIcon="l-check" />
                   ) : (
-                    <Chip color="red" text="Not Working" startIcon="times" />
+                    <Chip
+                      variant="danger"
+                      text="Not Working"
+                      startIcon="l-times"
+                    />
                   )}
                 </div>
               </div>
@@ -378,7 +381,7 @@ const AssetManage = (props: AssetManageProps) => {
                     icon: "wrench",
                     content:
                       asset?.last_serviced_on &&
-                      moment(asset?.last_serviced_on).format("DD MMM YYYY"),
+                      formatDate(asset?.last_serviced_on),
                   },
                   {
                     label: "Notes",

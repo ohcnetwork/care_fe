@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
@@ -6,6 +5,7 @@ import { getConsultation } from "../../../Redux/actions";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import { InvestigationType } from "../../Common/prescription-builder/InvestigationBuilder";
 import { InvestigationResponse } from "./Reports/types";
+import dayjs from "../../../Utils/dayjs";
 
 export default function ViewInvestigationSuggestions(props: {
   consultationId: any;
@@ -75,13 +75,13 @@ export default function ViewInvestigationSuggestions(props: {
                         );
                         const investigatedDate =
                           investigated &&
-                          moment(
+                          dayjs(
                             investigated.session_object.session_created_date
                           );
                         const nextInvestigationTime =
                           investigatedDate && investigation.frequency
                             ? investigatedDate.add(
-                                moment.duration({
+                                dayjs.duration({
                                   hours:
                                     parseInt(
                                       investigation.frequency.split(" ")[0]
@@ -94,7 +94,7 @@ export default function ViewInvestigationSuggestions(props: {
                                 })
                               )
                             : investigation.time
-                            ? moment(investigation.time)
+                            ? dayjs(investigation.time)
                             : undefined;
 
                         if (
@@ -109,7 +109,7 @@ export default function ViewInvestigationSuggestions(props: {
 
                         const investigationMissed =
                           nextInvestigationTime &&
-                          moment().isAfter(nextInvestigationTime);
+                          dayjs().isAfter(nextInvestigationTime);
                         console.log(
                           type,
                           nextFurthestInvestigation,
@@ -159,7 +159,7 @@ export default function ViewInvestigationSuggestions(props: {
                       {nextFurthestInvestigation ? (
                         <div
                           className={`${
-                            nextFurthestInvestigation.isBefore(moment())
+                            nextFurthestInvestigation.isBefore(dayjs())
                               ? "text-red-500"
                               : ""
                           }`}
@@ -232,11 +232,11 @@ export default function ViewInvestigationSuggestions(props: {
                     );
                     const investigatedDate =
                       investigated &&
-                      moment(investigated.session_object.session_created_date);
+                      dayjs(investigated.session_object.session_created_date);
                     const nextInvestigationTime =
                       investigatedDate && investigation.frequency
                         ? investigatedDate.add(
-                            moment.duration({
+                            dayjs.duration({
                               hours:
                                 parseInt(
                                   investigation.frequency.split(" ")[0]
@@ -249,7 +249,7 @@ export default function ViewInvestigationSuggestions(props: {
                             })
                           )
                         : investigation.time
-                        ? moment(investigation.time)
+                        ? dayjs(investigation.time)
                         : undefined;
 
                     if (
@@ -275,7 +275,7 @@ export default function ViewInvestigationSuggestions(props: {
                     {nextFurthestInvestigation ? (
                       <div
                         className={`${
-                          nextFurthestInvestigation.isBefore(moment())
+                          nextFurthestInvestigation.isBefore(dayjs())
                             ? "text-red-500"
                             : ""
                         }`}

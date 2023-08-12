@@ -48,16 +48,14 @@ import { PrimaryParametersPlot } from "./Consultations/PrimaryParametersPlot";
 import ReadMore from "../Common/components/Readmore";
 import VentilatorPatientVitalsMonitor from "../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
-import { formatDate } from "../../Utils/utils";
+import { formatDate, formatDateTime, relativeTime } from "../../Utils/utils";
 import loadable from "@loadable/component";
-import moment from "moment";
 import { navigate } from "raviger";
 import { useDispatch, useSelector } from "react-redux";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
-import useBreakpoints from "../../Common/hooks/useBreakpoints";
-import { getVitalsCanvasSizeAndDuration } from "../VitalsMonitor/utils";
 import { triggerGoal } from "../Common/Plausible";
+import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -222,7 +220,7 @@ export const ConsultationDetails = (props: any) => {
     });
   }, []);
 
-  const vitalsAspectRatio = useBreakpoints({
+  const vitals = useVitalsAspectRatioConfig({
     default: undefined,
     md: 8 / 11,
     lg: 15 / 11,
@@ -230,9 +228,6 @@ export const ConsultationDetails = (props: any) => {
     "2xl": 19 / 11,
     "3xl": 23 / 11,
   });
-
-  const vitalsConfig = getVitalsCanvasSizeAndDuration(vitalsAspectRatio);
-  const vitalsConfigHash = JSON.stringify(vitalsConfig);
 
   if (isLoading) {
     return <Loading />;
@@ -309,7 +304,7 @@ export const ConsultationDetails = (props: any) => {
               [consultationId]: {
                 name:
                   consultationData.suggestion === "A"
-                    ? `Admitted on ${formatDate(
+                    ? `Admitted on ${formatDateTime(
                         consultationData.admission_date!
                       )}`
                     : consultationData.suggestion_text,
@@ -398,18 +393,18 @@ export const ConsultationDetails = (props: any) => {
                   {(consultationData.admission_date ??
                     consultationData.discharge_date) && (
                     <div className="text-3xl font-bold">
-                      {moment(
+                      {relativeTime(
                         consultationData.discharge_date
                           ? consultationData.discharge_date
                           : consultationData.admission_date
-                      ).fromNow()}
+                      )}
                     </div>
                   )}
                   <div className="-mt-2 text-xs">
                     {consultationData.admission_date &&
-                      formatDate(consultationData.admission_date)}
+                      formatDateTime(consultationData.admission_date)}
                     {consultationData.discharge_date &&
-                      ` - ${formatDate(consultationData.discharge_date)}`}
+                      ` - ${formatDateTime(consultationData.discharge_date)}`}
                   </div>
                 </div>
               )}
@@ -479,7 +474,7 @@ export const ConsultationDetails = (props: any) => {
                 <div>
                   <span className="text-gray-900">Created: </span>
                   {consultationData.created_date
-                    ? formatDate(consultationData.created_date)
+                    ? formatDateTime(consultationData.created_date)
                     : "--:--"}{" "}
                   |
                 </div>
@@ -494,7 +489,7 @@ export const ConsultationDetails = (props: any) => {
                 <div>
                   <span className="text-gray-900">Last Modified: </span>
                   {consultationData.modified_date
-                    ? formatDate(consultationData.modified_date)
+                    ? formatDateTime(consultationData.modified_date)
                     : "--:--"}{" "}
                   |
                 </div>
@@ -580,7 +575,7 @@ export const ConsultationDetails = (props: any) => {
                             {hl7SocketUrl && (
                               <div className="min-h-[400px] flex-1">
                                 <HL7PatientVitalsMonitor
-                                  key={`hl7-${hl7SocketUrl}-${vitalsConfigHash}`}
+                                  key={`hl7-${hl7SocketUrl}-${vitals.hash}`}
                                   patientAssetBed={{
                                     asset:
                                       monitorBedData?.asset_object as AssetData,
@@ -589,14 +584,14 @@ export const ConsultationDetails = (props: any) => {
                                     meta: monitorBedData?.asset_object?.meta,
                                   }}
                                   socketUrl={hl7SocketUrl}
-                                  config={vitalsConfig}
+                                  config={vitals.config}
                                 />
                               </div>
                             )}
                             {ventilatorSocketUrl && (
                               <div className="min-h-[400px] flex-1">
                                 <VentilatorPatientVitalsMonitor
-                                  key={`ventilator-${ventilatorSocketUrl}-${vitalsConfigHash}`}
+                                  key={`ventilator-${ventilatorSocketUrl}-${vitals.hash}`}
                                   patientAssetBed={{
                                     asset:
                                       ventilatorBedData?.asset_object as AssetData,
@@ -605,7 +600,7 @@ export const ConsultationDetails = (props: any) => {
                                     meta: ventilatorBedData?.asset_object?.meta,
                                   }}
                                   socketUrl={ventilatorSocketUrl}
-                                  config={vitalsConfig}
+                                  config={vitals.config}
                                 />
                               </div>
                             )}
@@ -634,6 +629,16 @@ export const ConsultationDetails = (props: any) => {
                               )?.text ?? "--"}
                             </span>
                           </div>
+                          {consultationData.discharge_reason === "REF" && (
+                            <div>
+                              Referred Facility {" - "}
+                              <span className="font-semibold">
+                                {consultationData.referred_to_external ||
+                                  consultationData.referred_to_object?.name ||
+                                  "--"}
+                              </span>
+                            </div>
+                          )}
                           {consultationData.discharge_reason === "REC" && (
                             <div className="grid gap-4">
                               <div>
@@ -641,10 +646,9 @@ export const ConsultationDetails = (props: any) => {
                                 <span className="font-semibold">
                                   {consultationData.discharge_date
                                     ? formatDate(
-                                        consultationData.discharge_date,
-                                        "DD/MM/YYYY"
+                                        consultationData.discharge_date
                                       )
-                                    : "--:--"}
+                                    : "--/--/----"}
                                 </span>
                               </div>
                               <div>
@@ -678,7 +682,7 @@ export const ConsultationDetails = (props: any) => {
                                 Date of Death {" - "}
                                 <span className="font-semibold">
                                   {consultationData.death_datetime
-                                    ? formatDate(
+                                    ? formatDateTime(
                                         consultationData.death_datetime
                                       )
                                     : "--:--"}
@@ -708,10 +712,9 @@ export const ConsultationDetails = (props: any) => {
                                 <span className="font-semibold">
                                   {consultationData.discharge_date
                                     ? formatDate(
-                                        consultationData.discharge_date,
-                                        "DD/MM/YYYY"
+                                        consultationData.discharge_date
                                       )
-                                    : "--:--"}
+                                    : "--/--/----"}
                                 </span>
                               </div>
                               <div>
@@ -749,8 +752,7 @@ export const ConsultationDetails = (props: any) => {
                                           (choice) => choice.id === symptom
                                         )?.text ?? "Err. Unknown"
                                       }
-                                      color={"primary"}
-                                      size={"small"}
+                                      size="small"
                                     />
                                   )
                                 )}
@@ -769,9 +771,9 @@ export const ConsultationDetails = (props: any) => {
                               )}
                               <span className="text-xs font-semibold leading-relaxed text-gray-800">
                                 from{" "}
-                                {moment(
+                                {formatDate(
                                   consultationData.last_daily_round.created_at
-                                ).format("DD/MM/YYYY")}
+                                )}
                               </span>
                             </>
                           )}
@@ -789,8 +791,7 @@ export const ConsultationDetails = (props: any) => {
                                       (choice) => choice.id === symptom
                                     )?.text ?? "Err. Unknown"
                                   }
-                                  color={"primary"}
-                                  size={"small"}
+                                  size="small"
                                 />
                               )
                             )}
@@ -806,10 +807,8 @@ export const ConsultationDetails = (props: any) => {
                           <span className="text-xs font-semibold leading-relaxed text-gray-800">
                             from{" "}
                             {consultationData.symptoms_onset_date
-                              ? moment(
-                                  consultationData.symptoms_onset_date
-                                ).format("DD/MM/YYYY")
-                              : "--:--"}
+                              ? formatDate(consultationData.symptoms_onset_date)
+                              : "--/--/----"}
                           </span>
                         </div>
                       </div>
@@ -947,7 +946,7 @@ export const ConsultationDetails = (props: any) => {
                                   <td className="whitespace-nowrap p-4">
                                     {procedure.repetitive
                                       ? procedure.frequency
-                                      : formatDate(String(procedure.time))}
+                                      : formatDateTime(String(procedure.time))}
                                   </td>
                                 </tr>
                               )
@@ -967,14 +966,18 @@ export const ConsultationDetails = (props: any) => {
                         <div className="">
                           Intubation Date{" - "}
                           <span className="font-semibold">
-                            {formatDate(consultationData.intubation_start_date)}
+                            {formatDateTime(
+                              consultationData.intubation_start_date
+                            )}
                           </span>
                         </div>
                         <div className="">
                           Extubation Date{" - "}
                           <span className="font-semibold">
                             {consultationData.intubation_end_date &&
-                              formatDate(consultationData.intubation_end_date)}
+                              formatDateTime(
+                                consultationData.intubation_end_date
+                              )}
                           </span>
                         </div>
                         <div className="">
@@ -1013,7 +1016,7 @@ export const ConsultationDetails = (props: any) => {
                               <p>
                                 Insertion Date:{" "}
                                 <span className="font-semibold">
-                                  {formatDate(line.start_date)}
+                                  {formatDateTime(line.start_date)}
                                 </span>
                               </p>
                               <p>

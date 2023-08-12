@@ -1,5 +1,5 @@
-import moment from "moment";
 import CareIcon from "../../../../CAREUI/icons/CareIcon";
+import { formatDateTime } from "../../../../Utils/utils";
 
 export default function BinaryChronologicalChart(props: {
   data: {
@@ -53,7 +53,7 @@ export default function BinaryChronologicalChart(props: {
                       </p>
                     </div>
                     <div className="whitespace-nowrap text-right text-sm text-gray-500">
-                      <p>{moment(entry.timestamp).format("lll")}</p>
+                      <p>{formatDateTime(entry.timestamp)}</p>
                     </div>
                   </div>
                 </div>
