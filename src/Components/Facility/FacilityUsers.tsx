@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import loadable from "@loadable/component";
 import { useDispatch, useSelector } from "react-redux";
-import moment from "moment";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   addUserFacility,
@@ -19,7 +18,7 @@ import UserDeleteDialog from "../Users/UserDeleteDialog";
 import * as Notification from "../../Utils/Notifications.js";
 import UserDetails from "../Common/UserDetails";
 import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
-import { classNames } from "../../Utils/utils";
+import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
 import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -320,16 +319,12 @@ export default function FacilityUsers(props: any) {
                       aria-label="Online"
                       className={
                         "inline-block h-2 w-2 shrink-0 rounded-full " +
-                        (moment()
-                          .subtract(5, "minutes")
-                          .isBefore(user.last_login)
-                          ? "bg-primary-400"
-                          : "bg-gray-300")
+                        (isUserOnline(user) ? "bg-primary-400" : "bg-gray-300")
                       }
                     ></span>
                     <span className="pl-2">
                       {user.last_login
-                        ? moment(user.last_login).fromNow()
+                        ? relativeTime(user.last_login)
                         : "Never"}
                     </span>
                   </div>
@@ -337,8 +332,7 @@ export default function FacilityUsers(props: any) {
                 <div className="mt-2 text-2xl font-bold capitalize">
                   {`${user.first_name} ${user.last_name}`}
 
-                  {user.last_login &&
-                  moment().subtract(5, "minutes").isBefore(user.last_login) ? (
+                  {user.last_login && isUserOnline(user) ? (
                     <i
                       className="fas fa-circle ml-1 animate-pulse text-primary-500 opacity-75"
                       aria-label="Online"
@@ -471,7 +465,8 @@ export default function FacilityUsers(props: any) {
           text="Total Users"
           count={totalCount}
           loading={isLoading}
-          icon={"user-injured"}
+          icon="l-user-injured"
+          className="flex-1"
         />
       </div>
 

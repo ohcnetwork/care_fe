@@ -357,7 +357,11 @@ input:disabled,
 .disabled {
     @apply cursor-not-allowed bg-gray-200 border-gray-400 text-gray-700;
 }
-
+.disabled-select-form {
+    pointer-events: none; 
+    cursor: not-allowed;
+    background-color: rgb(219, 219, 219,0.5);
+  }
 textarea {
     @apply border-gray-300 rounded-md shadow-sm focus:ring-primary-500 focus:border-primary-500 transition-colors duration-300;
 }
@@ -400,6 +404,43 @@ button:disabled,
     }
 }
 
+.left-border-flash {
+    animation: borderPulse 1s infinite ease-out;
+    border-left: 10px solid #ffffff;
+    border-radius: 20px;
+}
+
+.right-border-flash {
+    animation: borderPulse 1s infinite ease-out;
+    border-right: 10px solid #ffffff;
+    border-radius: 20px;
+}
+
+.top-border-flash {
+    animation: borderPulse 1s infinite ease-out;
+    border-top: 10px solid #ffffff;
+    border-radius: 20px;
+}
+
+.bottom-border-flash {
+    animation: borderPulse 1s infinite ease-out;
+    border-bottom: 10px solid #ffffff;
+    border-radius: 20px;
+}
+
+
+@keyframes borderPulse {
+    0% {
+      border-color: #ffffff;
+      
+    }
+    50% {
+      border-color: #ff7272;
+    }
+    100% {
+      border-color: #ff0000;
+    }
+  }
 .feed-aspect-ratio {
     aspect-ratio: 16/9;
 }

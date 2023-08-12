@@ -4,7 +4,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getResourceComments, addResourceComments } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import Pagination from "../Common/Pagination";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import CircularProgress from "../Common/components/CircularProgress";
 import ButtonV2 from "../Common/components/ButtonV2";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -96,7 +96,7 @@ const CommentSection = (props: CommentSectionProps) => {
               </div>
               <div className="mt-3">
                 <span className="text-xs text-gray-500">
-                  {formatDate(comment.modified_date) || "-"}
+                  {formatDateTime(comment.modified_date) || "-"}
                 </span>
               </div>
               <div className=" mr-auto flex items-center rounded-md border bg-gray-100 py-1 pl-2 pr-3">

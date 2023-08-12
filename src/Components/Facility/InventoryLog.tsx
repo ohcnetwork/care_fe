@@ -10,7 +10,7 @@ import {
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import Page from "../Common/components/Page.js";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
 import ButtonV2 from "../Common/components/ButtonV2.js";
@@ -123,7 +123,7 @@ export default function InventoryLog(props: any) {
           <div className="flex items-center">
             <div className="ml-3">
               <p className="whitespace-nowrap text-gray-900">
-                {formatDate(inventoryItem.created_date)}
+                {formatDateTime(inventoryItem.created_date)}
               </p>
             </div>
           </div>

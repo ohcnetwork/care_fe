@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import {
@@ -24,16 +24,14 @@ import ConfirmDialog from "../../Common/ConfirmDialog";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import useFullscreen from "../../../Common/hooks/useFullscreen";
 import { UpdateCameraBoundaryConfigure } from "../../Assets/configure/CameraBoundayConfigure";
-import { BoundaryRange } from "../../Assets/AssetType/ONVIFCamera";
+import { BoundaryRange } from "../../../Common/constants";
 import CameraConfigure from "../../Assets/configure/CameraConfigure";
 import CameraBoundaryConfigure from "../../Assets/configure/CameraBoundayConfigure";
+import { direction } from "../../../Common/constants";
 
-export type direction = "left" | "right" | "up" | "down" | null;
 const LiveFeed = (props: any) => {
   const middlewareHostname =
     props.middlewareHostname || "dev_middleware.coronasafe.live";
-
-  const [assetOccupiedUser, setAssetOccupiedUser] = useState<string>("");
   const [presetsPage, setPresetsPage] = useState(0);
   const cameraAsset = props.asset;
   const [presets, setPresets] = useState<any>([]);
@@ -57,9 +55,9 @@ const LiveFeed = (props: any) => {
   const [isPreview, setIsPreview] = useState<boolean>(false);
   const [direction, setDirection] = useState<direction>(null);
   const [_isFullscreen, setFullscreen] = useFullscreen();
-
+  const [toAddPreset, setToAddPreset] = useState<boolean>(false);
   const asset: any = props.asset;
-  const addPreset: (e: React.SyntheticEvent) => void = props.addPreset;
+  const addPreset: () => void = props.addPreset;
   const bed: BedModel = props.bed;
   const setBed: (bed: BedModel) => void = props.setBed;
   const loadingAddPreset: boolean = props.loadingAddPreset;
@@ -67,17 +65,24 @@ const LiveFeed = (props: any) => {
   const setNewPreset: (preset: string) => void = props.setNewPreset;
 
   const boundaryPreset: any = props.boundaryPreset;
-  const addBoundaryPreset: (e: React.SyntheticEvent) => void =
-    props.addBoundaryPreset;
+  const addBoundaryPreset: () => void = props.addBoundaryPreset;
   const deleteBoundaryPreset: () => void = props.deleteBoundaryPreset;
   const setBoundaryPreset: (preset: any) => void = props.setBoundaryPreset;
   const fetchBoundaryBedPreset: () => void = props.fetchBoundaryBedPreset;
-  const updateBoundaryPreset: (action: "confirm" | "cancel") => void =
-    props.updateBoundaryPreset;
+  const updateBoundaryPreset: () => void = props.updateBoundaryPreset;
+  const [updateBoundaryInfo, setUpdateBoundaryInfo] = useState<
+    Record<string, boolean>
+  >({
+    left: false,
+    right: false,
+    up: false,
+    down: false,
+  });
   const setToUpdateBoundary: (toUpdate: boolean) => void =
     props.setToUpdateBoundary;
   const loadingAddBoundaryPreset: boolean = props.loadingAddBoundaryPreset;
   const toUpdateBoundary: boolean = props.toUpdateBoundary;
+
   const { width } = useWindowDimensions();
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
@@ -108,8 +113,6 @@ const LiveFeed = (props: any) => {
     getPresets,
     gotoPreset,
     relativeMove,
-    lockAsset,
-    unlockAsset,
   } = useFeedPTZ({
     config: {
       middlewareHostname,
@@ -202,15 +205,7 @@ const LiveFeed = (props: any) => {
   const gotoBedPreset = (preset: any) => {
     setLoading("Moving");
     absoluteMove(preset.meta.position, {
-      onSuccess: () => {
-        setLoading(undefined);
-        setAssetOccupiedUser("");
-      },
-      onError: async (resp) => {
-        if (resp.status == 409 && resp.data?.username) {
-          setAssetOccupiedUser(resp?.data?.username);
-        }
-      },
+      onSuccess: () => setLoading(undefined),
     });
   };
 
@@ -244,54 +239,76 @@ const LiveFeed = (props: any) => {
         setLoading("Moving to Bottom Boundary");
       }
       absoluteMove(position, {
-        onSuccess: () => {
+        onSuccess: () => setLoading(undefined),
+        onError: () => {
+          Notification.Error({ msg: "Something went wrong" });
           setLoading(undefined);
-          setAssetOccupiedUser("");
-        },
-        onError: async (resp) => {
-          if (resp.status == 409 && resp.data?.username) {
-            setAssetOccupiedUser(resp?.data?.username);
-          }
         },
       });
-    } else if (boundaryPreset?.meta?.range && !direction) {
-      Notification.Error({ msg: "Please select a direction" });
-    } else if (!boundaryPreset?.meta?.range && direction) {
-      Notification.Error({ msg: "Please set boundary" });
     } else {
       Notification.Error({ msg: "Something went wrong" });
     }
   };
 
-  const changeDirectionalBoundary = (action: "expand" | "shrink") => {
-    if (boundaryPreset?.meta?.range) {
-      const { max_x, max_y, min_x, min_y }: BoundaryRange =
-        boundaryPreset.meta.range;
-      const range: BoundaryRange = {
-        max_x: max_x,
-        max_y: max_y,
-        min_x: min_x,
-        min_y: min_y,
-      };
-      const delta = 0.1 / Math.max(1, precision);
-      if (direction == "left") {
-        range.min_x = action == "expand" ? min_x - delta : min_x + delta;
-      } else if (direction == "right") {
-        range.max_x = action == "expand" ? max_x + delta : max_x - delta;
-      } else if (direction == "up") {
-        range.max_y = action == "expand" ? max_y + delta : max_y - delta;
-      } else if (direction == "down") {
-        range.min_y = action == "expand" ? min_y - delta : min_y + delta;
-      }
-      setBoundaryPreset({
-        ...boundaryPreset,
-        meta: {
-          ...boundaryPreset.meta,
-          range: range,
-        },
-      });
-      setLoading(undefined);
+  const disableFeedButton: (action: string) => boolean = (action) => {
+    if (
+      (direction == "left" || direction == "right") &&
+      (action == "left" || action == "right")
+    ) {
+      return false;
+    } else if (
+      (direction == "up" || direction == "down") &&
+      (action == "up" || action == "down")
+    ) {
+      return false;
+    } else if (
+      action == "precision" ||
+      action == "zoomIn" ||
+      action == "zoomOut" ||
+      action == "fullScreen"
+    ) {
+      return false;
     }
+    return true;
+  };
+
+  const changeDirectionalBoundary = (option: any) => {
+    const { max_x, max_y, min_x, min_y }: BoundaryRange =
+      boundaryPreset.meta.range;
+    const range: BoundaryRange = {
+      max_x: max_x,
+      max_y: max_y,
+      min_x: min_x,
+      min_y: min_y,
+    };
+    const delta = 0.1 / Math.max(1, precision);
+    if (direction == "left") {
+      range.min_x =
+        option.action == "left" ? range.min_x - delta : range.min_x + delta;
+    } else if (direction == "right") {
+      range.max_x =
+        option.action == "right" ? range.max_x + delta : range.max_x - delta;
+    } else if (direction == "up") {
+      range.max_y =
+        option.action == "up" ? range.max_y + delta : range.max_y - delta;
+    } else if (direction == "down") {
+      range.min_y =
+        option.action == "down" ? range.min_y - delta : range.min_y + delta;
+    }
+
+    setBoundaryPreset({
+      ...boundaryPreset,
+      meta: {
+        ...boundaryPreset.meta,
+        range: range,
+      },
+    });
+    updateBoundaryPreset();
+
+    setUpdateBoundaryInfo({
+      ...updateBoundaryInfo,
+      [direction as string]: true,
+    });
   };
 
   const runFunctionWithDelay = (func: () => any, delay: number) => {
@@ -317,15 +334,7 @@ const LiveFeed = (props: any) => {
         await runFunctionWithDelay(
           () =>
             absoluteMove(edge, {
-              onSuccess: () => {
-                setLoading(undefined);
-                setAssetOccupiedUser("");
-              },
-              onError: async (resp) => {
-                if (resp.status == 409 && resp.data?.username) {
-                  setAssetOccupiedUser(resp?.data?.username);
-                }
-              },
+              onSuccess: () => setLoading(undefined),
             }),
           3000
         );
@@ -333,92 +342,6 @@ const LiveFeed = (props: any) => {
       setIsPreview(false);
       setLoading(undefined);
     }
-  };
-
-  useEffect(() => {
-    lockAsset({
-      onSuccess: async () => {
-        setAssetOccupiedUser("");
-      },
-      onError: async (resp) => {
-        if (resp.status == 409 && resp.data?.username) {
-          setAssetOccupiedUser(resp?.data?.username);
-        }
-      },
-    });
-    return () => {
-      unlockAsset({
-        onSuccess: async () => {
-          setAssetOccupiedUser("");
-        },
-        onError: async (resp) => {
-          if (resp.status == 409 && resp.data?.username) {
-            setAssetOccupiedUser(resp?.data?.username);
-          }
-        },
-      });
-    };
-  }, []);
-
-  useEffect(() => {
-    if (cameraAsset?.hostname) {
-      fetchCameraPresets();
-    }
-  }, []);
-
-  useEffect(() => {
-    setNewPresetName(toUpdate?.meta?.preset_name);
-    setBedTransfer(toUpdate?.bed_object);
-  }, [toUpdate]);
-
-  // change this function
-  useEffect(() => {
-    getBedPresets(cameraAsset.id);
-
-    absoluteMove(bedPresets[0]?.meta?.position, {});
-  }, [page.offset, cameraAsset.id, refreshPresetsHash, bed]);
-
-  useEffect(() => {
-    if (boundaryPreset?.meta?.range && direction) {
-      try {
-        gotoDirectionalBoundary();
-      } catch (e) {
-        Notification.Error({ msg: "Something Went Wrong" });
-      }
-    }
-  }, [direction, boundaryPreset]);
-  const viewOptions = (page: number) => {
-    return presets
-      ? Object.entries(presets)
-          .map(([key, value]) => ({ label: key, value }))
-          .slice(page, page + 10)
-      : Array.from(Array(10), (_, i) => ({
-          label: "Monitor " + (i + 1),
-          value: i + 1,
-        }));
-  };
-  useEffect(() => {
-    let tId: any;
-    if (streamStatus !== StreamStatus.Playing) {
-      setStreamStatus(StreamStatus.Loading);
-      tId = setTimeout(() => {
-        startStream({
-          onSuccess: () => setStreamStatus(StreamStatus.Playing),
-          onError: () => setStreamStatus(StreamStatus.Offline),
-        });
-      }, 500);
-    }
-
-    return () => {
-      clearTimeout(tId);
-    };
-  }, [startStream, streamStatus]);
-
-  const handlePagination = (cOffset: number) => {
-    setPage({
-      ...page,
-      offset: cOffset,
-    });
   };
 
   const cameraPTZActionCBs: { [key: string]: (option: any) => void } = {
@@ -438,6 +361,7 @@ const LiveFeed = (props: any) => {
       if (!liveFeedPlayerRef.current) return;
       setFullscreen(true, liveFeedPlayerRef.current);
     },
+
     updatePreset: (option) => {
       getCameraStatus({
         onSuccess: async (data) => {
@@ -470,16 +394,12 @@ const LiveFeed = (props: any) => {
     },
     other: (option) => {
       setLoading(option.loadingLabel);
+
+      if (toUpdateBoundary && boundaryPreset?.meta?.range) {
+        changeDirectionalBoundary(option);
+      }
       relativeMove(getPTZPayload(option.action, precision), {
-        onSuccess: () => {
-          setLoading(undefined);
-          setAssetOccupiedUser("");
-        },
-        onError: async (resp) => {
-          if (resp.status == 409 && resp.data?.username) {
-            setAssetOccupiedUser(resp?.data?.username);
-          }
-        },
+        onSuccess: () => setLoading(undefined),
       });
     },
   };
@@ -492,6 +412,85 @@ const LiveFeed = (props: any) => {
     return { ...option, callback: () => cb(option) };
   });
 
+  useEffect(() => {
+    if (cameraAsset?.hostname) {
+      fetchCameraPresets();
+    }
+  }, []);
+
+  useEffect(() => {
+    setNewPresetName(toUpdate?.meta?.preset_name);
+    setBedTransfer(toUpdate?.bed_object);
+  }, [toUpdate]);
+
+  useEffect(() => {
+    getBedPresets(cameraAsset.id);
+    setToUpdateBoundary(false);
+    setDirection(null);
+  }, [page.offset, cameraAsset.id, refreshPresetsHash, bed]);
+
+  useEffect(() => {
+    const position = bedPresets?.filter((preset: any) => {
+      if (preset?.meta?.position && preset?.meta?.type != "boundary") {
+        return true;
+      }
+      return false;
+    })?.[0]?.meta?.position;
+    if (position) {
+      setLoading("Moving to default preset");
+      absoluteMove(position, {
+        onSuccess: () => setLoading(undefined),
+        onError: () => {
+          Notification.Error({ msg: "Something went wrong" });
+          setLoading(undefined);
+        },
+      });
+    }
+  }, [bedPresets]);
+
+  useEffect(() => {
+    if (boundaryPreset?.meta?.range && direction) {
+      try {
+        gotoDirectionalBoundary();
+      } catch (e) {
+        Notification.Error({ msg: "Something Went Wrong" });
+      }
+    }
+  }, [direction]);
+
+  const viewOptions = (page: number) => {
+    return presets
+      ? Object.entries(presets)
+          .map(([key, value]) => ({ label: key, value }))
+          .slice(page, page + 10)
+      : Array.from(Array(10), (_, i) => ({
+          label: "Monitor " + (i + 1),
+          value: i + 1,
+        }));
+  };
+  useEffect(() => {
+    let tId: any;
+    if (streamStatus !== StreamStatus.Playing) {
+      setStreamStatus(StreamStatus.Loading);
+      tId = setTimeout(() => {
+        startStream({
+          onSuccess: () => setStreamStatus(StreamStatus.Playing),
+          onError: () => setStreamStatus(StreamStatus.Offline),
+        });
+      }, 500);
+    }
+    return () => {
+      clearTimeout(tId);
+    };
+  }, [startStream, streamStatus]);
+
+  const handlePagination = (cOffset: number) => {
+    setPage({
+      ...page,
+      offset: cOffset,
+    });
+  };
+
   // Voluntarily disabling eslint, since length of `cameraPTZ` is constant and
   // hence shall not cause issues. (https://news.ycombinator.com/item?id=24363703)
   for (const option of cameraPTZ) {
@@ -499,7 +498,6 @@ const LiveFeed = (props: any) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKeyboardShortcut(option.shortcutKey, option.callback);
   }
-
   return (
     <Page title="Live Feed" hideBack>
       {toDelete && (
@@ -548,14 +546,6 @@ const LiveFeed = (props: any) => {
       )}
       <div className="mt-4 flex flex-col">
         <div className="relative mt-4 flex flex-col gap-4 lg:flex-row">
-          {assetOccupiedUser && (
-            <div>
-              <div className="text-lg font-bold text-black">
-                {assetOccupiedUser} is using the camera
-              </div>
-            </div>
-          )}
-
           <div className="flex-1">
             {/* ADD VIDEO PLAYER HERE */}
             <div className="feed-aspect-ratio relative mb-4 w-full rounded bg-primary-100 lg:mb-0">
@@ -613,235 +603,273 @@ const LiveFeed = (props: any) => {
                 )}
               </div>
             </div>
-            {!toUpdateBoundary && (
-              <div
-                className={`${
-                  isExtremeSmallScreen ? " flex flex-wrap " : " md:flex "
-                } mt-4 max-w-lg`}
-              >
-                {cameraPTZ.map((option) => {
-                  const shortcutKeyDescription =
-                    option.shortcutKey &&
-                    option.shortcutKey
-                      .join(" + ")
-                      .replace("Control", "Ctrl")
-                      .replace("ArrowUp", "↑")
-                      .replace("ArrowDown", "↓")
-                      .replace("ArrowLeft", "←")
-                      .replace("ArrowRight", "→");
 
-                  return (
-                    <button
-                      className="tooltip flex-1 border border-green-100 bg-green-100 p-2 hover:bg-green-200"
-                      onClick={option.callback}
-                    >
-                      <span className="sr-only">{option.label}</span>
-                      {option.icon ? (
-                        <CareIcon className={`care-${option.icon}`} />
-                      ) : (
-                        <span className="flex h-full w-8 items-center justify-center px-2 font-bold">
-                          {option.value}x
-                        </span>
-                      )}
-                      <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">{`${option.label}  (${shortcutKeyDescription})`}</span>
-                    </button>
-                  );
-                })}
-                <div className="hideonmobilescreen pl-3">
-                  <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
-                </div>
+            <div
+              className={`${
+                isExtremeSmallScreen ? " flex flex-wrap " : " md:flex "
+              } mt-4 max-w-lg`}
+            >
+              {cameraPTZ.map((option) => {
+                const shortcutKeyDescription =
+                  option.shortcutKey &&
+                  option.shortcutKey
+                    .join(" + ")
+                    .replace("Control", "Ctrl")
+                    .replace("ArrowUp", "↑")
+                    .replace("ArrowDown", "↓")
+                    .replace("ArrowLeft", "←")
+                    .replace("ArrowRight", "→");
+
+                return (
+                  <button
+                    className="tooltip flex-1 border border-green-100 bg-green-100 p-2 hover:bg-green-200"
+                    onClick={option.callback}
+                    disabled={
+                      toUpdateBoundary && disableFeedButton(option.action)
+                    }
+                  >
+                    <span className="sr-only">{option.label}</span>
+                    {option.icon ? (
+                      <CareIcon className={`care-${option.icon}`} />
+                    ) : (
+                      <span className="flex h-full w-8 items-center justify-center px-2 font-bold">
+                        {option.value}x
+                      </span>
+                    )}
+                    <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">{`${option.label}  (${shortcutKeyDescription})`}</span>
+                  </button>
+                );
+              })}
+
+              <div className="hideonmobilescreen pl-3">
+                <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
               </div>
-            )}
-            <CameraConfigure
-              asset={asset}
-              addPreset={addPreset}
-              setBed={setBed}
-              bed={bed}
-              isLoading={loadingAddPreset}
-              newPreset={newPreset}
-              setNewPreset={setNewPreset}
-            />
-            <CameraBoundaryConfigure
-              addBoundaryPreset={addBoundaryPreset}
-              deleteBoundaryPreset={deleteBoundaryPreset}
-              boundaryPreset={boundaryPreset}
-              bed={bed}
-              toUpdateBoundary={toUpdateBoundary}
-              setToUpdateBoundary={setToUpdateBoundary}
-              loadingAddBoundaryPreset={loadingAddBoundaryPreset}
-            />
-            {toUpdateBoundary && boundaryPreset && (
-              <UpdateCameraBoundaryConfigure
-                cameraPTZ={cameraPTZ}
-                direction={direction}
-                setDirection={setDirection}
-                changeDirectionalBoundary={changeDirectionalBoundary}
-                updateBoundaryPreset={updateBoundaryPreset}
-                previewBoundary={previewBoundary}
-                isPreview={isPreview}
-                boundaryPreset={boundaryPreset}
-              />
-            )}
+            </div>
           </div>
-
           <div className="mx-4 flex max-w-sm flex-col">
-            <nav className="flex flex-wrap">
-              <button
-                className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
-                  showDefaultPresets
-                    ? "border-b-2 border-primary-500 text-primary-600"
-                    : ""
-                }`}
-                onClick={() => {
-                  setShowDefaultPresets(true);
-                }}
-              >
-                Default Presets
-              </button>
-              <button
-                className={`flex-1 p-4  text-center font-bold  text-gray-700 hover:text-gray-800  ${
-                  !showDefaultPresets
-                    ? "border-b-2 border-primary-500 text-primary-600"
-                    : ""
-                }`}
-                onClick={() => {
-                  setShowDefaultPresets(false);
-                }}
-              >
-                Patient Presets
-              </button>
-            </nav>
-            <div className="my-2 w-full space-y-4">
-              <div
-                className={`grid ${
-                  isExtremeSmallScreen ? " sm:grid-cols-2 " : " grid-cols-2 "
-                } my-auto gap-2`}
-              >
-                {showDefaultPresets ? (
-                  <>
-                    {viewOptions(presetsPage)?.map((option: any, i) => (
-                      <button
-                        key={i}
-                        className="max- flex w-full flex-wrap gap-2 truncate rounded-md border border-white bg-green-100 p-3  text-black hover:bg-green-500 hover:text-white"
-                        onClick={() => {
-                          setLoading(`Moving to Preset ${option.label}`);
-                          gotoPreset(
-                            { preset: option.value },
-                            {
-                              onSuccess: () => {
-                                setLoading(undefined);
-                                console.log("Preset Updated", option);
-                              },
-                            }
-                          );
-                        }}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </>
+            <div className={`${isPreview ? "disabled-select-form" : null}`}>
+              <label id="asset-type">Bed</label>
+              <BedSelect
+                name="bed"
+                className="overflow-y-scoll z-50 mt-2"
+                setSelected={(selected) => setBed(selected as BedModel)}
+                selected={bed}
+                error=""
+                multiple={false}
+                location={asset?.location_id}
+                facility={asset?.facility_id}
+              />
+            </div>
+            {toAddPreset ? (
+              <CameraConfigure
+                setToAddPreset={setToAddPreset}
+                addPreset={addPreset}
+                isLoading={loadingAddPreset}
+                newPreset={newPreset}
+                setNewPreset={setNewPreset}
+              />
+            ) : (
+              <>
+                {toUpdateBoundary ? (
+                  <UpdateCameraBoundaryConfigure
+                    direction={direction}
+                    setDirection={setDirection}
+                    setToUpdateBoundary={setToUpdateBoundary}
+                    updateBoundaryInfo={updateBoundaryInfo}
+                    setUpdateBoundaryInfo={setUpdateBoundaryInfo}
+                  />
                 ) : (
                   <>
-                    {bedPresets?.map(
-                      (preset: any, index: number) =>
-                        preset?.meta?.type != "boundary" && (
-                          <div className="flex flex-col">
-                            <button
-                              key={preset.id}
-                              className="flex flex-col truncate rounded-t-md border border-white bg-green-100 p-2  text-black hover:bg-green-500 hover:text-white"
-                              onClick={() => {
-                                setLoading("Moving");
-                                gotoBedPreset(preset);
-                                setCurrentPreset(preset);
-                                getBedPresets(cameraAsset?.id);
-                                fetchCameraPresets();
-                              }}
-                            >
-                              <span className="justify-start text-xs font-semibold">
-                                {preset.bed_object.name}
-                              </span>
-                              <span className="mx-auto">
-                                {preset.meta.preset_name
-                                  ? preset.meta.preset_name
-                                  : `Unnamed Preset ${index + 1}`}
-                              </span>
-                            </button>
-                            <div className="flex">
+                    <CameraBoundaryConfigure
+                      addBoundaryPreset={addBoundaryPreset}
+                      deleteBoundaryPreset={deleteBoundaryPreset}
+                      boundaryPreset={boundaryPreset}
+                      bed={bed}
+                      toUpdateBoundary={toUpdateBoundary}
+                      setToUpdateBoundary={setToUpdateBoundary}
+                      loadingAddBoundaryPreset={loadingAddBoundaryPreset}
+                      toAddPreset={toAddPreset}
+                      setDirection={setDirection}
+                      previewBoundary={previewBoundary}
+                      isPreview={isPreview}
+                    />
+
+                    <nav className="flex flex-wrap">
+                      <button
+                        className={`flex-1 p-4 text-center text-sm font-semibold  text-gray-700 hover:text-gray-800  ${
+                          showDefaultPresets
+                            ? "border-b-2 border-primary-500 text-primary-600"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          setShowDefaultPresets(true);
+                        }}
+                      >
+                        Default Presets
+                      </button>
+                      <button
+                        className={`flex-1 p-4  text-center text-sm font-semibold  text-gray-700 hover:text-gray-800  ${
+                          !showDefaultPresets
+                            ? "border-b-2 border-primary-500 text-primary-600"
+                            : ""
+                        }`}
+                        onClick={() => {
+                          setShowDefaultPresets(false);
+                        }}
+                      >
+                        Patient Presets
+                      </button>
+                    </nav>
+                    <div className="my-2 w-full space-y-4">
+                      <div
+                        className={`grid ${
+                          isExtremeSmallScreen
+                            ? " sm:grid-cols-2 "
+                            : " grid-cols-2 "
+                        } my-auto gap-2`}
+                      >
+                        {showDefaultPresets ? (
+                          <>
+                            {viewOptions(presetsPage)?.map((option: any, i) => (
                               <button
-                                onClick={() => setToUpdate(preset)}
-                                className="flex w-1/2 items-center justify-center gap-2 bg-green-200 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
+                                key={i}
+                                className="max- flex w-full flex-wrap gap-2 truncate rounded-md border border-white bg-green-100 p-3  text-black hover:bg-green-500 hover:text-white"
+                                onClick={() => {
+                                  setLoading(
+                                    `Moving to Preset ${option.label}`
+                                  );
+                                  gotoPreset(
+                                    { preset: option.value },
+                                    {
+                                      onSuccess: () => {
+                                        setLoading(undefined);
+                                        console.log("Preset Updated", option);
+                                      },
+                                    }
+                                  );
+                                }}
                               >
-                                <i className="fa-solid fa-pencil"></i>
+                                {option.label}
                               </button>
-                              <button
-                                onClick={() => setToDelete(preset)}
-                                className="flex w-1/2 items-center justify-center gap-2 bg-red-200 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200 "
-                              >
-                                <i className="fa-solid fa-trash-can"></i>
-                              </button>
-                            </div>
-                          </div>
-                        )
-                    )}
+                            ))}
+                          </>
+                        ) : (
+                          <>
+                            {bedPresets?.map(
+                              (preset: any, index: number) =>
+                                preset?.meta?.type != "boundary" && (
+                                  <div className="flex flex-col">
+                                    <button
+                                      key={preset.id}
+                                      className="flex flex-col truncate rounded-t-md border border-white bg-green-100 p-2  text-black hover:bg-green-500 hover:text-white"
+                                      onClick={() => {
+                                        setLoading("Moving");
+                                        gotoBedPreset(preset);
+                                        setCurrentPreset(preset);
+                                        getBedPresets(cameraAsset?.id);
+                                        fetchCameraPresets();
+                                      }}
+                                    >
+                                      <span className="justify-start text-xs font-semibold">
+                                        {preset.bed_object.name}
+                                      </span>
+                                      <span className="mx-auto">
+                                        {preset.meta.preset_name
+                                          ? preset.meta.preset_name
+                                          : `Unnamed Preset ${index + 1}`}
+                                      </span>
+                                    </button>
+                                    <div className="flex">
+                                      <button
+                                        onClick={() => setToUpdate(preset)}
+                                        className="flex w-1/2 items-center justify-center gap-2 bg-green-200 py-1 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
+                                      >
+                                        <i className="fa-solid fa-pencil"></i>
+                                      </button>
+                                      <button
+                                        onClick={() => setToDelete(preset)}
+                                        className="flex w-1/2 items-center justify-center gap-2 bg-red-200 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200 "
+                                      >
+                                        <i className="fa-solid fa-trash-can"></i>
+                                      </button>
+                                    </div>
+                                  </div>
+                                )
+                            )}
+                          </>
+                        )}
+                      </div>
+                      {/* Page Number Next and Prev buttons */}
+                      {showDefaultPresets ? (
+                        <div className="flex flex-row gap-1">
+                          <button
+                            className="flex-1 p-2  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                            disabled={presetsPage < 10}
+                            onClick={() => {
+                              setPresetsPage(presetsPage - 10);
+                            }}
+                          >
+                            <i className="fas fa-arrow-left"></i>
+                          </button>
+                          <button
+                            className="flex-1 p-2  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                            disabled={presetsPage >= presets?.length}
+                            onClick={() => {
+                              setPresetsPage(presetsPage + 10);
+                            }}
+                          >
+                            <i className="fas fa-arrow-right"></i>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-row gap-1">
+                          <button
+                            className="flex-1 p-2 text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                            disabled={page.offset === 0}
+                            onClick={() => {
+                              handlePagination(page.offset - page.limit);
+                            }}
+                          >
+                            <i className="fas fa-arrow-left"></i>
+                          </button>
+                          <button
+                            className="flex-1 p-2 text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+                            disabled={page.offset + page.limit >= page.count}
+                            onClick={() => {
+                              handlePagination(page.offset + page.limit);
+                            }}
+                          >
+                            <i className="fas fa-arrow-right"></i>
+                          </button>
+                        </div>
+                      )}
+                      <div className="flex flex-row gap-1">
+                        <button
+                          className="w-full rounded-md border border-white bg-green-100 p-2  text-black hover:bg-green-500 hover:text-white"
+                          onClick={() => {
+                            setToAddPreset(true);
+                          }}
+                          disabled={toUpdateBoundary}
+                        >
+                          <CareIcon className="care-l-plus" /> Add Preset
+                        </button>
+                        {props?.showRefreshButton && (
+                          <button
+                            className="w-full rounded-md border border-white bg-green-100 p-2 text-black hover:bg-green-500 hover:text-white"
+                            onClick={() => {
+                              getBedPresets(cameraAsset?.id);
+                              fetchCameraPresets();
+                            }}
+                          >
+                            <CareIcon className="care-l-redo" /> Refresh
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </>
                 )}
-              </div>
-              {/* Page Number Next and Prev buttons */}
-              {showDefaultPresets ? (
-                <div className="flex flex-row gap-1">
-                  <button
-                    className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                    disabled={presetsPage < 10}
-                    onClick={() => {
-                      setPresetsPage(presetsPage - 10);
-                    }}
-                  >
-                    <i className="fas fa-arrow-left"></i>
-                  </button>
-                  <button
-                    className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                    disabled={presetsPage >= presets?.length}
-                    onClick={() => {
-                      setPresetsPage(presetsPage + 10);
-                    }}
-                  >
-                    <i className="fas fa-arrow-right"></i>
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-row gap-1">
-                  <button
-                    className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                    disabled={page.offset === 0}
-                    onClick={() => {
-                      handlePagination(page.offset - page.limit);
-                    }}
-                  >
-                    <i className="fas fa-arrow-left"></i>
-                  </button>
-                  <button
-                    className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
-                    disabled={page.offset + page.limit >= page.count}
-                    onClick={() => {
-                      handlePagination(page.offset + page.limit);
-                    }}
-                  >
-                    <i className="fas fa-arrow-right"></i>
-                  </button>
-                </div>
-              )}
-              {props?.showRefreshButton && (
-                <button
-                  className="w-full rounded-md border border-white bg-green-100 px-3 py-2 font-semibold text-black hover:bg-green-500 hover:text-white"
-                  onClick={() => {
-                    getBedPresets(cameraAsset?.id);
-                    fetchCameraPresets();
-                  }}
-                >
-                  <CareIcon className="care-l-redo h-4 text-lg" /> Refresh
-                </button>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </div>
       </div>

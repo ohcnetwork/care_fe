@@ -240,10 +240,10 @@ export default function ResourceCreate(props: resourceProps) {
           label={t("contact_phone")}
           name="refering_facility_contact_number"
           required
-          disableCountry
           value={state.form.refering_facility_contact_number}
           onChange={handleFormFieldChange}
           error={state.errors.refering_facility_contact_number}
+          types={["mobile", "landline"]}
         />
 
         <div>

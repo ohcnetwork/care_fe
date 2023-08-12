@@ -289,7 +289,8 @@ export default function ResultList() {
             text="Total Results"
             count={totalCount}
             loading={isLoading}
-            icon={"clipboard-notes"}
+            icon="l-clipboard-notes"
+            className="flex-1"
           />
           <div className="mt-2">
             <SearchInput
@@ -307,6 +308,7 @@ export default function ResultList() {
                 onChange={(e) => setPhoneNum(e.value)}
                 error={phoneNumberError}
                 placeholder="Search by Phone Number"
+                types={["mobile", "landline"]}
               />
             </div>
           </div>

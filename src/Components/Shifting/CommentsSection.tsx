@@ -4,7 +4,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getShiftComments, addShiftComments } from "../../Redux/actions";
 import CircularProgress from "../Common/components/CircularProgress";
 import * as Notification from "../../Utils/Notifications.js";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import ButtonV2 from "../Common/components/ButtonV2";
 
@@ -87,7 +87,7 @@ const CommentSection = (props: CommentSectionProps) => {
               <div className="mt-3">
                 <span className="text-xs text-gray-500">
                   {comment.modified_date
-                    ? formatDate(comment.modified_date)
+                    ? formatDateTime(comment.modified_date)
                     : "-"}
                 </span>
               </div>

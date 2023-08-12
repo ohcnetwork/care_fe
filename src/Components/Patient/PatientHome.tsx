@@ -1,5 +1,4 @@
 import { navigate } from "raviger";
-import moment from "moment";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
@@ -21,7 +20,7 @@ import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 import Chip from "../../CAREUI/display/Chip";
-import { classNames, formatDate } from "../../Utils/utils";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
@@ -31,6 +30,8 @@ import CircularProgress from "../Common/components/CircularProgress";
 import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+import dayjs from "../../Utils/dayjs";
+import { triggerGoal } from "../Common/Plausible";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -222,6 +223,11 @@ export const PatientHome = (props: any) => {
   useAbortableEffect(
     (status: statusType) => {
       fetchpatient(status);
+      triggerGoal("Patient Profile Viewed", {
+        facilityId: facilityId,
+        patientId: patientData.id,
+        userID: currentUser.data.id,
+      });
     },
     [dispatch, fetchpatient]
   );
@@ -472,64 +478,62 @@ export const PatientHome = (props: any) => {
                   <div className="ml-auto mr-9 flex flex-wrap gap-3">
                     {patientData.is_vaccinated ? (
                       <Chip
-                        color="blue"
-                        startIcon="syringe"
+                        variant="custom"
+                        className="bg-blue-100 text-blue-800"
+                        startIcon="l-syringe"
                         text="Vaccinated"
                       />
                     ) : (
                       <Chip
-                        color="yellow"
-                        startIcon="exclamation-triangle"
+                        variant="warning"
+                        startIcon="l-exclamation-triangle"
                         text="Not Vaccinated"
                       />
                     )}
                     {patientData.allow_transfer ? (
                       <Chip
-                        color="yellow"
-                        startIcon="unlock"
+                        variant="warning"
+                        startIcon="l-unlock"
                         text="Transfer Allowed"
                       />
                     ) : (
-                      <Chip
-                        color="primary"
-                        startIcon="lock"
-                        text="Transfer Blocked"
-                      />
+                      <Chip startIcon="l-lock" text="Transfer Blocked" />
                     )}
                     {patientData.gender === 2 &&
                       patientData.is_antenatal &&
                       patientData.is_active && (
                         <Chip
-                          color="blue"
-                          startIcon="baby-carriage"
+                          variant="custom"
+                          className="bg-pink-100 text-pink-800"
+                          startIcon="l-baby-carriage"
                           text="Antenatal"
                         />
                       )}
                     {patientData.contact_with_confirmed_carrier && (
                       <Chip
-                        color="red"
-                        startIcon="exclamation-triangle"
+                        variant="danger"
+                        startIcon="l-exclamation-triangle"
                         text="Contact with confirmed carrier"
                       />
                     )}
                     {patientData.contact_with_suspected_carrier && (
                       <Chip
-                        color="yellow"
-                        startIcon="exclamation-triangle"
+                        variant="warning"
+                        startIcon="l-exclamation-triangle"
                         text="Contact with suspected carrier"
                       />
                     )}
                     {patientData.past_travel && (
                       <Chip
-                        color="yellow"
-                        startIcon="exclamation-triangle"
+                        variant="warning"
+                        startIcon="l-exclamation-triangle"
                         text="Travel (within last 28 days)"
                       />
                     )}
                     {patientData.last_consultation?.is_telemedicine && (
                       <Chip
-                        color="purple"
-                        startIcon="phone"
+                        variant="alert"
+                        startIcon="l-phone"
                         text="Telemedicine"
                       />
                     )}
@@ -608,7 +612,7 @@ export const PatientHome = (props: any) => {
                       Date of Return
                     </div>
                     <div className="mt-1 text-sm font-medium leading-5">
-                      {formatDate(patientData.date_of_return)}
+                      {formatDateTime(patientData.date_of_return)}
                     </div>
                   </div>
                 )}
@@ -639,7 +643,7 @@ export const PatientHome = (props: any) => {
                         Last Vaccinated on
                       </div>
                       <div className="mt-1 text-sm font-medium leading-5">
-                        {formatDate(patientData.last_vaccinated_date)}
+                        {formatDateTime(patientData.last_vaccinated_date)}
                       </div>
                     </div>
                   )}
@@ -670,17 +674,17 @@ export const PatientHome = (props: any) => {
                     <div
                       className={
                         "mb-6 mt-6 inline-flex w-full items-center justify-center rounded-md border p-3 text-xs font-semibold leading-4 shadow-sm lg:mt-0 " +
-                        (moment().isBefore(patientData.review_time)
+                        (dayjs().isBefore(patientData.review_time)
                           ? " bg-gray-100"
                           : " bg-red-600/5 p-1 text-sm font-normal text-red-600")
                       }
                     >
                       <i className="text-md fa-regular fa-clock mr-2" />
                       <p className="p-1">
-                        {(moment().isBefore(patientData.review_time)
+                        {(dayjs().isBefore(patientData.review_time)
                           ? "Review before: "
                           : "Review Missed: ") +
-                          formatDate(patientData.review_time)}
+                          formatDateTime(patientData.review_time)}
                       </p>
                     </div>
                   )}
@@ -888,7 +892,7 @@ export const PatientHome = (props: any) => {
                               title="  Last Modified"
                               className={
                                 "flex items-center text-sm font-medium leading-5 " +
-                                (moment()
+                                (dayjs()
                                   .subtract(2, "hours")
                                   .isBefore(shift.modified_date)
                                   ? "text-gray-900"
@@ -897,7 +901,7 @@ export const PatientHome = (props: any) => {
                             >
                               <CareIcon className="care-l-stopwatch mr-2 text-lg" />
                               <dd className="text-sm font-bold leading-5">
-                                {formatDate(shift.modified_date) || "--"}
+                                {formatDateTime(shift.modified_date) || "--"}
                               </dd>
                             </dt>
                           </div>
@@ -1313,7 +1317,6 @@ export const PatientHome = (props: any) => {
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     disabled={
                       !(
                         patientData.is_active &&
@@ -1327,40 +1330,43 @@ export const PatientHome = (props: any) => {
                       )
                     }
                   >
-                    <CareIcon className="care-l-chat-bubble-user mr-2 text-5xl text-green-700" />
-                    Add Consultation
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-chat-bubble-user text-xl" />
+                      Add Consultation
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     onClick={() =>
                       navigate(`/patient/${id}/investigation_reports`)
                     }
                   >
-                    <CareIcon className="care-l-file-search-alt mr-2 text-5xl" />
-                    Investigations Summary
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-file-search-alt text-xl" />
+                      Investigations Summary
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/files`
                       )
                     }
                   >
-                    <CareIcon className="care-l-file-upload mr-2 text-5xl" />
-                    View/Upload Patient Files
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-file-upload text-xl" />
+                      View/Upload Patient Files
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
@@ -1369,14 +1375,15 @@ export const PatientHome = (props: any) => {
                     }
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-ambulance mr-2 text-5xl" />
-                    SHIFT PATIENT
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-ambulance text-xl" />
+                      Shift Patient
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     disabled={isPatientInactive(patientData, facilityId)}
                     onClick={() =>
                       navigate(
@@ -1385,34 +1392,38 @@ export const PatientHome = (props: any) => {
                     }
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-medkit mr-2 text-5xl" />
-                    Request Sample Test
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-medkit text-xl" />
+                      Request Sample Test
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData?.facility}/patient/${id}/notes`
                       )
                     }
                   >
-                    <CareIcon className="care-l-clipboard-notes mr-2 text-5xl" />
-                    View Patient Notes
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-clipboard-notes text-xl" />
+                      View Patient Notes
+                    </span>
                   </ButtonV2>
                 </div>
                 <div>
                   <ButtonV2
                     className="w-full"
-                    align="start"
                     onClick={() => setOpenAssignVolunteerDialog(true)}
                     disabled={false}
                     authorizeFor={NonReadOnlyUsers}
                   >
-                    <CareIcon className="care-l-users-alt mr-2 text-5xl" />
-                    Assign to a volunteer
+                    <span className="flex w-full items-center justify-start gap-2">
+                      <CareIcon className="care-l-users-alt text-xl" />
+                      Assign to a volunteer
+                    </span>
                   </ButtonV2>
                 </div>
               </div>

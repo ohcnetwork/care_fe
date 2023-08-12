@@ -285,9 +285,9 @@ const AssetsList = () => {
 
               <div className="mt-2 flex flex-wrap gap-2">
                 {asset.is_working ? (
-                  <Chip color="green" startIcon="cog" text="Working" />
+                  <Chip startIcon="l-cog" text="Working" />
                 ) : (
-                  <Chip color="red" startIcon="cog" text="Not Working" />
+                  <Chip variant="danger" startIcon="l-cog" text="Not Working" />
                 )}
               </div>
             </div>
@@ -350,7 +350,8 @@ const AssetsList = () => {
           text="Total Assets"
           count={totalCount}
           loading={isLoading}
-          icon={"monitor-heart-rate"}
+          icon="l-monitor-heart-rate"
+          className="flex-1"
         />
         <div className="flex-1">
           <SearchInput

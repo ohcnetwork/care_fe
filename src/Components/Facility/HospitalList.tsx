@@ -1,29 +1,30 @@
-import { navigate } from "raviger";
-import { useCallback, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { FACILITY_TYPES } from "../../Common/constants";
 import {
-  getPermittedFacilities,
   downloadFacility,
   downloadFacilityCapacity,
   downloadFacilityDoctors,
   downloadFacilityTriage,
-  getState,
   getDistrict,
   getLocalBody,
+  getPermittedFacilities,
+  getState,
 } from "../../Redux/actions";
-import loadable from "@loadable/component";
-import { FacilityModel } from "./models";
-import FacilityFilter from "./FacilityFilter";
-import { useTranslation } from "react-i18next";
-import SearchInput from "../Form/SearchInput";
-import useFilters from "../../Common/hooks/useFilters";
-import { FacilityCard } from "./FacilityCard";
-import ExportMenu from "../Common/Export";
-import CountBlock from "../../CAREUI/display/Count";
-import Page from "../Common/components/Page";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { useCallback, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import CountBlock from "../../CAREUI/display/Count";
+import ExportMenu from "../Common/Export";
+import { FACILITY_TYPES } from "../../Common/constants";
+import { FacilityCard } from "./FacilityCard";
+import FacilityFilter from "./FacilityFilter";
+import { FacilityModel } from "./models";
+import Page from "../Common/components/Page";
+import SearchInput from "../Form/SearchInput";
+import loadable from "@loadable/component";
+import { navigate } from "raviger";
+import useFilters from "../../Common/hooks/useFilters";
+import { useTranslation } from "react-i18next";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -167,10 +168,14 @@ export const HospitalList = () => {
     );
   };
 
-  let facilityList: any[] = [];
+  let facilityList: JSX.Element[] = [];
   if (data && data.length) {
-    facilityList = data.map((facility: any) => (
-      <FacilityCard facility={facility} userType={userType} />
+    facilityList = data.map((facility: FacilityModel) => (
+      <FacilityCard
+        key={facility.id!}
+        facility={facility}
+        userType={userType}
+      />
     ));
   }
 
@@ -245,7 +250,8 @@ export const HospitalList = () => {
           text="Total Facilities"
           count={totalCount}
           loading={isLoading}
-          icon={"hospital"}
+          icon="l-hospital"
+          className="flex-1"
         />
         <div className="my-4 flex grow flex-col justify-between gap-2 sm:flex-row">
           <SearchInput

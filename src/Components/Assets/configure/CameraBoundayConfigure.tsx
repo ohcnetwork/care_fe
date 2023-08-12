@@ -1,30 +1,28 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { BedModel } from "../../Facility/models";
-import ButtonV2, { Submit } from "../../Common/components/ButtonV2";
-import Card from "../../../CAREUI/display/Card";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { direction } from "../../Facility/Consultations/LiveFeed";
-
+import { direction } from "../../../Common/constants";
 interface CameraBoundaryConfigureProps {
-  addBoundaryPreset: (e: React.SyntheticEvent) => void;
+  addBoundaryPreset: () => void;
   deleteBoundaryPreset: () => void;
   boundaryPreset: any;
   bed: BedModel;
   toUpdateBoundary: boolean;
   setToUpdateBoundary: (toUpdate: boolean) => void;
   loadingAddBoundaryPreset: boolean;
+  toAddPreset: boolean;
+  setDirection: (direction: direction) => void;
+  isPreview: boolean;
+  previewBoundary: () => void;
 }
 
 interface UpdateCameraBoundaryConfigureProps {
-  cameraPTZ: any;
   direction: direction;
   setDirection(direction: direction): void;
-  changeDirectionalBoundary(action: "expand" | "shrink"): void;
-  updateBoundaryPreset(action: "confirm" | "cancel"): void;
-  previewBoundary: () => void;
-  isPreview: boolean;
-  boundaryPreset: any;
+  setToUpdateBoundary: (toUpdate: boolean) => void;
+  updateBoundaryInfo: Record<string, boolean>;
+  setUpdateBoundaryInfo: (info: Record<string, boolean>) => void;
 }
 export default function CameraBoundaryConfigure(
   props: CameraBoundaryConfigureProps
@@ -37,6 +35,10 @@ export default function CameraBoundaryConfigure(
     toUpdateBoundary,
     setToUpdateBoundary,
     loadingAddBoundaryPreset,
+    toAddPreset,
+    setDirection,
+    isPreview,
+    previewBoundary,
   } = props;
   const [toDeleteBoundary, setToDeleteBoundary] = useState<any>(null);
   return (
@@ -65,59 +67,67 @@ export default function CameraBoundaryConfigure(
           }}
         />
       )}
-      {bed?.id && (
-        <div className="flex flex-col justify-between">
-          <div>
-            <div className="text-lg font-semibold">
-              {`${!boundaryPreset ? "Add" : ""}`} Boundary Preset
-            </div>
-            <div className="mt-2">
-              <label id="asset-name">Name</label>
-              <div className="text-lg">{`${
-                !boundaryPreset ? bed?.name : boundaryPreset?.meta?.preset_name
-              } ${!boundaryPreset ? "boundary" : ""}`}</div>
-            </div>
-          </div>
-          {!boundaryPreset ? (
-            <div>
-              <form onSubmit={addBoundaryPreset} className="mt-2">
-                <Submit
-                  label="Add Boundary"
-                  disabled={loadingAddBoundaryPreset}
-                />
-              </form>
-            </div>
-          ) : (
-            <>
-              {!toUpdateBoundary && (
-                <div className="flex justify-start mt-4 gap-4">
-                  <div>
-                    <ButtonV2
-                      variant="primary"
-                      onClick={() => {
-                        setToUpdateBoundary(true);
-                      }}
-                      id="update-boundary-preset"
-                    >
-                      Update
-                    </ButtonV2>
-                  </div>
-                  <div>
-                    <ButtonV2
-                      variant="danger"
-                      onClick={() => {
-                        setToDeleteBoundary(boundaryPreset);
-                      }}
-                      id="delete-boundary-preset"
-                    >
-                      Delete
-                    </ButtonV2>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
+
+      {bed?.id && !boundaryPreset ? (
+        <div className="my-4 flex flex-col">
+          <button
+            className="w-full rounded-md border border-white bg-green-100 px-3 py-2 text-black hover:bg-green-500 hover:text-white"
+            onClick={addBoundaryPreset}
+            disabled={loadingAddBoundaryPreset}
+            id="add-boundary-preset"
+          >
+            <CareIcon className="care-l-plus-circle" />
+            Add boundary preset
+          </button>
         </div>
+      ) : (
+        <>
+          {bed?.id && !toUpdateBoundary && (
+            <div className="my-4 flex flex-col">
+              <div className="flex-initial">
+                <label id="asset-name">Boundary Preset Name</label>
+                <div className="text-sm">{`${
+                  !boundaryPreset
+                    ? bed?.name
+                    : boundaryPreset?.meta?.preset_name
+                } ${!boundaryPreset ? "boundary" : ""}`}</div>
+              </div>
+              <div className="mt-1 flex flex-initial justify-start gap-1">
+                <button
+                  className="items-center rounded-md  bg-green-200 p-2 text-sm text-green-800 hover:bg-green-800 hover:text-green-200 "
+                  onClick={() => {
+                    setToUpdateBoundary(true);
+                    setDirection("left");
+                  }}
+                  id="update-boundary-preset"
+                  disabled={toAddPreset || isPreview}
+                >
+                  <CareIcon className="care-l-pen" />
+                </button>
+                <button
+                  className="items-center gap-2 rounded-md bg-red-200 p-2 py-1 text-sm text-red-800 hover:bg-red-800 hover:text-red-200"
+                  onClick={() => {
+                    setToDeleteBoundary(boundaryPreset);
+                  }}
+                  id="delete-boundary-preset"
+                  disabled={isPreview}
+                >
+                  <CareIcon className="care-l-trash" />
+                </button>
+                <button
+                  className="items-center gap-2 rounded-md bg-gray-200 p-2 py-1 text-sm text-gray-800 hover:bg-gray-800 hover:text-gray-200"
+                  onClick={() => {
+                    previewBoundary();
+                  }}
+                  id="delete-boundary-preset"
+                  disabled={isPreview}
+                >
+                  <CareIcon className="care-l-eye" />
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </>
   );
@@ -127,164 +137,129 @@ export function UpdateCameraBoundaryConfigure(
   props: UpdateCameraBoundaryConfigureProps
 ) {
   const {
-    cameraPTZ,
     direction,
     setDirection,
-    changeDirectionalBoundary,
-    updateBoundaryPreset,
-    previewBoundary,
-    isPreview,
-    boundaryPreset,
+    setToUpdateBoundary,
+    updateBoundaryInfo,
+    setUpdateBoundaryInfo,
   } = props;
 
-  return (
-    <div className="mt-4 flex">
-      <Card className="flex-initial">
-        <div className="flex flex-col space-y-4">
-          <div>
-            <label id="asset-name">Name</label>
-            <div className="text-lg font-semibold">
-              {boundaryPreset?.meta?.preset_name}
-            </div>
-          </div>
-          <div className="flex space-x-8">
-            <div className="flex-initial grid grid-cols-3">
-              {[
-                null,
-                "up",
-                null,
-                "left",
-                null,
-                "right",
-                null,
-                "down",
-                null,
-              ].map((button, index) => {
-                let out = <div className="w-[20px] h-[20px]" key={index}></div>;
-                if (button) {
-                  out = (
-                    <ButtonV2
-                      size="small"
-                      circle={true}
-                      variant={direction === button ? "primary" : "secondary"}
-                      border={true}
-                      key={index}
-                      onClick={() => {
-                        if (direction === button) {
-                          setDirection(null);
-                        } else {
-                          setDirection(button as direction);
-                        }
-                      }}
-                    >
-                      {button}
-                    </ButtonV2>
-                  );
-                }
-                return out;
-              })}
-            </div>
-            <div className="flex-initial flex flex-col justify-center space-y-2 items-center">
-              {" "}
-              {[cameraPTZ[4], cameraPTZ[5], cameraPTZ[6]].map(
-                (option, index) => {
-                  const shortcutKeyDescription =
-                    option.shortcutKey &&
-                    option.shortcutKey
-                      .join(" + ")
-                      .replace("Control", "Ctrl")
-                      .replace("ArrowUp", "↑")
-                      .replace("ArrowDown", "↓")
-                      .replace("ArrowLeft", "←")
-                      .replace("ArrowRight", "→");
+  const translation: Record<string, string> = {
+    left: "Left",
+    right: "Right",
+    up: "Top",
+    down: "Bottom",
+  };
 
-                  return (
-                    <div key={index}>
-                      <button
-                        className="bg-green-100 hover:bg-green-200 border border-green-100 p-2 tooltip"
-                        onClick={option.callback}
-                      >
-                        <span className="sr-only">{option.label}</span>
-                        {option.icon ? (
-                          <CareIcon className={`care-${option.icon}`} />
-                        ) : (
-                          <span className="font-bold flex items-center justify-center ">
-                            {option.value}x
-                          </span>
-                        )}
-                        <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm font-semibold">{`${option.label}  (${shortcutKeyDescription})`}</span>
-                      </button>
-                    </div>
-                  );
-                }
-              )}
-            </div>
-            <div className="flex-initial flex flex-col justify-center space-y-2 items-center">
-              <ButtonV2
-                size="small"
-                variant="primary"
-                onClick={() => {
-                  changeDirectionalBoundary("expand");
-                }}
-                disabled={isPreview || !direction}
-                className="w-full"
-              >
-                Expand
-              </ButtonV2>
+  const handlePrevButtonClick = () => {
+    switch (direction) {
+      case "left":
+        setToUpdateBoundary(false);
+        setDirection(null);
+        setUpdateBoundaryInfo({
+          left: false,
+          right: false,
+          up: false,
+          down: false,
+        });
+        break;
 
-              <ButtonV2
-                size="small"
-                variant="primary"
-                onClick={() => {
-                  changeDirectionalBoundary("shrink");
-                }}
-                disabled={isPreview || !direction}
-                className="w-full"
-              >
-                Shrink
-              </ButtonV2>
-            </div>
-          </div>
-          <div className="flex flex-row justify-center gap-2">
-            <ButtonV2
-              variant="primary"
-              size="small"
-              onClick={() => {
-                previewBoundary();
-              }}
-              id="preview-update-boundary-preset"
-              disabled={isPreview}
-            >
-              Preview
-            </ButtonV2>
-            <ButtonV2
-              variant="primary"
-              size="small"
-              onClick={() => {
-                updateBoundaryPreset("confirm");
-                setDirection(null);
-              }}
-              id="confirm-update-boundary-preset"
-              disabled={isPreview}
-            >
-              Confirm
-            </ButtonV2>
-            <ButtonV2
-              variant="secondary"
-              size="small"
-              border={true}
-              onClick={() => {
-                updateBoundaryPreset("cancel");
-                setDirection(null);
-              }}
-              id="cancel-modify-boundary-preset"
-              disabled={isPreview}
-            >
-              Cancel
-            </ButtonV2>
-          </div>
+      case "right":
+        setDirection("left");
+        break;
+
+      case "up":
+        setDirection("right");
+        break;
+
+      case "down":
+        setDirection("up");
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const showUpdateBoundaryInfo = (dir: string, updated: boolean) => {
+    if (dir == direction) {
+      return (
+        <div className="rounded-md bg-purple-100 py-1 text-center text-purple-700">
+          updating
         </div>
-      </Card>
+      );
+    }
+    if (updated) {
+      return (
+        <div className="rounded-md bg-green-100 py-1 text-center text-green-700">
+          updated
+        </div>
+      );
+    }
+    return (
+      <div className="rounded-md bg-gray-100 py-1 text-center text-gray-700">
+        not updated
+      </div>
+    );
+  };
+
+  const handleNextButtonClick = () => {
+    switch (direction) {
+      case "left":
+        setDirection("right");
+        break;
+      case "right":
+        setDirection("up");
+        break;
+      case "up":
+        setDirection("down");
+        break;
+      case "down":
+        setDirection(null);
+        setToUpdateBoundary(false);
+        setUpdateBoundaryInfo({
+          left: false,
+          right: false,
+          up: false,
+          down: false,
+        });
+        break;
+      default:
+        break;
+    }
+  };
+
+  return (
+    <div className="mt-4 flex flex-col flex-wrap">
+      <div className="text-md flex-1 bg-gray-200  p-2 text-center">
+        Update boundary
+      </div>
+      <div className="flex flex-1 flex-col gap-2 py-4">
+        {["left", "right", "up", "down"].map((dir) => {
+          return (
+            <div className="flex flex-1 flex-row justify-between gap-2">
+              <div>{translation[dir]}</div>
+              <div className="w-28">
+                {showUpdateBoundaryInfo(dir, updateBoundaryInfo[dir])}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex flex-1 flex-row gap-1">
+        <button
+          className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+          onClick={handlePrevButtonClick}
+        >
+          {direction === "left" ? "Cancel" : "Previous"}
+        </button>
+        <button
+          className="flex-1 p-4  text-center font-bold  text-gray-700 hover:bg-gray-300 hover:text-gray-800"
+          onClick={handleNextButtonClick}
+        >
+          {direction === "down" ? "Done" : "Next"}
+        </button>
+      </div>
     </div>
   );
 }

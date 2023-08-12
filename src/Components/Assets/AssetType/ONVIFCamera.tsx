@@ -19,18 +19,13 @@ import TextFormField from "../../Form/FormFields/TextFormField";
 import { Submit } from "../../Common/components/ButtonV2";
 import { SyntheticEvent } from "react";
 import LiveFeed from "../../Facility/Consultations/LiveFeed";
+import Card from "../../../CAREUI/display/Card";
+import { BoundaryRange } from "../../../Common/constants";
 
 interface ONVIFCameraProps {
   assetId: string;
   facilityId: string;
   asset: any;
-}
-
-export interface BoundaryRange {
-  max_x: number;
-  min_x: number;
-  max_y: number;
-  min_y: number;
 }
 
 const ONVIFCamera = (props: ONVIFCameraProps) => {
@@ -53,7 +48,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     Number(new Date())
   );
   const [boundaryPreset, setBoundaryPreset] = useState<any>(null);
-  const [refBoundaryPreset, setRefBoundaryPreset] = useState<any>(null); // to reference in case modification of boundary preset is cancelled.
   const [toUpdateBoundary, setToUpdateBoundary] = useState<boolean>(false);
   const [loadingAddBoundaryPreset, setLoadingAddBoundaryPreset] =
     useState<boolean>(false);
@@ -182,17 +176,14 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         });
         if (boundaryPreset) {
           setBoundaryPreset(boundaryPreset);
-          setRefBoundaryPreset(boundaryPreset);
         } else {
           setBoundaryPreset(null);
-          setRefBoundaryPreset(null);
         }
         setPresets(bedAssets);
       }
     } else {
       setPresets([]);
       setBoundaryPreset(null);
-      setRefBoundaryPreset(null);
     }
   };
 
@@ -228,8 +219,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     }
   };
 
-  const addBoundaryPreset = async (e: SyntheticEvent) => {
-    e.preventDefault();
+  const addBoundaryPreset = async () => {
     const config = getCameraConfig(asset as AssetData);
     try {
       setLoadingAddBoundaryPreset(true);
@@ -255,9 +245,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             msg: "Boundary Preset Added Successfully",
           });
           // setBed({});
-          setNewPreset("");
           setRefreshPresetsHash(Number(new Date()));
-          setBoundaryPreset(null);
         } else {
           Notification.Error({
             msg: "Failed to add Boundary Preset",
@@ -276,14 +264,9 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     setLoadingAddBoundaryPreset(false);
   };
 
-  const updateBoundaryPreset = async (action: any) => {
+  const updateBoundaryPreset = async () => {
     if (boundaryPreset && bed?.id) {
       try {
-        if (action == "cancel") {
-          setBoundaryPreset(refBoundaryPreset);
-          setToUpdateBoundary(false);
-          return;
-        }
         if (
           !boundaryPreset?.asset_object?.id ||
           !boundaryPreset?.bed_object?.id
@@ -305,11 +288,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           Notification.Success({
             msg: "Boundary Preset Modified Successfully",
           });
-          // setBed({});
-          setNewPreset("");
-          setRefreshPresetsHash(Number(new Date()));
-          setBoundaryPreset(null);
-          setToUpdateBoundary(false);
         } else {
           Notification.Error({
             msg: "Failed to modify Boundary Preset",
@@ -333,10 +311,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
             msg: "Boundary Preset Deleted Successfully",
           });
           // setBed({});
-          setNewPreset("");
           setRefreshPresetsHash(Number(new Date()));
-          setBoundaryPreset(null);
-          setRefBoundaryPreset(null);
         } else {
           Notification.Error({
             msg: "Failed to delete Boundary Preset",
@@ -350,8 +325,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     }
   };
 
-  const addPreset = async (e: SyntheticEvent) => {
-    e.preventDefault();
+  const addPreset = async () => {
     const config = getCameraConfig(asset as AssetData);
     const data = {
       bed_id: bed.id,
@@ -375,14 +349,13 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         Notification.Success({
           msg: "Preset Added Successfully",
         });
-        // setBed({});
-        setNewPreset("");
-        setRefreshPresetsHash(Number(new Date()));
       } else {
         Notification.Error({
           msg: "Something went wrong..!",
         });
       }
+      setNewPreset("");
+      setRefreshPresetsHash(Number(new Date()));
     } catch (e) {
       Notification.Error({
         msg: "Something went wrong..!",
@@ -390,9 +363,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
     }
     setLoadingAddPreset(false);
   };
-
   if (isLoading) return <Loading />;
-
   return (
     <div className="space-y-6">
       <form className="rounded bg-white p-8 shadow" onSubmit={handleSubmit}>
@@ -449,46 +420,29 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
 
       {assetType === "ONVIF" ? (
         <>
-          {/* <CameraConfigure
-            asset={asset as AssetData}
-            bed={bed}
-            setBed={setBed}
-            newPreset={newPreset}
-            setNewPreset={setNewPreset}
-            addPreset={addPreset}
-            isLoading={loadingAddPreset}
-            refreshPresetsHash={refreshPresetsHash}
-            facilityMiddlewareHostname={facilityMiddlewareHostname}
-            boundaryPreset={boundaryPreset}
-            setBoundaryPreset={setBoundaryPreset}
-            addBoundaryPreset={addBoundaryPreset}
-            updateBoundaryPreset={updateBoundaryPreset}
-            deleteBoundaryPreset={deleteBoundaryPreset}
-            toUpdateBoundary={toUpdateBoundary}
-            setToUpdateBoundary={setToUpdateBoundary}
-            loadingAddBoundaryPreset={loadingAddBoundaryPreset}
-          /> */}
-          <LiveFeed
-            middlewareHostname={facilityMiddlewareHostname}
-            asset={getCameraConfig(asset)}
-            addPreset={addPreset}
-            setBed={setBed}
-            bed={bed}
-            newPreset={newPreset}
-            loadingAddPreset={loadingAddPreset}
-            setNewPreset={setNewPreset}
-            showRefreshButton={true}
-            refreshPresetsHash={refreshPresetsHash}
-            boundaryPreset={boundaryPreset}
-            fetchBoundaryBedPreset={fetchBoundaryBedPreset}
-            setBoundaryPreset={setBoundaryPreset}
-            addBoundaryPreset={addBoundaryPreset}
-            updateBoundaryPreset={updateBoundaryPreset}
-            deleteBoundaryPreset={deleteBoundaryPreset}
-            toUpdateBoundary={toUpdateBoundary}
-            setToUpdateBoundary={setToUpdateBoundary}
-            loadingAddBoundaryPreset={loadingAddBoundaryPreset}
-          />
+          <Card className="mt-4" title="Live Feed">
+            <LiveFeed
+              middlewareHostname={facilityMiddlewareHostname}
+              asset={getCameraConfig(asset)}
+              addPreset={addPreset}
+              setBed={setBed}
+              bed={bed}
+              newPreset={newPreset}
+              loadingAddPreset={loadingAddPreset}
+              setNewPreset={setNewPreset}
+              showRefreshButton={true}
+              refreshPresetsHash={refreshPresetsHash}
+              boundaryPreset={boundaryPreset}
+              fetchBoundaryBedPreset={fetchBoundaryBedPreset}
+              setBoundaryPreset={setBoundaryPreset}
+              addBoundaryPreset={addBoundaryPreset}
+              updateBoundaryPreset={updateBoundaryPreset}
+              deleteBoundaryPreset={deleteBoundaryPreset}
+              toUpdateBoundary={toUpdateBoundary}
+              setToUpdateBoundary={setToUpdateBoundary}
+              loadingAddBoundaryPreset={loadingAddBoundaryPreset}
+            />
+          </Card>
         </>
       ) : null}
     </div>

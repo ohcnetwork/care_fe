@@ -20,9 +20,9 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import moment from "moment";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
+import dayjs from "../../Utils/dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -37,6 +37,7 @@ type EditForm = {
   doctor_qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
+  weekly_working_hours: string | undefined;
 };
 type State = {
   form: EditForm;
@@ -57,6 +58,7 @@ const initForm: EditForm = {
   doctor_qualification: undefined,
   doctor_experience_commenced_on: undefined,
   doctor_medical_council_registration: undefined,
+  weekly_working_hours: undefined,
 };
 
 const initError: EditForm = Object.assign(
@@ -145,12 +147,13 @@ export default function UserProfile() {
             phoneNumber: res.data.phone_number,
             altPhoneNumber: res.data.alt_phone_number,
             doctor_qualification: res.data.doctor_qualification,
-            doctor_experience_commenced_on: moment().diff(
-              moment(res.data.doctor_experience_commenced_on),
+            doctor_experience_commenced_on: dayjs().diff(
+              dayjs(res.data.doctor_experience_commenced_on),
               "years"
             ),
             doctor_medical_council_registration:
               res.data.doctor_medical_council_registration,
+            weekly_working_hours: res.data.weekly_working_hours,
           };
           dispatch({
             type: "set_form",
@@ -251,6 +254,20 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
+        case "weekly_working_hours":
+          if (!states.form[field]) {
+            errors[field] = "This field is required";
+            invalidForm = true;
+          } else if (
+            Number(states.form[field]) < 0 ||
+            Number(states.form[field]) > 168 ||
+            !/^\d+$/.test(states.form[field] ?? "")
+          ) {
+            errors[field] =
+              "Weekly working hours must be a number between 0 and 168";
+            invalidForm = true;
+          }
+          return;
       }
     });
     dispatch({ type: "set_error", errors });
@@ -298,14 +315,21 @@ export default function UserProfile() {
             : undefined,
         doctor_experience_commenced_on:
           details.user_type === "Doctor"
-            ? moment()
-                .subtract(states.form.doctor_experience_commenced_on, "years")
+            ? dayjs()
+                .subtract(
+                  parseInt(
+                    (states.form.doctor_experience_commenced_on as string) ??
+                      "0"
+                  ),
+                  "years"
+                )
                 .format("YYYY-MM-DD")
             : undefined,
         doctor_medical_council_registration:
           details.user_type === "Doctor"
             ? states.form.doctor_medical_council_registration
             : undefined,
+        weekly_working_hours: states.form.weekly_working_hours,
       };
       const res = await dispatchAction(partialUpdateUser(username, data));
       if (res && res.data) {
@@ -513,25 +537,33 @@ export default function UserProfile() {
                       {details.state_object?.name || "-"}
                     </dd>
                   </div>
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
+                      Skills
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      <div className="flex flex-wrap gap-2">
+                        {details.skills && details.skills.length
+                          ? details.skills?.map((skill: SkillObjectModel) => {
+                              return (
+                                <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
+                                  <p className="py-1.5">{skill.name}</p>
+                                </span>
+                              );
+                            })
+                          : "-"}
+                      </div>
+                    </dd>
+                  </div>
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
+                      Weekly working hours
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.weekly_working_hours ?? "-"}
+                    </dd>
+                  </div>
                 </dl>
-                <div className="my-2  sm:col-span-1">
-                  <dt className="text-sm font-medium leading-5 text-black">
-                    Skills
-                  </dt>
-                  <dd className="mt-1 text-sm leading-5 text-gray-900">
-                    <div className="flex flex-wrap gap-2">
-                      {details.skills && details.skills.length
-                        ? details.skills?.map((skill: SkillObjectModel) => {
-                            return (
-                              <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
-                                <p className="py-1.5">{skill.name}</p>
-                              </span>
-                            );
-                          })
-                        : "-"}
-                    </div>
-                  </dd>
-                </div>
               </div>
             )}
 
@@ -579,12 +611,14 @@ export default function UserProfile() {
                           className="col-span-6 sm:col-span-3"
                           required
                           placeholder="Phone Number"
+                          types={["mobile", "landline"]}
                         />
                         <PhoneNumberFormField
                           {...fieldProps("altPhoneNumber")}
                           label="Whatsapp Number"
                           className="col-span-6 sm:col-span-3"
                           placeholder="WhatsApp Number"
+                          types={["mobile"]}
                         />
                         <TextFormField
                           {...fieldProps("email")}
@@ -622,6 +656,15 @@ export default function UserProfile() {
                             />
                           </>
                         )}
+                        <TextFormField
+                          {...fieldProps("weekly_working_hours")}
+                          required
+                          label="Weekly working hours"
+                          className="col-span-6 sm:col-span-3"
+                          type="number"
+                          min={0}
+                          max={168}
+                        />
                       </div>
                     </div>
                     <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">

@@ -21,7 +21,11 @@ import {
   searchPatient,
   updatePatient,
 } from "../../Redux/actions";
-import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
+import {
+  dateQueryString,
+  getPincodeDetails,
+  includesIgnoreCase,
+} from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useEffect, useReducer, useState } from "react";
@@ -54,12 +58,12 @@ import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import countryList from "../../Common/static/countries.json";
 import { debounce } from "lodash";
 import loadable from "@loadable/component";
-import moment from "moment";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { validatePincode } from "../../Common/validation";
+import { FormContextValue } from "../Form/FormContext.js";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -188,8 +192,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     title: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [showImport, setShowImport] = useState(false);
+  const [showImport, setShowImport] = useState<{
+    show?: boolean;
+    field?: FormContextValue<PatientModel> | null;
+  }>({
+    show: false,
+    field: null,
+  });
   const [careExtId, setCareExtId] = useState("");
+  const [formField, setFormField] = useState<any>();
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
@@ -215,11 +226,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     useState<FieldError>();
 
   useEffect(() => {
-    if (extId) {
+    if (extId && formField) {
       setCareExtId(extId);
-      fetchExtResultData(null);
+      fetchExtResultData(null, formField);
     }
-  }, [careExtId]);
+  }, [careExtId, formField]);
 
   const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
@@ -282,69 +293,106 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  const fetchExtResultData = async (e: any) => {
+  const fetchExtResultData = async (e: any, field: any) => {
     if (e) e.preventDefault();
-    setIsLoading(true);
     if (!careExtId) return;
     const res = await dispatchAction(externalResult({ id: careExtId }));
 
     if (res?.data) {
-      const form = { ...state.form };
-      form["name"] = res.data.name ? res.data.name : state.form.name;
-      form["address"] = res.data.address
-        ? res.data.address
-        : state.form.address;
-      form["permanent_address"] = res.data.permanent_address
-        ? res.data.permanent_address
-        : state.form.permanent_address;
-      form["gender"] = res.data.gender
-        ? parseGenderFromExt(res.data.gender, state.form.gender)
-        : state.form.gender;
-      form["test_id"] = res.data.test_id
-        ? res.data.test_id
-        : state.form.test_id;
-      form["srf_id"] = res.data.srf_id ? res.data.srf_id : state.form.srf_id;
+      field.onChange({
+        name: "name",
+        value: res.data.name ? res.data.name : state.form.name,
+      });
+      field.onChange({
+        name: "address",
+        value: res.data.address ? res.data.address : state.form.address,
+      });
+      field.onChange({
+        name: "permanent_address",
+        value: res.data.permanent_address
+          ? res.data.permanent_address
+          : state.form.permanent_address,
+      });
+      field.onChange({
+        name: "gender",
+        value: res.data.gender
+          ? parseGenderFromExt(res.data.gender, state.form.gender)
+          : state.form.gender,
+      });
+      field.onChange({
+        name: "test_id",
+        value: res.data.test_id ? res.data.test_id : state.form.test_id,
+      });
+      field.onChange({
+        name: "srf_id",
+        value: res.data.srf_id ? res.data.srf_id : state.form.srf_id,
+      });
+      field.onChange({
+        name: "state",
+        value: res.data.district_object
+          ? res.data.district_object.state
+          : state.form.state,
+      });
+      field.onChange({
+        name: "district",
+        value: res.data.district ? res.data.district : state.form.district,
+      });
+      field.onChange({
+        name: "local_body",
+        value: res.data.local_body
+          ? res.data.local_body
+          : state.form.local_body,
+      });
+      field.onChange({
+        name: "ward",
+        value: res.data.ward ? res.data.ward : state.form.ward,
+      });
+      field.onChange({
+        name: "village",
+        value: res.data.village ? res.data.village : state.form.village,
+      });
+      field.onChange({
+        name: "disease_status",
+        value: res.data.result
+          ? res.data.result.toUpperCase()
+          : state.form.disease_status,
+      });
+      field.onChange({
+        name: "test_type",
+        value: res.data.test_type
+          ? res.data.test_type.toUpperCase()
+          : state.form.test_type,
+      });
+      field.onChange({
+        name: "date_of_test",
+        value: res.data.sample_collection_date
+          ? res.data.sample_collection_date
+          : state.form.date_of_test,
+      });
+      field.onChange({
+        name: "date_of_result",
+        value: res.data.result_date
+          ? res.data.result_date
+          : state.form.date_of_result,
+      });
+      field.onChange({
+        name: "phone_number",
+        value: res.data.mobile_number
+          ? "+91" + res.data.mobile_number
+          : state.form.phone_number,
+      });
 
-      form["state"] = res.data.district_object
-        ? res.data.district_object.state
-        : state.form.state;
-      form["district"] = res.data.district
-        ? res.data.district
-        : state.form.district;
-      form["local_body"] = res.data.local_body
-        ? res.data.local_body
-        : state.form.local_body;
-      form["ward"] = res.data.ward ? res.data.ward : state.form.ward;
-      form["village"] = res.data.village
-        ? res.data.village
-        : state.form.village;
-      form["disease_status"] = res.data.result
-        ? res.data.result.toUpperCase()
-        : state.form.disease_status;
-      form["test_type"] = res.data.test_type
-        ? res.data.test_type.toUpperCase()
-        : state.form.test_type;
-      form["date_of_test"] = res.data.sample_collection_date
-        ? moment(res.data.sample_collection_date)
-        : state.form.date_of_test;
-      form["date_of_result"] = res.data.result_date
-        ? moment(res.data.result_date)
-        : state.form.date_of_result;
-      form["phone_number"] = res.data.mobile_number
-        ? "+91" + res.data.mobile_number
-        : state.form.phone_number;
-
-      dispatch({ type: "set_form", form });
       Promise.all([
         fetchDistricts(res.data.district_object.state),
         fetchLocalBody(res.data.district),
         fetchWards(res.data.local_body),
         duplicateCheck(res.data.mobile_number),
       ]);
-
-      setShowImport(false);
+      setShowImport({
+        show: false,
+        field: null,
+      });
     }
-    setIsLoading(false);
   };
 
   const fetchData = useCallback(
@@ -352,7 +400,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       setIsLoading(true);
       const res = await dispatchAction(getPatient({ id }));
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setFacilityName(res.data.facility_object.name);
           setPatientName(res.data.name);
           console.log(res.data);
@@ -687,7 +735,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       emergency_phone_number: parsePhoneNumberFromString(
         formData.emergency_phone_number
       )?.format("E.164"),
-      date_of_birth: moment(formData.date_of_birth).format("YYYY-MM-DD"),
+      date_of_birth: dateQueryString(formData.date_of_birth),
       disease_status: formData.disease_status,
       date_of_test: formData.date_of_test ? formData.date_of_test : undefined,
       date_of_result: formData.date_of_result
@@ -1002,8 +1050,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         title={headerText}
         className="mb-11"
         onBackClick={() => {
-          if (showImport) {
-            setShowImport(false);
+          if (showImport.show) {
+            setShowImport({
+              show: false,
+              field: null,
+            });
             return false;
           } else {
             id
@@ -1040,7 +1091,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               show
             />
           )}
-          {showImport ? (
+          {showImport.show && (
             <div className="p-4">
               <div>
                 <div className="my-4">
@@ -1059,52 +1110,66 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 </div>
                 <button
                   className="btn btn-primary mr-4"
-                  onClick={fetchExtResultData}
+                  onClick={(e) => {
+                    fetchExtResultData(e, showImport?.field?.("name"));
+                  }}
                   disabled={!careExtId}
                 >
                   Import Patient Data from External Results
                 </button>{" "}
                 <button
                   className="btn border"
-                  onClick={(_) => setShowImport(false)}
+                  onClick={(_) =>
+                    setShowImport({
+                      show: false,
+                      field: null,
+                    })
+                  }
                 >
                   Cancel Import
                 </button>
               </div>
             </div>
-          ) : (
-            <>
-              <>
-                <ButtonV2
-                  className="mb-8 flex items-center gap-2 sm:mx-4"
-                  onClick={(_) => {
-                    setShowImport(true);
-                    setQuery({ extId: "" }, { replace: true });
-                  }}
-                >
-                  <CareIcon className="care-l-import text-lg" />
-                  Import From External Results
-                </ButtonV2>
-                <Form<PatientModel>
-                  defaults={id ? state.form : initForm}
-                  validate={validateForm}
-                  onSubmit={handleSubmit}
-                  submitLabel={buttonText}
-                  onCancel={() => navigate("/facility")}
-                  className="bg-transparent px-1 py-2 md:px-2"
-                  onDraftRestore={(newState) => {
-                    dispatch({ type: "set_state", state: newState });
-                    Promise.all([
-                      fetchDistricts(newState.form.state ?? 0),
-                      fetchLocalBody(newState.form.district?.toString() ?? ""),
-                      fetchWards(newState.form.local_body?.toString() ?? ""),
-                      duplicateCheck(newState.form.phone_number ?? ""),
-                    ]);
-                  }}
-                  noPadding
-                >
-                  {(field) => (
+          )}
+          <>
+            <div className={`${showImport.show && "hidden"}`}>
+              <Form<PatientModel>
+                defaults={id ? state.form : initForm}
+                validate={validateForm}
+                onSubmit={handleSubmit}
+                submitLabel={buttonText}
+                onCancel={() => navigate("/facility")}
+                className="bg-transparent px-1 py-2 md:px-2"
+                onDraftRestore={(newState) => {
+                  dispatch({ type: "set_state", state: newState });
+                  Promise.all([
+                    fetchDistricts(newState.form.state ?? 0),
+                    fetchLocalBody(newState.form.district?.toString() ?? ""),
+                    fetchWards(newState.form.local_body?.toString() ?? ""),
+                    duplicateCheck(newState.form.phone_number ?? ""),
+                  ]);
+                }}
+                noPadding
+              >
+                {(field) => {
+                  if (!formField) setFormField(field);
+                  return (
                     <>
+                      <div className="mb-2 overflow-visible rounded border border-gray-200 p-4">
+                        <ButtonV2
+                          className="flex items-center gap-2"
+                          onClick={(_) => {
+                            setShowImport({
+                              show: true,
+                              field,
+                            });
+                            setQuery({ extId: "" }, { replace: true });
+                          }}
+                        >
+                          <CareIcon className="care-l-import text-lg" />
+                          Import From External Results
+                        </ButtonV2>
+                      </div>
                       {enable_abdm && (
                         <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
                           <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
@@ -1187,6 +1252,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                                 duplicateCheck(event.value);
                                 field("phone_number").onChange(event);
                               }}
+                              types={["mobile", "landline"]}
                             />
                           </div>
                           <div
@@ -1197,6 +1263,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               {...field("emergency_phone_number")}
                               label="Emergency contact number"
                               required
+                              types={["mobile", "landline"]}
                             />
                           </div>
                           <div data-testid="name" id="name-div">
@@ -1819,11 +1886,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                         />
                       </div>
                     </>
-                  )}
-                </Form>
-              </>
-            </>
-          )}
+                  );
+                }}
+              </Form>
+            </div>
+          </>
         </>
       </div>
     </div>
