@@ -220,11 +220,11 @@ export default function ManageUsers() {
           className=" mt-6 w-full md:px-4 lg:w-1/2 xl:w-1/3"
         >
           <div className="relative block h-full overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
-            <div className="flex h-full flex-col justify-between">
+            <div className="flex h-full flex-col justify-between @container">
               <div className="px-6 py-4">
                 <div
-                  className="flex-wra p flex
-                flex-col justify-between gap-3 lg:flex-row"
+                  className="flex flex-col
+                flex-wrap justify-between gap-3 @sm:flex-row"
                 >
                   {user.username && (
                     <div
@@ -405,10 +405,10 @@ export default function ManageUsers() {
               </div>
               {user.username && (
                 <div className="mb-0 mt-auto flex w-full flex-col justify-between gap-2 p-4">
-                  <div className="flex flex-col md:flex-row">
+                  <div className="flex flex-col gap-2 @sm:flex-row">
                     <ButtonV2
                       id="facilities"
-                      className="flex w-full items-center md:w-1/2"
+                      className="flex w-full items-center @sm:w-1/2"
                       onClick={() => {
                         setExpandFacilityList(!expandFacilityList);
                         setSelectedUser(user);
@@ -417,10 +417,9 @@ export default function ManageUsers() {
                       <CareIcon className="care-l-hospital text-lg" />
                       <p>Linked Facilities</p>
                     </ButtonV2>
-                    <div className="mx-1 my-2 sm:my-0"></div>
                     <ButtonV2
                       id="skills"
-                      className="flex w-full items-center md:w-1/2"
+                      className="flex w-full items-center @sm:w-1/2"
                       onClick={() => {
                         setExpandSkillList(true);
                         setSelectedUser(user.username);
