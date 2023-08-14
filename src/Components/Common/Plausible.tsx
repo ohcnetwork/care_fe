@@ -1,3 +1,4 @@
+import { useLocationChange } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import Script from "./Script";
 import { useEffect } from "react";
@@ -5,9 +6,13 @@ import { useEffect } from "react";
 export default function Plausible() {
   const { site_url, analytics_server_url } = useConfig();
 
+  useLocationChange(() => {
+    plausible("pageview");
+  });
+
   useEffect(() => {
     plausible("pageview");
-  }, [window.location.href]);
+  }, []);
 
   return (
     <Script
