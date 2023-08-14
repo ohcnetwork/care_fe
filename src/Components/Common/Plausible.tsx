@@ -18,6 +18,9 @@ export default function Plausible() {
     <Script
       defer
       data-domain={site_url}
+      // To add another extension, combine the extension using dots. Refer: https://plausible.io/docs/script-extensions#you-can-combine-extensions-according-to-your-needs
+      // Do not accidentally remove existing extensions.
+      // `manual` extension is used for the URL to be overridden. See https://plausible.io/docs/script-extensions#scriptmanualjs
       src={`${analytics_server_url}/js/script.manual.tagged-events.js`}
     />
   );
