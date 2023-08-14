@@ -90,7 +90,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
         <p
           className={`${
             facilityId ? "font-medium" : "font-bold"
-          } mb-2 h-12 text-center text-xl text-slate-900 md:mb-4`}
+          } mb-2 text-center text-xl text-slate-900 md:mb-4`}
         >
           {label}
         </p>
@@ -133,7 +133,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
               </div>
             </div>
             <div className="mt-4 flex h-1/3 flex-col items-center justify-center gap-4 text-center lg:flex-row">
-              <div className="w-1/2 overflow-x-auto">
+              <div className="overflow-x-auto">
                 <p className="text-lg font-medium text-slate-500 xl:text-xl">
                   Used:
                   <animated.span className="ml-2 text-lg font-semibold text-slate-700">
@@ -141,7 +141,7 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
                   </animated.span>
                 </p>
               </div>
-              <div className="w-1/2 overflow-x-auto">
+              <div className="overflow-x-auto">
                 <p className="text-lg font-medium text-slate-500 xl:text-xl">
                   Total:
                   <animated.span className="ml-2 text-lg font-semibold text-slate-700">

@@ -176,7 +176,7 @@ export const FacilityHome = (props: any) => {
     });
 
     capacityList = (
-      <div className="mt-4 grid w-full gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="mt-4 grid w-full gap-7 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         <BedTypeCard
           label="Total Beds"
           used={totalOccupiedBedCount}
