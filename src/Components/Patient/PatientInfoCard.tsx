@@ -20,7 +20,7 @@ import { PatientModel } from "./models";
 import { getDimensionOrDash } from "../../Common/utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { useState } from "react";
-import { formatDate } from "../../Utils/utils.js";
+import { formatDate, formatDateTime } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
 
 export default function PatientInfoCard(props: {
@@ -141,7 +141,7 @@ export default function PatientInfoCard(props: {
                     {(dayjs().isBefore(patient.review_time)
                       ? "Review before: "
                       : "Review Missed: ") +
-                      dayjs(patient.review_time).format("lll")}
+                      formatDateTime(patient.review_time)}
                   </div>
                 )}
             </div>
