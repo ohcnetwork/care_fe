@@ -18,7 +18,7 @@ export default function Plausible() {
     <Script
       defer
       data-domain={site_url}
-      src={`${analytics_server_url}/js/script.tagged-events.js`}
+      src={`${analytics_server_url}/js/script.manual.tagged-events.js`}
     />
   );
 }
