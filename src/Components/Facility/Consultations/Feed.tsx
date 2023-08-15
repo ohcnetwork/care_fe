@@ -30,6 +30,7 @@ import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import useFullscreen from "../../../Common/hooks/useFullscreen.js";
 import { triggerGoal } from "../../Common/Plausible.js";
+import { useMessageListener } from "../../../Common/hooks/useMessageListener.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -62,6 +63,7 @@ export const Feed: React.FC<IFeedProps> = ({
   const [isFullscreen, setFullscreen] = useFullscreen();
 
   const [borderAlert, setBorderAlert] = useState<any>(null);
+  // const [cameraOccupier, setCameraOccupier] = useState<string | null>(null);
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
@@ -205,10 +207,38 @@ export const Feed: React.FC<IFeedProps> = ({
     getPTZPayload,
     getPresets,
     relativeMove,
+    lockAsset,
+    unlockAsset,
   } = useFeedPTZ({
     config: cameraAsset,
     dispatch,
   });
+
+  useEffect(() => {
+    lockAsset({
+      onError: async (resp) => {
+        if (resp.status === 409) {
+          Notification.Error({
+            msg: `${resp.data?.username} is using the camera.`,
+          });
+        } else {
+          Notification.Error({
+            msg: "Error locking camera.",
+          });
+        }
+      },
+    });
+
+    return () => {
+      unlockAsset({
+        onError() {
+          Notification.Error({
+            msg: "Error unlocking camera.",
+          });
+        },
+      });
+    };
+  }, [dispatch]);
 
   const getBedPresets = async (asset: any) => {
     if (asset.id && bed) {
@@ -371,7 +401,6 @@ export const Feed: React.FC<IFeedProps> = ({
       });
     },
     other: (option, value) => {
-      // TODO: Check border flash once camera is active
       setLoading(option.loadingLabel);
       let payLoad = getPTZPayload(option.action, precision, value);
       if (boundaryPreset?.meta?.range && cameraState) {
@@ -474,6 +503,10 @@ export const Feed: React.FC<IFeedProps> = ({
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKeyboardShortcut(option.shortcutKey, option.callback);
   }
+
+  useMessageListener((message) => {
+    console.log("message", message);
+  });
 
   if (isLoading) return <Loading />;
 
