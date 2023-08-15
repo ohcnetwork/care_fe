@@ -7,7 +7,7 @@ import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DailyRoundsModel } from "./models";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
-import dayjs from "../../Utils/dayjs";
+import { formatDateTime } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
@@ -107,7 +107,7 @@ export const DailyRoundListDetails = (props: any) => {
           <div>
             <span className="font-semibold leading-relaxed">Taken at: </span>
             {dailyRoundListDetailsData.taken_at
-              ? dayjs(dailyRoundListDetailsData.taken_at).format("lll")
+              ? formatDateTime(dailyRoundListDetailsData.taken_at)
               : "-"}
           </div>
           <div>
