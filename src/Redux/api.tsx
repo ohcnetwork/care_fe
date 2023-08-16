@@ -1,4 +1,4 @@
-import { PaginatedResponse } from "../Common/hooks/query/usePaginatedQuery";
+import { PaginatedResponse } from "../Utils/request/usePaginatedQuery";
 import { LocationModel } from "../Components/Facility/models";
 
 /**
