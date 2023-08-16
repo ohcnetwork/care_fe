@@ -57,12 +57,28 @@ export const AddLocationForm = (props: LocationFormProps) => {
     fetchFacilityName();
   }, [dispatchAction, facilityId, locationId]);
 
-  const handleSubmit = async (e: SyntheticEvent) => {
-    setErrors({
+  const validateForm = () => {
+    let formValid = true;
+    const error = {
       name: "",
       description: "",
-    });
+    };
+
+    if (name.trim().length === 0) {
+      error.name = "Name is required";
+      formValid = false;
+    }
+
+    setErrors(error);
+    return formValid;
+  };
+
+  const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
     const data = {
       name,

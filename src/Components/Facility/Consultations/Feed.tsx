@@ -34,16 +34,11 @@ import { triggerGoal } from "../../Common/Plausible.js";
 
 interface IFeedProps {
   facilityId: string;
-  patientId: string;
   consultationId: any;
 }
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
-export const Feed: React.FC<IFeedProps> = ({
-  patientId,
-  consultationId,
-  facilityId,
-}) => {
+export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const dispatch: any = useDispatch();
 
   const videoWrapper = useRef<HTMLDivElement>(null);
@@ -391,7 +386,6 @@ export const Feed: React.FC<IFeedProps> = ({
                       triggerGoal("Camera Preset Clicked", {
                         presetName: preset?.meta?.preset_name,
                         consultationId,
-                        patientId,
                         userId: currentUser?.id,
                         result: "success",
                       });
@@ -405,7 +399,6 @@ export const Feed: React.FC<IFeedProps> = ({
                       triggerGoal("Camera Preset Clicked", {
                         presetName: preset?.meta?.preset_name,
                         consultationId,
-                        patientId,
                         userId: currentUser?.id,
                         result: "error",
                       });
@@ -555,7 +548,6 @@ export const Feed: React.FC<IFeedProps> = ({
                     triggerGoal("Camera Feed Moved", {
                       direction: button.action,
                       consultationId,
-                      patientId,
                       userId: currentUser?.id,
                     });
 
