@@ -214,7 +214,6 @@ export const ConsultationDetails = (props: any) => {
     fetchData(status);
     triggerGoal("Patient Consultation Viewed", {
       facilityId: facilityId,
-      patientId: patientId,
       consultationId: consultationId,
       userID: authUser.id,
     });
@@ -332,7 +331,6 @@ export const ConsultationDetails = (props: any) => {
                     triggerGoal("Doctor Connect Clicked", {
                       consultationId,
                       facilityId: patientData.facility,
-                      patientId: patientData.id,
                       userId: authUser.id,
                       page: "ConsultationDetails",
                     });
@@ -1122,11 +1120,7 @@ export const ConsultationDetails = (props: any) => {
               hideBack={true}
               focusOnLoad={true}
             />
-            <Feed
-              facilityId={facilityId}
-              patientId={patientId}
-              consultationId={consultationId}
-            />
+            <Feed facilityId={facilityId} consultationId={consultationId} />
           </div>
         )}
         {tab === "SUMMARY" && (

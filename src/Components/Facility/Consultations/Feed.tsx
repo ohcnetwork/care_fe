@@ -35,16 +35,11 @@ import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 
 interface IFeedProps {
   facilityId: string;
-  patientId: string;
   consultationId: any;
 }
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
-export const Feed: React.FC<IFeedProps> = ({
-  patientId,
-  consultationId,
-  facilityId,
-}) => {
+export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const dispatch: any = useDispatch();
 
   const videoWrapper = useRef<HTMLDivElement>(null);
@@ -391,7 +386,6 @@ export const Feed: React.FC<IFeedProps> = ({
                       triggerGoal("Camera Preset Clicked", {
                         presetName: preset?.meta?.preset_name,
                         consultationId,
-                        patientId,
                         userId: authUser.id,
                         result: "success",
                       });
@@ -405,7 +399,6 @@ export const Feed: React.FC<IFeedProps> = ({
                       triggerGoal("Camera Preset Clicked", {
                         presetName: preset?.meta?.preset_name,
                         consultationId,
-                        patientId,
                         userId: authUser.id,
                         result: "error",
                       });
@@ -504,7 +497,7 @@ export const Feed: React.FC<IFeedProps> = ({
             </div>
           )}
         </div>
-        <div className="absolute right-8 top-8 z-20 flex flex-col gap-4">
+        <div className="absolute right-8 top-8 z-10 flex flex-col gap-4">
           {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
             (button, index) => {
               const option = cameraPTZ.find(
@@ -524,7 +517,7 @@ export const Feed: React.FC<IFeedProps> = ({
             <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
           </div>
         </div>
-        <div className="absolute bottom-8 right-8 z-20">
+        <div className="absolute bottom-8 right-8 z-10">
           <FeedButton
             camProp={cameraPTZ[4]}
             styleType="CHHOTUBUTTON"
@@ -555,7 +548,6 @@ export const Feed: React.FC<IFeedProps> = ({
                     triggerGoal("Camera Feed Moved", {
                       direction: button.action,
                       consultationId,
-                      patientId,
                       userId: authUser.id,
                     });
 
