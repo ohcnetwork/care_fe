@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/browser";
 
-import React, { useEffect, useState } from "react";
+import { FC, Suspense, lazy, useEffect, useState } from "react";
 import { getConfig, getCurrentUser } from "./Redux/actions";
 import { statusType, useAbortableEffect } from "./Common/utils";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,11 +12,10 @@ import { LocalStorageKeys } from "./Common/constants";
 import Plausible from "./Components/Common/Plausible";
 import SessionRouter from "./Router/SessionRouter";
 import axios from "axios";
-import loadable from "@loadable/component";
 
-const Loading = loadable(() => import("./Components/Common/Loading"));
+const Loading = lazy(() => import("./Components/Common/Loading"));
 
-const App: React.FC = () => {
+const App: FC = () => {
   const dispatch: any = useDispatch();
   const state: any = useSelector((state) => state);
   const { currentUser, config } = state;
@@ -94,10 +93,12 @@ const App: React.FC = () => {
   }
 
   return (
-    <HistoryAPIProvider>
-      {currentUser?.data ? <AppRouter /> : <SessionRouter />}
-      <Plausible />
-    </HistoryAPIProvider>
+    <Suspense fallback={<Loading />}>
+      <HistoryAPIProvider>
+        {currentUser?.data ? <AppRouter /> : <SessionRouter />}
+        <Plausible />
+      </HistoryAPIProvider>
+    </Suspense>
   );
 };
 

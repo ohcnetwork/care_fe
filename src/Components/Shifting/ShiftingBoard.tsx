@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { classNames, formatDateTime } from "../../Utils/utils";
 import {
   completeTransfer,

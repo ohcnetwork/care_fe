@@ -1,4 +1,3 @@
-import * as React from "react";
 import useRecorder from "./useRecorder";
 import { useEffect, useState } from "react";
 import ButtonV2 from "../Components/Common/components/ButtonV2";

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import * as Notification from "../../Utils/Notifications";
 import { animated, config, useSpring } from "@react-spring/web";
 import { useDispatch } from "react-redux";

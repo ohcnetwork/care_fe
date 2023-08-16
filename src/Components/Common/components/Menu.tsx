@@ -4,8 +4,7 @@ import { ButtonVariant } from "./ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { DropdownTransition } from "./HelperComponents";
 import { Menu } from "@headlessui/react";
-import React from "react";
-import { ReactNode } from "react";
+import { DetailedHTMLProps, HTMLAttributes, ReactNode } from "react";
 import { classNames } from "../../../Utils/utils";
 import { useIsAuthorized } from "../../../Common/hooks/useIsAuthorized";
 
@@ -46,8 +45,8 @@ export default function DropdownMenu({
   );
 }
 
-type RawDivProps = React.DetailedHTMLProps<
-  React.HTMLAttributes<HTMLDivElement>,
+type RawDivProps = DetailedHTMLProps<
+  HTMLAttributes<HTMLDivElement>,
   HTMLDivElement
 >;
 

@@ -1,7 +1,14 @@
 import axios from "axios";
 import CircularProgress from "../Common/components/CircularProgress";
-import loadable from "@loadable/component";
-import React, { useCallback, useState, useEffect, useRef } from "react";
+
+import {
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+  lazy,
+  ChangeEvent,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -33,7 +40,7 @@ import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
 import Page from "../Common/components/Page";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export const header_content_type: URLS = {
   pdf: "application/pdf",
@@ -894,7 +901,7 @@ export const FileUpload = (props: FileUploadProps) => {
     return <Loading />;
   }
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
     if (e.target.files == null) {
       throw new Error("Error finding e.target.files");
     }

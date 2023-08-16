@@ -1,4 +1,4 @@
-import React, { Dispatch, useEffect } from "react";
+import { Dispatch, useEffect, useState } from "react";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { AssetData } from "../AssetTypes";
@@ -36,9 +36,9 @@ const update_Link = (
 };
 
 export default function MonitorConfigure({ asset }: { asset: AssetData }) {
-  const [bed, setBed] = React.useState<BedModel>({});
-  const [updateLink, setUpdateLink] = React.useState<boolean>(false);
-  const [assetBed, setAssetBed] = React.useState<any>();
+  const [bed, setBed] = useState<BedModel>({});
+  const [updateLink, setUpdateLink] = useState<boolean>(false);
+  const [assetBed, setAssetBed] = useState<any>();
   const dispatch: any = useDispatch();
 
   const getAssetBeds = async (id: string) => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useReducer } from "react";
+import { useEffect, useState, useReducer } from "react";
 import axios from "axios";
 import {
   SAMPLE_TEST_STATUS,
