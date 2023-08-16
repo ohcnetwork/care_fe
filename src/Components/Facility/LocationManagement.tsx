@@ -3,7 +3,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Page from "../Common/components/Page";
-import useQuery from "../../Common/hooks/query/useQuery";
+import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 
 const Loading = lazy(() => import("../Common/Loading"));
@@ -78,6 +78,7 @@ export const LocationManagement = ({ facilityId }: { facilityId: string }) => {
         <div className="flex justify-end">
           <ButtonV2
             href={`/facility/${facilityId}/location/add`}
+            // hello
             authorizeFor={NonReadOnlyUsers}
           >
             <CareIcon className="care-l-plus text-lg" />
