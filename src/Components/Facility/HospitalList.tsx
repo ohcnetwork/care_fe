@@ -9,9 +9,8 @@ import {
   getState,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-
+import { lazy, useCallback, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CountBlock from "../../CAREUI/display/Count";
 import ExportMenu from "../Common/Export";
@@ -21,13 +20,13 @@ import FacilityFilter from "./FacilityFilter";
 import { FacilityModel } from "./models";
 import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
-import loadable from "@loadable/component";
+
 import { navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export const HospitalList = () => {
   const {

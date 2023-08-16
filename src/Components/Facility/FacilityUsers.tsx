@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import loadable from "@loadable/component";
-import { useDispatch } from "react-redux";
+import { lazy, useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   addUserFacility,
@@ -25,7 +24,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function FacilityUsers(props: any) {
   const { facilityId } = props;

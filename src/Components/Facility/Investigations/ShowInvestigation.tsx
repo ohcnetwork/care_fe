@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import {
@@ -8,12 +8,12 @@ import {
 } from "../../../Redux/actions";
 import PageTitle from "../../Common/PageTitle";
 import InvestigationTable from "./InvestigationTable";
-import loadable from "@loadable/component";
+
 import _ from "lodash";
 import { navigate } from "raviger";
 import * as Notification from "../../../Utils/Notifications.js";
 
-const Loading = loadable(() => import("../../Common/Loading"));
+const Loading = lazy(() => import("../../Common/Loading"));
 
 const initialState = {
   changedFields: {},

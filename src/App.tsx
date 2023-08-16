@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/browser";
 
-import React, { useEffect, useState } from "react";
+import { FC, Suspense, lazy, useEffect, useState } from "react";
 import { getConfig, getCurrentUser } from "./Redux/actions";
 import { statusType, useAbortableEffect } from "./Common/utils";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,12 +12,11 @@ import { LocalStorageKeys } from "./Common/constants";
 import Plausible from "./Components/Common/Plausible";
 import SessionRouter from "./Router/SessionRouter";
 import axios from "axios";
-import loadable from "@loadable/component";
 import { AuthUserContext } from "./Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("./Components/Common/Loading"));
+const Loading = lazy(() => import("./Components/Common/Loading"));
 
-const App: React.FC = () => {
+const App: FC = () => {
   const dispatch: any = useDispatch();
   const state: any = useSelector((state) => state);
   const { currentUser, config } = state;
@@ -95,18 +94,20 @@ const App: React.FC = () => {
   }
 
   return (
-    <HistoryAPIProvider>
-      <AppConfigContext.Provider value={config.data}>
-        {currentUser?.data ? (
-          <AuthUserContext.Provider value={currentUser.data}>
-            <AppRouter />
-          </AuthUserContext.Provider>
-        ) : (
-          <SessionRouter />
-        )}
-        <Plausible />
-      </AppConfigContext.Provider>
-    </HistoryAPIProvider>
+    <Suspense fallback={<Loading />}>
+      <HistoryAPIProvider>
+        <AppConfigContext.Provider value={config.data}>
+          {currentUser?.data ? (
+            <AuthUserContext.Provider value={currentUser.data}>
+              <AppRouter />
+            </AuthUserContext.Provider>
+          ) : (
+            <SessionRouter />
+          )}
+          <Plausible />
+        </AppConfigContext.Provider>
+      </HistoryAPIProvider>
+    </Suspense>
   );
 };
 

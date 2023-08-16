@@ -1,15 +1,15 @@
 import { classNames, formatDateTime } from "../../Utils/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useState } from "react";
+import { lazy, useCallback, useState } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import { SampleReportModel } from "./models";
-import loadable from "@loadable/component";
+
 import { sampleReport } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface ISamplePreviewProps {
   id: string;

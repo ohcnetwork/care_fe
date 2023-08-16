@@ -22,9 +22,8 @@ import {
   listDoctor,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-
+import { lazy, useCallback, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -40,14 +39,14 @@ import DoctorsCountCard from "./DoctorsCountCard";
 import Page from "../Common/components/Page";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import Table from "../Common/components/Table";
-import loadable from "@loadable/component";
+
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);

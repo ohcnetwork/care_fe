@@ -1,8 +1,7 @@
-import loadable from "@loadable/component";
 import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy, useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   GENDER_TYPES,
   USER_TYPES,
@@ -44,7 +43,7 @@ import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface UserProps {
   userId?: number;

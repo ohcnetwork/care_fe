@@ -1,8 +1,7 @@
 import { navigate } from "raviger";
-import React, { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy, useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
-import loadable from "@loadable/component";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getConsultationList,
@@ -34,7 +33,7 @@ import dayjs from "../../Utils/dayjs";
 import { triggerGoal } from "../Common/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export const PatientHome = (props: any) => {
   const { facilityId, id } = props;
@@ -74,7 +73,7 @@ export const PatientHome = (props: any) => {
     loading: false,
   });
   const [openAssignVolunteerDialog, setOpenAssignVolunteerDialog] =
-    React.useState(false);
+    useState(false);
 
   const initErr: any = {};
   const errors = initErr;

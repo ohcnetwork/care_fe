@@ -1,4 +1,3 @@
-import React from "react";
 import useConfig from "../../Common/hooks/useConfig";
 import LanguageSelector from "./LanguageSelector";
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import { lazy, useEffect, useReducer, useState } from "react";
 import { TestTable } from "./Table";
 import { useDispatch } from "react-redux";
 import {
@@ -9,14 +9,14 @@ import {
 } from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
 import { navigate, useQueryParams } from "raviger";
-import loadable from "@loadable/component";
+
 import { useTranslation } from "react-i18next";
 import Page from "../../Common/components/Page";
 import AutocompleteMultiSelectFormField from "../../Form/FormFields/AutocompleteMultiselect";
 import { Submit } from "../../Common/components/ButtonV2";
 import Card from "../../../CAREUI/display/Card";
 
-const Loading = loadable(() => import("../../Common/Loading"));
+const Loading = lazy(() => import("../../Common/Loading"));
 
 const initialState = {
   form: {},

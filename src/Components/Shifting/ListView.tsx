@@ -3,7 +3,7 @@ import {
   downloadShiftRequests,
   listShiftRequests,
 } from "../../Redux/actions";
-import { useEffect, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 
 import BadgesList from "./BadgesList";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -14,7 +14,6 @@ import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
 import { formatDateTime } from "../../Utils/utils";
 import { formatFilter } from "./Commons";
-import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
@@ -25,7 +24,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ListView() {
   const dispatch: any = useDispatch();

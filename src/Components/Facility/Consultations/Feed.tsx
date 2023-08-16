@@ -11,7 +11,7 @@ import {
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
 import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getConsultation,
   getPermittedFacility,

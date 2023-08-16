@@ -1,6 +1,6 @@
 import { navigate } from "raviger";
-import loadable from "@loadable/component";
-import { useReducer, useState, useEffect } from "react";
+
+import { useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
 import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
 import { createSampleTest, getPatient } from "../../Redux/actions";
@@ -16,7 +16,7 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import Page from "../Common/components/Page";
 import { FacilitySelect } from "../Common/FacilitySelect";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: SampleTestModel = {
   isFastTrack: false,

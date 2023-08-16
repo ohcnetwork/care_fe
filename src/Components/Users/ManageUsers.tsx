@@ -10,9 +10,8 @@ import {
   partialUpdateUser,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-
+import { lazy, useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -29,7 +28,6 @@ import UserDeleteDialog from "./UserDeleteDialog";
 import UserDetails from "../Common/UserDetails";
 import UserFilter from "./UserFilter";
 import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
-import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
@@ -39,7 +37,7 @@ import dayjs from "dayjs";
 import TextFormField from "../Form/FormFields/TextFormField.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ManageUsers() {
   const { width } = useWindowDimensions();
