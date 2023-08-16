@@ -1,11 +1,12 @@
 import { Popover } from "@headlessui/react";
-import moment from "moment";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { listAssetAvailability } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import { AssetStatus, AssetUptimeRecord } from "../Assets/AssetTypes";
 import { reverse } from "lodash";
+import { classNames } from "../../Utils/utils";
+import dayjs from "../../Utils/dayjs";
 
 const STATUS_COLORS = {
   Operational: "bg-green-500",
@@ -21,9 +22,9 @@ const STATUS_COLORS_TEXT = {
   "Under Maintenance": "text-blue-500",
 };
 
-const now = moment();
+const now = dayjs();
 const formatDateBeforeDays = Array.from({ length: 100 }, (_, index) =>
-  now.clone().subtract(index, "days").format("Do MMMM YYYY")
+  now.subtract(index, "days").format("Do MMMM YYYY")
 );
 
 const uptimeScore: number[] = Array.from({ length: 100 }, () => 0);
@@ -48,42 +49,42 @@ function UptimeInfo({
   let totalMinutes = 0;
 
   return (
-    <div className="z-50 absolute rounded-lg shadow-lg ring-1 ring-gray-400 w-full">
+    <div className="absolute z-50 w-full rounded-lg shadow-lg ring-1 ring-gray-400">
       <div className="rounded-lg bg-white px-6 py-4">
         <div className="flow-root rounded-md">
-          <div className="block text-sm text-gray-800 text-center">
+          <div className="block text-center text-sm text-gray-800">
             <span className="font-bold ">{date}</span>
-            <div className="border-t border-gray-200 my-2"></div>
+            <div className="my-2 border-t border-gray-200"></div>
             {incidents.length === 0 ? (
               <>
                 <span>No status for the day</span>
               </>
             ) : (
               <>
-                <span className="font-bold my-2 block">Status Updates</span>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-1">
+                <span className="my-2 block font-bold">Status Updates</span>
+                <div className="grid grid-cols-1 gap-1 md:grid-cols-4">
                   {reverse(incidents)?.map((incident, index) => {
                     const prevIncident = incidents[index - 1];
                     let endTimestamp;
                     let ongoing = false;
 
                     if (prevIncident?.id) {
-                      endTimestamp = moment(prevIncident.timestamp);
-                    } else if (moment(incident.timestamp).isSame(now, "day")) {
-                      endTimestamp = moment();
+                      endTimestamp = dayjs(prevIncident.timestamp);
+                    } else if (dayjs(incident.timestamp).isSame(now, "day")) {
+                      endTimestamp = dayjs();
                       ongoing = true;
                     } else {
-                      endTimestamp = moment(incident.timestamp)
+                      endTimestamp = dayjs(incident.timestamp)
                         .set("hour", 23)
                         .set("minute", 59)
                         .set("second", 59);
                     }
                     const duration = !ongoing
                       ? formatDurationMins(
-                          moment
+                          dayjs
                             .duration(
-                              moment(endTimestamp).diff(
-                                moment(incident.timestamp)
+                              dayjs(endTimestamp).diff(
+                                dayjs(incident.timestamp)
                               )
                             )
                             .asMinutes()
@@ -93,8 +94,8 @@ function UptimeInfo({
                       incident.status === AssetStatus.down ||
                       incident.status === AssetStatus.maintenance
                     )
-                      totalMinutes += moment(endTimestamp).diff(
-                        moment(incident.timestamp),
+                      totalMinutes += dayjs(endTimestamp).diff(
+                        dayjs(incident.timestamp),
                         "minutes"
                       );
 
@@ -110,8 +111,8 @@ function UptimeInfo({
                           {incident.status}
                         </span>
                         <span className="md:col-span-2">
-                          {moment(incident.timestamp).format("h:mmA")} -{" "}
-                          {moment(endTimestamp).format("h:mmA")}
+                          {dayjs(incident.timestamp).format("h:mmA")} -{" "}
+                          {dayjs(endTimestamp).format("h:mmA")}
                         </span>
                         <span className="border-b md:border-b-0">
                           {duration}
@@ -120,8 +121,8 @@ function UptimeInfo({
                     );
                   })}
                 </div>
-                <div className="border-t border-gray-200 my-2"></div>
-                <div className="flex justify-between mt-1">
+                <div className="my-2 border-t border-gray-200"></div>
+                <div className="mt-1 flex justify-between">
                   <span className="font-bold">Total downtime</span>
                   <span>
                     {incidents.length > 0 && formatDurationMins(totalMinutes)}
@@ -148,15 +149,16 @@ function UptimeInfoPopover({
   numDays: number;
 }) {
   return (
-    <Popover className="mt-10 relative hidden sm:block">
+    <Popover className="relative mt-10 hidden sm:block">
       <Popover.Panel
-        className={`absolute z-50 w-64 lg:w-96 transform px-4 sm:px-0 ${
+        className={classNames(
+          "absolute z-50 w-64 px-4 sm:px-0 lg:w-96",
           day > numDays - 10
             ? "-translate-x-6"
             : day < 10
             ? "-translate-x-full"
             : "-translate-x-1/2"
-        }`}
+        )}
         static
       >
         <UptimeInfo records={records} date={date} />
@@ -190,8 +192,8 @@ export default function Uptime(props: { assetId: string }) {
     const recordsByDayBefore: { [key: number]: AssetUptimeRecord[] } = {};
 
     records.forEach((record) => {
-      const timestamp = moment(record.timestamp).startOf("day");
-      const today = moment().startOf("day");
+      const timestamp = dayjs(record.timestamp).startOf("day");
+      const today = dayjs().startOf("day");
       const diffDays = today.diff(timestamp, "days");
       if (diffDays <= 100) {
         const recordsForDay = recordsByDayBefore[diffDays] || [];
@@ -212,7 +214,7 @@ export default function Uptime(props: { assetId: string }) {
             created_date: "",
             modified_date: "",
             status: statusToCarryOver,
-            timestamp: moment()
+            timestamp: dayjs()
               .subtract(i, "days")
               .startOf("day")
               .format("YYYY-MM-DDTHH:mm:ss.SSSSSSZ"),
@@ -221,7 +223,7 @@ export default function Uptime(props: { assetId: string }) {
       } else {
         if (
           recordsByDayBefore[i].filter(
-            (r) => moment(r.timestamp).get("hour") < 8
+            (r) => dayjs(r.timestamp).get("hour") < 8
           ).length === 0
         ) {
           recordsByDayBefore[i].unshift({
@@ -230,7 +232,7 @@ export default function Uptime(props: { assetId: string }) {
             created_date: "",
             modified_date: "",
             status: statusToCarryOver,
-            timestamp: moment()
+            timestamp: dayjs()
               .subtract(i, "days")
               .startOf("day")
               .format("YYYY-MM-DDTHH:mm:ss.SSSSSSZ"),
@@ -248,8 +250,8 @@ export default function Uptime(props: { assetId: string }) {
     let upStatus = 0;
 
     const oldestRecord = availabilityData[0];
-    const daysAvailable = moment().diff(
-      moment(oldestRecord?.timestamp)
+    const daysAvailable = dayjs().diff(
+      dayjs(oldestRecord?.timestamp)
         .set("hour", 0)
         .set("minute", 0)
         .set("second", 0),
@@ -310,8 +312,8 @@ export default function Uptime(props: { assetId: string }) {
         const end = (i + 1) * 8;
         const recordsInPeriod = dayRecords.filter(
           (record) =>
-            moment(record.timestamp).hour() >= start &&
-            moment(record.timestamp).hour() < end
+            dayjs(record.timestamp).hour() >= start &&
+            dayjs(record.timestamp).hour() < end
         );
         recordsInPeriodCache[i] = recordsInPeriod;
         if (recordsInPeriod.length === 0) {
@@ -320,11 +322,11 @@ export default function Uptime(props: { assetId: string }) {
               recordsInPeriodCache[i - 1]?.length - 1
             ];
           if (
-            moment(previousLatestRecord?.timestamp)
+            dayjs(previousLatestRecord?.timestamp)
               .hour(end)
               .minute(0)
               .second(0)
-              .isBefore(moment())
+              .isBefore(dayjs())
           ) {
             if (previousLatestRecord?.status === AssetStatus["operational"]) {
               dayUptimeScore += 1;
@@ -374,19 +376,19 @@ export default function Uptime(props: { assetId: string }) {
   };
   if (loading) {
     return (
-      <div className="mt-8 flex flex-col bg-white w-full sm:rounded-lg shadow-sm p-4">
+      <div className="mt-8 flex w-full flex-col bg-white p-4 shadow-sm sm:rounded-lg">
         <p>Loading status...</p>
       </div>
     );
   } else if (summary) {
     return (
-      <div className="mt-8 flex flex-col bg-white w-full sm:rounded-lg shadow-sm p-4">
+      <div className="mt-8 flex w-full flex-col bg-white p-4 shadow-sm sm:rounded-lg">
         <div className="mx-2 w-full">
           <div className="grid grid-cols-1">
             <div className="text-xl font-semibold">Availability History</div>
             <div>
-              <div className="mt-2 px-5 overflow-x-clip">
-                <div className="flex text-gray-700 text-xs mt-2 opacity-70 justify-center mb-1">
+              <div className="mt-2 overflow-x-clip px-5">
+                <div className="mb-1 mt-2 flex justify-center text-xs text-gray-700 opacity-70">
                   {getUptimePercent(numDays)}% uptime
                 </div>
                 <div
@@ -402,7 +404,7 @@ export default function Uptime(props: { assetId: string }) {
                         <span
                           onMouseEnter={() => setHoveredDay(index)}
                           key={index}
-                          className="h-8 w-3 flex-1 mx-1"
+                          className="mx-1 h-8 w-3 flex-1"
                         >
                           <div
                             className={`h-[11px] w-3 rounded-t-sm ${
@@ -441,17 +443,17 @@ export default function Uptime(props: { assetId: string }) {
                   })}
                 </div>
                 <div
-                  className={`flex text-gray-700 text-xs opacity-70 ${
+                  className={`flex text-xs text-gray-700 opacity-70 ${
                     hoveredDay == -1 && "mt-2"
                   }`}
                 >
                   <span className="ml-0 mr-auto">{numDays} days ago</span>
-                  <span className="mr-0 ml-auto">Today</span>
+                  <span className="ml-auto mr-0">Today</span>
                 </div>
               </div>
             </div>
             {hoveredDay !== -1 && (
-              <div className="sm:hidden relative">
+              <div className="relative sm:hidden">
                 <UptimeInfo
                   records={summary[hoveredDay]}
                   date={formatDateBeforeDays[hoveredDay]}
@@ -464,7 +466,7 @@ export default function Uptime(props: { assetId: string }) {
     );
   } else {
     return (
-      <div className="mt-8 flex flex-col bg-white w-full sm:rounded-lg shadow-sm p-4">
+      <div className="mt-8 flex w-full flex-col bg-white p-4 shadow-sm sm:rounded-lg">
         <p>No status information available.</p>
       </div>
     );

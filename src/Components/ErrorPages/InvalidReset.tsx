@@ -9,8 +9,8 @@ export default function InvalidReset() {
     Notification.closeAllNotifications();
   }, []);
   return (
-    <div className="flex justify-center text-center items-center h-screen">
-      <div className="text-center w-[500px]">
+    <div className="flex h-screen items-center justify-center text-center">
+      <div className="w-[500px] text-center">
         <img
           src="/images/invalid_reset.svg"
           alt={t("invalid_reset")}
@@ -23,7 +23,7 @@ export default function InvalidReset() {
           <br />
           <Link
             href="/forgot-password"
-            className="rounded-lg px-4 py-2 inline-block bg-primary-600 text-white hover:text-white hover:bg-primary- cursor-pointer"
+            className="hover:bg-primary- inline-block cursor-pointer rounded-lg bg-primary-600 px-4 py-2 text-white hover:text-white"
           >
             {t("return_to_password_reset")}
           </Link>

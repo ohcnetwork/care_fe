@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
@@ -6,6 +5,7 @@ import { getConsultation } from "../../../Redux/actions";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import { InvestigationType } from "../../Common/prescription-builder/InvestigationBuilder";
 import { InvestigationResponse } from "./Reports/types";
+import dayjs from "../../../Utils/dayjs";
 
 export default function ViewInvestigationSuggestions(props: {
   consultationId: any;
@@ -35,8 +35,8 @@ export default function ViewInvestigationSuggestions(props: {
   return (
     <div className="mt-5">
       <h3>Investigations Suggested</h3>
-      <table className="hidden md:table w-full bg-white shadow rounded-xl mt-3">
-        <thead className="text-left bg-gray-200">
+      <table className="mt-3 hidden w-full rounded-xl bg-white shadow md:table">
+        <thead className="bg-gray-200 text-left">
           <tr>
             <th className="p-4">Investigations</th>
             <th className="p-4">To be conducted</th>
@@ -51,7 +51,7 @@ export default function ViewInvestigationSuggestions(props: {
               return (
                 <tr key={index} className="border-b border-b-gray-200">
                   <td className="p-4">
-                    <ul className="list-decimal ml-4">
+                    <ul className="ml-4 list-decimal">
                       {investigation.type?.map((type, index) => {
                         const investigationType = type.includes(" (GROUP)")
                           ? {
@@ -75,13 +75,13 @@ export default function ViewInvestigationSuggestions(props: {
                         );
                         const investigatedDate =
                           investigated &&
-                          moment(
+                          dayjs(
                             investigated.session_object.session_created_date
                           );
                         const nextInvestigationTime =
                           investigatedDate && investigation.frequency
                             ? investigatedDate.add(
-                                moment.duration({
+                                dayjs.duration({
                                   hours:
                                     parseInt(
                                       investigation.frequency.split(" ")[0]
@@ -94,7 +94,7 @@ export default function ViewInvestigationSuggestions(props: {
                                 })
                               )
                             : investigation.time
-                            ? moment(investigation.time)
+                            ? dayjs(investigation.time)
                             : undefined;
 
                         if (
@@ -109,7 +109,7 @@ export default function ViewInvestigationSuggestions(props: {
 
                         const investigationMissed =
                           nextInvestigationTime &&
-                          moment().isAfter(nextInvestigationTime);
+                          dayjs().isAfter(nextInvestigationTime);
                         console.log(
                           type,
                           nextFurthestInvestigation,
@@ -127,7 +127,7 @@ export default function ViewInvestigationSuggestions(props: {
                           >
                             {type}
                             {investigationMissed && (
-                              <div className="tooltip text-red-400 inline-block cursor-pointer">
+                              <div className="tooltip inline-block cursor-pointer text-red-400">
                                 <i className="fas fa-triangle-exclamation" />
                                 <div className="tooltip-text">
                                   Investigation Missed!
@@ -135,7 +135,7 @@ export default function ViewInvestigationSuggestions(props: {
                               </div>
                             )}
                             {investigated && !investigationMissed && (
-                              <div className="tooltip text-green-400 inline-block cursor-pointer">
+                              <div className="tooltip inline-block cursor-pointer text-green-400">
                                 <i className="fas fa-check" />
                                 <div className="tooltip-text">
                                   Investigation Recorded
@@ -146,7 +146,7 @@ export default function ViewInvestigationSuggestions(props: {
                         );
                       })}
                     </ul>
-                    <div className="text-sm mt-4">
+                    <div className="mt-4 text-sm">
                       <span className="font-bold">Notes:</span>{" "}
                       {investigation.notes || "none"}
                     </div>
@@ -159,7 +159,7 @@ export default function ViewInvestigationSuggestions(props: {
                       {nextFurthestInvestigation ? (
                         <div
                           className={`${
-                            nextFurthestInvestigation.isBefore(moment())
+                            nextFurthestInvestigation.isBefore(dayjs())
                               ? "text-red-500"
                               : ""
                           }`}
@@ -206,9 +206,9 @@ export default function ViewInvestigationSuggestions(props: {
             let nextFurthestInvestigation: any = undefined;
 
             return (
-              <div key={index} className="bg-white shadow rounded-xl p-4">
+              <div key={index} className="rounded-xl bg-white p-4 shadow">
                 <b>Investigations :</b>
-                <ul className="list-decimal ml-4">
+                <ul className="ml-4 list-decimal">
                   {investigation.type?.map((type, index) => {
                     const investigationType = type.includes(" (GROUP)")
                       ? {
@@ -232,11 +232,11 @@ export default function ViewInvestigationSuggestions(props: {
                     );
                     const investigatedDate =
                       investigated &&
-                      moment(investigated.session_object.session_created_date);
+                      dayjs(investigated.session_object.session_created_date);
                     const nextInvestigationTime =
                       investigatedDate && investigation.frequency
                         ? investigatedDate.add(
-                            moment.duration({
+                            dayjs.duration({
                               hours:
                                 parseInt(
                                   investigation.frequency.split(" ")[0]
@@ -249,7 +249,7 @@ export default function ViewInvestigationSuggestions(props: {
                             })
                           )
                         : investigation.time
-                        ? moment(investigation.time)
+                        ? dayjs(investigation.time)
                         : undefined;
 
                     if (
@@ -275,7 +275,7 @@ export default function ViewInvestigationSuggestions(props: {
                     {nextFurthestInvestigation ? (
                       <div
                         className={`${
-                          nextFurthestInvestigation.isBefore(moment())
+                          nextFurthestInvestigation.isBefore(dayjs())
                             ? "text-red-500"
                             : ""
                         }`}
@@ -314,7 +314,7 @@ export default function ViewInvestigationSuggestions(props: {
             );
           })
         ) : (
-          <div className="bg-white shadow rounded-xl">
+          <div className="rounded-xl bg-white shadow">
             No Investigation Suggestions
           </div>
         )}

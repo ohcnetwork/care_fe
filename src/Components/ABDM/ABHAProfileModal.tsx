@@ -4,7 +4,7 @@ import { AbhaObject } from "../Patient/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DialogModal from "../Common/Dialog";
 import QRCode from "qrcode.react";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { getAbhaCard } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { useRef } from "react";
@@ -66,7 +66,7 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
       <div
         ref={printRef}
         id="section-to-print"
-        className="print flex items-center justify-around print:border border-black p-4 print:w-full"
+        className="print flex items-center justify-around border-black p-4 print:w-full print:border"
       >
         <>
           <div className="flex flex-col items-center justify-evenly">
@@ -89,7 +89,7 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
                 <span>{abha.health_id.split("@")[1] || "care"}</span> */}
               </div>
             )}
-            <div className="flex flex-col mt-2">
+            <div className="mt-2 flex flex-col">
               {abha?.gender && (
                 <p className="text-sm text-gray-600">
                   Gender:
@@ -134,17 +134,17 @@ const ABHAProfileModal = ({ patientId, show, onClose, abha }: IProps) => {
         </>
       </div>
 
-      <div className="flex flex-col mt-4 text-sm text-gray-700">
+      <div className="mt-4 flex flex-col text-sm text-gray-700">
         {abha?.created_date && (
-          <div className="flex gap-1 items-center">
+          <div className="flex items-center gap-1">
             <span className="">Created On: </span>
-            <span>{formatDate(abha.created_date)}</span>
+            <span>{formatDateTime(abha.created_date)}</span>
           </div>
         )}
         {abha?.modified_date && (
-          <div className="flex gap-1 items-center">
+          <div className="flex items-center gap-1">
             <span className="">Last Modified On: </span>
-            <span>{formatDate(abha.modified_date)}</span>
+            <span>{formatDateTime(abha.modified_date)}</span>
           </div>
         )}
       </div>

@@ -44,12 +44,12 @@ import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import { UserModel } from "../Users/models";
 import { dischargePatient } from "../../Redux/actions";
 import loadable from "@loadable/component";
-import moment from "moment";
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
+import dayjs from "../../Utils/dayjs";
 
 const Loading = loadable(() => import("../Common/Loading"));
 const PageTitle = loadable(() => import("../Common/PageTitle"));
@@ -152,7 +152,7 @@ const initError = Object.assign(
 );
 
 const isoStringToDate = (isoDate: string) =>
-  (moment(isoDate).isValid() && moment(isoDate).toDate()) || undefined;
+  (dayjs(isoDate).isValid() && dayjs(isoDate).toDate()) || undefined;
 
 const initialState = {
   form: { ...initForm },
@@ -218,6 +218,7 @@ export const ConsultationForm = (props: any) => {
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
   const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
   const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
+  const [disabledFields, setDisabledFields] = useState<string[]>([]);
 
   const sections = {
     "Consultation Details": {
@@ -323,9 +324,14 @@ export const ConsultationForm = (props: any) => {
             cause_of_death: res.data?.discharge_notes || "",
             death_datetime: res.data?.death_datetime || "",
             death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
+            InvestigationAdvice: res.data.investigation,
           };
           dispatch({ type: "set_form", form: formData });
           setBed(formData.bed);
+
+          if (res.data.last_daily_round) {
+            setDisabledFields((fields) => [...fields, "category"]);
+          }
         } else {
           goBack();
         }
@@ -397,8 +403,11 @@ export const ConsultationForm = (props: any) => {
           }
           return;
         case "admission_date":
-          if (state.form.suggestion === "A" && !state.form[field]) {
-            errors[field] = "Field is required as person is admitted";
+          if (
+            ["A", "DC"].includes(state.form.suggestion) &&
+            !state.form[field]
+          ) {
+            errors[field] = "Field is required";
             invalidForm = true;
           }
           return;
@@ -489,7 +498,12 @@ export const ConsultationForm = (props: any) => {
               break;
             }
             if (i.repetitive && !i.frequency?.replace(/\s/g, "").length) {
-              errors[field] = "Frequency field can not be empty";
+              errors[field] = "Frequency field cannot be empty";
+              invalidForm = true;
+              break;
+            }
+            if (!i.repetitive && !i.time?.replace(/\s/g, "").length) {
+              errors[field] = "Time field cannot be empty";
               invalidForm = true;
               break;
             }
@@ -581,8 +595,9 @@ export const ConsultationForm = (props: any) => {
         suggestion: state.form.suggestion,
         consultation_status: Number(state.form.consultation_status),
         admitted: state.form.suggestion === "A",
-        admission_date:
-          state.form.suggestion === "A" ? state.form.admission_date : undefined,
+        admission_date: ["A", "DC"].includes(state.form.suggestion)
+          ? state.form.admission_date
+          : undefined,
         category: state.form.category,
         is_kasp: state.form.is_kasp,
         kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
@@ -728,15 +743,15 @@ export const ConsultationForm = (props: any) => {
     return (
       <div
         id={sectionId(sectionTitle)}
-        className="col-span-6 flex flex-row items-center mb-6 -ml-2"
+        className="col-span-6 -ml-2 mb-6 flex flex-row items-center"
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
-        <CareIcon className={`${section.iconClass} text-xl mr-3`} />
-        <label className="font-bold text-lg text-gray-900">
+        <CareIcon className={`${section.iconClass} mr-3 text-xl`} />
+        <label className="text-lg font-bold text-gray-900">
           {sectionTitle}
           {required && <span className="text-danger-500">{" *"}</span>}
         </label>
-        <hr className="ml-6 flex-1 border-gray-400 border" />
+        <hr className="ml-6 flex-1 border border-gray-400" />
       </div>
     );
   };
@@ -764,6 +779,7 @@ export const ConsultationForm = (props: any) => {
       value: (state.form as any)[name],
       error: (state.errors as any)[name],
       onChange: handleFormFieldChange,
+      disabled: disabledFields.includes(name),
     };
   };
 
@@ -777,9 +793,9 @@ export const ConsultationForm = (props: any) => {
   };
 
   return (
-    <div className="pb-2 relative flex flex-col">
+    <div className="relative flex flex-col pb-2">
       <PageTitle
-        className="pl-6 flex-grow-0"
+        className="grow-0 pl-6"
         title={isUpdate ? "Edit Consultation" : "Create Consultation"}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
@@ -792,8 +808,8 @@ export const ConsultationForm = (props: any) => {
         }
       />
 
-      <div className="mt-5 flex top-0 sm:mx-12 flex-grow-0">
-        <div className="hidden xl:flex flex-col w-72 fixed h-full">
+      <div className="top-0 mt-5 flex grow-0 sm:mx-12">
+        <div className="fixed hidden h-full w-72 flex-col xl:flex">
           {Object.keys(sections).map((sectionTitle) => {
             if (state.form.consultation_status === 1) {
               return null;
@@ -802,9 +818,9 @@ export const ConsultationForm = (props: any) => {
             const section = sections[sectionTitle as ConsultationFormSection];
             return (
               <button
-                className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
+                className={`flex w-full items-center justify-start gap-3 rounded-l-lg px-5 py-3 font-medium ${
                   isCurrent ? "bg-white text-primary-500" : "bg-transparent"
-                } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
+                } transition-all duration-100 ease-in hover:bg-white hover:tracking-wider`}
                 onClick={() => {
                   section.ref.current?.scrollIntoView({
                     behavior: "smooth",
@@ -819,11 +835,11 @@ export const ConsultationForm = (props: any) => {
             );
           })}
         </div>
-        <div className="w-full h-full flex overflow-auto xl:ml-72">
+        <div className="flex h-full w-full overflow-auto xl:ml-72">
           <div className="w-full max-w-4xl">
             <form
               onSubmit={handleSubmit}
-              className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
+              className="rounded bg-white p-6 transition-all sm:rounded-xl sm:p-12"
             >
               <DraftSection
                 handleDraftSelect={(newState: any) => {
@@ -831,7 +847,7 @@ export const ConsultationForm = (props: any) => {
                 }}
                 formData={state.form}
               />
-              <div className="grid grid-cols-1 gap-x-12 items-start">
+              <div className="grid grid-cols-1 items-start gap-x-12">
                 <div className="grid grid-cols-6 gap-x-6">
                   {sectionTitle("Consultation Details")}
                   <div
@@ -910,7 +926,7 @@ export const ConsultationForm = (props: any) => {
                   <div className="col-span-6">
                     <div className="flex items-center justify-between">
                       <FieldLabel>Body Surface Area</FieldLabel>
-                      <span className="mb-2 text-black font-medium text-sm">
+                      <span className="mb-2 text-sm font-medium text-black">
                         {Math.sqrt(
                           (Number(state.form.weight) *
                             Number(state.form.height)) /
@@ -920,7 +936,7 @@ export const ConsultationForm = (props: any) => {
                       </span>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row items-center sm:gap-3">
+                    <div className="flex flex-col items-center sm:flex-row sm:gap-3">
                       <TextFormField
                         className="w-full"
                         {...field("weight")}
@@ -928,7 +944,7 @@ export const ConsultationForm = (props: any) => {
                         placeholder="Weight"
                         trailingPadding=" "
                         trailing={
-                          <p className="text-sm text-gray-700 mr-8">
+                          <p className="mr-8 text-sm text-gray-700">
                             Weight (kg)
                           </p>
                         }
@@ -941,7 +957,7 @@ export const ConsultationForm = (props: any) => {
                         placeholder="Height"
                         trailingPadding=" "
                         trailing={
-                          <p className="text-sm text-gray-700 mr-8">
+                          <p className="mr-8 text-sm text-gray-700">
                             Height (cm)
                           </p>
                         }
@@ -953,6 +969,13 @@ export const ConsultationForm = (props: any) => {
                   {String(state.form.consultation_status) !== "1" && (
                     <div className="col-span-6" ref={fieldRef["category"]}>
                       <PatientCategorySelect
+                        labelSuffix={
+                          disabledFields.includes("category") && (
+                            <p className="text-xs font-medium text-warning-500">
+                              A daily round already exists.
+                            </p>
+                          )
+                        }
                         required
                         label="Category"
                         {...field("category")}
@@ -967,9 +990,11 @@ export const ConsultationForm = (props: any) => {
                     <SelectFormField
                       required
                       label="Decision after consultation"
-                      disabled={String(state.form.consultation_status) === "1"}
                       {...selectField("suggestion")}
-                      options={CONSULTATION_SUGGESTION}
+                      disabled={String(state.form.consultation_status) === "1"}
+                      options={CONSULTATION_SUGGESTION.filter(
+                        ({ deprecated }) => !deprecated
+                      )}
                     />
                   </div>
 
@@ -1013,7 +1038,7 @@ export const ConsultationForm = (props: any) => {
                         <TextFormField
                           {...field("death_datetime")}
                           type="datetime-local"
-                          max={new Date().toISOString().slice(0, 16)}
+                          max={dayjs().format("YYYY-MM-DDTHH:mm")}
                           required={state.form.suggestion === "DD"}
                           label="Date & Time of Death"
                           value={state.form.death_datetime}
@@ -1034,7 +1059,7 @@ export const ConsultationForm = (props: any) => {
                     </>
                   )}
 
-                  {state.form.suggestion === "A" && (
+                  {["A", "DC"].includes(state.form.suggestion) && (
                     <>
                       <div
                         className="col-span-6"
@@ -1044,7 +1069,11 @@ export const ConsultationForm = (props: any) => {
                           {...field("admission_date")}
                           required
                           disableFuture
-                          label="Admission date"
+                          label={
+                            state.form.suggestion === "A"
+                              ? "Date of Admission"
+                              : "Domiciliary Care Start Date"
+                          }
                           position="LEFT"
                         />
                       </div>
@@ -1083,7 +1112,7 @@ export const ConsultationForm = (props: any) => {
                 <div className="flex flex-col gap-4 pb-4">
                   <div className="flex flex-col">
                     {sectionTitle("Diagnosis", true)}
-                    <p className="text-gray-700 text-sm -mt-4 mb-4 space-x-1">
+                    <p className="-mt-4 mb-4 space-x-1 text-sm text-gray-700">
                       <span className="font-medium">
                         Either Provisional or Final Diagnosis is mandatory
                       </span>
@@ -1203,7 +1232,7 @@ export const ConsultationForm = (props: any) => {
                             />
                           </div>
 
-                          <div className="flex flex-col md:flex-row gap-3 col-span-6">
+                          <div className="col-span-6 flex flex-col gap-3 md:flex-row">
                             <div
                               ref={fieldRef["review_interval"]}
                               className="flex-1"
@@ -1236,7 +1265,7 @@ export const ConsultationForm = (props: any) => {
 
                           {JSON.parse(state.form.is_telemedicine) && (
                             <div
-                              className="flex-[2] col-span-6"
+                              className="col-span-6 flex-[2]"
                               ref={fieldRef["assigned_to"]}
                             >
                               <UserAutocompleteFormField
@@ -1258,7 +1287,7 @@ export const ConsultationForm = (props: any) => {
                   )}
                 </div>
 
-                <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end">
+                <div className="mt-6 flex flex-col justify-end gap-3 sm:flex-row">
                   <Cancel
                     onClick={() =>
                       navigate(`/facility/${facilityId}/patient/${patientId}`)
@@ -1275,7 +1304,7 @@ export const ConsultationForm = (props: any) => {
             </form>
             {isUpdate && (
               <>
-                <div className="mt-4 bg-white rounded max-w-4xl px-11 py-8 mx-auto">
+                <div className="mx-auto mt-4 max-w-4xl rounded bg-white px-11 py-8">
                   <h4>Update Bed</h4>
                   <Beds
                     facilityId={facilityId}

@@ -8,10 +8,11 @@ import { DupPatientModel } from "./models";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { OptionsType } from "../../Common/constants";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import moment from "moment";
 import { navigate } from "raviger";
 import { transferPatient } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
+import { dateQueryString } from "../../Utils/utils.js";
+import dayjs from "dayjs";
 
 interface Props {
   patientList: Array<DupPatientModel>;
@@ -36,7 +37,7 @@ const initialState = {
 };
 
 const getDate = (value: any) =>
-  value && moment(value).isValid() && moment(value).toDate();
+  value && dayjs(value).isValid() && dayjs(value).toDate();
 
 const patientFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
@@ -76,9 +77,9 @@ const TransferPatientDialog = (props: Props) => {
   };
 
   const handleDateChange = (e: any) => {
-    if (moment(e.value).isValid()) {
+    if (dayjs(e.value).isValid()) {
       const form = { ...state.form };
-      form[e.name] = moment(e.value).format("YYYY-MM-DD");
+      form[e.name] = dateQueryString(e.value);
       dispatch({ type: "set_form", form });
     }
   };
@@ -114,7 +115,7 @@ const TransferPatientDialog = (props: Props) => {
     if (validForm) {
       setIsLoading(true);
       const data = {
-        date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
+        date_of_birth: dateQueryString(state.form.date_of_birth),
         facility: facilityId,
       };
       const res = await dispatchAction(
@@ -143,14 +144,14 @@ const TransferPatientDialog = (props: Props) => {
   return (
     <div>
       <div>
-        <div className="grid gap-4 grid-cols-1">
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <p className="leading-relaxed">
               Note: Date of birth must match the patient to process the transfer
               request.
             </p>
           </div>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <FieldLabel required className="text-sm">
                 Patient
@@ -184,7 +185,7 @@ const TransferPatientDialog = (props: Props) => {
           </div>
         </div>
       </div>
-      <div className="justify-between flex flex-col md:flex-row gap-2 pt-4">
+      <div className="flex flex-col justify-between gap-2 pt-4 md:flex-row">
         <Cancel onClick={handleCancel} disabled={isLoading} />
         <Submit
           disabled={isLoading}

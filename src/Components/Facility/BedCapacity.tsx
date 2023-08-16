@@ -147,6 +147,12 @@ export const BedCapacity = (props: BedCapacityProps) => {
         invalidForm = true;
       } else if (
         field === "currentOccupancy" &&
+        Number(state.form[field] < 0)
+      ) {
+        errors[field] = "Occupied cannot be negative";
+        invalidForm = true;
+      } else if (
+        field === "currentOccupancy" &&
         Number(state.form[field]) > Number(state.form.totalCapacity)
       ) {
         errors[field] = "Occupied must be less than or equal to total capacity";
@@ -154,6 +160,9 @@ export const BedCapacity = (props: BedCapacityProps) => {
       }
       if (field === "totalCapacity" && Number(state.form[field]) === 0) {
         errors[field] = "Total capacity cannot be 0";
+        invalidForm = true;
+      } else if (field === "totalCapacity" && Number(state.form[field]) < 0) {
+        errors[field] = "Total capacity cannot be negative";
         invalidForm = true;
       }
     });
@@ -209,11 +218,11 @@ export const BedCapacity = (props: BedCapacityProps) => {
   return (
     <div className={className}>
       {isLoading ? (
-        <div className="flex justify-center items-center py-4">
+        <div className="flex items-center justify-center py-4">
           <div role="status">
             <svg
               aria-hidden="true"
-              className="mr-2 w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-primary"
+              className="mr-2 h-8 w-8 animate-spin fill-primary text-gray-200 dark:text-gray-600"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -245,7 +254,7 @@ export const BedCapacity = (props: BedCapacityProps) => {
             disabled={!!id}
             error={state.errors.bedType}
           />
-          <div className="flex flex-col md:flex-row gap-7">
+          <div className="flex flex-col gap-7 md:flex-row">
             <TextFormField
               className="w-full"
               id="total-capacity"
@@ -272,26 +281,21 @@ export const BedCapacity = (props: BedCapacityProps) => {
               max={state.form.totalCapacity}
             />
           </div>
-          <div>
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-end mt-4">
-              <div className="w-full md:w-auto">
-                <Cancel onClick={handleClose} />
-              </div>
-              <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-                {!isLastOptionType && headerText === "Add Bed Capacity" && (
-                  <Submit
-                    id="bed-capacity-save-and-exit"
-                    onClick={(e) => handleSubmit(e, "Save and Exit")}
-                    label="Save Bed Capacity"
-                  />
-                )}
-                <Submit
-                  id="bed-capacity-save"
-                  onClick={(e) => handleSubmit(e)}
-                  label={buttonText}
-                />
-              </div>
-            </div>
+
+          <div className="cui-form-button-group mt-4">
+            <Cancel onClick={handleClose} />
+            {!isLastOptionType && headerText === "Add Bed Capacity" && (
+              <Submit
+                id="bed-capacity-save-and-exit"
+                onClick={(e) => handleSubmit(e, "Save and Exit")}
+                label="Save Bed Capacity"
+              />
+            )}
+            <Submit
+              id="bed-capacity-save"
+              onClick={(e) => handleSubmit(e)}
+              label={buttonText}
+            />
           </div>
         </div>
       )}

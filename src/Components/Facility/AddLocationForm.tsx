@@ -120,7 +120,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
       <div className="mt-10">
         <div className="cui-card">
           <form onSubmit={handleSubmit}>
-            <div className="mt-2 grid gap-4 grid-cols-1">
+            <div className="mt-2 grid grid-cols-1 gap-4">
               <div>
                 <TextFormField
                   name="name"
@@ -143,7 +143,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
                 />
               </div>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between mt-4">
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-between">
               <Cancel
                 onClick={() =>
                   navigate(`/facility/${facilityId}/location`, {

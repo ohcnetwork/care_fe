@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { PrescriptionActions } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { MedicineAdministrationRecord } from "./models";
@@ -38,22 +38,22 @@ export default function MedicineAdministrationsTable({
 
   return (
     <div>
-      <div className="flex flex-wrap items-center justify-between mb-2">
+      <div className="mb-2 flex flex-wrap items-center justify-between">
         <div className="flex items-center font-semibold leading-relaxed text-gray-900">
-          <span className="text-lg mr-3">
+          <span className="mr-3 text-lg">
             {t("medicine_administration_history")}
           </span>
           <div className="text-gray-600">
             <CareIcon className="care-l-history-alt pr-2" />
             <span className="text-xs">
-              {lastModified && formatDate(lastModified)}
+              {lastModified && formatDateTime(lastModified)}
             </span>
           </div>
         </div>
       </div>
       <div className="flex flex-col">
-        <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          <div className="align-middle inline-block min-w-full shadow sm:rounded-lg border-b border-gray-200">
+        <div className="-my-2 overflow-x-auto py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+          <div className="inline-block min-w-full border-b border-gray-200 align-middle shadow sm:rounded-lg">
             <ResponsiveMedicineTable
               theads={["medicine", "notes", "administered_on"].map((_) => t(_))}
               list={
@@ -76,7 +76,7 @@ export default function MedicineAdministrationsTable({
               fieldsToDisplay={[2, 3]}
             />
             {items?.length === 0 && (
-              <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
+              <div className="text-semibold flex items-center justify-center py-2 text-gray-600">
                 {t("no_data_found")}
               </div>
             )}

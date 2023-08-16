@@ -8,7 +8,7 @@ import Card from "../../CAREUI/display/Card";
 import { FileUpload } from "./FileUpload";
 import Page from "../Common/components/Page";
 import _ from "lodash";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { getTestSample } from "../../Redux/actions";
 import loadable from "@loadable/component";
 import { navigate } from "raviger";
@@ -63,7 +63,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
     )?.text;
 
     return (
-      <div className="border rounded-lg bg-white shadow h-full text-black mt-2 mr-3 md:mr-8 p-4">
+      <div className="mr-3 mt-2 h-full rounded-lg border bg-white p-4 text-black shadow md:mr-8">
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="mt-2 flex flex-col gap-2">
             <div>
@@ -100,7 +100,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
                 Date of Test:{" "}
               </span>
               {(patientData?.date_of_test &&
-                formatDate(patientData?.date_of_test)) ||
+                formatDateTime(patientData?.date_of_test)) ||
                 "-"}
             </div>
 
@@ -194,7 +194,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
                 <span className="font-semibold leading-relaxed">
                   Estimated contact date:{" "}
                 </span>
-                {formatDate(patientData?.estimated_contact_date)}
+                {formatDateTime(patientData?.estimated_contact_date)}
               </div>
             )}
             <div className="md:col-span-2">
@@ -259,7 +259,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
   const renderFlow = (flow: FlowModel) => {
     return (
       <Card key={flow.id}>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Status: </span>{" "}
             {_.startCase(_.camelCase(flow.status))}
@@ -270,11 +270,11 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Created On :</span>{" "}
-            {flow.created_date ? formatDate(flow.created_date) : "-"}
+            {flow.created_date ? formatDateTime(flow.created_date) : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Modified on:</span>{" "}
-            {flow.modified_date ? formatDate(flow.modified_date) : "-"}
+            {flow.modified_date ? formatDateTime(flow.modified_date) : "-"}
           </div>
         </div>
       </Card>
@@ -302,7 +302,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
       }
     >
       <Card>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Status: </span>
             {_.startCase(_.camelCase(sampleDetails.status))}
@@ -324,13 +324,13 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
           <div>
             <span className="font-semibold leading-relaxed">Tested on: </span>
             {sampleDetails.date_of_result
-              ? formatDate(sampleDetails.date_of_result)
+              ? formatDateTime(sampleDetails.date_of_result)
               : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Result on: </span>
             {sampleDetails.date_of_result
-              ? formatDate(sampleDetails.date_of_result)
+              ? formatDateTime(sampleDetails.date_of_result)
               : "-"}
           </div>
           {sampleDetails.fast_track && (

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import { PrescriptionActions } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { Prescription } from "./models";
@@ -86,7 +86,7 @@ export default function PrescriptionsTable({
       {showDiscontinueFor && (
         <DiscontinuePrescription
           prescription={showDiscontinueFor}
-          actions={prescription(showDiscontinueFor.id!)}
+          actions={prescription(showDiscontinueFor.id ?? "")}
           onClose={(success) => {
             setShowDiscontinueFor(undefined);
             if (success) onChange?.();
@@ -97,7 +97,7 @@ export default function PrescriptionsTable({
       {showAdministerFor && (
         <AdministerMedicine
           prescription={showAdministerFor}
-          actions={prescription(showAdministerFor.id!)}
+          actions={prescription(showAdministerFor.id ?? "")}
           onClose={(success) => {
             setShowAdministerFor(undefined);
             if (success) onChange?.();
@@ -109,17 +109,17 @@ export default function PrescriptionsTable({
         <DialogModal
           onClose={() => setDetailedViewFor(undefined)}
           title={t("prescription_details")}
-          className="md:max-w-4xl w-full"
+          className="w-full md:max-w-4xl"
           show
         >
           <div className="mt-4 flex flex-col gap-4">
             <PrescriptionDetailCard
               prescription={detailedViewFor}
-              actions={prescription(detailedViewFor.id!)}
+              actions={prescription(detailedViewFor.id ?? "")}
               key={detailedViewFor.id}
               readonly
             />
-            <div className="flex flex-col md:flex-row w-full gap-2 items-center justify-end">
+            <div className="flex w-full flex-col items-center justify-end gap-2 md:flex-row">
               <Cancel
                 onClick={() => setDetailedViewFor(undefined)}
                 label={t("close")}
@@ -149,20 +149,20 @@ export default function PrescriptionsTable({
           </div>
         </DialogModal>
       )}
-      <div className="flex flex-wrap items-center justify-between mb-2">
+      <div className="mb-2 flex flex-wrap items-center justify-between">
         <div className="flex items-center font-semibold leading-relaxed text-gray-900">
-          <span className="text-lg mr-3">
+          <span className="mr-3 text-lg">
             {is_prn ? "PRN Prescriptions" : "Prescriptions"}
           </span>
           <div className="text-gray-600">
             <CareIcon className="care-l-history-alt pr-2" />
             <span className="text-xs">
-              {lastModified && formatDate(lastModified)}
+              {lastModified && formatDateTime(lastModified)}
             </span>
           </div>
         </div>
         {prescription_type === "REGULAR" && (
-          <div className="flex w-full mt-2 md:mt-0 md:w-auto flex-col sm:flex-row gap-2 justify-end">
+          <div className="mt-2 flex w-full flex-col justify-end gap-2 sm:flex-row md:mt-0 md:w-auto">
             <ButtonV2
               disabled={readonly}
               variant="secondary"
@@ -191,8 +191,8 @@ export default function PrescriptionsTable({
         )}
       </div>
       <div className="flex flex-col">
-        <div className="-my-2 py-2 overflow-x-auto sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          <div className="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200">
+        <div className="-my-2 overflow-x-auto py-2 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+          <div className="inline-block min-w-full overflow-hidden border-b border-gray-200 align-middle shadow sm:rounded-lg">
             <ResponsiveMedicineTable
               onClick={setDetailedViewFor}
               maxWidthColumn={0}
@@ -224,7 +224,7 @@ export default function PrescriptionsTable({
                   ? (med: Prescription) => {
                       if (med.prescription_type === "DISCHARGE") {
                         return (
-                          <div className="flex w-full gap-1 items-center justify-center font-medium text-gray-700">
+                          <div className="flex w-full items-center justify-center gap-1 font-medium text-gray-700">
                             <span className="text-sm">
                               {t("discharge_prescription")}
                             </span>
@@ -234,7 +234,7 @@ export default function PrescriptionsTable({
 
                       if (med.discontinued) {
                         return (
-                          <div className="flex w-full gap-1 items-center justify-center font-medium text-gray-700">
+                          <div className="flex w-full items-center justify-center gap-1 font-medium text-gray-700">
                             <CareIcon className="care-l-ban" />
                             <span className="text-sm">{t("discontinued")}</span>
                           </div>
@@ -278,7 +278,7 @@ export default function PrescriptionsTable({
               }
             />
             {prescriptions?.length === 0 && (
-              <div className="flex items-center justify-center text-gray-600 py-2 text-semibold">
+              <div className="text-semibold flex items-center justify-center py-2 text-gray-600">
                 {t("no_data_found")}
               </div>
             )}

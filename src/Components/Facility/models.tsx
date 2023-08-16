@@ -101,6 +101,8 @@ export interface ConsultationModel {
   patient?: string;
   prescribed_medication?: string;
   referred_to?: number | null;
+  referred_to_object?: FacilityModel;
+  referred_to_external?: string;
   suggestion?: string;
   ip_no?: string;
   op_no?: string;
@@ -192,6 +194,7 @@ export interface BedModel {
   facility?: string;
   location_object?: {
     name: string;
+    id?: string;
   };
   location?: string;
   is_occupied?: boolean;

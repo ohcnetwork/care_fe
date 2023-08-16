@@ -210,7 +210,7 @@ const AssetsList = () => {
 
   if (isScannerActive)
     return (
-      <div className="md:w-1/2 w-full my-2 mx-auto flex flex-col justify-start items-end">
+      <div className="mx-auto my-2 flex w-full flex-col items-end justify-start md:w-1/2">
         <button
           onClick={() => setIsScannerActive(false)}
           className="btn btn-default mb-2"
@@ -232,14 +232,14 @@ const AssetsList = () => {
           }
           style={{ width: "100%" }}
         />
-        <h2 className="text-center text-lg self-center">Scan Asset QR!</h2>
+        <h2 className="self-center text-center text-lg">Scan Asset QR!</h2>
       </div>
     );
 
   let manageAssets = null;
   if (assetsExist) {
     manageAssets = (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:-mx-8 gap-2">
+      <div className="grid grid-cols-1 gap-2 md:-mx-8 md:grid-cols-2 lg:grid-cols-3">
         {assets.map((asset: AssetData) => (
           <Link
             key={asset.id}
@@ -249,10 +249,10 @@ const AssetsList = () => {
           >
             <div
               key={asset.id}
-              className="w-full bg-white rounded-lg cursor-pointer border-1 shadow p-5 justify-center items-center border border-transparent hover:border-primary-500"
+              className="border-1 w-full cursor-pointer items-center justify-center rounded-lg border border-transparent bg-white p-5 shadow hover:border-primary-500"
             >
               <div className="md:flex">
-                <p className="text-xl flex font-medium capitalize break-words">
+                <p className="flex break-words text-xl font-medium capitalize">
                   <span className="mr-2 text-primary-500">
                     <CareIcon
                       className={`care-l-${
@@ -265,29 +265,29 @@ const AssetsList = () => {
                     />
                   </span>
                   <p
-                    className="truncate w-48"
+                    className="w-48 truncate"
                     data-testid="created-asset-list-name"
                   >
                     {asset.name}
                   </p>
                 </p>
               </div>
-              <p className="font-normal text-sm">
+              <p className="text-sm font-normal">
                 <span className="text-sm font-medium">
                   <CareIcon className="care-l-location-point mr-1 text-primary-500" />
                   {asset?.location_object?.name}
                 </span>
-                <span className="text-sm font-medium ml-2">
+                <span className="ml-2 text-sm font-medium">
                   <CareIcon className="care-l-hospital mr-1 text-primary-500" />
                   {asset?.location_object?.facility?.name}
                 </span>
               </p>
 
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="mt-2 flex flex-wrap gap-2">
                 {asset.is_working ? (
-                  <Chip color="green" startIcon="cog" text="Working" />
+                  <Chip startIcon="l-cog" text="Working" />
                 ) : (
-                  <Chip color="red" startIcon="cog" text="Not Working" />
+                  <Chip variant="danger" startIcon="l-cog" text="Not Working" />
                 )}
               </div>
             </div>
@@ -297,7 +297,7 @@ const AssetsList = () => {
     );
   } else {
     manageAssets = (
-      <div className="w-full bg-white rounded-lg p-2 text-center col-span-3 py-8 pt-4">
+      <div className="col-span-3 w-full rounded-lg bg-white p-2 py-8 pt-4 text-center">
         <p className="text-2xl font-bold text-gray-600">No Assets Found</p>
       </div>
     );
@@ -347,12 +347,13 @@ const AssetsList = () => {
         </>
       }
     >
-      <div className="lg:flex mt-5 space-y-2 gap-3">
+      <div className="mt-5 gap-3 space-y-2 lg:flex">
         <CountBlock
           text="Total Assets"
           count={totalCount}
           loading={isLoading}
-          icon={"monitor-heart-rate"}
+          icon="l-monitor-heart-rate"
+          className="flex-1"
         />
         <div className="flex-1">
           <SearchInput
@@ -362,8 +363,8 @@ const AssetsList = () => {
             placeholder="Search by name/serial no./QR code ID"
           />
         </div>
-        <div className="flex flex-col lg:ml-2 justify-start items-start gap-2">
-          <div className="flex flex-col md:flex-row gap-2 w-full lg:w-auto">
+        <div className="flex flex-col items-start justify-start gap-2 lg:ml-2">
+          <div className="flex w-full flex-col gap-2 md:flex-row lg:w-auto">
             <div className="w-full">
               <AdvancedFilterButton
                 onClick={() => advancedFilter.setShow(true)}
@@ -377,12 +378,12 @@ const AssetsList = () => {
             </ButtonV2>
           </div>
           <div
-            className="flex flex-col md:flex-row w-full"
+            className="flex w-full flex-col md:flex-row"
             data-testid="create-asset-buttom"
           >
             <ButtonV2
               authorizeFor={NonReadOnlyUsers}
-              className="w-full inline-flex items-center justify-center"
+              className="inline-flex w-full items-center justify-center"
               onClick={() => {
                 if (qParams.facility) {
                   navigate(`/facility/${qParams.facility}/assets/new`);

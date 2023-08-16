@@ -7,7 +7,7 @@ import {
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import Pagination from "../../Common/Pagination";
-import { formatDate } from "../../../Utils/utils";
+import { formatDateTime } from "../../../Utils/utils";
 
 export const NursingPlot = (props: any) => {
   const { consultationId } = props;
@@ -50,7 +50,7 @@ export const NursingPlot = (props: any) => {
 
   const data = Object.entries(results).map((key: any) => {
     return {
-      date: formatDate(key[0]),
+      date: formatDateTime(key[0]),
       nursing: key[1]["nursing"],
     };
   });
@@ -86,8 +86,8 @@ export const NursingPlot = (props: any) => {
         <div>
           <div className="flex flex-row overflow-x-scroll">
             {areFieldsEmpty() && (
-              <div className="w-full mt-1 border bg-white shadow rounded-lg p-4">
-                <div className="font-bold text-gray-500 text-2xl flex justify-center items-center">
+              <div className="mt-1 w-full rounded-lg border bg-white p-4 shadow">
+                <div className="flex items-center justify-center text-2xl font-bold text-gray-500">
                   No data available
                 </div>
               </div>
@@ -96,9 +96,9 @@ export const NursingPlot = (props: any) => {
               (f: any) =>
                 filterEmpty(f) && (
                   <div key={f.desc} className="m-2 w-3/4">
-                    <div className="sticky top-0 pt-2  rounded z-10">
-                      <div className="flex justify-between p-4 mx-2 rounded bg-gray-200 border items-center">
-                        <h3 className="text-sm flex items-center h-8">
+                    <div className="sticky top-0 z-10  rounded pt-2">
+                      <div className="mx-2 flex items-center justify-between rounded border bg-gray-200 p-4">
+                        <h3 className="flex h-8 items-center text-sm">
                           {f.desc}
                         </h3>
                       </div>
@@ -109,12 +109,12 @@ export const NursingPlot = (props: any) => {
                         .map((care: any, index: number) => (
                           <div
                             key={index}
-                            className="w-full my-2 p-4 divide-y bg-white border rounded-lg shadow"
+                            className="my-2 w-full divide-y rounded-lg border bg-white p-4 shadow"
                           >
                             <div className="text-xs font-semibold">
                               {care.date}
                             </div>
-                            <div className="text-sm py-2">
+                            <div className="py-2 text-sm">
                               {care.description}
                             </div>
                           </div>

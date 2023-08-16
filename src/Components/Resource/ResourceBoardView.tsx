@@ -38,8 +38,8 @@ export default function BoardView() {
   };
 
   return (
-    <div className="flex flex-col h-screen px-2 pb-2">
-      <div className="w-full flex-col lg:flex-row flex items-center justify-between">
+    <div className="flex h-screen flex-col px-2 pb-2">
+      <div className="flex w-full flex-col items-center justify-between lg:flex-row">
         <div className="w-1/3 lg:w-1/4">
           <PageTitle
             title="Resource"
@@ -57,7 +57,7 @@ export default function BoardView() {
           />
         </div>
 
-        <div className="w-full flex flex-col lg:flex-row justify-between pt-2 lg:gap-4 gap-2 items-center">
+        <div className="flex w-full flex-col items-center justify-between gap-2 pt-2 lg:flex-row lg:gap-4">
           <div></div>
           <SwitchTabs
             Tab1="Active"
@@ -66,7 +66,7 @@ export default function BoardView() {
             onClickTab2={() => setBoardFilter(COMPLETED)}
             activeTab={boardFilter !== ACTIVE}
           />
-          <div className="flex flex-col lg:flex-row gap-2 lg:gap-4 w-full lg:w-fit lg:mr-4">
+          <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
             <ButtonV2 className="py-[11px]" onClick={onListViewBtnClick}>
               <CareIcon className="care-l-list-ul" />
               {t("list_view")}
@@ -79,8 +79,8 @@ export default function BoardView() {
       </div>
 
       <BadgesList {...{ appliedFilters, FilterBadges }} />
-      <ScrollingComponent className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
-        <div className="flex mt-4 pb-2 flex-1 items-start overflow-x-scroll px-4">
+      <ScrollingComponent className="mt-4 flex flex-1 items-start overflow-x-scroll px-4 pb-2">
+        <div className="mt-4 flex flex-1 items-start overflow-x-scroll px-4 pb-2">
           {isLoading ? (
             <Loading />
           ) : (

@@ -269,18 +269,18 @@ export const ShiftCreate = (props: patientShiftProps) => {
       }}
       backUrl={`/facility/${facilityId}/patient/${patientId}`}
     >
-      <Card className="mt-4 flex flex-col w-full max-w-3xl mx-auto px-8 md:px-16 py-5 md:py-11">
+      <Card className="mx-auto mt-4 flex w-full max-w-3xl flex-col px-8 py-5 md:px-16 md:py-11">
         <TextFormField
           {...field("refering_facility_contact_name")}
-          label="Contact person at the current facility"
+          label="Name of Contact person at the current facility"
           required
         />
 
         <PhoneNumberFormField
           {...field("refering_facility_contact_number")}
-          label="Contact person phone"
+          label="Contact person phone number"
           required
-          disableCountry
+          types={["mobile", "landline"]}
         />
 
         {wartime_shifting && (
@@ -330,7 +330,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
         />
 
         <PatientCategorySelect
-          required={false}
+          required={true}
           {...field("patient_category")}
           value={patientCategory}
           onChange={(e) => setPatientCategory(e.value)}
@@ -382,6 +382,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
         <PhoneNumberFormField
           {...field("ambulance_phone_number")}
           label="Ambulance Phone Number"
+          types={["mobile", "landline"]}
         />
 
         <TextFormField {...field("ambulance_number")} label="Ambulance No." />
@@ -391,7 +392,7 @@ export const ShiftCreate = (props: patientShiftProps) => {
           placeholder="Type any extra comments here"
         />
 
-        <div className="mt-4 flex flex-col-reverse md:flex-row gap-2 justify-end">
+        <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
           <Cancel onClick={() => goBack()} />
           <Submit onClick={handleSubmit} />
         </div>

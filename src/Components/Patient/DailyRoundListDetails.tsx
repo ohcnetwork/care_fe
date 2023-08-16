@@ -1,5 +1,4 @@
 import loadable from "@loadable/component";
-import moment from "moment";
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { CURRENT_HEALTH_CHANGE, SYMPTOM_CHOICES } from "../../Common/constants";
@@ -8,6 +7,7 @@ import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DailyRoundsModel } from "./models";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
+import { formatDateTime } from "../../Utils/utils";
 const Loading = loadable(() => import("../Common/Loading"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
@@ -77,7 +77,7 @@ export const DailyRoundListDetails = (props: any) => {
       title={`Consultation Update #${id}`}
       backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
     >
-      <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
+      <div className="mt-4 h-full rounded-lg border bg-white p-4 text-black shadow hover:border-primary-500">
         <div className="flex justify-between">
           <div className="max-w-md">
             <div>
@@ -99,7 +99,7 @@ export const DailyRoundListDetails = (props: any) => {
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Temperature: </span>
             {dailyRoundListDetailsData.temperature ?? "-"}
@@ -107,20 +107,20 @@ export const DailyRoundListDetails = (props: any) => {
           <div>
             <span className="font-semibold leading-relaxed">Taken at: </span>
             {dailyRoundListDetailsData.taken_at
-              ? moment(dailyRoundListDetailsData.taken_at).format("lll")
+              ? formatDateTime(dailyRoundListDetailsData.taken_at)
               : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">SpO2: </span>
             {dailyRoundListDetailsData.ventilator_spo2 ?? "-"}
           </div>
-          <div className="md:col-span-2 capitalize">
+          <div className="capitalize md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Additional Symptoms:{" "}
             </span>
             {dailyRoundListDetailsData.additional_symptoms_text ?? "-"}
           </div>
-          <div className="md:col-span-2 capitalize">
+          <div className="capitalize md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Admitted To *:{" "}
             </span>

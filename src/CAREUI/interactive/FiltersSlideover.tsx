@@ -27,8 +27,8 @@ export default function FiltersSlideover({
       setOpen={advancedFilter.setShow}
       title={
         <div className="flex items-center justify-between">
-          <span className="font-bold text-lg">{t("advanced_filters")}</span>
-          <div className="flex items-center justify-end gap-1 mr-2">
+          <span className="text-lg font-bold">{t("advanced_filters")}</span>
+          <div className="mr-2 flex items-center justify-end gap-1">
             <ButtonV2
               variant="danger"
               ghost
@@ -57,7 +57,7 @@ export const AdvancedFilterButton = ({ onClick }: { onClick: () => void }) => {
     <ButtonV2
       ghost
       border
-      className="bg-white w-full sm:w-auto"
+      className="w-full bg-white sm:w-auto"
       onClick={onClick}
       id="advanced-filter"
     >

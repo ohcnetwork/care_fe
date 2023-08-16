@@ -303,8 +303,8 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           handleSubmit(true);
         }}
       />
-      <Card className="mt-4 w-full max-w-4xl mx-auto !p-6">
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+      <Card className="mx-auto mt-4 w-full max-w-4xl md:p-6 lg:p-8">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <SelectFormField
             name="status"
             label={t("status")}
@@ -319,7 +319,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             optionValue={(option) => option.text}
             optionSelectedLabel={(option) => option.text}
             onChange={handleFormFieldChange}
-            className="bg-white w-full md:leading-5 mt-2 md:col-span-1"
+            className="w-full bg-white md:col-span-1 md:leading-5"
           />
 
           {wartime_shifting &&
@@ -360,7 +360,6 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               multiple={false}
               freeText
               name="assigned_facility"
-              className="mt-4"
               selected={state.form.assigned_facility_object}
               setSelected={(obj) =>
                 setFacility(obj, "assigned_facility_object")
@@ -411,7 +410,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
           />
 
           <PatientCategorySelect
-            required={false}
+            required={true}
             name="patient_category"
             value={state.form.patient_category}
             onChange={handleFormFieldChange}
@@ -429,7 +428,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 optionLabel={(option) => option}
                 optionValue={(option) => option}
                 onChange={handleFormFieldChange}
-                className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5"
+                className="mt-2 h-11 w-full bg-white shadow-sm md:leading-5"
                 error={state.errors.preferred_vehicle_choice}
               />
               <SelectFormField
@@ -441,7 +440,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 optionLabel={(option) => option}
                 optionValue={(option) => option}
                 onChange={handleFormFieldChange}
-                className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5 md:col-span-1"
+                className="mt-2 h-11 w-full bg-white shadow-sm md:col-span-1 md:leading-5"
                 error={state.errors.assigned_facility_type}
               />
               <SelectFormField
@@ -453,7 +452,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
                 optionLabel={(option) => option}
                 optionValue={(option) => option}
                 onChange={handleFormFieldChange}
-                className="bg-white h-11 w-full mt-2 shadow-sm md:leading-5 md:col-span-1"
+                className="mt-2 h-11 w-full bg-white shadow-sm md:col-span-1 md:leading-5"
               />
             </>
           )}
@@ -488,6 +487,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
               handleFormFieldChange(event);
             }}
             error={state.errors.ambulance_phone_number}
+            types={["mobile", "landline"]}
           />
 
           <TextFormField
@@ -511,7 +511,7 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
             error={state.errors.comments}
           />
 
-          <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
+          <div className="mt-4 flex flex-col justify-between gap-2 md:col-span-2 md:flex-row">
             <Cancel onClick={() => goBack()} />
             <Submit onClick={() => handleSubmit()} />
           </div>

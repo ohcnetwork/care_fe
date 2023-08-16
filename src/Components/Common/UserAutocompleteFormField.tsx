@@ -1,4 +1,3 @@
-import moment from "moment";
 import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
 import { getFacilityUsers, getUserList } from "../../Redux/actions";
 import { Autocomplete } from "../Form/FormFields/Autocomplete";
@@ -8,6 +7,7 @@ import {
   useFormFieldPropsResolver,
 } from "../Form/FormFields/Utils";
 import { UserModel } from "../Users/models";
+import { isUserOnline } from "../../Utils/utils";
 
 type Props = FormFieldBaseProps<UserModel> & {
   placeholder?: string;
@@ -37,14 +37,12 @@ export default function UserAutocompleteFormField(props: Props) {
   const getStatusIcon = (option: UserModel) => {
     if (!props.showActiveStatus) return null;
 
-    const isOnline = moment()
-      .subtract(5, "minutes")
-      .isBefore(option.last_login);
-
     return (
       <div className="mr-6 mt-[2px]">
         <svg
-          className={`h-3 w-3 ${isOnline ? "text-green-500" : "text-gray-400"}`}
+          className={`h-3 w-3 ${
+            isUserOnline(option) ? "text-green-500" : "text-gray-400"
+          }`}
           fill="currentColor"
           viewBox="0 0 8 8"
         >
