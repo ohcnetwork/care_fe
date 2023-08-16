@@ -84,44 +84,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
           </div>
         </div>
       )}
-      <div className="relative flex flex-col gap-2 divide-x-0 divide-y divide-blue-600 md:flex-row md:justify-between md:divide-x md:divide-y-0">
-        <div>
-          <div
-            className={classNames(
-              "flex flex-col items-center justify-center gap-1 p-1 text-center font-mono font-medium text-warning-500",
-              isOnline && "hidden"
-            )}
-            style={waveformCanvas.size}
-          >
-            <CareIcon className="care-l-cloud-times mb-2 animate-pulse text-4xl" />
-            <span className="font-bold">No incoming data from HL7 Monitor</span>
-          </div>
-          <div
-            className={classNames("relative", !isOnline && "hidden")}
-            style={waveformCanvas.size}
-          >
-            <WaveformLabels
-              labels={{
-                ECG: "text-lime-300",
-                ECG_CHANNEL_2: "invisible",
-                Pleth: "text-yellow-300",
-                Resp: "text-sky-300",
-              }}
-            />
-            <canvas
-              className="absolute left-0 top-0"
-              ref={waveformCanvas.background.canvasRef}
-              style={waveformCanvas.size}
-              {...waveformCanvas.size}
-            />
-            <canvas
-              className="absolute left-0 top-0"
-              ref={waveformCanvas.foreground.canvasRef}
-              style={waveformCanvas.size}
-              {...waveformCanvas.size}
-            />
-          </div>
-        </div>
+      <div className="relative flex flex-col gap-2 md:flex-row md:justify-between">
         <VitalsNonWaveformContent>
           {/* Pulse Rate */}
           <NonWaveformData
@@ -205,6 +168,43 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
             </div>
           </div>
         </VitalsNonWaveformContent>
+        <div>
+          <div
+            className={classNames(
+              "flex flex-col items-center justify-center gap-1 p-1 text-center font-mono font-medium text-warning-500",
+              isOnline && "hidden"
+            )}
+            style={waveformCanvas.size}
+          >
+            <CareIcon className="care-l-cloud-times mb-2 animate-pulse text-4xl" />
+            <span className="font-bold">No incoming data from HL7 Monitor</span>
+          </div>
+          <div
+            className={classNames("relative", !isOnline && "hidden")}
+            style={waveformCanvas.size}
+          >
+            <WaveformLabels
+              labels={{
+                ECG: "text-lime-300",
+                ECG_CHANNEL_2: "invisible",
+                Pleth: "text-yellow-300",
+                Resp: "text-sky-300",
+              }}
+            />
+            <canvas
+              className="absolute left-0 top-0"
+              ref={waveformCanvas.background.canvasRef}
+              style={waveformCanvas.size}
+              {...waveformCanvas.size}
+            />
+            <canvas
+              className="absolute left-0 top-0"
+              ref={waveformCanvas.foreground.canvasRef}
+              style={waveformCanvas.size}
+              {...waveformCanvas.size}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -215,7 +215,7 @@ export const VitalsNonWaveformContent = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => (
-  <div className="grid grid-cols-2 gap-x-8 gap-y-4 divide-blue-600 bg-[#020617] tracking-wider text-white md:absolute md:inset-y-0 md:right-0 md:grid-cols-1 md:gap-0 md:divide-y">
+  <div className="z-10 grid grid-cols-2 gap-x-8 gap-y-4 divide-blue-600 border-b border-blue-600 bg-[#020617] tracking-wider text-white md:absolute md:inset-y-0 md:right-0 md:grid-cols-1 md:gap-0 md:divide-y md:border-b-0 md:border-l">
     {children}
   </div>
 );
