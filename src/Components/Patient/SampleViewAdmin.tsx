@@ -1,6 +1,5 @@
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
-
 import { useCallback, useState, useEffect, lazy } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -52,10 +51,6 @@ export default function SampleViewAdmin() {
     show: boolean;
     sample: SampleTestModel;
   }>({ show: false, sample: {} });
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-  const userType: "Staff" | "DistrictAdmin" | "StateLabAdmin" =
-    currentUser.data.user_type;
 
   useEffect(() => {
     async function fetchData() {
@@ -346,7 +341,6 @@ export default function SampleViewAdmin() {
           sample={statusDialog.sample}
           handleOk={handleApproval}
           handleCancel={dismissUpdateStatus}
-          userType={userType}
         />
       )}
       <div className="mt-5 gap-5 lg:grid lg:grid-cols-1">

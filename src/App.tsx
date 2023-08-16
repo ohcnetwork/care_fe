@@ -7,11 +7,12 @@ import { useDispatch, useSelector } from "react-redux";
 
 import AppRouter from "./Router/AppRouter";
 import { HistoryAPIProvider } from "./CAREUI/misc/HistoryAPIProvider";
-import { IConfig } from "./Common/hooks/useConfig";
+import { AppConfigContext, IConfig } from "./Common/hooks/useConfig";
 import { LocalStorageKeys } from "./Common/constants";
 import Plausible from "./Components/Common/Plausible";
 import SessionRouter from "./Router/SessionRouter";
 import axios from "axios";
+import { AuthUserContext } from "./Common/hooks/useAuthUser";
 
 const Loading = lazy(() => import("./Components/Common/Loading"));
 
@@ -95,8 +96,16 @@ const App: FC = () => {
   return (
     <Suspense fallback={<Loading />}>
       <HistoryAPIProvider>
-        {currentUser?.data ? <AppRouter /> : <SessionRouter />}
-        <Plausible />
+        <AppConfigContext.Provider value={config.data}>
+          {currentUser?.data ? (
+            <AuthUserContext.Provider value={currentUser.data}>
+              <AppRouter />
+            </AuthUserContext.Provider>
+          ) : (
+            <SessionRouter />
+          )}
+          <Plausible />
+        </AppConfigContext.Provider>
       </HistoryAPIProvider>
     </Suspense>
   );

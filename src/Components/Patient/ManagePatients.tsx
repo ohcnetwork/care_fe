@@ -39,12 +39,13 @@ import SwitchTabs from "../Common/components/SwitchTabs";
 import SwipeableViews from "react-swipeable-views";
 import { parseOptionId } from "../../Common/utils";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
 import dayjs from "dayjs";
 import { triggerGoal } from "../Common/Plausible.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -97,8 +98,7 @@ export const PatientManager = () => {
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const authUser = useAuthUser();
   const [showDialog, setShowDialog] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
   const [showDoctorConnect, setShowDoctorConnect] = useState(false);
@@ -769,7 +769,7 @@ export const PatientManager = () => {
                 onClick={() => {
                   triggerGoal("Doctor Connect Clicked", {
                     facilityId: qParams.facility,
-                    userId: currentUser.data.id,
+                    userId: authUser.id,
                     page: "FacilityPatientsList",
                   });
                   setShowDoctors(true);

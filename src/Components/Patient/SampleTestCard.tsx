@@ -1,7 +1,7 @@
 import { navigate } from "raviger";
 import { useState } from "react";
 import { SampleTestModel } from "./models";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { SAMPLE_TEST_STATUS } from "../../Common/constants";
 import { patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
@@ -27,10 +27,6 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
     show: boolean;
     sample: SampleTestModel;
   }>({ show: false, sample: {} });
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-  const userType: "Staff" | "DistrictAdmin" | "StateLabAdmin" =
-    currentUser.data.user_type;
 
   const handleApproval1 = async (
     sample: SampleTestModel,
@@ -202,7 +198,6 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
           sample={statusDialog.sample}
           handleOk={handleApproval1}
           handleCancel={dismissUpdateStatus}
-          userType={userType}
         />
       )}
     </div>

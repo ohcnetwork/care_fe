@@ -51,11 +51,12 @@ import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { formatDate, formatDateTime, relativeTime } from "../../Utils/utils";
 
 import { navigate } from "raviger";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { triggerGoal } from "../Common/Plausible";
 import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -99,8 +100,7 @@ export const ConsultationDetails = (props: any) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const authUser = useAuthUser();
 
   useEffect(() => {
     if (
@@ -215,7 +215,7 @@ export const ConsultationDetails = (props: any) => {
     triggerGoal("Patient Consultation Viewed", {
       facilityId: facilityId,
       consultationId: consultationId,
-      userID: currentUser.data.id,
+      userID: authUser.id,
     });
   }, []);
 
@@ -331,7 +331,7 @@ export const ConsultationDetails = (props: any) => {
                     triggerGoal("Doctor Connect Clicked", {
                       consultationId,
                       facilityId: patientData.facility,
-                      userId: currentUser.data.id,
+                      userId: authUser.id,
                       page: "ConsultationDetails",
                     });
                     setShowDoctors(true);

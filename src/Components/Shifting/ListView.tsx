@@ -16,12 +16,13 @@ import { formatDateTime } from "../../Utils/utils";
 import { formatFilter } from "./Commons";
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import dayjs from "../../Utils/dayjs";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -43,10 +44,7 @@ export default function ListView() {
     externalId: undefined,
     loading: false,
   });
-  const rootState: any = useSelector((rootState) => rootState);
-  const { currentUser } = rootState;
-  const userHomeFacilityId = currentUser.data.home_facility;
-  const userType = currentUser.data.user_type;
+  const authUser = useAuthUser();
   const { t } = useTranslation();
 
   const handleTransferComplete = (shift: any) => {
@@ -251,8 +249,11 @@ export default function ListView() {
                   disabled={
                     !shift.patient_object.allow_transfer ||
                     !(
-                      ["DistrictAdmin", "StateAdmin"].includes(userType) ||
-                      userHomeFacilityId === shift.assigned_facility
+                      ["DistrictAdmin", "StateAdmin"].includes(
+                        authUser.user_type
+                      ) ||
+                      authUser.home_facility_object?.id ===
+                        shift.assigned_facility
                     )
                   }
                   onClick={() => setModalFor(shift.external_id)}
