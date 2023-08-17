@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { RESOURCE_FILTER_ORDER } from "../../Common/constants";
 import { getAnyFacility } from "../../Redux/actions";

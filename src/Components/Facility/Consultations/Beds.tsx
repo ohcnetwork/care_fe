@@ -1,7 +1,7 @@
 import * as Notification from "../../../Utils/Notifications.js";
 
 import { BedModel, CurrentBed } from "../models";
-import React, { Dispatch, SetStateAction, useCallback } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 import {
   createConsultationBed,
   listConsultationBeds,
@@ -33,15 +33,13 @@ interface BedsProps {
 const Beds = (props: BedsProps) => {
   const dispatch = useDispatch<any>();
   const { facilityId, consultationId, discharged } = props;
-  const [bed, setBed] = React.useState<BedModel>({});
-  const [startDate, setStartDate] = React.useState<string>(
+  const [bed, setBed] = useState<BedModel>({});
+  const [startDate, setStartDate] = useState<string>(
     dayjs().format("YYYY-MM-DDTHH:mm")
   );
-  const [consultationBeds, setConsultationBeds] = React.useState<CurrentBed[]>(
-    []
-  );
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [key, setKey] = React.useState(0);
+  const [consultationBeds, setConsultationBeds] = useState<CurrentBed[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [key, setKey] = useState(0);
 
   const fetchData = useCallback(
     async (status: statusType) => {

@@ -1,9 +1,10 @@
 import CareIcon from "../icons/CareIcon";
 import { formatDateTime, isUserOnline, relativeTime } from "../../Utils/utils";
+import { ReactNode } from "react";
 
 interface Props {
   time?: string;
-  prefix?: React.ReactNode;
+  prefix?: ReactNode;
   className?: string;
   user?: {
     first_name: string;

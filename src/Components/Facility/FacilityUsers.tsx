@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
-import loadable from "@loadable/component";
+import { lazy, useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -23,8 +22,9 @@ import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function FacilityUsers(props: any) {
   const { facilityId } = props;
@@ -42,9 +42,8 @@ export default function FacilityUsers(props: any) {
     name: "",
     district_object_id: 0,
   });
+  const authUser = useAuthUser();
 
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
   const [linkFacility, setLinkFacility] = useState<{
     show: boolean;
     username: string;
@@ -280,17 +279,17 @@ export default function FacilityUsers(props: any) {
       USER_TYPES.indexOf("StateReadOnlyAdmin");
     const DISTRICT_ADMIN_LEVEL = USER_TYPES.indexOf("DistrictAdmin");
     const level = USER_TYPES.indexOf(user.user_type);
-    const currentUserLevel = USER_TYPES.indexOf(currentUser.data.user_type);
+    const currentUserLevel = USER_TYPES.indexOf(authUser.user_type);
     if (user.is_superuser) return true;
 
     if (currentUserLevel >= STATE_ADMIN_LEVEL)
-      return user.state_object?.id === currentUser?.data?.state;
+      return user.state_object?.id === authUser.state;
     if (
       currentUserLevel < STATE_READ_ONLY_ADMIN_LEVEL &&
       currentUserLevel >= DISTRICT_ADMIN_LEVEL &&
       currentUserLevel > level
     )
-      return facilityData?.district_object_id === currentUser?.data?.district;
+      return facilityData?.district_object_id === authUser.district;
     return false;
   };
 

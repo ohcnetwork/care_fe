@@ -1,7 +1,7 @@
 import * as Notification from "../../Utils/Notifications.js";
 
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import React, { useCallback, useEffect, useReducer, useState } from "react";
+import { lazy, useCallback, useEffect, useReducer, useState } from "react";
 import {
   getResourceDetails,
   getUserList,
@@ -22,11 +22,11 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
-import loadable from "@loadable/component";
+
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import { useDispatch } from "react-redux";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface resourceProps {
   id: string;
