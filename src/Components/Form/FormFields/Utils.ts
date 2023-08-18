@@ -1,4 +1,4 @@
-import React from "react";
+import { useContext } from "react";
 import { FieldError, FieldValidator } from "../FieldValidators";
 import { FormContext } from "../FormContext";
 import { FormDetails } from "../Utils";
@@ -69,7 +69,7 @@ export const useFormFieldPropsResolver = <
     // defined, we want to use the props instead.
     //
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const registerField = React.useContext(props.context);
+    const registerField = useContext(props.context);
     const fieldProps = registerField(props.name, props.validate);
 
     const handleChange = (value: T) =>

@@ -13,7 +13,7 @@ import {
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
 import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment, useCallback, useState } from "react";
+import { Fragment, lazy, useCallback, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
 import {
   createFacility,
@@ -49,7 +49,7 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import loadable from "@loadable/component";
+
 import { navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -57,7 +57,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface FacilityProps {
   facilityId?: string;

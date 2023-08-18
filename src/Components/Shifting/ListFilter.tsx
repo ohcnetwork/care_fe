@@ -4,7 +4,7 @@ import {
   SHIFTING_FILTER_ORDER,
 } from "../../Common/constants";
 import { DateRange } from "../Common/DateRangeInputV2";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,

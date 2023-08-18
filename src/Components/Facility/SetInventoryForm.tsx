@@ -1,6 +1,6 @@
-import { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
-import loadable from "@loadable/component";
+
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getItems, setMinQuantity, getAnyFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
@@ -12,7 +12,7 @@ import Card from "../../CAREUI/display/Card";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
   id: "",

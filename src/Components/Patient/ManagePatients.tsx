@@ -11,7 +11,7 @@ import {
 } from "../../Common/constants";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
-import React, { useCallback, useEffect, useState } from "react";
+import { ReactNode, lazy, useCallback, useEffect, useState } from "react";
 import {
   getAllPatient,
   getAnyFacility,
@@ -37,20 +37,20 @@ import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import SwipeableViews from "react-swipeable-views";
-import loadable from "@loadable/component";
 import { parseOptionId } from "../../Common/utils";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
 import dayjs from "dayjs";
 import { triggerGoal } from "../Common/Plausible.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface TabPanelProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   dir?: string;
   index: any;
   value: any;
@@ -98,8 +98,7 @@ export const PatientManager = () => {
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const authUser = useAuthUser();
   const [showDialog, setShowDialog] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
   const [showDoctorConnect, setShowDoctorConnect] = useState(false);
@@ -478,7 +477,7 @@ export const PatientManager = () => {
       });
   };
 
-  let patientList: React.ReactNode[] = [];
+  let patientList: ReactNode[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any) => {
       let patientUrl = "";
@@ -770,7 +769,7 @@ export const PatientManager = () => {
                 onClick={() => {
                   triggerGoal("Doctor Connect Clicked", {
                     facilityId: qParams.facility,
-                    userId: currentUser.data.id,
+                    userId: authUser.id,
                     page: "FacilityPatientsList",
                   });
                   setShowDoctors(true);

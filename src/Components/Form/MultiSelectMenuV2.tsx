@@ -1,8 +1,8 @@
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import { Listbox } from "@headlessui/react";
-import React from "react";
 import { classNames } from "../../Utils/utils";
+import { ReactNode } from "react";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 
@@ -10,15 +10,15 @@ type Props<T, V = T> = {
   id?: string;
   options: T[];
   value: V[] | undefined;
-  placeholder?: React.ReactNode;
-  optionLabel: OptionCallback<T, React.ReactNode>;
-  optionSelectedLabel?: OptionCallback<T, React.ReactNode>;
-  optionDescription?: OptionCallback<T, React.ReactNode>;
-  optionIcon?: OptionCallback<T, React.ReactNode>;
+  placeholder?: ReactNode;
+  optionLabel: OptionCallback<T, ReactNode>;
+  optionSelectedLabel?: OptionCallback<T, ReactNode>;
+  optionDescription?: OptionCallback<T, ReactNode>;
+  optionIcon?: OptionCallback<T, ReactNode>;
   optionValue?: OptionCallback<T, V>;
   className?: string;
   disabled?: boolean;
-  renderSelectedOptions?: OptionCallback<T[], React.ReactNode>;
+  renderSelectedOptions?: OptionCallback<T[], ReactNode>;
   onChange: OptionCallback<V[]>;
 };
 
@@ -147,7 +147,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
 export default MultiSelectMenuV2;
 
 interface MultiSelectOptionChipProps {
-  label: React.ReactNode;
+  label: ReactNode;
   onRemove?: () => void;
 }
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import PageHeadTitle from "./PageHeadTitle";
 import { classNames } from "../../Utils/utils";
@@ -9,7 +9,7 @@ export interface PageTitleProps {
   hideBack?: boolean;
   backUrl?: string;
   className?: string;
-  componentRight?: React.ReactNode;
+  componentRight?: ReactNode;
   /**
    * If `false` is returned, prevents from going back.
    */

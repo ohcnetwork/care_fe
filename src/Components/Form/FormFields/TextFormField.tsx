@@ -1,5 +1,5 @@
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
-import React, { HTMLInputTypeAttribute, useState } from "react";
+import { HTMLInputTypeAttribute, forwardRef, useState } from "react";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import FormField from "./FormField";
@@ -25,7 +25,7 @@ export type TextFormFieldProps = FormFieldBaseProps<string> & {
   onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
 };
 
-const TextFormField = React.forwardRef((props: TextFormFieldProps, ref) => {
+const TextFormField = forwardRef((props: TextFormFieldProps, ref) => {
   const field = useFormFieldPropsResolver(props as any);
   const { leading, trailing } = props;
   const leadingFocused = props.leadingFocused || props.leading;
