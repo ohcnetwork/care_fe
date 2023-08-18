@@ -36,7 +36,7 @@ export const FieldErrorText = ({ error, className }: ErrorProps) => {
   return (
     <span
       className={classNames(
-        "ml-1 mt-2 text-xs font-medium leading-4 tracking-wide text-danger-500 transition-opacity duration-300",
+        "error-text ml-1 mt-2 text-xs font-medium tracking-wide text-danger-500 transition-opacity duration-300",
         error ? "opacity-100" : "opacity-0",
         className
       )}
