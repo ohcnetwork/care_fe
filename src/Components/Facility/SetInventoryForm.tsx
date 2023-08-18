@@ -113,7 +113,7 @@ export const SetInventoryForm = (props: any) => {
 
     const res = await dispatchAction(setMinQuantity(data, { facilityId }));
     setIsLoading(false);
-    if (res && res.data) {
+    if (res && res.data && res.data.id) {
       Notification.Success({
         msg: "Minimum quantiy updated successfully",
       });
