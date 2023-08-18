@@ -1,12 +1,16 @@
 // FacilityCreation
+import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
+import LoginPage from "../../pageobject/Login/LoginPage";
 
 describe("Facility Creation", () => {
   let facilityUrl: string;
   const facilityPage = new FacilityPage();
+  const loginPage = new LoginPage();
+  const phone_number = "9999999999";
 
   before(() => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    loginPage.loginAsDisctrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -58,6 +62,40 @@ describe("Facility Creation", () => {
     facilityPage.submitForm();
 
     cy.url().should("not.include", "/update");
+  });
+
+  it("Configure the existing facility", () => {
+    facilityPage.visitUpdateFacilityPage(facilityUrl);
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickConfigureFacilityOption();
+    facilityPage.fillMiddleWareAddress("dev_middleware.coronasafe.live");
+    facilityPage.clickupdateMiddleWare();
+    facilityPage.verifySuccessNotification("Facility updated successfully");
+  });
+
+  it("Create a resource request", () => {
+    facilityPage.visitUpdateFacilityPage(facilityUrl);
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickResourceRequestOption();
+    facilityPage.fillResourceRequestDetails(
+      "Test User",
+      phone_number,
+      "test",
+      "Test title",
+      "10",
+      "Test description"
+    );
+    facilityPage.clickSubmitRequestButton();
+    facilityPage.verifySuccessNotification(
+      "Resource request created successfully"
+    );
+  });
+
+  it("Delete a facility", () => {
+    facilityPage.visitUpdateFacilityPage(facilityUrl);
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickDeleteFacilityOption();
+    facilityPage.confirmDeleteFacility();
   });
 
   afterEach(() => {

@@ -23,7 +23,7 @@ import {
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { lazy, useCallback, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -565,6 +565,7 @@ export const FacilityHome = (props: any) => {
                   Location Management
                 </DropdownItem>
                 <DropdownItem
+                  id="resource-request"
                   onClick={() =>
                     navigate(`/facility/${facilityId}/resource/new`)
                   }
@@ -593,6 +594,7 @@ export const FacilityHome = (props: any) => {
                   View Users
                 </DropdownItem>
                 <DropdownItem
+                  id="delete-facility"
                   variant="danger"
                   onClick={() => setOpenDeleteDialog(true)}
                   className="flex items-center gap-3"
