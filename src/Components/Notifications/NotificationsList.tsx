@@ -1,19 +1,12 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getNotifications,
-  markNotificationAsRead,
-  getUserPnconfig,
-  updateUserPnconfig,
-  getPublicKey,
-} from "../../Redux/actions";
+import { useDispatch } from "react-redux";
+import { getNotifications, markNotificationAsRead } from "../../Redux/actions";
 import Spinner from "../Common/Spinner";
 import { NOTIFICATION_EVENTS } from "../../Common/constants";
-import { Error } from "../../Utils/Notifications.js";
 import { classNames, formatDateTime } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import * as Sentry from "@sentry/browser";
+
 import {
   ShrinkedSidebarItem,
   SidebarItem,
@@ -23,6 +16,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
+import useNotificationSubscribe from "../../Common/hooks/useNotificationSubscribe";
 
 const RESULT_LIMIT = 14;
 
@@ -151,9 +145,6 @@ export default function NotificationsList({
   onClickCB,
   handleOverflow,
 }: NotificationsListProps) {
-  const rootState: any = useSelector((rootState) => rootState);
-  const { currentUser } = rootState;
-  const username = currentUser.data.username;
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -164,10 +155,13 @@ export default function NotificationsList({
   const [eventFilter, setEventFilter] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
-  const [isSubscribed, setIsSubscribed] = useState("");
-  const [isSubscribing, setIsSubscribing] = useState(false);
   const { t } = useTranslation();
-
+  const {
+    isSubscribed,
+    isSubscribing,
+    intialSubscriptionState,
+    handleSubscribeClick,
+  } = useNotificationSubscribe();
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -177,32 +171,6 @@ export default function NotificationsList({
     if (open) document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open]);
-
-  const intialSubscriptionState = async () => {
-    try {
-      const res = await dispatch(getUserPnconfig({ username: username }));
-      const reg = await navigator.serviceWorker.ready;
-      const subscription = await reg.pushManager.getSubscription();
-      if (!subscription && !res?.data?.pf_endpoint) {
-        setIsSubscribed("NotSubscribed");
-      } else if (subscription?.endpoint === res?.data?.pf_endpoint) {
-        setIsSubscribed("SubscribedOnThisDevice");
-      } else {
-        setIsSubscribed("SubscribedOnAnotherDevice");
-      }
-    } catch (error) {
-      Sentry.captureException(error);
-    }
-  };
-
-  const handleSubscribeClick = () => {
-    const status = isSubscribed;
-    if (status === "NotSubscribed" || status === "SubscribedOnAnotherDevice") {
-      subscribe();
-    } else {
-      unsubscribe();
-    }
-  };
 
   const getButtonText = () => {
     const status = isSubscribed;
@@ -231,81 +199,6 @@ export default function NotificationsList({
   };
 
   let manageResults: any = null;
-
-  const unsubscribe = () => {
-    navigator.serviceWorker.ready
-      .then(function (reg) {
-        setIsSubscribing(true);
-        reg.pushManager
-          .getSubscription()
-          .then(function (subscription) {
-            subscription
-              ?.unsubscribe()
-              .then(async function (_successful) {
-                const data = {
-                  pf_endpoint: "",
-                  pf_p256dh: "",
-                  pf_auth: "",
-                };
-                await dispatch(
-                  updateUserPnconfig(data, { username: username })
-                );
-
-                setIsSubscribed("NotSubscribed");
-                setIsSubscribing(false);
-              })
-              .catch(function (_e) {
-                Error({
-                  msg: t("unsubscribe_failed"),
-                });
-              });
-          })
-          .catch(function (_e) {
-            Error({ msg: t("subscription_error") });
-          });
-      })
-      .catch(function (_e) {
-        Sentry.captureException(_e);
-      });
-  };
-
-  async function subscribe() {
-    setIsSubscribing(true);
-    const response = await dispatch(getPublicKey());
-    const public_key = response.data.public_key;
-    const sw = await navigator.serviceWorker.ready;
-    const push = await sw.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: public_key,
-    });
-    const p256dh = btoa(
-      String.fromCharCode.apply(
-        null,
-        new Uint8Array(push.getKey("p256dh") as any) as any
-      )
-    );
-    const auth = btoa(
-      String.fromCharCode.apply(
-        null,
-        new Uint8Array(push.getKey("auth") as any) as any
-      )
-    );
-
-    const data = {
-      pf_endpoint: push.endpoint,
-      pf_p256dh: p256dh,
-      pf_auth: auth,
-    };
-
-    const res = await dispatch(
-      updateUserPnconfig(data, { username: username })
-    );
-
-    if (res.status >= 200 && res.status <= 300) {
-      setIsSubscribed("SubscribedOnThisDevice");
-    }
-    setIsSubscribing(false);
-  }
 
   const handleMarkAllAsRead = async () => {
     setIsMarkingAllAsRead(true);

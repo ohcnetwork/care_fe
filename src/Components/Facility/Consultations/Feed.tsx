@@ -18,6 +18,8 @@ import {
   partialUpdateAssetBed,
 } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
+import ButtonV2 from "../../Common/components/ButtonV2.js";
+import Spinner from "../../Common/Spinner.js";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon.js";
 import { ConsultationModel } from "../models";
@@ -31,6 +33,7 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 import useFullscreen from "../../../Common/hooks/useFullscreen.js";
 import { triggerGoal } from "../../Common/Plausible.js";
 import { useMessageListener } from "../../../Common/hooks/useMessageListener.js";
+import useNotificationSubscribe from "../../../Common/hooks/useNotificationSubscribe.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -61,12 +64,62 @@ export const Feed: React.FC<IFeedProps> = ({
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
   const [boundaryPreset, setBoundaryPreset] = useState<any>();
   const [isFullscreen, setFullscreen] = useFullscreen();
+  const [showInfo, setShowInfo] = useState(false);
 
   const [borderAlert, setBorderAlert] = useState<any>(null);
-  // const [cameraOccupier, setCameraOccupier] = useState<string | null>(null);
 
   const state: any = useSelector((state) => state);
   const { currentUser } = state;
+
+  // Notification hook
+  const { isSubscribed, isSubscribing, intialSubscriptionState, subscribe } =
+    useNotificationSubscribe();
+
+  useEffect(() => {
+    intialSubscriptionState();
+  }, [dispatch, isSubscribed]);
+
+  const subscriptionInfo = () => {
+    return (
+      <div className="relative">
+        <div
+          onMouseEnter={() => {
+            setShowInfo(true);
+          }}
+        >
+          <CareIcon className="care-l-info-circle text-xl" />
+        </div>
+        {showInfo && (
+          <div
+            className="absolute z-10 flex -translate-x-16 -translate-y-12 flex-col gap-2 rounded-md bg-white p-2  drop-shadow-md"
+            onMouseLeave={() => {
+              setShowInfo(false);
+            }}
+          >
+            <div className="text-xs">
+              {isSubscribed != "SubscribedOnThisDevice"
+                ? "Subscribe to get real time information about camera access"
+                : "You are subscribed, and will get real time information about camera access"}
+            </div>
+            {isSubscribed != "SubscribedOnThisDevice" && (
+              <ButtonV2
+                onClick={subscribe}
+                ghost
+                variant="secondary"
+                disabled={isSubscribing}
+                size="small"
+                border
+              >
+                {isSubscribing && <Spinner />}
+                <CareIcon className="care-l-bell" />
+                Subscribe
+              </ButtonV2>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -566,10 +619,11 @@ export const Feed: React.FC<IFeedProps> = ({
             ))}
           </div>
         </div>
+        {subscriptionInfo()}
       </div>
       <div className={`${borderAlert == null ? "" : borderAlert}-border-flash`}>
         <div
-          className="relative flex h-[calc(100vh-1.5rem-90px)] grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
+          className="relative z-0 flex h-[calc(100vh-1.5rem-90px)] grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
           ref={videoWrapper}
         >
           {isIOS ? (
