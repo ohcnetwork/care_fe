@@ -2,7 +2,12 @@ import { useCallback, useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
 
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getItems, setMinQuantity, getAnyFacility } from "../../Redux/actions";
+import {
+  getItems,
+  setMinQuantity,
+  getAnyFacility,
+  getMinQuantity,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -57,13 +62,27 @@ export const SetInventoryForm = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
+
+      const existingItemIDs: number[] = [];
+      const resMinQuantity = await dispatchAction(
+        getMinQuantity(facilityId, {})
+      );
+
+      resMinQuantity.data.results.map((item: any) =>
+        existingItemIDs.push(item.item_object.id)
+      );
+
       const res = await dispatchAction(getItems({ limit, offset }));
+
       if (!status.aborted) {
         if (res && res.data) {
-          setData(res.data.results);
+          const filteredData = res.data.results.filter(
+            (item: any) => !existingItemIDs.includes(item.id)
+          );
+          setData(filteredData);
           dispatch({
             type: "set_form",
-            form: { ...state.form, id: res.data.results[0]?.id },
+            form: { ...state.form, id: filteredData[0]?.id },
           });
         }
         setIsLoading(false);
