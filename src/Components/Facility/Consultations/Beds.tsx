@@ -62,7 +62,9 @@ const Beds = (props: BedsProps) => {
             msg: "Something went wrong..!",
           });
         else {
-          setConsultationBeds(bedsData?.data?.results);
+          setConsultationBeds(bedsData.data.results);
+          setBed(bedsData.data.results[0]?.bed_object || {});
+          setAssets(bedsData.data.results[0]?.assets_objects || []);
         }
       }
     },
@@ -228,6 +230,8 @@ const Beds = (props: BedsProps) => {
                 selected={assets}
                 multiple={true}
                 facility={facilityId}
+                in_use_by_consultation={false}
+                is_permanent={false}
               />
             </div>
           </div>
@@ -266,10 +270,12 @@ const Beds = (props: BedsProps) => {
                 <div className="break-words bg-primary-100 p-2 text-center">
                   {bed?.bed_object?.name}
                   {bed?.assets_objects && bed.assets_objects.length > 0 && (
-                    <i
-                      className="fas fa-info-circle ml-2 cursor-pointer "
-                      onClick={() => setShowBedDetails(bed)}
-                    />
+                    <span
+                    className={` bg-primary-500 font-semibold text-white ml-2 h-6 cursor-pointer rounded-md px-2 text-xs`}
+                    onClick={() => setShowBedDetails(bed)}
+                  >
+                    {bed.assets_objects.length}
+                  </span>
                   )}
                 </div>
                 <div className="bg-primary-100 py-2 text-center">

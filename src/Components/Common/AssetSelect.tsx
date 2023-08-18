@@ -10,6 +10,7 @@ interface AssetSelectProps {
   facility?: string;
   is_working?: boolean;
   in_use_by_consultation?: boolean;
+  is_permanent?: boolean;
   multiple?: boolean;
   AssetType?: number;
   showAll?: boolean;
@@ -28,6 +29,7 @@ export const AssetSelect = (props: AssetSelectProps) => {
     facility,
     is_working = true,
     in_use_by_consultation = false,
+    is_permanent = null,
     showNOptions = 10,
     className = "",
     freeText = false,
@@ -45,6 +47,7 @@ export const AssetSelect = (props: AssetSelectProps) => {
         facility,
         is_working,
         in_use_by_consultation,
+        is_permanent,
       };
 
       const res = await dispatchAction(listAssets(params));
