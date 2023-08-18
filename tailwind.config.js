@@ -83,14 +83,10 @@ module.exports = {
       },
     },
   },
-  corePlugins: {
-    aspectRatio: false,
-  },
   content: ["./src/**/*.{html,md,js,jsx,ts,tsx,res}", "./index.html"],
   plugins: [
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
-    require("@tailwindcss/aspect-ratio"),
     require("@tailwindcss/container-queries"),
   ],
 };
