@@ -121,6 +121,7 @@ describe("Asset", () => {
 
   it("Configure an asset", () => {
     assetPage.openCreatedAsset();
+    assetPage.spyAssetConfigureApi();
     assetPage.configureAsset(
       "Host name",
       "192.168.1.64",
@@ -129,8 +130,7 @@ describe("Asset", () => {
       "d5694af2-21e2-4a39-9bad-2fb98d9818bd"
     );
     assetPage.clickConfigureAsset();
-
-    assetPage.verifySuccessNotification("Asset Configured Successfully");
+    assetPage.verifyAssetConfiguration();
   });
 
   it("Import new asset", () => {

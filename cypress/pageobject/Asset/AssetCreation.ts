@@ -131,6 +131,16 @@ export class AssetPage {
     cy.get("[name=stream_uuid]").type(streamUuid);
   }
 
+  spyAssetConfigureApi() {
+    cy.intercept(/\/api\/v1\/asset/).as("asset");
+  }
+
+  verifyAssetConfiguration() {
+    cy.wait("@asset").then((interception) => {
+      expect(interception.response.statusCode).to.equal(200);
+    });
+  }
+
   clickConfigureAsset() {
     cy.get("#submit").contains("Set Configuration").click();
   }
