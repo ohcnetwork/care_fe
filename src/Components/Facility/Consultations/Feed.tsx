@@ -338,8 +338,16 @@ export const Feed: React.FC<IFeedProps> = ({
   useEffect(() => {
     if (cameraAsset.id) {
       getPresets({
-        onSuccess: (resp) => setPresets(resp),
-        onError: (_) => {
+        onSuccess: (resp) => {
+          setPresets(resp);
+          setCameraOccupier({});
+        },
+        onError: (resp) => {
+          if (resp.status === 409) {
+            setCameraOccupier(resp.data as cameraOccupier);
+          } else {
+            setCameraOccupier({});
+          }
           Notification.Error({
             msg: "Fetching presets failed",
           });
@@ -356,6 +364,9 @@ export const Feed: React.FC<IFeedProps> = ({
           if (resp.status === 409) {
             setCameraOccupier(resp.data as cameraOccupier);
           }
+        },
+        onSuccess() {
+          setCameraOccupier({});
         },
       });
     }
@@ -416,8 +427,14 @@ export const Feed: React.FC<IFeedProps> = ({
           onSuccess: () => {
             setLoading(CAMERA_STATES.IDLE);
             setCurrentPreset(preset);
+            setCameraOccupier({});
           },
           onError: (err: Record<any, any>) => {
+            if (err.status === 409) {
+              setCameraOccupier(err.data as cameraOccupier);
+            } else {
+              setCameraOccupier({});
+            }
             setLoading(CAMERA_STATES.IDLE);
             const responseData = err.data.result;
             if (responseData.status) {
@@ -482,6 +499,7 @@ export const Feed: React.FC<IFeedProps> = ({
     updatePreset: (option) => {
       getCameraStatus({
         onSuccess: async (data) => {
+          setCameraOccupier({});
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
             const response = await dispatch(
@@ -500,9 +518,27 @@ export const Feed: React.FC<IFeedProps> = ({
             if (response && response.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
               getBedPresets(cameraAsset?.id);
-              getPresets({});
+              getPresets({
+                onSuccess: () => {
+                  setCameraOccupier({});
+                },
+                onError: (resp) => {
+                  if (resp.status === 409) {
+                    setCameraOccupier(resp.data as cameraOccupier);
+                  } else {
+                    setCameraOccupier({});
+                  }
+                },
+              });
             }
             setLoading(CAMERA_STATES.IDLE);
+          }
+        },
+        onError: (resp) => {
+          if (resp.status === 409) {
+            setCameraOccupier(resp.data as cameraOccupier);
+          } else {
+            setCameraOccupier({});
           }
         },
       });
@@ -556,8 +592,18 @@ export const Feed: React.FC<IFeedProps> = ({
       }
 
       relativeMove(payLoad, {
-        onSuccess: () => setLoading(CAMERA_STATES.IDLE),
-        onError: () => setLoading(CAMERA_STATES.IDLE),
+        onSuccess: () => {
+          setLoading(CAMERA_STATES.IDLE);
+          setCameraOccupier({});
+        },
+        onError: async (resp) => {
+          if (resp.status === 409) {
+            setCameraOccupier(resp.data as cameraOccupier);
+          } else {
+            setCameraOccupier({});
+          }
+          setLoading(CAMERA_STATES.IDLE);
+        },
       });
       if (cameraState) {
         let x = cameraState.x;
@@ -628,6 +674,7 @@ export const Feed: React.FC<IFeedProps> = ({
                   absoluteMove(preset.meta.position, {
                     onSuccess: () => {
                       setLoading(CAMERA_STATES.IDLE);
+                      setCameraOccupier({});
                       setCurrentPreset(preset);
                       console.log(
                         "onSuccess: Set Preset to " + preset?.meta?.preset_name
@@ -640,7 +687,12 @@ export const Feed: React.FC<IFeedProps> = ({
                         result: "success",
                       });
                     },
-                    onError: () => {
+                    onError: async (resp) => {
+                      if (resp.status === 409) {
+                        setCameraOccupier(resp.data as cameraOccupier);
+                      } else {
+                        setCameraOccupier({});
+                      }
                       setLoading(CAMERA_STATES.IDLE);
                       setCurrentPreset(preset);
                       console.log(
@@ -655,7 +707,18 @@ export const Feed: React.FC<IFeedProps> = ({
                       });
                     },
                   });
-                  getCameraStatus({});
+                  getCameraStatus({
+                    onSuccess: () => {
+                      setCameraOccupier({});
+                    },
+                    onError: (resp) => {
+                      if (resp.status === 409) {
+                        setCameraOccupier(resp.data as cameraOccupier);
+                      } else {
+                        setCameraOccupier({});
+                      }
+                    },
+                  });
                 }}
                 className={classNames(
                   "block border border-gray-500 px-4 py-2",
