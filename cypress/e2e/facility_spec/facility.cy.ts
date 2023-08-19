@@ -80,7 +80,7 @@ describe("Facility Creation", () => {
     facilityPage.fillResourceRequestDetails(
       "Test User",
       phone_number,
-      "test",
+      "cypress",
       "Test title",
       "10",
       "Test description"
