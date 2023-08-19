@@ -9,9 +9,8 @@ import {
   getAsset,
 } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, lazy } from "react";
 import { Link, navigate } from "raviger";
-import loadable from "@loadable/component";
 import AssetFilter from "./AssetFilter";
 import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
@@ -30,7 +29,7 @@ import Page from "../Common/components/Page";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import { useTranslation } from "react-i18next";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const AssetsList = () => {
   const { t } = useTranslation();

@@ -9,9 +9,8 @@ import {
   getState,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useState } from "react";
+import { lazy, useCallback, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CountBlock from "../../CAREUI/display/Count";
 import ExportMenu from "../Common/Export";
@@ -21,12 +20,13 @@ import FacilityFilter from "./FacilityFilter";
 import { FacilityModel } from "./models";
 import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
-import loadable from "@loadable/component";
+
 import { navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export const HospitalList = () => {
   const {
@@ -47,9 +47,7 @@ export const HospitalList = () => {
   const [stateName, setStateName] = useState("");
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
-  const rootState: any = useSelector((rootState) => rootState);
-  const { currentUser } = rootState;
-  const userType = currentUser.data.user_type;
+  const { user_type } = useAuthUser();
   const { t } = useTranslation();
 
   const fetchData = useCallback(
@@ -174,7 +172,7 @@ export const HospitalList = () => {
       <FacilityCard
         key={facility.id!}
         facility={facility}
-        userType={userType}
+        userType={user_type}
       />
     ));
   }

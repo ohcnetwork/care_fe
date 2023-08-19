@@ -2,8 +2,8 @@ import { getColorIndex, rowColor, transformData } from "./utils";
 
 import ButtonV2 from "../../../Common/components/ButtonV2";
 import { InvestigationResponse } from "./types";
-import React from "react";
 import { formatDateTime } from "../../../../Utils/utils";
+import { FC } from "react";
 
 const ReportRow = ({ data, name, min, max }: any) => {
   return (
@@ -59,7 +59,7 @@ interface ReportTableProps {
   hidePrint?: boolean;
 }
 
-const ReportTable: React.FC<ReportTableProps> = ({
+const ReportTable: FC<ReportTableProps> = ({
   title,
   investigationData,
   patientDetails,

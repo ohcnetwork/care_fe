@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useRef, useState } from "react";
 import { classNames } from "../../../Utils/utils";
 
 export default function AccordionV2(props: {
@@ -9,7 +9,7 @@ export default function AccordionV2(props: {
   expanded?: boolean;
 }) {
   const [toggle, setToggle] = useState(props.expanded as boolean);
-  const contentEl = React.useRef<HTMLDivElement>(null);
+  const contentEl = useRef<HTMLDivElement>(null);
 
   return (
     <div className={props.className}>

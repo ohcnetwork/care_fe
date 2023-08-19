@@ -1,6 +1,6 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   getNotifications,
   markNotificationAsRead,
@@ -23,6 +23,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const RESULT_LIMIT = 14;
 
@@ -151,9 +152,7 @@ export default function NotificationsList({
   onClickCB,
   handleOverflow,
 }: NotificationsListProps) {
-  const rootState: any = useSelector((rootState) => rootState);
-  const { currentUser } = rootState;
-  const username = currentUser.data.username;
+  const { username } = useAuthUser();
   const dispatch: any = useDispatch();
   const [data, setData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
