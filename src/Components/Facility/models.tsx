@@ -1,6 +1,7 @@
 import { AssignedToObjectModel } from "../Patient/models";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
+import { AssetData } from "../Assets/AssetTypes";
 
 export interface LocalBodyModel {
   name: string;
@@ -205,6 +206,7 @@ export interface CurrentBed {
   consultation: string;
   bed?: string;
   bed_object: BedModel;
+  assets_objects?: AssetData[];
   created_date: string;
   modified_date: string;
   start_date: string;
