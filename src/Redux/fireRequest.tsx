@@ -129,9 +129,6 @@ export const fireRequest = (
 
           // 409 is for conflict on access to an asset
           if (error.response.status === 409 && key === "operateAsset") {
-            Notification.Error({
-              msg: "Asset is already in use!",
-            });
             return error.response;
           }
 

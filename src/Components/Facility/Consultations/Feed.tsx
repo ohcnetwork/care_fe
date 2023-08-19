@@ -40,6 +40,14 @@ interface IFeedProps {
   patientId: string;
   consultationId: any;
 }
+
+interface cameraOccupier {
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  homeFacility?: string;
+}
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
 export const Feed: React.FC<IFeedProps> = ({
@@ -64,7 +72,9 @@ export const Feed: React.FC<IFeedProps> = ({
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
   const [boundaryPreset, setBoundaryPreset] = useState<any>();
   const [isFullscreen, setFullscreen] = useFullscreen();
-  const [showInfo, setShowInfo] = useState(false);
+  const [showSubscriptionInfo, setShowSubscriptionInfo] = useState(false);
+  const [showCameraOccupierInfo, setShowCameraOccupierInfo] = useState(false);
+  const [cameraOccupier, setCameraOccupier] = useState<cameraOccupier>({});
 
   const [borderAlert, setBorderAlert] = useState<any>(null);
 
@@ -81,19 +91,12 @@ export const Feed: React.FC<IFeedProps> = ({
 
   const subscriptionInfo = () => {
     return (
-      <div className="relative">
-        <div
-          onMouseEnter={() => {
-            setShowInfo(true);
-          }}
-        >
-          <CareIcon className="care-l-info-circle text-xl" />
-        </div>
-        {showInfo && (
+      <div className="relative mb-1 flex flex-col justify-end">
+        {showSubscriptionInfo && (
           <div
-            className="absolute z-10 flex -translate-x-16 -translate-y-12 flex-col gap-2 rounded-md bg-white p-2  drop-shadow-md"
+            className="absolute z-10 flex -translate-x-16 translate-y-10 flex-col gap-2 rounded-md bg-white p-2  drop-shadow-md"
             onMouseLeave={() => {
-              setShowInfo(false);
+              setShowSubscriptionInfo(false);
             }}
           >
             <div className="text-xs">
@@ -117,6 +120,52 @@ export const Feed: React.FC<IFeedProps> = ({
             )}
           </div>
         )}
+        <div
+          onMouseEnter={() => {
+            setShowSubscriptionInfo(true);
+          }}
+        >
+          <CareIcon className="care-l-info-circle text-xl" />
+        </div>
+      </div>
+    );
+  };
+
+  const currentCameraOccupierInfo = () => {
+    return (
+      <div className="relative mb-1 flex flex-row-reverse">
+        {showCameraOccupierInfo && (
+          <div className="absolute z-10 flex w-48 -translate-x-12 flex-col gap-2 rounded-md bg-white p-2 drop-shadow-md">
+            <div className="text-xs text-gray-600">
+              Camera is being used by...
+            </div>
+
+            <div className="flex flex-row gap-1 text-sm font-semibold">
+              <div>{`${cameraOccupier.firstName} ${cameraOccupier.lastName}-`}</div>
+              <div className="text-green-600">{`${cameraOccupier.role}`}</div>
+            </div>
+            {cameraOccupier.homeFacility && (
+              <div className="text-sm">{`${cameraOccupier.homeFacility}`}</div>
+            )}
+          </div>
+        )}
+        <div
+          className="h-12 w-12 flex-col items-center justify-center  rounded-full border-2 border-green-500 bg-white text-center"
+          onMouseEnter={() => {
+            setShowCameraOccupierInfo(true);
+          }}
+          onMouseLeave={() => {
+            setShowCameraOccupierInfo(false);
+          }}
+        >
+          <div className="text-4xl font-bold text-green-600">
+            {cameraOccupier?.firstName?.[0] ? (
+              cameraOccupier?.firstName?.[0].toUpperCase()
+            ) : (
+              <CareIcon className="care-l-user" />
+            )}
+          </div>
+        </div>
       </div>
     );
   };
@@ -267,32 +316,6 @@ export const Feed: React.FC<IFeedProps> = ({
     dispatch,
   });
 
-  useEffect(() => {
-    lockAsset({
-      onError: async (resp) => {
-        if (resp.status === 409) {
-          Notification.Error({
-            msg: `${resp.data?.username} is using the camera.`,
-          });
-        } else {
-          Notification.Error({
-            msg: "Error locking camera.",
-          });
-        }
-      },
-    });
-
-    return () => {
-      unlockAsset({
-        onError() {
-          Notification.Error({
-            msg: "Error unlocking camera.",
-          });
-        },
-      });
-    };
-  }, [dispatch]);
-
   const getBedPresets = async (asset: any) => {
     if (asset.id && bed) {
       const bedAssets = await dispatch(listAssetBeds({ asset: asset.id, bed }));
@@ -325,6 +348,37 @@ export const Feed: React.FC<IFeedProps> = ({
       getBedPresets(cameraAsset);
     }
   }, [cameraAsset, cameraMiddlewareHostname]);
+
+  useEffect(() => {
+    if (cameraAsset.id) {
+      lockAsset({
+        onError: async (resp) => {
+          if (resp.status === 409) {
+            setCameraOccupier(resp.data as cameraOccupier);
+          }
+        },
+      });
+    }
+
+    return () => {
+      if (cameraAsset.id) {
+        unlockAsset({});
+      }
+    };
+  }, [cameraAsset, cameraMiddlewareHostname]);
+
+  useMessageListener((data) => {
+    if (data?.status == "success" && data?.asset_id === cameraAsset?.id) {
+      setCameraOccupier({});
+      lockAsset({
+        onError: async (resp) => {
+          if (resp.status === 409) {
+            setCameraOccupier(resp.data as cameraOccupier);
+          }
+        },
+      });
+    }
+  });
 
   useEffect(() => {
     let tId: any;
@@ -557,10 +611,6 @@ export const Feed: React.FC<IFeedProps> = ({
     useKeyboardShortcut(option.shortcutKey, option.callback);
   }
 
-  useMessageListener((message) => {
-    console.log("message", message);
-  });
-
   if (isLoading) return <Loading />;
 
   return (
@@ -619,7 +669,10 @@ export const Feed: React.FC<IFeedProps> = ({
             ))}
           </div>
         </div>
-        {subscriptionInfo()}
+        <div className="flex flex-row gap-2">
+          {cameraOccupier?.username && currentCameraOccupierInfo()}
+          {subscriptionInfo()}
+        </div>
       </div>
       <div className={`${borderAlert == null ? "" : borderAlert}-border-flash`}>
         <div
