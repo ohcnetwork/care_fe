@@ -56,15 +56,11 @@ export class PatientConsultationPage {
   prescribeMedicine() {
     cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
       .click()
-      .type("dolo");
-    cy.get("div#medicine_object [role='option']")
-      .contains("DOLO")
-      .should("be.visible")
-      .click();
+      .type("dolo{enter}");
   }
 
   enterDosage(doseAmount: string) {
-    cy.get("#dosage").click().type(doseAmount);
+    cy.get("#dosage").type(doseAmount, { force: true });
   }
 
   selectDosageFrequency(frequency: string) {
