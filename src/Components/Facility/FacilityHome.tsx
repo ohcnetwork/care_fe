@@ -22,9 +22,8 @@ import {
   listDoctor,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-
+import { lazy, useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -40,13 +39,14 @@ import DoctorsCountCard from "./DoctorsCountCard";
 import Page from "../Common/components/Page";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import Table from "../Common/components/Table";
-import loadable from "@loadable/component";
+
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { useTranslation } from "react-i18next";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export const getFacilityFeatureIcon = (featureId: number) => {
   const feature = FACILITY_FEATURE_TYPES.find((f) => f.id === featureId);
@@ -75,6 +75,7 @@ export const FacilityHome = (props: any) => {
   >([]);
   const [bedCapacityModalOpen, setBedCapacityModalOpen] = useState(false);
   const [doctorCapacityModalOpen, setDoctorCapacityModalOpen] = useState(false);
+  const authUser = useAuthUser();
   const config = useConfig();
 
   useMessageListener((data) => console.log(data));
@@ -154,9 +155,6 @@ export const FacilityHome = (props: any) => {
     navigate("/facility");
   };
 
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-
   if (isLoading) {
     return <Loading />;
   }
@@ -176,7 +174,7 @@ export const FacilityHome = (props: any) => {
     });
 
     capacityList = (
-      <div className="mt-4 grid w-full gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="mt-4 grid w-full gap-7 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
         <BedTypeCard
           label="Total Beds"
           used={totalOccupiedBedCount}
@@ -320,8 +318,8 @@ export const FacilityHome = (props: any) => {
 
   const StaffUserTypeIndex = USER_TYPES.findIndex((type) => type === "Staff");
   const hasPermissionToEditCoverImage =
-    !(currentUser.data.user_type as string).includes("ReadOnly") &&
-    USER_TYPES.findIndex((type) => type == currentUser.data.user_type) >=
+    !(authUser.user_type as string).includes("ReadOnly") &&
+    USER_TYPES.findIndex((type) => type == authUser.user_type) >=
       StaffUserTypeIndex;
 
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
@@ -728,12 +726,12 @@ export const FacilityHome = (props: any) => {
               ]}
             />
             {stats.length === 0 && (
-              <div>
+              <>
                 <hr />
-                <div className="mt-3 flex items-center justify-center rounded-sm border border-[#D2D6DC] p-4 text-xl font-bold text-gray-600">
+                <div className="mt-3 flex min-w-[1000px] items-center justify-center rounded-sm border border-[#D2D6DC] p-4 text-xl font-bold text-gray-600">
                   No Data Found
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>

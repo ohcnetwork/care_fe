@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect } from "react";
-import loadable from "@loadable/component";
+import { useState, useCallback, useEffect, lazy } from "react";
+
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import {
@@ -14,7 +14,7 @@ import { formatDateTime } from "../../Utils/utils";
 import Page from "../Common/components/Page.js";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
 import ButtonV2 from "../Common/components/ButtonV2.js";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function InventoryLog(props: any) {
   const { facilityId, inventoryId }: any = props;

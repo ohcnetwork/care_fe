@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react";
-import loadable from "@loadable/component";
+import { lazy, useCallback, useState } from "react";
+
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -18,7 +18,7 @@ import BedDeleteDialog from "./BedDeleteDialog";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import Page from "../Common/components/Page";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface BedManagementProps {
   facilityId: string;

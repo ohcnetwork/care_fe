@@ -1,8 +1,14 @@
 import axios from "axios";
 import CircularProgress from "../Common/components/CircularProgress";
-import loadable from "@loadable/component";
-import React, { useCallback, useState, useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import {
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+  lazy,
+  ChangeEvent,
+} from "react";
+import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   viewUpload,
@@ -32,8 +38,9 @@ import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
 import Page from "../Common/components/Page";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export const header_content_type: URLS = {
   pdf: "application/pdf",
@@ -211,10 +218,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [editFileNameError, setEditFileNameError] = useState("");
   const [btnloader, setbtnloader] = useState(false);
   const [sortFileState, setSortFileState] = useState("UNARCHIVED");
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-  const currentuser_username = currentUser.data.username;
-  const currentuser_type = currentUser.data.user_type;
+  const authUser = useAuthUser();
   const limit = RESULTS_PER_PAGE_LIMIT;
   const [isActive, setIsActive] = useState(true);
   const [tabs, setTabs] = useState([
@@ -638,10 +642,9 @@ export const FileUpload = (props: FileUploadProps) => {
                             <CareIcon className="care-l-arrow-circle-down text-lg" />{" "}
                             DOWNLOAD
                           </a>
-                          {item?.uploaded_by?.username ===
-                            currentuser_username ||
-                          currentuser_type === "DistrictAdmin" ||
-                          currentuser_type === "StateAdmin" ? (
+                          {item?.uploaded_by?.username === authUser.username ||
+                          authUser.user_type === "DistrictAdmin" ||
+                          authUser.user_type === "StateAdmin" ? (
                             <>
                               <ButtonV2
                                 onClick={() => {
@@ -661,10 +664,9 @@ export const FileUpload = (props: FileUploadProps) => {
                           ) : (
                             <></>
                           )}
-                          {item?.uploaded_by?.username ===
-                            currentuser_username ||
-                          currentuser_type === "DistrictAdmin" ||
-                          currentuser_type === "StateAdmin" ? (
+                          {item?.uploaded_by?.username === authUser.username ||
+                          authUser.user_type === "DistrictAdmin" ||
+                          authUser.user_type === "StateAdmin" ? (
                             <>
                               <ButtonV2
                                 onClick={() => {
@@ -739,9 +741,9 @@ export const FileUpload = (props: FileUploadProps) => {
                       <CareIcon className="care-l-eye text-lg" />
                       PREVIEW FILE
                     </ButtonV2>
-                    {item?.uploaded_by?.username === currentuser_username ||
-                    currentuser_type === "DistrictAdmin" ||
-                    currentuser_type === "StateAdmin" ? (
+                    {item?.uploaded_by?.username === authUser.username ||
+                    authUser.user_type === "DistrictAdmin" ||
+                    authUser.user_type === "StateAdmin" ? (
                       <>
                         {" "}
                         <ButtonV2
@@ -760,9 +762,9 @@ export const FileUpload = (props: FileUploadProps) => {
                       <></>
                     )}
                     {sortFileState != "DISCHARGE_SUMMARY" &&
-                    (item?.uploaded_by?.username === currentuser_username ||
-                      currentuser_type === "DistrictAdmin" ||
-                      currentuser_type === "StateAdmin") ? (
+                    (item?.uploaded_by?.username === authUser.username ||
+                      authUser.user_type === "DistrictAdmin" ||
+                      authUser.user_type === "StateAdmin") ? (
                       <>
                         <ButtonV2
                           onClick={() => {
@@ -894,7 +896,7 @@ export const FileUpload = (props: FileUploadProps) => {
     return <Loading />;
   }
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
     if (e.target.files == null) {
       throw new Error("Error finding e.target.files");
     }

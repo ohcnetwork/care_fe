@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listAssetBeds, getPermittedFacility } from "../../Redux/actions";
 import { classNames } from "../../Utils/utils";
@@ -46,8 +46,8 @@ export default function LegacyPatientVitalsCard({
   const dispatch: any = useDispatch();
   const [middlewareHostname, setMiddlewareHostname] = useState("");
   const [wsUrl, setWsUrl] = useState("");
-  const [patientObservations, setPatientObservations] = React.useState<any>();
-  const [stats, setStats] = React.useState(false);
+  const [patientObservations, setPatientObservations] = useState<any>();
+  const [stats, setStats] = useState(false);
 
   useEffect(() => {
     const fetchFacility = async () => {

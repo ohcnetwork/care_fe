@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getNotifications } from "../../Redux/actions";
 import Page from "../Common/components/Page";
