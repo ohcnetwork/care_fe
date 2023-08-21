@@ -1,4 +1,4 @@
-import React from "react";
+import { SyntheticEvent } from "react";
 import { AssetData } from "../AssetTypes";
 import LiveFeed from "../../Facility/Consultations/LiveFeed";
 import { BedSelect } from "../../Common/BedSelect";
@@ -10,7 +10,7 @@ import Card from "../../../CAREUI/display/Card";
 
 interface CameraConfigureProps {
   asset: AssetData;
-  addPreset(e: React.SyntheticEvent): void;
+  addPreset(e: SyntheticEvent): void;
   setBed(bed: BedModel): void;
   bed: BedModel;
   newPreset: string;

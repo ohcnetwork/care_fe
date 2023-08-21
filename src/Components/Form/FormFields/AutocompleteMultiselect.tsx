@@ -3,7 +3,7 @@ import {
   MultiSelectOptionChip,
   dropdownOptionClassNames,
 } from "../MultiSelectMenuV2";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { Combobox } from "@headlessui/react";
 import { DropdownTransition } from "../../Common/components/HelperComponents";

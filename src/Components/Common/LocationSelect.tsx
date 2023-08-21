@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listFacilityAssetLocation } from "../../Redux/actions";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";

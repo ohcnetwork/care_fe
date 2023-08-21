@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { lazy, useState } from "react";
 import { navigate } from "raviger";
 import ListFilter from "./ListFilter";
 import ResourceBoard from "./ResourceBoard";
 import { RESOURCE_CHOICES } from "../../Common/constants";
 import { downloadResourceRequests } from "../../Redux/actions";
-import loadable from "@loadable/component";
 import withScrolling from "react-dnd-scrolling";
 import BadgesList from "./BadgesList";
 import { formatFilter } from "./Commons";
@@ -16,8 +15,8 @@ import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = lazy(() => import("../Common/Loading"));
+const PageTitle = lazy(() => import("../Common/PageTitle"));
 const ScrollingComponent = withScrolling("div");
 const resourceStatusOptions = RESOURCE_CHOICES.map((obj) => obj.text);
 
@@ -79,7 +78,7 @@ export default function BoardView() {
       </div>
 
       <BadgesList {...{ appliedFilters, FilterBadges }} />
-      <ScrollingComponent className="mt-4 flex flex-1 items-start overflow-x-scroll px-4 pb-2">
+      <ScrollingComponent className="mt-4 flex flex-1 items-start overflow-x-scroll px-4 pb-2 @container">
         <div className="mt-4 flex flex-1 items-start overflow-x-scroll px-4 pb-2">
           {isLoading ? (
             <Loading />

@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
-import loadable from "@loadable/component";
+import { useState, useCallback, useEffect, lazy } from "react";
+
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -9,7 +9,7 @@ import { classNames } from "../../Utils/utils";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function InventoryList(props: any) {
   const { facilityId }: any = props;

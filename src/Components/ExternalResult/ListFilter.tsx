@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getAllLocalBodyByDistrict } from "../../Redux/actions";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import useMergeState from "../../Common/hooks/useMergeState";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -10,6 +10,7 @@ import { MultiSelectFormField } from "../Form/FormFields/SelectFormField";
 import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import dayjs from "dayjs";
 import { dateQueryString } from "../../Utils/utils";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const clearFilterState = {
   created_date_before: "",
@@ -32,8 +33,7 @@ export default function ListFilter(props: any) {
   const [wards, setWards] = useState<any[]>([]);
   const [selectedLsgs, setSelectedLsgs] = useState<any[]>([]);
   const dispatch: any = useDispatch();
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const authUser = useAuthUser();
   const [filterState, setFilterState] = useMergeState({
     created_date_before: filter.created_date_before || null,
     created_date_after: filter.created_date_after || null,
@@ -92,8 +92,8 @@ export default function ListFilter(props: any) {
     } = filterState;
 
     const data = {
-      state: currentUser.data.state,
-      district: currentUser.data.district,
+      state: authUser.state,
+      district: authUser.district,
       wards: selectedWardIds.length ? selectedWardIds : "",
       local_bodies: selectedLsgIds.length ? selectedLsgIds : "",
       created_date_before: dateQueryString(created_date_before),
@@ -120,7 +120,7 @@ export default function ListFilter(props: any) {
 
   useEffect(() => {
     async function getWardList() {
-      const id: number = currentUser.data.district;
+      const id = authUser.district;
       const res = await dispatch(getAllLocalBodyByDistrict({ id }));
       let allWards: any[] = [];
       let allLsgs: any[] = [];

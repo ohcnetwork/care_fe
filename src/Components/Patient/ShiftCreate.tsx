@@ -8,7 +8,7 @@ import {
 } from "../../Common/constants";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { createShift, getPatient } from "../../Redux/actions";
-import { useEffect, useReducer, useState } from "react";
+import { lazy, useEffect, useReducer, useState } from "react";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -17,7 +17,6 @@ import PatientCategorySelect from "./PatientCategorySelect";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { phonePreg } from "../../Common/validation";
@@ -30,7 +29,7 @@ import Card from "../../CAREUI/display/Card.js";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField.js";
 import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface patientShiftProps {
   facilityId: number;
