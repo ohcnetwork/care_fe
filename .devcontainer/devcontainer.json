@@ -1,0 +1,40 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
+{
+	"name": "care_fe",
+	"image": "mcr.microsoft.com/devcontainers/javascript-node:1-18-bullseye",
+	"features": {
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+			"moby": true,
+			"installDockerBuildx": true,
+			"version": "latest",
+			"dockerDashComposeVersion": "v2"
+		}
+	},
+
+	"portsAttributes": {
+		"4000": {
+		  "label": "Application",
+		  "onAutoForward": "openPreview"
+		}
+	  },
+	"forwardPorts": [
+		4000
+	],
+	"postCreateCommand": "npm install",
+	"postAttachCommand": {
+		"server": "npm run dev"
+	},
+	"customizations": {
+		"vscode": {
+			"settings": {},
+			"extensions": [
+				"streetsidesoftware.code-spell-checker",
+				"esbenp.prettier-vscode",
+				"bradlc.vscode-tailwindcss",
+				"yoavbls.pretty-ts-errors",
+				"chenglou92.rescript-vscode"
+			]
+		}
+	}
+}
