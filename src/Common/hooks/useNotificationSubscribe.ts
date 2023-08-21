@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   getUserPnconfig,
   updateUserPnconfig,
@@ -8,11 +8,10 @@ import { useState } from "react";
 import * as Sentry from "@sentry/browser";
 import { useTranslation } from "react-i18next";
 import { Error } from "../../Utils/Notifications.js";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 export default function useNotificationSubscribe() {
-  const rootState: any = useSelector((rootState) => rootState);
-  const { currentUser } = rootState;
-  const username = currentUser.data.username;
+  const { username } = useAuthUser();
   const dispatch: any = useDispatch();
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);

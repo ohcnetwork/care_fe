@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import { useCallback, useState } from "react";
 import Loading from "../Common/Loading";
 import { AssetData } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -16,9 +16,9 @@ interface AssetConfigureProps {
 
 const AssetConfigure = (props: AssetConfigureProps) => {
   const { assetId, facilityId } = props;
-  const [asset, setAsset] = React.useState<AssetData>();
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [assetType, setAssetType] = React.useState("");
+  const [asset, setAsset] = useState<AssetData>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [assetType, setAssetType] = useState("");
   const dispatch = useDispatch<any>();
 
   const fetchData = useCallback(

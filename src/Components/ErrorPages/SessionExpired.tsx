@@ -1,13 +1,12 @@
 import * as Notification from "../../Utils/Notifications";
 import { useNavigate } from "raviger";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { handleSignOut } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
+import { AuthUserContext } from "../../Common/hooks/useAuthUser";
 
 export default function SessionExpired() {
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const isAuthenticated = !!useContext(AuthUserContext);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -15,7 +14,7 @@ export default function SessionExpired() {
     Notification.closeAllNotifications();
   }, []);
 
-  if ("data" in currentUser) {
+  if (isAuthenticated) {
     navigate("/");
   }
 

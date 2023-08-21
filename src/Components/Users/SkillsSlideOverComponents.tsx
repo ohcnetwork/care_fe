@@ -1,9 +1,9 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { SkillModel } from "./models";
+import { Fragment } from "react";
 
 export const AddSkillsPlaceholder = () => {
   const { t } = useTranslation();
@@ -33,7 +33,7 @@ export const SkillsArray = ({
   setDeleteSkill,
 }: SkillsArrayProps) => {
   return (
-    <React.Fragment>
+    <Fragment>
       {skills.map((skill, i) => (
         <div
           key={`facility_${i}`}
@@ -57,6 +57,6 @@ export const SkillsArray = ({
           </div>
         </div>
       ))}
-    </React.Fragment>
+    </Fragment>
   );
 };

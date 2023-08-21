@@ -1,5 +1,5 @@
 import { CSSTransition as ReactCSSTransition } from "react-transition-group";
-import React, { useContext, useEffect, useRef } from "react";
+import { createContext, useContext, useEffect, useRef } from "react";
 
 type TransitionContextProps = {
   parent: {
@@ -9,7 +9,7 @@ type TransitionContextProps = {
   };
 };
 
-const TransitionContext = React.createContext<Partial<TransitionContextProps>>({
+const TransitionContext = createContext<Partial<TransitionContextProps>>({
   parent: {
     show: false,
     isInitialRender: true,

@@ -77,7 +77,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
       />
       <br />
       <div className="overflow-x-scroll border-b border-gray-200 shadow sm:overflow-x-visible sm:rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="block min-w-full divide-y divide-gray-200 overflow-scroll">
           <thead className="bg-gray-50">
             <tr>
               {["Name", "Value", "Unit", "Min", "Max", "Ideal"].map(

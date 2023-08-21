@@ -1,9 +1,10 @@
 import { navigate } from "raviger";
 import ReportTable from "./Reports/ReportTable";
-import loadable from "@loadable/component";
+
 import { formatDateTime } from "../../../Utils/utils";
 import { InvestigationSessionType } from "./investigationsTab";
-const Loading = loadable(() => import("../../Common/Loading"));
+import { lazy } from "react";
+const Loading = lazy(() => import("../../Common/Loading"));
 
 export default function ViewInvestigations(props: {
   isLoading: boolean;
