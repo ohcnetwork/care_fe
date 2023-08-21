@@ -87,15 +87,10 @@ module.exports = {
     aspectRatio: false,
   },
   content: ["./src/**/*.{html,md,js,jsx,ts,tsx,res}", "./index.html"],
-  safelist: [
-    {
-      pattern: /^(bg-[^/]+|text-[^/]+|border-.+)$/,
-      variants: ["hover"],
-    },
-  ],
   plugins: [
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
     require("@tailwindcss/aspect-ratio"),
+    require("@tailwindcss/container-queries"),
   ],
 };

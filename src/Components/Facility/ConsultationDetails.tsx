@@ -19,7 +19,7 @@ import {
   listAssetBeds,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useEffect, useState } from "react";
+import { lazy, useCallback, useEffect, useState } from "react";
 
 import { ABGPlots } from "./Consultations/ABGPlots";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -49,17 +49,17 @@ import ReadMore from "../Common/components/Readmore";
 import VentilatorPatientVitalsMonitor from "../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { formatDate, formatDateTime, relativeTime } from "../../Utils/utils";
-import loadable from "@loadable/component";
+
 import { navigate } from "raviger";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
-import useBreakpoints from "../../Common/hooks/useBreakpoints";
-import { getVitalsCanvasSizeAndDuration } from "../VitalsMonitor/utils";
 import { triggerGoal } from "../Common/Plausible";
+import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = lazy(() => import("../Common/Loading"));
+const PageTitle = lazy(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 
 export const ConsultationDetails = (props: any) => {
@@ -100,8 +100,7 @@ export const ConsultationDetails = (props: any) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const authUser = useAuthUser();
 
   useEffect(() => {
     if (
@@ -137,9 +136,21 @@ export const ConsultationDetails = (props: any) => {
         );
       }
 
-      const ventilatorBedData = assetBeds.find(
-        (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
-      );
+      const consultationBedVentilator =
+        consultationData?.current_bed?.assets_objects?.find(
+          (i) => i.asset_class === AssetClass.VENTILATOR
+        );
+      let ventilatorBedData;
+      if (consultationBedVentilator) {
+        ventilatorBedData = {
+          asset_object: consultationBedVentilator,
+          bed_object: consultationData?.current_bed?.bed_object,
+        } as AssetBedModel;
+      } else {
+        ventilatorBedData = assetBeds.find(
+          (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
+        );
+      }
       setVentilatorBedData(ventilatorBedData);
       const ventilatorMeta = ventilatorBedData?.asset_object?.meta;
       const ventilatorMiddleware =
@@ -215,13 +226,12 @@ export const ConsultationDetails = (props: any) => {
     fetchData(status);
     triggerGoal("Patient Consultation Viewed", {
       facilityId: facilityId,
-      patientId: patientId,
       consultationId: consultationId,
-      userID: currentUser.data.id,
+      userID: authUser.id,
     });
   }, []);
 
-  const vitalsAspectRatio = useBreakpoints({
+  const vitals = useVitalsAspectRatioConfig({
     default: undefined,
     md: 8 / 11,
     lg: 15 / 11,
@@ -229,9 +239,6 @@ export const ConsultationDetails = (props: any) => {
     "2xl": 19 / 11,
     "3xl": 23 / 11,
   });
-
-  const vitalsConfig = getVitalsCanvasSizeAndDuration(vitalsAspectRatio);
-  const vitalsConfigHash = JSON.stringify(vitalsConfig);
 
   if (isLoading) {
     return <Loading />;
@@ -336,8 +343,7 @@ export const ConsultationDetails = (props: any) => {
                     triggerGoal("Doctor Connect Clicked", {
                       consultationId,
                       facilityId: patientData.facility,
-                      patientId: patientData.id,
-                      userId: currentUser.data.id,
+                      userId: authUser.id,
                       page: "ConsultationDetails",
                     });
                     setShowDoctors(true);
@@ -579,7 +585,7 @@ export const ConsultationDetails = (props: any) => {
                             {hl7SocketUrl && (
                               <div className="min-h-[400px] flex-1">
                                 <HL7PatientVitalsMonitor
-                                  key={`hl7-${hl7SocketUrl}-${vitalsConfigHash}`}
+                                  key={`hl7-${hl7SocketUrl}-${vitals.hash}`}
                                   patientAssetBed={{
                                     asset:
                                       monitorBedData?.asset_object as AssetData,
@@ -588,14 +594,14 @@ export const ConsultationDetails = (props: any) => {
                                     meta: monitorBedData?.asset_object?.meta,
                                   }}
                                   socketUrl={hl7SocketUrl}
-                                  config={vitalsConfig}
+                                  config={vitals.config}
                                 />
                               </div>
                             )}
                             {ventilatorSocketUrl && (
                               <div className="min-h-[400px] flex-1">
                                 <VentilatorPatientVitalsMonitor
-                                  key={`ventilator-${ventilatorSocketUrl}-${vitalsConfigHash}`}
+                                  key={`ventilator-${ventilatorSocketUrl}-${vitals.hash}`}
                                   patientAssetBed={{
                                     asset:
                                       ventilatorBedData?.asset_object as AssetData,
@@ -604,7 +610,7 @@ export const ConsultationDetails = (props: any) => {
                                     meta: ventilatorBedData?.asset_object?.meta,
                                   }}
                                   socketUrl={ventilatorSocketUrl}
-                                  config={vitalsConfig}
+                                  config={vitals.config}
                                 />
                               </div>
                             )}
@@ -633,6 +639,16 @@ export const ConsultationDetails = (props: any) => {
                               )?.text ?? "--"}
                             </span>
                           </div>
+                          {consultationData.discharge_reason === "REF" && (
+                            <div>
+                              Referred Facility {" - "}
+                              <span className="font-semibold">
+                                {consultationData.referred_to_external ||
+                                  consultationData.referred_to_object?.name ||
+                                  "--"}
+                              </span>
+                            </div>
+                          )}
                           {consultationData.discharge_reason === "REC" && (
                             <div className="grid gap-4">
                               <div>
@@ -746,8 +762,7 @@ export const ConsultationDetails = (props: any) => {
                                           (choice) => choice.id === symptom
                                         )?.text ?? "Err. Unknown"
                                       }
-                                      color={"primary"}
-                                      size={"small"}
+                                      size="small"
                                     />
                                   )
                                 )}
@@ -786,8 +801,7 @@ export const ConsultationDetails = (props: any) => {
                                       (choice) => choice.id === symptom
                                     )?.text ?? "Err. Unknown"
                                   }
-                                  color={"primary"}
-                                  size={"small"}
+                                  size="small"
                                 />
                               )
                             )}
@@ -1118,11 +1132,7 @@ export const ConsultationDetails = (props: any) => {
               hideBack={true}
               focusOnLoad={true}
             />
-            <Feed
-              facilityId={facilityId}
-              patientId={patientId}
-              consultationId={consultationId}
-            />
+            <Feed facilityId={facilityId} consultationId={consultationId} />
           </div>
         )}
         {tab === "SUMMARY" && (

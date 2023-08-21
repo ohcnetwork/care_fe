@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { getNotifications } from "../../Redux/actions";
 import Page from "../Common/components/Page";
@@ -7,7 +7,7 @@ import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
-export const NoticeBoard = () => {
+export const NoticeBoard: any = () => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<any[]>([]);
@@ -16,10 +16,7 @@ export const NoticeBoard = () => {
   useEffect(() => {
     setIsLoading(true);
     dispatch(
-      getNotifications(
-        { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
-        new Date().getTime().toString()
-      )
+      getNotifications({ offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" })
     )
       .then((res: any) => {
         if (res && res.data) {

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import loadable from "@loadable/component";
+import { useState, useEffect, lazy } from "react";
+
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 import {
@@ -18,8 +18,8 @@ import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover"
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import dayjs from "../../Utils/dayjs";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = lazy(() => import("../Common/Loading"));
+const PageTitle = lazy(() => import("../Common/PageTitle"));
 
 export default function ListView() {
   const dispatch: any = useDispatch();

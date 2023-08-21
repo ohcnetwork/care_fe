@@ -1,9 +1,9 @@
-import React from "react";
 import { Listbox } from "@headlessui/react";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
 import { classNames } from "../../Utils/utils";
+import { ReactNode } from "react";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -12,12 +12,12 @@ type SelectMenuProps<T, V = T> = {
   options: T[];
   disabled?: boolean | undefined;
   value: V | undefined;
-  placeholder?: React.ReactNode;
+  placeholder?: ReactNode;
   position?: "above" | "below";
-  optionLabel: OptionCallback<T, React.ReactNode>;
-  optionSelectedLabel?: OptionCallback<T, React.ReactNode>;
-  optionDescription?: OptionCallback<T, React.ReactNode>;
-  optionIcon?: OptionCallback<T, React.ReactNode>;
+  optionLabel: OptionCallback<T, ReactNode>;
+  optionSelectedLabel?: OptionCallback<T, ReactNode>;
+  optionDescription?: OptionCallback<T, ReactNode>;
+  optionIcon?: OptionCallback<T, ReactNode>;
   optionValue?: OptionCallback<T, V>;
   showIconWhenSelected?: boolean;
   showChevronIcon?: boolean;

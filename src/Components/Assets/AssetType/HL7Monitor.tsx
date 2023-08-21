@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { SyntheticEvent, useEffect, useState } from "react";
 import { AssetData } from "../AssetTypes";
 import { useDispatch } from "react-redux";
 import {
@@ -53,7 +53,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
     setIsLoading(false);
   }, [asset]);
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
+  const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
     if (checkIfValidIP(localipAddress)) {
       setIpAddress_error("");
@@ -115,11 +115,11 @@ const HL7Monitor = (props: HL7MonitorProps) => {
               </div>
             </form>
           </Card>
-          <Card>
-            {["HL7MONITOR", "VENTILATOR"].includes(assetType) && (
+          {["HL7MONITOR"].includes(assetType) && (
+            <Card className="z-20">
               <MonitorConfigure asset={asset as AssetData} />
-            )}
-          </Card>
+            </Card>
+          )}
         </div>
 
         {assetType === "HL7MONITOR" && (

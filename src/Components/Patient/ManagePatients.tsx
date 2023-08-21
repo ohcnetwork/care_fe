@@ -11,7 +11,7 @@ import {
 } from "../../Common/constants";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
-import React, { useCallback, useEffect, useState } from "react";
+import { ReactNode, lazy, useCallback, useEffect, useState } from "react";
 import {
   getAllPatient,
   getAnyFacility,
@@ -37,20 +37,20 @@ import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import SwipeableViews from "react-swipeable-views";
-import loadable from "@loadable/component";
 import { parseOptionId } from "../../Common/utils";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
 import dayjs from "dayjs";
 import { triggerGoal } from "../Common/Plausible.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface TabPanelProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   dir?: string;
   index: any;
   value: any;
@@ -98,8 +98,7 @@ export const PatientManager = () => {
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const authUser = useAuthUser();
   const [showDialog, setShowDialog] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
   const [showDoctorConnect, setShowDoctorConnect] = useState(false);
@@ -478,7 +477,7 @@ export const PatientManager = () => {
       });
   };
 
-  let patientList: React.ReactNode[] = [];
+  let patientList: ReactNode[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any) => {
       let patientUrl = "";
@@ -598,16 +597,16 @@ export const PatientManager = () => {
                     dayjs().isAfter(patient.review_time) && (
                       <Chip
                         size="small"
-                        color="red"
-                        startIcon="clock"
+                        variant="danger"
+                        startIcon="l-clock"
                         text="Review Missed"
                       />
                     )}
                   {patient.disease_status === "POSITIVE" && (
                     <Chip
                       size="small"
-                      color="red"
-                      startIcon="radiation"
+                      variant="danger"
+                      startIcon="l-coronavirus"
                       text="Positive"
                     />
                   )}
@@ -616,24 +615,26 @@ export const PatientManager = () => {
                     patient.is_active && (
                       <Chip
                         size="small"
-                        color="blue"
-                        startIcon="baby-carriage"
+                        variant="custom"
+                        className="bg-pink-100 text-pink-600"
+                        startIcon="l-baby-carriage"
                         text="Antenatal"
                       />
                     )}
                   {patient.is_medical_worker && patient.is_active && (
                     <Chip
                       size="small"
-                      color="blue"
-                      startIcon="user-md"
+                      variant="custom"
+                      className="bg-blue-100 text-blue-600"
+                      startIcon="l-user-md"
                       text="Medical Worker"
                     />
                   )}
                   {patient.disease_status === "EXPIRED" && (
                     <Chip
                       size="small"
-                      color="yellow"
-                      startIcon="exclamation-triangle"
+                      variant="warning"
+                      startIcon="l-exclamation-triangle"
                       text="Patient Expired"
                     />
                   )}
@@ -644,8 +645,8 @@ export const PatientManager = () => {
                     <span className="relative inline-flex">
                       <Chip
                         size="small"
-                        color="red"
-                        startIcon="notes-medical"
+                        variant="danger"
+                        startIcon="l-notes"
                         text="No Consultation Filed"
                       />
                       <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
@@ -667,8 +668,8 @@ export const PatientManager = () => {
                       <span className="relative inline-flex">
                         <Chip
                           size="small"
-                          color="red"
-                          startIcon="circle-exclamation"
+                          variant="danger"
+                          startIcon="l-exclamation-circle"
                           text="No update in 24 hours"
                         />
                         <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
@@ -768,7 +769,7 @@ export const PatientManager = () => {
                 onClick={() => {
                   triggerGoal("Doctor Connect Clicked", {
                     facilityId: qParams.facility,
-                    userId: currentUser.data.id,
+                    userId: authUser.id,
                     page: "FacilityPatientsList",
                   });
                   setShowDoctors(true);
@@ -856,8 +857,8 @@ export const PatientManager = () => {
               text="Total Patients"
               count={totalCount}
               loading={isLoading}
-              icon={"user-injured"}
-              containerClass="pb-10"
+              icon="l-user-injured"
+              className="pb-12"
             />
           </div>
         </div>

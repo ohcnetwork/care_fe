@@ -19,7 +19,9 @@ export default function DoctorVideoSlideover(props: {
   useEffect(() => {
     const fetchUsers = async () => {
       if (facilityId) {
-        const res = await dispatchAction(getFacilityUsers(facilityId));
+        const res = await dispatchAction(
+          getFacilityUsers(facilityId, { limit: 50 })
+        );
         if (res && res.data) {
           setDoctors(
             res.data.results
@@ -72,7 +74,7 @@ export default function DoctorVideoSlideover(props: {
           </div>
 
           <ul
-            className="max-h-96 scroll-py-3 list-none overflow-y-auto"
+            className="max-h-96 scroll-py-3 list-none overflow-y-auto py-3"
             id="options"
             role="listbox"
           >

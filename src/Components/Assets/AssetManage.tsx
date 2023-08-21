@@ -1,6 +1,4 @@
-import { useState, useCallback, useEffect, ReactElement } from "react";
-
-import loadable from "@loadable/component";
+import { useState, useCallback, useEffect, ReactElement, lazy } from "react";
 import {
   AssetClass,
   assetClassProps,
@@ -8,7 +6,7 @@ import {
   AssetTransaction,
 } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   deleteAsset,
   getAsset,
@@ -26,11 +24,12 @@ import { UserRole, USER_TYPES } from "../../Common/constants";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
-const Loading = loadable(() => import("../Common/Loading"));
+const PageTitle = lazy(() => import("../Common/PageTitle"));
+const Loading = lazy(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Uptime from "../Common/Uptime";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 interface AssetManageProps {
   assetId: string;
@@ -58,8 +57,7 @@ const AssetManage = (props: AssetManageProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch<any>();
   const limit = 14;
-  const { currentUser }: any = useSelector((state) => state);
-  const user_type = currentUser.data.user_type;
+  const authUser = useAuthUser();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const fetchData = useCallback(
@@ -274,18 +272,22 @@ const AssetManage = (props: AssetManageProps) => {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {asset?.status === "ACTIVE" ? (
-                    <Chip color="green" text="Active" startIcon="check" />
+                    <Chip text="Active" startIcon="l-check" />
                   ) : (
                     <Chip
-                      color="yellow"
+                      variant="warning"
                       text="Transfer in progress"
-                      startIcon="exclamation"
+                      startIcon="l-exclamation"
                     />
                   )}
                   {asset?.is_working ? (
-                    <Chip color="green" text="Working" startIcon="check" />
+                    <Chip text="Working" startIcon="l-check" />
                   ) : (
-                    <Chip color="red" text="Not Working" startIcon="times" />
+                    <Chip
+                      variant="danger"
+                      text="Not Working"
+                      startIcon="l-times"
+                    />
                   )}
                 </div>
               </div>
@@ -353,7 +355,7 @@ const AssetManage = (props: AssetManageProps) => {
                   {t("configure")}
                 </ButtonV2>
               )}
-              {checkAuthority(user_type, "DistrictAdmin") && (
+              {checkAuthority(authUser.user_type, "DistrictAdmin") && (
                 <ButtonV2
                   authorizeFor={NonReadOnlyUsers}
                   onClick={() => setShowDeleteDialog(true)}

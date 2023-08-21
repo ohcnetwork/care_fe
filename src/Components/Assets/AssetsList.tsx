@@ -9,9 +9,8 @@ import {
   getAsset,
 } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, lazy } from "react";
 import { Link, navigate } from "raviger";
-import loadable from "@loadable/component";
 import AssetFilter from "./AssetFilter";
 import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
@@ -30,7 +29,7 @@ import Page from "../Common/components/Page";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import { useTranslation } from "react-i18next";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const AssetsList = () => {
   const { t } = useTranslation();
@@ -285,9 +284,9 @@ const AssetsList = () => {
 
               <div className="mt-2 flex flex-wrap gap-2">
                 {asset.is_working ? (
-                  <Chip color="green" startIcon="cog" text="Working" />
+                  <Chip startIcon="l-cog" text="Working" />
                 ) : (
-                  <Chip color="red" startIcon="cog" text="Not Working" />
+                  <Chip variant="danger" startIcon="l-cog" text="Not Working" />
                 )}
               </div>
             </div>
@@ -350,7 +349,8 @@ const AssetsList = () => {
           text="Total Assets"
           count={totalCount}
           loading={isLoading}
-          icon={"monitor-heart-rate"}
+          icon="l-monitor-heart-rate"
+          className="flex-1"
         />
         <div className="flex-1">
           <SearchInput
