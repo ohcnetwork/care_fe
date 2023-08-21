@@ -2,7 +2,15 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import React, { LegacyRef, useEffect, useReducer, useState } from "react";
+import {
+  LegacyRef,
+  RefObject,
+  createRef,
+  lazy,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import {
   createAsset,
   getAsset,
@@ -20,7 +28,7 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import SwitchV2 from "../Common/components/Switch";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import loadable from "@loadable/component";
+
 import { navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { parseQueryParams } from "../../Utils/primitives";
@@ -31,7 +39,7 @@ import { validateEmailAddress } from "../../Common/validation";
 import { dateQueryString } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const formErrorKeys = [
   "name",
@@ -60,8 +68,8 @@ const initError = formErrorKeys.reduce(
 );
 
 const fieldRef = formErrorKeys.reduce(
-  (acc: { [key: string]: React.RefObject<any> }, key) => {
-    acc[key] = React.createRef();
+  (acc: { [key: string]: RefObject<any> }, key) => {
+    acc[key] = createRef();
     return acc;
   },
   {}

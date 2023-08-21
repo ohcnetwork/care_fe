@@ -1,6 +1,6 @@
 import { navigate } from "raviger";
-import loadable from "@loadable/component";
-import { useCallback, useState, useEffect } from "react";
+
+import { useCallback, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
 import {
   TELEMEDICINE_ACTIONS,
@@ -35,7 +35,7 @@ import BloodPressureFormField, {
 } from "../Common/BloodPressureFormField";
 import TemperatureFormField from "../Common/TemperatureFormField";
 import dayjs from "dayjs";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
   additional_symptoms: [],

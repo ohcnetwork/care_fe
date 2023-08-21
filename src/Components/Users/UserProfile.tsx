@@ -1,8 +1,7 @@
-import loadable from "@loadable/component";
-import React, { useState, useCallback, useReducer } from "react";
+import { useState, useCallback, useReducer, lazy, FormEvent } from "react";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   getUserDetails,
   getUserListSkills,
@@ -23,8 +22,9 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 import dayjs from "../../Utils/dayjs";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 type EditForm = {
   firstName: string;
@@ -95,9 +95,7 @@ export default function UserProfile() {
     isUpdateAvailable: false,
   });
 
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-  const username = currentUser.data.username;
+  const authUser = useAuthUser();
 
   const [changePasswordForm, setChangePasswordForm] = useState<{
     username: string;
@@ -105,7 +103,7 @@ export default function UserProfile() {
     new_password_1: string;
     new_password_2: string;
   }>({
-    username: username,
+    username: authUser.username,
     old_password: "",
     new_password_1: "",
     new_password_2: "",
@@ -130,8 +128,10 @@ export default function UserProfile() {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatchAction(getUserDetails(username));
-      const resSkills = await dispatchAction(getUserListSkills({ username }));
+      const res = await dispatchAction(getUserDetails(authUser.username));
+      const resSkills = await dispatchAction(
+        getUserListSkills({ username: authUser.username })
+      );
       if (!status.aborted) {
         if (res && res.data && resSkills) {
           res.data.skills = resSkills.data.results.map(
@@ -163,7 +163,7 @@ export default function UserProfile() {
         setIsLoading(false);
       }
     },
-    [dispatchAction, username]
+    [dispatchAction, authUser.username]
   );
   useAbortableEffect(
     (status: statusType) => {
@@ -291,12 +291,12 @@ export default function UserProfile() {
     };
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const validForm = validateForm();
     if (validForm) {
       const data = {
-        username: username,
+        username: authUser.username,
         first_name: states.form.firstName,
         last_name: states.form.lastName,
         email: states.form.email,
@@ -331,7 +331,9 @@ export default function UserProfile() {
             : undefined,
         weekly_working_hours: states.form.weekly_working_hours,
       };
-      const res = await dispatchAction(partialUpdateUser(username, data));
+      const res = await dispatchAction(
+        partialUpdateUser(authUser.username, data)
+      );
       if (res && res.data) {
         Notification.Success({
           msg: "Details updated successfully",
@@ -388,7 +390,7 @@ export default function UserProfile() {
       setIsLoading(true);
       const form = {
         old_password: changePasswordForm.old_password,
-        username: username,
+        username: authUser.username,
         new_password: changePasswordForm.new_password_1,
       };
       reduxDispatch(updateUserPassword(form)).then((resp: any) => {
