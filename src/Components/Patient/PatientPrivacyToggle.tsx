@@ -1,30 +1,34 @@
 import * as Notification from "../../Utils/Notifications.js";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
-import { ConsultationModel } from "../Facility/models";
-import { useSelector, useDispatch } from "react-redux";
+import { ConsultationModel } from "../Facility/models.js";
+import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
-import { UserRole } from "../../Common/constants";
-import { getConsultationBed, togglePatientPrivacy } from "../../Redux/actions";
-interface PatientPricacyToggleProps {
+import { UserRole } from "../../Common/constants.js";
+import {
+  getConsultationBed,
+  togglePatientPrivacy,
+} from "../../Redux/actions.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
+interface PatientPrivacyToggleProps {
   consultationId: string;
   consultation?: ConsultationModel;
-  fetchPatientData: ((state: { aborted: boolean }) => void) | undefined;
+  fetchPatientData?: (state: { aborted: boolean }) => void;
 }
-export default function PatientPricacyToggle(props: PatientPricacyToggleProps) {
+export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
   const { consultationId, consultation, fetchPatientData } = props;
   const [privacy, setPrivacy] = useState<boolean>(false);
-  const state: any = useSelector((state) => state);
+  const user = useAuthUser();
   const dispatch: any = useDispatch();
-  const { currentUser } = state;
   const allowPrivacyToggle = () => {
-    const currentUserType: UserRole = currentUser.data.user_type;
+    const currentUserType: UserRole = user.user_type;
     if (
       currentUserType == "DistrictAdmin" ||
       currentUserType == "StateAdmin" ||
       currentUserType == "LocalBodyAdmin" ||
       (currentUserType == "Doctor" &&
-        currentUser?.data?.home_facility === consultation?.facility) ||
-      currentUserType == "Staff" ||
+        user?.home_facility_object?.id === consultation?.facility) ||
+      (currentUserType == "Staff" &&
+        user?.home_facility_object?.id === consultation?.facility) ||
       currentUserType == "WardAdmin"
     )
       return true;

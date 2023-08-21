@@ -21,7 +21,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useState } from "react";
 import { formatDate, formatDateTime } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
-import PatientPricacyToggle from "./PatientPricacyToggle.js";
+import PatientPrivacyToggle from "./PatientPrivacyToggle.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -427,7 +427,7 @@ export default function PatientInfoCard(props: {
                 />
               </>
             ))}
-          <PatientPricacyToggle
+          <PatientPrivacyToggle
             consultation={consultation}
             consultationId={consultationId}
             fetchPatientData={props.fetchPatientData}
