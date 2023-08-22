@@ -1,13 +1,15 @@
 import { defineConfig } from "cypress";
-
 import fs from "fs";
 
 export default defineConfig({
   projectId: "wf7d2m",
   defaultCommandTimeout: 10000,
   e2e: {
-    setupNodeEvents(on, _) {
+    setupNodeEvents(on, config) {
       // implement node event listeners here
+
+      require("cypress-localstorage-commands/plugin")(on, config); // eslint-disable-line
+
       on("task", {
         readFileMaybe(filename) {
           if (fs.existsSync(filename)) {
@@ -17,6 +19,8 @@ export default defineConfig({
           return null;
         },
       });
+
+      return config;
     },
     baseUrl: "http://localhost:4000",
     retries: 2,

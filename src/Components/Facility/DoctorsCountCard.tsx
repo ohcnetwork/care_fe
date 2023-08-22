@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { DoctorModal } from "./models";
 import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
-import { RoleButton } from "../Common/RoleButton";
 import { useDispatch } from "react-redux";
 import { deleteDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
 import { DoctorCapacity } from "./DoctorCapacity";
 import DialogModal from "../Common/Dialog";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
+import ButtonV2 from "../Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 
 interface DoctorsCountProps extends DoctorModal {
   facilityId: string;
@@ -49,40 +50,40 @@ const DoctorsCountCard = (props: DoctorsCountProps) => {
 
   return (
     <div className="w-full">
-      <div className="shadow-sm rounded-sm h-full border border-[#D2D6DC] flex flex-col">
-        <div className="flex justify-start items-center gap-3 px-4 py-6 flex-1">
+      <div className="flex h-full flex-col rounded-sm border border-[#D2D6DC] shadow-sm">
+        <div className="flex flex-1 items-center justify-start gap-3 px-4 py-6">
           <div className={`rounded-full p-4 ${specialization?.desc}`}>
-            <DoctorIcon className="fill-current text-white w-5 h-5" />
+            <DoctorIcon className="h-5 w-5 fill-current text-white" />
           </div>
           <div>
-            <div className="font-medium text-sm text-[#808080]">
+            <div className="text-sm font-medium text-[#808080]">
               {specialization?.text} Doctors
             </div>
-            <h2 className="font-bold text-xl mt-2">{props.count}</h2>
+            <h2 className="mt-2 text-xl font-bold">{props.count}</h2>
           </div>
         </div>
-        <div className="bg-[#FBF9FB] py-2 px-3 flex justify-end gap-8 border-t border-[#D2D6DC]">
-          <RoleButton
-            className="font-medium"
-            handleClickCB={() => {
+        <div className="flex justify-end gap-4 border-t border-[#D2D6DC] bg-[#FBF9FB] px-3 py-2">
+          <ButtonV2
+            variant="secondary"
+            ghost
+            onClick={() => {
               setSelectedId(props.area || 0);
               setOpen(true);
             }}
-            disableFor="readOnly"
-            buttonType="html"
+            authorizeFor={NonReadOnlyUsers}
           >
             Edit
-          </RoleButton>
-          <RoleButton
-            className="font-medium text-[#C81E1E]"
-            handleClickCB={() => setOpenDeleteDialog(true)}
-            disableFor="readOnly"
-            buttonType="html"
+          </ButtonV2>
+          <ButtonV2
+            variant="danger"
+            ghost
+            onClick={() => setOpenDeleteDialog(true)}
+            authorizeFor={NonReadOnlyUsers}
           >
             Delete
-          </RoleButton>
+          </ButtonV2>
         </div>
-        <ConfirmDialogV2
+        <ConfirmDialog
           show={openDeleteDialog}
           onClose={handleDeleteClose}
           title={`Delete ${specialization?.text} doctors`}

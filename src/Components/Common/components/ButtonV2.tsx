@@ -44,8 +44,6 @@ export type ButtonProps = RawButtonProps &
      * - `"alert"` is ideal for actions that require alert.
      */
     variant?: ButtonVariant;
-    /** Specify text alignment. Defaults to `center` */
-    align?: "start" | "center" | "end" | "between" | "around" | "evenly";
     /** If set, gives an elevated button with hover effects. */
     shadow?: boolean | undefined;
     /** If set, removes the background to give a simple text button. */
@@ -89,7 +87,6 @@ const ButtonV2 = ({
   authorizeFor,
   size = "default",
   variant = "primary",
-  align = "center",
   circle,
   shadow,
   ghost,
@@ -105,53 +102,56 @@ const ButtonV2 = ({
 }: ButtonProps) => {
   const className = classNames(
     props.className,
-    "font-medium h-min inline-flex whitespace-pre items-center gap-2 transition-all duration-200 ease-in-out cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 outline-offset-1",
+    "inline-flex h-min cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500",
     `button-size-${size}`,
-    `justify-${align}`,
     `button-shape-${circle ? "circle" : "square"}`,
     ghost ? `button-${variant}-ghost` : `button-${variant}-default`,
     border && `button-${variant}-border`,
-    shadow && "shadow enabled:hover:shadow-lg"
+    shadow && "shadow enabled:hover:shadow-lg",
+    tooltip && "tooltip"
   );
 
-  if (authorizeFor) {
-    <AuthorizedChild authorizeFor={authorizeFor}>
-      {({ isAuthorized }) => (
-        <button
-          {...props}
-          disabled={disabled || !isAuthorized || loading}
-          className={className}
-        >
-          {children}
-        </button>
-      )}
-    </AuthorizedChild>;
+  if (tooltip) {
+    children = (
+      <>
+        {tooltip && (
+          <span className={classNames("tooltip-text", tooltipClassName)}>
+            {tooltip}
+          </span>
+        )}
+        {children}
+      </>
+    );
   }
 
   if (href && !(disabled || loading)) {
     return (
-      <Link
-        {...(props as any)}
-        href={href}
-        target={target}
-        className={className}
-      >
-        {children}
+      <Link href={href} target={target}>
+        <button {...props} disabled={disabled || loading} className={className}>
+          {children}
+        </button>
       </Link>
     );
   }
 
+  if (authorizeFor) {
+    return (
+      <AuthorizedChild authorizeFor={authorizeFor}>
+        {({ isAuthorized }) => (
+          <button
+            {...props}
+            disabled={disabled || !isAuthorized || loading}
+            className={className}
+          >
+            {children}
+          </button>
+        )}
+      </AuthorizedChild>
+    );
+  }
+
   return (
-    <button
-      {...props}
-      disabled={disabled || loading}
-      className={classNames(className, tooltip && "tooltip")}
-    >
-      {tooltip && (
-        <span className={classNames("tooltip-text", tooltipClassName)}>
-          {tooltip}
-        </span>
-      )}
+    <button {...props} disabled={disabled || loading} className={className}>
       {children}
     </button>
   );
@@ -172,7 +172,7 @@ export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
       children={
         <>
           <CareIcon className="care-l-check-circle text-lg" />
-          <span>{t(label)}</span>
+          <span className="whitespace-pre-wrap">{t(label)}</span>
         </>
       }
       {...props}
@@ -192,7 +192,7 @@ export const Cancel = ({ label = "Cancel", ...props }: CommonButtonProps) => {
       children={
         <>
           <CareIcon className="care-l-times-circle text-lg" />
-          <span>{t(label)}</span>
+          <span className="whitespace-pre-wrap">{t(label)}</span>
         </>
       }
       {...props}

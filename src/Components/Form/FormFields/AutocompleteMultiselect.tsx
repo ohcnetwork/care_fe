@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import {
+  MultiSelectOptionChip,
+  dropdownOptionClassNames,
+} from "../MultiSelectMenuV2";
+import { useEffect, useState } from "react";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { Combobox } from "@headlessui/react";
 import { DropdownTransition } from "../../Common/components/HelperComponents";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
-import {
-  dropdownOptionClassNames,
-  MultiSelectOptionChip,
-} from "../MultiSelectMenuV2";
+import { classNames } from "../../../Utils/utils";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -18,6 +19,8 @@ type AutocompleteMultiSelectFormFieldProps<T, V> = FormFieldBaseProps<V[]> & {
   optionValue?: OptionCallback<T, V>;
   onQuery?: (query: string) => void;
   dropdownIcon?: React.ReactNode | undefined;
+  isLoading?: boolean;
+  selectAll?: boolean;
 };
 
 const AutocompleteMultiSelectFormField = <T, V>(
@@ -50,6 +53,8 @@ type AutocompleteMutliSelectProps<T, V = T> = {
   onChange: OptionCallback<V[], void>;
   onQuery?: (query: string) => void;
   isLoading?: boolean;
+  selectAll?: boolean;
+  error?: string;
 };
 
 /**
@@ -86,22 +91,36 @@ export const AutocompleteMutliSelect = <T, V>(
         disabled={props.disabled}
         value={value}
         multiple
-        onChange={(selection) => props.onChange(selection.map((o) => o.value))}
+        onChange={(selections) => {
+          if (selections[selections.length - 1].value === ("select-all" as V)) {
+            if (selections.length - 1 === options.length) {
+              props.onChange([]);
+            } else {
+              props.onChange(options.map((o) => o.value));
+            }
+          } else {
+            props.onChange(selections.map((o) => o.value));
+          }
+        }}
       >
         <div className="relative">
           <div className="flex">
             <Combobox.Input
               multiple
-              className="cui-input-base pr-16 truncate"
+              className={classNames(
+                "cui-input-base truncate pr-16",
+                props.error && "border-danger-500"
+              )}
               placeholder={
                 value.length
                   ? `${value.length} item(s) selected`
                   : props.placeholder || "Select"
               }
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
+              autoComplete="off"
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-gray-900">
+              <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-gray-900">
                 {props.isLoading ? (
                   <CareIcon className="care-l-spinner animate-spin" />
                 ) : (
@@ -111,7 +130,7 @@ export const AutocompleteMutliSelect = <T, V>(
             </Combobox.Button>
           </div>
           {value.length !== 0 && (
-            <div className="p-2 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 p-2">
               {value.map((v) => (
                 <MultiSelectOptionChip
                   label={v.label}
@@ -126,27 +145,44 @@ export const AutocompleteMutliSelect = <T, V>(
           )}
 
           <DropdownTransition>
-            <Combobox.Options className="cui-dropdown-base top-12 absolute z-10 mt-0.5">
+            <Combobox.Options className="cui-dropdown-base absolute top-12 z-10 mt-0.5">
               {props.isLoading ? (
                 <Searching />
               ) : filteredOptions.length ? (
-                filteredOptions.map((option, index) => (
-                  <Combobox.Option
-                    id={`${props.id}-option-${option.value}`}
-                    key={index}
-                    className={dropdownOptionClassNames}
-                    value={option}
-                  >
-                    {({ selected }) => (
+                <>
+                  {props.selectAll && (
+                    <Combobox.Option
+                      id={`${props.id}-option-select-all`}
+                      key={`${props.id}-option-select-all`}
+                      className={dropdownOptionClassNames}
+                      value={{ value: "select-all" }}
+                    >
                       <div className="flex justify-between">
-                        {option.label}
-                        {selected && (
+                        Select All
+                        {value.length === filteredOptions.length && (
                           <CareIcon className="care-l-check text-lg" />
                         )}
                       </div>
-                    )}
-                  </Combobox.Option>
-                ))
+                    </Combobox.Option>
+                  )}
+                  {filteredOptions.map((option, index) => (
+                    <Combobox.Option
+                      id={`${props.id}-option-${index}`}
+                      key={`${props.id}-option-${index}`}
+                      className={dropdownOptionClassNames}
+                      value={option}
+                    >
+                      {({ selected }) => (
+                        <div className="flex justify-between">
+                          {option.label}
+                          {selected && (
+                            <CareIcon className="care-l-check text-lg" />
+                          )}
+                        </div>
+                      )}
+                    </Combobox.Option>
+                  ))}
+                </>
               ) : (
                 <span className="flex items-center justify-center gap-2 py-6">
                   {!query && <CareIcon className="care-l-search text-lg" />}

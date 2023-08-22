@@ -1,4 +1,4 @@
-import React, { Dispatch, useEffect } from "react";
+import { Dispatch, useEffect, useState } from "react";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { AssetData } from "../AssetTypes";
@@ -36,9 +36,9 @@ const update_Link = (
 };
 
 export default function MonitorConfigure({ asset }: { asset: AssetData }) {
-  const [bed, setBed] = React.useState<BedModel>({});
-  const [updateLink, setUpdateLink] = React.useState<boolean>(false);
-  const [assetBed, setAssetBed] = React.useState<any>();
+  const [bed, setBed] = useState<BedModel>({});
+  const [updateLink, setUpdateLink] = useState<boolean>(false);
+  const [assetBed, setAssetBed] = useState<any>();
   const dispatch: any = useDispatch();
 
   const getAssetBeds = async (id: string) => {
@@ -89,7 +89,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
             className="w-full"
           />
         </div>
-        <Submit className="shrink-0 w-full mt-6">
+        <Submit className="mt-6 w-full shrink-0">
           <i className="fas fa-bed-pulse" />
           {updateLink ? "Update Bed" : "Save Bed"}
         </Submit>

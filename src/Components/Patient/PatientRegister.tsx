@@ -1,19 +1,5 @@
-import {
-  Box,
-  Card,
-  CardContent,
-  CircularProgress,
-  FormControlLabel,
-  Radio,
-  RadioGroup,
-} from "@material-ui/core";
+import * as Notification from "../../Utils/Notifications.js";
 
-import { navigate, useQueryParams } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import moment from "moment";
-import loadable from "@loadable/component";
-import { useCallback, useReducer, useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
 import {
   BLOOD_GROUPS,
   DISEASE_STATUS,
@@ -22,64 +8,70 @@ import {
   TEST_TYPE,
   VACCINES,
 } from "../../Common/constants";
-import countryList from "../../Common/static/countries.json";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
+  HCXActions,
   createPatient,
+  externalResult,
+  getAnyFacility,
   getDistrictByState,
   getLocalbodyByDistrict,
   getPatient,
   getStates,
+  getWardByLocalBody,
   searchPatient,
   updatePatient,
-  getWardByLocalBody,
-  externalResult,
-  getAnyFacility,
-  HCXActions,
 } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import AlertDialog from "../Common/AlertDialog";
 import {
-  LegacyCheckboxField,
-  LegacyDateInputField,
-  LegacyErrorHelperText,
-  LegacySelectField,
-  LegacyTextInputField,
-} from "../Common/HelperInputFields";
-import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
-import { DupPatientModel } from "../Facility/models";
-import { PatientModel } from "./models";
-import TransferPatientDialog from "../Facility/TransferPatientDialog";
-import { validatePincode } from "../../Common/validation";
-import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
-
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+  dateQueryString,
+  getPincodeDetails,
+  includesIgnoreCase,
+} from "../../Utils/utils";
+import { navigate, useQueryParams } from "raviger";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { lazy, useCallback, useEffect, useReducer, useState } from "react";
 
 import AccordionV2 from "../Common/components/AccordionV2";
-import CollapseV2 from "../Common/components/CollapseV2";
-import { debounce } from "lodash";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import CollapseV2 from "../Common/components/CollapseV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import DateFormField from "../Form/FormFields/DateFormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import useConfig from "../../Common/hooks/useConfig";
-import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
-import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
+import DialogModal from "../Common/Dialog";
+import { DupPatientModel } from "../Facility/models";
+import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
+import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
+import Form from "../Form/Form";
 import { HCXPolicyModel } from "../HCX/models";
 import HCXPolicyValidator from "../HCX/validators";
-import { FieldError } from "../Form/FieldValidators";
+import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
+import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
+import { PatientModel } from "./models";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import RadioFormField from "../Form/FormFields/RadioFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import Spinner from "../Common/Spinner";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import TransferPatientDialog from "../Facility/TransferPatientDialog";
+import countryList from "../../Common/static/countries.json";
+import { debounce } from "lodash";
+
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import DialogModal from "../Common/Dialog";
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import { validatePincode } from "../../Common/validation";
+import { FormContextValue } from "../Form/FormContext.js";
+
+const Loading = lazy(() => import("../Common/Loading"));
+const PageTitle = lazy(() => import("../Common/PageTitle"));
+
 // const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
-  facilityId: number;
+  facilityId: string;
 }
 
 interface medicalHistoryModel {
@@ -105,8 +97,8 @@ const initForm: any = {
   name: "",
   age: "",
   gender: "",
-  phone_number: "",
-  emergency_phone_number: "",
+  phone_number: "+91",
+  emergency_phone_number: null,
   blood_group: "",
   disease_status: diseaseStatus[2],
   is_declared_positive: "false",
@@ -121,6 +113,7 @@ const initForm: any = {
   ward: "",
   address: "",
   permanent_address: "",
+  sameAddress: true,
   village: "",
   allergies: "",
   pincode: "",
@@ -149,6 +142,7 @@ const initForm: any = {
   number_of_doses: "0",
   vaccine_name: null,
   last_vaccinated_date: null,
+  abha_number: null,
   ...medicalHistoryChoices,
 };
 
@@ -182,16 +176,13 @@ const patientFormReducer = (state = initialState, action: any) => {
 };
 
 const scrollTo = (id: string | boolean) => {
-  const element = document.querySelector(`#${id}-div`);
+  const element = document.querySelector(`#${id}`);
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
-const getDate = (value: any) =>
-  value && moment(value).isValid() && moment(value).toDate();
-
 export const PatientRegister = (props: PatientRegisterProps) => {
   const { goBack } = useAppHistory();
-  const { gov_data_api_key, enable_hcx } = useConfig();
+  const { gov_data_api_key, enable_hcx, enable_abdm } = useConfig();
   const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(patientFormReducer, initialState);
@@ -201,8 +192,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     title: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [showImport, setShowImport] = useState(false);
+  const [showImport, setShowImport] = useState<{
+    show?: boolean;
+    field?: FormContextValue<PatientModel> | null;
+  }>({
+    show: false,
+    field: null,
+  });
   const [careExtId, setCareExtId] = useState("");
+  const [formField, setFormField] = useState<any>();
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
   const [isLocalbodyLoading, setIsLocalbodyLoading] = useState(false);
@@ -216,10 +214,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     transfer?: boolean;
     patientList: Array<DupPatientModel>;
   }>({ patientList: [] });
-  const [sameAddress, setSameAddress] = useState(true);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
   const [{ extId }, setQuery] = useQueryParams();
+  const [showLinkAbhaNumberModal, setShowLinkAbhaNumberModal] = useState(false);
   const [showAutoFilledPincode, setShowAutoFilledPincode] = useState(false);
   const [insuranceDetails, setInsuranceDetails] = useState<HCXPolicyModel[]>(
     []
@@ -228,11 +226,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     useState<FieldError>();
 
   useEffect(() => {
-    if (extId) {
+    if (extId && formField) {
       setCareExtId(extId);
-      fetchExtResultData(null);
+      fetchExtResultData(null, formField);
     }
-  }, [careExtId]);
+  }, [careExtId, formField]);
 
   const headerText = !id ? "Add Details of Patient" : "Update Patient Details";
   const buttonText = !id ? "Add Patient" : "Save Details";
@@ -268,16 +266,6 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     [dispatchAction]
   );
 
-  const field = (name: string) => {
-    return {
-      id: name,
-      name,
-      onChange: handleChange,
-      value: state.form[name],
-      error: state.errors[name],
-    };
-  };
-
   const fetchWards = useCallback(
     async (id: string) => {
       if (Number(id) > 0) {
@@ -305,69 +293,106 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  const fetchExtResultData = async (e: any) => {
+  const fetchExtResultData = async (e: any, field: any) => {
     if (e) e.preventDefault();
-    setIsLoading(true);
     if (!careExtId) return;
     const res = await dispatchAction(externalResult({ id: careExtId }));
 
-    if (res && res.data) {
-      const form = { ...state.form };
-      form["name"] = res.data.name ? res.data.name : state.form.name;
-      form["address"] = res.data.address
-        ? res.data.address
-        : state.form.address;
-      form["permanent_address"] = res.data.permanent_address
-        ? res.data.permanent_address
-        : state.form.permanent_address;
-      form["gender"] = res.data.gender
-        ? parseGenderFromExt(res.data.gender, state.form.gender)
-        : state.form.gender;
-      form["test_id"] = res.data.test_id
-        ? res.data.test_id
-        : state.form.test_id;
-      form["srf_id"] = res.data.srf_id ? res.data.srf_id : state.form.srf_id;
+    if (res?.data) {
+      field.onChange({
+        name: "name",
+        value: res.data.name ? res.data.name : state.form.name,
+      });
+      field.onChange({
+        name: "address",
+        value: res.data.address ? res.data.address : state.form.address,
+      });
+      field.onChange({
+        name: "permanent_address",
+        value: res.data.permanent_address
+          ? res.data.permanent_address
+          : state.form.permanent_address,
+      });
+      field.onChange({
+        name: "gender",
+        value: res.data.gender
+          ? parseGenderFromExt(res.data.gender, state.form.gender)
+          : state.form.gender,
+      });
+      field.onChange({
+        name: "test_id",
+        value: res.data.test_id ? res.data.test_id : state.form.test_id,
+      });
+      field.onChange({
+        name: "srf_id",
+        value: res.data.srf_id ? res.data.srf_id : state.form.srf_id,
+      });
+      field.onChange({
+        name: "state",
+        value: res.data.district_object
+          ? res.data.district_object.state
+          : state.form.state,
+      });
+      field.onChange({
+        name: "district",
+        value: res.data.district ? res.data.district : state.form.district,
+      });
+      field.onChange({
+        name: "local_body",
+        value: res.data.local_body
+          ? res.data.local_body
+          : state.form.local_body,
+      });
+      field.onChange({
+        name: "ward",
+        value: res.data.ward ? res.data.ward : state.form.ward,
+      });
+      field.onChange({
+        name: "village",
+        value: res.data.village ? res.data.village : state.form.village,
+      });
+      field.onChange({
+        name: "disease_status",
+        value: res.data.result
+          ? res.data.result.toUpperCase()
+          : state.form.disease_status,
+      });
+      field.onChange({
+        name: "test_type",
+        value: res.data.test_type
+          ? res.data.test_type.toUpperCase()
+          : state.form.test_type,
+      });
+      field.onChange({
+        name: "date_of_test",
+        value: res.data.sample_collection_date
+          ? res.data.sample_collection_date
+          : state.form.date_of_test,
+      });
+      field.onChange({
+        name: "date_of_result",
+        value: res.data.result_date
+          ? res.data.result_date
+          : state.form.date_of_result,
+      });
+      field.onChange({
+        name: "phone_number",
+        value: res.data.mobile_number
+          ? "+91" + res.data.mobile_number
+          : state.form.phone_number,
+      });
 
-      form["state"] = res.data.district_object
-        ? res.data.district_object.state
-        : state.form.state;
-      form["district"] = res.data.district
-        ? res.data.district
-        : state.form.district;
-      form["local_body"] = res.data.local_body
-        ? res.data.local_body
-        : state.form.local_body;
-      form["ward"] = res.data.ward ? res.data.ward : state.form.ward;
-      form["village"] = res.data.village
-        ? res.data.village
-        : state.form.village;
-      form["disease_status"] = res.data.result
-        ? res.data.result.toUpperCase()
-        : state.form.disease_status;
-      form["test_type"] = res.data.test_type
-        ? res.data.test_type.toUpperCase()
-        : state.form.test_type;
-      form["date_of_test"] = res.data.sample_collection_date
-        ? moment(res.data.sample_collection_date)
-        : state.form.date_of_test;
-      form["date_of_result"] = res.data.result_date
-        ? moment(res.data.result_date)
-        : state.form.date_of_result;
-      form["phone_number"] = res.data.mobile_number
-        ? "+91" + res.data.mobile_number
-        : state.form.phone_number;
-
-      dispatch({ type: "set_form", form });
       Promise.all([
         fetchDistricts(res.data.district_object.state),
         fetchLocalBody(res.data.district),
         fetchWards(res.data.local_body),
-        duplicateCheck("+91" + res.data.mobile_number),
+        duplicateCheck(res.data.mobile_number),
       ]);
-
-      setShowImport(false);
+      setShowImport({
+        show: false,
+        field: null,
+      });
     }
-    setIsLoading(false);
   };
 
   const fetchData = useCallback(
@@ -375,11 +400,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       setIsLoading(true);
       const res = await dispatchAction(getPatient({ id }));
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setFacilityName(res.data.facility_object.name);
           setPatientName(res.data.name);
+          console.log(res.data);
           const formData = {
             ...res.data,
+            health_id_number: res.data.abha_number_object?.abha_number || "",
+            health_id: res.data.abha_number_object?.health_id || "",
             nationality: res.data.nationality ? res.data.nationality : "India",
             gender: res.data.gender ? res.data.gender : "",
             cluster_name: res.data.cluster_name ? res.data.cluster_name : "",
@@ -436,9 +464,9 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               ? res.data.last_vaccinated_date
               : null,
           };
-          if (res.data.address !== res.data.permanent_address) {
-            setSameAddress(false);
-          }
+
+          formData.sameAddress =
+            res.data.address === res.data.permanent_address;
           res.data.medical_history.forEach((i: any) => {
             const medicalHistory = MEDICAL_HISTORY_CHOICES.find(
               (j: any) =>
@@ -477,7 +505,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       const res = await dispatchAction(
         HCXActions.policies.list({ patient: id })
       );
-      if (res && res.data) {
+      if (res?.data) {
         setInsuranceDetails(res.data.results);
       }
     };
@@ -520,201 +548,128 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     fetchFacilityName();
   }, [dispatchAction, facilityId]);
 
-  const validateForm = () => {
-    const errors = { ...initError };
-    let invalidForm = false;
-    let error_div = "";
+  const validateForm = (form: any) => {
+    const errors: Partial<Record<keyof any, FieldError>> = {};
 
     const insuranceDetailsError = insuranceDetails
       .map((policy) => HCXPolicyValidator(policy, enable_hcx))
       .find((error) => !!error);
     setInsuranceDetailsError(insuranceDetailsError);
 
-    if (insuranceDetailsError) {
-      invalidForm = true;
-      error_div = "insurance_details";
-    }
-
-    Object.keys(state.form).forEach((field) => {
+    Object.keys(form).forEach((field) => {
       let phoneNumber, emergency_phone_number;
       switch (field) {
         case "address":
         case "name":
         case "gender":
-          if (!state.form[field]) {
-            errors[field] = "Field is required";
-            if (!error_div) error_div = field;
-            invalidForm = true;
-          }
+        case "date_of_birth":
+          errors[field] = RequiredFieldValidator()(form[field]);
           return;
         case "permanent_address":
-          if (!sameAddress) {
-            if (!state.form[field]) {
-              errors[field] = "Field is required";
-              if (!error_div) error_div = field;
-              invalidForm = true;
-            }
-          }
-          return;
-        case "date_of_birth":
-          if (!state.form[field]) {
-            errors[field] = "Please enter date in YYYY/MM/DD format";
-            if (!error_div) error_div = field;
-            invalidForm = true;
+          if (!form.sameAddress) {
+            errors[field] = RequiredFieldValidator()(form[field]);
           }
           return;
         case "local_body":
-          if (
-            state.form.nationality === "India" &&
-            !Number(state.form[field])
-          ) {
-            errors[field] = "Please select local body";
-            if (!error_div) error_div = field;
-            invalidForm = true;
+          if (form.nationality === "India" && !Number(form[field])) {
+            errors[field] = "Please select a localbody";
           }
           return;
         case "district":
-          if (
-            state.form.nationality === "India" &&
-            !Number(state.form[field])
-          ) {
+          if (form.nationality === "India" && !Number(form[field])) {
             errors[field] = "Please select district";
-            if (!error_div) error_div = field;
-            invalidForm = true;
           }
           return;
         case "state":
-          if (
-            state.form.nationality === "India" &&
-            !Number(state.form[field])
-          ) {
+          if (form.nationality === "India" && !Number(form[field])) {
             errors[field] = "Please enter the state";
-            if (!error_div) error_div = field;
-            invalidForm = true;
           }
           return;
         case "pincode":
-          if (!validatePincode(state.form[field])) {
+          if (!validatePincode(form[field])) {
             errors[field] = "Please enter valid pincode";
-            if (!error_div) error_div = field;
-            invalidForm = true;
           }
           return;
         case "passport_no":
-          if (state.form.nationality !== "India" && !state.form[field]) {
+          if (form.nationality !== "India" && !form[field]) {
             errors[field] = "Please enter the passport number";
-            if (!error_div) error_div = field;
-            invalidForm = true;
           }
           return;
         case "phone_number":
-          phoneNumber = parsePhoneNumberFromString(state.form[field]);
-          if (!state.form[field] || !phoneNumber?.isPossible()) {
+          phoneNumber = parsePhoneNumberFromString(form[field]);
+          if (!form[field] || !phoneNumber?.isPossible()) {
             errors[field] = "Please enter valid phone number";
-            if (!error_div) error_div = field;
-            invalidForm = true;
           }
           return;
         case "emergency_phone_number":
-          emergency_phone_number = parsePhoneNumberFromString(
-            state.form[field]
-          );
-          if (!state.form[field] || !emergency_phone_number?.isPossible()) {
+          emergency_phone_number = parsePhoneNumberFromString(form[field]);
+          if (!form[field] || !emergency_phone_number?.isPossible()) {
             errors[field] = "Please enter valid phone number";
-            if (!error_div) error_div = field;
-            invalidForm = true;
           }
           return;
 
         case "estimated_contact_date":
           if (
-            JSON.parse(state.form.contact_with_confirmed_carrier) ||
-            JSON.parse(state.form.contact_with_suspected_carrier)
+            JSON.parse(form.contact_with_confirmed_carrier) ||
+            JSON.parse(form.contact_with_suspected_carrier)
           ) {
-            if (!state.form[field]) {
+            if (!form[field]) {
               errors[field] = "Please enter the estimated date of contact";
-              if (!error_div) error_div = field;
-              invalidForm = true;
             }
           }
           return;
         case "cluster_name":
           if (
-            JSON.parse(state.form.contact_with_confirmed_carrier) ||
-            JSON.parse(state.form.contact_with_suspected_carrier)
+            JSON.parse(form.contact_with_confirmed_carrier) ||
+            JSON.parse(form.contact_with_suspected_carrier)
           ) {
-            if (!state.form[field]) {
+            if (!form[field]) {
               errors[field] = "Please enter the name / cluster of the contact";
-              if (!error_div) error_div = field;
-              invalidForm = true;
             }
           }
           return;
         case "blood_group":
-          if (!state.form[field]) {
+          if (!form[field]) {
             errors[field] = "Please select a blood group";
-            if (!error_div) error_div = field;
-            invalidForm = true;
           }
           return;
 
         case "is_vaccinated":
-          if (state.form.is_vaccinated === "true") {
-            if (state.form.number_of_doses === "0") {
+          if (form.is_vaccinated === "true") {
+            if (form.number_of_doses === "0") {
               errors["number_of_doses"] =
                 "Please fill the number of doses taken";
-              if (!error_div) error_div = field;
-              invalidForm = true;
             }
-            if (
-              state.form.vaccine_name === null ||
-              state.form.vaccine_name === "Select"
-            ) {
+            if (form.vaccine_name === null || form.vaccine_name === "Select") {
               errors["vaccine_name"] = "Please select vaccine name";
-              if (!error_div) error_div = field;
-              invalidForm = true;
             }
 
-            if (!state.form.last_vaccinated_date) {
+            if (!form.last_vaccinated_date) {
               errors["last_vaccinated_date"] =
                 "Please enter last vaccinated date";
-              if (!error_div) error_div = field;
-              invalidForm = true;
             }
           }
           return;
 
         case "date_of_result":
-          if (state.form[field] < state.form.date_of_test) {
+          if (form[field] < form.date_of_test) {
             errors[field] =
               "Date should not be before the date of sample collection";
-            if (!error_div) error_div = field;
-            invalidForm = true;
           }
           return;
         case "disease_status":
-          if (state.form[field] === "POSITIVE") {
-            if (!state.form.date_of_test) {
+          if (form[field] === "POSITIVE") {
+            if (!form.date_of_test) {
               errors["date_of_test"] = "Please fill the date of sample testing";
-              if (!error_div) error_div = field;
-              invalidForm = true;
             }
-            if (!state.form.date_of_result) {
+            if (!form.date_of_result) {
               errors["date_of_result"] = "Please fill the date of result";
-              if (!error_div) error_div = field;
-              invalidForm = true;
             }
           }
           return;
         case "medical_history":
-          if (!state.form[field].length) {
-            errors[field] = (
-              <span className="text-red-500">
-                Please fill the medical history
-              </span>
-            );
-            if (!error_div) error_div = field;
-            invalidForm = true;
+          if (!form[field].length) {
+            errors[field] = "Please fill the medical history";
           }
           return;
         default:
@@ -722,13 +677,15 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       }
     });
 
-    dispatch({ type: "set_error", errors });
-    return [!invalidForm, error_div];
+    const firstError = Object.keys(errors).find((e) => errors[e]);
+    if (firstError) {
+      scrollTo(firstError);
+    }
+
+    return errors;
   };
 
-  const handlePincodeChange = async (e: any) => {
-    handleFormFieldChange(e);
-
+  const handlePincodeChange = async (e: any, setField: any) => {
     if (!validatePincode(e.value)) return;
 
     const pincodeDetails = await getPincodeDetails(e.value, gov_data_api_key);
@@ -747,15 +704,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     });
     if (!matchedDistrict) return;
 
-    dispatch({
-      type: "set_form",
-      form: {
-        ...state.form,
-        state: matchedState.id,
-        district: matchedDistrict.id,
-        pincode: e.value,
-      },
-    });
+    setField({ name: "state", value: matchedState.id });
+    setField({ name: "district", value: matchedDistrict.id });
 
     fetchLocalBody(matchedDistrict.id);
     setShowAutoFilledPincode(true);
@@ -764,252 +714,246 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }, 2000);
   };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    const [validForm, error_div] = validateForm();
-    if (!validForm) {
-      scrollTo(error_div);
-    } else {
-      setIsLoading(true);
-      const medical_history: Array<medicalHistoryModel> = [];
-      state.form.medical_history.forEach((id: number) => {
-        const medData = MEDICAL_HISTORY_CHOICES.find((i) => i.id === id);
-        if (medData) {
-          const details = state.form[`medical_history_${medData.id}`];
-          medical_history.push({
-            disease: medData.text,
-            details: details ? details : "",
-          });
-        }
-      });
-      const data = {
-        phone_number: parsePhoneNumberFromString(
-          state.form.phone_number
-        )?.format("E.164"),
-        emergency_phone_number: parsePhoneNumberFromString(
-          state.form.emergency_phone_number
-        )?.format("E.164"),
-        date_of_birth: moment(state.form.date_of_birth).format("YYYY-MM-DD"),
-        disease_status: state.form.disease_status,
-        date_of_test: state.form.date_of_test
-          ? state.form.date_of_test
-          : undefined,
-        date_of_result: state.form.date_of_result
-          ? state.form.date_of_result
-          : undefined,
-        date_declared_positive:
-          JSON.parse(state.form.is_declared_positive) &&
-          state.form.date_declared_positive
-            ? state.form.date_declared_positive
-            : null,
-        test_id: state.form.test_id,
-        srf_id: state.form.srf_id,
-        covin_id:
-          state.form.is_vaccinated === "true" ? state.form.covin_id : undefined,
-        is_vaccinated: state.form.is_vaccinated,
-        number_of_doses:
-          state.form.is_vaccinated === "true"
-            ? Number(state.form.number_of_doses)
-            : Number("0"),
-        vaccine_name:
-          state.form.vaccine_name &&
-          state.form.vaccine_name !== "Select" &&
-          state.form.is_vaccinated === "true"
-            ? state.form.vaccine_name
-            : null,
-        last_vaccinated_date:
-          state.form.is_vaccinated === "true"
-            ? state.form.last_vaccinated_date
-              ? state.form.last_vaccinated_date
-              : null
-            : null,
-        test_type: state.form.test_type,
-        name: state.form.name,
-        pincode: state.form.pincode ? state.form.pincode : undefined,
-        gender: Number(state.form.gender),
-        nationality: state.form.nationality,
-        is_antenatal: state.form.is_antenatal,
-        passport_no:
-          state.form.nationality !== "India"
-            ? state.form.passport_no
-            : undefined,
-        state:
-          state.form.nationality === "India" ? state.form.state : undefined,
-        district:
-          state.form.nationality === "India" ? state.form.district : undefined,
-        local_body:
-          state.form.nationality === "India"
-            ? state.form.local_body
-            : undefined,
-        ward: state.form.ward,
-        village: state.form.village,
-        address: state.form.address ? state.form.address : undefined,
-        permanent_address: sameAddress
-          ? state.form.address
-          : state.form.permanent_address
-          ? state.form.permanent_address
-          : undefined,
-        present_health: state.form.present_health
-          ? state.form.present_health
-          : undefined,
-        contact_with_confirmed_carrier: JSON.parse(
-          state.form.contact_with_confirmed_carrier
-        ),
-        contact_with_suspected_carrier: JSON.parse(
-          state.form.contact_with_suspected_carrier
-        ),
-        estimated_contact_date:
-          (JSON.parse(state.form.contact_with_confirmed_carrier) ||
-            JSON.parse(state.form.contact_with_suspected_carrier)) &&
-          state.form.estimated_contact_date
-            ? state.form.estimated_contact_date
-            : null,
-        cluster_name:
-          (JSON.parse(state.form.contact_with_confirmed_carrier) ||
-            JSON.parse(state.form.contact_with_suspected_carrier)) &&
-          state.form.cluster_name
-            ? state.form.cluster_name
-            : null,
-        allergies: state.form.allergies,
-        number_of_primary_contacts: Number(
-          state.form.number_of_primary_contacts
-        )
-          ? Number(state.form.number_of_primary_contacts)
-          : undefined,
-        number_of_secondary_contacts: Number(
-          state.form.number_of_secondary_contacts
-        )
-          ? Number(state.form.number_of_secondary_contacts)
-          : undefined,
-        ongoing_medication: state.form.ongoing_medication,
-        is_declared_positive: JSON.parse(state.form.is_declared_positive),
-        designation_of_health_care_worker:
-          state.form.designation_of_health_care_worker,
-        instituion_of_health_care_worker:
-          state.form.instituion_of_health_care_worker,
-        blood_group: state.form.blood_group
-          ? state.form.blood_group
-          : undefined,
-        medical_history,
-        is_active: true,
-      };
-      const res = await dispatchAction(
-        id
-          ? updatePatient(data, { id })
-          : createPatient({ ...data, facility: facilityId })
-      );
-      if (res && res.data && res.status != 400) {
-        await Promise.all(
-          insuranceDetails.map(async (obj) => {
-            const policy = {
-              ...obj,
-              patient: res.data.id,
-              insurer_id: obj.insurer_id || undefined,
-              insurer_name: obj.insurer_name || undefined,
-            };
-            const policyRes = await (policy.id
-              ? dispatchAction(
-                  HCXActions.policies.update(
-                    policy.id,
-                    policy as HCXPolicyModel
-                  )
-                )
-              : dispatchAction(
-                  HCXActions.policies.create(policy as HCXPolicyModel)
-                ));
-
-            if (enable_hcx) {
-              const eligibilityCheckRes = await dispatchAction(
-                HCXActions.checkEligibility(policyRes.data.id)
-              );
-              if (eligibilityCheckRes.status === 200) {
-                Notification.Success({ msg: "Checking Policy Eligibility..." });
-              } else {
-                Notification.Error({ msg: "Something Went Wrong..." });
-              }
-            }
-          })
-        );
-
-        dispatch({ type: "set_form", form: initForm });
-        if (!id) {
-          setAlertMessage({
-            show: true,
-            message: `Please note down patient name: ${state.form.name} and patient ID: ${res.data.id}`,
-            title: "Patient Added Successfully",
-          });
-          navigate(
-            `/facility/${facilityId}/patient/${res.data.id}/consultation`
-          );
-        } else {
-          Notification.Success({
-            msg: "Patient updated successfully",
-          });
-          goBack();
-        }
+  const handleSubmit = async (formData: any) => {
+    setIsLoading(true);
+    const medical_history: Array<medicalHistoryModel> = [];
+    formData.medical_history.forEach((id: number) => {
+      const medData = MEDICAL_HISTORY_CHOICES.find((i) => i.id === id);
+      if (medData) {
+        const details = formData[`medical_history_${medData.id}`];
+        medical_history.push({
+          disease: medData.text,
+          details: details ? details : "",
+        });
       }
-      setIsLoading(false);
+    });
+    const data = {
+      abha_number: state.form.abha_number,
+      phone_number: parsePhoneNumberFromString(formData.phone_number)?.format(
+        "E.164"
+      ),
+      emergency_phone_number: parsePhoneNumberFromString(
+        formData.emergency_phone_number
+      )?.format("E.164"),
+      date_of_birth: dateQueryString(formData.date_of_birth),
+      disease_status: formData.disease_status,
+      date_of_test: formData.date_of_test ? formData.date_of_test : undefined,
+      date_of_result: formData.date_of_result
+        ? formData.date_of_result
+        : undefined,
+      date_declared_positive:
+        JSON.parse(formData.is_declared_positive) &&
+        formData.date_declared_positive
+          ? formData.date_declared_positive
+          : null,
+      test_id: formData.test_id,
+      srf_id: formData.srf_id,
+      covin_id:
+        formData.is_vaccinated === "true" ? formData.covin_id : undefined,
+      is_vaccinated: formData.is_vaccinated,
+      number_of_doses:
+        formData.is_vaccinated === "true"
+          ? Number(formData.number_of_doses)
+          : Number("0"),
+      vaccine_name:
+        formData.vaccine_name &&
+        formData.vaccine_name !== "Select" &&
+        formData.is_vaccinated === "true"
+          ? formData.vaccine_name
+          : null,
+      last_vaccinated_date:
+        formData.is_vaccinated === "true"
+          ? formData.last_vaccinated_date
+            ? formData.last_vaccinated_date
+            : null
+          : null,
+      test_type: formData.test_type,
+      name: formData.name,
+      pincode: formData.pincode ? formData.pincode : undefined,
+      gender: Number(formData.gender),
+      nationality: formData.nationality,
+      is_antenatal: formData.is_antenatal,
+      passport_no:
+        formData.nationality !== "India" ? formData.passport_no : undefined,
+      state: formData.nationality === "India" ? formData.state : undefined,
+      district:
+        formData.nationality === "India" ? formData.district : undefined,
+      local_body:
+        formData.nationality === "India" ? formData.local_body : undefined,
+      ward: formData.ward,
+      village: formData.village,
+      address: formData.address ? formData.address : undefined,
+      permanent_address: formData.sameAddress
+        ? formData.address
+        : formData.permanent_address
+        ? formData.permanent_address
+        : undefined,
+      present_health: formData.present_health
+        ? formData.present_health
+        : undefined,
+      contact_with_confirmed_carrier: JSON.parse(
+        formData.contact_with_confirmed_carrier
+      ),
+      contact_with_suspected_carrier: JSON.parse(
+        formData.contact_with_suspected_carrier
+      ),
+      estimated_contact_date:
+        (JSON.parse(formData.contact_with_confirmed_carrier) ||
+          JSON.parse(formData.contact_with_suspected_carrier)) &&
+        formData.estimated_contact_date
+          ? formData.estimated_contact_date
+          : null,
+      cluster_name:
+        (JSON.parse(formData.contact_with_confirmed_carrier) ||
+          JSON.parse(formData.contact_with_suspected_carrier)) &&
+        formData.cluster_name
+          ? formData.cluster_name
+          : null,
+      allergies: formData.allergies,
+      number_of_primary_contacts: Number(formData.number_of_primary_contacts)
+        ? Number(formData.number_of_primary_contacts)
+        : undefined,
+      number_of_secondary_contacts: Number(
+        formData.number_of_secondary_contacts
+      )
+        ? Number(formData.number_of_secondary_contacts)
+        : undefined,
+      ongoing_medication: formData.ongoing_medication,
+      is_declared_positive: JSON.parse(formData.is_declared_positive),
+      designation_of_health_care_worker:
+        formData.designation_of_health_care_worker,
+      instituion_of_health_care_worker:
+        formData.instituion_of_health_care_worker,
+      blood_group: formData.blood_group ? formData.blood_group : undefined,
+      medical_history,
+      is_active: true,
+    };
+    const res = await dispatchAction(
+      id
+        ? updatePatient(data, { id })
+        : createPatient({ ...data, facility: facilityId })
+    );
+    if (res && res.data && res.status != 400) {
+      await Promise.all(
+        insuranceDetails.map(async (obj) => {
+          const policy = {
+            ...obj,
+            patient: res.data.id,
+            insurer_id: obj.insurer_id || undefined,
+            insurer_name: obj.insurer_name || undefined,
+          };
+          const policyRes = await (policy.id
+            ? dispatchAction(
+                HCXActions.policies.update(policy.id, policy as HCXPolicyModel)
+              )
+            : dispatchAction(
+                HCXActions.policies.create(policy as HCXPolicyModel)
+              ));
+
+          if (enable_hcx) {
+            const eligibilityCheckRes = await dispatchAction(
+              HCXActions.checkEligibility(policyRes.data.id)
+            );
+            if (eligibilityCheckRes.status === 200) {
+              Notification.Success({ msg: "Checking Policy Eligibility..." });
+            } else {
+              Notification.Error({ msg: "Something Went Wrong..." });
+            }
+          }
+        })
+      );
+
+      dispatch({ type: "set_form", form: initForm });
+      if (!id) {
+        setAlertMessage({
+          show: true,
+          message: `Please note down patient name: ${formData.name} and patient ID: ${res.data.id}`,
+          title: "Patient Added Successfully",
+        });
+        navigate(`/facility/${facilityId}/patient/${res.data.id}/consultation`);
+      } else {
+        Notification.Success({
+          msg: "Patient updated successfully",
+        });
+        goBack();
+      }
     }
+    setIsLoading(false);
   };
 
-  const handleChange = (e: any) => {
-    const form = { ...state.form };
-    switch (e.target.name) {
-      case "state":
-        form["district"] = "0";
-        form["local_body"] = "0";
-        form["ward"] = "0";
-        break;
+  const handleAbhaLinking = (
+    {
+      id,
+      abha_profile: {
+        healthIdNumber,
+        healthId,
+        name,
+        mobile,
+        gender,
+        monthOfBirth,
+        dayOfBirth,
+        yearOfBirth,
+        pincode,
+      },
+    }: any,
+    field: any
+  ) => {
+    const values: any = {};
+    if (id) values["abha_number"] = id;
+    if (healthIdNumber) values["health_id_number"] = healthIdNumber;
+    if (healthId) values["health_id"] = healthId;
 
-      case "district":
-        form["local_body"] = "0";
-        form["ward"] = "0";
-        break;
+    if (name)
+      field("name").onChange({
+        name: "name",
+        value: name,
+      });
 
-      case "local_body":
-        form["ward"] = "0";
-        break;
-    }
-    form[e.target.name] = e.target.value;
-    dispatch({ type: "set_form", form });
-  };
+    if (mobile) {
+      field("phone_number").onChange({
+        name: "phone_number",
+        value: parsePhoneNumberFromString(mobile, "IN")?.format("E.164"),
+      });
 
-  const handleFormFieldChange = (e: FieldChangeEvent<unknown>) => {
-    const form = { ...state.form };
-    form[e.name] = e.value;
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleDateChange = (date: MaterialUiPickersDate, field: string) => {
-    if (moment(date).isValid()) {
-      const form = { ...state.form };
-      form[field] = date;
-      dispatch({ type: "set_form", form });
-    }
-  };
-
-  const handleDOBChange = (e: FieldChangeEvent<Date>) => {
-    if (moment(e.value).isValid()) {
-      dispatch({
-        type: "set_form",
-        form: {
-          ...state.form,
-          [e.name]: moment(e.value).format("YYYY-MM-DD"),
-        },
+      field("emergency_phone_number").onChange({
+        name: "emergency_phone_number",
+        value: parsePhoneNumberFromString(mobile, "IN")?.format("E.164"),
       });
     }
+
+    if (gender)
+      field("gender").onChange({
+        name: "gender",
+        value: gender === "M" ? "1" : gender === "F" ? "2" : "3",
+      });
+
+    if (monthOfBirth && dayOfBirth && yearOfBirth)
+      field("date_of_birth").onChange({
+        name: "date_of_birth",
+        value: new Date(`${monthOfBirth}-${dayOfBirth}-${yearOfBirth}`),
+      });
+
+    if (pincode)
+      field("pincode").onChange({
+        name: "pincode",
+        value: pincode,
+      });
+
+    dispatch({ type: "set_form", form: { ...state.form, ...values } });
+    setShowLinkAbhaNumberModal(false);
   };
 
-  const handleMedicalCheckboxChange = (e: any, id: number) => {
-    const form = { ...state.form };
-    const values = state.form.medical_history;
-    if (e.target.checked) {
+  const handleMedicalCheckboxChange = (e: any, id: number, field: any) => {
+    const values = field("medical_history").value ?? [];
+    if (e.value) {
       values.push(id);
     } else {
       values.splice(values.indexOf(id), 1);
     }
-    form["medical_history"] = values;
-    dispatch({ type: "set_form", form });
+    field("medical_history").onChange({
+      name: "medical_history",
+      value: values,
+    });
   };
 
   const duplicateCheck = useCallback(
@@ -1019,7 +963,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           phone_number: parsePhoneNumberFromString(phoneNo)?.format("E.164"),
         };
         const res = await dispatchAction(searchPatient(query));
-        if (res && res.data && res.data.results) {
+        if (res?.data?.results) {
           const duplicateList = !id
             ? res.data.results
             : res.data.results.filter(
@@ -1047,28 +991,25 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     }
   };
 
-  const renderMedicalHistory = (id: number, title: string) => {
+  const renderMedicalHistory = (id: number, title: string, field: any) => {
     const checkboxField = `medical_history_check_${id}`;
     const textField = `medical_history_${id}`;
     return (
       <div key={textField}>
         <div>
-          <LegacyCheckboxField
-            checked={state.form.medical_history.includes(id)}
-            onChange={(e) => handleMedicalCheckboxChange(e, id)}
+          <CheckBoxFormField
+            value={(field("medical_history").value ?? []).includes(id)}
+            onChange={(e) => handleMedicalCheckboxChange(e, id, field)}
             name={checkboxField}
             label={id !== 1 ? title : "NONE"}
           />
         </div>
-        {id !== 1 && state.form.medical_history.includes(id) && (
+        {id !== 1 && (field("medical_history").value ?? []).includes(id) && (
           <div className="mx-4">
             <TextAreaFormField
+              {...field(textField)}
               placeholder="Details"
               rows={2}
-              name={textField}
-              value={state.form[textField]}
-              onChange={handleFormFieldChange}
-              error={state.errors[textField]}
             />
           </div>
         )}
@@ -1109,8 +1050,11 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         title={headerText}
         className="mb-11"
         onBackClick={() => {
-          if (showImport) {
-            setShowImport(false);
+          if (showImport.show) {
+            setShowImport({
+              show: false,
+              field: null,
+            });
             return false;
           } else {
             id
@@ -1120,16 +1064,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         }}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
-          [id || "????"]: { name: patientName },
+          [id ?? "????"]: { name: patientName },
         }}
       />
       <div className="mt-4">
-        <div className="bg-purple-100 text-purple-800 p-4 font-semibold text-xs my-8 rounded mx-4">
-          <div className="text-lg font-bold flex items-center mb-1">
-            <CareIcon className=" care-l-info-circle text-2xl font-bold mr-1" />{" "}
+        <div className="mx-4 my-8 rounded bg-purple-100 p-4 text-xs font-semibold text-purple-800">
+          <div className="mx-1 mb-1 flex items-center text-lg font-bold">
+            <CareIcon className=" care-l-info-circle mr-1 text-2xl font-bold" />{" "}
             Please enter the correct date of birth for the patient
           </div>
-          <p className="text-sm text-black font-normal">
+          <p className="text-sm font-normal text-black">
             Each patient in the system is uniquely identifiable by the number
             and date of birth. Adding incorrect date of birth can result in
             duplication of patient records.
@@ -1137,1024 +1081,816 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         </div>
         <>
           {showAlertMessage.show && (
-            <AlertDialog
-              handleClose={goBack}
-              message={showAlertMessage.message}
+            <ConfirmDialog
               title={showAlertMessage.title}
+              description={showAlertMessage.message}
+              onConfirm={() => goBack()}
+              onClose={() => goBack()}
+              variant="primary"
+              action="Ok"
+              show
             />
           )}
-          {showImport ? (
+          {showImport.show && (
             <div className="p-4">
               <div>
                 <div className="my-4">
                   <FieldLabel htmlFor="care-external-results-id" required>
                     Enter Care External Results Id
                   </FieldLabel>
-                  <LegacyTextInputField
+                  <TextFormField
                     id="care-external-results-id"
                     name="care-external-results-id"
-                    variant="outlined"
-                    margin="dense"
                     type="text"
                     required
                     value={careExtId}
-                    onChange={(e) => setCareExtId(e.target.value)}
-                    errors={state.errors.name}
+                    onChange={(e) => setCareExtId(e.value)}
+                    error={state.errors.name}
                   />
                 </div>
                 <button
                   className="btn btn-primary mr-4"
-                  onClick={fetchExtResultData}
+                  onClick={(e) => {
+                    fetchExtResultData(e, showImport?.field?.("name"));
+                  }}
                   disabled={!careExtId}
                 >
                   Import Patient Data from External Results
                 </button>{" "}
                 <button
                   className="btn border"
-                  onClick={(_) => setShowImport(false)}
+                  onClick={(_) =>
+                    setShowImport({
+                      show: false,
+                      field: null,
+                    })
+                  }
                 >
                   Cancel Import
                 </button>
               </div>
             </div>
-          ) : (
-            <>
-              <>
-                <ButtonV2
-                  className="mb-8 mx-4 flex gap-2 items-center"
-                  onClick={(_) => {
-                    setShowImport(true);
-                    setQuery({ extId: "" }, { replace: true });
-                  }}
-                >
-                  <CareIcon className="care-l-import text-lg" />
-                  Import From External Results
-                </ButtonV2>
-                <form onSubmit={(e) => handleSubmit(e)}>
-                  <Card elevation={0} className="mb-8 rounded overflow-visible">
-                    <CardContent>
-                      <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
-                        Personal Details
-                      </h1>
-                      <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                        <div data-testid="phone-number" id="phone_number-div">
-                          <PhoneNumberFormField
-                            name="phone_number"
-                            label="Phone Number"
-                            required
-                            value={state.form.phone_number}
-                            onChange={(event) => {
-                              duplicateCheck(event.value);
-                              handleFormFieldChange(event);
-                            }}
-                            error={state.errors.phone_number}
-                          />
-                        </div>
-                        <div
-                          data-testid="emergency-phone-number"
-                          id="emergency_phone_number-div"
+          )}
+          <>
+            <div className={`${showImport.show && "hidden"}`}>
+              <Form<PatientModel>
+                defaults={id ? state.form : initForm}
+                validate={validateForm}
+                onSubmit={handleSubmit}
+                submitLabel={buttonText}
+                onCancel={() => navigate("/facility")}
+                className="bg-transparent px-1 py-2 md:px-2"
+                onDraftRestore={(newState) => {
+                  dispatch({ type: "set_state", state: newState });
+                  Promise.all([
+                    fetchDistricts(newState.form.state ?? 0),
+                    fetchLocalBody(newState.form.district?.toString() ?? ""),
+                    fetchWards(newState.form.local_body?.toString() ?? ""),
+                    duplicateCheck(newState.form.phone_number ?? ""),
+                  ]);
+                }}
+                noPadding
+              >
+                {(field) => {
+                  if (!formField) setFormField(field);
+                  return (
+                    <>
+                      <div className="mb-2 overflow-visible rounded border border-gray-200 p-4">
+                        <ButtonV2
+                          className="flex items-center gap-2"
+                          onClick={(_) => {
+                            setShowImport({
+                              show: true,
+                              field,
+                            });
+                            setQuery({ extId: "" }, { replace: true });
+                          }}
                         >
-                          <PhoneNumberFormField
-                            label="Emergency contact number"
-                            required
-                            name="emergency_phone_number"
-                            value={state.form.emergency_phone_number}
-                            onChange={handleFormFieldChange}
-                            error={state.errors.emergency_phone_number}
-                          />
-                        </div>
-                        <div data-testid="name" id="name-div">
-                          <FieldLabel htmlFor="name" id="name-label" required>
-                            Name
-                          </FieldLabel>
-                          <TextFormField
-                            id="name"
-                            name="name"
-                            value={state.form.name}
-                            onChange={handleFormFieldChange}
-                            error={state.errors.name}
-                          />
-                        </div>
-                        <div data-testid="date-of-birth" id="date_of_birth-div">
-                          <DateFormField
-                            name="date_of_birth"
-                            label="Date of Birth"
-                            required
-                            value={getDate(state.form.date_of_birth)}
-                            onChange={handleDOBChange}
-                            error={state.errors.date_of_birth}
-                            position="LEFT"
-                            disableFuture
-                          />
-                        </div>
-                        <div data-testid="Gender" id="gender-div">
-                          <SelectFormField
-                            name="gender"
-                            required
-                            label="Gender"
-                            optionLabel={(o: any) => o.text}
-                            value={state.form.gender}
-                            options={genderTypes}
-                            onChange={handleFormFieldChange}
-                            error={state.errors.gender}
-                            optionValue={(o: any) => o.id}
-                          />
-                        </div>
+                          <CareIcon className="care-l-import text-lg" />
+                          Import From External Results
+                        </ButtonV2>
+                      </div>
+                      {enable_abdm && (
+                        <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
+                          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
+                            ABHA Details
+                          </h1>
+                          {showLinkAbhaNumberModal && (
+                            <LinkABHANumberModal
+                              show={showLinkAbhaNumberModal}
+                              onClose={() => setShowLinkAbhaNumberModal(false)}
+                              onSuccess={(data: any) => {
+                                if (id) {
+                                  navigate(
+                                    `/facility/${facilityId}/patient/${id}`
+                                  );
+                                  return;
+                                }
 
-                        <CollapseV2 opened={String(state.form.gender) === "2"}>
-                          {
-                            <div id="is_antenatal-div" className="col-span-2">
-                              <FieldLabel
-                                id="is_antenatal"
-                                htmlFor="is_antenatal"
-                              >
-                                Is antenatal ?
-                              </FieldLabel>
-                              <RadioGroup
-                                aria-label="is_antenatal"
-                                id="is_antenatal"
-                                name="is_antenatal"
-                                value={state.form.is_antenatal}
-                                onChange={handleChange}
-                                style={{ padding: "0px 5px" }}
-                              >
-                                <Box display="flex" flexDirection="row">
-                                  <FormControlLabel
-                                    value="true"
-                                    control={<Radio />}
-                                    label="Yes"
+                                handleAbhaLinking(data, field);
+                              }}
+                            />
+                          )}
+                          {!state.form.abha_number ? (
+                            <button
+                              className="btn btn-primary my-4"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setShowLinkAbhaNumberModal(true);
+                              }}
+                            >
+                              Link Abha Number
+                            </button>
+                          ) : (
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
+                              <div id="abha-number">
+                                <TextFormField
+                                  id="abha-number"
+                                  name="abha-number"
+                                  label="ABHA Number"
+                                  type="text"
+                                  value={state.form.health_id_number}
+                                  onChange={() => null}
+                                  disabled={true}
+                                  error=""
+                                />
+                              </div>
+                              <div id="health-id">
+                                {state.form.health_id ? (
+                                  <TextFormField
+                                    id="health-id"
+                                    name="health-id"
+                                    label="Abha Address"
+                                    type="text"
+                                    value={state.form.health_id}
+                                    onChange={() => null}
+                                    disabled={true}
+                                    error=""
                                   />
-                                  <FormControlLabel
-                                    value="false"
-                                    control={<Radio />}
-                                    label="No"
-                                  />
-                                </Box>
-                              </RadioGroup>
-                            </div>
-                          }
-                        </CollapseV2>
-                        <div data-testid="current-address" id="address-div">
-                          <FieldLabel
-                            id="address-label"
-                            htmlFor="address"
-                            required
-                          >
-                            Current Address
-                          </FieldLabel>
-                          <TextAreaFormField
-                            id="address"
-                            name="address"
-                            placeholder="Enter the current address"
-                            value={state.form.address}
-                            onChange={handleFormFieldChange}
-                            error={state.errors.address}
-                          />
-                        </div>
-                        <div
-                          data-testid="permanent-address"
-                          id="permanent_address-div"
-                        >
-                          <FieldLabel
-                            htmlFor="permanent_address"
-                            id="permanent-address-label"
-                            required
-                          >
-                            Permanent Address
-                          </FieldLabel>
-
-                          <TextAreaFormField
-                            rows={3}
-                            id="permanent_address"
-                            name="permanent_address"
-                            disabled={sameAddress}
-                            placeholder="Enter the permanent address"
-                            value={
-                              sameAddress
-                                ? state.form.address
-                                : state.form.permanent_address
-                            }
-                            onChange={handleFormFieldChange}
-                            error={state.errors.permanent_address}
-                          />
-
-                          <LegacyCheckboxField
-                            checked={sameAddress}
-                            onChange={() => setSameAddress(!sameAddress)}
-                            label="Same as Current Address"
-                            className="font-bold"
-                          />
-                        </div>
-
-                        <div data-testid="pincode" id="pincode-div">
-                          <FieldLabel
-                            htmlFor="pincode"
-                            id="name-label"
-                            required
-                          >
-                            Pincode
-                          </FieldLabel>
-                          <TextFormField
-                            id="pincode"
-                            name="pincode"
-                            value={state.form.pincode}
-                            onChange={handlePincodeChange}
-                            error={state.errors.pincode}
-                          />
-                          {showAutoFilledPincode && (
-                            <div>
-                              <i className="fas fa-circle-check text-green-500 mr-2 text-sm" />
-                              <span className="text-primary-500 text-sm">
-                                State and District auto-filled from Pincode
-                              </span>
+                                ) : (
+                                  <div className="mt-4 text-sm text-gray-500">
+                                    No Abha Address Associated with this ABHA
+                                    Number
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           )}
                         </div>
-                        <div id="village-div">
-                          <FieldLabel htmlFor="village" id="name-label">
-                            Village
-                          </FieldLabel>
-                          <LegacyTextInputField
-                            id="village"
-                            name="village"
-                            variant="outlined"
-                            margin="dense"
-                            type="text"
-                            value={state.form.village}
-                            onChange={handleChange}
-                            errors={state.errors.village}
-                          />
-                        </div>
-                        <div id="nationality-div">
-                          <FieldLabel
-                            id="nationality-label"
-                            htmlFor="nationality"
-                          >
-                            Nationality
-                          </FieldLabel>
-                          <LegacySelectField
-                            labelId="nationality"
-                            name="nationality"
-                            variant="outlined"
-                            margin="dense"
-                            optionArray={true}
-                            value={state.form.nationality}
-                            options={countryList}
-                            onChange={handleChange}
-                            errors={state.errors.nationality}
-                          />
-                        </div>
-                        {state.form.nationality === "India" ? (
-                          <>
-                            <div data-testid="state" id="state-div">
-                              {isStateLoading ? (
-                                <CircularProgress size={20} />
-                              ) : (
-                                <SelectFormField
-                                  {...field("state")}
-                                  name="state"
-                                  label="State"
-                                  required
-                                  placeholder="Choose State"
-                                  value={state.form.state}
-                                  options={states}
-                                  optionLabel={(o: any) => o.name}
-                                  optionValue={(o: any) => o.id}
-                                  onChange={(e: any) => [
-                                    handleFormFieldChange(e),
-                                    fetchDistricts(e.value),
-                                  ]}
-                                  error={state.errors.state}
-                                />
-                              )}
-                            </div>
-
-                            <div data-testid="district" id="district-div">
-                              {isDistrictLoading ? (
-                                <CircularProgress size={20} />
-                              ) : (
-                                <SelectFormField
-                                  {...field("district")}
-                                  name="district"
-                                  label="District"
-                                  required
-                                  placeholder={
-                                    state.form.state
-                                      ? "Choose District"
-                                      : "Select State First"
-                                  }
-                                  disabled={!state.form.state}
-                                  value={state.form.district}
-                                  options={districts}
-                                  optionLabel={(o: any) => o.name}
-                                  optionValue={(o: any) => o.id}
-                                  onChange={(e: any) => [
-                                    handleFormFieldChange(e),
-                                    fetchLocalBody(String(e.value)),
-                                  ]}
-                                  error={state.errors.district}
-                                />
-                              )}
-                            </div>
-
-                            <div data-testid="localbody" id="local_body-div">
-                              {isLocalbodyLoading ? (
-                                <CircularProgress size={20} />
-                              ) : (
-                                <SelectFormField
-                                  {...field("local_body")}
-                                  name="local_body"
-                                  label="Localbody"
-                                  required
-                                  placeholder={
-                                    state.form.district
-                                      ? "Choose Localbody"
-                                      : "Select District First"
-                                  }
-                                  disabled={!state.form.district}
-                                  value={state.form.local_body}
-                                  options={localBody}
-                                  optionLabel={(o: any) => o.name}
-                                  optionValue={(o: any) => o.id}
-                                  onChange={(e: any) => [
-                                    handleFormFieldChange(e),
-                                    fetchWards(String(e.value)),
-                                  ]}
-                                  error={state.errors.local_body}
-                                />
-                              )}
-                            </div>
-                            <div
-                              data-testid="ward-respective-lsgi"
-                              id="ward-div"
-                            >
-                              {isWardLoading ? (
-                                <CircularProgress size={20} />
-                              ) : (
-                                <SelectFormField
-                                  label="Ward"
-                                  name="ward"
-                                  options={ward
-                                    .sort((a, b) => a.number - b.number)
-                                    .map((e) => {
-                                      return {
-                                        id: e.id,
-                                        name: e.number + ": " + e.name,
-                                      };
-                                    })}
-                                  value={state.form.ward}
-                                  placeholder={
-                                    state.form.local_body
-                                      ? "Choose Ward"
-                                      : "Select Localbody First"
-                                  }
-                                  disabled={!state.form.local_body}
-                                  optionLabel={(o: any) => o.name}
-                                  optionValue={(o: any) => o.id}
-                                  onChange={handleFormFieldChange}
-                                  error={state.errors.ward}
-                                />
-                              )}
-                            </div>
-                          </>
-                        ) : (
-                          <div id="passport_no-div">
-                            <FieldLabel
-                              htmlFor="passport_no"
-                              id="passport-label"
+                      )}
+                      <div className="mb-8 overflow-visible rounded border border-gray-200 p-4">
+                        <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
+                          Personal Details
+                        </h1>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
+                          <div data-testid="phone-number" id="phone_number-div">
+                            <PhoneNumberFormField
+                              {...field("phone_number")}
                               required
-                            >
-                              Passport Number
-                            </FieldLabel>
-                            <LegacyTextInputField
-                              id="passport_no"
-                              name="passport_no"
-                              variant="outlined"
-                              margin="dense"
-                              value={state.form.passport_no}
-                              onChange={handleChange}
-                              errors={state.errors.passport_no}
+                              label="Phone Number"
+                              onChange={(event) => {
+                                duplicateCheck(event.value);
+                                field("phone_number").onChange(event);
+                              }}
+                              types={["mobile", "landline"]}
                             />
                           </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card elevation={0} className="mb-8 rounded">
-                    <AccordionV2
-                      className="mt-2 lg:mt-0 md:mt-0 bg-white shadow-sm rounded-lg p-3 relative"
-                      expandIcon={
-                        <CareIcon className="care-l-angle-down text-2xl font-bold" />
-                      }
-                      title={
-                        <h1 className="font-bold text-purple-500 text-left text-xl">
-                          COVID Details
-                        </h1>
-                      }
-                    >
-                      <div>
-                        <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2 w-full mt-5">
-                          <div id="is_vaccinated-div">
-                            <FieldLabel
-                              id="is_vaccinated"
-                              htmlFor="is_vaccinated"
-                            >
-                              Is patient Vaccinated against COVID?
-                            </FieldLabel>
-                            <RadioGroup
-                              aria-label="is_vaccinated"
-                              id="is_vaccinated"
-                              name="is_vaccinated"
-                              value={state.form.is_vaccinated}
-                              onChange={handleChange}
-                              style={{ padding: "0px 5px" }}
-                            >
-                              <Box display="flex" flexDirection="row">
-                                <FormControlLabel
-                                  value="true"
-                                  control={<Radio />}
-                                  label="Yes"
-                                />
-                                <FormControlLabel
-                                  value="false"
-                                  control={<Radio />}
-                                  label="No"
-                                />
-                              </Box>
-                            </RadioGroup>
+                          <div
+                            data-testid="emergency-phone-number"
+                            id="emergency_phone_number-div"
+                          >
+                            <PhoneNumberFormField
+                              {...field("emergency_phone_number")}
+                              label="Emergency contact number"
+                              required
+                              types={["mobile", "landline"]}
+                            />
+                          </div>
+                          <div data-testid="name" id="name-div">
+                            <TextFormField
+                              required
+                              {...field("name")}
+                              type="text"
+                              label={"Name"}
+                            />
+                          </div>
+                          <div
+                            data-testid="date-of-birth"
+                            id="date_of_birth-div"
+                          >
+                            <DateFormField
+                              containerClassName="w-full"
+                              {...field("date_of_birth")}
+                              label="Date of Birth"
+                              required
+                              position="LEFT"
+                              disableFuture
+                            />
+                          </div>
+                          <div data-testid="Gender" id="gender-div">
+                            <SelectFormField
+                              {...field("gender")}
+                              required
+                              label="Gender"
+                              options={genderTypes}
+                              optionLabel={(o: any) => o.text}
+                              optionValue={(o: any) => o.id}
+                            />
                           </div>
                           <CollapseV2
-                            opened={String(state.form.is_vaccinated) === "true"}
+                            opened={String(field("gender").value) === "2"}
                           >
                             {
-                              <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                                <div id="covin_id-div">
-                                  <FieldLabel
-                                    id="covin_id-label"
-                                    htmlFor="covin_id"
-                                  >
-                                    COWIN ID
-                                  </FieldLabel>
-                                  <LegacyTextInputField
-                                    id="covin_id"
-                                    name="covin_id"
-                                    variant="outlined"
-                                    margin="dense"
-                                    type="text"
-                                    value={state.form.covin_id}
-                                    onChange={handleChange}
-                                    errors={state.errors.covin_id}
+                              <div id="is_antenatal-div" className="col-span-2">
+                                <RadioFormField
+                                  {...field("is_antenatal")}
+                                  label="Is antenatal ?"
+                                  aria-label="is_antenatal"
+                                  options={[
+                                    { label: "Yes", value: "true" },
+                                    { label: "No", value: "false" },
+                                  ]}
+                                  optionDisplay={(option) => option.label}
+                                  optionValue={(option) => option.value}
+                                />
+                              </div>
+                            }
+                          </CollapseV2>
+                          <div data-testid="current-address" id="address-div">
+                            <TextAreaFormField
+                              {...field("address")}
+                              required
+                              label="Current Address"
+                              placeholder="Enter the current address"
+                            />
+                          </div>
+                          <div
+                            data-testid="permanent-address"
+                            id="permanent_address-div"
+                          >
+                            <TextAreaFormField
+                              {...field("permanent_address")}
+                              required
+                              label="Permanent Address"
+                              rows={3}
+                              disabled={field("sameAddress").value}
+                              placeholder="Enter the permanent address"
+                              value={
+                                field("sameAddress").value
+                                  ? field("address").value
+                                  : field("permanent_address").value
+                              }
+                            />
+                            <CheckBoxFormField
+                              {...field("sameAddress")}
+                              label="Same as Current Address"
+                              className="font-bold"
+                            />
+                          </div>
+
+                          <div data-testid="pincode" id="pincode-div">
+                            <TextFormField
+                              {...field("pincode")}
+                              required
+                              type="text"
+                              label={"Pincode"}
+                              onChange={(e) => {
+                                field("pincode").onChange(e);
+                                handlePincodeChange(
+                                  e,
+                                  field("pincode").onChange
+                                );
+                              }}
+                            />
+                            {showAutoFilledPincode && (
+                              <div>
+                                <i className="fas fa-circle-check mr-2 text-sm text-green-500" />
+                                <span className="text-sm text-primary-500">
+                                  State and District auto-filled from Pincode
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div id="village-div">
+                            <TextFormField
+                              {...field("village")}
+                              type="text"
+                              label="Village"
+                            />
+                          </div>
+                          <div id="nationality-div">
+                            <SelectFormField
+                              {...field("nationality")}
+                              label="Nationality"
+                              options={countryList}
+                              optionLabel={(o) => o}
+                              optionValue={(o) => o}
+                            />
+                          </div>
+                          {field("nationality").value === "India" ? (
+                            <>
+                              <div data-testid="state" id="state-div">
+                                {isStateLoading ? (
+                                  <Spinner />
+                                ) : (
+                                  <SelectFormField
+                                    {...field("state")}
+                                    label="State"
+                                    required
+                                    placeholder="Choose State"
+                                    options={states}
+                                    optionLabel={(o: any) => o.name}
+                                    optionValue={(o: any) => o.id}
+                                    onChange={(e: any) => {
+                                      field("state").onChange(e);
+                                      field("district").onChange({
+                                        name: "district",
+                                        value: undefined,
+                                      });
+                                      field("local_body").onChange({
+                                        name: "local_body",
+                                        value: undefined,
+                                      });
+                                      field("ward").onChange({
+                                        name: "ward",
+                                        value: undefined,
+                                      });
+                                      fetchDistricts(e.value);
+                                      fetchLocalBody("0");
+                                      fetchWards("0");
+                                    }}
                                   />
-                                </div>
-                                <div id="number_of_doses-div">
-                                  <FieldLabel
-                                    id="doses-label"
-                                    htmlFor="number_of_doses"
-                                  >
-                                    Number of doses
-                                  </FieldLabel>
-                                  <RadioGroup
-                                    aria-label="number_of_doses"
-                                    id="number_of_doses"
-                                    name="number_of_doses"
-                                    value={state.form.number_of_doses}
-                                    onChange={handleChange}
-                                    style={{ padding: "0px 5px" }}
-                                  >
-                                    <div className="flex flex-wrap">
-                                      <FormControlLabel
-                                        value="1"
-                                        control={<Radio />}
-                                        label="1"
-                                      />
-                                      <FormControlLabel
-                                        value="2"
-                                        control={<Radio />}
-                                        label="2"
-                                      />
-                                      <FormControlLabel
-                                        value="3"
-                                        control={<Radio />}
-                                        label="3 (Booster/Precautionary Dose)"
+                                )}
+                              </div>
+
+                              <div data-testid="district" id="district-div">
+                                {isDistrictLoading ? (
+                                  <div className="flex w-full items-center justify-center">
+                                    <Spinner />
+                                  </div>
+                                ) : (
+                                  <SelectFormField
+                                    {...field("district")}
+                                    label="District"
+                                    required
+                                    placeholder={
+                                      field("state").value
+                                        ? "Choose District"
+                                        : "Select State First"
+                                    }
+                                    disabled={!field("state").value}
+                                    options={districts}
+                                    optionLabel={(o: any) => o.name}
+                                    optionValue={(o: any) => o.id}
+                                    onChange={(e: any) => {
+                                      field("district").onChange(e);
+                                      field("local_body").onChange({
+                                        name: "local_body",
+                                        value: undefined,
+                                      });
+                                      field("ward").onChange({
+                                        name: "ward",
+                                        value: undefined,
+                                      });
+                                      fetchLocalBody(String(e.value));
+                                      fetchWards("0");
+                                    }}
+                                  />
+                                )}
+                              </div>
+
+                              <div data-testid="localbody" id="local_body-div">
+                                {isLocalbodyLoading ? (
+                                  <div className="flex w-full items-center justify-center">
+                                    <Spinner />
+                                  </div>
+                                ) : (
+                                  <SelectFormField
+                                    {...field("local_body")}
+                                    label="Localbody"
+                                    required
+                                    placeholder={
+                                      field("district").value
+                                        ? "Choose Localbody"
+                                        : "Select District First"
+                                    }
+                                    disabled={!field("district").value}
+                                    options={localBody}
+                                    optionLabel={(o: any) => o.name}
+                                    optionValue={(o: any) => o.id}
+                                    onChange={(e: any) => {
+                                      field("local_body").onChange(e);
+                                      field("ward").onChange({
+                                        name: "ward",
+                                        value: undefined,
+                                      });
+                                      fetchWards(String(e.value));
+                                    }}
+                                  />
+                                )}
+                              </div>
+                              <div
+                                data-testid="ward-respective-lsgi"
+                                id="ward-div"
+                              >
+                                {isWardLoading ? (
+                                  <div className="flex w-full items-center justify-center">
+                                    <Spinner />
+                                  </div>
+                                ) : (
+                                  <SelectFormField
+                                    {...field("ward")}
+                                    label="Ward"
+                                    options={ward
+                                      .sort((a, b) => a.number - b.number)
+                                      .map((e) => {
+                                        return {
+                                          id: e.id,
+                                          name: e.number + ": " + e.name,
+                                        };
+                                      })}
+                                    placeholder={
+                                      field("local_body").value
+                                        ? "Choose Ward"
+                                        : "Select Localbody First"
+                                    }
+                                    disabled={!field("local_body").value}
+                                    optionLabel={(o: any) => o.name}
+                                    optionValue={(o: any) => o.id}
+                                    onChange={(e: any) => {
+                                      field("ward").onChange(e);
+                                    }}
+                                  />
+                                )}
+                              </div>
+                            </>
+                          ) : (
+                            <div id="passport_no-div">
+                              <TextFormField
+                                label="Passport Number"
+                                {...field("passport_no")}
+                                type="text"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="mb-8 rounded border border-gray-200 p-4">
+                        <AccordionV2
+                          className="mt-2 shadow-none md:mt-0 lg:mt-0"
+                          expandIcon={
+                            <CareIcon className="care-l-angle-down text-2xl font-bold" />
+                          }
+                          title={
+                            <h1 className="text-left text-xl font-bold text-purple-500">
+                              COVID Details
+                            </h1>
+                          }
+                        >
+                          <div>
+                            <div className="mt-5 grid w-full grid-cols-1 gap-4 sm:grid-cols-3 xl:gap-x-20 xl:gap-y-6">
+                              <div>
+                                <RadioFormField
+                                  label="Is patient Vaccinated against COVID?"
+                                  aria-label="is_vaccinated"
+                                  {...field("is_vaccinated")}
+                                  options={[
+                                    { label: "Yes", value: "true" },
+                                    { label: "No", value: "false" },
+                                  ]}
+                                  optionDisplay={(option) => option.label}
+                                  optionValue={(option) => option.value}
+                                />
+                              </div>
+                              <div id="contact_with_confirmed_carrier-div">
+                                <RadioFormField
+                                  {...field("contact_with_confirmed_carrier")}
+                                  label="Contact with confirmed Covid patient?"
+                                  aria-label="contact_with_confirmed_carrier"
+                                  options={[
+                                    { label: "Yes", value: "true" },
+                                    { label: "No", value: "false" },
+                                  ]}
+                                  optionDisplay={(option) => option.label}
+                                  optionValue={(option) => option.value}
+                                />
+                              </div>
+                              <div id="contact_with_suspected_carrier-div">
+                                <RadioFormField
+                                  {...field("contact_with_suspected_carrier")}
+                                  label="Contact with Covid suspect?"
+                                  aria-label="contact_with_suspected_carrier"
+                                  options={[
+                                    { label: "Yes", value: "true" },
+                                    { label: "No", value: "false" },
+                                  ]}
+                                  optionDisplay={(option) => option.label}
+                                  optionValue={(option) => option.value}
+                                />
+                              </div>
+                            </div>
+                            <div className="mt-5 grid w-full grid-cols-1 gap-4 xl:gap-x-20 xl:gap-y-6">
+                              <CollapseV2
+                                opened={
+                                  String(field("is_vaccinated").value) ===
+                                  "true"
+                                }
+                              >
+                                {
+                                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
+                                    <div id="covin_id-div">
+                                      <TextFormField
+                                        label="COWIN ID"
+                                        {...field("covin_id")}
+                                        type="text"
                                       />
                                     </div>
-                                  </RadioGroup>
-                                  <LegacyErrorHelperText
-                                    error={state.errors.number_of_doses}
-                                  />
+                                    <div id="number_of_doses-div">
+                                      <RadioFormField
+                                        label="Number of doses"
+                                        {...field("number_of_doses")}
+                                        options={[
+                                          { label: "1", value: "1" },
+                                          { label: "2", value: "2" },
+                                          {
+                                            label:
+                                              "3 (Booster/Precautionary Dose)",
+                                            value: "3",
+                                          },
+                                        ]}
+                                        optionDisplay={(option) => option.label}
+                                        optionValue={(option) => option.value}
+                                      />
+                                    </div>
+                                    <div id="vaccine_name-div">
+                                      <SelectFormField
+                                        {...field("vaccine_name")}
+                                        label="Vaccine Name"
+                                        options={vaccines}
+                                        optionLabel={(o) => o}
+                                        optionValue={(o) => o}
+                                      />
+                                    </div>
+                                    <div id="last_vaccinated_date-div">
+                                      <DateFormField
+                                        {...field("last_vaccinated_date")}
+                                        label="Last Date of Vaccination"
+                                        disableFuture={true}
+                                        position="LEFT"
+                                      />
+                                    </div>
+                                  </div>
+                                }
+                              </CollapseV2>
+                              <CollapseV2
+                                opened={
+                                  JSON.parse(
+                                    field("contact_with_confirmed_carrier")
+                                      .value ?? "{}"
+                                  ) ||
+                                  JSON.parse(
+                                    field("contact_with_suspected_carrier")
+                                      .value ?? "{}"
+                                  )
+                                }
+                              >
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
+                                  <div id="estimated_contact_date-div">
+                                    <DateFormField
+                                      {...field("estimated_contact_date")}
+                                      id="estimated_contact_date"
+                                      label="Estimate date of contact"
+                                      disableFuture
+                                      required
+                                      position="LEFT"
+                                    />
+                                  </div>
+
+                                  <div id="cluster_name-div">
+                                    <TextFormField
+                                      {...field("cluster_name")}
+                                      id="cluster_name"
+                                      label="Name / Cluster of Contact"
+                                      placeholder="Name / Cluster of Contact"
+                                      required
+                                    />
+                                  </div>
                                 </div>
-                                <div id="vaccine_name-div">
-                                  <FieldLabel
-                                    id="vaccine-name-label"
-                                    htmlFor="vaccine_name"
-                                    required
-                                  >
-                                    Vaccine Name
-                                  </FieldLabel>
-                                  <LegacySelectField
-                                    labelId="vaccine_name"
-                                    name="vaccine_name"
-                                    variant="outlined"
-                                    margin="dense"
-                                    optionArray={true}
-                                    value={state.form.vaccine_name}
-                                    options={vaccines}
-                                    onChange={handleChange}
-                                    errors={state.errors.vaccine_name}
-                                  />
-                                </div>
-                                <div id="last_vaccinated_date-div">
-                                  <FieldLabel
-                                    id="last_vaccinated_date-label"
-                                    htmlFor="last_vaccinated_date"
-                                    required
-                                  >
-                                    Last Date of Vaccination
-                                  </FieldLabel>
-                                  <LegacyDateInputField
-                                    id="last_vaccinated_date"
-                                    fullWidth={true}
-                                    value={state.form.last_vaccinated_date}
-                                    onChange={(date) =>
-                                      handleDateChange(
-                                        date,
-                                        "last_vaccinated_date"
-                                      )
-                                    }
-                                    errors={state.errors.last_vaccinated_date}
-                                    inputVariant="outlined"
-                                    margin="dense"
-                                    openTo="year"
-                                    disableFuture={true}
-                                  />
-                                </div>
-                              </div>
-                            }
-                          </CollapseV2>
-                          <div id="contact_with_confirmed_carrier-div">
-                            <FieldLabel htmlFor="contact_with_confirmed_carrier">
-                              Contact with confirmed Covid patient?
-                            </FieldLabel>
-                            <RadioGroup
-                              aria-label="contact_with_confirmed_carrier"
-                              id="contact_with_confirmed_carrier"
-                              name="contact_with_confirmed_carrier"
-                              value={state.form.contact_with_confirmed_carrier}
-                              onChange={handleChange}
-                              style={{ padding: "0px 5px" }}
-                            >
-                              <Box display="flex" flexDirection="row">
-                                <FormControlLabel
-                                  value="true"
-                                  control={<Radio />}
-                                  label="Yes"
-                                />
-                                <FormControlLabel
-                                  value="false"
-                                  control={<Radio />}
-                                  label="No"
-                                />
-                              </Box>
-                            </RadioGroup>
-                          </div>
-                          <div id="contact_with_suspected_carrier-div">
-                            <FieldLabel htmlFor="contact_with_suspected_carrier">
-                              Contact with Covid suspect?
-                            </FieldLabel>
-                            <RadioGroup
-                              aria-label="contact_with_suspected_carrier"
-                              id="contact_with_suspected_carrier"
-                              name="contact_with_suspected_carrier"
-                              value={state.form.contact_with_suspected_carrier}
-                              onChange={handleChange}
-                              style={{ padding: "0px 5px" }}
-                            >
-                              <Box display="flex" flexDirection="row">
-                                <FormControlLabel
-                                  value="true"
-                                  control={<Radio />}
-                                  label="Yes"
-                                />
-                                <FormControlLabel
-                                  value="false"
-                                  control={<Radio />}
-                                  label="No"
-                                />
-                              </Box>
-                            </RadioGroup>
-                          </div>
-                          <CollapseV2
-                            opened={
-                              JSON.parse(
-                                state.form.contact_with_confirmed_carrier
-                              ) ||
-                              JSON.parse(
-                                state.form.contact_with_suspected_carrier
-                              )
-                            }
-                          >
-                            <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                              <div id="estimated_contact_date-div">
-                                <FieldLabel
-                                  id="estimated_contact_date-label"
-                                  htmlFor="estimated_contact_date"
+                              </CollapseV2>
+                              <div
+                                data-testid="disease-status"
+                                id="disease_status-div"
+                              >
+                                <SelectFormField
+                                  {...field("disease_status")}
+                                  id="disease_status"
+                                  label="COVID Disease Status"
+                                  options={diseaseStatus}
+                                  optionLabel={(o) => o}
+                                  optionValue={(o) => o}
                                   required
-                                >
-                                  Estimate date of contact
-                                </FieldLabel>
-                                <LegacyDateInputField
-                                  fullWidth={true}
-                                  id="estimated_contact_date"
-                                  value={state.form.estimated_contact_date}
-                                  onChange={(date) =>
-                                    handleDateChange(
-                                      date,
-                                      "estimated_contact_date"
-                                    )
+                                />
+                              </div>
+                              <div id="test_type-div">
+                                <SelectFormField
+                                  {...field("test_type")}
+                                  id="test_type"
+                                  label="COVID Test Type"
+                                  options={testType}
+                                  optionLabel={(o) => o}
+                                  optionValue={(o) => o}
+                                  required
+                                />
+                              </div>
+                              <div id="srf_id-div">
+                                <TextFormField
+                                  {...field("srf_id")}
+                                  id="srf_id"
+                                  label="SRF Id for COVID Test"
+                                />
+                              </div>
+                              <div id="is_declared_positive-div">
+                                <RadioFormField
+                                  {...field("is_declared_positive")}
+                                  label="Is patient declared covid postive by state?"
+                                  aria-label="is_declared_positive"
+                                  options={[
+                                    { label: "Yes", value: "true" },
+                                    { label: "No", value: "false" },
+                                  ]}
+                                  optionDisplay={(option) => option.label}
+                                  optionValue={(option) => option.value}
+                                />
+                                <CollapseV2
+                                  opened={
+                                    String(
+                                      field("is_declared_positive").value
+                                    ) === "true"
                                   }
-                                  errors={state.errors.estimated_contact_date}
-                                  inputVariant="outlined"
-                                  margin="dense"
-                                  disableFuture={true}
+                                  className="mt-4"
+                                >
+                                  <div id="date_declared_positive-div">
+                                    <DateFormField
+                                      {...field("date_declared_positive")}
+                                      label="Date Patient is Declared Positive for COVID"
+                                      disableFuture
+                                      position="LEFT"
+                                    />
+                                  </div>
+                                </CollapseV2>
+                              </div>
+                              <div id="test_id-div">
+                                <TextFormField
+                                  {...field("test_id")}
+                                  id="test_id"
+                                  label="COVID Positive ID issued by ICMR"
+                                  type="number"
                                 />
                               </div>
 
-                              <div id="cluster_name-div">
-                                <FieldLabel
-                                  htmlFor="cluster_name"
-                                  id="cluster_name-label"
-                                  required
-                                >
-                                  Name / Cluster of Contact
-                                </FieldLabel>
-                                <LegacyTextInputField
-                                  id="cluster_name"
-                                  name="cluster_name"
-                                  variant="outlined"
-                                  margin="dense"
-                                  type="text"
-                                  placeholder="Name / Cluster of Contact"
-                                  value={state.form.cluster_name}
-                                  onChange={handleChange}
-                                  errors={state.errors.cluster_name}
+                              <div id="date_of_test-div">
+                                <DateFormField
+                                  {...field("date_of_test")}
+                                  id="date_of_test"
+                                  label="Date of Sample given for COVID Test"
+                                  disableFuture
+                                  position="LEFT"
+                                />
+                              </div>
+                              <div id="date_of_result-div">
+                                <DateFormField
+                                  {...field("date_of_result")}
+                                  id="date_of_result"
+                                  label="Date of Result for COVID Test"
+                                  disableFuture
+                                  position="LEFT"
+                                />
+                              </div>
+
+                              <div id="number_of_primary_contacts-div">
+                                <TextFormField
+                                  {...field("number_of_primary_contacts")}
+                                  id="number_of_primary_contacts"
+                                  label="Number Of Primary Contacts for COVID"
+                                  type="number"
+                                />
+                              </div>
+                              <div id="number_of_secondary_contacts-div">
+                                <TextFormField
+                                  {...field("number_of_secondary_contacts")}
+                                  id="number_of_secondary_contacts"
+                                  label="Number Of Secondary Contacts for COVID"
+                                  type="number"
                                 />
                               </div>
                             </div>
-                          </CollapseV2>
-                          <div
-                            data-testid="disease-status"
-                            id="disease_status-div"
-                          >
-                            <FieldLabel
-                              htmlFor="disease_status"
-                              id="disease_status-label"
-                              required
-                            >
-                              COVID Disease Status
-                            </FieldLabel>
-                            <LegacySelectField
-                              labelId="disease_status"
-                              name="disease_status"
-                              variant="outlined"
-                              margin="dense"
-                              optionArray={true}
-                              value={state.form.disease_status}
-                              options={diseaseStatus}
-                              onChange={handleChange}
-                              errors={state.errors.disease_status}
-                            />
                           </div>
-                          <div id="test_type-div">
-                            <FieldLabel
-                              id="test_type-label"
-                              htmlFor="test_type"
-                              required
-                            >
-                              COVID Test Type
-                            </FieldLabel>
-                            <LegacySelectField
-                              labelId="test_type"
-                              name="test_type"
-                              variant="outlined"
-                              margin="dense"
-                              optionArray={true}
-                              value={state.form.test_type}
-                              options={testType}
-                              onChange={handleChange}
-                              errors={state.errors.test_type}
-                            />
-                          </div>
-                          <div id="srf_id-div">
-                            <FieldLabel id="srf_id-label" htmlFor="srf_id">
-                              SRF Id for COVID Test
-                            </FieldLabel>
-                            <LegacyTextInputField
-                              id="srf_id"
-                              name="srf_id"
-                              variant="outlined"
-                              margin="dense"
-                              type="text"
-                              value={state.form.srf_id}
-                              onChange={handleChange}
-                              errors={state.errors.srf_id}
-                            />
-                          </div>
-                          <div id="is_declared_positive-div">
-                            <FieldLabel
-                              id="is_declared_positive"
-                              htmlFor="is_declared_positive"
-                            >
-                              Is patient declared covid postive by state?
-                            </FieldLabel>
-                            <RadioGroup
-                              aria-label="is_declared_positive"
-                              id="is_declared_positive"
-                              name="is_declared_positive"
-                              value={state.form.is_declared_positive}
-                              onChange={handleChange}
-                              style={{ padding: "0px 5px" }}
-                            >
-                              <Box display="flex" flexDirection="row">
-                                <FormControlLabel
-                                  value="true"
-                                  control={<Radio />}
-                                  label="Yes"
-                                />
-                                <FormControlLabel
-                                  value="false"
-                                  control={<Radio />}
-                                  label="No"
-                                />
-                              </Box>
-                            </RadioGroup>
-                            <CollapseV2
-                              opened={
-                                String(state.form.is_declared_positive) ===
-                                "true"
-                              }
-                              className="mt-4"
-                            >
-                              <div id="date_declared_positive-div">
-                                <FieldLabel id="date_declared_positive-label">
-                                  Date Patient is Declared Positive for COVID
-                                </FieldLabel>
-                                <LegacyDateInputField
-                                  fullWidth={true}
-                                  value={state.form.date_declared_positive}
-                                  onChange={(date) =>
-                                    handleDateChange(
-                                      date,
-                                      "date_declared_positive"
-                                    )
-                                  }
-                                  errors={state.errors.date_declared_positive}
-                                  inputVariant="outlined"
-                                  margin="dense"
-                                  disableFuture={true}
-                                />
-                              </div>
-                            </CollapseV2>
-                          </div>
-                          <div id="test_id-div">
-                            <FieldLabel id="test_id-label" htmlFor="test_id">
-                              COVID Positive ID issued by ICMR
-                            </FieldLabel>
-                            <LegacyTextInputField
-                              id="test_id"
-                              name="test_id"
-                              variant="outlined"
-                              margin="dense"
-                              type="number"
-                              value={state.form.test_id}
-                              onChange={handleChange}
-                              errors={state.errors.test_id}
+                        </AccordionV2>
+                      </div>
+                      <div className="mb-8 overflow-visible rounded border p-4">
+                        <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
+                          Medical History
+                        </h1>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:gap-x-20 xl:gap-y-6">
+                          <div id="present_health-div">
+                            <TextAreaFormField
+                              {...field("present_health")}
+                              label="Present Health Condition"
+                              rows={3}
+                              placeholder="Optional Information"
                             />
                           </div>
 
-                          <div id="date_of_test-div">
-                            <FieldLabel
-                              id="date_of_birth-label"
-                              htmlFor="date_of_test"
-                            >
-                              Date of Sample given for COVID Test
-                            </FieldLabel>
-                            <LegacyDateInputField
-                              fullWidth={true}
-                              id="date_of_test"
-                              value={state.form.date_of_test}
-                              onChange={(date) =>
-                                handleDateChange(date, "date_of_test")
-                              }
-                              errors={state.errors.date_of_test}
-                              inputVariant="outlined"
-                              margin="dense"
-                              disableFuture={true}
+                          <div id="ongoing_medication-div">
+                            <TextAreaFormField
+                              {...field("ongoing_medication")}
+                              label="Ongoing Medication"
+                              rows={3}
+                              placeholder="Optional Information"
                             />
                           </div>
-                          <div id="date_of_result-div">
-                            <FieldLabel
-                              htmlFor="date_of_result"
-                              id="date_of_result-label"
-                            >
-                              Date of Result for COVID Test
+                          <div className="md:col-span-2">
+                            <FieldLabel id="med-history-label" required>
+                              Any medical history? (Comorbidities)
                             </FieldLabel>
-                            <LegacyDateInputField
-                              fullWidth={true}
-                              id="date_of_result"
-                              value={state.form.date_of_result}
-                              onChange={(date) =>
-                                handleDateChange(date, "date_of_result")
-                              }
-                              errors={state.errors.date_of_result}
-                              inputVariant="outlined"
-                              margin="dense"
-                              disableFuture={true}
+                            <div className={"flex flex-wrap gap-2"}>
+                              {MEDICAL_HISTORY_CHOICES.map((i) => {
+                                return renderMedicalHistory(
+                                  i.id as number,
+                                  i.text,
+                                  field
+                                );
+                              })}
+                            </div>
+                            <FieldErrorText
+                              error={field("medical_history")["error"]}
                             />
                           </div>
 
-                          <div id="number_of_primary_contacts-div">
-                            <FieldLabel
-                              id="number_of_primary_contacts-label"
-                              htmlFor="number_of_primary_contacts"
-                            >
-                              Number Of Primary Contacts for COVID
-                            </FieldLabel>
-                            <LegacyTextInputField
-                              id="number_of_primary_contacts"
-                              name="number_of_primary_contacts"
-                              variant="outlined"
-                              margin="dense"
-                              type="number"
-                              value={state.form.number_of_primary_contacts}
-                              onChange={handleChange}
-                              errors={state.errors.number_of_primary_contacts}
+                          <div id="allergies-div">
+                            <TextAreaFormField
+                              {...field("allergies")}
+                              label="Allergies"
+                              rows={1}
+                              placeholder="Optional Information"
                             />
                           </div>
-                          <div id="number_of_secondary_contacts-div">
-                            <FieldLabel
-                              id="number_of_secondary_contacts-label"
-                              htmlFor="number_of_secondary_contacts"
-                            >
-                              Number Of Secondary Contacts for COVID
-                            </FieldLabel>
-                            <LegacyTextInputField
-                              id="number_of_secondary_contacts"
-                              name="number_of_secondary_contacts"
-                              variant="outlined"
-                              margin="dense"
-                              type="number"
-                              value={state.form.number_of_secondary_contacts}
-                              onChange={handleChange}
-                              errors={state.errors.number_of_secondary_contacts}
+
+                          <div data-testid="blood-group" id="blood_group-div">
+                            <SelectFormField
+                              {...field("blood_group")}
+                              position="above"
+                              label="Blood Group"
+                              required
+                              options={bloodGroups}
+                              optionLabel={(o: any) => o}
+                              optionValue={(o: any) => o}
                             />
                           </div>
                         </div>
                       </div>
-                    </AccordionV2>
-                  </Card>
-                  <Card elevation={0} className="mb-8 rounded overflow-visible">
-                    <CardContent>
-                      <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
-                        Medical History
-                      </h1>
-                      <div className="grid gap-4 xl:gap-x-20 xl:gap-y-6 grid-cols-1 md:grid-cols-2">
-                        <div id="present_health-div">
-                          <FieldLabel
-                            id="present_health-label"
-                            htmlFor="present_health"
+                      <div className="flex w-full flex-col gap-4 rounded border border-gray-200 bg-white p-4">
+                        <div className="flex w-full flex-col items-center justify-between gap-4 sm:flex-row">
+                          <h1 className="text-left text-xl font-bold text-purple-500">
+                            Insurance Details
+                          </h1>
+                          <ButtonV2
+                            type="button"
+                            variant="alert"
+                            border
+                            ghost={insuranceDetails.length !== 0}
+                            onClick={() =>
+                              setInsuranceDetails([
+                                ...insuranceDetails,
+                                {
+                                  id: "",
+                                  subscriber_id: "",
+                                  policy_id: "",
+                                  insurer_id: "",
+                                  insurer_name: "",
+                                },
+                              ])
+                            }
+                            data-testid="add-insurance-button"
                           >
-                            Present Health Condition
-                          </FieldLabel>
-                          <TextAreaFormField
-                            rows={3}
-                            id="present_health"
-                            name="present_health"
-                            placeholder="Optional Information"
-                            value={state.form.present_health}
-                            onChange={handleFormFieldChange}
-                            error={state.errors.present_health}
-                          />
+                            <CareIcon className="care-l-plus text-lg" />
+                            <span>Add Insurance Details</span>
+                          </ButtonV2>
                         </div>
-
-                        <div id="ongoing_medication-div">
-                          <FieldLabel
-                            htmlFor="ongoing_medication"
-                            id="ongoing_medication-label"
-                          >
-                            Ongoing Medication
-                          </FieldLabel>
-                          <TextAreaFormField
-                            rows={3}
-                            id="ongoing_medication"
-                            name="ongoing_medication"
-                            placeholder="Optional Information"
-                            value={state.form.ongoing_medication}
-                            onChange={handleFormFieldChange}
-                            error={state.errors.ongoing_medication}
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <FieldLabel id="med-history-label" required>
-                            Any medical history? (Comorbidities)
-                          </FieldLabel>
-                          <div className="flex flex-wrap">
-                            {MEDICAL_HISTORY_CHOICES.map((i) => {
-                              return renderMedicalHistory(i.id, i.text);
-                            })}
-                          </div>
-                          <LegacyErrorHelperText
-                            error={state.errors.medical_history}
-                          />
-                        </div>
-
-                        <div id="allergies-div">
-                          <FieldLabel htmlFor="allergies" id="allergies_label">
-                            Allergies
-                          </FieldLabel>
-                          <TextAreaFormField
-                            rows={1}
-                            id="allergies"
-                            name="allergies"
-                            placeholder="Optional Information"
-                            value={state.form.allergies}
-                            onChange={handleFormFieldChange}
-                            error={state.errors.allergies}
-                          />
-                        </div>
-
-                        <div data-testid="blood-group" id="blood_group-div">
-                          <SelectFormField
-                            position="above"
-                            label="Blood Group"
-                            name="blood_group"
-                            required
-                            value={state.form.blood_group}
-                            options={bloodGroups}
-                            optionLabel={(o: any) => o}
-                            onChange={handleFormFieldChange}
-                            error={state.errors.blood_group}
-                          />
-                        </div>
+                        <InsuranceDetailsBuilder
+                          name="insurance_details"
+                          value={insuranceDetails}
+                          onChange={({ value }) => setInsuranceDetails(value)}
+                          error={insuranceDetailsError}
+                          gridView
+                        />
                       </div>
-                    </CardContent>
-                  </Card>
-                  <div className="bg-white rounded flex flex-col gap-4 w-full p-4">
-                    <div className="flex w-full items-center justify-between">
-                      <h1 className="font-bold text-purple-500 text-left text-xl">
-                        Insurance Details
-                      </h1>
-                      <ButtonV2
-                        type="button"
-                        variant="alert"
-                        border
-                        ghost={insuranceDetails.length !== 0}
-                        onClick={() =>
-                          setInsuranceDetails([
-                            ...insuranceDetails,
-                            {
-                              id: "",
-                              subscriber_id: "",
-                              policy_id: "",
-                              insurer_id: "",
-                              insurer_name: "",
-                            },
-                          ])
-                        }
-                      >
-                        <CareIcon className="care-l-plus text-lg" />
-                        <span>Add Insurance Details</span>
-                      </ButtonV2>
-                    </div>
-                    <InsuranceDetailsBuilder
-                      name="insurance_details"
-                      value={insuranceDetails}
-                      onChange={({ value }) => setInsuranceDetails(value)}
-                      error={insuranceDetailsError}
-                      gridView
-                    />
-                  </div>
-                  <div className="flex items-center my-4 mx-4">
-                    <button
-                      className="btn btn-large btn-primary mr-4"
-                      type="submit"
-                      onClick={(e) => handleSubmit(e)}
-                      data-testid="submit-button"
-                    >
-                      {buttonText}
-                    </button>
-                    <button
-                      className="btn btn-default bg-gray-300 hover:bg-gray-400 btn-large   mr-4"
-                      type="button"
-                      onClick={() => goBack()}
-                    >
-                      {" "}
-                      Cancel{" "}
-                    </button>
-                  </div>
-                </form>
-              </>
-            </>
-          )}
+                    </>
+                  );
+                }}
+              </Form>
+            </div>
+          </>
         </>
       </div>
     </div>

@@ -1,6 +1,6 @@
-import React from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
+import { Fragment } from "react";
 
 type DialogProps = {
   title: React.ReactNode;
@@ -25,10 +25,10 @@ const DialogModal = (props: DialogProps) => {
   } = props;
   return (
     <div>
-      <Transition appear show={show} as={React.Fragment}>
+      <Transition appear show={show} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={onClose}>
           <Transition.Child
-            as={React.Fragment}
+            as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
             enterTo="opacity-100"
@@ -42,7 +42,7 @@ const DialogModal = (props: DialogProps) => {
           <div className="fixed inset-0 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4 text-center">
               <Transition.Child
-                as={React.Fragment}
+                as={Fragment}
                 enter="ease-out duration-300"
                 enterFrom="opacity-0 scale-95"
                 enterTo="opacity-100 scale-100"
@@ -53,15 +53,15 @@ const DialogModal = (props: DialogProps) => {
                 <Dialog.Panel
                   className={classNames(
                     className,
-                    fixedWidth && "max-w-md w-full",
+                    fixedWidth && "w-full max-w-md",
                     "transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
                   )}
                 >
                   <Dialog.Title
                     as="h4"
-                    className="text-lg font-medium leading-6 text-gray-900 flex justify-between"
+                    className="flex w-full flex-col text-lg font-medium leading-6 text-gray-900"
                   >
-                    <div>
+                    <div className="w-full">
                       <h4>{title}</h4>
                       <p className="mt-2 text-sm text-gray-600">
                         {description}

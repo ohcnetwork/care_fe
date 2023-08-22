@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import Breadcrumbs from "./Breadcrumbs";
 import PageHeadTitle from "./PageHeadTitle";
 import { classNames } from "../../Utils/utils";
@@ -9,7 +9,7 @@ export interface PageTitleProps {
   hideBack?: boolean;
   backUrl?: string;
   className?: string;
-  componentRight?: React.ReactNode;
+  componentRight?: ReactNode;
   /**
    * If `false` is returned, prevents from going back.
    */
@@ -51,7 +51,10 @@ export default function PageTitle({
   const { goBack } = useAppHistory();
 
   return (
-    <div ref={divRef} className={isInsidePage ? "" : `pt-4 mb-4 ${className}`}>
+    <div
+      ref={divRef}
+      className={isInsidePage ? "" : `mb-2 pt-4 md:mb-4 ${className}`}
+    >
       <PageHeadTitle title={title} />
       <div className={classNames("flex items-center", justifyContents)}>
         <div className="flex items-center">
@@ -62,16 +65,16 @@ export default function PageTitle({
                 goBack(backUrl);
               }}
             >
-              <i className="fas fa-chevron-left text-2xl rounded-md p-2 hover:bg-gray-200 mr-1">
+              <i className="fas fa-chevron-left mr-1 rounded-md p-2 text-2xl hover:bg-gray-200">
                 {" "}
               </i>
             </button>
           )}
-          <h2 className="font-semibold text-2xl leading-tight ml-0">{title}</h2>
+          <h2 className="ml-0 text-2xl font-semibold leading-tight">{title}</h2>
         </div>
         {componentRight}
       </div>
-      <div className={hideBack ? "my-2" : "ml-8 my-2"}>
+      <div className={hideBack ? "my-2" : "my-2 ml-8"}>
         {breadcrumbs && <Breadcrumbs replacements={crumbsReplacements} />}
       </div>
     </div>

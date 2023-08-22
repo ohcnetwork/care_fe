@@ -1,38 +1,33 @@
-import CareIcon from "../icons/CareIcon";
+import { classNames } from "../../Utils/utils";
+import CareIcon, { IconName } from "../icons/CareIcon";
 
-export default function CountBlock(props: {
+interface Props {
   count: number;
   text: string;
   loading: boolean;
-  icon: string;
-  color?: string;
-  containerClass?: string;
-}) {
-  const {
-    count,
-    text,
-    loading,
-    icon,
-    color = "primary",
-    containerClass,
-  } = props;
+  icon: IconName;
+  className?: string;
+}
 
+export default function CountBlock(props: Props) {
   return (
-    <div className={"rounded-lg p-4 shadow flex-1 bg-white " + containerClass}>
-      <dl className="">
-        <div
-          className={`flex items-center justify-center rounded-lg text-xl w-10 h-10 bg-${color}-100`}
-        >
-          <CareIcon className={`care-l-${icon} text-${color}-600`} />
+    <div
+      className={classNames("rounded-lg bg-white p-4 shadow", props.className)}
+    >
+      <dl>
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 text-xl">
+          <CareIcon icon={props.icon} className="text-primary-600" />
         </div>
         <div>
-          <dt className="text-sm font-semibold text-gray-700 truncate my-2">
-            {text}
+          <dt className="my-2 truncate text-sm font-semibold text-gray-700">
+            {props.text}
           </dt>
-          {loading ? (
-            <dd className="rounded-lg w-full max-w-[100px] h-10 bg-gray-300 animate-pulse" />
+          {props.loading ? (
+            <dd className="h-10 w-full max-w-[100px] animate-pulse rounded-lg bg-gray-300" />
           ) : (
-            <dd className="text-5xl leading-9 font-black">{count}</dd>
+            <dd id="count" className="text-5xl font-black leading-9">
+              {props.count}
+            </dd>
           )}
         </div>
       </dl>

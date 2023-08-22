@@ -1,61 +1,63 @@
-import { Card, CardContent } from "@material-ui/core";
-import Popover from "@material-ui/core/Popover";
-import { navigate } from "raviger";
-import loadable from "@loadable/component";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import React, { useCallback, useReducer, useState } from "react";
-import { useDispatch } from "react-redux";
+import * as Notification from "../../Utils/Notifications.js";
+
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
+import { CapacityModal, DoctorModal } from "./models";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
 import {
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
   getBedTypes,
 } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  phonePreg,
-  validatePincode,
-  validateLatitude,
-  validateLongitude,
-} from "../../Common/validation";
-import {
-  createFacility,
-  getDistrictByState,
-  getPermittedFacility,
-  getLocalbodyByDistrict,
-  getStates,
-  updateFacility,
-  getWardByLocalBody,
-  listCapacity,
-  listDoctor,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import GLocationPicker from "../Common/GLocationPicker";
-import {
-  includesIgnoreCase as includesIgnoreCase,
-  getPincodeDetails,
-} from "../../Utils/utils";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import TextFormField from "../Form/FormFields/TextFormField";
-import Steps, { Step } from "../Common/Steps";
-import { BedCapacity } from "./BedCapacity";
-import { DoctorCapacity } from "./DoctorCapacity";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import useConfig from "../../Common/hooks/useConfig";
-import { CapacityModal, DoctorModal } from "./models";
-import BedTypeCard from "./BedTypeCard";
-import DoctorsCountCard from "./DoctorsCountCard";
 import {
   MultiSelectFormField,
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
-import RadioFormField from "../Form/FormFields/RadioFormField";
+import { Popover, Transition } from "@headlessui/react";
+import { Fragment, lazy, useCallback, useState } from "react";
+import Steps, { Step } from "../Common/Steps";
+import {
+  createFacility,
+  getDistrictByState,
+  getLocalbodyByDistrict,
+  getPermittedFacility,
+  getStates,
+  getWardByLocalBody,
+  listCapacity,
+  listDoctor,
+  updateFacility,
+} from "../../Redux/actions";
+import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
+import {
+  phonePreg,
+  validateLatitude,
+  validateLongitude,
+  validatePincode,
+} from "../../Common/validation";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import { BedCapacity } from "./BedCapacity";
+import BedTypeCard from "./BedTypeCard";
+import Card from "../../CAREUI/display/Card.js";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useTranslation } from "react-i18next";
+import { DoctorCapacity } from "./DoctorCapacity";
+import DoctorsCountCard from "./DoctorsCountCard";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { FormAction } from "../Form/Utils.js";
+import GLocationPicker from "../Common/GLocationPicker";
+import Page from "../Common/components/Page.js";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import RadioFormField from "../Form/FormFields/RadioFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+
+import { navigate } from "raviger";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import useConfig from "../../Common/hooks/useConfig";
+import { useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
+
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface FacilityProps {
   facilityId?: string;
@@ -128,22 +130,16 @@ const initialState = {
   errors: { ...initError },
 };
 
-type SetFormAction = { type: "set_form"; form: FacilityForm };
-type SetErrorAction = {
-  type: "set_error";
-  errors: Record<keyof FacilityForm, string>;
-};
-type FacilityCreateFormAction = SetFormAction | SetErrorAction;
-
-const facilityCreateReducer = (
-  state = initialState,
-  action: FacilityCreateFormAction
-) => {
+const facilityCreateReducer = (state = initialState, action: FormAction) => {
   switch (action.type) {
     case "set_form":
       return { ...state, form: action.form };
-    case "set_error":
+    case "set_errors":
       return { ...state, errors: action.errors };
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
+    }
   }
 };
 
@@ -153,7 +149,10 @@ export const FacilityCreate = (props: FacilityProps) => {
   const dispatchAction: any = useDispatch();
   const { facilityId } = props;
 
-  const [state, dispatch] = useReducer(facilityCreateReducer, initialState);
+  const [state, dispatch] = useAutoSaveReducer<FacilityForm>(
+    facilityCreateReducer,
+    initialState
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [isStateLoading, setIsStateLoading] = useState(false);
   const [isDistrictLoading, setIsDistrictLoading] = useState(false);
@@ -171,11 +170,6 @@ export const FacilityCreate = (props: FacilityProps) => {
   const [bedCapacityKey, setBedCapacityKey] = useState(0);
   const [docCapacityKey, setDocCapacityKey] = useState(0);
   const { goBack } = useAppHistory();
-
-  const [anchorEl, setAnchorEl] = React.useState<
-    (EventTarget & Element) | null
-  >(null);
-
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
 
@@ -409,10 +403,6 @@ export const FacilityCreate = (props: FacilityProps) => {
     }
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
   const validateForm = () => {
     const errors = { ...initError };
     let invalidForm = false;
@@ -472,10 +462,10 @@ export const FacilityCreate = (props: FacilityProps) => {
       }
     });
     if (invalidForm) {
-      dispatch({ type: "set_error", errors });
+      dispatch({ type: "set_errors", errors });
       return false;
     }
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return true;
   };
 
@@ -561,16 +551,13 @@ export const FacilityCreate = (props: FacilityProps) => {
     return <Loading />;
   }
 
-  const open = Boolean(anchorEl);
-  const id = open ? "map-popover" : undefined;
-
   let capacityList: any = null;
   let totalBedCount = 0;
   let totalOccupiedBedCount = 0;
 
   if (!capacityData || !capacityData.length) {
     capacityList = (
-      <h5 className="mt-4 text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+      <h5 className="mt-4 flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
         {t("no_bed_types_found")}
       </h5>
     );
@@ -581,7 +568,7 @@ export const FacilityCreate = (props: FacilityProps) => {
     });
 
     capacityList = (
-      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-7 w-full">
+      <div className="mt-4 grid w-full gap-7 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <BedTypeCard
           label={t("total_beds")}
           bedCapacityId={0}
@@ -631,13 +618,13 @@ export const FacilityCreate = (props: FacilityProps) => {
   let doctorList: any = null;
   if (!doctorData || !doctorData.length) {
     doctorList = (
-      <h5 className="text-xl text-gray-500 font-bold flex items-center justify-center bg-white rounded-lg shadow p-4 w-full">
+      <h5 className="flex w-full items-center justify-center rounded-lg bg-white p-4 text-xl font-bold text-gray-500 shadow">
         {t("no_doctors")}
       </h5>
     );
   } else {
     doctorList = (
-      <div className="mt-4 grid xl:grid-cols-4 lg:grid-cols-3 sm:grid-cols-2 gap-6">
+      <div className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {doctorData.map((data: DoctorModal) => {
           const removeCurrentDoctorData = (doctorId: number | undefined) => {
             setDoctorData((state) =>
@@ -681,18 +668,17 @@ export const FacilityCreate = (props: FacilityProps) => {
   switch (currentStep) {
     case 3:
       return (
-        <div className="px-2 pb-2">
-          <PageTitle
-            title={headerText}
-            crumbsReplacements={{
-              [createdFacilityId || "????"]: { name: state.form.name },
-            }}
-          />
+        <Page
+          title={headerText}
+          crumbsReplacements={{
+            [createdFacilityId || "????"]: { name: state.form.name },
+          }}
+        >
           <Steps steps={getSteps()} />
           <div className="mt-3">
             <DoctorCapacity
               key={docCapacityKey}
-              className="max-w-2xl w-full mx-auto"
+              className="mx-auto w-full max-w-2xl"
               facilityId={createdFacilityId || ""}
               handleClose={() => {
                 navigate(`/facility/${createdFacilityId}`);
@@ -707,28 +693,27 @@ export const FacilityCreate = (props: FacilityProps) => {
               }}
             />
           </div>
-          <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
-            <div className="md:flex justify-between md:pb-2">
-              <div className="font-bold text-xl mb-2">{t("doctors_list")}</div>
+          <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
+            <div className="justify-between md:flex md:pb-2">
+              <div className="mb-2 text-xl font-bold">{t("doctors_list")}</div>
             </div>
             <div className="mt-4">{doctorList}</div>
           </div>
-        </div>
+        </Page>
       );
     case 2:
       return (
-        <div className="px-2 pb-2">
-          <PageTitle
-            title={headerText}
-            crumbsReplacements={{
-              [createdFacilityId || "????"]: { name: state.form.name },
-            }}
-          />
+        <Page
+          title={headerText}
+          crumbsReplacements={{
+            [createdFacilityId || "????"]: { name: state.form.name },
+          }}
+        >
           <Steps steps={getSteps()} />
           <div className="mt-3">
             <BedCapacity
               key={bedCapacityKey}
-              className="max-w-2xl w-full mx-auto"
+              className="mx-auto w-full max-w-2xl"
               facilityId={createdFacilityId || ""}
               handleClose={() => {
                 setCurrentStep(3);
@@ -743,31 +728,41 @@ export const FacilityCreate = (props: FacilityProps) => {
               }}
             />
           </div>
-          <div className="bg-white rounded p-3 md:p-6 shadow-sm mt-5">
-            <div className="md:flex justify-between  md:border-b md:pb-2">
-              <div className="font-semibold text-xl mb-2">
+          <div className="mt-5 rounded bg-white p-3 shadow-sm md:p-6">
+            <div className="justify-between md:flex  md:border-b md:pb-2">
+              <div className="mb-2 text-xl font-semibold">
                 {t("bed_capacity")}
               </div>
             </div>
             <div>{capacityList}</div>
           </div>
-        </div>
+        </Page>
       );
     case 1:
     default:
       return (
-        <div className="px-2 pb-2">
-          <PageTitle
-            title={headerText}
-            crumbsReplacements={{
-              [facilityId || "????"]: { name: state.form.name },
-            }}
-          />
+        <Page
+          title={headerText}
+          crumbsReplacements={{
+            [facilityId || "????"]: { name: state.form.name },
+          }}
+        >
           {!facilityId && <Steps steps={getSteps()} />}
           <Card className="mt-4">
-            <CardContent>
+            <div className="md:p-4">
               <form onSubmit={(e) => handleSubmit(e)}>
-                <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                <DraftSection
+                  handleDraftSelect={(newState: any) => {
+                    dispatch({ type: "set_state", state: newState });
+                    Promise.all([
+                      fetchDistricts(newState.form.state),
+                      fetchLocalBody(newState.form.district),
+                      fetchWards(newState.form.local_body),
+                    ]);
+                  }}
+                  formData={state.form}
+                />
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <SelectFormField
                     {...field("facility_type")}
                     required
@@ -869,9 +864,9 @@ export const FacilityCreate = (props: FacilityProps) => {
                     {...field("phone_number")}
                     label={t("emergency_contact_number")}
                     required
-                    onlyIndia
+                    types={["mobile", "landline"]}
                   />
-                  <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 py-4">
+                  <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2 md:col-span-2 xl:grid-cols-4">
                     <TextFormField
                       {...field("oxygen_capacity")}
                       type="number"
@@ -955,71 +950,78 @@ export const FacilityCreate = (props: FacilityProps) => {
                   )}
                 </div>
 
-                <div className="flex gap-2 items-center">
+                <div className="flex items-center gap-3">
                   <TextFormField
-                    className="flex-1 px-2"
+                    className="flex-1"
                     {...field("latitude")}
                     label={t("location")}
                     placeholder="Latitude"
                   />
 
                   <div className="flex flex-col justify-center md:block">
-                    <ButtonV2
-                      circle
-                      type="button"
-                      id="facility-location-button"
-                      onClick={(event) => setAnchorEl(event.currentTarget)}
-                      className="tooltip p-2"
-                    >
-                      <CareIcon className="care-l-map-marker text-xl" />
-                      <span className="tooltip-text tooltip-bottom">
-                        Select location from map
-                      </span>
-                    </ButtonV2>
-                    <Popover
-                      id={id}
-                      open={open}
-                      anchorEl={anchorEl}
-                      onClose={handleClose}
-                      anchorOrigin={{
-                        vertical: "top",
-                        horizontal: "left",
-                      }}
-                      transformOrigin={{
-                        vertical: "top",
-                        horizontal: "left",
-                      }}
-                    >
-                      <GLocationPicker
-                        lat={Number(state.form.latitude)}
-                        lng={Number(state.form.longitude)}
-                        handleOnChange={handleLocationChange}
-                        handleOnClose={handleClose}
-                        handleOnSelectCurrentLocation={
-                          handleSelectCurrentLocation
-                        }
-                      />
+                    <Popover id="map-popover" className="relative">
+                      <>
+                        <Popover.Button>
+                          <ButtonV2
+                            circle
+                            type="button"
+                            id="facility-location-button"
+                            className="tooltip p-2"
+                          >
+                            <CareIcon className="care-l-map-marker text-xl" />
+                            <span className="tooltip-text tooltip-bottom">
+                              Select location from map
+                            </span>
+                          </ButtonV2>
+                        </Popover.Button>
+
+                        <Transition
+                          as={Fragment}
+                          enter="transition ease-out duration-200"
+                          enterFrom="opacity-0 translate-y-1"
+                          enterTo="opacity-100 translate-y-0"
+                          leave="transition ease-in duration-150"
+                          leaveFrom="opacity-100 translate-y-0"
+                          leaveTo="opacity-0 translate-y-1"
+                        >
+                          <Popover.Panel className="absolute -right-40 bottom-10 sm:-right-48">
+                            <GLocationPicker
+                              lat={Number(state.form.latitude)}
+                              lng={Number(state.form.longitude)}
+                              handleOnChange={handleLocationChange}
+                              handleOnClose={() => null}
+                              handleOnSelectCurrentLocation={
+                                handleSelectCurrentLocation
+                              }
+                            />
+                          </Popover.Panel>
+                        </Transition>
+                      </>
                     </Popover>
                   </div>
                   <TextFormField
-                    className="flex-1 px-2"
+                    className="flex-1"
                     {...field("longitude")}
                     label={<br />}
                     placeholder="Longitude"
                   />
                 </div>
-                <div className="mt-12 flex flex-col-reverse sm:flex-row gap-3 justify-end">
+                <div className="mt-12 flex flex-col-reverse justify-end gap-3 sm:flex-row">
                   <Cancel onClick={() => goBack()} />
-                  <Submit onClick={handleSubmit} label={buttonText} />
+                  <Submit
+                    type="button"
+                    onClick={handleSubmit}
+                    label={buttonText}
+                  />
                 </div>
               </form>
-            </CardContent>
+            </div>
           </Card>
-        </div>
+        </Page>
       );
   }
 };
 
 const FieldUnit = ({ unit }: { unit: string }) => {
-  return <p className="text-xs text-gray-700 mr-8">{unit}</p>;
+  return <p className="mr-8 text-xs text-gray-700">{unit}</p>;
 };

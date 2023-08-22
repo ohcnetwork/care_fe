@@ -14,7 +14,9 @@ import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";
-  return parsePhoneNumberFromString(phoneNumber)?.format("E.164") || "";
+  if (phoneNumber.startsWith("+"))
+    return parsePhoneNumberFromString(phoneNumber)?.format("E.164") || "";
+  return phoneNumber;
 };
 
 export default function UserFilter(props: any) {
@@ -23,8 +25,8 @@ export default function UserFilter(props: any) {
   const [filterState, setFilterState] = useMergeState({
     first_name: filter.first_name || "",
     last_name: filter.last_name || "",
-    phone_number: filter.phone_number || "",
-    alt_phone_number: filter.alt_phone_number || "",
+    phone_number: filter.phone_number || undefined,
+    alt_phone_number: filter.alt_phone_number || undefined,
     user_type: filter.user_type || "",
     district_id: filter.district_id || "",
     district_ref: null,
@@ -33,8 +35,8 @@ export default function UserFilter(props: any) {
   const clearFilterState = {
     first_name: "",
     last_name: "",
-    phone_number: "",
-    alt_phone_number: "",
+    phone_number: undefined,
+    alt_phone_number: undefined,
     user_type: "",
     district_id: "",
     district_ref: null,
@@ -129,7 +131,6 @@ export default function UserFilter(props: any) {
           name="district"
           selected={filterState.district_ref}
           setSelected={setDistrict}
-          className="shifting-page-filter-dropdown"
           errors={""}
         />
       </div>
@@ -141,6 +142,7 @@ export default function UserFilter(props: any) {
         value={filterState.phone_number}
         onChange={handleChange}
         errorClassName="hidden"
+        types={["mobile", "landline"]}
       />
 
       <PhoneNumberFormField
@@ -150,6 +152,7 @@ export default function UserFilter(props: any) {
         value={filterState.alt_phone_number}
         onChange={handleChange}
         errorClassName="hidden"
+        types={["mobile"]}
       />
     </FiltersSlideover>
   );

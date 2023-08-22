@@ -1,13 +1,10 @@
-import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { getNotificationData } from "../../Redux/actions";
 
 export default function ShowPushNotification({ external_id }: any) {
-  const [isLoading, setIsLoading] = useState(true);
   const dispatch: any = useDispatch();
 
-  let resultUrl = async () => {
-    setIsLoading(true);
+  const resultUrl = async () => {
     console.log("ID:", external_id.id);
     const res = await dispatch(getNotificationData({ id: external_id.id }));
     const data = res.data.caused_objects;
@@ -27,7 +24,7 @@ export default function ShowPushNotification({ external_id }: any) {
       case "INVESTIGATION_SESSION_CREATED":
         return `/facility/${data.facility}/patient/${data.patient}/consultation/${data.consultation}/investigation/${data.session}`;
       case "MESSAGE":
-        return `/notice_board/`;
+        return "/notice_board/";
       default:
         return "#";
     }
@@ -35,7 +32,6 @@ export default function ShowPushNotification({ external_id }: any) {
 
   resultUrl()
     .then((url) => {
-      setIsLoading(false);
       window.location.href = url;
     })
     .catch((err) => console.log(err));

@@ -1,104 +1,64 @@
-import {
-  Paper,
-  TableCell,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableBody,
-  InputLabel,
-  Box,
-  Button,
-} from "@material-ui/core";
-import { createStyles, withStyles } from "@material-ui/styles";
-import React from "react";
-import { useState } from "react";
-import {
-  LegacySelectField,
-  LegacyTextInputField,
-} from "../../Common/HelperInputFields";
+import ButtonV2 from "../../Common/components/ButtonV2";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { SelectFormField } from "../../Form/FormFields/SelectFormField";
+import TextFormField from "../../Form/FormFields/TextFormField";
 import _ from "lodash";
 import { classNames } from "../../../Utils/utils";
+import { useState } from "react";
 
-const StyledTableRow = withStyles(() =>
-  createStyles({
-    root: {
-      "&:nth-of-type(odd)": {
-        backgroundColor: "#f7f7f7",
-      },
-      "&:hover": {
-        backgroundColor: "#eeeeee",
-      },
-    },
-  })
-)(TableRow);
-
-const TestRow = ({ data, onChange, showForm, value, isChanged }: any) => {
-  const tableClass = "h-12 text-sm border-l border-r border-gray-400 px-2";
-  const testValue = value;
-
-  const inputType =
-    data?.investigation_object?.investigation_type === "Float"
-      ? "number"
-      : "string";
+const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
   return (
-    <StyledTableRow className={isChanged ? "bg-primary-300" : ""}>
-      <TableCell className={tableClass}>
+    <tr
+      className={classNames(
+        i % 2 == 0 ? "bg-gray-50" : "bg-white",
+        isChanged && "!bg-primary-300"
+      )}
+      x-description="Even row"
+    >
+      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
         {data?.investigation_object?.name || "---"}
-      </TableCell>
-      <TableCell
-        className={classNames(
-          "h-12 text-sm border-l border-r border-gray-400",
-          showForm ? "p-0" : "px-2"
-        )}
-        align="right"
-        style={{
-          padding: 0,
-          minWidth: 150,
-          maxWidth: 150,
-        }}
-      >
+      </td>
+      <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-gray-700">
         {showForm ? (
           data?.investigation_object?.investigation_type === "Choice" ? (
-            <LegacySelectField
-              name="preferred_vehicle_choice"
-              variant="outlined"
-              optionArray={true}
-              value={testValue}
-              options={[
-                "Unselected",
-                ...data?.investigation_object?.choices.split(","),
-              ]}
+            <SelectFormField
+              name={data?.investigation_object?.name}
+              options={data?.investigation_object?.choices.split(",")}
+              optionLabel={(o: string) => o}
+              optionValue={(o: string) => o}
+              value={value}
               onChange={onChange}
-              className="w-full px-4 h-full text-right text-sm m-0"
             />
           ) : (
-            <input
-              className="w-full px-4 h-full text-right text-sm border-l border-r m-0 focus:border-primary-500 focus:ring-primary-500"
-              value={testValue}
+            <TextFormField
+              name={data?.investigation_object?.name}
+              value={value}
               onChange={onChange}
-              type={inputType}
-              step="any"
+              type={
+                data?.investigation_object?.investigation_type === "Float"
+                  ? "number"
+                  : "string"
+              }
               placeholder="Enter value"
             />
           )
         ) : (
-          testValue || "---"
+          value || "---"
         )}
-      </TableCell>
-      <TableCell className={tableClass} align="left">
+      </td>
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.investigation_object.unit || "---"}
-      </TableCell>
-      <TableCell className={tableClass} align="center">
+      </td>
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.investigation_object.min_value || "---"}
-      </TableCell>
-      <TableCell className={tableClass} align="center">
+      </td>
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.investigation_object.max_value || "---"}
-      </TableCell>
-      <TableCell className={tableClass} align="right">
+      </td>
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.investigation_object.ideal_value || "---"}
-      </TableCell>
-    </StyledTableRow>
+      </td>
+    </tr>
   );
 };
 
@@ -122,107 +82,107 @@ export const InvestigationTable = ({
   });
 
   return (
-    <Box padding="1rem" margin="1rem 0">
-      <div className="flex flex-col sm:flex-row items-center justify-between mb">
-        {title && <div className="font-bold text-xl">{title}</div>}
-        <div className="py-2 flex sm:flex-row flex-col ">
-          <Button
-            color="primary"
-            variant="outlined"
+    <div className="m-4 p-4">
+      <div className="mb flex flex-col items-center justify-between sm:flex-row">
+        {title && <div className="text-xl font-bold">{title}</div>}
+        <div className="flex flex-col py-2 sm:flex-row ">
+          <ButtonV2
+            variant="primary"
             onClick={() => window.print()}
-            className="mr-2 my-2"
+            className="my-2 mr-2"
             disabled={showForm}
           >
             Print Report
-          </Button>
-          <Button
-            variant={showForm ? "outlined" : "contained"}
-            color="primary"
-            className="mr-2 my-2"
+          </ButtonV2>
+          <ButtonV2
+            variant="primary"
+            className="my-2 mr-2"
             onClick={() => {
               showForm && handleUpdateCancel();
               setShowForm((prev) => !prev);
             }}
           >
-            {!showForm && <i className="fas fa-pencil-alt mr-2" />}
+            {!showForm && <CareIcon className="care-l-edit mr-2" />}
             {showForm ? "Cancel" : "Update Details"}
-          </Button>
+          </ButtonV2>
           {showForm && (
-            <Button
-              variant={"contained"}
-              color="primary"
+            <ButtonV2
+              variant="primary"
               onClick={() => handleSave()}
-              className="mr-2 my-2"
+              className="my-2 mr-2"
             >
               Save
-            </Button>
+            </ButtonV2>
           )}
         </div>
       </div>
-      <InputLabel className="mt-4">Search Test</InputLabel>
-      <LegacyTextInputField
-        value={searchFilter}
+      <TextFormField
+        name="test_search"
+        label="Search Test"
+        className="mt-2"
         placeholder="Search test"
-        errors=""
-        variant="outlined"
-        margin="dense"
-        onChange={(e) => setSearchFilter(e.target.value)}
+        value={searchFilter}
+        onChange={(e) => setSearchFilter(e.value)}
       />
       <br />
-      <TableContainer component={Paper} id="section-to-print">
-        <Table aria-label="simple table" size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell align="right">value</TableCell>
-              <TableCell align="left">Unit</TableCell>
-              <TableCell align="right">Min</TableCell>
-              <TableCell align="right">Max</TableCell>
-              <TableCell align="right">Ideal</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filterTests.length > 0 ? (
-              filterTests.map((t: any) => {
-                const value =
-                  changedFields[t.id]?.notes ??
-                  changedFields[t.id]?.value ??
-                  null;
-                const isChanged = changedFields[t.id]?.initialValue !== value;
-                return (
-                  <TestRow
-                    data={t}
-                    key={t.id}
-                    showForm={showForm}
-                    value={value}
-                    isChanged={isChanged}
-                    onChange={(e: { target: { value: any } }) => {
-                      const { target, value } =
-                        t?.investigation_object?.investigation_type === "Float"
-                          ? {
-                              target: `${t.id}.value`,
-                              value: Number(e.target.value) || null,
-                            }
-                          : {
-                              target: `${t.id}.notes`,
-                              value: e.target.value,
-                            };
-                      handleValueChange(value, target);
-                    }}
-                  />
-                );
-              })
-            ) : (
-              <TableRow>
-                <TableCell component="th" scope="row">
-                  No test
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+      <div id="section-to-print">
+        <div className="overflow-x-scroll border-b border-gray-200 shadow sm:rounded-lg">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                {["Name", "Value", "Unit", "Min", "Max", "Ideal"].map(
+                  (heading) => (
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-800"
+                    >
+                      {heading}
+                    </th>
+                  )
+                )}
+              </tr>
+            </thead>
+            <tbody x-max="2">
+              {filterTests.length > 0 ? (
+                filterTests.map((t: any, i) => {
+                  const value =
+                    changedFields[t.id]?.notes ??
+                    changedFields[t.id]?.value ??
+                    null;
+                  const isChanged = changedFields[t.id]?.initialValue !== value;
+                  return (
+                    <TestRow
+                      data={t}
+                      key={t.id}
+                      i={i}
+                      showForm={showForm}
+                      value={value}
+                      isChanged={isChanged}
+                      onChange={(e: any) => {
+                        const { target, value } =
+                          t?.investigation_object?.investigation_type ===
+                          "Float"
+                            ? {
+                                target: `${t.id}.value`,
+                                value: Number(e.value) || null,
+                              }
+                            : {
+                                target: `${t.id}.notes`,
+                                value: e.value,
+                              };
+                        handleValueChange(value, target);
+                      }}
+                    />
+                  );
+                })
+              ) : (
+                <tr className="text-center text-gray-500">No tests taken</tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   );
 };
 

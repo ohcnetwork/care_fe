@@ -1,16 +1,9 @@
 import * as Notification from "../../Utils/Notifications";
 
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import PRNPrescriptionBuilder, {
-  PRNPrescriptionType,
-} from "../Common/prescription-builder/PRNPrescriptionBuilder";
-import PrescriptionBuilder, {
-  PrescriptionType,
-} from "../Common/prescription-builder/PrescriptionBuilder";
 import { useCallback, useEffect, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { CircularProgress } from "@material-ui/core";
 import ClaimDetailCard from "../HCX/ClaimDetailCard";
 import { ConsultationModel } from "./models";
 import CreateClaimCard from "../HCX/CreateClaimCard";
@@ -19,25 +12,29 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { HCXActions } from "../../Redux/actions";
+import { HCXActions, PrescriptionActions } from "../../Redux/actions";
 import { HCXClaimModel } from "../HCX/models";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { dischargePatient } from "../../Redux/actions";
-import moment from "moment";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
+import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
+import CircularProgress from "../Common/components/CircularProgress";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { FacilityModel } from "./models";
+import dayjs from "../../Utils/dayjs";
 
 interface PreDischargeFormInterface {
   discharge_reason: string;
   discharge_notes: string;
-  discharge_date: string | null;
-  death_datetime: string | null;
-  death_confirmed_doctor: string | null;
-  discharge_prescription: PrescriptionType[];
-  discharge_prn_prescription: PRNPrescriptionType[];
+  discharge_date?: string;
+  death_datetime?: string;
+  death_confirmed_doctor?: string;
+  referred_to?: number | null | undefined;
+  referred_to_external?: string | null | undefined;
 }
 
 interface IProps {
@@ -47,8 +44,8 @@ interface IProps {
   afterSubmit?: () => void;
   discharge_reason?: string;
   discharge_notes?: string;
-  discharge_date?: string | null;
-  death_datetime?: string | null;
+  discharge_date?: string;
+  death_datetime?: string;
 }
 
 const DischargeModal = ({
@@ -61,8 +58,8 @@ const DischargeModal = ({
   },
   discharge_reason = "",
   discharge_notes = "",
-  discharge_date = new Date().toISOString(),
-  death_datetime = null,
+  discharge_date = dayjs().format("YYYY-MM-DDTHH:mm"),
+  death_datetime = dayjs().format("YYYY-MM-DDTHH:mm"),
 }: IProps) => {
   const { enable_hcx } = useConfig();
   const dispatch: any = useDispatch();
@@ -72,19 +69,13 @@ const DischargeModal = ({
       discharge_notes,
       discharge_date,
       death_datetime,
-      death_confirmed_doctor: null,
-      discharge_prescription: [],
-      discharge_prn_prescription: [],
+      death_confirmed_doctor: undefined,
+      referred_to_external: null,
     });
-  const [dischargePrescription, setDischargePrescription] = useState<
-    PrescriptionType[]
-  >([]);
-  const [dischargePRNPrescription, setDischargePRNPrescription] = useState<
-    PRNPrescriptionType[]
-  >([]);
   const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
   const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
+  const [facility, setFacility] = useState<FacilityModel>({ id: 0, name: "" }); // for referred to external
   const [errors, setErrors] = useState<any>({});
 
   const fetchLatestClaim = useCallback(async () => {
@@ -145,18 +136,26 @@ const DischargeModal = ({
       return;
     }
 
+    const dischargeDetails = {
+      ...preDischargeForm,
+      discharge: value,
+      discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
+    };
+
+    if (dischargeDetails.referred_to != undefined)
+      delete dischargeDetails.referred_to_external;
+
+    if (dischargeDetails.referred_to_external != undefined)
+      delete dischargeDetails.referred_to;
+
     const dischargeResponse = await dispatch(
       dischargePatient(
         {
           ...preDischargeForm,
           discharge: value,
-          discharge_date: moment(preDischargeForm.discharge_date).toISOString(
-            true
-          ),
-          discharge_prescription: dischargePrescription,
-          discharge_prn_prescription: dischargePRNPrescription,
+          discharge_date: dayjs(preDischargeForm.discharge_date).toISOString(),
         },
-        { id: consultationData.patient }
+        { id: consultationData.id }
       )
     );
 
@@ -168,7 +167,7 @@ const DischargeModal = ({
       //   setPatientData(dischargeData);
 
       Notification.Success({
-        msg: "Patient Discharged",
+        msg: "Patient Discharged Successfully",
       });
 
       afterSubmit();
@@ -184,12 +183,24 @@ const DischargeModal = ({
     });
   };
 
+  const prescriptionActions = PrescriptionActions(consultationData.id ?? "");
+
+  const handleFacilitySelect = (selected: FacilityModel) => {
+    setFacility(selected ? selected : facility);
+    const { id, name } = selected;
+    const isExternal = id === -1;
+    setPreDischargeForm((prev) => ({
+      ...prev,
+      ...(isExternal ? { referred_to_external: name } : { referred_to: id }),
+    }));
+  };
+
   return (
     <DialogModal
       title={
         <div>
           <p>Discharge patient from CARE</p>
-          <span className="mt-1 flex gap-1 text-sm text-secondary-500 font-medium">
+          <span className="mt-1 flex gap-1 text-sm font-medium text-warning-500">
             <CareIcon className="care-l-exclamation-triangle text-base" />
             <p>Caution: this action is irreversible.</p>
           </span>
@@ -218,6 +229,23 @@ const DischargeModal = ({
           }
           error={errors?.discharge_reason}
         />
+        {preDischargeForm.discharge_reason === "REF" && (
+          <>
+            <FieldLabel>Referred to</FieldLabel>
+            <FacilitySelect
+              name="referred_to"
+              setSelected={(selected) =>
+                handleFacilitySelect(selected as FacilityModel)
+              }
+              selected={facility}
+              showAll={true}
+              freeText={true}
+              multiple={false}
+              errors={errors?.referred_to}
+              className="mb-4"
+            />
+          </>
+        )}
         <TextAreaFormField
           required={preDischargeForm.discharge_reason == "EXP"}
           label={
@@ -240,59 +268,61 @@ const DischargeModal = ({
         {preDischargeForm.discharge_reason === "REC" && (
           <div>
             <DateFormField
+              position="LEFT"
               label="Discharge Date"
               name="discharge_date"
-              value={moment(preDischargeForm?.discharge_date).toDate()}
-              min={moment(
-                consultationData?.admission_date ||
+              value={dayjs(preDischargeForm?.discharge_date).toDate()}
+              min={dayjs(
+                consultationData?.admission_date ??
                   consultationData?.created_date
               ).toDate()}
               disableFuture={true}
               required
               onChange={handleDateChange}
             />
-            <FieldLabel>Discharge Prescription</FieldLabel>
-            <div className="my-2">
+
+            <div className="mb-4">
+              <FieldLabel>Discharge Prescription Medications</FieldLabel>
               <PrescriptionBuilder
-                prescriptions={dischargePrescription}
-                setPrescriptions={setDischargePrescription}
+                actions={prescriptionActions}
+                prescription_type="DISCHARGE"
               />
             </div>
-            <div>
-              <FieldLabel>Discharge PRN Prescription</FieldLabel>
-              <PRNPrescriptionBuilder
-                prescriptions={dischargePRNPrescription}
-                setPrescriptions={setDischargePRNPrescription}
+            <div className="mb-4">
+              <FieldLabel>Discharge PRN Prescriptions</FieldLabel>
+              <PrescriptionBuilder
+                actions={prescriptionActions}
+                prescription_type="DISCHARGE"
+                is_prn
               />
             </div>
           </div>
         )}
         {preDischargeForm.discharge_reason === "EXP" && (
           <div>
-            <div>
-              Death Date and Time
-              <span className="text-danger-500">{" *"}</span>
-              <input
-                type="datetime-local"
-                className="w-[calc(100%-5px)] focus:ring-primary-500 focus:border-primary-500 block border border-gray-400 rounded py-2 px-4 text-sm bg-gray-100 hover:bg-gray-200 focus:outline-none focus:bg-white"
-                value={preDischargeForm.death_datetime || ""}
-                required
-                min={consultationData?.admission_date?.substring(0, 16)}
-                max={moment(new Date()).format("YYYY-MM-DDThh:mm")}
-                onChange={(e) => {
-                  setPreDischargeForm((form) => {
-                    return {
-                      ...form,
-                      death_datetime: e.target.value,
-                    };
-                  });
-                }}
-              />
-            </div>
+            <TextFormField
+              name="death_datetime"
+              label="Death Date and Time"
+              type="datetime-local"
+              value={preDischargeForm.death_datetime}
+              onChange={(e) => {
+                setPreDischargeForm((form) => {
+                  return {
+                    ...form,
+                    death_datetime: e.value,
+                  };
+                });
+              }}
+              required
+              min={dayjs(consultationData?.admission_date).format(
+                "YYYY-MM-DDTHH:mm"
+              )}
+              max={dayjs().format("YYYY-MM-DDTHH:mm")}
+            />
             <TextFormField
               name="death_confirmed_by"
               label="Confirmed By"
-              value={preDischargeForm.death_confirmed_doctor || ""}
+              value={preDischargeForm.death_confirmed_doctor ?? ""}
               onChange={(e) => {
                 setPreDischargeForm((form) => {
                   return {
@@ -311,9 +341,9 @@ const DischargeModal = ({
             <DateFormField
               label="Date of Discharge"
               name="discharge_date"
-              value={moment(preDischargeForm.discharge_date).toDate()}
-              min={moment(
-                consultationData?.admission_date ||
+              value={dayjs(preDischargeForm.discharge_date).toDate()}
+              min={dayjs(
+                consultationData?.admission_date ??
                   consultationData?.created_date
               ).toDate()}
               disableFuture={true}
@@ -326,14 +356,14 @@ const DischargeModal = ({
 
       {enable_hcx && (
         // TODO: if policy and approved pre-auth exists
-        <div className="my-5 shadow rounded p-5">
+        <div className="my-5 rounded p-5 shadow">
           <h2 className="mb-2">Claim Insurance</h2>
           {latestClaim ? (
             <ClaimDetailCard claim={latestClaim} />
           ) : (
             <CreateClaimCard
-              consultationId={consultationData.id}
-              patientId={consultationData.patient}
+              consultationId={consultationData.id ?? ""}
+              patientId={consultationData.patient ?? ""}
               use="claim"
               isCreating={isCreateClaimLoading}
               setIsCreating={setIsCreateClaimLoading}
@@ -342,10 +372,10 @@ const DischargeModal = ({
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-2 pt-4 md:justify-end">
+      <div className="flex flex-col gap-2 pt-4 md:flex-row md:justify-end">
         <Cancel onClick={onClose} />
         {isSendingDischargeApi ? (
-          <CircularProgress size={20} />
+          <CircularProgress />
         ) : (
           <Submit
             onClick={() => handlePatientDischarge(false)}

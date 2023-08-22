@@ -1,6 +1,6 @@
-import { Card, CardContent } from "@material-ui/core";
-import loadable from "@loadable/component";
-import React, { useState, useEffect } from "react";
+import Card from "../../CAREUI/display/Card";
+
+import { useState, useEffect, lazy, SyntheticEvent } from "react";
 import { useDispatch } from "react-redux";
 import {
   createFacilityBed,
@@ -10,15 +10,15 @@ import {
   updateFacilityBed,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { LegacySelectField } from "../Common/HelperInputFields";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { LOCATION_BED_TYPES } from "../../Common/constants";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface BedFormProps {
   facilityId: string;
@@ -36,14 +36,17 @@ export const AddBedForm = (props: BedFormProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [locationName, setLocationName] = useState("");
   const [bedName, setBedName] = useState("");
+  const [multipleBeds, setMultipleBeds] = useState(false);
+  const [numberOfBeds, setNumberOfBeds] = useState(1); //default = 1
   const [errors, setErrors] = useState({
     name: "",
     description: "",
     bedType: "",
+    numberOfBeds: "",
   });
 
   const headerText = !bedId ? "Add Bed" : "Update Bed";
-  const buttonText = !bedId ? "Add Bed" : "Update Bed";
+  const buttonText = !bedId ? "Add Bed(s)" : "Update Bed";
 
   useEffect(() => {
     async function fetchFacilityLocationAndBed() {
@@ -66,6 +69,7 @@ export const AddBedForm = (props: BedFormProps) => {
         setBedName(res?.data?.name || "");
         setDescription(res?.data?.description || "");
         setBedType(res?.data?.bed_type || "");
+        setNumberOfBeds(res?.data?.number_of_beds || "");
       }
       setIsLoading(false);
     }
@@ -76,6 +80,7 @@ export const AddBedForm = (props: BedFormProps) => {
     name: string;
     description: string;
     bed_type: string;
+    number_of_beds: number;
   }) => {
     let isValid = true;
     if (!data.name) {
@@ -86,6 +91,24 @@ export const AddBedForm = (props: BedFormProps) => {
       isValid = false;
       setErrors((prev) => ({ ...prev, bedType: "Please select a bed type" }));
     }
+    if (multipleBeds === false) {
+      setNumberOfBeds(1);
+    }
+    if (data.number_of_beds < 1) {
+      isValid = false;
+      setErrors((prev) => ({
+        ...prev,
+        numberOfBeds: "Please enter a number larger than 0.",
+      }));
+
+      if (data.number_of_beds > 100) {
+        isValid = false;
+        setErrors((prev) => ({
+          ...prev,
+          numberOfBeds: "Please enter a number smaller than or equal to 100.",
+        }));
+      }
+    }
 
     return isValid;
   };
@@ -95,13 +118,14 @@ export const AddBedForm = (props: BedFormProps) => {
       replace: true,
     });
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
+  const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
 
     const data = {
       name,
       description,
       bed_type: bedType,
+      number_of_beds: numberOfBeds,
     };
 
     if (!validateInputs(data)) return;
@@ -117,7 +141,7 @@ export const AddBedForm = (props: BedFormProps) => {
     if (res && (res.status === 201 || res.status === 200)) {
       const notificationMessage = bedId
         ? "Bed updated successfully"
-        : "Bed created successfully";
+        : "Bed(s) created successfully";
 
       navigate(`/facility/${facilityId}/location/${locationId}/beds`, {
         replace: true,
@@ -133,8 +157,8 @@ export const AddBedForm = (props: BedFormProps) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle
+    <div className="mx-auto max-w-3xl px-2 pb-2">
+      <Page
         title={headerText}
         backUrl={`/facility/${facilityId}/location/${locationId}/beds`}
         crumbsReplacements={{
@@ -150,71 +174,71 @@ export const AddBedForm = (props: BedFormProps) => {
             },
           }),
         }}
-      />
-      <div className="mt-10">
-        <Card>
+      >
+        <Card className="mt-10 lg:p-6">
           <form onSubmit={(e) => handleSubmit(e)}>
-            <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1">
-                <div>
-                  <TextFormField
-                    name="name"
-                    type="text"
-                    label="Name"
-                    id="name"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.value)}
-                    error={errors.name}
-                  />
-                </div>
-                <div>
-                  <TextAreaFormField
-                    rows={5}
-                    label="Description"
-                    name="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.value)}
-                    error={errors.description}
-                  />
-                </div>
+            <TextFormField
+              name="name"
+              type="text"
+              label="Name"
+              id="name"
+              required
+              value={name}
+              onChange={(e) => setName(e.value)}
+              error={errors.name}
+            />
+            <TextAreaFormField
+              rows={5}
+              label="Description"
+              name="description"
+              value={description}
+              onChange={(e) => setDescription(e.value)}
+              error={errors.description}
+            />
 
-                <div>
-                  <FieldLabel required id="bedType">
-                    Bed Type
-                  </FieldLabel>
-                  <LegacySelectField
-                    id="bed-type"
-                    fullWidth
-                    name="bed_type"
-                    placeholder=""
-                    variant="outlined"
-                    margin="dense"
-                    options={[
-                      {
-                        id: "",
-                        name: "Select",
-                      },
-                      ...LOCATION_BED_TYPES,
-                    ]}
-                    optionValue="name"
-                    value={bedType}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setBedType(e.target.value)
-                    }
-                    errors={errors.bedType}
-                  />
-                </div>
+            <SelectFormField
+              id="bed-type"
+              className="w-full"
+              name="bed_type"
+              label="Bed Type"
+              required
+              options={LOCATION_BED_TYPES}
+              optionLabel={(option) => option.name}
+              optionValue={(option) => option.id}
+              value={bedType}
+              onChange={(e) => setBedType(e.value)}
+              error={errors.bedType}
+            />
 
-                <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-                  <Cancel onClick={handleCancel} />
-                  <Submit onClick={handleSubmit} label={buttonText} />
-                </div>
-              </div>
-            </CardContent>
+            {!bedId && (
+              <>
+                <CheckBoxFormField
+                  label="Do you want to make multiple beds?"
+                  onChange={() => {
+                    setMultipleBeds(!multipleBeds);
+                    if (!multipleBeds) setNumberOfBeds(1);
+                  }}
+                  name={"multipleBeds"}
+                />
+                <TextFormField
+                  name="number_of_beds"
+                  disabled={!multipleBeds}
+                  label="Number of beds"
+                  type="number"
+                  value={numberOfBeds.toString()}
+                  min={1}
+                  max={100}
+                  onChange={(e) => setNumberOfBeds(Number(e.value))}
+                />
+              </>
+            )}
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <Cancel onClick={handleCancel} />
+              <Submit onClick={handleSubmit} label={buttonText} />
+            </div>
           </form>
         </Card>
-      </div>
+      </Page>
     </div>
   );
 };

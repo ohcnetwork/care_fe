@@ -44,7 +44,7 @@ import ShowInvestigation from "../Components/Facility/Investigations/ShowInvesti
 import InvestigationReports from "../Components/Facility/Investigations/Reports";
 import AssetCreate from "../Components/Facility/AssetCreate";
 import DeathReport from "../Components/DeathReport/DeathReport";
-import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.gen";
+import { make as CriticalCareRecording } from "../Components/CriticalCareRecording/CriticalCareRecording.bs";
 import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
 import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
@@ -55,7 +55,6 @@ import AssetsList from "../Components/Assets/AssetsList";
 import AssetManage from "../Components/Assets/AssetManage";
 import AssetConfigure from "../Components/Assets/AssetConfigure";
 import { DailyRoundListDetails } from "../Components/Patient/DailyRoundListDetails";
-import HubDashboard from "../Components/Dashboard/HubDashboard";
 import Error404 from "../Components/ErrorPages/404";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -63,20 +62,22 @@ import FacilityUsers from "../Components/Facility/FacilityUsers";
 import {
   DesktopSidebar,
   MobileSidebar,
+  SIDEBAR_SHRINK_PREFERENCE_KEY,
+  SidebarShrinkContext,
 } from "../Components/Common/Sidebar/Sidebar";
 import { BLACKLISTED_PATHS, LocalStorageKeys } from "../Common/constants";
 import { UpdateFacilityMiddleware } from "../Components/Facility/UpdateFacilityMiddleware";
 import useConfig from "../Common/hooks/useConfig";
-import FacilityCNS from "../Components/Facility/FacilityCNS";
 import ConsultationClaims from "../Components/Facility/ConsultationClaims";
 import { handleSignOut } from "../Utils/utils";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
+import ManagePrescriptions from "../Components/Medicine/ManagePrescriptions";
+import CentralNursingStation from "../Components/Facility/CentralNursingStation";
 
 export default function AppRouter() {
-  const { static_black_logo, enable_hcx } = useConfig();
+  const { main_logo, enable_hcx } = useConfig();
 
   const routes = {
-    "/hub": () => <HubDashboard />,
     "/": () => <HospitalList />,
     "/users": () => <ManageUsers />,
     "/users/add": () => <UserAdd />,
@@ -177,6 +178,8 @@ export default function AppRouter() {
         unspecified={true}
       />
     ),
+    "/facility/:facilityId/patient/:patientId/consultation/:consultationId/prescriptions":
+      (path: any) => <ManagePrescriptions {...path} />,
     "/facility/:facilityId/patient/:patientId/consultation/:id/investigation":
       ({ facilityId, patientId, id }: any) => (
         <Investigation
@@ -324,7 +327,7 @@ export default function AppRouter() {
       facilityId,
     }: any) => <AssetConfigure assetId={assetId} facilityId={facilityId} />,
     "/facility/:facilityId/cns": ({ facilityId }: any) => (
-      <FacilityCNS facilityId={facilityId} />
+      <CentralNursingStation facilityId={facilityId} />
     ),
 
     "/shifting": () =>
@@ -431,57 +434,70 @@ export default function AppRouter() {
     }
   }, [path]);
 
+  const [shrinked, setShrinked] = useState(
+    localStorage.getItem(SIDEBAR_SHRINK_PREFERENCE_KEY) === "true"
+  );
+
+  useEffect(() => {
+    localStorage.setItem(
+      SIDEBAR_SHRINK_PREFERENCE_KEY,
+      shrinked ? "true" : "false"
+    );
+  }, [shrinked]);
+
   return (
-    <div className="absolute inset-0 h-screen flex overflow-hidden bg-gray-100">
-      <>
-        <div className="block md:hidden">
-          <MobileSidebar open={sidebarOpen} setOpen={setSidebarOpen} />{" "}
-        </div>
-        <div className="md:block hidden">
-          <DesktopSidebar />
-        </div>
-      </>
+    <SidebarShrinkContext.Provider value={{ shrinked, setShrinked }}>
+      <div className="absolute inset-0 flex h-screen overflow-hidden bg-gray-100 print:overflow-visible">
+        <>
+          <div className="block md:hidden">
+            <MobileSidebar open={sidebarOpen} setOpen={setSidebarOpen} />{" "}
+          </div>
+          <div className="hidden md:block">
+            <DesktopSidebar />
+          </div>
+        </>
 
-      <div className="flex flex-col w-full flex-1 overflow-hidden">
-        <div className="flex md:hidden relative z-10 shrink-0 h-16 bg-white shadow">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:bg-gray-100 focus:text-gray-600 md:hidden"
-            aria-label="Open sidebar"
-          >
-            <svg
-              className="h-6 w-6"
-              stroke="currentColor"
-              fill="none"
-              viewBox="0 0 24 24"
+        <div className="flex w-full flex-1 flex-col overflow-hidden print:overflow-visible">
+          <div className="relative z-10 flex h-16 shrink-0 bg-white shadow md:hidden">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="border-r border-gray-200 px-4 text-gray-500 focus:bg-gray-100 focus:text-gray-600 focus:outline-none md:hidden"
+              aria-label="Open sidebar"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h7"
+              <svg
+                className="h-6 w-6"
+                stroke="currentColor"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h7"
+                />
+              </svg>
+            </button>
+            <a
+              href="/"
+              className="flex h-full w-full items-center px-4 md:hidden"
+            >
+              <img
+                className="h-6 w-auto"
+                src={main_logo.dark}
+                alt="care logo"
               />
-            </svg>
-          </button>
-          <a
-            href="/"
-            className="md:hidden flex h-full w-full items-center px-4"
-          >
-            <img
-              className="h-6 w-auto"
-              src={static_black_logo}
-              alt="care logo"
-            />
-          </a>
-        </div>
+            </a>
+          </div>
 
-        <main
-          id="pages"
-          className="flex-1 overflow-y-scroll pb-4 md:py-0 focus:outline-none"
-        >
-          <div className="max-w-8xl mx-auto px-3 py-3">{pages}</div>
-        </main>
+          <main
+            id="pages"
+            className="flex-1 overflow-y-scroll pb-4 focus:outline-none md:py-0"
+          >
+            <div className="max-w-8xl mx-auto p-3">{pages}</div>
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarShrinkContext.Provider>
   );
 }

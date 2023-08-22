@@ -1,17 +1,45 @@
 import { useState, useCallback } from "react";
-import loadable from "@loadable/component";
 import { useDispatch } from "react-redux";
 import { getPatient } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
-import {
-  LegacyTextInputField,
-  LegacyMultilineInputField,
-} from "../Common/HelperInputFields";
-import { InputLabel } from "@material-ui/core";
-import moment from "moment";
-import { formatDate } from "../../Utils/utils";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import TextFormField from "../Form/FormFields/TextFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import DateFormField from "../Form/FormFields/DateFormField";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import { formatDateTime } from "../../Utils/utils";
+import Page from "../Common/components/Page";
+import Form from "../Form/Form";
+import { useTranslation } from "react-i18next";
+import { navigate } from "raviger";
+import dayjs from "dayjs";
+
+type DeathReport = {
+  name: string;
+  age: string;
+  gender: string;
+  address: string;
+  phone_number: string;
+  is_declared_positive: string;
+  date_declared_positive: Date | "";
+  test_type: string;
+  date_of_test: Date | "";
+  date_of_result: Date | "";
+  srf_id: string;
+  hospital_tested_in: string;
+  hospital_died_in: string;
+  date_of_admission: Date | "";
+  date_of_death: Date | "";
+  comorbidities: string;
+  history_clinical_course: string;
+  brought_dead: string;
+  home_or_cfltc: string;
+  is_vaccinated: string;
+  kottayam_confirmation_sent: string;
+  kottayam_sample_date: Date | "";
+  cause_of_death: string;
+  facility: string;
+};
 
 export default function PrintDeathReport(props: { id: string }) {
   const initialState = {
@@ -21,32 +49,33 @@ export default function PrintDeathReport(props: { id: string }) {
     address: "",
     phone_number: "",
     is_declared_positive: "",
-    date_declared_positive: new Date(),
+    date_declared_positive: "" as const,
     test_type: "",
-    date_of_test: new Date(),
-    date_of_result: new Date(),
+    date_of_test: "" as const,
+    date_of_result: "" as const,
     srf_id: "",
     hospital_tested_in: "",
     hospital_died_in: "",
-    date_of_admission: new Date(),
-    date_of_death: new Date(),
+    date_of_admission: "" as const,
+    date_of_death: "" as const,
     comorbidities: "",
     history_clinical_course: "",
     brought_dead: "",
     home_or_cfltc: "",
     is_vaccinated: "",
     kottayam_confirmation_sent: "",
-    kottayam_sample_date: "",
+    kottayam_sample_date: "" as const,
     cause_of_death: "",
     facility: "",
   };
 
-  const [patientData, setPatientData] = useState(initialState);
+  const [patientData, setPatientData] = useState<DeathReport>(initialState);
   const [patientName, setPatientName] = useState("");
   const [_isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const { id } = props;
   const dispatch: any = useDispatch();
+  const { t } = useTranslation();
 
   const getPatientGender = (patientData: any) =>
     GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
@@ -88,6 +117,22 @@ export default function PrintDeathReport(props: { id: string }) {
             is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
             cause_of_death:
               patientRes.data.last_consultation?.discharge_notes || "",
+            hospital_died_in: patientRes.data.last_consultation.facility_name,
+            date_declared_positive: patientRes.data.date_declared_positive
+              ? dayjs(patientRes.data.date_declared_positive).toDate()
+              : "",
+            date_of_admission: patientRes.data.last_consultation.admission_date
+              ? dayjs(patientRes.data.last_consultation.admission_date).toDate()
+              : "",
+            date_of_test: patientRes.data.date_of_test
+              ? dayjs(patientRes.data.date_of_test).toDate()
+              : "",
+            date_of_result: patientRes.data.date_of_result
+              ? dayjs(patientRes.data.date_of_result).toDate()
+              : "",
+            date_of_death: patientRes.data.last_consultation.death_datetime
+              ? dayjs(patientRes.data.last_consultation.death_datetime).toDate()
+              : "",
           };
           setPatientData(data);
         }
@@ -123,11 +168,11 @@ export default function PrintDeathReport(props: { id: string }) {
 
       <div id="section-to-print" className="print bg-white">
         <div></div>
-        <div className="mx-20 p-4">
-          <div className="font-bold text-xl text-center mt-6 mb-6">
+        <div className="p-4 md:mx-20">
+          <div className="my-6 text-center text-xl font-bold">
             Covid-19 Death Reporting: Form 1
           </div>
-          <div className="grid gap-2 grid-cols-1">
+          <div className="grid grid-cols-1 gap-2">
             <div>
               <span className="font-semibold leading-relaxed">Name: </span>
               {patientData.name}
@@ -160,7 +205,9 @@ export default function PrintDeathReport(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Date of declaring positive:{" "}
               </span>
-              {formatDate(patientData.date_declared_positive) || ""}
+              {patientData.date_declared_positive
+                ? formatDateTime(patientData.date_declared_positive)
+                : ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
@@ -172,13 +219,18 @@ export default function PrintDeathReport(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Date of sample collection for Covid testing:{" "}
               </span>
-              {formatDate(patientData.date_of_test) || ""}
+              {patientData.date_of_test
+                ? formatDateTime(patientData.date_of_test)
+                : ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Date of confirmation as Covid with SRF ID:{" "}
               </span>
-              {formatDate(patientData.date_of_result) || ""} (SRF ID:{" "}
+              {patientData.date_of_result
+                ? formatDateTime(patientData.date_of_result)
+                : ""}{" "}
+              ({"SRF ID: "}
               {patientData.srf_id || "-"})
             </div>
             <div>
@@ -198,13 +250,17 @@ export default function PrintDeathReport(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 Date of admission:{" "}
               </span>
-              {formatDate(patientData.date_of_admission) || ""}
+              {patientData.date_of_admission
+                ? formatDateTime(patientData.date_of_admission)
+                : ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Date of death:{" "}
               </span>
-              {formatDate(patientData.date_of_death) || ""}
+              {patientData.date_of_death
+                ? formatDateTime(patientData.date_of_death)
+                : ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
@@ -247,7 +303,9 @@ export default function PrintDeathReport(props: { id: string }) {
                 Date of sending the sample for confirmation to NIV/IUCBR
                 Kottayam:{" "}
               </span>
-              {formatDate(patientData.kottayam_sample_date) || ""}
+              {patientData.kottayam_sample_date
+                ? formatDateTime(patientData.kottayam_sample_date)
+                : ""}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
@@ -276,389 +334,233 @@ export default function PrintDeathReport(props: { id: string }) {
     </div>
   );
 
-  const handleChange = (e: any) => {
-    const key = e.target.name;
-    setPatientData({ ...patientData, [key]: e.target.value });
-  };
-
   return (
     <div>
       {isPrintMode ? (
         previewData()
       ) : (
-        <div className="m-5 p-5 bg-gray-100 border rounded-xl shadow">
-          <PageTitle
-            title={"Covid-19 Death Reporting : Form 1"}
-            crumbsReplacements={{
-              [props.id]: { name: patientName },
-              death_report: { style: "pointer-events-none" },
+        <Page
+          title={"Covid-19 Death Reporting : Form 1"}
+          crumbsReplacements={{
+            [props.id]: { name: patientName },
+            death_report: { style: "pointer-events-none" },
+          }}
+          backUrl={`/facility/${patientData.facility}/patient/${id}`}
+          className="w-full"
+        >
+          <Form<DeathReport>
+            disabled={isPrintMode}
+            defaults={patientData}
+            asyncGetDefaults={async () => patientData}
+            submitLabel="Preview"
+            onSubmit={async (formData) => {
+              setIsPrintMode(true);
+              setPatientData({ ...patientData, ...formData });
             }}
-            backUrl={`/facility/${patientData.facility}/patient/${id}`}
-          />
-          <div className="grid grid-rows-11">
-            <div className="grid grid-cols-1 mt-4 gap-10">
+            onCancel={() =>
+              navigate(`/facility/${patientData.facility}/patient/${id}`)
+            }
+            className="px-4 py-5 md:px-6"
+            noPadding
+          >
+            {(field) => (
               <div>
-                <InputLabel htmlFor="name">Name</InputLabel>
-                <LegacyTextInputField
-                  name="name"
-                  id="name"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.name}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
+                <div className="grid-rows-13 grid">
+                  <div className="md:mt-4 md:grid md:grid-cols-1 md:gap-10">
+                    <div>
+                      <TextFormField
+                        {...field("name")}
+                        type="text"
+                        label={t("name")}
+                      />
+                    </div>
+                  </div>
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
+                    <div>
+                      <TextFormField
+                        {...field("age")}
+                        type="number"
+                        label={t("age")}
+                      />
+                    </div>
+                    <div>
+                      <TextFormField
+                        {...field("gender")}
+                        type="text"
+                        label={t("gender")}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:mt-4">
+                    <TextAreaFormField
+                      {...field("address")}
+                      label={t("address")}
+                      rows={5}
+                    />
+                  </div>
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
+                    <div>
+                      <PhoneNumberFormField
+                        {...field("phone_number")}
+                        label={t("phone_number")}
+                        types={["mobile", "landline"]}
+                      />
+                    </div>
+                    <div>
+                      <TextFormField
+                        {...field("is_declared_positive")}
+                        type="text"
+                        label="Whether declared positive"
+                      />
+                    </div>
+                  </div>
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
+                    <div>
+                      <DateFormField
+                        {...field("date_declared_positive")}
+                        label="Date of declaring positive"
+                        position="LEFT"
+                        className="w-full"
+                        disableFuture
+                      />
+                    </div>
+                    <div>
+                      <TextFormField
+                        {...field("test_type")}
+                        type="text"
+                        label="Type of test done"
+                      />
+                    </div>
+                  </div>
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
+                    <div>
+                      <DateFormField
+                        {...field("date_of_test")}
+                        label="Date of sample collection for Covid testing"
+                        position="LEFT"
+                      />
+                    </div>
+                    <div>
+                      <DateFormField
+                        {...field("date_of_result")}
+                        label="Covid confirmation date"
+                        position="LEFT"
+                        disableFuture
+                      />
+                    </div>
+                  </div>
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
+                    <div>
+                      <TextFormField
+                        {...field("srf_id")}
+                        type="text"
+                        label={t("srf_id")}
+                      />
+                    </div>
+                    <div>
+                      <TextFormField
+                        {...field("is_vaccinated")}
+                        type="text"
+                        label="Whether vaccinated"
+                      />
+                    </div>
+                  </div>
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
+                    <div>
+                      <TextFormField
+                        {...field("hospital_tested_in")}
+                        type="text"
+                        label="Hospital in which patient tested for SARS COV 2"
+                      />
+                    </div>
+                    <div>
+                      <TextFormField
+                        {...field("hospital_died_in")}
+                        type="text"
+                        label="Name of the hospital in which the patient died"
+                      />
+                    </div>
+                  </div>
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
+                    <div>
+                      <DateFormField
+                        {...field("date_of_admission")}
+                        label="Date of admission"
+                        position="LEFT"
+                        disableFuture
+                      />
+                    </div>
+                    <div>
+                      <DateFormField
+                        {...field("date_of_death")}
+                        label="Date of death"
+                        position="LEFT"
+                        disableFuture
+                      />
+                    </div>
+                  </div>
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
+                    <div>
+                      <TextFormField
+                        {...field("comorbidities")}
+                        type="text"
+                        label="Mention the co-morbidities if present"
+                      />
+                    </div>
+                    <div>
+                      <TextFormField
+                        {...field("history_clinical_course")}
+                        type="text"
+                        label="History and clinical course in the hospital"
+                      />
+                    </div>
+                  </div>
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
+                    <div>
+                      <TextFormField
+                        {...field("brought_dead")}
+                        type="text"
+                        label="Whether brought dead"
+                      />
+                    </div>
+                    <div>
+                      <TextFormField
+                        {...field("home_or_cfltc")}
+                        type="text"
+                        label="If yes was the deceased brought from home/CFLTC"
+                      />
+                    </div>
+                  </div>
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
+                    <div>
+                      <TextFormField
+                        {...field("kottayam_confirmation_sent")}
+                        type="text"
+                        label="Whether NIV/IUBCR Kottayam confirmation sent"
+                      />
+                    </div>
+                    <div>
+                      <DateFormField
+                        {...field("kottayam_sample_date")}
+                        label="Sample sent to NIV/IUCBR Kottayam on"
+                        position="LEFT"
+                      />
+                    </div>
+                  </div>
+                  <div className="md:mt-4 md:grid md:grid-cols-2 md:gap-10">
+                    <div>
+                      <TextFormField
+                        {...field("cause_of_death")}
+                        type="text"
+                        label="Cause of death"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="grid grid-cols-2 mt-4 gap-10">
-              <div>
-                <InputLabel htmlFor="age">Age</InputLabel>
-                <LegacyTextInputField
-                  name="age"
-                  id="age"
-                  variant="outlined"
-                  margin="dense"
-                  type="number"
-                  value={patientData.age}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="gender">Gender</InputLabel>
-                <LegacyTextInputField
-                  name="gender"
-                  id="gender"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.gender}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 mt-4">
-              <InputLabel htmlFor="address">Address</InputLabel>
-              <LegacyMultilineInputField
-                name="address"
-                id="address"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                value={patientData.address}
-                onChange={(e) => handleChange(e)}
-                errors=""
-              />
-            </div>
-            <div className="grid grid-cols-2 mt-4 gap-10">
-              <div>
-                <InputLabel htmlFor="phone_number">Phone Number</InputLabel>
-                <LegacyTextInputField
-                  name="phone_number"
-                  id="phone_number"
-                  variant="outlined"
-                  margin="dense"
-                  type="tel"
-                  value={patientData.phone_number}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="is_declared_positive">
-                  Whether declared positive
-                </InputLabel>
-                <LegacyTextInputField
-                  name="is_declared_positive"
-                  id="is_declared_positive"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.is_declared_positive}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 mt-4 gap-10">
-              <div>
-                <InputLabel htmlFor="date_declared_positive">
-                  Date of declaring positive
-                </InputLabel>
-                <LegacyTextInputField
-                  name="date_declared_positive"
-                  id="date_declared_positive"
-                  variant="outlined"
-                  margin="dense"
-                  type="date"
-                  value={moment(patientData.date_declared_positive).format(
-                    "YYYY-MM-DD"
-                  )}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="test_type">Type of test done</InputLabel>
-                <LegacyTextInputField
-                  name="test_type"
-                  id="test_type"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.test_type}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-4 mt-4 gap-10">
-              <div className="col-span-2">
-                <InputLabel htmlFor="date_of_test">
-                  Date of sample collection for Covid testing
-                </InputLabel>
-                <LegacyTextInputField
-                  name="date_of_test"
-                  id="date_of_test"
-                  variant="outlined"
-                  margin="dense"
-                  type="date"
-                  value={moment(patientData.date_of_test).format("YYYY-MM-DD")}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-              <div className="col-span-1">
-                <InputLabel htmlFor="date_of_result">
-                  Covid confirmation date
-                </InputLabel>
-                <LegacyTextInputField
-                  name="date_of_result"
-                  id="date_of_result"
-                  variant="outlined"
-                  margin="dense"
-                  type="date"
-                  value={moment(patientData.date_of_result).format(
-                    "YYYY-MM-DD"
-                  )}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-              <div className="col-span-1">
-                <InputLabel htmlFor="srf_id">SRF ID</InputLabel>
-                <LegacyTextInputField
-                  name="srf_id"
-                  id="srf_id"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.srf_id}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 mt-4 gap-10">
-              <div>
-                <InputLabel htmlFor="hospital_tested_in">
-                  Hospital in which patient tested for SARS COV 2
-                </InputLabel>
-                <LegacyTextInputField
-                  name="hospital_tested_in"
-                  id="hospital_tested_in"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.hospital_tested_in}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="hospital_died_in">
-                  Name of the hospital in which the patient died
-                </InputLabel>
-                <LegacyTextInputField
-                  name="hospital_died_in"
-                  id="hospital_died_in"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.hospital_died_in}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 mt-4 gap-10">
-              <div>
-                <InputLabel htmlFor="date_of_admission">
-                  Date of admission
-                </InputLabel>
-                <LegacyTextInputField
-                  name="date_of_admission"
-                  id="date_of_admission"
-                  variant="outlined"
-                  margin="dense"
-                  type="date"
-                  value={patientData.date_of_admission}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="date_of_death">Date of death</InputLabel>
-                <LegacyTextInputField
-                  name="date_of_death"
-                  id="date_of_death"
-                  variant="outlined"
-                  margin="dense"
-                  type="date"
-                  value={patientData.date_of_death}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 mt-4 gap-10">
-              <div>
-                <InputLabel htmlFor="comorbidities">
-                  Mention the co-morbidities if present
-                </InputLabel>
-                <LegacyTextInputField
-                  name="comorbidities"
-                  id="comorbidities"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.comorbidities}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="history_clinical_course">
-                  History and clinical course in the hospital
-                </InputLabel>
-                <LegacyTextInputField
-                  name="history_clinical_course"
-                  id="history_clinical_course"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.history_clinical_course}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 mt-4 gap-10">
-              <div>
-                <InputLabel htmlFor="brought_dead">
-                  Whether brought dead
-                </InputLabel>
-                <LegacyTextInputField
-                  name="brought_dead"
-                  id="brought_dead"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.brought_dead}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="home_or_cfltc">
-                  If yes was the deceased brought from home/CFLTC
-                </InputLabel>
-                <LegacyTextInputField
-                  name="home_or_cfltc"
-                  id="home_or_cfltc"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.home_or_cfltc}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 mt-4 gap-10">
-              <div>
-                <InputLabel htmlFor="is_vaccinated">
-                  Whether vaccinated
-                </InputLabel>
-                <LegacyTextInputField
-                  name="is_vaccinated"
-                  id="is_vaccinated"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.is_vaccinated}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="kottayam_confirmation_sent">
-                  Whether NIV/IUBCR Kottayam confirmation sent
-                </InputLabel>
-                <LegacyTextInputField
-                  name="kottayam_confirmation_sent"
-                  id="kottayam_confirmation_sent"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.kottayam_confirmation_sent}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 mt-4 gap-10">
-              <div>
-                <InputLabel htmlFor="kottayam_sample_date">
-                  Sample sent to NIV/IUCBR Kottayam on
-                </InputLabel>
-                <LegacyTextInputField
-                  name="kottayam_sample_date"
-                  id="kottayam_sample_date"
-                  variant="outlined"
-                  margin="dense"
-                  type="date"
-                  value={patientData.kottayam_sample_date}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-              <div>
-                <InputLabel htmlFor="cause_of_death">Cause of death</InputLabel>
-                <LegacyTextInputField
-                  name="cause_of_death"
-                  id="cause_of_death"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  value={patientData.cause_of_death}
-                  onChange={(e) => handleChange(e)}
-                  errors=""
-                />
-              </div>
-            </div>
-          </div>
-          <div className="mt-6 w-1/2 md:w-1/4">
-            <button
-              onClick={(_) => setIsPrintMode(true)}
-              className="btn btn-primary"
-            >
-              Preview
-            </button>
-          </div>
-        </div>
+            )}
+          </Form>
+        </Page>
       )}
     </div>
   );

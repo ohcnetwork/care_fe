@@ -1,20 +1,29 @@
-import { useSelector } from "react-redux";
+import { createContext, useContext } from "react";
+
+export const AppConfigContext = createContext<IConfig | null>(null);
+
+interface ILogo {
+  light: string;
+  dark: string;
+}
 
 export interface IConfig {
   dashboard_url: string;
   github_url: string;
   coronasafe_url: string;
-  dpg_url: string;
   site_url: string;
   analytics_server_url: string;
-  static_header_logo: string;
-  static_light_logo: string;
-  static_black_logo: string;
+
+  header_logo: ILogo;
+  main_logo: ILogo;
+
   /**
-   * White logo of Digital Public Goods.
+   * Logo and description for custom deployment. (This overrides the state logo)
    */
-  static_dpg_white_logo: string;
-  static_coronasafe_logo: string;
+  custom_logo?: ILogo;
+  custom_logo_alt?: ILogo;
+  custom_description?: string;
+
   /**
    * The API key for the Google Maps API used for location picker.
    */
@@ -38,11 +47,7 @@ export interface IConfig {
   /**
    * If present, the image will be displayed in the login page.
    */
-  state_logo?: string;
-  /**
-   * If true, the state logo will be white by applying "invert brightness-0" classes.
-   */
-  state_logo_white?: boolean;
+  state_logo?: ILogo;
   /**
    * URL of the sample format for asset import.
    */
@@ -56,15 +61,23 @@ export interface IConfig {
    */
   enable_hcx: boolean;
   /**
+   * Env to enable ABDM features
+   */
+  enable_abdm: boolean;
+  /**
    * Env to toggle peacetime and wartime shifting
    */
   wartime_shifting: boolean;
 }
 
 const useConfig = () => {
-  const state: any = useSelector((state) => state);
-  const { config } = state;
-  return config.data as IConfig;
+  const config = useContext(AppConfigContext);
+
+  if (!config) {
+    throw new Error("useConfig must be used within an AppConfigProvider");
+  }
+
+  return config;
 };
 
 export default useConfig;

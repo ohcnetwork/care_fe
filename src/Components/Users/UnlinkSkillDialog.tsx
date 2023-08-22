@@ -1,58 +1,38 @@
-import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
-} from "@material-ui/core";
+import { useState } from "react";
+import ConfirmDialog from "../Common/ConfirmDialog";
 
-interface ConfirmDialogProps {
+interface Props {
   skillName: string;
   userName: string;
-  handleCancel: () => void;
-  handleOk: () => void;
+  onCancel: () => void;
+  onSubmit: () => void;
 }
 
-const UnlinkSkillDialog = (props: ConfirmDialogProps) => {
-  const { skillName, userName, handleCancel, handleOk } = props;
-
-  const [disable, setDisable] = useState(false);
+export default function UnlinkSkillDialog(props: Props) {
+  const [disabled, setDisabled] = useState(false);
 
   const handleSubmit = () => {
-    handleOk();
-    setDisable(true);
+    props.onSubmit();
+    setDisabled(true);
   };
-  return (
-    <Dialog open={true} onClose={handleCancel}>
-      <DialogContent>
-        <div className="md:min-w-[400px] max-w-[650px]">
-          <DialogContentText
-            id="alert-dialog-description"
-            className="flex text-gray-800 leading-relaxed sm:min-w-[400px]"
-          >
-            <div>
-              Are you sure you want to unlink the skill{" "}
-              <strong>{skillName}</strong> from user <strong>{userName}</strong>
-              ? the user will not have the skill associated anymore.
-            </div>
-          </DialogContentText>
-        </div>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCancel} color="primary">
-          Cancel
-        </Button>
-        <button
-          onClick={handleSubmit}
-          className="font-medium btn btn-danger"
-          disabled={disable}
-        >
-          Delete
-        </button>
-      </DialogActions>
-    </Dialog>
-  );
-};
 
-export default UnlinkSkillDialog;
+  return (
+    <ConfirmDialog
+      action="Unlink"
+      title="Unlink Skill"
+      variant="warning"
+      onClose={props.onCancel}
+      onConfirm={handleSubmit}
+      disabled={disabled}
+      show
+      description={
+        <span>
+          Are you sure you want to unlink the skill{" "}
+          <strong>{props.skillName}</strong> from user{" "}
+          <strong>{props.userName}</strong>? the user will not have the skill
+          associated anymore.
+        </span>
+      }
+    ></ConfirmDialog>
+  );
+}

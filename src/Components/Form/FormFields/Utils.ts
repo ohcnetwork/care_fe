@@ -1,4 +1,4 @@
-import React from "react";
+import { useContext } from "react";
 import { FieldError, FieldValidator } from "../FieldValidators";
 import { FormContext } from "../FormContext";
 import { FormDetails } from "../Utils";
@@ -23,6 +23,7 @@ export type FormFieldBaseProps<
   Form extends FormDetails | undefined = undefined
 > = {
   label?: React.ReactNode;
+  labelSuffix?: React.ReactNode;
   disabled?: boolean;
   className?: string;
   required?: boolean;
@@ -68,7 +69,7 @@ export const useFormFieldPropsResolver = <
     // defined, we want to use the props instead.
     //
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const registerField = React.useContext(props.context);
+    const registerField = useContext(props.context);
     const fieldProps = registerField(props.name, props.validate);
 
     const handleChange = (value: T) =>
@@ -86,7 +87,7 @@ export const useFormFieldPropsResolver = <
 
   return {
     ...props,
-    id: props.id,
+    id: props.id ?? props.name,
     name: props.name,
     onChange: props.onChange,
     value: props.value,

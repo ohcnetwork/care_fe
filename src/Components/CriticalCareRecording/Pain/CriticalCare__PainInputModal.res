@@ -89,10 +89,11 @@ let getStatus = (min, minText, max, maxText, val) => {
                   {str(Pain.regionToString(state.region))}
                 </span>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                <div>
+              <div className="flex flex-col sm:flex-row justify-center mt-2">
+                <div className="w-full">
                   <Slider
                     title={""}
+                    className="px-0 py-5 m-0"
                     disabled={previewMode}
                     start={"0"}
                     end={"5"}
@@ -110,7 +111,7 @@ let getStatus = (min, minText, max, maxText, val) => {
                     hasError={ValidationUtils.isInputInRangeInt(0, 5, Belt.Float.toString(painScale)->Belt.Int.fromString)}
                   />
                   <div className="mt-2">
-                    <label className="block font-medium text-black text-left">
+                    <label className="block font-medium text-black text-left mb-1">
                       {str("Description")}
                     </label>
                     <textarea

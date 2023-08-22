@@ -1,4 +1,4 @@
-import React, { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import {
@@ -8,12 +8,12 @@ import {
 } from "../../../Redux/actions";
 import PageTitle from "../../Common/PageTitle";
 import InvestigationTable from "./InvestigationTable";
-import loadable from "@loadable/component";
+
 import _ from "lodash";
 import { navigate } from "raviger";
 import * as Notification from "../../../Utils/Notifications.js";
 
-const Loading = loadable(() => import("../../Common/Loading"));
+const Loading = lazy(() => import("../../Common/Loading"));
 
 const initialState = {
   changedFields: {},
@@ -160,7 +160,7 @@ export default function ShowInvestigation(props: any) {
   }, [state.initialValues]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
+    <div className="mx-auto max-w-7xl px-4">
       <PageTitle
         title="Investigation"
         className="mx-3 md:mx-4"

@@ -453,13 +453,14 @@ button:disabled,
 }
 
 .App-logo {
-    height: 40vmin;
+    height: 10vmin;
     pointer-events: none;
+    filter: brightness(80%);
 }
 
 @media (prefers-reduced-motion: no-preference) {
     .App-logo {
-        animation: App-logo-spin infinite 20s linear;
+        animation: App-logo-blink 1s linear infinite;
     }
 }
 
@@ -473,29 +474,12 @@ button:disabled,
     color: white;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-.MuiInputBase-input:focus {
-    @apply ring-0 !important;
-}
-
-.Mui-selected .MuiSvgIcon-root {
-    color: #0085ad !important;
-}
-
-.Mui-selected .MuiListItemText-root {
-    color: #0085ad !important;
-}
-
-.MuiSelect-select:focus {
-    background-color: #ffffff !important;
+@keyframes App-logo-blink {
+    0% { opacity: 0;}
+    25% { opacity: 0.5;}
+    50% {opacity: 1;}
+    75% {opacity: 0.5;}
+    100% {opacity: 0;}
 }
 
 .main-content {
@@ -592,19 +576,6 @@ button:disabled,
     letter-spacing: 0.025em; 
 }
 
-.textMarginCenter {
-    text-align: center;
-    padding-top: 5px;
-}
-
-.nativeSelectMod .MuiInputBase-root {
-    width: 100%;
-}
-
-.care-secondary-color {
-    color: #3f51b5;
-}
-
 .hometext {
     margin: 10px 35px !important;
 }
@@ -615,23 +586,9 @@ button:disabled,
     }
 }
 
-.MuiCardHeader-title {
-    text-align: center;
-}
-
 @media (min-width: 768px) {
     .hometitle {
         margin-top: 15px !important;
-    }
-}
-
-.MuiTypography-h6 {
-    font-weight: 400 !important;
-}
-
-@media (max-width: 768px) {
-    .MuiTypography-h6 {
-        font-size: 1.1rem !important;
     }
 }
 
@@ -727,18 +684,6 @@ button:disabled,
     box-shadow: 0 0 0 1px #28a745 !important;
 }
 
-.shifting-page-filter-dropdown .MuiFormControl-root {
-    @apply mt-2;
-}
-
-.shifting-page-filter-dropdown .MuiFormControl-root .MuiInputBase-root {
-    @apply bg-white h-9;
-}
-
-.shifting-page-filter-dropdown .MuiFormControl-root .MuiInputBase-root input {
-    @apply p-0;
-}
-
 @media (min-width:770px) {
     .title-text {
         position: absolute;
@@ -746,24 +691,6 @@ button:disabled,
         right: 0;
         margin-top: -3rem;
     }
-}
-
-.DateRangePicker_picker__portal {
-    z-index: 100000 !important;
-}
-
-.DateRangePickerInput {
-    padding: 4px;
-    border-radius: 4px;
-    border-color: rgba(0, 0, 0, 0.22);
-}
-
-.DateRangePickerInput:hover {
-    border-color: rgba(0, 0, 0, 0.8);
-}
-
-.DateRangePicker_picker {
-    z-index: 100000 !important;
 }
 
 .copied-to-cb {

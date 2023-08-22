@@ -7,8 +7,8 @@ import {
   DISEASE_STATUS,
   PATIENT_FILTER_CATEGORIES,
   ADMITTED_TO,
+  DISCHARGE_REASONS,
 } from "../../Common/constants";
-import moment from "moment";
 import {
   getAllLocalBody,
   getAnyFacility,
@@ -32,9 +32,11 @@ import useMergeState from "../../Common/hooks/useMergeState";
 import useConfig from "../../Common/hooks/useConfig";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import AccordionV2 from "../Common/components/AccordionV2";
+import { dateQueryString } from "../../Utils/utils";
+import dayjs from "dayjs";
 
 const getDate = (value: any) =>
-  value && moment(value).isValid() && moment(value).toDate();
+  value && dayjs(value).isValid() && dayjs(value).toDate();
 
 export default function PatientFilter(props: any) {
   const { kasp_enabled, kasp_string } = useConfig();
@@ -75,6 +77,8 @@ export default function PatientFilter(props: any) {
       filter.last_consultation_admitted_bed_type_list
         ? filter.last_consultation_admitted_bed_type_list.split(",")
         : [],
+    last_consultation_discharge_reason:
+      filter.last_consultation_discharge_reason || null,
     srf_id: filter.srf_id || null,
     number_of_doses: filter.number_of_doses || null,
     covin_id: filter.covin_id || null,
@@ -230,6 +234,7 @@ export default function PatientFilter(props: any) {
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_bed_type_list,
+      last_consultation_discharge_reason,
       number_of_doses,
       covin_id,
       srf_id,
@@ -248,64 +253,31 @@ export default function PatientFilter(props: any) {
       lsgBody: lsgBody || "",
       facility: facility || "",
       facility_type: facility_type || "",
-      date_declared_positive_before:
-        date_declared_positive_before &&
-        moment(date_declared_positive_before).isValid()
-          ? moment(date_declared_positive_before).format("YYYY-MM-DD")
-          : "",
-      date_declared_positive_after:
-        date_declared_positive_after &&
-        moment(date_declared_positive_after).isValid()
-          ? moment(date_declared_positive_after).format("YYYY-MM-DD")
-          : "",
-      date_of_result_before:
-        date_of_result_before && moment(date_of_result_before).isValid()
-          ? moment(date_of_result_before).format("YYYY-MM-DD")
-          : "",
-      date_of_result_after:
-        date_of_result_after && moment(date_of_result_after).isValid()
-          ? moment(date_of_result_after).format("YYYY-MM-DD")
-          : "",
-      created_date_before:
-        created_date_before && moment(created_date_before).isValid()
-          ? moment(created_date_before).format("YYYY-MM-DD")
-          : "",
-      created_date_after:
-        created_date_after && moment(created_date_after).isValid()
-          ? moment(created_date_after).format("YYYY-MM-DD")
-          : "",
-      modified_date_before:
-        modified_date_before && moment(modified_date_before).isValid()
-          ? moment(modified_date_before).format("YYYY-MM-DD")
-          : "",
-      modified_date_after:
-        modified_date_after && moment(modified_date_after).isValid()
-          ? moment(modified_date_after).format("YYYY-MM-DD")
-          : "",
-      date_of_result:
-        date_of_result && moment(date_of_result).isValid()
-          ? moment(date_of_result).format("YYYY-MM-DD")
-          : "",
-      last_consultation_admission_date_before:
-        last_consultation_admission_date_before &&
-        moment(last_consultation_admission_date_before).isValid()
-          ? moment(last_consultation_admission_date_before).format("YYYY-MM-DD")
-          : "",
-      last_consultation_admission_date_after:
-        last_consultation_admission_date_after &&
-        moment(last_consultation_admission_date_after).isValid()
-          ? moment(last_consultation_admission_date_after).format("YYYY-MM-DD")
-          : "",
-      last_consultation_discharge_date_before:
-        last_consultation_discharge_date_before &&
-        moment(last_consultation_discharge_date_before).isValid()
-          ? moment(last_consultation_discharge_date_before).format("YYYY-MM-DD")
-          : "",
-      last_consultation_discharge_date_after:
-        last_consultation_discharge_date_after &&
-        moment(last_consultation_discharge_date_after).isValid()
-          ? moment(last_consultation_discharge_date_after).format("YYYY-MM-DD")
-          : "",
+      date_declared_positive_before: dateQueryString(
+        date_declared_positive_before
+      ),
+      date_declared_positive_after: dateQueryString(
+        date_declared_positive_after
+      ),
+      date_of_result_before: dateQueryString(date_of_result_before),
+      date_of_result_after: dateQueryString(date_of_result_after),
+      created_date_before: dateQueryString(created_date_before),
+      created_date_after: dateQueryString(created_date_after),
+      modified_date_before: dateQueryString(modified_date_before),
+      modified_date_after: dateQueryString(modified_date_after),
+      date_of_result: dateQueryString(date_of_result),
+      last_consultation_admission_date_before: dateQueryString(
+        last_consultation_admission_date_before
+      ),
+      last_consultation_admission_date_after: dateQueryString(
+        last_consultation_admission_date_after
+      ),
+      last_consultation_discharge_date_before: dateQueryString(
+        last_consultation_discharge_date_before
+      ),
+      last_consultation_discharge_date_after: dateQueryString(
+        last_consultation_discharge_date_after
+      ),
       category: category || "",
       gender: gender || "",
       disease_status:
@@ -314,35 +286,21 @@ export default function PatientFilter(props: any) {
       age_max: age_max || "",
       last_consultation_admitted_bed_type_list:
         last_consultation_admitted_bed_type_list || [],
+      last_consultation_discharge_reason:
+        last_consultation_discharge_reason || "",
       srf_id: srf_id || "",
       number_of_doses: number_of_doses || "",
       covin_id: covin_id || "",
       is_kasp: is_kasp || "",
       is_declared_positive: is_declared_positive || "",
-      last_consultation_symptoms_onset_date_before:
-        last_consultation_symptoms_onset_date_before &&
-        moment(last_consultation_symptoms_onset_date_before).isValid()
-          ? moment(last_consultation_symptoms_onset_date_before).format(
-              "YYYY-MM-DD"
-            )
-          : "",
-      last_consultation_symptoms_onset_date_after:
-        last_consultation_symptoms_onset_date_after &&
-        moment(last_consultation_symptoms_onset_date_after).isValid()
-          ? moment(last_consultation_symptoms_onset_date_after).format(
-              "YYYY-MM-DD"
-            )
-          : "",
-      last_vaccinated_date_before:
-        last_vaccinated_date_before &&
-        moment(last_vaccinated_date_before).isValid()
-          ? moment(last_vaccinated_date_before).format("YYYY-MM-DD")
-          : "",
-      last_vaccinated_date_after:
-        last_vaccinated_date_after &&
-        moment(last_vaccinated_date_after).isValid()
-          ? moment(last_vaccinated_date_after).format("YYYY-MM-DD")
-          : "",
+      last_consultation_symptoms_onset_date_before: dateQueryString(
+        last_consultation_symptoms_onset_date_before
+      ),
+      last_consultation_symptoms_onset_date_after: dateQueryString(
+        last_consultation_symptoms_onset_date_after
+      ),
+      last_vaccinated_date_before: dateQueryString(last_vaccinated_date_before),
+      last_vaccinated_date_after: dateQueryString(last_vaccinated_date_after),
       last_consultation_is_telemedicine:
         last_consultation_is_telemedicine || "",
       is_antenatal: is_antenatal || "",
@@ -373,14 +331,14 @@ export default function PatientFilter(props: any) {
     >
       <AccordionV2
         title={
-          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
             Patient Details based
           </h1>
         }
         expanded={true}
         className="w-full rounded-md"
       >
-        <div className="w-full grid gap-4 grid-cols-1">
+        <div className="grid w-full grid-cols-1 gap-4">
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Gender</FieldLabel>
             <SelectMenuV2
@@ -452,6 +410,23 @@ export default function PatientFilter(props: any) {
               }
             />
           </div>
+          <div className="w-full flex-none" id="discharge-reason-select">
+            <FieldLabel className="text-sm">Discharge Reason</FieldLabel>
+            <SelectMenuV2
+              id="last_consultation_discharge_reason"
+              placeholder="Select discharge reason"
+              options={DISCHARGE_REASONS}
+              value={filterState.last_consultation_discharge_reason}
+              optionValue={(o) => o.id}
+              optionLabel={(o) => o.text}
+              onChange={(o) =>
+                setFilterState({
+                  ...filterState,
+                  last_consultation_discharge_reason: o,
+                })
+              }
+            />
+          </div>
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Telemedicine</FieldLabel>
             <SelectMenuV2
@@ -502,14 +477,14 @@ export default function PatientFilter(props: any) {
       </AccordionV2>
       <AccordionV2
         title={
-          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
             Date based
           </h1>
         }
         expanded={true}
         className="w-full rounded-md"
       >
-        <div className="w-full grid gap-4 grid-cols-1">
+        <div className="grid w-full grid-cols-1 gap-4">
           <DateRangeFormField
             labelClassName="text-sm"
             name="created_date"
@@ -577,14 +552,14 @@ export default function PatientFilter(props: any) {
       </AccordionV2>
       <AccordionV2
         title={
-          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
             Geography based
           </h1>
         }
         expanded={true}
         className="w-full rounded-md"
       >
-        <div className="w-full grid gap-4 grid-cols-1">
+        <div className="grid w-full grid-cols-1 gap-4">
           <div className="w-full flex-none">
             <FieldLabel className="text-sm">Facility</FieldLabel>
             <FacilitySelect
@@ -593,7 +568,6 @@ export default function PatientFilter(props: any) {
               selected={filterState.facility_ref}
               showAll
               setSelected={(obj) => setFacility(obj, "facility")}
-              className="shifting-page-filter-dropdown"
             />
           </div>
 
@@ -640,7 +614,6 @@ export default function PatientFilter(props: any) {
               name="district"
               selected={filterState.district_ref}
               setSelected={(obj: any) => setFacility(obj, "district")}
-              className="shifting-page-filter-dropdown"
               errors={""}
             />
           </div>
@@ -648,14 +621,14 @@ export default function PatientFilter(props: any) {
       </AccordionV2>
       <AccordionV2
         title={
-          <h1 className="font-bold text-purple-500 text-left text-xl mb-4">
+          <h1 className="mb-4 text-left text-xl font-bold text-purple-500">
             COVID Details based
           </h1>
         }
         expanded={true}
         className="w-full rounded-md"
       >
-        <div className="w-full grid gap-4 grid-cols-1">
+        <div className="grid w-full grid-cols-1 gap-4">
           {kasp_enabled && (
             <div className="w-full flex-none">
               <FieldLabel className="text-sm">{kasp_string}</FieldLabel>
@@ -692,7 +665,7 @@ export default function PatientFilter(props: any) {
               optionValue={({ id }) => id}
               optionIcon={({ id }) => (
                 <>
-                  <CareIcon className="care-l-syringe w-5 mr-2" />
+                  <CareIcon className="care-l-syringe mr-2 w-5" />
                   <span className="font-bold">{id}</span>
                 </>
               )}

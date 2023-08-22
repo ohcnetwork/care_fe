@@ -2,7 +2,6 @@
 const colors = require("tailwindcss/colors");
 const defaultTheme = require("tailwindcss/defaultTheme");
 
-
 const gray = {
   100: "#FBFAFC",
   200: "#F7F5FA",
@@ -22,6 +21,7 @@ module.exports = {
     screens: {
       vs: "348px",
       ...defaultTheme.screens,
+      "3xl": "1920px",
     },
     extend: {
       fontFamily: {
@@ -87,15 +87,10 @@ module.exports = {
     aspectRatio: false,
   },
   content: ["./src/**/*.{html,md,js,jsx,ts,tsx,res}", "./index.html"],
-  safelist: [
-    {
-      pattern: /^(bg-[^/]+|text-[^/]+|border-.+)$/,
-      variants: ["hover"],
-    },
-  ],
   plugins: [
     require("@tailwindcss/forms"),
     require("@tailwindcss/typography"),
     require("@tailwindcss/aspect-ratio"),
+    require("@tailwindcss/container-queries"),
   ],
 };

@@ -1,19 +1,18 @@
-import { Card, CardContent, InputLabel } from "@material-ui/core";
-import { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
-import loadable from "@loadable/component";
+
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getItems, setMinQuantity, getAnyFacility } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  LegacySelectField,
-  LegacyTextInputField,
-} from "../Common/HelperInputFields";
 import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
+import Card from "../../CAREUI/display/Card";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
   id: "",
@@ -48,7 +47,6 @@ export const SetInventoryForm = (props: any) => {
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  // const [offset, setOffset] = useState(0);
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
   const [currentUnit, setCurrentUnit] = useState<any>();
   const [facilityName, setFacilityName] = useState("");
@@ -123,10 +121,8 @@ export const SetInventoryForm = (props: any) => {
     goBack();
   };
 
-  const handleChange = (e: any) => {
-    const form = { ...state.form };
-    form[e.target.name] = e.target.value;
-    dispatch({ type: "set_form", form });
+  const handleChange = ({ name, value }: FieldChangeEvent<unknown>) => {
+    dispatch({ type: "set_form", form: { ...state.form, [name]: value } });
   };
 
   if (isLoading) {
@@ -134,78 +130,59 @@ export const SetInventoryForm = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title="Set Minimum Quantity"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          min_quantity: {
-            name: "Min Quantity",
-            uri: `/facility/${facilityId}/inventory/min_quantity/list`,
-          },
-          set: {
-            style: "pointer-events-none",
-          },
-        }}
-        backUrl={`/facility/${facilityId}/inventory/min_quantity/list`}
-      />
-      <div className="mt-4">
-        <Card>
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <CardContent>
-              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
-                <div>
-                  <InputLabel id="inventory_name_label">
-                    Inventory Name
-                  </InputLabel>
-                  <LegacySelectField
-                    name="id"
-                    variant="outlined"
-                    margin="dense"
-                    value={state.form.id}
-                    options={data.map((e) => {
-                      return { id: e.id, name: e.name };
-                    })}
-                    onChange={handleChange}
-                    optionKey="id"
-                    optionValue="name"
-                  />
-                </div>
+    <Page
+      title="Set Minimum Quantity"
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        min_quantity: {
+          name: "Min Quantity",
+          uri: `/facility/${facilityId}/inventory/min_quantity/list`,
+        },
+        set: {
+          style: "pointer-events-none",
+        },
+      }}
+      backUrl={`/facility/${facilityId}/inventory/min_quantity/list`}
+    >
+      <Card className="mx-auto mt-10 max-w-3xl">
+        <form onSubmit={(e) => handleSubmit(e)} className="mt-6 flex flex-col">
+          <SelectFormField
+            name="id"
+            required
+            label="Inventory Name"
+            value={state.form.id}
+            options={data}
+            onChange={handleChange}
+            optionValue={(item) => item.id}
+            optionLabel={(item) => item.name}
+          />
 
-                <div>
-                  <InputLabel id="inventory_name_label">Unit</InputLabel>
-                  <LegacyTextInputField
-                    name="id"
-                    variant="outlined"
-                    margin="dense"
-                    type="string"
-                    value={currentUnit}
-                    errors=""
-                  />
-                </div>
+          <div className="flex gap-2">
+            <TextFormField
+              className="w-full"
+              label="Minimum Quantity"
+              required
+              name="quantity"
+              type="number"
+              value={state.form.quantity}
+              onChange={handleChange}
+            />
 
-                <div className="md:col-span-2">
-                  <InputLabel id="quantity">Item Min Quantity</InputLabel>
-                  <LegacyTextInputField
-                    fullWidth
-                    name="quantity"
-                    variant="outlined"
-                    margin="dense"
-                    type="number"
-                    value={state.form.quantity}
-                    onChange={handleChange}
-                    errors=""
-                  />
-                </div>
-              </div>
-              <div className="sm:flex sm:justify-between mt-4">
-                <Cancel onClick={() => goBack()} />
-                <Submit onClick={handleSubmit} label="Set" />
-              </div>
-            </CardContent>
-          </form>
-        </Card>
-      </div>
-    </div>
+            <TextFormField
+              name="unit"
+              label="Unit"
+              value={currentUnit}
+              onChange={handleChange}
+              disabled
+            />
+          </div>
+
+          <div className="mt-4 flex flex-col justify-end gap-2 sm:flex-row">
+            <Cancel onClick={() => goBack()} />
+            <Submit label="Set" />
+          </div>
+        </form>
+      </Card>
+    </Page>
   );
 };

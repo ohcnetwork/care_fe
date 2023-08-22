@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { LegacyErrorHelperText } from "../Common/HelperInputFields";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import { postResetPassword, checkResetToken } from "../../Redux/actions";
@@ -8,7 +7,8 @@ import { useTranslation } from "react-i18next";
 import { LocalStorageKeys } from "../../Common/constants";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
-import CollapseV2 from "../Common/components/CollapseV2";
+import { validateRule } from "../Users/UserAdd";
+import { validatePassword } from "../../Common/validation.js";
 
 export const ResetPassword = (props: any) => {
   const dispatch: any = useDispatch();
@@ -20,7 +20,10 @@ export const ResetPassword = (props: any) => {
   const initErr: any = {};
   const [form, setForm] = useState(initForm);
   const [errors, setErrors] = useState(initErr);
-  const [passReg, setPassReg] = useState(0);
+  const [passwordInputInFocus, setPasswordInputInFocus] = useState(false);
+  const [confirmPasswordInputInFocus, setConfirmPasswordInputInFocus] =
+    useState(false);
+
   const { t } = useTranslation();
   const handleChange = (e: any) => {
     const { value, name } = e;
@@ -31,7 +34,6 @@ export const ResetPassword = (props: any) => {
       setErrors(errorField);
     }
     fieldValue[name] = value;
-    setPassReg(0);
     setForm(fieldValue);
   };
 
@@ -40,12 +42,10 @@ export const ResetPassword = (props: any) => {
     const err = Object.assign({}, errors);
     if (form.password !== form.confirm) {
       hasError = true;
-      setPassReg(1);
       err.confirm = t("password_mismatch");
     }
 
-    const regex = /^(?=.*[a-z]+)(?=.*[A-Z]+)(?=.*[0-9]+)(?=.*[!@#$%^&*]).{8,}$/;
-    if (!regex.test(form.password)) {
+    if (!validatePassword(form.password)) {
       hasError = true;
       err.password = t("invalid_password");
     }
@@ -105,12 +105,12 @@ export const ResetPassword = (props: any) => {
       <div>
         <div>
           <form
-            className="max-w-xl bg-white shadow rounded-lg mx-auto"
+            className="mx-auto max-w-xl rounded-lg bg-white shadow"
             onSubmit={(e) => {
               handleSubmit(e);
             }}
           >
-            <div className="text-xl font-bold py-4 text-center">
+            <div className="py-4 text-center text-xl font-bold">
               {t("reset_password")}
             </div>
             <div className="px-4">
@@ -120,28 +120,46 @@ export const ResetPassword = (props: any) => {
                 placeholder={t("new_password")}
                 onChange={handleChange}
                 error={errors.password}
+                onFocus={() => setPasswordInputInFocus(true)}
+                onBlur={() => setPasswordInputInFocus(false)}
               />
-              <CollapseV2 opened={passReg === 0}>
-                <div className="mb-4 px-4">
-                  <ul className="text-red-500 list-disc">
-                    <li>{t("min_password_len_8")}</li>
-                    <li>{t("req_atleast_one_digit")}</li>
-                    <li>{t("req_atleast_one_uppercase")}</li>
-                    <li>{t("req_atleast_one_lowercase")}</li>
-                    <li>{t("req_atleast_one_symbol")}</li>
-                  </ul>
+              {passwordInputInFocus && (
+                <div className="text-small mb-2 pl-2 text-gray-500">
+                  {validateRule(
+                    form.password?.length >= 8,
+                    "Password should be atleast 8 characters long"
+                  )}
+                  {validateRule(
+                    form.password !== form.password.toUpperCase(),
+                    "Password should contain at least 1 lowercase letter"
+                  )}
+                  {validateRule(
+                    form.password !== form.password.toLowerCase(),
+                    "Password should contain at least 1 uppercase letter"
+                  )}
+                  {validateRule(
+                    /\d/.test(form.password),
+                    "Password should contain at least 1 number"
+                  )}
                 </div>
-              </CollapseV2>
+              )}
               <TextFormField
                 type="password"
                 name="confirm"
                 placeholder={t("confirm_password")}
                 onChange={handleChange}
                 error={errors.confirm}
+                onFocus={() => setConfirmPasswordInputInFocus(true)}
+                onBlur={() => setConfirmPasswordInputInFocus(false)}
               />
-              <LegacyErrorHelperText error={errors.token} />
+              {confirmPasswordInputInFocus &&
+                form.confirm.length > 0 &&
+                validateRule(
+                  form.confirm === form.password,
+                  "Confirm password should match the entered password"
+                )}
             </div>
-            <div className="sm:flex sm:justify-between grid p-4">
+            <div className="grid p-4 sm:flex sm:justify-between">
               <Cancel onClick={() => navigate("/login")} />
               <Submit onClick={(e) => handleSubmit(e)} label="reset" />
             </div>
