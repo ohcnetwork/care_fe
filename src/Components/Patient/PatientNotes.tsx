@@ -118,6 +118,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       />
       <h3 className="pl-10 text-lg">Add new notes</h3>
       <textarea
+        id="doctor_notes_textarea"
         rows={3}
         placeholder="Type your Note"
         className="mx-10 my-4 rounded-lg border border-gray-500 p-4 focus:border-primary-500 focus:outline-none focus:ring-primary-500"
@@ -125,6 +126,7 @@ const PatientNotes = (props: PatientNotesProps) => {
       />
       <div className="flex w-full justify-end pr-10">
         <ButtonV2
+          id="submit"
           authorizeFor={NonReadOnlyUsers}
           onClick={onAddNote}
           disabled={!patientActive}

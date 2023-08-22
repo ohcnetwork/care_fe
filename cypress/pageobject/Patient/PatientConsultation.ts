@@ -1,8 +1,10 @@
 export class PatientConsultationPage {
   selectConsultationStatus(status: string) {
-    cy.get("#consultation_status")
+    cy.wait(1000);
+    cy.get("#consultation_status button")
       .click()
       .then(() => {
+        cy.get("[role='option']", { timeout: 3000 }).should("be.visible");
         cy.get("[role='option']").contains(status).click();
       });
   }
@@ -74,5 +76,101 @@ export class PatientConsultationPage {
   submitPrescriptionAndReturn() {
     cy.get("button#submit").should("be.visible").click();
     cy.get("[data-testid='return-to-patient-dashboard']").click();
+  }
+
+  visitEditConsultationPage() {
+    cy.get("#view_consulation_updates").click();
+    cy.get("button").contains("Edit Consultation Details").click();
+  }
+
+  setSymptomsDate(date: string) {
+    cy.get("#symptoms_onset_date")
+      .click()
+      .then(() => {
+        cy.get("[placeholder='DD/MM/YYYY']").type(date);
+      });
+  }
+
+  updateConsultation() {
+    cy.get("#submit").contains("Update Consultation").click();
+  }
+
+  verifySuccessNotification(message: string) {
+    cy.verifyNotification(message);
+  }
+
+  updateSymptoms(symptoms: string) {
+    this.selectSymptoms(symptoms);
+    cy.get("#symptoms").click();
+  }
+
+  visitShiftRequestPage() {
+    cy.get("#create_shift_request").click();
+  }
+
+  enterPatientShiftDetails(
+    name: string,
+    phone_number: string,
+    facilityName: string,
+    reason: string
+  ) {
+    cy.get("#refering_facility_contact_name").type(name);
+    cy.get("#refering_facility_contact_number").type(phone_number);
+    cy.get("input[name='assigned_facility']")
+      .type(facilityName)
+      .then(() => {
+        cy.get("[role='option']").first().click();
+      });
+    cy.get("#reason").type(reason);
+  }
+
+  createShiftRequest() {
+    cy.get("#submit").click();
+  }
+
+  visitDoctorNotesPage() {
+    cy.get("#patient_doctor_notes").click();
+  }
+
+  addDoctorsNotes(notes: string) {
+    cy.get("#doctor_notes_textarea").type(notes);
+  }
+
+  postDoctorNotes() {
+    cy.get("#submit").contains("Post Your Note").click();
+  }
+
+  clickDischargePatient() {
+    cy.get("#discharge_patient_from_care").click();
+  }
+
+  selectDischargeReason(reason: string) {
+    cy.get("#discharge_reason")
+      .click()
+      .then(() => {
+        cy.get("[role='option']").contains(reason).click();
+      });
+  }
+
+  addDischargeNotes(notes: string) {
+    cy.get("#discharge_notes").type(notes);
+  }
+
+  confirmDischarge() {
+    cy.get("#submit").contains("Confirm Discharge").click();
+  }
+
+  discontinuePreviousPrescription() {
+    cy.get("button").contains("Discontinue").click();
+    cy.get("#submit").contains("Discontinue").click();
+  }
+
+  visitEditPrescriptionPage() {
+    cy.get("#consultation_tab_nav").contains("Medicines").click();
+    cy.get("a[href='prescriptions']").first().click();
+  }
+
+  submitPrescription() {
+    cy.get("#submit").contains("Submit").click();
   }
 }

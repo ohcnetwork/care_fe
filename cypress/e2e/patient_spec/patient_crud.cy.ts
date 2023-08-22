@@ -30,7 +30,7 @@ describe("Patient Creation with consultation", () => {
 
   it("Create a new patient with no consultation", () => {
     patientPage.createPatient();
-    patientPage.selectFacility("cypress facility");
+    patientPage.selectFacility("Dummy Facility");
     patientPage.enterPatientDetails(
       phone_number,
       emergency_phone_number,
@@ -122,6 +122,70 @@ describe("Patient Creation with consultation", () => {
     patientConsultationPage.enterDosage("3");
     patientConsultationPage.selectDosageFrequency("Twice daily");
     patientConsultationPage.submitPrescriptionAndReturn();
+  });
+
+  it("Edit created consultation to existing patient", () => {
+    updatePatientPage.visitUpdatedPatient();
+    patientConsultationPage.visitEditConsultationPage();
+    patientConsultationPage.selectConsultationStatus(
+      "Referred from other hospital"
+    );
+    patientConsultationPage.updateSymptoms("FEVER");
+    patientConsultationPage.setSymptomsDate("01082023");
+    patientConsultationPage.updateConsultation();
+    patientConsultationPage.verifySuccessNotification(
+      "Consultation updated successfully"
+    );
+  });
+
+  it("Create Patient shift requests.", () => {
+    updatePatientPage.visitUpdatedPatient();
+    patientConsultationPage.visitShiftRequestPage();
+    patientConsultationPage.enterPatientShiftDetails(
+      "Test User",
+      "+919120330220",
+      "Dummy Shifting",
+      "Reason"
+    );
+    patientConsultationPage.createShiftRequest();
+    patientConsultationPage.verifySuccessNotification(
+      "Shift request created successfully"
+    );
+  });
+
+  it("Post doctor notes for an already created patient", () => {
+    updatePatientPage.visitUpdatedPatient();
+    patientConsultationPage.visitDoctorNotesPage();
+    patientConsultationPage.addDoctorsNotes("Test Doctor Notes");
+    patientConsultationPage.postDoctorNotes();
+    patientConsultationPage.verifySuccessNotification(
+      "Note added successfully"
+    );
+  });
+
+  it("Edit prescription for an already created patient", () => {
+    updatePatientPage.visitUpdatedPatient();
+    patientConsultationPage.visitEditPrescriptionPage();
+    patientConsultationPage.discontinuePreviousPrescription();
+    patientConsultationPage.verifySuccessNotification(
+      "Prescription discontinued"
+    );
+    patientConsultationPage.clickAddPrescription();
+    patientConsultationPage.prescribeMedicine();
+    patientConsultationPage.enterDosage("4");
+    patientConsultationPage.selectDosageFrequency("Twice daily");
+    patientConsultationPage.submitPrescription();
+  });
+
+  it("Discharge a patient", () => {
+    updatePatientPage.visitUpdatedPatient();
+    patientConsultationPage.clickDischargePatient();
+    patientConsultationPage.selectDischargeReason("Recovered");
+    patientConsultationPage.addDischargeNotes("Discharge notes");
+    patientConsultationPage.confirmDischarge();
+    patientConsultationPage.verifySuccessNotification(
+      "Patient Discharged Successfully"
+    );
   });
 
   afterEach(() => {
