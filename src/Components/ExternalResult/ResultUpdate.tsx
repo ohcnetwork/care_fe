@@ -1,5 +1,5 @@
-import { useCallback, useState, useReducer } from "react";
-import loadable from "@loadable/component";
+import { useCallback, useState, useReducer, lazy } from "react";
+
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -18,7 +18,7 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import Page from "../Common/components/Page.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
   address: "",

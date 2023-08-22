@@ -1,9 +1,9 @@
-import React from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
 import CircularProgress from "./components/CircularProgress";
 import { useTranslation } from "react-i18next";
 import { StateInterface } from "../Patient/FileUpload";
+import { Dispatch, Fragment, ReactNode, SetStateAction } from "react";
 
 export const zoom_values = [
   "h-1/6 w-1/6 my-40",
@@ -15,16 +15,16 @@ export const zoom_values = [
 ];
 
 type FilePreviewProps = {
-  title?: React.ReactNode;
-  description?: React.ReactNode;
+  title?: ReactNode;
+  description?: ReactNode;
   show: boolean;
   onClose: () => void;
   file_state: StateInterface;
-  setFileState: React.Dispatch<React.SetStateAction<StateInterface>>;
+  setFileState: Dispatch<SetStateAction<StateInterface>>;
   downloadURL?: string;
   fileUrl: string;
   className?: string;
-  titleAction?: React.ReactNode;
+  titleAction?: ReactNode;
   fixedWidth?: boolean;
 };
 
@@ -60,7 +60,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   };
 
   const handleRotate = (rotation: number) => {
-    setFileState((prev) => ({
+    setFileState((prev: any) => ({
       ...prev,
       rotation: prev.rotation + rotation,
     }));
@@ -68,10 +68,10 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   return (
     <div>
-      <Transition appear show={show} as={React.Fragment}>
+      <Transition appear show={show} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={onClose}>
           <Transition.Child
-            as={React.Fragment}
+            as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0"
             enterTo="opacity-100"
@@ -85,7 +85,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
           <div className="fixed inset-0 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4 text-center">
               <Transition.Child
-                as={React.Fragment}
+                as={Fragment}
                 enter="ease-out duration-300"
                 enterFrom="opacity-0 scale-95"
                 enterTo="opacity-100 scale-100"

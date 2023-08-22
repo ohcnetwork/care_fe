@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import ConfirmDialog from "../Common/ConfirmDialog";
 
 interface ConfirmDialogProps {

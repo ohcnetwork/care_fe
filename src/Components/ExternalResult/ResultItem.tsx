@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from "react";
-import loadable from "@loadable/component";
+import { useState, useCallback, lazy } from "react";
+
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { externalResult, deleteExternalResult } from "../../Redux/actions";
@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultItem(props: any) {
   const dispatch: any = useDispatch();

@@ -1,5 +1,4 @@
-import loadable from "@loadable/component";
-import { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
 import Card from "../../CAREUI/display/Card";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -17,7 +16,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
   id: "",

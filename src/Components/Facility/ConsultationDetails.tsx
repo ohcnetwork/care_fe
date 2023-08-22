@@ -19,7 +19,7 @@ import {
   listAssetBeds,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useEffect, useState } from "react";
+import { lazy, useCallback, useEffect, useState } from "react";
 
 import { ABGPlots } from "./Consultations/ABGPlots";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -49,17 +49,18 @@ import ReadMore from "../Common/components/Readmore";
 import VentilatorPatientVitalsMonitor from "../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { formatDate, formatDateTime, relativeTime } from "../../Utils/utils";
-import loadable from "@loadable/component";
+
 import { navigate } from "raviger";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { triggerGoal } from "../Common/Plausible";
 import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
 import PatientNotesSlideover from "./PatientNotesSlideover";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = lazy(() => import("../Common/Loading"));
+const PageTitle = lazy(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 
 export const ConsultationDetails = (props: any) => {
@@ -101,8 +102,7 @@ export const ConsultationDetails = (props: any) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const authUser = useAuthUser();
 
   useEffect(() => {
     if (
@@ -138,9 +138,21 @@ export const ConsultationDetails = (props: any) => {
         );
       }
 
-      const ventilatorBedData = assetBeds.find(
-        (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
-      );
+      const consultationBedVentilator =
+        consultationData?.current_bed?.assets_objects?.find(
+          (i) => i.asset_class === AssetClass.VENTILATOR
+        );
+      let ventilatorBedData;
+      if (consultationBedVentilator) {
+        ventilatorBedData = {
+          asset_object: consultationBedVentilator,
+          bed_object: consultationData?.current_bed?.bed_object,
+        } as AssetBedModel;
+      } else {
+        ventilatorBedData = assetBeds.find(
+          (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
+        );
+      }
       setVentilatorBedData(ventilatorBedData);
       const ventilatorMeta = ventilatorBedData?.asset_object?.meta;
       const ventilatorMiddleware =
@@ -216,9 +228,8 @@ export const ConsultationDetails = (props: any) => {
     fetchData(status);
     triggerGoal("Patient Consultation Viewed", {
       facilityId: facilityId,
-      patientId: patientId,
       consultationId: consultationId,
-      userID: currentUser.data.id,
+      userID: authUser.id,
     });
   }, []);
 
@@ -334,8 +345,7 @@ export const ConsultationDetails = (props: any) => {
                     triggerGoal("Doctor Connect Clicked", {
                       consultationId,
                       facilityId: patientData.facility,
-                      patientId: patientData.id,
-                      userId: currentUser.data.id,
+                      userId: authUser.id,
                       page: "ConsultationDetails",
                     });
                     setShowDoctors(true);
@@ -1124,11 +1134,7 @@ export const ConsultationDetails = (props: any) => {
               hideBack={true}
               focusOnLoad={true}
             />
-            <Feed
-              facilityId={facilityId}
-              patientId={patientId}
-              consultationId={consultationId}
-            />
+            <Feed facilityId={facilityId} consultationId={consultationId} />
           </div>
         )}
         {tab === "SUMMARY" && (

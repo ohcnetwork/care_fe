@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 // TODO: Add Name, Value to each body part and implement multiselect
 const parts = [

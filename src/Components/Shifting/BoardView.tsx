@@ -10,11 +10,11 @@ import SearchInput from "../Form/SearchInput";
 import ShiftingBoard from "./ShiftingBoard";
 import { downloadShiftRequests } from "../../Redux/actions";
 import { formatFilter } from "./Commons";
-import loadable from "@loadable/component";
+
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
 import useFilters from "../../Common/hooks/useFilters";
-import { useState } from "react";
+import { lazy, useState } from "react";
 import { useTranslation } from "react-i18next";
 import withScrolling from "react-dnd-scrolling";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -22,8 +22,8 @@ import SwitchTabs from "../Common/components/SwitchTabs";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = lazy(() => import("../Common/Loading"));
+const PageTitle = lazy(() => import("../Common/PageTitle"));
 const ScrollingComponent = withScrolling("div");
 
 export default function BoardView() {

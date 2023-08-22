@@ -79,7 +79,7 @@ const PatientNotesList = (props: PatientNotesProps) => {
 
   if (isLoading && !state.notes.length) {
     return (
-      <div className=" bg-white flex items-center justify-center w-full h-[400px]">
+      <div className=" flex h-[400px] w-full items-center justify-center bg-white">
         <CircularProgress />
       </div>
     );
@@ -87,7 +87,7 @@ const PatientNotesList = (props: PatientNotesProps) => {
 
   return (
     <div
-      className="flex flex-col-reverse grow h-[390px] overflow-auto m-2 bg-white"
+      className="m-2 flex h-[390px] grow flex-col-reverse overflow-auto bg-white"
       id="patient-notes-list"
     >
       {state.notes.length ? (
@@ -99,7 +99,7 @@ const PatientNotesList = (props: PatientNotesProps) => {
               <CircularProgress />
             </div>
           }
-          className="flex flex-col-reverse p-2 h-full"
+          className="flex h-full flex-col-reverse p-2"
           inverse={true}
           dataLength={state.notes.length}
           scrollableTarget="patient-notes-list"
@@ -109,7 +109,7 @@ const PatientNotesList = (props: PatientNotesProps) => {
           ))}
         </InfiniteScroll>
       ) : (
-        <div className="text-gray-500 text-2xl font-bold flex justify-center items-center mt-2">
+        <div className="mt-2 flex items-center justify-center text-2xl font-bold text-gray-500">
           No Notes Found
         </div>
       )}

@@ -1,7 +1,7 @@
-import React from "react";
+import { ReactNode } from "react";
 
 function UserDetails(props: {
-  children: React.ReactNode;
+  children: ReactNode;
   title: string;
   id?: string;
 }) {
