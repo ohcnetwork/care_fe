@@ -49,6 +49,8 @@ import ReadMore from "../Common/components/Readmore";
 import VentilatorPatientVitalsMonitor from "../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { formatDate, formatDateTime, relativeTime } from "../../Utils/utils";
+import Page from "../Common/components/Page";
+import PatientPrivacyToggle from "../Patient/PatientPrivacyToggle";
 
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
@@ -1126,13 +1128,21 @@ export const ConsultationDetails = (props: any) => {
         )}
         {tab === "FEED" && (
           <div>
-            <PageTitle
+            <Page
               title="Camera Feed"
               breadcrumbs={false}
               hideBack={true}
               focusOnLoad={true}
-            />
-            <Feed facilityId={facilityId} consultationId={consultationId} />
+              options={
+                <PatientPrivacyToggle
+                  consultationId={consultationId}
+                  consultation={consultationData}
+                  fetchPatientData={fetchData}
+                />
+              }
+            >
+              <Feed facilityId={facilityId} consultationId={consultationId} />
+            </Page>
           </div>
         )}
         {tab === "SUMMARY" && (
