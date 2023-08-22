@@ -45,10 +45,8 @@ describe("User management", () => {
     cy.get("[name='phone_number']").type(phone_number);
     cy.get("[name='alt_phone_number']").type(alt_phone_number);
     cy.intercept(/users/).as("check_availability");
-    cy.get("[id='date_of_birth']").click();
-    cy.get("div").contains("20").click();
-    cy.get("[id='year-0']").click();
-    cy.get("[id='date-1']").click();
+    cy.get("#date_of_birth").should("be.visible").click();
+    cy.get("#date-input").click().type("25081999");
     cy.get("[name='username']").type(username);
     cy.wait("@check_availability").its("response.statusCode").should("eq", 200);
     cy.get("[name='password']").type("#@Cypress_test123");

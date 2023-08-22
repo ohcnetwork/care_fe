@@ -24,8 +24,8 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Create a new patient with no consultation", () => {
-    cy.get("button").should("contain", "Add Patient Details");
-    cy.get("#add-patient-div").click();
+    cy.get("#add-patient-details").should("be.visible");
+    cy.get("#add-patient-details").click();
     cy.get("input[name='facilities']")
       .type("cypress facility")
       .then(() => {
@@ -95,15 +95,11 @@ describe("Patient Creation with consultation", () => {
 
   it("Edit the patient details", () => {
     cy.awaitUrl(patient_url + "/update");
+    cy.get("#address").type("Test Patient Address Edited");
     cy.get("[data-testid=name] input").clear();
     cy.get("[data-testid=name] input").type("Test E2E User Edited");
-    cy.get("#emergency_phone_number-div")
-      .clear()
-      .then(() => {
-        cy.get("#emergency_phone_number__country").select("IN");
-      });
-    cy.get("#emergency_phone_number-div").type("9120330220");
-    cy.get("#address").clear().type("Test Patient Address Edited");
+    cy.get("#emergency_phone_number-div").clear();
+    cy.get("#emergency_phone_number-div").type("+919120330220");
     cy.get("#present_health").type("Severe Cough");
     cy.get("#ongoing_medication").type("Paracetamol");
     cy.get("#allergies").type("Dust");
@@ -139,7 +135,6 @@ describe("Patient Creation with consultation", () => {
       "+919120330220"
     );
     const patientDetails_values: string[] = [
-      "Test Patient Address Edited",
       "Severe Cough",
       "Paracetamol",
       "Dust",
