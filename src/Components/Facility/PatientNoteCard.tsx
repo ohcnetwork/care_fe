@@ -6,17 +6,19 @@ const PatientNoteCard = ({ note }: { note: any }) => {
       key={note.id}
       className="mt-4 flex w-full flex-col rounded-lg border border-gray-300 bg-white p-3 text-gray-800"
     >
-      <div className="flex justify-between">
+      <div className="flex">
         <span className="text-sm font-semibold text-gray-700">
           {note.created_by_object?.first_name || "Unknown"}{" "}
           {note.created_by_object?.last_name}
         </span>
-        <span className="text-sm text-gray-700">
+        <span className="pl-1 text-sm text-gray-700">
+          {" ("}
           {note.created_by_object.user_type === "Doctor"
             ? note.created_by_local_user
               ? ""
               : "Remote Specialist"
             : note.created_by_object.user_type}
+          {")"}
         </span>
       </div>
       <span className="whitespace-pre-wrap break-words">{note.note}</span>
