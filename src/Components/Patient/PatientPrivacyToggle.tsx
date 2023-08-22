@@ -11,7 +11,7 @@ import {
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 interface PatientPrivacyToggleProps {
   consultationId: string;
-  consultation?: ConsultationModel;
+  consultation?: ConsultationModel | null;
   fetchPatientData?: (state: { aborted: boolean }) => void;
 }
 export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
@@ -114,7 +114,7 @@ export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
   if (allowPrivacyToggle() && consultation?.current_bed?.id)
     return (
       <div className="flex flex-row justify-start gap-2">
-        <div className="tooltip bg-gray-200 px-3 py-2 font-semibold">
+        <div className="tooltip rounded-md bg-gray-300  px-3 py-2 text-sm font-semibold">
           Privacy Mode: {privacy ? "ON" : "OFF"}
           <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm">
             privacy setting for camera feed visual
