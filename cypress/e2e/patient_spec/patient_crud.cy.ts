@@ -113,6 +113,11 @@ describe("Patient Creation with consultation", () => {
     cy.get("#policy_id").type("P123");
     cy.get("#insurer_id").type("GICOFINDIA");
     cy.get("#insurer_name").type("GICOFINDIA");
+    cy.get("[data-testid=blood-group] button")
+      .click()
+      .then(() => {
+        cy.get("[role='option']").contains("O+").click();
+      });
     cy.get("button").get("[data-testid=submit-button]").click();
     cy.url().should("include", "/patient");
     cy.url().then((url) => {
