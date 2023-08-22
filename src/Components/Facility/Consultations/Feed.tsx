@@ -52,6 +52,7 @@ const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
 export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const dispatch: any = useDispatch();
+  const CAMERA_ACCESS_TIMEOUT = 10 * 60; //seconds
 
   const videoWrapper = useRef<HTMLDivElement>(null);
 
@@ -71,9 +72,33 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [showSubscriptionInfo, setShowSubscriptionInfo] = useState(false);
   const [showCameraOccupierInfo, setShowCameraOccupierInfo] = useState(false);
   const [cameraOccupier, setCameraOccupier] = useState<cameraOccupier>({});
+  const [timeoutSeconds, setTimeoutSeconds] = useState(CAMERA_ACCESS_TIMEOUT);
 
   const [borderAlert, setBorderAlert] = useState<any>(null);
   const authUser = useAuthUser();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeoutSeconds((prevSeconds) => prevSeconds - 1);
+    }, 1000);
+
+    const resetTimer = () => {
+      setTimeoutSeconds(CAMERA_ACCESS_TIMEOUT);
+    };
+
+    document.addEventListener("mousemove", resetTimer);
+
+    if (cameraOccupier.username) {
+      clearInterval(interval);
+      setTimeoutSeconds(CAMERA_ACCESS_TIMEOUT);
+      removeEventListener("mousemove", resetTimer);
+    }
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("mousemove", resetTimer);
+    };
+  }, [cameraOccupier]);
 
   // Notification hook
   const { isSubscribed, isSubscribing, intialSubscriptionState, subscribe } =
@@ -372,14 +397,36 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     };
   }, [cameraAsset, cameraMiddlewareHostname]);
 
+  useEffect(() => {
+    if (timeoutSeconds === 0) {
+      unlockAsset({});
+      setTimeoutSeconds(CAMERA_ACCESS_TIMEOUT);
+      setTimeout(() => {
+        lockAsset({
+          onError: async (resp) => {
+            if (resp.status === 409) {
+              setCameraOccupier(resp.data as cameraOccupier);
+            }
+          },
+          onSuccess() {
+            setCameraOccupier({});
+          },
+        });
+      }, 2000);
+    }
+  }, [timeoutSeconds]);
+
   useMessageListener((data) => {
     if (data?.status == "success" && data?.asset_id === cameraAsset?.id) {
-      setCameraOccupier({});
       lockAsset({
         onError: async (resp) => {
           if (resp.status === 409) {
             setCameraOccupier(resp.data as cameraOccupier);
           }
+        },
+        onSuccess: () => {
+          setCameraOccupier({});
+          setTimeoutSeconds(CAMERA_ACCESS_TIMEOUT);
         },
       });
     }
