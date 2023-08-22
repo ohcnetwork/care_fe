@@ -173,7 +173,7 @@ describe("Patient Creation with consultation", () => {
       .type("Examination details and Clinical conditions");
     cy.get("#weight").click().type("70");
     cy.get("#height").click().type("170");
-    cy.get("#ip_no").type("192.168.1.11");
+    cy.get("#patient_no").type("IP007");
     cy.get(
       "#icd11_diagnoses_object input[placeholder='Select'][role='combobox']"
     )

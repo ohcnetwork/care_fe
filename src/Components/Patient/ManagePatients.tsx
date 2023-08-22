@@ -154,7 +154,7 @@ export const PatientManager = () => {
     page: qParams.page || 1,
     limit: resultsPerPage,
     name: qParams.name || undefined,
-    ip_or_op_no: qParams.ip_or_op_no || undefined,
+    patient_no: qParams.patient_no || undefined,
     is_active:
       !qParams.last_consultation_discharge_reason &&
       (qParams.is_active || "True"),
@@ -356,7 +356,7 @@ export const PatientManager = () => {
     qParams.is_active,
     qParams.disease_status,
     qParams.name,
-    qParams.ip_or_op_no,
+    qParams.patient_no,
     qParams.page,
     qParams.phone_number,
     qParams.emergency_phone_number,
@@ -874,7 +874,7 @@ export const PatientManager = () => {
                 label="Search by IP/OP Number"
                 placeholder="Enter IP/OP Number"
                 secondary
-                {...queryField("ip_or_op_no")}
+                {...queryField("patient_no")}
               />
             </div>
             <div className="md:flex md:gap-4">
@@ -912,7 +912,7 @@ export const PatientManager = () => {
             phoneNumber("Primary number", "phone_number"),
             phoneNumber("Emergency number", "emergency_phone_number"),
             badge("Patient name", "name"),
-            badge("IP/OP number", "ip_or_op_no"),
+            badge("IP/OP number", "patient_no"),
             ...dateRange("Modified", "modified_date"),
             ...dateRange("Created", "created_date"),
             ...dateRange("Admitted", "last_consultation_admission_date"),
