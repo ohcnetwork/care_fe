@@ -25,7 +25,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
 
   return (
     <div
-      className={`flex w-full flex-col gap-4 rounded-lg p-4 shadow ${
+      className={`flex w-full flex-col gap-4 rounded-lg p-4 shadow @container ${
         telemedicine_doctor_update ? "bg-purple-200" : "bg-white"
       }`}
     >
@@ -36,7 +36,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
           </div>
           <span className="flex gap-1 whitespace-nowrap pr-3 text-sm tracking-wider">
             <span className="font-semibold">{`${by?.first_name} ${by?.last_name}`}</span>
-            <span className="hidden font-medium md:block">
+            <span className="hidden font-medium @xs:block">
               ({by?.user_type})
             </span>
           </span>
@@ -65,7 +65,7 @@ const DefaultLogUpdateCard = ({ round, ...props }: Props) => {
           attributeValue={round.other_details}
         />
 
-        <div className="mt-2 flex flex-col space-x-0 space-y-2 md:flex-row md:space-x-2 md:space-y-0">
+        <div className="mt-2 flex flex-col space-x-0 space-y-2 @xs:flex-row @xs:space-x-2 @xs:space-y-0">
           <ButtonV2
             variant="secondary"
             border
