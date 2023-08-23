@@ -55,10 +55,6 @@ export default ({ show, setShow, username }: IProps) => {
         Notification.Error({
           msg: "Error while adding skill",
         });
-      } else {
-        Notification.Success({
-          msg: "Skill added successfully",
-        });
       }
       setSelectedSkill(null);
       setIsLoading(false);
@@ -69,7 +65,12 @@ export default ({ show, setShow, username }: IProps) => {
 
   const removeSkill = useCallback(
     async (username: string, skillId: string) => {
-      await dispatch(deleteUserSkill(username, skillId));
+      const res = await dispatch(deleteUserSkill(username, skillId));
+      if (res?.status !== 204) {
+        Notification.Error({
+          msg: "Error while unlinking skill",
+        });
+      }
       setDeleteSkill(null);
       fetchSkills(username);
     },
@@ -100,7 +101,9 @@ export default ({ show, setShow, username }: IProps) => {
       )}
       <SlideOverCustom
         open={show}
-        setOpen={setShow}
+        setOpen={(openState) => {
+          !deleteSkill && setShow(openState);
+        }}
         slideFrom="right"
         title="Skills"
         dialogClass="md:w-[400px]"
