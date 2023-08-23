@@ -95,9 +95,11 @@ describe("Patient Creation with consultation", () => {
 
   it("Edit the patient details", () => {
     cy.awaitUrl(patient_url + "/update");
-    cy.get("#address").type("Test Patient Address Edited", { force: true });
+    cy.get("#address").type("Test Patient Address Edited");
     cy.get("[data-testid=name] input").clear();
     cy.get("[data-testid=name] input").type("Test E2E User Edited");
+    cy.get("#phone_number-div").clear();
+    cy.get("#phone_number-div").type("+919120330223");
     cy.get("#emergency_phone_number-div").clear();
     cy.get("#emergency_phone_number-div").type("+919120330220");
     cy.get("#present_health").type("Severe Cough");
