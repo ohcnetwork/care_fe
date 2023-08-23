@@ -32,6 +32,9 @@ import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Uptime from "../Common/Uptime";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import dayjs from "dayjs";
+import RelativeDateUserMention from "../Common/RelativeDateUserMention";
+import { AssetServiceEditModal } from "./AssetServiceEditModal";
 
 interface AssetManageProps {
   assetId: string;
@@ -65,6 +68,9 @@ const AssetManage = (props: AssetManageProps) => {
   const limit = 14;
   const authUser = useAuthUser();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [serviceEditData, setServiceEditData] = useState<
+    AssetService & { open: boolean; viewOnly?: boolean }
+  >();
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -196,18 +202,58 @@ const AssetManage = (props: AssetManageProps) => {
       setServiceDetails(
         services.map((service: AssetService) => (
           <tr key={`service_id_${service.id}`}>
-            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
-                {moment(service.serviced_on).format("DD MMM YYYY")}
+                {dayjs(service.serviced_on).format("DD MMM YYYY")}
               </span>
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
-              <span className="font-medium text-gray-900">{service.note}</span>
-            </td>
-            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
-              <span className="font-medium text-gray-900">
-                {formatDate(service.modified_date)}
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
+              <span className="whitespace-break-spaces break-words font-medium text-gray-900">
+                {service.note}
               </span>
+            </td>
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
+              <span className="font-medium text-gray-900">
+                {formatDate(service.created_date)}
+              </span>
+            </td>
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
+              <span className="flex justify-center font-medium text-gray-900">
+                {service.edits?.length > 1 ? (
+                  <RelativeDateUserMention
+                    actionDate={service.edits?.[0]?.edited_on}
+                    user={service.edits?.[0]?.edited_by}
+                  />
+                ) : (
+                  "--"
+                )}
+              </span>
+            </td>
+            <td className="gap-4 whitespace-nowrap px-6 py-4 text-left text-sm leading-5">
+              <ButtonV2
+                authorizeFor={NonReadOnlyUsers}
+                onClick={() => {
+                  setServiceEditData({ ...service, open: true });
+                }}
+                className="mr-2"
+              >
+                <CareIcon icon="l-pen" className="text-lg" />
+              </ButtonV2>
+              <ButtonV2
+                authorizeFor={NonReadOnlyUsers}
+                tooltip={service.edits?.length < 2 ? "No previous edits" : ""}
+                tooltipClassName="tooltip-left"
+                disabled={service.edits?.length < 2}
+                onClick={() => {
+                  setServiceEditData({
+                    ...service,
+                    open: true,
+                    viewOnly: true,
+                  });
+                }}
+              >
+                <CareIcon icon="l-eye" className="text-lg" />
+              </ButtonV2>
             </td>
           </tr>
         ))
@@ -434,13 +480,13 @@ const AssetManage = (props: AssetManageProps) => {
                     label: "Last serviced on",
                     icon: "wrench",
                     content:
-                      asset?.last_service.serviced_on &&
-                      formatDate(asset?.last_service.serviced_on),
+                      asset?.last_service?.serviced_on &&
+                      formatDate(asset?.last_service?.serviced_on),
                   },
                   {
                     label: "Notes",
                     icon: "notes",
-                    content: asset?.last_service.note,
+                    content: asset?.last_service?.note,
                   },
                 ].map(detailBlock)}
               </div>
@@ -470,14 +516,20 @@ const AssetManage = (props: AssetManageProps) => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
-              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Serviced on
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Note
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
-                Edited
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                Created on
+              </th>
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                Last Updated
+              </th>
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                Edit
               </th>
             </tr>
           </thead>
@@ -519,6 +571,18 @@ const AssetManage = (props: AssetManageProps) => {
             onChange={handlePagination}
           />
         </div>
+      )}
+      {serviceEditData && (
+        <AssetServiceEditModal
+          asset={asset}
+          service_record={serviceEditData}
+          handleClose={() =>
+            setServiceEditData({ ...serviceEditData, open: false })
+          }
+          handleUpdate={() => fetchData({ aborted: false })}
+          show={serviceEditData.open}
+          viewOnly={serviceEditData.viewOnly}
+        />
       )}
     </div>
   );

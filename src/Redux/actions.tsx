@@ -861,6 +861,8 @@ export const listAssetService = (params: object) =>
   fireRequest("listAssetService", [], params);
 export const getAssetService = (params: object) =>
   fireRequest("getAssetService", [], params);
+export const updateAssetService = (id: string, params: object) =>
+  fireRequest("updateAssetService", [], params, { external_id: id });
 
 // ABDM related
 export const generateAadhaarOtp = (aadhaar: string) =>

@@ -1,4 +1,5 @@
 import { BedModel } from "../Facility/models";
+import { PerformedByModel } from "../HCX/misc";
 import { PatientModel } from "../Patient/models";
 
 export interface AssetLocationObject {
@@ -139,6 +140,14 @@ export interface AssetBedModel {
   meta: Record<string, any>;
 }
 
+export interface AssetServiceEdit {
+  id: string;
+  asset_service: AssetService;
+  serviced_on: string;
+  note: string;
+  edited_on: string;
+  edited_by: PerformedByModel;
+}
 export interface AssetService {
   id: string;
   asset: {
@@ -147,6 +156,7 @@ export interface AssetService {
   };
   serviced_on: string;
   note: string;
+  edits: AssetServiceEdit[];
   created_date: string;
   modified_date: string;
 }

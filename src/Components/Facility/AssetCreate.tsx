@@ -19,7 +19,7 @@ import {
 } from "../../Redux/actions";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import { LocationSelect } from "../Common/LocationSelect";
 import Page from "../Common/components/Page";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
@@ -38,6 +38,7 @@ import useVisibility from "../../Utils/useVisibility";
 import { validateEmailAddress } from "../../Common/validation";
 import { dateQueryString } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
+import DateInputV2 from "../Common/DateInputV2.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -211,9 +212,9 @@ const AssetCreate = (props: AssetProps) => {
       setManufacturer(asset.manufacturer);
       asset.warranty_amc_end_of_validity &&
         setWarrantyAmcEndOfValidity(asset.warranty_amc_end_of_validity);
-      asset.last_service.serviced_on &&
-        setLastServicedOn(asset.last_service.serviced_on);
-      asset.last_service.note && setNotes(asset.last_service.note);
+      asset.last_service?.serviced_on &&
+        setLastServicedOn(asset.last_service?.serviced_on);
+      asset.last_service?.note && setNotes(asset.last_service?.note);
     }
   }, [asset]);
 
@@ -866,29 +867,29 @@ const AssetCreate = (props: AssetProps) => {
                       ref={fieldRef["last_serviced_on"]}
                       data-testid="asset-last-serviced-on-input"
                     >
-                      <TextFormField
+                      <FieldLabel>Last Serviced On</FieldLabel>
+                      <DateInputV2
                         name="last_serviced_on"
-                        label="Last Serviced On"
                         className="mt-2"
-                        value={last_serviced_on}
-                        error={state.errors.last_serviced_on}
+                        position="RIGHT"
+                        value={last_serviced_on && new Date(last_serviced_on)}
                         onChange={(date) => {
                           if (
-                            dayjs(date.value).format("YYYY-MM-DD") >
+                            dayjs(date).format("YYYY-MM-DD") >
                             new Date().toLocaleDateString("en-ca")
                           ) {
                             Notification.Error({
                               msg: "Last Serviced date can't be in future",
                             });
                           } else {
-                            setLastServicedOn(
-                              dayjs(date.value).format("YYYY-MM-DD")
-                            );
+                            setLastServicedOn(dayjs(date).format("YYYY-MM-DD"));
                           }
                         }}
-                        type="date"
-                        max={dayjs(new Date()).format("YYYY-MM-DD")}
+                        max={new Date()}
                       />
+                      <FieldErrorText
+                        error={state.errors.last_serviced_on}
+                      ></FieldErrorText>
                     </div>
 
                     {/* Notes */}
