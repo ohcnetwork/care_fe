@@ -87,7 +87,7 @@ class FacilityPage {
   }
 
   clickManageFacilityDropdown() {
-    cy.get("#manage-facility-dropdown").click();
+    cy.get("#manage-facility-dropdown div button").click();
   }
 
   clickUpdateFacilityOption() {
