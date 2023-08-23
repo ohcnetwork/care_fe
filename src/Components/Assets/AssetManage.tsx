@@ -93,7 +93,7 @@ const AssetManage = (props: AssetManageProps) => {
                 offset,
               })
             ),
-            dispatch(listAssetService({ external_id: assetId })),
+            dispatch(listAssetService({}, assetId)),
           ]);
 
           if (transactionsData?.data) {

@@ -820,15 +820,15 @@ const routes: Routes = {
   // Asset service endpoints
 
   listAssetService: {
-    path: "/api/v1/asset_service/",
+    path: "/api/v1/asset/{asset_external_id}/service_records/",
     method: "GET",
   },
   getAssetService: {
-    path: "/api/v1/asset_service/{id}",
+    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
     method: "GET",
   },
   updateAssetService: {
-    path: "/api/v1/asset_service/{external_id}",
+    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
     method: "PUT",
   },
 

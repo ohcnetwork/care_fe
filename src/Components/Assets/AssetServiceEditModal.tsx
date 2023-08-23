@@ -37,7 +37,7 @@ export const AssetServiceEditModal = (props: {
     };
 
     const res = await dispatchAction(
-      updateAssetService(props.service_record?.id, data)
+      updateAssetService(props.asset?.id ?? "", props.service_record.id, data)
     );
     setIsLoading(false);
     if (res?.data) {
@@ -71,31 +71,38 @@ export const AssetServiceEditModal = (props: {
             </p>
           </div>
           {!editRecord &&
-            props.service_record?.edits?.map((edit, index) => (
-              <div
-                key={index}
-                onClick={() => {
-                  setEditRecord(edit);
-                }}
-                className="my-2 flex cursor-pointer justify-between rounded-lg border border-gray-300 p-4 py-2 transition-colors duration-200 hover:bg-gray-100"
-              >
-                <div className="grow">
-                  <p className="text-sm font-medium text-gray-500">Edited On</p>
-                  <p className="text-sm text-gray-900">
-                    {formatDateTime(edit.edited_on)}
-                  </p>
+            props.service_record?.edits?.map((edit, index) => {
+              const isLast = index === props.service_record?.edits?.length - 1;
+              return (
+                <div
+                  key={index}
+                  onClick={() => {
+                    setEditRecord(edit);
+                  }}
+                  className="my-2 flex cursor-pointer justify-between rounded-lg border border-gray-300 p-4 py-2 transition-colors duration-200 hover:bg-gray-100"
+                >
+                  <div className="grow">
+                    <p className="text-sm font-medium text-gray-500">
+                      {isLast ? "Created" : "Edited"} On
+                    </p>
+                    <p className="text-sm text-gray-900">
+                      {formatDateTime(edit.edited_on)}
+                    </p>
+                  </div>
+                  <div className="grow">
+                    <p className="text-sm font-medium text-gray-500">
+                      {isLast ? "Created" : "Edited"} By
+                    </p>
+                    <p className="text-sm text-gray-900">
+                      {edit.edited_by.username}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <CareIcon icon="l-eye" className="text-lg" />
+                  </div>
                 </div>
-                <div className="grow">
-                  <p className="text-sm font-medium text-gray-500">Edited By</p>
-                  <p className="text-sm text-gray-900">
-                    {edit.edited_by.username}
-                  </p>
-                </div>
-                <div className="flex items-center justify-center">
-                  <CareIcon icon="l-eye" className="text-lg" />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           {editRecord && (
             <div className="mb-4 rounded-lg border border-gray-300 p-4 py-2">
               <div className="my-2 flex justify-between">
