@@ -1000,3 +1000,20 @@ export const XLSXAssetImportSchema = {
     },
   },
 };
+
+export const USER_TYPES_MAP = {
+  Pharmacist: "Pharmacist",
+  Volunteer: "Volunteer",
+  StaffReadOnly: "Staff",
+  Staff: "Staff",
+  Doctor: "Doctor",
+  WardAdmin: "Ward Admin",
+  LocalBodyAdmin: "Local Body Admin",
+  DistrictLabAdmin: "District Lab Admin",
+  DistrictReadOnlyAdmin: "District Admin",
+  DistrictAdmin: "District Admin",
+  StateLabAdmin: "State Lab Admin",
+  StateReadOnlyAdmin: "State Admin",
+  StateAdmin: "State Admin",
+  RemoteSpecialist: "Remote Specialist",
+};

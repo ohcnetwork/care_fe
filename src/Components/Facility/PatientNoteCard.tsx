@@ -1,23 +1,23 @@
-import { relativeDate, formatDateTime } from "../../Utils/utils";
+import { relativeDate, formatDateTime, classNames } from "../../Utils/utils";
+import { USER_TYPES_MAP } from "../../Common/constants";
 
 const PatientNoteCard = ({ note }: { note: any }) => {
   return (
     <div
       key={note.id}
-      className="mt-4 flex w-full flex-col rounded-lg border border-gray-300 bg-white p-3 text-gray-800"
+      className={classNames(
+        "mt-4 flex w-full flex-col rounded-lg border border-gray-300 bg-white p-3 text-gray-800",
+        note.user_type === "RemoteSpecialist" && "border-primary-400"
+      )}
     >
       <div className="flex">
         <span className="text-sm font-semibold text-gray-700">
           {note.created_by_object?.first_name || "Unknown"}{" "}
           {note.created_by_object?.last_name}
         </span>
-        <span className="pl-1 text-sm text-gray-700">
-          {" ("}
-          {note.created_by_object.user_type === "Doctor"
-            ? note.created_by_local_user
-              ? ""
-              : "Remote Specialist"
-            : note.created_by_object.user_type}
+        <span className="pl-2 text-sm text-gray-700">
+          {"("}
+          {USER_TYPES_MAP[note.user_type]}
           {")"}
         </span>
       </div>
