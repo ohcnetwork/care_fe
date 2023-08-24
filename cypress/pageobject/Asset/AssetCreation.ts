@@ -98,6 +98,7 @@ export class AssetPage {
     vendorName: string,
     notes: string
   ) {
+    cy.wait(3000);
     cy.get("[data-testid=asset-update-button]").click();
     cy.get("[data-testid=asset-name-input] input").clear().type(name);
     cy.get("[data-testid=asset-description-input] textarea")

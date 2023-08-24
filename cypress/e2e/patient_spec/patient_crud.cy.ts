@@ -66,6 +66,7 @@ describe("Patient Creation with consultation", () => {
     updatePatientPage.enterPatientDetails(
       "Test E2E User Edited",
       "9120330220",
+      "O+",
       "Test Patient Address Edited",
       "Severe Cough",
       "Paracetamol",

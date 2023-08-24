@@ -4,6 +4,7 @@ export class UpdatePatientPage {
   enterPatientDetails(
     patientName: string,
     emergencyPhoneNumber: string,
+    bloodGroup,
     address: string,
     currentHealthCondition: string,
     ongoingMedication: string,
@@ -26,6 +27,11 @@ export class UpdatePatientPage {
     cy.get("#present_health").type(currentHealthCondition);
     cy.get("#ongoing_medication").type(ongoingMedication);
     cy.get("#allergies").type(allergies);
+    cy.get("[data-testid=blood-group] button")
+      .click()
+      .then(() => {
+        cy.get("[role='option']").contains(bloodGroup).click();
+      });
     cy.get("[name=medical_history_check_1]").uncheck();
     cy.get("[name=medical_history_check_2]").check();
     cy.get("#medical_history_2").type(medicalHistory[0]);
