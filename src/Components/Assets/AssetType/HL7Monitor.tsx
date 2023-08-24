@@ -116,7 +116,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
             </form>
           </Card>
           {["HL7MONITOR"].includes(assetType) && (
-            <Card className="z-20">
+            <Card>
               <MonitorConfigure asset={asset as AssetData} />
             </Card>
           )}

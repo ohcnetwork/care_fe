@@ -24,7 +24,7 @@ const STATUS_COLORS_TEXT = {
 
 const now = dayjs();
 const formatDateBeforeDays = Array.from({ length: 100 }, (_, index) =>
-  now.subtract(index, "days").format("Do MMMM YYYY")
+  now.subtract(index, "days").format("DD MMMM YYYY")
 );
 
 const uptimeScore: number[] = Array.from({ length: 100 }, () => 0);
