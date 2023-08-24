@@ -80,7 +80,8 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: "https://careapi.ohc.network",
+        target: "http://localhost:9000",
+        // target: "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },
@@ -89,7 +90,8 @@ export default defineConfig({
     port: 4000,
     proxy: {
       "/api": {
-        target: "https://careapi.ohc.network",
+        target: "http://localhost:9000",
+        // target: "https://careapi.ohc.network",
         changeOrigin: true,
       },
     },
