@@ -30,7 +30,7 @@ describe("Patient Creation with consultation", () => {
 
   it("Create a new patient with no consultation", () => {
     patientPage.createPatient();
-    patientPage.selectFacility("cypress facility");
+    patientPage.selectFacility("Dummy facility");
     patientPage.enterPatientDetails(
       phone_number,
       emergency_phone_number,
@@ -39,7 +39,8 @@ describe("Patient Creation with consultation", () => {
       "Test Patient Address",
       "682001",
       "1: PAZHAMTHOTTAM",
-      "O+"
+      "O+",
+      "01012001"
     );
     patientPage.clickCreatePatient();
 

@@ -26,12 +26,16 @@ export class PatientPage {
     address: string,
     pincode: string,
     wardName: string,
-    bloodGroup: string
+    bloodGroup: string,
+    dateOfBirth: string
   ) {
     cy.get("#phone_number-div").type(phoneNumber);
     cy.get("#emergency_phone_number-div").type(emergencyPhoneNumber);
-    cy.get("[data-testid=date-of-birth] button").click();
-    cy.get("#date-1").click();
+    cy.get("#date_of_birth")
+      .click()
+      .then(() => {
+        cy.get("[placeholder='DD/MM/YYYY']").type(dateOfBirth);
+      });
     cy.get("[data-testid=name] input").type(patientName);
     cy.get("[data-testid=Gender] button")
       .click()
