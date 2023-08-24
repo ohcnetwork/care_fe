@@ -117,6 +117,7 @@ export default ({ show, setShow, username }: IProps) => {
                 selected={selectedSkill}
                 setSelected={setSelectedSkill}
                 errors=""
+                username={username}
               />
               <ButtonV2
                 disabled={!authorizeForAddSkill}
