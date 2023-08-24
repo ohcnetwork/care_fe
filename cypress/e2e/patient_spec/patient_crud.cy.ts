@@ -158,6 +158,7 @@ describe("Patient Creation with consultation", () => {
 
   it("Create a New consultation to existing patient", () => {
     cy.visit(patient_url + "/consultation");
+    cy.get("#history_of_present_illness").click().type("histroy");
     cy.get("#consultation_status")
       .click()
       .then(() => {
@@ -169,7 +170,7 @@ describe("Patient Creation with consultation", () => {
         cy.get("[role='option']").contains("ASYMPTOMATIC").click();
       });
     cy.get("#symptoms").click();
-    cy.get("#history_of_present_illness").click().type("histroy");
+
     cy.get("#examination_details")
       .click()
       .type("Examination details and Clinical conditions");
