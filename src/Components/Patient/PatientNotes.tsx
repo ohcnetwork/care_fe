@@ -8,6 +8,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import PatientNotesList from "../Facility/PatientNotesList";
 import Page from "../Common/components/Page";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
 
 interface PatientNotesProps {
   patientId: any;
@@ -55,6 +56,16 @@ const PatientNotes = (props: PatientNotesProps) => {
     }
     fetchPatientName();
   }, [dispatch, patientId]);
+
+  useMessageListener((data) => {
+    if (
+      data?.status == "updated" &&
+      data?.facility_id == facilityId &&
+      data?.patient_id == patientId
+    ) {
+      setReload(true);
+    }
+  });
 
   return (
     <Page
