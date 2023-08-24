@@ -743,6 +743,7 @@ export const PatientManager = () => {
         <div className="flex w-full flex-col items-center justify-between lg:flex-row">
           <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
             <ButtonV2
+              id="add-patient-details"
               onClick={() => {
                 qParams.facility
                   ? navigate(`/facility/${qParams.facility}/patient`)
