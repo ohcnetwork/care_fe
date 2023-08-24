@@ -36,7 +36,7 @@ export const VoiceRecorder = (props: any) => {
   }, [isRecording, reset, setResetRecording, resetRecording]);
 
   return (
-    <div>
+    <div className="w-full md:w-auto">
       <div>
         {isRecording ? (
           <>
