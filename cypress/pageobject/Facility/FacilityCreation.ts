@@ -5,7 +5,10 @@ class FacilityPage {
   }
 
   visitUpdateFacilityPage(url: string) {
+    cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.visit(url);
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+    cy.get("#manage-facility-dropdown button").should("be.visible");
   }
 
   fillFacilityName(name: string) {
@@ -87,7 +90,9 @@ class FacilityPage {
   }
 
   clickManageFacilityDropdown() {
-    cy.get("#manage-facility-dropdown div button").click();
+    cy.get("#manage-facility-dropdown button")
+      .contains("Manage Facility")
+      .click();
   }
 
   clickUpdateFacilityOption() {

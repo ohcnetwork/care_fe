@@ -94,12 +94,17 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Edit the patient details", () => {
+    cy.intercept("GET", "**/facility/*/patient/**").as("getFacilities");
     cy.awaitUrl(patient_url + "/update");
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+    cy.wait(10000);
+    cy.get("#address").scrollIntoView();
+    cy.get("#address").should("be.visible");
     cy.get("#address").type("Test Patient Address Edited");
     cy.get("[data-testid=name] input").clear();
     cy.get("[data-testid=name] input").type("Test E2E User Edited");
     cy.get("#phone_number-div").clear();
-    cy.get("#phone_number-div").type("+919120330223");
+    cy.get("#phone_number-div").type("+919846856666");
     cy.get("#emergency_phone_number-div").clear();
     cy.get("#emergency_phone_number-div").type("+919120330220");
     cy.get("#present_health").type("Severe Cough");
@@ -157,7 +162,10 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Create a New consultation to existing patient", () => {
+    cy.intercept("GET", "**/api/v1/patient/**").as("getFacilities");
     cy.visit(patient_url + "/consultation");
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+    cy.get("#history_of_present_illness").should("be.visible");
     cy.get("#history_of_present_illness").click().type("histroy");
     cy.get("#consultation_status")
       .click()
@@ -196,6 +204,7 @@ describe("Patient Creation with consultation", () => {
     cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
       .click()
       .type("dolo{enter}");
+    cy.get("#dosage").should("be.visible");
     cy.get("#dosage").type("3", { force: true });
     cy.get("#frequency")
       .click()
