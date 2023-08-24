@@ -201,10 +201,14 @@ describe("Patient Creation with consultation", () => {
     cy.contains("button", "Add Prescription Medication")
       .should("be.visible")
       .click();
+    cy.intercept("GET", "**/api/v1/medibase/**").as("getFacilities");
+    cy.get(
+      "div#medicine_object input[placeholder='Select'][role='combobox']"
+    ).click();
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
     cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
       .click()
       .type("dolo{enter}");
-    cy.get("#dosage").should("be.visible");
     cy.get("#dosage").type("3", { force: true });
     cy.get("#frequency")
       .click()
