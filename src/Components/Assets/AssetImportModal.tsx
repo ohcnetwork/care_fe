@@ -64,6 +64,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                     msg: `Please check the row ${error.row} of column ${error.column}`,
                   });
                 });
+                setSelectedFile(undefined);
               } else {
                 setPreview(parsedData.rows as AssetData[]);
               }
