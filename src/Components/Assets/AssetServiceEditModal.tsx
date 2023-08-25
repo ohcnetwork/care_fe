@@ -130,7 +130,7 @@ export const AssetServiceEditModal = (props: {
                 </div>
                 <div className="mt-4 grow">
                   <p className="text-sm font-medium text-gray-500">Notes</p>
-                  <p className="text-gray-900">{editRecord.note}</p>
+                  <p className="text-gray-900">{editRecord.note || "-"}</p>
                 </div>
               </div>
             </div>

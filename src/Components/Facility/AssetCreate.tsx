@@ -275,6 +275,12 @@ const AssetCreate = (props: AssetProps) => {
             invalidForm = true;
           }
           return;
+        case "last_serviced_on":
+          if (notes && !last_serviced_on) {
+            errors[field] = "Last serviced on date is require with notes";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -321,7 +327,7 @@ const AssetCreate = (props: AssetProps) => {
     const validated = validateForm();
     if (validated) {
       setIsLoading(true);
-      const data = {
+      const data: any = {
         name: name,
         asset_type: asset_type,
         asset_class: asset_class || "",
@@ -341,11 +347,13 @@ const AssetCreate = (props: AssetProps) => {
         warranty_amc_end_of_validity: warranty_amc_end_of_validity
           ? dateQueryString(warranty_amc_end_of_validity)
           : null,
-        last_serviced_on: last_serviced_on
-          ? dateQueryString(last_serviced_on)
-          : last_serviced_on,
-        note: notes,
       };
+
+      if (last_serviced_on) {
+        data["last_serviced_on"] = dateQueryString(last_serviced_on);
+        data["note"] = notes ?? "";
+      }
+
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
         if (res && res.data && res.status === 201) {

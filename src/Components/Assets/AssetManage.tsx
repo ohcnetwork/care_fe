@@ -209,7 +209,7 @@ const AssetManage = (props: AssetManageProps) => {
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
               <span className="whitespace-break-spaces break-words font-medium text-gray-900">
-                {service.note}
+                {service.note || "--"}
               </span>
             </td>
             <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
