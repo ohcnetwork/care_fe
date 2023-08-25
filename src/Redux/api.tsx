@@ -817,6 +817,21 @@ const routes: Routes = {
     method: "GET",
   },
 
+  // Asset service endpoints
+
+  listAssetService: {
+    path: "/api/v1/asset/{asset_external_id}/service_records/",
+    method: "GET",
+  },
+  getAssetService: {
+    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
+    method: "GET",
+  },
+  updateAssetService: {
+    path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
+    method: "PUT",
+  },
+
   // ABDM HealthID endpoints
   generateAadhaarOtp: {
     path: "/api/v1/abdm/healthid/generate_aadhaar_otp/",
