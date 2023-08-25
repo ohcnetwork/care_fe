@@ -4,8 +4,8 @@ let patient_url = "";
 
 export class PatientPage {
   createPatient() {
-    cy.get("button").should("contain", "Add Patient Details");
-    cy.get("#add-patient-div").click();
+    cy.get("#add-patient-details").should("be.visible");
+    cy.get("#add-patient-details").click();
   }
 
   selectFacility(facilityName: string) {
@@ -31,11 +31,8 @@ export class PatientPage {
   ) {
     cy.get("#phone_number-div").type(phoneNumber);
     cy.get("#emergency_phone_number-div").type(emergencyPhoneNumber);
-    cy.get("#date_of_birth")
-      .click()
-      .then(() => {
-        cy.get("[placeholder='DD/MM/YYYY']").type(dateOfBirth);
-      });
+    cy.get("#date_of_birth").should("be.visible").click();
+    cy.get("#date-input").click().type(dateOfBirth);
     cy.get("[data-testid=name] input").type(patientName);
     cy.get("[data-testid=Gender] button")
       .click()
@@ -106,5 +103,13 @@ export class PatientPage {
 
   visitUpdatePatientUrl() {
     cy.awaitUrl(patient_url + "/update");
+  }
+
+  interceptFacilities() {
+    cy.intercept("GET", "**/facility/*/patient/**").as("getFacilities");
+  }
+
+  verifyStatusCode() {
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
   }
 }

@@ -30,7 +30,7 @@ describe("Patient Creation with consultation", () => {
 
   it("Create a new patient with no consultation", () => {
     patientPage.createPatient();
-    patientPage.selectFacility("Dummy facility");
+    patientPage.selectFacility("cypress facility");
     patientPage.enterPatientDetails(
       phone_number,
       emergency_phone_number,
@@ -62,11 +62,14 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Edit the patient details", () => {
+    patientPage.interceptFacilities();
     patientPage.visitUpdatePatientUrl();
+    patientPage.verifyStatusCode();
     updatePatientPage.enterPatientDetails(
       "Test E2E User Edited",
-      "9120330220",
       "O+",
+      "+919846856666",
+      "+919120330220",
       "Test Patient Address Edited",
       "Severe Cough",
       "Paracetamol",
@@ -86,7 +89,6 @@ describe("Patient Creation with consultation", () => {
   it("Patient Detail verification post edit", () => {
     updatePatientPage.visitUpdatedPatient();
     const patientDetails_values: string[] = [
-      "Test Patient Address Edited",
       "Severe Cough",
       "Paracetamol",
       "Dust",

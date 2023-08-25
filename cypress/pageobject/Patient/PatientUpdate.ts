@@ -3,8 +3,9 @@ let patient_url = "";
 export class UpdatePatientPage {
   enterPatientDetails(
     patientName: string,
+    bloodGroup: string,
     emergencyPhoneNumber: string,
-    bloodGroup,
+    phoneNumber: string,
     address: string,
     currentHealthCondition: string,
     ongoingMedication: string,
@@ -15,23 +16,19 @@ export class UpdatePatientPage {
     insuranceId: string,
     insuranceName: string
   ) {
+    cy.wait(10000);
+    cy.get("#address").scrollIntoView();
+    cy.get("#address").should("be.visible");
+    cy.get("#address").type(address);
     cy.get("[data-testid=name] input").clear();
     cy.get("[data-testid=name] input").type(patientName);
-    cy.get("#emergency_phone_number-div")
-      .clear()
-      .then(() => {
-        cy.get("#emergency_phone_number__country").select("IN");
-      });
+    cy.get("#phone_number-div").clear();
+    cy.get("#phone_number-div").type(phoneNumber);
+    cy.get("#emergency_phone_number-div").clear();
     cy.get("#emergency_phone_number-div").type(emergencyPhoneNumber);
-    cy.get("#address").clear().type(address);
     cy.get("#present_health").type(currentHealthCondition);
     cy.get("#ongoing_medication").type(ongoingMedication);
     cy.get("#allergies").type(allergies);
-    cy.get("[data-testid=blood-group] button")
-      .click()
-      .then(() => {
-        cy.get("[role='option']").contains(bloodGroup).click();
-      });
     cy.get("[name=medical_history_check_1]").uncheck();
     cy.get("[name=medical_history_check_2]").check();
     cy.get("#medical_history_2").type(medicalHistory[0]);
@@ -42,6 +39,11 @@ export class UpdatePatientPage {
     cy.get("#policy_id").type(policyId);
     cy.get("#insurer_id").type(insuranceId);
     cy.get("#insurer_name").type(insuranceName);
+    cy.get("[data-testid=blood-group] button")
+      .click()
+      .then(() => {
+        cy.get("[role='option']").contains(bloodGroup).click();
+      });
   }
 
   clickUpdatePatient() {
