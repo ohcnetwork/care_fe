@@ -89,6 +89,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
         Notification.Error({
           msg: "Invalid file",
         });
+        setSelectedFile(undefined);
       }
     };
     readFile();
@@ -327,7 +328,10 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
               }}
               disabled={isImporting}
             />
-            <Submit onClick={handleUpload} disabled={isImporting}>
+            <Submit
+              onClick={handleUpload}
+              disabled={isImporting || !selectedFile}
+            >
               {isImporting ? (
                 <i className="fa-solid fa-spinner animate-spin" />
               ) : (
