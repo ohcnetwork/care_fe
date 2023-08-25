@@ -933,7 +933,14 @@ export const healthFacilityActions = {
   },
 
   read: (id: string) => {
-    return fireRequest("getHealthFacility", [], {}, { facility_id: id });
+    return fireRequest(
+      "getHealthFacility",
+      [],
+      {},
+      { facility_id: id },
+      undefined,
+      true
+    );
   },
 
   update: (id: string, data: object) => {
