@@ -1,4 +1,5 @@
 import { BedModel } from "../Facility/models";
+import { PerformedByModel } from "../HCX/misc";
 import { PatientModel } from "../Patient/models";
 
 export interface AssetLocationObject {
@@ -55,6 +56,14 @@ export const assetClassProps = {
   },
 };
 
+export interface AssetService {
+  id: string;
+  created_date: string;
+  modified_date: string;
+  serviced_on: string;
+  note: string;
+}
+
 export interface AssetData {
   id: string;
   name: string;
@@ -76,8 +85,8 @@ export interface AssetData {
   qr_code_id: string;
   manufacturer: string;
   warranty_amc_end_of_validity: string;
-  last_serviced_on: string;
-  notes: string;
+  last_service: AssetService;
+  note: string;
   meta?: {
     [key: string]: any;
   };
@@ -129,6 +138,27 @@ export interface AssetBedModel {
   created_date: string;
   modified_date: string;
   meta: Record<string, any>;
+}
+
+export interface AssetServiceEdit {
+  id: string;
+  asset_service: AssetService;
+  serviced_on: string;
+  note: string;
+  edited_on: string;
+  edited_by: PerformedByModel;
+}
+export interface AssetService {
+  id: string;
+  asset: {
+    id: string;
+    name: string;
+  };
+  serviced_on: string;
+  note: string;
+  edits: AssetServiceEdit[];
+  created_date: string;
+  modified_date: string;
 }
 
 export interface PatientAssetBed {
