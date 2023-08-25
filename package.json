@@ -132,7 +132,7 @@
     "@typescript-eslint/parser": "^5.61.0",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "autoprefixer": "^10.4.14",
-    "cypress": "^12.14.0",
+    "cypress": "^12.17.4",
     "cypress-localstorage-commands": "^2.2.3",
     "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.8.0",

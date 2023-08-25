@@ -250,6 +250,7 @@ const DateInputV2: React.FC<Props> = ({
                 >
                   <div className="mb-4 flex w-full flex-col items-center justify-between">
                     <input
+                      id="date-input"
                       autoFocus
                       onBlur={(e) => {
                         popover.current?.focus();
