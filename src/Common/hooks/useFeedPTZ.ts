@@ -52,6 +52,7 @@ interface UseMSEMediaPlayerReturnType {
   gotoPreset: (payload: IGotoPresetPayload, options: IOptions) => void;
   lockAsset: (options: IOptions) => void;
   unlockAsset: (options: IOptions) => void;
+  requestAccess: (options: IOptions) => void;
 }
 
 interface IOptions {
@@ -210,6 +211,23 @@ const lockAsset =
         : options?.onError && options.onError(resp));
   };
 
+const requestAccess =
+  (config: IAsset, dispatch: any) =>
+  async (options: IOptions = {}) => {
+    if (!config.id) return;
+    const resp = await dispatch(
+      operateAsset(config.id, {
+        action: {
+          type: "request_access",
+        },
+      })
+    );
+    resp &&
+      (resp.status === 200
+        ? options?.onSuccess && options.onSuccess(resp.data.result)
+        : options?.onError && options.onError(resp));
+  };
+
 const unlockAsset =
   (config: IAsset, dispatch: any) =>
   async (options: IOptions = {}) => {
@@ -240,5 +258,6 @@ export const useFeedPTZ = ({
     gotoPreset: gotoPreset(config, dispatch),
     lockAsset: lockAsset(config, dispatch),
     unlockAsset: unlockAsset(config, dispatch),
+    requestAccess: requestAccess(config, dispatch),
   };
 };

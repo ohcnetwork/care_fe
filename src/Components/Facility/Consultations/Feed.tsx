@@ -73,6 +73,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [showCameraOccupierInfo, setShowCameraOccupierInfo] = useState(false);
   const [cameraOccupier, setCameraOccupier] = useState<cameraOccupier>({});
   const [timeoutSeconds, setTimeoutSeconds] = useState(CAMERA_ACCESS_TIMEOUT);
+  const [isRequestingAccess, setIsRequestingAccess] = useState<boolean>(false);
 
   const [borderAlert, setBorderAlert] = useState<any>(null);
   const authUser = useAuthUser();
@@ -152,7 +153,15 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
 
   const currentCameraOccupierInfo = () => {
     return (
-      <div className="relative mb-1 flex flex-row-reverse">
+      <div
+        className="relative mb-1 flex flex-row-reverse"
+        // onMouseEnter={() => {
+        //   setShowCameraOccupierInfo(true);
+        // }}
+        onMouseLeave={() => {
+          setShowCameraOccupierInfo(false);
+        }}
+      >
         {showCameraOccupierInfo && (
           <div className="absolute z-10 flex w-48 -translate-x-12 flex-col gap-2 rounded-md bg-white p-2 drop-shadow-md">
             <div className="text-xs text-gray-600">
@@ -166,6 +175,28 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             {cameraOccupier.homeFacility && (
               <div className="text-sm">{`${cameraOccupier.homeFacility}`}</div>
             )}
+            <ButtonV2
+              onClick={() => {
+                setIsRequestingAccess(true);
+                requestAccess({
+                  onSuccess: () => {
+                    Notification.Success({ msg: "Request sent" });
+                    setIsRequestingAccess(false);
+                  },
+                  onError: () => {
+                    Notification.Error({ msg: "Request failed" });
+                    setIsRequestingAccess(false);
+                  },
+                });
+              }}
+              ghost
+              variant="secondary"
+              size="small"
+              border
+            >
+              {isRequestingAccess && <Spinner />}
+              Request Access
+            </ButtonV2>
           </div>
         )}
         <div
@@ -173,9 +204,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           onMouseEnter={() => {
             setShowCameraOccupierInfo(true);
           }}
-          onMouseLeave={() => {
-            setShowCameraOccupierInfo(false);
-          }}
+          // onMouseLeave={() => {
+          //   setShowCameraOccupierInfo(false);
+          // }}
         >
           <div className="text-4xl font-bold text-green-600">
             {cameraOccupier?.firstName?.[0] ? (
@@ -330,6 +361,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     relativeMove,
     lockAsset,
     unlockAsset,
+    requestAccess,
   } = useFeedPTZ({
     config: cameraAsset,
     dispatch,
@@ -390,10 +422,21 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       });
     }
 
+    window.addEventListener("beforeunload", () => {
+      if (cameraAsset.id) {
+        unlockAsset({});
+      }
+    });
+
     return () => {
       if (cameraAsset.id) {
         unlockAsset({});
       }
+      window.removeEventListener("beforeunload", () => {
+        if (cameraAsset.id) {
+          unlockAsset({});
+        }
+      });
     };
   }, [cameraAsset, cameraMiddlewareHostname]);
 
@@ -428,6 +471,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           setCameraOccupier({});
           setTimeoutSeconds(CAMERA_ACCESS_TIMEOUT);
         },
+      });
+    } else if (data.status == "request") {
+      Notification.Warn({
+        msg: `${data?.firstName} ${data?.lastName} is requesting access to the camera`,
       });
     }
   });
