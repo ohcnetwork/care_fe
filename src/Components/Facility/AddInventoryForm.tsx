@@ -207,7 +207,7 @@ export const AddInventoryForm = (props: any) => {
           }
           return;
         case "isIncoming":
-          if (!state.form[field]) {
+          if (state.form[field] == undefined) {
             errors[field] = "Please select an option";
             invalidForm = true;
           }
@@ -297,8 +297,8 @@ export const AddInventoryForm = (props: any) => {
                   onChange={handleChange}
                   value={state.form.isIncoming}
                   options={[
-                    { id: true, name: "Add Stock" },
-                    { id: false, name: "Use Stock" },
+                    { id: 1, name: "Add Stock" },
+                    { id: 0, name: "Use Stock" },
                   ]}
                   optionValue={(inventory) => inventory.id}
                   optionLabel={(inventory) => inventory.name}
