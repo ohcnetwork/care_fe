@@ -944,6 +944,39 @@ export const getAbhaCard = (patient: string, type: "pdf" | "png") => {
   });
 };
 
+export const healthFacilityActions = {
+  list: (params: object) => {
+    return fireRequest("listHealthFacilities", [], params);
+  },
+
+  create: (data: object) => {
+    return fireRequest("createHealthFacility", [], data);
+  },
+
+  read: (id: string) => {
+    return fireRequest(
+      "getHealthFacility",
+      [],
+      {},
+      { facility_id: id },
+      undefined,
+      true
+    );
+  },
+
+  update: (id: string, data: object) => {
+    return fireRequest("updateHealthFacility", [], data, {
+      facility_id: id,
+    });
+  },
+
+  partialUpdate: (id: string, data: object) => {
+    return fireRequest("partialUpdateHealthFacility", [], data, {
+      facility_id: id,
+    });
+  },
+};
+
 export const listAssetAvailability = (params: object) =>
   fireRequest("listAssetAvailability", [], params);
 export const getAssetAvailability = (id: string) =>

@@ -903,6 +903,34 @@ const routes: Routes = {
     path: "/api/v1/abdm/healthid/get_abha_card/",
     method: "POST",
   },
+
+  // ABDM Health Facility
+
+  listHealthFacility: {
+    path: "/api/v1/abdm/health_facility/",
+    method: "GET",
+  },
+
+  createHealthFacility: {
+    path: "/api/v1/abdm/health_facility/",
+    method: "POST",
+  },
+
+  getHealthFacility: {
+    path: "/api/v1/abdm/health_facility/{facility_id}/",
+    method: "GET",
+  },
+
+  updateHealthFacility: {
+    path: "/api/v1/abdm/health_facility/{facility_id}/",
+    method: "PUT",
+  },
+
+  partialUpdateHealthFacility: {
+    path: "/api/v1/abdm/health_facility/{facility_id}/",
+    method: "PATCH",
+  },
+
   // Asset Availability endpoints
 
   listAssetAvailability: {
