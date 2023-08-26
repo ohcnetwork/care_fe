@@ -127,8 +127,8 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
         manufacturer: asset.manufacturer,
         meta: { ...asset.meta },
         warranty_amc_end_of_validity: asset.warranty_amc_end_of_validity,
-        last_serviced_on: asset.last_serviced_on,
-        notes: asset.notes,
+        last_serviced_on: asset.last_service.serviced_on,
+        note: asset.last_service.note,
         cancelToken: { promise: {} },
       });
 
