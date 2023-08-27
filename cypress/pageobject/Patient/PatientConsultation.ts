@@ -15,8 +15,12 @@ export class PatientConsultationPage {
       });
   }
 
+  fillIllnessHistory(history: string) {
+    cy.get("#history_of_present_illness").should("be.visible");
+    cy.get("#history_of_present_illness").click().type(history);
+  }
+
   enterConsultationDetails(
-    illnessHistory: string,
     examinationDetails: string,
     weight: string,
     height: string,
@@ -25,11 +29,10 @@ export class PatientConsultationPage {
     verificationBy: string
   ) {
     cy.get("#symptoms").click();
-    cy.get("#history_of_present_illness").click().type(illnessHistory);
     cy.get("#examination_details").click().type(examinationDetails);
     cy.get("#weight").click().type(height);
     cy.get("#height").click().type(weight);
-    cy.get("#ip_no").type(ipNumber);
+    cy.get("#patient_no").type(ipNumber);
     cy.get(
       "#icd11_diagnoses_object input[placeholder='Select'][role='combobox']"
     )
@@ -53,10 +56,24 @@ export class PatientConsultationPage {
       .click();
   }
 
+  interceptMediaBase() {
+    cy.intercept("GET", "**/api/v1/medibase/**").as("getMediaBase");
+  }
+
   prescribeMedicine() {
     cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
       .click()
       .type("dolo{enter}");
+  }
+
+  selectMedicinebox() {
+    cy.get(
+      "div#medicine_object input[placeholder='Select'][role='combobox']"
+    ).click();
+  }
+
+  waitForMediabaseStatusCode() {
+    cy.wait("@getMediaBase").its("response.statusCode").should("eq", 200);
   }
 
   enterDosage(doseAmount: string) {

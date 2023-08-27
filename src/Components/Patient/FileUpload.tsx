@@ -8,7 +8,7 @@ import {
   lazy,
   ChangeEvent,
 } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   viewUpload,
@@ -1457,7 +1457,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       </ButtonV2>
                     </div>
                   )}
-                  <div className="flex flex-col md:flex-row items-center gap-4">
+                  <div className="flex flex-col items-center gap-4 md:flex-row">
                     <VoiceRecorder
                       createAudioBlob={createAudioBlob}
                       confirmAudioBlobExists={confirmAudioBlobExists}

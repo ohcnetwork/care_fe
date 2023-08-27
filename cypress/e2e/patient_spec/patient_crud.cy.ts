@@ -106,22 +106,27 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Create a New consultation to existing patient", () => {
+    patientPage.interceptFacilities();
     updatePatientPage.visitConsultationPage();
+    patientPage.verifyStatusCode();
+    patientConsultationPage.fillIllnessHistory("history");
     patientConsultationPage.selectConsultationStatus("Out-patient (walk in)");
     patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
 
     patientConsultationPage.enterConsultationDetails(
-      "history",
       "Examination details and Clinical conditions",
       "70",
       "170",
-      "192.168.1.11",
+      "IP007",
       "generalnote",
       "generalnote"
     );
     patientConsultationPage.submitConsultation();
     // Below code for the prescription module only present while creating a new consultation
     patientConsultationPage.clickAddPrescription();
+    patientConsultationPage.interceptMediaBase();
+    patientConsultationPage.selectMedicinebox();
+    patientConsultationPage.waitForMediabaseStatusCode();
     patientConsultationPage.prescribeMedicine();
     patientConsultationPage.enterDosage("3");
     patientConsultationPage.selectDosageFrequency("Twice daily");
