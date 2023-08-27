@@ -119,7 +119,7 @@ export default function CameraBoundaryConfigure(
                   onClick={() => {
                     previewBoundary();
                   }}
-                  id="delete-boundary-preset"
+                  id="preview-boundary-preset"
                   disabled={isPreview}
                 >
                   <CareIcon className="care-l-eye" />
