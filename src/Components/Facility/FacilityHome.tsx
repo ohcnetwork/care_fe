@@ -23,7 +23,7 @@ import {
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { lazy, useCallback, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -549,6 +549,20 @@ export const FacilityHome = (props: any) => {
                 >
                   Configure Facility
                 </DropdownItem>
+                {config.enable_abdm ? (
+                  <DropdownItem
+                    id="configure-health-facility"
+                    onClick={() =>
+                      navigate(`/facility/${facilityId}/health_facility`)
+                    }
+                    authorizeFor={NonReadOnlyUsers}
+                    icon={<CareIcon className="care-l-setting text-lg" />}
+                  >
+                    Configure Health Facility
+                  </DropdownItem>
+                ) : (
+                  <></>
+                )}
                 <DropdownItem
                   id="inventory-management"
                   onClick={() => navigate(`/facility/${facilityId}/inventory`)}

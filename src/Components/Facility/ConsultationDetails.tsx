@@ -136,9 +136,10 @@ export const ConsultationDetails = (props: any) => {
         );
       }
 
-      const consultationBedVentilator = consultationData?.current_bed?.assets_objects?.find(
-        (i) => i.asset_class === AssetClass.VENTILATOR
-      )
+      const consultationBedVentilator =
+        consultationData?.current_bed?.assets_objects?.find(
+          (i) => i.asset_class === AssetClass.VENTILATOR
+        );
       let ventilatorBedData;
       if (consultationBedVentilator) {
         ventilatorBedData = {
