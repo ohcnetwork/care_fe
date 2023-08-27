@@ -124,6 +124,7 @@ export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
           <button
             className=" tooltip items-center rounded-md bg-red-500 p-1 text-gray-200 hover:bg-gray-200 hover:text-red-500"
             onClick={togglePrivacy}
+            id="privacy-toggle"
           >
             <CareIcon className="care-l-lock text-3xl" />
             <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm">
@@ -131,15 +132,16 @@ export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
             </span>
           </button>
         ) : (
-          <div
+          <button
             className="tooltip items-center rounded-md bg-gray-500 p-1 text-gray-200 hover:bg-gray-200 hover:text-black"
             onClick={togglePrivacy}
+            id="privacy-toggle"
           >
             <CareIcon className="care-l-unlock text-3xl" />
             <span className="tooltip-text tooltip-top -translate-x-1/2 text-sm">
               Unlock Privacy
             </span>
-          </div>
+          </button>
         )}
       </div>
     );
