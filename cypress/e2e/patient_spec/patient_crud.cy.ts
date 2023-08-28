@@ -24,8 +24,8 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Create a new patient with no consultation", () => {
-    cy.get("button").should("contain", "Add Patient Details");
-    cy.get("#add-patient-div").click();
+    cy.get("#add-patient-details").should("be.visible");
+    cy.get("#add-patient-details").click();
     cy.get("input[name='facilities']")
       .type("cypress facility")
       .then(() => {
@@ -35,8 +35,8 @@ describe("Patient Creation with consultation", () => {
     cy.get("button").get("#submit").click();
     cy.get("#phone_number-div").type(phone_number);
     cy.get("#emergency_phone_number-div").type(emergency_phone_number);
-    cy.get("[data-testid=date-of-birth] button").click();
-    cy.get("#date-1").click();
+    cy.get("#date_of_birth").should("be.visible").click();
+    cy.get("#date-input").click().type("01082023");
     cy.get("[data-testid=name] input").type("Test E2E User");
     cy.get("[data-testid=Gender] button")
       .click()
@@ -94,16 +94,19 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Edit the patient details", () => {
+    cy.intercept("GET", "**/facility/*/patient/**").as("getFacilities");
     cy.awaitUrl(patient_url + "/update");
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+    cy.wait(10000);
+    cy.get("#address").scrollIntoView();
+    cy.get("#address").should("be.visible");
+    cy.get("#address").type("Test Patient Address Edited");
     cy.get("[data-testid=name] input").clear();
     cy.get("[data-testid=name] input").type("Test E2E User Edited");
-    cy.get("#emergency_phone_number-div")
-      .clear()
-      .then(() => {
-        cy.get("#emergency_phone_number__country").select("IN");
-      });
-    cy.get("#emergency_phone_number-div").type("9120330220");
-    cy.get("#address").clear().type("Test Patient Address Edited");
+    cy.get("#phone_number-div").clear();
+    cy.get("#phone_number-div").type("+919846856666");
+    cy.get("#emergency_phone_number-div").clear();
+    cy.get("#emergency_phone_number-div").type("+919120330220");
     cy.get("#present_health").type("Severe Cough");
     cy.get("#ongoing_medication").type("Paracetamol");
     cy.get("#allergies").type("Dust");
@@ -117,7 +120,12 @@ describe("Patient Creation with consultation", () => {
     cy.get("#policy_id").type("P123");
     cy.get("#insurer_id").type("GICOFINDIA");
     cy.get("#insurer_name").type("GICOFINDIA");
-    cy.get("button").get("[data-testid=submit-button]").click();
+    cy.get("[data-testid=blood-group] button")
+      .click()
+      .then(() => {
+        cy.get("[role='option']").contains("O+").click();
+      });
+    cy.get("button[data-testid='submit-button']").click();
     cy.url().should("include", "/patient");
     cy.url().then((url) => {
       cy.log(url);
@@ -139,7 +147,6 @@ describe("Patient Creation with consultation", () => {
       "+919120330220"
     );
     const patientDetails_values: string[] = [
-      "Test Patient Address Edited",
       "Severe Cough",
       "Paracetamol",
       "Dust",
@@ -155,7 +162,11 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Create a New consultation to existing patient", () => {
+    cy.intercept("GET", "**/api/v1/patient/**").as("getFacilities");
     cy.visit(patient_url + "/consultation");
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+    cy.get("#history_of_present_illness").should("be.visible");
+    cy.get("#history_of_present_illness").click().type("histroy");
     cy.get("#consultation_status")
       .click()
       .then(() => {
@@ -167,13 +178,13 @@ describe("Patient Creation with consultation", () => {
         cy.get("[role='option']").contains("ASYMPTOMATIC").click();
       });
     cy.get("#symptoms").click();
-    cy.get("#history_of_present_illness").click().type("histroy");
+
     cy.get("#examination_details")
       .click()
       .type("Examination details and Clinical conditions");
     cy.get("#weight").click().type("70");
     cy.get("#height").click().type("170");
-    cy.get("#ip_no").type("192.168.1.11");
+    cy.get("#patient_no").type("IP007");
     cy.get(
       "#icd11_diagnoses_object input[placeholder='Select'][role='combobox']"
     )
@@ -190,6 +201,11 @@ describe("Patient Creation with consultation", () => {
     cy.contains("button", "Add Prescription Medication")
       .should("be.visible")
       .click();
+    cy.intercept("GET", "**/api/v1/medibase/**").as("getFacilities");
+    cy.get(
+      "div#medicine_object input[placeholder='Select'][role='combobox']"
+    ).click();
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
     cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
       .click()
       .type("dolo{enter}");

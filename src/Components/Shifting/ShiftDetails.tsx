@@ -7,7 +7,7 @@ import {
   TEST_TYPE_CHOICES,
 } from "../../Common/constants";
 import { Link, navigate } from "raviger";
-import React, { useCallback, useState } from "react";
+import { lazy, useCallback, useState } from "react";
 import { deleteShiftRecord, getShiftDetails } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 
@@ -19,12 +19,11 @@ import Page from "../Common/components/Page";
 import QRCode from "qrcode.react";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { formatDateTime } from "../../Utils/utils";
-import loadable from "@loadable/component";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ShiftDetails(props: { id: string }) {
   const { header_logo, kasp_full_string, wartime_shifting, kasp_enabled } =
@@ -35,8 +34,7 @@ export default function ShiftDetails(props: { id: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [openDeleteShiftDialog, setOpenDeleteShiftDialog] =
-    React.useState(false);
+  const [openDeleteShiftDialog, setOpenDeleteShiftDialog] = useState(false);
   const { t } = useTranslation();
 
   const shiftStatusOptions = wartime_shifting
@@ -428,9 +426,9 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
-                {t("op_ip_no")}:{" "}
+                {t("patient_no")}:{" "}
               </span>
-              {consultation.ip_no || "-"}
+              {consultation.patient_no || "-"}
             </div>
           </div>
           <div className="mt-2 flex justify-between">

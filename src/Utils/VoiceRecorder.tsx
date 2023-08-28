@@ -1,4 +1,3 @@
-import * as React from "react";
 import useRecorder from "./useRecorder";
 import { useEffect, useState } from "react";
 import ButtonV2 from "../Components/Common/components/ButtonV2";
@@ -37,7 +36,7 @@ export const VoiceRecorder = (props: any) => {
   }, [isRecording, reset, setResetRecording, resetRecording]);
 
   return (
-    <div>
+    <div className="w-full md:w-auto">
       <div>
         {isRecording ? (
           <>

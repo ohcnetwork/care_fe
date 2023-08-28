@@ -1,6 +1,7 @@
 import { AssignedToObjectModel } from "../Patient/models";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
+import { AssetData } from "../Assets/AssetTypes";
 
 export interface LocalBodyModel {
   name: string;
@@ -101,9 +102,10 @@ export interface ConsultationModel {
   patient?: string;
   treatment_plan?: string;
   referred_to?: number | null;
+  referred_to_object?: FacilityModel;
+  referred_to_external?: string;
   suggestion?: string;
-  ip_no?: string;
-  op_no?: string;
+  patient_no?: string;
   consultation_status?: number;
   is_kasp?: boolean;
   kasp_enabled_date?: string;
@@ -203,6 +205,7 @@ export interface CurrentBed {
   consultation: string;
   bed?: string;
   bed_object: BedModel;
+  assets_objects?: AssetData[];
   created_date: string;
   modified_date: string;
   start_date: string;

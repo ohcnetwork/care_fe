@@ -1,5 +1,4 @@
-import loadable from "@loadable/component";
-import { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
 import Card from "../../CAREUI/display/Card";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -17,7 +16,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
   id: "",
@@ -208,7 +207,7 @@ export const AddInventoryForm = (props: any) => {
           }
           return;
         case "isIncoming":
-          if (!state.form[field]) {
+          if (state.form[field] == undefined) {
             errors[field] = "Please select an option";
             invalidForm = true;
           }
@@ -298,8 +297,8 @@ export const AddInventoryForm = (props: any) => {
                   onChange={handleChange}
                   value={state.form.isIncoming}
                   options={[
-                    { id: true, name: "Add Stock" },
-                    { id: false, name: "Use Stock" },
+                    { id: 1, name: "Add Stock" },
+                    { id: 0, name: "Use Stock" },
                   ]}
                   optionValue={(inventory) => inventory.id}
                   optionLabel={(inventory) => inventory.name}

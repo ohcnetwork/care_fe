@@ -1,6 +1,6 @@
-import { useCallback, useReducer, useState } from "react";
+import { lazy, useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import loadable from "@loadable/component";
+
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getPermittedFacility,
@@ -11,7 +11,7 @@ import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import Page from "../Common/components/Page";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
   name: "",

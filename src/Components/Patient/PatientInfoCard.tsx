@@ -20,7 +20,7 @@ import { PatientModel } from "./models";
 import { getDimensionOrDash } from "../../Common/utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { useState } from "react";
-import { formatDate } from "../../Utils/utils.js";
+import { formatDate, formatDateTime } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
 
 export default function PatientInfoCard(props: {
@@ -41,8 +41,6 @@ export default function PatientInfoCard(props: {
 
   const patient = props.patient;
   const consultation = props.consultation;
-  const ip_no = consultation?.ip_no;
-  const op_no = consultation?.op_no;
 
   const category: PatientCategory | undefined =
     consultation?.last_daily_round?.patient_category ?? consultation?.category;
@@ -141,7 +139,7 @@ export default function PatientInfoCard(props: {
                     {(dayjs().isBefore(patient.review_time)
                       ? "Review before: "
                       : "Review Missed: ") +
-                      dayjs(patient.review_time).format("lll")}
+                      formatDateTime(patient.review_time)}
                   </div>
                 )}
             </div>
@@ -157,12 +155,12 @@ export default function PatientInfoCard(props: {
                 {consultation?.facility_name}
               </Link>
 
-              {(consultation?.suggestion === "A" || op_no) && (
+              {consultation?.patient_no && (
                 <span className="pl-2 capitalize md:col-span-2">
                   <span className="badge badge-pill badge-primary">
-                    {consultation?.suggestion !== "A"
-                      ? `OP: ${op_no}`
-                      : `IP: ${ip_no}`}
+                    {`${consultation?.suggestion === "A" ? "IP" : "OP"}: ${
+                      consultation?.patient_no
+                    }`}
                   </span>
                 </span>
               )}
@@ -354,11 +352,12 @@ export default function PatientInfoCard(props: {
                           setOpen(true);
                         }
                       }}
-                      align="start"
                       className="w-full"
                     >
-                      <CareIcon className={`care-l-${action[2]} text-lg`} />
-                      <p className="font-semibold">{action[1]}</p>
+                      <span className="flex w-full items-center justify-start gap-2">
+                        <CareIcon className={`care-l-${action[2]} text-lg`} />
+                        <p className="font-semibold">{action[1]}</p>
+                      </span>
                     </ButtonV2>
                     {action[4] && action[4][0] && (
                       <>
@@ -375,19 +374,21 @@ export default function PatientInfoCard(props: {
               <>
                 <ButtonV2
                   className="flex justify-start gap-3 font-semibold hover:text-white"
-                  align="start"
                   onClick={() => setShowABHAProfile(true)}
                 >
-                  <CareIcon className="care-l-user-square" />
-                  <p>Show ABHA Profile</p>
+                  <span className="flex w-full items-center justify-start gap-2">
+                    <CareIcon className="care-l-user-square" />
+                    <p>Show ABHA Profile</p>
+                  </span>
                 </ButtonV2>
                 <ButtonV2
                   className="mt-0 flex justify-start gap-3 font-semibold hover:text-white"
-                  align="start"
                   onClick={() => setShowLinkCareContext(true)}
                 >
-                  <CareIcon className="care-l-link" />
-                  <p>Link Care Context</p>
+                  <span className="flex w-full items-center justify-start gap-2">
+                    <CareIcon className="care-l-link" />
+                    <p>Link Care Context</p>
+                  </span>
                 </ButtonV2>
                 <ABHAProfileModal
                   patientId={patient.id}
@@ -406,11 +407,12 @@ export default function PatientInfoCard(props: {
               <>
                 <ButtonV2
                   className="flex justify-start gap-3 font-semibold hover:text-white"
-                  align="start"
                   onClick={() => setShowLinkABHANumber(true)}
                 >
-                  <CareIcon className="care-l-link" />
-                  <p>Link ABHA Number</p>
+                  <span className="flex w-full items-center justify-start gap-2">
+                    <CareIcon className="care-l-link" />
+                    <p>Link ABHA Number</p>
+                  </span>
                 </ButtonV2>
                 <LinkABHANumberModal
                   show={showLinkABHANumber}

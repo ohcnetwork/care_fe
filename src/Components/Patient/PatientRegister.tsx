@@ -28,7 +28,7 @@ import {
 } from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { lazy, useCallback, useEffect, useReducer, useState } from "react";
 
 import AccordionV2 from "../Common/components/AccordionV2";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -57,7 +57,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import countryList from "../../Common/static/countries.json";
 import { debounce } from "lodash";
-import loadable from "@loadable/component";
+
 import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
@@ -65,8 +65,8 @@ import { useDispatch } from "react-redux";
 import { validatePincode } from "../../Common/validation";
 import { FormContextValue } from "../Form/FormContext.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = lazy(() => import("../Common/Loading"));
+const PageTitle = lazy(() => import("../Common/PageTitle"));
 
 // const debounce = require("lodash.debounce");
 

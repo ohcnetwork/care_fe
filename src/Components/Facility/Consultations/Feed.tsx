@@ -11,7 +11,7 @@ import {
   useMSEMediaPlayer,
 } from "../../../Common/hooks/useMSEplayer";
 import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   getConsultation,
   getPermittedFacility,
@@ -26,24 +26,20 @@ import FeedButton from "./FeedButton";
 import Loading from "../../Common/Loading";
 import ReactPlayer from "react-player";
 import { classNames } from "../../../Utils/utils";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import useFullscreen from "../../../Common/hooks/useFullscreen.js";
 import { triggerGoal } from "../../Common/Plausible.js";
+import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 
 interface IFeedProps {
   facilityId: string;
-  patientId: string;
   consultationId: any;
 }
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
-export const Feed: React.FC<IFeedProps> = ({
-  patientId,
-  consultationId,
-  facilityId,
-}) => {
+export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const dispatch: any = useDispatch();
 
   const videoWrapper = useRef<HTMLDivElement>(null);
@@ -60,8 +56,7 @@ export const Feed: React.FC<IFeedProps> = ({
   const [precision, setPrecision] = useState(1);
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
   const [isFullscreen, setFullscreen] = useFullscreen();
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const authUser = useAuthUser();
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -391,8 +386,7 @@ export const Feed: React.FC<IFeedProps> = ({
                       triggerGoal("Camera Preset Clicked", {
                         presetName: preset?.meta?.preset_name,
                         consultationId,
-                        patientId,
-                        userId: currentUser?.id,
+                        userId: authUser.id,
                         result: "success",
                       });
                     },
@@ -405,8 +399,7 @@ export const Feed: React.FC<IFeedProps> = ({
                       triggerGoal("Camera Preset Clicked", {
                         presetName: preset?.meta?.preset_name,
                         consultationId,
-                        patientId,
-                        userId: currentUser?.id,
+                        userId: authUser.id,
                         result: "error",
                       });
                     },
@@ -504,7 +497,7 @@ export const Feed: React.FC<IFeedProps> = ({
             </div>
           )}
         </div>
-        <div className="absolute right-8 top-8 z-20 flex flex-col gap-4">
+        <div className="absolute right-8 top-8 z-10 flex flex-col gap-4">
           {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
             (button, index) => {
               const option = cameraPTZ.find(
@@ -524,7 +517,7 @@ export const Feed: React.FC<IFeedProps> = ({
             <FeedCameraPTZHelpButton cameraPTZ={cameraPTZ} />
           </div>
         </div>
-        <div className="absolute bottom-8 right-8 z-20">
+        <div className="absolute bottom-8 right-8 z-10">
           <FeedButton
             camProp={cameraPTZ[4]}
             styleType="CHHOTUBUTTON"
@@ -555,8 +548,7 @@ export const Feed: React.FC<IFeedProps> = ({
                     triggerGoal("Camera Feed Moved", {
                       direction: button.action,
                       consultationId,
-                      patientId,
-                      userId: currentUser?.id,
+                      userId: authUser.id,
                     });
 
                     button.callback();
