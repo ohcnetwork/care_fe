@@ -10,7 +10,7 @@ import {
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { lazy, useCallback, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CountBlock from "../../CAREUI/display/Count";
 import ExportMenu from "../Common/Export";

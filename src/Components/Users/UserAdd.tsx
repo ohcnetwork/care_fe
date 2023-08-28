@@ -1,7 +1,7 @@
 import { Link, navigate } from "raviger";
 import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { lazy, useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   GENDER_TYPES,
   USER_TYPES,
