@@ -19,6 +19,8 @@ export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
   const [privacy, setPrivacy] = useState<boolean>(false);
   const user = useAuthUser();
   const dispatch: any = useDispatch();
+
+  //condititonally render the privacy toggle button depending on user role
   const allowPrivacyToggle = () => {
     const currentUserType: UserRole = user.user_type;
     if (
@@ -35,7 +37,7 @@ export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
 
     return false;
   };
-
+  //hook to fetch the privacy info of the patient
   useEffect(() => {
     const getPrivacyInfo = async () => {
       if (
@@ -83,6 +85,7 @@ export default function PatientPrivacyToggle(props: PatientPrivacyToggleProps) {
     }
   }, [consultation]);
 
+  //function to toggle the privacy of the patient
   const togglePrivacy = async () => {
     try {
       if (consultation?.current_bed?.id) {
