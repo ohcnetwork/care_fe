@@ -608,6 +608,11 @@ export const NOTIFICATION_EVENTS = [
     text: "Shifting Updated",
     icon: "fa-solid fa-truck-medical",
   },
+  {
+    id: "PATIENT_NOTE_ADDED",
+    text: "Patient Note Added",
+    icon: "fa-solid fa-message",
+  },
 ];
 
 export const BREATHLESSNESS_LEVEL = [
