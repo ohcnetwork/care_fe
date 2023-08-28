@@ -101,6 +101,7 @@ let reducer = (state, action) => {
       modalPosition: position,
     }
   | ShowInputModal(region, position) => {
+    
       ...state,
       selectedRegion: region,
       modalPosition: position,
@@ -163,6 +164,8 @@ let initialState = (psp, previewMode) => {
   }
 }
 
+
+
 let selectedClass = (part: option<PressureSore.part>) => {
   switch part {
   | Some(p) =>
@@ -197,6 +200,15 @@ let pushScoreValue = (selectedPart: option<PressureSore.part>) => {
   | None => 0.0
   }->Js.Float.toString
 }
+
+let getOffsetValues = (id: string) => {
+  let ele = document["getElementById"](. id)
+  let rect = ele["getBoundingClientRect"](.)
+  let x = rect["left"]
+  let y = rect["top"]
+  {"x": x, "y": y}
+}
+
 
 let getIntoView = (region: string, isPart: bool) => {
   let scrollValues: scrollIntoView = {
@@ -318,7 +330,10 @@ let renderBody = (state, send, title, partPaths, substr) => {
             fill="currentColor"
             id={"part" ++ PressureSore.regionToString(regionType)}
             onClick={e => {
-              send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX, "y": e->ReactEvent.Mouse.clientY}))
+              e->ReactEvent.Mouse.stopPropagation
+              let offsetX = getOffsetValues("modal-parent")["x"]
+              let offsetY = getOffsetValues("modal-parent")["y"]
+              send(ShowInputModal(part.region, {"x": e->ReactEvent.Mouse.clientX - offsetX, "y": e->ReactEvent.Mouse.clientY - offsetY}))
             }}
           >
             <title className=""> {str(PressureSore.regionToString(regionType))} </title>
@@ -338,7 +353,7 @@ let make = (~pressureSoreParameter, ~updateCB, ~id, ~consultationId, ~previewMod
     None
   }, [pressureSoreParameter])
 
-  <div className="my-5">
+  <div className="my-5 relative" id="modal-parent" onClick={e => send(SetSelectedRegion(PressureSore.Other))} >
     <div className="flex flex-col sm:flex-row justify-between">
       {!previewMode
         ? <>
