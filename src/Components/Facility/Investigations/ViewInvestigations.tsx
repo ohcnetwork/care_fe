@@ -1,9 +1,10 @@
 import { navigate } from "raviger";
 import ReportTable from "./Reports/ReportTable";
-import loadable from "@loadable/component";
-import { formatDate } from "../../../Utils/utils";
+
+import { formatDateTime } from "../../../Utils/utils";
 import { InvestigationSessionType } from "./investigationsTab";
-const Loading = loadable(() => import("../../Common/Loading"));
+import { lazy } from "react";
+const Loading = lazy(() => import("../../Common/Loading"));
 
 export default function ViewInvestigations(props: {
   isLoading: boolean;
@@ -23,14 +24,14 @@ export default function ViewInvestigations(props: {
   } = props;
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="mx-auto max-w-7xl">
       {isLoading ? (
         <Loading />
       ) : (
         <div className="mt-4 space-y-2 ">
           {investigations.length > 0 && (
             <div>
-              <h4 className="text-gray-700 -mb-14">Summary</h4>
+              <h4 className="-mb-14 text-gray-700">Summary</h4>
               <ReportTable
                 investigationData={investigations}
                 hidePrint={true}
@@ -38,7 +39,7 @@ export default function ViewInvestigations(props: {
             </div>
           )}
           {investigationSessions.length === 0 && (
-            <div className="text-lg h-full text-center mt-5 text-gray-500 text-semibold bg-white py-4 rounded-lg shadow">
+            <div className="text-semibold mt-5 h-full rounded-lg bg-white py-4 text-center text-lg text-gray-500 shadow">
               No Investigation Reports Found
             </div>
           )}
@@ -46,10 +47,10 @@ export default function ViewInvestigations(props: {
             return (
               <div
                 key={investigationSession.session_external_id}
-                className="flex justify-between items-center bg-white hover:bg-gray-200 cursor-pointer p-4 border rounded-lg shadow"
+                className="flex cursor-pointer items-center justify-between rounded-lg border bg-white p-4 shadow hover:bg-gray-200"
               >
                 <div>
-                  {formatDate(investigationSession.session_created_date)}
+                  {formatDateTime(investigationSession.session_created_date)}
                 </div>
                 <button
                   onClick={() =>

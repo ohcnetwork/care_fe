@@ -1,8 +1,9 @@
 import { IConfig } from "./hooks/useConfig";
 import { PatientCategory } from "../Components/Facility/models";
 import { SortOption } from "../Components/Common/SortDropdown";
-import moment from "moment";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { dateQueryString } from "../Utils/utils";
+import { IconName } from "../CAREUI/icons/CareIcon";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -15,7 +16,7 @@ export const LocalStorageKeys = {
   refreshToken: "care_refresh_token",
 };
 export interface OptionsType {
-  id: number;
+  id: number | string;
   text: string;
   label?: string;
   desc?: string;
@@ -246,6 +247,7 @@ export const MEDICAL_HISTORY_CHOICES: Array<OptionsType> = [
 ];
 
 export const REVIEW_AT_CHOICES: Array<OptionsType> = [
+  { id: -1, text: "No Review" },
   { id: 10, text: "10 mins" },
   { id: 15, text: "15 mins" },
   { id: 30, text: "30 mins" },
@@ -311,7 +313,7 @@ export const LINES_CATHETER_CHOICES: Array<OptionsType> = [
 export const GENDER_TYPES = [
   { id: 1, text: "Male", icon: "M" },
   { id: 2, text: "Female", icon: "F" },
-  { id: 3, text: "Non-binary", icon: "NB" },
+  { id: 3, text: "Transgender", icon: "TRANS" },
 ];
 
 export const SAMPLE_TEST_RESULT = [
@@ -322,7 +324,7 @@ export const SAMPLE_TEST_RESULT = [
 ];
 
 export const CONSULTATION_SUGGESTION = [
-  { id: "HI", text: "Home Isolation" },
+  { id: "HI", text: "Home Isolation", deprecated: true }, // # Deprecated. Preserving option for backward compatibility (use only for readonly operations)
   { id: "A", text: "Admission" },
   { id: "R", text: "Refer to another Hospital" },
   { id: "OP", text: "OP Consultation" },
@@ -465,16 +467,16 @@ export const BLOOD_GROUPS = [
 ];
 
 export const SAMPLE_TYPE_CHOICES = [
-  { id: 0, text: "UNKNOWN" },
-  { id: 1, text: "BA/ETA" },
-  { id: 2, text: "TS/NPS/NS" },
-  { id: 3, text: "Blood in EDTA" },
-  { id: 4, text: "Acute Sera" },
-  { id: 5, text: "Covalescent sera" },
-  { id: 6, text: "Biopsy" },
-  { id: 7, text: "AMR" },
-  { id: 8, text: "Communicable Diseases" },
-  { id: 9, text: "OTHER TYPE" },
+  { id: "0", text: "UNKNOWN" },
+  { id: "1", text: "BA/ETA" },
+  { id: "2", text: "TS/NPS/NS" },
+  { id: "3", text: "Blood in EDTA" },
+  { id: "4", text: "Acute Sera" },
+  { id: "5", text: "Covalescent sera" },
+  { id: "6", text: "Biopsy" },
+  { id: "7", text: "AMR" },
+  { id: "8", text: "Communicable Diseases" },
+  { id: "9", text: "OTHER TYPE" },
 ];
 
 export const ICMR_CATEGORY = [
@@ -697,9 +699,9 @@ export const CONSULTATION_TABS: Array<OptionsType> = [
 ];
 
 export const RHYTHM_CHOICES: Array<OptionsType> = [
-  { id: 0, text: "Unknown" },
-  { id: 5, text: "Regular" },
-  { id: 10, text: "Irregular" },
+  { id: 0, text: "UNKNOWN", desc: "Unknown" },
+  { id: 5, text: "REGULAR", desc: "Regular" },
+  { id: 10, text: "IRREGULAR", desc: "Irregular" },
 ];
 
 export const LOCATION_BED_TYPES: Array<any> = [
@@ -757,28 +759,28 @@ export const CAMERA_STATES = {
 
 export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
   {
-    icon: "chevron-up",
+    icon: "l-angle-up",
     label: "Move Up",
     action: "up",
     loadingLabel: CAMERA_STATES.MOVING.UP,
     shortcutKey: ["Control", "Shift", "ArrowUp"],
   },
   {
-    icon: "chevron-down",
+    icon: "l-angle-down",
     label: "Move Down",
     action: "down",
     loadingLabel: CAMERA_STATES.MOVING.DOWN,
     shortcutKey: ["Control", "Shift", "ArrowDown"],
   },
   {
-    icon: "chevron-left",
+    icon: "l-angle-left",
     label: "Move Left",
     action: "left",
     loadingLabel: CAMERA_STATES.MOVING.LEFT,
     shortcutKey: ["Control", "Shift", "ArrowLeft"],
   },
   {
-    icon: "chevron-right",
+    icon: "l-angle-right",
     label: "Move Right",
     action: "right",
     loadingLabel: CAMERA_STATES.MOVING.RIGHT,
@@ -792,34 +794,34 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
     shortcutKey: ["Shift", "P"],
   },
   {
-    icon: "search-plus",
+    icon: "l-search-plus",
     label: "Zoom In",
     action: "zoomIn",
     loadingLabel: CAMERA_STATES.ZOOMING.IN,
     shortcutKey: ["Shift", "I"],
   },
   {
-    icon: "search-minus",
+    icon: "l-search-minus",
     label: "Zoom Out",
     action: "zoomOut",
     loadingLabel: CAMERA_STATES.ZOOMING.OUT,
     shortcutKey: ["Shift", "O"],
   },
   {
-    icon: "save",
+    icon: "l-save",
     label: "Update Preset",
     action: "updatePreset",
     loadingLabel: CAMERA_STATES.UPDATING_PRESET,
     shortcutKey: ["Shift", "S"],
   },
   {
-    icon: "undo",
+    icon: "l-redo",
     label: "Reset",
     action: "reset",
     shortcutKey: ["Shift", "R"],
   },
   {
-    icon: "expand",
+    icon: "l-expand-arrows-alt",
     label: "Full Screen",
     action: "fullScreen",
     shortcutKey: ["F"],
@@ -827,36 +829,40 @@ export const getCameraPTZ: (precision: number) => CameraPTZ[] = (precision) => [
 ];
 
 // in future, if you find Unicon equivalents of all these icons, please replace them. Only use the same iconset throughout.
-export const FACILITY_FEATURE_TYPES = [
+export const FACILITY_FEATURE_TYPES: {
+  id: number;
+  name: string;
+  icon: IconName;
+}[] = [
   {
     id: 1,
     name: "CT Scan",
-    icon: "compact-disc",
+    icon: "l-compact-disc",
   },
   {
     id: 2,
     name: "Maternity Care",
-    icon: "person-breastfeeding",
+    icon: "l-baby-carriage",
   },
   {
     id: 3,
     name: "X-Ray",
-    icon: "x-ray",
+    icon: "l-clipboard-alt",
   },
   {
     id: 4,
     name: "Neonatal Care",
-    icon: "baby-carriage",
+    icon: "l-baby-carriage",
   },
   {
     id: 5,
     name: "Operation Theater",
-    icon: "syringe",
+    icon: "l-syringe",
   },
   {
     id: 6,
     name: "Blood Bank",
-    icon: "droplet",
+    icon: "l-medical-drip",
   },
 ];
 
@@ -951,7 +957,7 @@ export const XLSXAssetImportSchema = {
         throw new Error("Invalid Warrenty End Date");
       }
 
-      return moment(parsed).format("YYYY-MM-DD");
+      return dateQueryString(parsed);
     },
   },
   "Last Service Date": {
@@ -964,7 +970,7 @@ export const XLSXAssetImportSchema = {
         throw new Error("Invalid Last Service Date");
       }
 
-      return moment(parsed).format("YYYY-MM-DD");
+      return dateQueryString(parsed);
     },
   },
   Notes: { prop: "notes", type: String },

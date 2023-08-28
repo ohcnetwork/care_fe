@@ -1,23 +1,7 @@
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from "@material-ui/core";
-import React, { useState } from "react";
+import { useState } from "react";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-import { makeStyles } from "@material-ui/core/styles";
-
-const useStyles = makeStyles({
-  paperFullWidth: {
-    overflowY: "visible",
-  },
-  dialogContentRoot: {
-    overflowY: "visible",
-  },
-});
+import ConfirmDialog from "../Common/ConfirmDialog";
 
 interface Props {
   username: string;
@@ -28,35 +12,18 @@ interface Props {
   handleCancel: () => void;
 }
 
-const LinkFacilityDialog = (props: Props) => {
-  const { username, handleOk, handleCancel } = props;
+const LinkFacilityDialog = ({ username, handleOk, handleCancel }: Props) => {
   const [facility, setFacility] = useState<any>(null);
-  const classes = useStyles();
-
-  const okClicked = () => {
-    handleOk(username, facility);
-  };
-
-  const cancelClicked = () => {
-    handleCancel();
-  };
 
   return (
-    <Dialog
-      open={true}
-      onClose={cancelClicked}
-      classes={{
-        paper: classes.paperFullWidth,
-      }}
-    >
-      <DialogTitle id="alert-dialog-title">
-        Link new facility to {username}
-      </DialogTitle>
-      <DialogContent
-        classes={{
-          root: classes.dialogContentRoot,
-        }}
-      >
+    <ConfirmDialog
+      show
+      title={
+        <span>
+          Link new facility to <strong>{username}</strong>
+        </span>
+      }
+      description={
         <div className="md:min-w-[400px]">
           <FacilitySelect
             multiple={false}
@@ -69,21 +36,13 @@ const LinkFacilityDialog = (props: Props) => {
             className="z-40"
           />
         </div>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={cancelClicked} color="secondary">
-          Cancel
-        </Button>
-        <Button
-          color="primary"
-          disabled={!facility}
-          onClick={okClicked}
-          autoFocus
-        >
-          Add
-        </Button>
-      </DialogActions>
-    </Dialog>
+      }
+      action="Link"
+      variant="primary"
+      onClose={handleCancel}
+      onConfirm={() => handleOk(username, facility)}
+      disabled={!facility}
+    />
   );
 };
 

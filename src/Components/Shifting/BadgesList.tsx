@@ -22,8 +22,10 @@ export default function BadgesList(props: any) {
   useEffect(() => {
     async function fetchData() {
       if (!qParams.assigned_to) return setAssignedUsername("");
-      const res = await dispatch(getUserList({ id: qParams.assigned_to }));
-      const { first_name, last_name } = res?.data?.results[0];
+      const res = await dispatch(
+        getUserList({ id: qParams.assigned_to }, "assigned_user_name")
+      );
+      const { first_name, last_name } = res?.data?.results[0] || {};
       setAssignedUsername(`${first_name} ${last_name}`);
     }
     fetchData();
@@ -31,14 +33,14 @@ export default function BadgesList(props: any) {
 
   useEffect(() => {
     async function fetchData() {
-      if (!qParams.orgin_facility) return setOriginFacilityName("");
+      if (!qParams.origin_facility) return setOriginFacilityName("");
       const res = await dispatch(
-        getAnyFacility(qParams.orgin_facility, "orgin_facility")
+        getAnyFacility(qParams.origin_facility, "origin_facility_name")
       );
       setOriginFacilityName(res?.data?.name);
     }
     fetchData();
-  }, [dispatch, qParams.orgin_facility]);
+  }, [dispatch, qParams.origin_facility]);
 
   useEffect(() => {
     async function fetchData() {
@@ -47,7 +49,7 @@ export default function BadgesList(props: any) {
       const res = await dispatch(
         getAnyFacility(
           qParams.shifting_approving_facility,
-          "shifting_approving_facility"
+          "shifting_approving_facility_name"
         )
       );
       setApprovingFacilityName(res?.data?.name);
@@ -59,7 +61,7 @@ export default function BadgesList(props: any) {
     async function fetchData() {
       if (!qParams.assigned_facility) return setAssignedFacilityName("");
       const res = await dispatch(
-        getAnyFacility(qParams.assigned_facility, "assigned_facility")
+        getAnyFacility(qParams.assigned_facility, "assigned_facility_name")
       );
       setAssignedFacilityName(res?.data?.name);
     }
@@ -77,19 +79,12 @@ export default function BadgesList(props: any) {
 
   return (
     <FilterBadges
-      badges={({
-        badge,
-        boolean,
-        phoneNumber,
-        dateRange,
-        kasp,
-        value,
-      }: any) => [
+      badges={({ badge, phoneNumber, dateRange, kasp, value }: any) => [
         badge(t("status"), "status"),
-        boolean(t("emergency"), "emergency", booleanFilterOptions),
+        badge(t("emergency"), "emergency", booleanFilterOptions),
         kasp(),
-        boolean(t("up_shift"), "is_up_shift", booleanFilterOptions),
-        boolean(t("antenatal"), "is_antenatal", booleanFilterOptions),
+        badge(t("up_shift"), "is_up_shift", booleanFilterOptions),
+        badge(t("antenatal"), "is_antenatal", booleanFilterOptions),
         phoneNumber(t("phone_no"), "patient_phone_number"),
         badge(t("patient_name"), "patient_name"),
         ...dateRange(t("created"), "created_date"),
@@ -102,7 +97,7 @@ export default function BadgesList(props: any) {
           "assigned_facility",
           assignedFacilityName
         ),
-        value(t("origin_facility"), "orgin_facility", originFacilityName),
+        value(t("origin_facility"), "origin_facility", originFacilityName),
         value(
           t("shifting_approval_facility"),
           "shifting_approving_facility",

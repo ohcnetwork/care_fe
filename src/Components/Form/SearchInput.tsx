@@ -51,7 +51,7 @@ const SearchInput = ({
     (isAppleDevice ? (
       "⌘K"
     ) : (
-      <div className="flex font-medium gap-1">
+      <div className="flex gap-1 font-medium">
         <span className="text-gray-400">Ctrl</span>
         <span className="text-gray-500">K</span>
       </div>
@@ -64,7 +64,7 @@ const SearchInput = ({
 
   return (
     <TextFormField
-      labelClassName="text-sm font-medium"
+      labelClassName="font-medium"
       {...props}
       name={name}
       errorClassName="hidden"
@@ -73,13 +73,13 @@ const SearchInput = ({
       className={className}
       leading={
         props.leading || (
-          <CareIcon className="text-gray-600 care-l-search-alt" />
+          <CareIcon className="care-l-search-alt text-gray-600" />
         )
       }
       trailing={
         props.trailing ||
         (!props.secondary && (
-          <div className="hidden md:flex absolute inset-y-0 right-0 py-1.5 pr-1.5">
+          <div className="absolute inset-y-0 right-0 hidden py-1.5 pr-1.5 md:flex">
             <kbd className="inline-flex items-center rounded border border-gray-200 px-2 font-sans text-sm font-medium text-gray-500">
               {shortcutKeyIcon}
             </kbd>
@@ -87,7 +87,7 @@ const SearchInput = ({
         ))
       }
       trailingFocused={
-        <div className="hidden md:flex absolute inset-y-0 right-0 py-1.5 pr-1.5 gap-1">
+        <div className="absolute inset-y-0 right-0 hidden gap-1 py-1.5 pr-1.5 md:flex">
           <kbd className="inline-flex items-center rounded border border-gray-200 px-2 font-sans text-sm font-medium text-gray-500">
             Esc
           </kbd>

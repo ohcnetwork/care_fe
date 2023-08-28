@@ -23,6 +23,7 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
 import { SortOption } from "../Common/SortDropdown";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
 
 const PER_PAGE_LIMIT = 6;
 
@@ -97,7 +98,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
       setData(
         entries.map(({ patient, asset, bed }) => {
           const middleware =
-            asset.meta?.middleware_hostname ?? facilityObj?.middleware_address;
+            asset.meta?.middleware_hostname || facilityObj?.middleware_address;
           const local_ip_address = asset.meta?.local_ip_address;
 
           return {
@@ -117,6 +118,17 @@ export default function CentralNursingStation({ facilityId }: Props) {
     qParams.bed_is_occupied,
   ]);
 
+  const { config, hash } = useVitalsAspectRatioConfig({
+    default: 6 / 11,
+    vs: 10 / 11,
+    sm: 17 / 11,
+    md: 19 / 11,
+    lg: 11 / 11,
+    xl: 13 / 11,
+    "2xl": 16 / 11,
+    "3xl": 12 / 11,
+  });
+
   return (
     <Page
       title="Central Nursing Station"
@@ -124,8 +136,8 @@ export default function CentralNursingStation({ facilityId }: Props) {
       noImplicitPadding
       breadcrumbs={false}
       options={
-        <div className="flex gap-4 items-center">
-          <Popover>
+        <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
+          <Popover className="relative">
             <Popover.Button>
               <ButtonV2 variant="secondary" border>
                 <CareIcon className="care-l-setting text-lg" />
@@ -141,7 +153,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
             >
-              <Popover.Panel className="absolute z-10 mt-1 w-96 transform -translate-x-1/2 px-4 sm:px-0 lg:max-w-3xl">
+              <Popover.Panel className="absolute z-30 mt-1 w-80 -translate-x-1/3 px-4 sm:px-0 md:w-96 md:-translate-x-1/2 lg:max-w-3xl">
                 <div className="rounded-lg shadow-lg ring-1 ring-gray-400">
                   <div className="rounded-t-lg bg-gray-100 px-6 py-4">
                     <div className="flow-root rounded-md">
@@ -151,13 +163,14 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       </span>
                     </div>
                   </div>
-                  <div className="rounded-b-lg relative flex flex-col gap-8 bg-white p-6">
+                  <div className="relative flex flex-col gap-8 rounded-b-lg bg-white p-6">
                     <div>
                       <FieldLabel className="text-sm">
                         Filter by Location
                       </FieldLabel>
-                      <div className="flex gap-2 w-full items-center">
+                      <div className="flex w-full items-center gap-2">
                         <LocationSelect
+                          key={qParams.location}
                           name="Facilities"
                           setSelected={(location) => updateQuery({ location })}
                           selected={qParams.location}
@@ -166,7 +179,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
                           facilityId={facilityId}
                           errors=""
                           errorClassName="hidden"
-                          className="w-64"
                         />
                         {qParams.location && (
                           <ButtonV2
@@ -253,16 +265,19 @@ export default function CentralNursingStation({ facilityId }: Props) {
       {data === undefined ? (
         <Loading />
       ) : data.length === 0 ? (
-        <div className="flex w-full h-[80vh] items-center justify-center text-black text-center">
+        <div className="flex h-[80vh] w-full items-center justify-center text-center text-black">
           No Vitals Monitor present in this location or facility.
         </div>
       ) : (
-        <div className="mt-1 grid grid-cols-1 lg:grid-cols-2 3xl:grid-cols-3 gap-1">
+        <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 3xl:grid-cols-3">
           {data.map((props) => (
-            <HL7PatientVitalsMonitor
-              key={props.patientAssetBed?.bed.id}
-              {...props}
-            />
+            <div className="overflow-hidden text-clip">
+              <HL7PatientVitalsMonitor
+                key={`${props.patientAssetBed?.bed.id}-${hash}`}
+                {...props}
+                config={config}
+              />
+            </div>
           ))}
         </div>
       )}

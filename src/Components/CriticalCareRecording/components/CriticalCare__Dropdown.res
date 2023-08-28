@@ -77,7 +77,7 @@ let make = (~id, ~value, ~updateCB, ~placeholder, ~selectables, ~label="", ~disa
       id
       value
       autoComplete="off"
-      onClick={_ => setShowDropdown(_ => !showDropdown)}
+      onClick={e => {ReactEvent.Mouse.stopPropagation(e); setShowDropdown(_ => !showDropdown)}}
       onChange={e => updateCB(ReactEvent.Form.target(e)["value"])}
       className="cui-input-base appearance-none h-10 mt-1 block py-2 px-4"
       disabled

@@ -25,7 +25,7 @@ export default function NumericWithUnitsFormField(props: Props) {
           name={field.name}
           id={field.name}
           className={classNames(
-            "cui-input-base pr-24 md:pr-28 sm:leading-6",
+            "cui-input-base pr-24 sm:leading-6 md:pr-28",
             field.error && "border-danger-500",
             field.className
           )}

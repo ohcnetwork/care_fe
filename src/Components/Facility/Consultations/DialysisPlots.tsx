@@ -5,20 +5,17 @@ import { dailyRoundsAnalyse } from "../../../Redux/actions";
 import { LinePlot } from "./components/LinePlot";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
-import { formatDate } from "../../../Utils/utils";
+import { formatDateTime } from "../../../Utils/utils";
 
 export const DialysisPlots = (props: any) => {
-  const { facilityId, patientId, consultationId } = props;
+  const { consultationId } = props;
   const dispatch: any = useDispatch();
-  const [isLoading, setIsLoading] = useState(false);
-  const [offset, setOffset] = useState(0);
   const [results, setResults] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
   const fetchDailyRounds = useCallback(
     async (status: statusType) => {
-      setIsLoading(true);
       const res = await dispatch(
         dailyRoundsAnalyse(
           {
@@ -29,11 +26,10 @@ export const DialysisPlots = (props: any) => {
         )
       );
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setTotalCount(res.data.count);
           setResults(res.data.results);
         }
-        setIsLoading(false);
       }
     },
     [consultationId, dispatch, currentPage]
@@ -46,14 +42,12 @@ export const DialysisPlots = (props: any) => {
     [consultationId, currentPage]
   );
 
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
+  const handlePagination = (page: number, _limit: number) => {
     setCurrentPage(page);
-    setOffset(offset);
   };
 
   const dates = Object.keys(results)
-    .map((p: string) => formatDate(p))
+    .map((p: string) => formatDateTime(p))
     .reverse();
 
   const yAxisData = (name: string) => {
@@ -64,8 +58,8 @@ export const DialysisPlots = (props: any) => {
 
   return (
     <div>
-      <div className="grid grid-row-1 md:grid-cols-2 gap-4">
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+      <div className="grid-row-1 grid gap-4 md:grid-cols-2">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="Dialysis Fluid Balance"
             name="Fluid Balance"
@@ -74,7 +68,7 @@ export const DialysisPlots = (props: any) => {
           />
         </div>
 
-        <div className="pt-4 px-4 bg-white border rounded-lg shadow">
+        <div className="rounded-lg border bg-white px-4 pt-4 shadow">
           <LinePlot
             title="Dialysis Net Balance"
             name="Net Balance"

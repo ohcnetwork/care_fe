@@ -1,6 +1,5 @@
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import reducer from "../src/Redux/Reducer";
-import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import App from "./App";
 import "./i18n";
 import { applyMiddleware, createStore } from "redux";
@@ -10,7 +9,7 @@ import * as Sentry from "@sentry/browser";
 import "./style/index.css";
 import { registerSW } from "virtual:pwa-register";
 
-if (import.meta.env.PROD) {
+if("serviceWorker" in navigator){
   registerSW({ immediate: false });
 }
 
@@ -22,19 +21,9 @@ if (import.meta.env.PROD) {
   });
 }
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#0e9f6e",
-    },
-  },
-});
-
-ReactDOM.render(
+const root = createRoot(document.getElementById("root") as HTMLElement);
+root.render(
   <Provider store={store}>
-    <ThemeProvider theme={theme}>
-      <App />
-    </ThemeProvider>
-  </Provider>,
-  document.getElementById("root")
+    <App />
+  </Provider>
 );

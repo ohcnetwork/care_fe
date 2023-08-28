@@ -1,9 +1,9 @@
-import React from "react";
 import { Listbox } from "@headlessui/react";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
 import { classNames } from "../../Utils/utils";
+import { ReactNode } from "react";
 
 type OptionCallback<T, R> = (option: T) => R;
 
@@ -12,12 +12,12 @@ type SelectMenuProps<T, V = T> = {
   options: T[];
   disabled?: boolean | undefined;
   value: V | undefined;
-  placeholder?: React.ReactNode;
+  placeholder?: ReactNode;
   position?: "above" | "below";
-  optionLabel: OptionCallback<T, React.ReactNode>;
-  optionSelectedLabel?: OptionCallback<T, React.ReactNode>;
-  optionDescription?: OptionCallback<T, React.ReactNode>;
-  optionIcon?: OptionCallback<T, React.ReactNode>;
+  optionLabel: OptionCallback<T, ReactNode>;
+  optionSelectedLabel?: OptionCallback<T, ReactNode>;
+  optionDescription?: OptionCallback<T, ReactNode>;
+  optionIcon?: OptionCallback<T, ReactNode>;
   optionValue?: OptionCallback<T, V>;
   showIconWhenSelected?: boolean;
   showChevronIcon?: boolean;
@@ -59,7 +59,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
 
   const showChevronIcon = props.showChevronIcon ?? true;
 
-  const placeholder = props.placeholder || "Select";
+  const placeholder = props.placeholder ?? "Select";
   const defaultOption = {
     label: placeholder,
     selectedLabel: <p className="font-normal text-gray-600">{placeholder}</p>,
@@ -72,7 +72,7 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
     ? valueOptions
     : [defaultOption, ...valueOptions];
 
-  const value = options.find((o) => props.value == o.value) || defaultOption;
+  const value = options.find((o) => props.value == o.value) ?? defaultOption;
 
   return (
     <div className={props.className} id={props.id}>
@@ -90,12 +90,12 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
               <Listbox.Button
                 className={`${
                   props?.requiredError ? "border-red-500" : ""
-                } w-full flex rounded cui-input-base`}
+                } cui-input-base flex w-full rounded`}
                 onFocus={props.onFocus}
                 onBlur={props.onBlur}
               >
-                <div className="relative z-0 flex items-center w-full">
-                  <div className="relative flex-1 flex items-center focus:z-10">
+                <div className="relative z-0 flex w-full items-center">
+                  <div className="relative flex flex-1 items-center focus:z-10">
                     {props.showIconWhenSelected && value?.icon && (
                       <div className="ml-2 text-sm text-gray-700">
                         {value.icon}
@@ -106,13 +106,13 @@ const SelectMenuV2 = <T, V>(props: SelectMenuProps<T, V>) => {
                     </p>
                   </div>
                   {showChevronIcon && (
-                    <CareIcon className="-mb-0.5 care-l-angle-down text-lg text-gray-900" />
+                    <CareIcon className="care-l-angle-down -mb-0.5 text-lg text-gray-900" />
                   )}
                 </div>
               </Listbox.Button>
               <div
                 className={classNames(
-                  "absolute w-full z-10",
+                  "absolute z-10 w-full",
                   props.position === "above" ? "bottom-0 mb-12" : "top-0 mt-12"
                 )}
               >

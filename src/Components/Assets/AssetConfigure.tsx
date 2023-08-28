@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import { useCallback, useState } from "react";
 import Loading from "../Common/Loading";
 import { AssetData } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -16,9 +16,9 @@ interface AssetConfigureProps {
 
 const AssetConfigure = (props: AssetConfigureProps) => {
   const { assetId, facilityId } = props;
-  const [asset, setAsset] = React.useState<AssetData>();
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [assetType, setAssetType] = React.useState("");
+  const [asset, setAsset] = useState<AssetData>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [assetType, setAssetType] = useState("");
   const dispatch = useDispatch<any>();
 
   const fetchData = useCallback(
@@ -53,6 +53,22 @@ const AssetConfigure = (props: AssetConfigureProps) => {
     return (
       <Page
         title={`Configure HL7 Monitor: ${asset?.name}`}
+        crumbsReplacements={{
+          [facilityId]: { name: asset?.location_object.facility.name },
+          assets: { uri: `/assets?facility=${facilityId}` },
+          [assetId]: { name: asset?.name },
+        }}
+        backUrl={`/facility/${facilityId}/assets/${assetId}`}
+      >
+        <HL7Monitor asset={asset} assetId={assetId} facilityId={facilityId} />
+      </Page>
+    );
+  }
+
+  if (assetType === "VENTILATOR") {
+    return (
+      <Page
+        title={`Configure Ventilator: ${asset?.name}`}
         crumbsReplacements={{
           [facilityId]: { name: asset?.location_object.facility.name },
           assets: { uri: `/assets?facility=${facilityId}` },

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function CollapseV2(props: {
   children: JSX.Element | JSX.Element[];
   opened: boolean;
   className?: string;
 }) {
-  const content = React.useRef<HTMLDivElement>(null);
+  const content = useRef<HTMLDivElement>(null);
   const [innerDivState, setInnerDivState] = useState(false);
   const [outerDivState, setOuterDivState] = useState(false);
 
@@ -25,7 +25,7 @@ export default function CollapseV2(props: {
 
   return (
     <div
-      className="transition-all ease-in-out duration-300"
+      className="transition-all duration-300 ease-in-out"
       style={
         outerDivState
           ? {
@@ -35,7 +35,7 @@ export default function CollapseV2(props: {
       }
     >
       <div
-        className={`transition-all ease-in-out duration-300 overflow-hidden ${
+        className={`transition-all duration-300 ease-in-out ${
           props.className ? props.className : ""
         }`}
         ref={content}

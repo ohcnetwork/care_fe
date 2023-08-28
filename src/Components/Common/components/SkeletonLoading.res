@@ -1,4 +1,4 @@
-export card = (~className="", ()) =>
+let card = (~className="", ()) =>
   <div className={"skeleton-body-container pt-4 w-full mx-auto" ++ className}>
     <div className="skeleton-body-wrapper px-3 lg:px-0">
       <div className="skeleton-placeholder__card px-5 py-6 bg-white rounded-lg shadow">
@@ -13,7 +13,7 @@ export card = (~className="", ()) =>
     </div>
   </div>
 
-export smallCard = () =>
+let smallCard = () =>
   <div className={"skeleton-body-container pt-4 w-full mx-auto"}>
     <div className="skeleton-body-wrapper px-3 lg:px-0">
       <div className="skeleton-placeholder__card px-5 py-6 bg-white rounded-lg shadow">

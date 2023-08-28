@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import * as Notification from "../../Utils/Notifications";
 import { animated, config, useSpring } from "@react-spring/web";
 import { useDispatch } from "react-redux";
@@ -9,7 +9,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import { useTranslation } from "react-i18next";
 
 interface BedTypeCardProps {
@@ -83,22 +83,22 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
         facilityId
           ? "border border-slate-200 bg-white"
           : "border border-primary-500 bg-primary-100"
-      } opacity-100 shadow-sm rounded-xl flex flex-col justify-between h-full`}
+      } flex h-full flex-col justify-between rounded-xl opacity-100 shadow-sm`}
       style={{ padding: "clamp(0.75rem,5vw,1.5rem)" }}
     >
       <div className={"opacity-100"}>
         <p
           className={`${
             facilityId ? "font-medium" : "font-bold"
-          } text-slate-900 text-xl mb-2 md:mb-4 text-center h-12`}
+          } mb-2 text-center text-xl text-slate-900 md:mb-4`}
         >
           {label}
         </p>
 
         <div className="relative">
           <div className={"opacity-100"}>
-            <div className="flex items-center justify-center h-2/3">
-              <div className="relative flex content-center justify-center m-2 w-4/5">
+            <div className="flex h-2/3 items-center justify-center">
+              <div className="relative m-2 flex w-4/5 content-center justify-center">
                 <svg viewBox="0 0 38 36" className="w-full">
                   <path
                     className={`${
@@ -108,15 +108,15 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
                     d={CIRCLE_PATH}
                   />
                   <animated.path
-                    className="text-primary-500 stroke-current stroke-[2px]"
+                    className="stroke-current stroke-[2px] text-primary-500"
                     fill="none"
                     strokeDasharray={progress}
                     d={CIRCLE_PATH}
                   />
                 </svg>
-                <div className="absolute inline-flex flex-col items-center justify-center self-center w-3/5 text-center text-sm xl:text-lg">
+                <div className="absolute inline-flex w-3/5 flex-col items-center justify-center self-center text-center text-sm xl:text-lg">
                   <div className="space-x-1">
-                    <animated.span className="text-center text-3xl text-slate-700 font-semibold">
+                    <animated.span className="text-center text-3xl font-semibold text-slate-700">
                       {innerProgress.to(
                         (x: number) => `${Math.round(x) || 0}%`
                       )}
@@ -132,19 +132,19 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
                 </div>
               </div>
             </div>
-            <div className="flex flex-col h-1/3 lg:flex-row gap-4 text-center mt-4 justify-center items-center">
-              <div className="w-1/2 overflow-x-auto">
-                <p className="text-slate-500 font-medium text-lg xl:text-xl">
+            <div className="mt-4 flex h-1/3 flex-col items-center justify-center gap-4 text-center lg:flex-row">
+              <div className="overflow-x-auto">
+                <p className="text-lg font-medium text-slate-500 xl:text-xl">
                   Used:
-                  <animated.span className="ml-2 text-slate-700 font-semibold text-lg">
+                  <animated.span className="ml-2 text-lg font-semibold text-slate-700">
                     {occupied.to((x: number) => Math.round(x))}
                   </animated.span>
                 </p>
               </div>
-              <div className="w-1/2 overflow-x-auto">
-                <p className="text-slate-500 font-medium text-lg xl:text-xl">
+              <div className="overflow-x-auto">
+                <p className="text-lg font-medium text-slate-500 xl:text-xl">
                   Total:
-                  <animated.span className="ml-2 text-slate-700 font-semibold text-lg">
+                  <animated.span className="ml-2 text-lg font-semibold text-slate-700">
                     {totalCount.to((x: number) => Math.round(x))}
                   </animated.span>
                 </p>
@@ -154,12 +154,12 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
               <div className="flex items-center justify-between gap-2 pt-6">
                 {lastUpdated && (
                   <RecordMeta
-                    className="text-xs text-gray-600 font-normal"
+                    className="text-xs font-normal text-gray-600"
                     prefix={t("updated")}
                     time={lastUpdated}
                   />
                 )}
-                <div className="flex justify-end gap-2 relative">
+                <div className="relative flex justify-end gap-2">
                   <ButtonV2
                     onClick={() => {
                       setSelectedId(room_type || 0);
@@ -189,14 +189,14 @@ export const BedTypeCard: React.FC<BedTypeCardProps> = ({
           </div>
           <p
             className={
-              "font-bold text-xl text-slate-500 text-center my-8 w-full absolute top-1/4 left-1/2 -translate-x-1/2 opacity-0 pointer-events-none"
+              "pointer-events-none absolute left-1/2 top-1/4 my-8 w-full -translate-x-1/2 text-center text-xl font-bold text-slate-500 opacity-0"
             }
           >
             No Data Available
           </p>
         </div>
       </div>
-      <ConfirmDialogV2
+      <ConfirmDialog
         show={openDeleteDialog}
         onClose={() => setOpenDeleteDialog(false)}
         title={`Delete ${label}?`}
