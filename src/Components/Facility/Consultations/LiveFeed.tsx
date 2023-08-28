@@ -23,10 +23,10 @@ import Page from "../../Common/components/Page";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import useFullscreen from "../../../Common/hooks/useFullscreen";
-import { UpdateCameraBoundaryConfigure } from "../../Assets/configure/CameraBoundayConfigure";
+import { UpdateCameraBoundaryConfigure } from "../../Assets/configure/CameraBoundaryConfigure";
 import { BoundaryRange } from "../../../Common/constants";
 import CameraConfigure from "../../Assets/configure/CameraConfigure";
-import CameraBoundaryConfigure from "../../Assets/configure/CameraBoundayConfigure";
+import CameraBoundaryConfigure from "../../Assets/configure/CameraBoundaryConfigure";
 import { direction } from "../../../Common/constants";
 
 const LiveFeed = (props: any) => {
@@ -64,12 +64,13 @@ const LiveFeed = (props: any) => {
   const newPreset: string = props.newPreset;
   const setNewPreset: (preset: string) => void = props.setNewPreset;
 
-  const boundaryPreset: any = props.boundaryPreset;
-  const addBoundaryPreset: () => void = props.addBoundaryPreset;
-  const deleteBoundaryPreset: () => void = props.deleteBoundaryPreset;
-  const setBoundaryPreset: (preset: any) => void = props.setBoundaryPreset;
-  const fetchBoundaryBedPreset: () => void = props.fetchBoundaryBedPreset;
-  const updateBoundaryPreset: () => void = props.updateBoundaryPreset;
+  // boundary preset configuration.
+  const boundaryPreset: any = props?.boundaryPreset;
+  const addBoundaryPreset: () => void = props?.addBoundaryPreset;
+  const deleteBoundaryPreset: () => void = props?.deleteBoundaryPreset;
+  const setBoundaryPreset: (preset: any) => void = props?.setBoundaryPreset;
+  const fetchBoundaryBedPreset: () => void = props?.fetchBoundaryBedPreset;
+  const updateBoundaryPreset: () => void = props?.updateBoundaryPreset;
   const [updateBoundaryInfo, setUpdateBoundaryInfo] = useState<
     Record<string, boolean>
   >({
@@ -209,47 +210,7 @@ const LiveFeed = (props: any) => {
     });
   };
 
-  const gotoDirectionalBoundary = (): void => {
-    if (boundaryPreset?.meta?.range && direction) {
-      const { max_x, max_y, min_x, min_y }: BoundaryRange =
-        boundaryPreset.meta.range;
-      const position = {
-        x: 0,
-        y: 0,
-        zoom: 0.2,
-      };
-      if (direction == "left") {
-        position.x = min_x;
-        position.y = (min_y + max_y) / 2;
-        setLoading("Moving to Left Boundary");
-      }
-      if (direction == "right") {
-        position.x = max_x;
-        position.y = (min_y + max_y) / 2;
-        setLoading("Moving to Right Boundary");
-      }
-      if (direction == "up") {
-        position.x = (min_x + max_x) / 2;
-        position.y = max_y;
-        setLoading("Moving to Top Boundary");
-      }
-      if (direction == "down") {
-        position.x = (min_x + max_x) / 2;
-        position.y = min_y;
-        setLoading("Moving to Bottom Boundary");
-      }
-      absoluteMove(position, {
-        onSuccess: () => setLoading(undefined),
-        onError: () => {
-          Notification.Error({ msg: "Something went wrong" });
-          setLoading(undefined);
-        },
-      });
-    } else {
-      Notification.Error({ msg: "Something went wrong" });
-    }
-  };
-
+  //conditionally disable feed buttons when modifying the boundary
   const disableFeedButton: (action: string) => boolean = (action) => {
     if (
       (direction == "left" || direction == "right") &&
@@ -272,6 +233,7 @@ const LiveFeed = (props: any) => {
     return true;
   };
 
+  //update a directional boundary when modifying the boundary
   const changeDirectionalBoundary = (option: any) => {
     const { max_x, max_y, min_x, min_y }: BoundaryRange =
       boundaryPreset.meta.range;
@@ -318,6 +280,8 @@ const LiveFeed = (props: any) => {
       }, delay);
     });
   };
+
+  //preivew all the edges of the boundary at a delay of 3 seconds
   const previewBoundary = async () => {
     if (boundaryPreset?.meta?.range) {
       setIsPreview(true);
@@ -449,7 +413,49 @@ const LiveFeed = (props: any) => {
     }
   }, [bedPresets]);
 
+  //hook move to directional boundary when modifying the boundary
   useEffect(() => {
+    const gotoDirectionalBoundary = (): void => {
+      if (boundaryPreset?.meta?.range && direction) {
+        const { max_x, max_y, min_x, min_y }: BoundaryRange =
+          boundaryPreset.meta.range;
+        const position = {
+          x: 0,
+          y: 0,
+          zoom: 0.2,
+        };
+        if (direction == "left") {
+          position.x = min_x;
+          position.y = (min_y + max_y) / 2;
+          setLoading("Moving to Left Boundary");
+        }
+        if (direction == "right") {
+          position.x = max_x;
+          position.y = (min_y + max_y) / 2;
+          setLoading("Moving to Right Boundary");
+        }
+        if (direction == "up") {
+          position.x = (min_x + max_x) / 2;
+          position.y = max_y;
+          setLoading("Moving to Top Boundary");
+        }
+        if (direction == "down") {
+          position.x = (min_x + max_x) / 2;
+          position.y = min_y;
+          setLoading("Moving to Bottom Boundary");
+        }
+        absoluteMove(position, {
+          onSuccess: () => setLoading(undefined),
+          onError: () => {
+            Notification.Error({ msg: "Something went wrong" });
+            setLoading(undefined);
+          },
+        });
+      } else {
+        Notification.Error({ msg: "Something went wrong" });
+      }
+    };
+
     if (boundaryPreset?.meta?.range && direction) {
       try {
         gotoDirectionalBoundary();
@@ -649,7 +655,7 @@ const LiveFeed = (props: any) => {
           </div>
           <div className="mx-4 flex max-w-sm flex-col">
             <div className={`${isPreview ? "disabled-select-form" : null}`}>
-              <label id="asset-type">Bed</label>
+              <label id="bed-select">Bed</label>
               <BedSelect
                 name="bed"
                 className="overflow-y-scoll z-50 mt-2"

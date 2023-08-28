@@ -69,6 +69,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
   const [boundaryPreset, setBoundaryPreset] = useState<any>();
   const [isFullscreen, setFullscreen] = useFullscreen();
+
+  // Information about subscription and camera occupier in case asset is not occupied by the current user
   const [showSubscriptionInfo, setShowSubscriptionInfo] = useState(false);
   const [showCameraOccupierInfo, setShowCameraOccupierInfo] = useState(false);
   const [cameraOccupier, setCameraOccupier] = useState<cameraOccupier>({});
@@ -78,30 +80,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [borderAlert, setBorderAlert] = useState<any>(null);
   const authUser = useAuthUser();
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeoutSeconds((prevSeconds) => prevSeconds - 1);
-    }, 1000);
-
-    const resetTimer = () => {
-      setTimeoutSeconds(CAMERA_ACCESS_TIMEOUT);
-    };
-
-    document.addEventListener("mousemove", resetTimer);
-
-    if (cameraOccupier.username) {
-      clearInterval(interval);
-      setTimeoutSeconds(CAMERA_ACCESS_TIMEOUT);
-      removeEventListener("mousemove", resetTimer);
-    }
-
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener("mousemove", resetTimer);
-    };
-  }, [cameraOccupier]);
-
-  // Notification hook
+  // Notification hook to get subscription info
   const { isSubscribed, isSubscribing, intialSubscriptionState, subscribe } =
     useNotificationSubscribe();
 
@@ -109,6 +88,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     intialSubscriptionState();
   }, [dispatch, isSubscribed]);
 
+  // display subscription info
   const subscriptionInfo = () => {
     return (
       <div className="relative mb-1 flex flex-col justify-end">
@@ -151,13 +131,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     );
   };
 
+  //display current cameraoccupier info incase the asset is not occupied by the current user
   const currentCameraOccupierInfo = () => {
     return (
       <div
         className="relative mb-1 flex flex-row-reverse"
-        // onMouseEnter={() => {
-        //   setShowCameraOccupierInfo(true);
-        // }}
         onMouseLeave={() => {
           setShowCameraOccupierInfo(false);
         }}
@@ -204,9 +182,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           onMouseEnter={() => {
             setShowCameraOccupierInfo(true);
           }}
-          // onMouseLeave={() => {
-          //   setShowCameraOccupierInfo(false);
-          // }}
         >
           <div className="text-4xl font-bold text-green-600">
             {cameraOccupier?.firstName?.[0] ? (
@@ -408,6 +383,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     }
   }, [cameraAsset, cameraMiddlewareHostname]);
 
+  //lock and unlock asset on mount and unmount
   useEffect(() => {
     if (cameraAsset.id) {
       lockAsset({
@@ -440,6 +416,31 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     };
   }, [cameraAsset, cameraMiddlewareHostname]);
 
+  //count down from CAMERA_ACCESS_TIMEOUT when mouse is idle to unlock asset after timeout
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeoutSeconds((prevSeconds) => prevSeconds - 1);
+    }, 1000);
+
+    const resetTimer = () => {
+      setTimeoutSeconds(CAMERA_ACCESS_TIMEOUT);
+    };
+
+    document.addEventListener("mousemove", resetTimer);
+
+    if (cameraOccupier.username) {
+      clearInterval(interval);
+      setTimeoutSeconds(CAMERA_ACCESS_TIMEOUT);
+      removeEventListener("mousemove", resetTimer);
+    }
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("mousemove", resetTimer);
+    };
+  }, [cameraOccupier]);
+
+  //unlock asset after timeout
   useEffect(() => {
     if (timeoutSeconds === 0) {
       unlockAsset({});
@@ -459,6 +460,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     }
   }, [timeoutSeconds]);
 
+  //Listen to push notifications for-
+  //1) camera access request
+  //2) camera access granted
   useMessageListener((data) => {
     if (data?.status == "success" && data?.asset_id === cameraAsset?.id) {
       lockAsset({

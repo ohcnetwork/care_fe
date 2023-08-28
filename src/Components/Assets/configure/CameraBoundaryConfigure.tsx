@@ -85,7 +85,7 @@ export default function CameraBoundaryConfigure(
           {bed?.id && !toUpdateBoundary && (
             <div className="my-4 flex flex-col">
               <div className="flex-initial">
-                <label id="asset-name">Boundary Preset Name</label>
+                <label id="boundary-preset-name">Boundary Preset Name</label>
                 <div className="text-sm">{`${
                   !boundaryPreset
                     ? bed?.name
@@ -119,7 +119,7 @@ export default function CameraBoundaryConfigure(
                   onClick={() => {
                     previewBoundary();
                   }}
-                  id="delete-boundary-preset"
+                  id="preview-boundary-preset"
                   disabled={isPreview}
                 >
                   <CareIcon className="care-l-eye" />
