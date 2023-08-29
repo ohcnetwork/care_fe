@@ -39,8 +39,6 @@ export default function PatientInfoCard(props: {
 
   const patient = props.patient;
   const consultation = props.consultation;
-  const ip_no = consultation?.ip_no;
-  const op_no = consultation?.op_no;
 
   const category: PatientCategory | undefined =
     consultation?.last_daily_round?.patient_category ?? consultation?.category;
@@ -155,12 +153,12 @@ export default function PatientInfoCard(props: {
                 {consultation?.facility_name}
               </Link>
 
-              {(consultation?.suggestion === "A" || op_no) && (
+              {consultation?.patient_no && (
                 <span className="pl-2 capitalize md:col-span-2">
                   <span className="badge badge-pill badge-primary">
-                    {consultation?.suggestion !== "A"
-                      ? `OP: ${op_no}`
-                      : `IP: ${ip_no}`}
+                    {`${consultation?.suggestion === "A" ? "IP" : "OP"}: ${
+                      consultation?.patient_no
+                    }`}
                   </span>
                 </span>
               )}

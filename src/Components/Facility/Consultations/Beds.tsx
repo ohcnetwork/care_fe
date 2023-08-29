@@ -21,7 +21,11 @@ import dayjs from "../../../Utils/dayjs";
 import { AssetSelect } from "../../Common/AssetSelect.js";
 import DialogModal from "../../Common/Dialog.js";
 import { Link } from "raviger";
-import { AssetData, assetClassProps } from "../../Assets/AssetTypes.js";
+import {
+  AssetClass,
+  AssetData,
+  assetClassProps,
+} from "../../Assets/AssetTypes.js";
 import Chip from "../../../CAREUI/display/Chip.js";
 
 interface BedsProps {
@@ -228,6 +232,7 @@ const Beds = (props: BedsProps) => {
                 setSelected={setAssets}
                 selected={assets}
                 multiple={true}
+                asset_class={AssetClass.VENTILATOR}
                 facility={facilityId}
                 in_use_by_consultation={false}
                 is_permanent={false}

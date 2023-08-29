@@ -105,8 +105,7 @@ export interface ConsultationModel {
   referred_to_object?: FacilityModel;
   referred_to_external?: string;
   suggestion?: string;
-  ip_no?: string;
-  op_no?: string;
+  patient_no?: string;
   consultation_status?: number;
   is_kasp?: boolean;
   kasp_enabled_date?: string;
