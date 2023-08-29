@@ -1,13 +1,15 @@
+import { HTMLAttributes, ReactNode } from "react";
+
 export default function Card(
   props: {
-    children?: React.ReactNode;
-  } & React.HTMLAttributes<HTMLDivElement>
+    children?: ReactNode;
+  } & HTMLAttributes<HTMLDivElement>
 ) {
   const { children, ...rest } = props;
   return (
     <div
       {...rest}
-      className={"bg-white rounded-lg shadow p-4 " + props.className}
+      className={"rounded-lg bg-white p-4 shadow " + props.className}
     >
       {children}
     </div>

@@ -1,14 +1,15 @@
-import moment from "moment";
 import CareIcon from "../icons/CareIcon";
+import { formatDateTime, isUserOnline, relativeTime } from "../../Utils/utils";
+import { ReactNode } from "react";
 
 interface Props {
   time?: string;
-  prefix?: React.ReactNode;
+  prefix?: ReactNode;
   className?: string;
   user?: {
     first_name: string;
     last_name: string;
-    last_login?: string;
+    last_login: string | undefined;
   };
 }
 
@@ -17,23 +18,19 @@ interface Props {
  * if provided.
  */
 const RecordMeta = ({ time, user, prefix, className }: Props) => {
-  const relativeTime = moment(time).fromNow();
-
-  const isOnline =
-    user?.last_login &&
-    moment().subtract(5, "minutes").isBefore(user.last_login);
+  const isOnline = user && isUserOnline(user);
 
   let child = (
     <div className="tooltip">
-      <span className="underline">{relativeTime}</span>
-      <span className="flex gap-1 tooltip-text font-medium tracking-wider text-xs -translate-x-1/3">
-        {moment(time).format("hh:mm A; DD/MM/YYYY")}
+      <span className="underline">{relativeTime(time)}</span>
+      <span className="tooltip-text tooltip-bottom flex -translate-x-1/2 gap-1 text-xs font-medium tracking-wider">
+        {formatDateTime(time)}
         {user && (
           <>
             <CareIcon className="care-l-user" />
             {user.first_name} {user.last_name}
             {isOnline && (
-              <div className="rounded-full w-1 h-1 bg-primary-500" />
+              <div className="h-1 w-1 rounded-full bg-primary-500" />
             )}
           </>
         )}

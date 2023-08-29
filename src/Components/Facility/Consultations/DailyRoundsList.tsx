@@ -9,8 +9,6 @@ import VirtualNursingAssistantLogUpdateCard from "./DailyRounds/VirtualNursingAs
 import DefaultLogUpdateCard from "./DailyRounds/DefaultLogUpdateCard";
 import { useTranslation } from "react-i18next";
 import LoadingLogUpdateCard from "./DailyRounds/LoadingCard";
-import { getTemperaturePreference } from "../../Common/utils/DevicePreference";
-import { fahrenheitToCelsius } from "../../../Utils/utils";
 
 export const DailyRoundsList = (props: any) => {
   const { t } = useTranslation();
@@ -46,16 +44,7 @@ export const DailyRoundsList = (props: any) => {
       );
       if (!status.aborted) {
         if (res && res.data) {
-          res.data.results.forEach((round: DailyRoundsModel) => {
-            round.temperatureUnit = getTemperaturePreference();
-            round.temperature =
-              round.temperatureUnit === "F"
-                ? round.temperature
-                : fahrenheitToCelsius(round.temperature);
-            return round;
-          });
           setDailyRoundsListData(res.data.results);
-          console.log(res.data.results);
           setTotalCount(res.data.count);
         }
         setIsDailyRoundLoading(false);
@@ -89,7 +78,7 @@ export const DailyRoundsList = (props: any) => {
     );
   } else if (dailyRoundsListData.length === 0) {
     roundsList = (
-      <span className="text-gray-700 bg-white rounded-lg shadow p-3 flex justify-center">
+      <span className="flex justify-center rounded-lg bg-white p-3 text-gray-700 shadow">
         {t("no_consultation_updates")}
       </span>
     );
@@ -106,7 +95,6 @@ export const DailyRoundsList = (props: any) => {
 
       return (
         <DefaultLogUpdateCard
-          key={itemData.id}
           round={itemData}
           consultationData={consultationData}
           onViewDetails={() => {
@@ -137,8 +125,8 @@ export const DailyRoundsList = (props: any) => {
   }
 
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <div className="flex flex-col gap-4 overflow-y-auto overflow-x-hidden max-h-[85vh] px-3">
+    <div className="flex w-full flex-col gap-4">
+      <div className="flex max-h-[85vh] flex-col gap-4 overflow-y-auto overflow-x-hidden px-3">
         {roundsList}
       </div>
       {!isDailyRoundLoading && totalCount > limit && (

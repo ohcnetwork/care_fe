@@ -4,13 +4,12 @@ import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { LegacyErrorHelperText } from "../Common/HelperInputFields";
-import { DoctorModal, OptionsType } from "./models";
 import ButtonV2, { Cancel } from "../Common/components/ButtonV2";
-import SelectMenuV2 from "../Form/SelectMenuV2";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
 import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
+import SelectMenuV2 from "../Form/SelectMenuV2";
+import { DoctorModal, OptionsType } from "./models";
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: string;
@@ -132,6 +131,10 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
         errors[field] = "Field is required";
         invalidForm = true;
       }
+      if (field === "count" && state.form[field] < 0) {
+        errors[field] = "Doctor count cannot be negative";
+        invalidForm = true;
+      }
     });
     if (invalidForm) {
       dispatch({ type: "set_error", errors });
@@ -189,11 +192,11 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
   return (
     <div className={className}>
       {isLoading ? (
-        <div className="flex justify-center items-center">
+        <div className="flex items-center justify-center">
           <div role="status">
             <svg
               aria-hidden="true"
-              className="mr-2 w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-primary"
+              className="mr-2 h-8 w-8 animate-spin fill-primary text-gray-200 dark:text-gray-600"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -218,19 +221,20 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
             </FieldLabel>
             <SelectMenuV2
               id="area-of-specialization"
-              value={doctorTypes.find((type) => type.id == state.form.area)}
+              value={doctorTypes.find((type) => type.id == state.form.area)?.id}
               options={doctorTypes.filter((type) => !type.disabled)}
               optionLabel={(option) => option.text}
+              optionValue={(option) => option.id}
               requiredError={state.errors.area.length !== 0}
               onChange={(e) =>
                 handleFormFieldChange({
                   name: "area",
-                  value: (e && e.id) || "",
+                  value: e || "",
                 })
               }
               disabled={!!id}
             />
-            <LegacyErrorHelperText error={state.errors.area} />
+            <FieldErrorText error={state.errors.area} />
           </div>
           <div>
             <TextFormField
@@ -245,22 +249,16 @@ export const DoctorCapacity = (props: DoctorCapacityProps) => {
               min={0}
             />
           </div>
-          <div>
-            <div className="flex justify-between flex-col md:flex-row mt-4">
-              <div className="flex flex-row w-full sm:w-auto gap-4 mt-2">
-                <Cancel onClick={() => handleClose()} />
-              </div>
-              <div className="flex flex-row w-full sm:w-auto flex-wrap gap-2 mt-2">
-                {!isLastOptionType && headerText === "Add Doctor Capacity" && (
-                  <ButtonV2 id="save-and-exit" onClick={handleSubmit}>
-                    Save Doctor Capacity
-                  </ButtonV2>
-                )}
-                <ButtonV2 id="doctor-save" onClick={handleSubmit}>
-                  {buttonText}
-                </ButtonV2>
-              </div>
-            </div>
+          <div className="cui-form-button-group mt-4">
+            <Cancel onClick={() => handleClose()} />
+            {!isLastOptionType && headerText === "Add Doctor Capacity" && (
+              <ButtonV2 id="save-and-exit" onClick={handleSubmit}>
+                Save Doctor Capacity
+              </ButtonV2>
+            )}
+            <ButtonV2 id="doctor-save" onClick={handleSubmit}>
+              {buttonText}
+            </ButtonV2>
           </div>
         </div>
       )}

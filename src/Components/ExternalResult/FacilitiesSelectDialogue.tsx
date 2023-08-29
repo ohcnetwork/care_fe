@@ -30,12 +30,13 @@ const FacilitiesSelectDialog = (props: Props) => {
         showAll={false}
         multiple={false}
       />
-      <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:justify-end">
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-end">
         <Cancel onClick={handleCancel} />
         <Submit
           onClick={handleOk}
           disabled={!selectedFacility.id}
           label={t("select")}
+          data-testid="submit-button"
         />
       </div>
     </DialogModal>

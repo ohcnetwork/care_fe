@@ -1,15 +1,14 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
-import loadable from "@loadable/component";
+
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getMinQuantity, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
-import { navigate } from "raviger";
-import { RoleButton } from "../Common/RoleButton";
 import { MinQuantityRequiredModal } from "./MinQuantityRequiredModal";
 import ButtonV2 from "../Common/components/ButtonV2";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import Page from "../Common/components/Page";
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function MinQuantityList(props: any) {
   const { facilityId }: any = props;
@@ -71,18 +70,18 @@ export default function MinQuantityList(props: any) {
   };
 
   let inventoryList: any = [];
-  if (inventory && inventory.length) {
+  if (inventory?.length) {
     inventoryList = inventory.map((inventoryItem: any) => (
       <tr key={inventoryItem.id} className="bg-white">
-        <td className="px-5 py-5 border-b border-gray-200 sm:text-sm sm:hover:bg-white hover:bg-gray-200 sm:cursor-default cursor-pointer">
-          <div className="sm:flex flex-col hidden">
-            <p className="text-gray-900 whitespace-nowrap font-normal">
+        <td className="cursor-pointer border-b border-gray-200 p-5 hover:bg-gray-200 sm:cursor-default sm:text-sm sm:hover:bg-white">
+          <div className="hidden flex-col sm:flex">
+            <p className="whitespace-nowrap font-normal text-gray-900">
               {inventoryItem.item_object?.name}
             </p>
           </div>
           <ButtonV2
             ghost={true}
-            className="sm:hidden hover:bg-gray-200 w-full"
+            className="w-full hover:bg-gray-200 sm:hidden"
             onClick={() => {
               setSelectedItem({
                 id: inventoryItem.id,
@@ -91,12 +90,12 @@ export default function MinQuantityList(props: any) {
               setShowMinQuantityRequiredModal(true);
             }}
           >
-            <div className="sm:hidden flex justify-between items-center w-full">
-              <div className="flex flex-col">
-                <p className="text-gray-900 whitespace-nowrap font-semibold">
+            <div className="flex w-full items-center justify-between sm:hidden">
+              <div className="flex flex-col text-start">
+                <p className="whitespace-nowrap font-semibold text-gray-900">
                   {inventoryItem.item_object?.name}
                 </p>
-                <p className="text-gray-900 whitespace-nowrap text-sm mt-1">
+                <p className="mt-1 whitespace-nowrap text-sm text-gray-900">
                   {"Min Quantity: "}
                   {inventoryItem.min_quantity}{" "}
                   {inventoryItem.item_object?.default_unit?.name}
@@ -109,7 +108,7 @@ export default function MinQuantityList(props: any) {
                   viewBox="0 0 24 24"
                   strokeWidth={2}
                   stroke="currentColor"
-                  className="w-5 h-5"
+                  className="h-5 w-5"
                 >
                   <path
                     strokeLinecap="round"
@@ -121,30 +120,26 @@ export default function MinQuantityList(props: any) {
             </div>
           </ButtonV2>
         </td>
-        <td className="px-5 py-5 border-b border-gray-200 text-sm sm:flex hidden w-full justify-between">
-          <p className="text-gray-900 whitespace-nowrap lowercase mt-2">
+        <td className="hidden w-full justify-between border-b border-gray-200 p-5 text-sm sm:flex">
+          <p className="mt-2 whitespace-nowrap lowercase text-gray-900">
             {inventoryItem.min_quantity}{" "}
             {inventoryItem.item_object?.default_unit?.name}
           </p>
-          <RoleButton
-            className=" bg-primary-500 hover:bg-primary-600 text-white"
-            materialButtonProps={{
-              variant: "contained",
-              color: "primary",
-              size: "medium",
-            }}
-            handleClickCB={() => {
+          <ButtonV2
+            variant="secondary"
+            ghost
+            border
+            onClick={() => {
               setSelectedItem({
                 id: inventoryItem.id,
                 item_id: inventoryItem.item_object?.id,
               });
               setShowMinQuantityRequiredModal(true);
             }}
-            disableFor="readOnly"
-            buttonType="materialUI"
+            authorizeFor={NonReadOnlyUsers}
           >
-            UPDATE
-          </RoleButton>
+            Update
+          </ButtonV2>
         </td>
       </tr>
     ));
@@ -153,9 +148,9 @@ export default function MinQuantityList(props: any) {
       <tr className="bg-white">
         <td
           colSpan={3}
-          className="pxf-5 py-5 border-b border-gray-200 text-center"
+          className="pxf-5 border-b border-gray-200 py-5 text-center"
         >
-          <p className="text-gray-500 whitespace-nowrap">
+          <p className="whitespace-nowrap text-gray-500">
             No item with minimum quantity set
           </p>
         </td>
@@ -168,25 +163,25 @@ export default function MinQuantityList(props: any) {
   } else if (inventory) {
     inventoryItem = (
       <>
-        <div className="-mx-4 sm:-mx-8 px-4 sm:px-8 py-4">
-          <div className="min-w-full sm:inline-block hidden bg-white">
-            <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
+        <div className="-mx-4 p-4 sm:-mx-8 sm:px-8">
+          <div className="hidden min-w-full bg-white sm:inline-block">
+            <table className="min-w-full overflow-hidden rounded-lg leading-normal shadow">
               <thead>
                 <tr>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="border-b-2 border-gray-200 bg-primary-500 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Item
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-500 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                  <th className="border-b-2 border-gray-200 bg-primary-500 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
                     Minimum Quantity
                   </th>
-                  <th className="px-5 py-3 border-b-2 border-gray-200 bg-primary-500 text-left text-xs font-semibold text-white uppercase tracking-wider"></th>
+                  <th className="border-b-2 border-gray-200 bg-primary-500 px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white"></th>
                 </tr>
               </thead>
               <tbody>{inventoryList}</tbody>
             </table>
           </div>
-          <div className="sm:hidden bg-gray-100 shadow-sm rounded-lg">
-            <table className="min-w-full leading-normal shadow rounded-lg overflow-hidden">
+          <div className="rounded-lg bg-gray-100 shadow-sm sm:hidden">
+            <table className="min-w-full overflow-hidden rounded-lg leading-normal shadow">
               {inventoryList}
             </table>
           </div>
@@ -207,39 +202,29 @@ export default function MinQuantityList(props: any) {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Minimum Quantity Required"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          min_quantity: {
-            name: "Min Quantity",
-            uri: `/facility/${facilityId}/inventory/min_quantity/list`,
-          },
-          list: {
-            style: "pointer-events-none",
-          },
-        }}
-        backUrl={`/facility/${facilityId}/inventory`}
-      />
+    <Page
+      title="Minimum Quantity Required"
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        min_quantity: {
+          name: "Min Quantity",
+          uri: `/facility/${facilityId}/inventory/min_quantity/list`,
+        },
+        list: {
+          style: "pointer-events-none",
+        },
+      }}
+      backUrl={`/facility/${facilityId}/inventory`}
+    >
       <div className="container mx-auto px-4 sm:px-8">
         <div className="py-8">
-          <RoleButton
+          <ButtonV2
             className="ml-2"
-            materialButtonProps={{
-              variant: "contained",
-              color: "primary",
-              size: "small",
-            }}
-            handleClickCB={() =>
-              navigate(`/facility/${facilityId}/inventory/min_quantity/set`)
-            }
-            disableFor="readOnly"
-            buttonType="materialUI"
+            href={`/facility/${facilityId}/inventory/min_quantity/set`}
+            authorizeFor={NonReadOnlyUsers}
           >
             Set Min Quantity
-          </RoleButton>
+          </ButtonV2>
           {inventoryItem}
         </div>
       </div>
@@ -256,6 +241,6 @@ export default function MinQuantityList(props: any) {
           }}
         />
       )}
-    </div>
+    </Page>
   );
 }

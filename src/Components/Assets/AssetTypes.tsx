@@ -1,4 +1,5 @@
 import { BedModel } from "../Facility/models";
+import { PerformedByModel } from "../HCX/misc";
 import { PatientModel } from "../Patient/models";
 
 export interface AssetLocationObject {
@@ -23,7 +24,15 @@ export enum AssetClass {
   NONE = "NONE",
   ONVIF = "ONVIF",
   HL7MONITOR = "HL7MONITOR",
+  VENTILATOR = "VENTILATOR",
 }
+
+export const AssetStatus = {
+  not_monitored: "Not Monitored",
+  operational: "Operational",
+  down: "Down",
+  maintenance: "Under Maintenance",
+};
 
 export const assetClassProps = {
   ONVIF: {
@@ -36,11 +45,24 @@ export const assetClassProps = {
     description: "",
     icon: "monitor-heart-rate",
   },
+  VENTILATOR: {
+    name: "Ventilator",
+    description: "",
+    icon: "lungs",
+  },
   NONE: {
     name: "N/A",
     icon: "box",
   },
 };
+
+export interface AssetService {
+  id: string;
+  created_date: string;
+  modified_date: string;
+  serviced_on: string;
+  note: string;
+}
 
 export interface AssetData {
   id: string;
@@ -63,8 +85,8 @@ export interface AssetData {
   qr_code_id: string;
   manufacturer: string;
   warranty_amc_end_of_validity: string;
-  last_serviced_on: string;
-  notes: string;
+  last_service: AssetService;
+  note: string;
   meta?: {
     [key: string]: any;
   };
@@ -75,6 +97,18 @@ export interface AssetsResponse {
   next?: string;
   previous?: string;
   results: AssetData[];
+}
+
+export interface AssetUptimeRecord {
+  id: string;
+  asset: {
+    id: string;
+    name: string;
+  };
+  status: string;
+  timestamp: string;
+  created_date: string;
+  modified_date: string;
 }
 
 export interface AssetTransaction {
@@ -104,6 +138,27 @@ export interface AssetBedModel {
   created_date: string;
   modified_date: string;
   meta: Record<string, any>;
+}
+
+export interface AssetServiceEdit {
+  id: string;
+  asset_service: AssetService;
+  serviced_on: string;
+  note: string;
+  edited_on: string;
+  edited_by: PerformedByModel;
+}
+export interface AssetService {
+  id: string;
+  asset: {
+    id: string;
+    name: string;
+  };
+  serviced_on: string;
+  note: string;
+  edits: AssetServiceEdit[];
+  created_date: string;
+  modified_date: string;
 }
 
 export interface PatientAssetBed {

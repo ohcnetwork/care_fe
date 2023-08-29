@@ -1,5 +1,4 @@
-import loadable from "@loadable/component";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, lazy, SyntheticEvent } from "react";
 import { useDispatch } from "react-redux";
 import {
   createFacilityAssetLocation,
@@ -14,7 +13,7 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import Page from "../Common/components/Page";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface LocationFormProps {
   facilityId: string;
@@ -58,12 +57,28 @@ export const AddLocationForm = (props: LocationFormProps) => {
     fetchFacilityName();
   }, [dispatchAction, facilityId, locationId]);
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
-    setErrors({
+  const validateForm = () => {
+    let formValid = true;
+    const error = {
       name: "",
       description: "",
-    });
+    };
+
+    if (name.trim().length === 0) {
+      error.name = "Name is required";
+      formValid = false;
+    }
+
+    setErrors(error);
+    return formValid;
+  };
+
+  const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
     const data = {
       name,
@@ -120,7 +135,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
       <div className="mt-10">
         <div className="cui-card">
           <form onSubmit={handleSubmit}>
-            <div className="mt-2 grid gap-4 grid-cols-1">
+            <div className="mt-2 grid grid-cols-1 gap-4">
               <div>
                 <TextFormField
                   name="name"
@@ -143,7 +158,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
                 />
               </div>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:justify-between mt-4">
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-between">
               <Cancel
                 onClick={() =>
                   navigate(`/facility/${facilityId}/location`, {

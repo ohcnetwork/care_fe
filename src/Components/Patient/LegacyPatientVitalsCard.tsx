@@ -1,17 +1,11 @@
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listAssetBeds, getPermittedFacility } from "../../Redux/actions";
-import {
-  celsiusToFahrenheit,
-  classNames,
-  fahrenheitToCelsius,
-} from "../../Utils/utils";
+import { classNames } from "../../Utils/utils";
 import { AssetData } from "../Assets/AssetTypes";
 import ToolTip from "../Common/utils/Tooltip";
 import { PatientModel } from "./models";
 import Waveform, { WaveformType } from "./Waveform";
-import { getTemperaturePreference } from "../Common/utils/DevicePreference";
-import { fahrenheitToCelcius } from "../CriticalCareRecording/HemodynamicParameters/CriticalCare__HemodynamicParametersEditor.bs";
 
 export interface IPatientVitalsCardProps {
   facilityId?: string;
@@ -52,70 +46,8 @@ export default function LegacyPatientVitalsCard({
   const dispatch: any = useDispatch();
   const [middlewareHostname, setMiddlewareHostname] = useState("");
   const [wsUrl, setWsUrl] = useState("");
-  const [patientObservations, setPatientObservations] = React.useState<any>();
-  const [stats, setStats] = React.useState(false);
-  const [temperatureUnit, setTemperatureUnit] = useState(
-    getTemperaturePreference()
-  );
-
-  const initialTemperature = () => {
-    if (patient?.last_consultation?.last_daily_round?.temperature) {
-      patient = {
-        ...patient,
-        last_consultation: {
-          ...patient?.last_consultation,
-          last_daily_round: {
-            ...patient?.last_consultation?.last_daily_round,
-            temperature:
-              temperatureUnit === "F"
-                ? patient?.last_consultation?.last_daily_round?.temperature
-                : fahrenheitToCelcius(
-                    patient?.last_consultation?.last_daily_round?.temperature
-                  ),
-          },
-        },
-      };
-    }
-  };
-  initialTemperature();
-
-  const handleTemperatureChange = (change: "C->F" | "F->C") => {
-    if (patient?.last_consultation?.last_daily_round?.temperature) {
-      patient = {
-        ...patient,
-        last_consultation: {
-          ...patient?.last_consultation,
-          last_daily_round: {
-            ...patient?.last_consultation?.last_daily_round,
-            temperature:
-              change === "C->F"
-                ? celsiusToFahrenheit(
-                    patient?.last_consultation?.last_daily_round?.temperature
-                  )
-                : fahrenheitToCelsius(
-                    patient?.last_consultation?.last_daily_round?.temperature
-                  ),
-          },
-        },
-      };
-    }
-  };
-
-  useEffect(() => {
-    function handleLocalTemperatureChange(e: any) {
-      if (e.key === "temperature") {
-        if (temperatureUnit === "C" && e.newValue === "F")
-          handleTemperatureChange("C->F");
-        else if (temperatureUnit === "F" && e.newValue === "C")
-          handleTemperatureChange("F->C");
-        setTemperatureUnit(e.newValue);
-      }
-    }
-    window.addEventListener("storage", handleLocalTemperatureChange);
-    return () => {
-      window.removeEventListener("storage", handleLocalTemperatureChange);
-    };
-  }, []);
+  const [patientObservations, setPatientObservations] = useState<any>();
+  const [stats, setStats] = useState(false);
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -247,9 +179,7 @@ export default function LegacyPatientVitalsCard({
       //waveformDefaultSpace: true
     },
     {
-      label: shrinked
-        ? `Temp. (°${temperatureUnit})`
-        : `Temperature (°${temperatureUnit})`,
+      label: shrinked ? "Temp. (°F)" : "Temperature (°F)",
       liveKey: "body-temperature1",
       vitalKey: "temperature",
     },
@@ -259,11 +189,11 @@ export default function LegacyPatientVitalsCard({
     <div className=" w-full">
       <div
         className={classNames(
-          "flex w-full items-stretch flex-col md:flex-row",
+          "flex w-full flex-col items-stretch md:flex-row",
           shrinked && "bg-black"
         )}
       >
-        <div className="w-full flex flex-col items-stretch py-2 bg-black h-auto text-gray-400 relative">
+        <div className="relative flex h-auto w-full flex-col items-stretch bg-black py-2 text-gray-400">
           {waveforms ? (
             <>
               {vitals.map((v, i) => {
@@ -300,9 +230,9 @@ export default function LegacyPatientVitalsCard({
               </div>
             </>
           ) : (
-            <div className="h-full w-full flex items-center justify-center">
-              <div className="text-center w-[150px] text-gray-800">
-                <i className="fas fa-plug-circle-exclamation text-4xl mb-4" />
+            <div className="flex h-full w-full items-center justify-center">
+              <div className="w-[150px] text-center text-gray-800">
+                <i className="fas fa-plug-circle-exclamation mb-4 text-4xl" />
                 <div>No Live data at the moment!</div>
               </div>
             </div>
@@ -310,15 +240,15 @@ export default function LegacyPatientVitalsCard({
         </div>
         <div
           className={classNames(
-            "flex flex-row md:flex-col flex-wrap md:flex-nowrap w-full border-l border-l-gray-400 justify-between md:justify-start shrink-0",
-            shrinked ? "md:w-[120px] p-2 text-gray-400" : "md:w-[200px] p-3"
+            "flex w-full shrink-0 flex-row flex-wrap justify-between border-l border-l-gray-400 md:flex-col md:flex-nowrap md:justify-start",
+            shrinked ? "p-2 text-gray-400 md:w-[120px]" : "p-3 md:w-[200px]"
           )}
         >
           {vitals.map((vital, i) => {
             const liveReading = getVital(patientObservations, vital.liveKey);
             return (
-              <div key={i} className="p-2 h-[90px]">
-                <h2 className="font-bold text-xl md:text-3xl">
+              <div key={i} className="h-[90px] p-2">
+                <h2 className="text-xl font-bold md:text-3xl">
                   {liveReading ||
                     (vital.vitalKey === "bp"
                       ? `${
@@ -342,7 +272,7 @@ export default function LegacyPatientVitalsCard({
                   <div
                     className={classNames(
                       "mr-2 rounded-full",
-                      shrinked ? "w-2 h-2" : "w-3 h-3",
+                      shrinked ? "h-2 w-2" : "h-3 w-3",
                       liveReading ? "text-green-500" : "text-gray-500"
                     )}
                   />

@@ -1,32 +1,27 @@
-import React, { useCallback, useEffect, useReducer, useState } from "react";
-import { useRef } from "react";
-import { useDispatch } from "react-redux";
+import * as Notification from "../../../../Utils/Notifications";
+
 import { Group, InvestigationType } from "..";
 import {
+  getPatient,
   getPatientInvestigation,
   listInvestigationGroups,
   listInvestigations,
-  getPatient,
 } from "../../../../Redux/actions";
-import { LegacyMultiSelectField } from "../../../Common/HelperInputFields";
-import PageTitle from "../../../Common/PageTitle";
-import { Button, ButtonGroup, Checkbox, TextField } from "@material-ui/core";
-import Loading from "../../../Common/Loading";
-import _ from "lodash";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import { InputLabel, makeStyles, CircularProgress } from "@material-ui/core";
+import { useCallback, useEffect, useReducer, useState } from "react";
+
+import AutocompleteMultiSelectFormField from "../../../Form/FormFields/AutocompleteMultiselect";
+import ButtonV2 from "../../../Common/components/ButtonV2";
+import CircularProgress from "../../../Common/components/CircularProgress";
+import { FieldChangeEvent } from "../../../Form/FormFields/Utils";
 import { InvestigationResponse } from "./types";
+import Loading from "../../../Common/Loading";
+import Page from "../../../Common/components/Page";
 import ReportTable from "./ReportTable";
-import * as Notification from "../../../../Utils/Notifications";
+import _ from "lodash";
+import { useDispatch } from "react-redux";
+import { useRef } from "react";
 
 const RESULT_PER_PAGE = 14;
-
-const useStyle = makeStyles({
-  button: {
-    margin: "1.5rem 0",
-  },
-});
-
 interface InitialState {
   investigationGroups: Group[];
   selectedGroup: string[];
@@ -97,7 +92,6 @@ const investigationReportsReducer = (state = initialState, action: any) => {
 };
 
 const InvestigationReports = ({ id }: any) => {
-  const className = useStyle();
   const dispatchAction: any = useDispatch();
   const [page, setPage] = useState(1);
   const [sessionPage, setSessionPage] = useState(1);
@@ -240,12 +234,12 @@ const InvestigationReports = ({ id }: any) => {
     fetchPatientName();
   }, [dispatchAction, id]);
 
-  const handleGroupSelect = (e: any) => {
+  const handleGroupSelect = ({ value }: FieldChangeEvent<string[]>) => {
     dispatch({ type: "set_investigations", payload: [] });
     dispatch({ type: "set_investigation_table_data", payload: [] });
     dispatch({ type: "set_selected_investigations", payload: [] });
     dispatch({ type: "set_loading", payload: initialState.isLoading });
-    dispatch({ type: "set_selected_group", payload: e.target.value });
+    dispatch({ type: "set_selected_group", payload: value });
   };
 
   useEffect(() => {
@@ -307,15 +301,7 @@ const InvestigationReports = ({ id }: any) => {
     setSessionPage(count);
     handleGenerateReports(count);
   };
-  const handleSelectAllClick = (prev: boolean) => {
-    const e = {
-      target: {
-        value: prev ? [] : investigationGroups.map((i) => i.external_id),
-      },
-    };
 
-    handleGroupSelect(e);
-  };
   const loadMoreDisabled =
     page - 1 >= totalPage || isLoading.tableData || isLoadMoreDisabled;
   const getTestDisabled =
@@ -331,129 +317,95 @@ const InvestigationReports = ({ id }: any) => {
   const nextSessionDisabled = isNextSessionDisabled || isLoading.tableData;
 
   return (
-    <div className="max-w-7xl mx-auto px-4">
-      <PageTitle
-        title={"Investigation Reports"}
-        crumbsReplacements={{
-          patient: { style: "pointer-events-none" },
-          [id]: { name: patientDetails.name },
-        }}
-      />
+    <Page
+      title="Investigation Reports"
+      crumbsReplacements={{
+        patient: { style: "pointer-events-none" },
+        [id]: { name: patientDetails.name },
+      }}
+    >
       {!isLoading.investigationGroupLoading ? (
         <>
           <div className="mt-5">
-            <InputLabel required id="investigation-group-label">
-              Select Investigation Groups
-            </InputLabel>
-            <LegacyMultiSelectField
-              id="investigation-group-label"
+            <AutocompleteMultiSelectFormField
+              id="investigation-group-select"
+              name="investigation-group-select"
+              label="Select Investigation Groups"
               options={investigationGroups}
               value={selectedGroup}
-              optionValue="name"
-              optionKey="external_id"
               onChange={handleGroupSelect}
+              optionLabel={(option) => option.name}
+              optionValue={(option) => option.external_id}
+              isLoading={isLoading.investigationLoading}
               placeholder="Select Groups"
               selectAll
-              onSelectAllClick={handleSelectAllClick}
             />
           </div>
           {!isLoading.investigationLoading && (
-            <Button
+            <ButtonV2
               onClick={() => fetchInvestigation()}
               disabled={getTestDisabled}
-              variant="contained"
-              color="primary"
-              className={className.button}
+              variant="primary"
+              className="my-2.5"
             >
               Get Tests
-            </Button>
+            </ButtonV2>
           )}
           {!!isLoading.investigationLoading && (
-            <CircularProgress className={className.button} />
+            <CircularProgress className="text-primary-500" />
           )}
-          {!!investigations.length && !isLoading.investigationLoading && (
+          {!!investigations.length && (
             <>
               <div className="mt-5">
-                <Autocomplete
-                  multiple
-                  id="investigation-group-label"
-                  options={investigations}
+                <AutocompleteMultiSelectFormField
+                  id="investigation-select"
+                  name="investigation-select"
+                  label="Select Investigations (all investigations will be selected by default)"
                   value={selectedInvestigations}
-                  disableCloseOnSelect
-                  getOptionLabel={(option) => option.name}
-                  renderOption={(option, { selected }) => (
-                    <React.Fragment>
-                      <Checkbox
-                        style={{ marginRight: 8 }}
-                        checked={selected}
-                        color="primary"
-                      />
-                      {option.name}
-                    </React.Fragment>
-                  )}
-                  renderInput={(params) => (
-                    <>
-                      <InputLabel>
-                        Select Investigations (all investigations will be
-                        selected by default)
-                      </InputLabel>
-
-                      <TextField
-                        margin="dense"
-                        {...params}
-                        placeholder={
-                          selectedInvestigations.length
-                            ? ""
-                            : "Select Investigation"
-                        }
-                      />
-                    </>
-                  )}
-                  onChange={(_: any, options: any) => {
+                  options={investigations}
+                  onChange={({ value }) =>
                     dispatch({
                       type: "set_selected_investigations",
-                      payload: options,
-                    });
-                  }}
+                      payload: value,
+                    })
+                  }
+                  optionLabel={(option) => option.name}
+                  optionValue={(option) => option}
+                  isLoading={isLoading.investigationLoading}
+                  placeholder="Select Investigations"
                 />
               </div>
 
-              <Button
+              <ButtonV2
                 onClick={() => {
                   setSessionPage(1);
                   handleGenerateReports(1);
                 }}
                 disabled={generateReportDisabled}
-                variant="contained"
-                color="primary"
-                className={className.button}
+                variant="primary"
+                className="my-2.5"
               >
                 Generate Report
-              </Button>
+              </ButtonV2>
             </>
           )}
           <section id="reports_section">
             {!!investigationTableData.length && (
               <>
-                <ButtonGroup
-                  disableElevation
-                  variant="outlined"
-                  color="primary"
-                  className={className.button}
-                >
-                  <Button
+                <div className="my-2.5">
+                  <ButtonV2
                     onClick={() => handleSessionPage("NEXT")}
                     disabled={prevSessionDisabled}
                   >
                     {isLoading.tableData ? "Loading..." : "Next Sessions"}
-                  </Button>
-                  <Button
+                  </ButtonV2>
+                  <ButtonV2
                     onClick={() => handleSessionPage("PREV")}
                     disabled={nextSessionDisabled}
                   >
                     {isLoading.tableData ? "Loading..." : "Prev Sessions"}
-                  </Button>
-                </ButtonGroup>
+                  </ButtonV2>
+                </div>
 
                 <ReportTable
                   investigationData={investigationTableData}
@@ -462,21 +414,18 @@ const InvestigationReports = ({ id }: any) => {
                 />
 
                 {!!isLoading.tableData && (
-                  <CircularProgress className={className.button} />
+                  <CircularProgress className="text-primary-500" />
                 )}
 
                 {!loadMoreDisabled && (
-                  <Button
+                  <ButtonV2
                     disabled={loadMoreDisabled}
                     onClick={handleLoadMore}
-                    className={className.button}
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    size="large"
+                    className="my-2.5 w-full"
+                    variant="primary"
                   >
                     Load More
-                  </Button>
+                  </ButtonV2>
                 )}
               </>
             )}
@@ -485,7 +434,7 @@ const InvestigationReports = ({ id }: any) => {
       ) : (
         <Loading />
       )}
-    </div>
+    </Page>
   );
 };
 

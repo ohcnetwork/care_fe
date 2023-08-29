@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import { useState } from "react";
+import ConfirmDialog from "../Common/ConfirmDialog";
 
 interface ConfirmDialogProps {
   previousFacilityName: string;
@@ -25,7 +25,7 @@ const ConfirmHomeFacilityUpdateDialog = (props: ConfirmDialogProps) => {
     setDisable(true);
   };
   return (
-    <ConfirmDialogV2
+    <ConfirmDialog
       title={<span>Replace Home Facility</span>}
       show={true}
       action={"Replace"}
@@ -34,7 +34,7 @@ const ConfirmHomeFacilityUpdateDialog = (props: ConfirmDialogProps) => {
       disabled={disable}
       variant="danger"
     >
-      <div className="flex text-gray-800 leading-relaxed">
+      <div className="flex leading-relaxed text-gray-800">
         <div>
           Are you sure you want to replace{" "}
           <strong>{previousFacilityName}</strong> with{" "}
@@ -44,7 +44,7 @@ const ConfirmHomeFacilityUpdateDialog = (props: ConfirmDialogProps) => {
           <br />
         </div>
       </div>
-    </ConfirmDialogV2>
+    </ConfirmDialog>
   );
 };
 
