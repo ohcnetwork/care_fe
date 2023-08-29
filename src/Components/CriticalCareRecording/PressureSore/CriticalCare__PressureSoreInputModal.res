@@ -49,13 +49,7 @@ let make = (
     }
   }
 
-  let handleClickOutside = %raw(`
-    function (event, ref, hideModal) {
-      if (ref.current && !ref.current.contains(event.target)) {
-        hideModal(event)
-      }
-    }
-  `)
+
 
   let getModalPosition = React.useMemo(() => {
     () => {
@@ -74,9 +68,9 @@ let make = (
   })
 
   <div
+     onClick={e => {e->ReactEvent.Mouse.stopPropagation}}
     hidden={!show}
-    onClick={e => handleClickOutside(e, modalRef, hideModal)}
-    className={previewMode && innerWidth > 720 ? "" : "fixed w-full inset-0 z-40 overflow-y-auto"}>
+    >
     <div
       hidden={!show}
       className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
