@@ -6,7 +6,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
-// import Page from "../Common/components/Page";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
@@ -121,13 +120,6 @@ export const ConfigureHealthFacility = (props: any) => {
   }
 
   return (
-    // <Page
-    //   title="Configure Health Facility"
-    //   crumbsReplacements={{
-    //     [facilityId]: { name: state.form.name },
-    //   }}
-    //   className="mx-auto max-w-3xl"
-    // >
     <div className="cui-card mt-4">
       <form onSubmit={(e) => handleSubmit(e)}>
         <div className="mt-2 grid grid-cols-1 gap-4">
@@ -148,6 +140,5 @@ export const ConfigureHealthFacility = (props: any) => {
         </div>
       </form>
     </div>
-    // </Page>
   );
 };
