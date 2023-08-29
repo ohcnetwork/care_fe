@@ -1,83 +1,49 @@
-import {
-  Paper,
-  TableCell,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableBody,
-  InputLabel,
-  Typography,
-  Box,
-} from "@material-ui/core";
-import { LegacySelectField } from "../../Common/HelperInputFields";
-import { createStyles, makeStyles, withStyles } from "@material-ui/styles";
-import React from "react";
-import { useState } from "react";
-import { LegacyTextInputField } from "../../Common/HelperInputFields";
+import { FieldChangeEvent } from "../../Form/FormFields/Utils";
+import { SelectFormField } from "../../Form/FormFields/SelectFormField";
+import TextFormField from "../../Form/FormFields/TextFormField";
 import _ from "lodash";
+import { useState } from "react";
 
-const useStyle = makeStyles(() => ({
-  tableCell: {
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
-}));
-
-const StyledTableRow = withStyles(() =>
-  createStyles({
-    root: {
-      "&:nth-of-type(odd)": {
-        backgroundColor: "#f7f7f7",
-      },
-      "&:hover": {
-        backgroundColor: "#eeeeee",
-      },
-    },
-  })
-)(TableRow);
-
-const TestRow = ({ data, value, onChange }: any) => {
-  const className = useStyle();
-  const inputType = data.investigation_type === "Float" ? "number" : "text";
+const TestRow = ({ data, value, onChange, i }: any) => {
   return (
-    <StyledTableRow>
-      <TableCell className={className.tableCell}>{data.name}</TableCell>
-      <TableCell className={className.tableCell} align="right">
+    <tr className={i % 2 == 0 ? "bg-gray-50" : "bg-white"}>
+      <td className="whitespace-nowrap px-6 py-4 text-sm font-medium text-gray-900">
+        {data.name}
+      </td>
+      <td className="min-w-[200px] whitespace-nowrap px-6 py-4 text-right text-sm text-gray-700">
         {data.investigation_type === "Choice" ? (
-          <LegacySelectField
-            name="preferred_vehicle_choice"
-            variant="outlined"
-            optionArray={true}
+          <SelectFormField
+            name={data.name}
             value={value}
-            options={["Unselected", ...data.choices.split(",")]}
+            options={data?.choices.split(",")}
+            optionLabel={(o: string) => o}
+            optionValue={(o: string) => o}
             onChange={onChange}
-            className="border-l border-r border-gray-400"
+            errorClassName="hidden"
           />
         ) : (
-          <input
-            className="lg:w-full h-12 text-right text-sm border-l border-r focus:ring-primary-500 focus:border-primary-500 bg-[#fbfafc]"
+          <TextFormField
+            name={data.name}
             value={value}
             onChange={onChange}
-            type={inputType}
-            step="any"
+            type={data.investigation_type === "Float" ? "number" : "text"}
             placeholder="Enter value"
           />
         )}
-      </TableCell>
-      <TableCell className={className.tableCell} align="left">
+      </td>
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.unit || "---"}
-      </TableCell>
-      <TableCell className={className.tableCell} align="right">
+      </td>
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.min_value ?? "---"}
-      </TableCell>
-      <TableCell className={className.tableCell} align="right">
+      </td>
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.max_value ?? "---"}
-      </TableCell>
-      <TableCell className={className.tableCell} align="right">
+      </td>
+      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
         {data.ideal_value || "---"}
-      </TableCell>
-    </StyledTableRow>
+      </td>
+    </tr>
   );
 };
 
@@ -98,46 +64,51 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
   };
 
   return (
-    <Box padding="1rem" margin="1rem 0">
-      {title && (
-        <Typography component="h1" variant="h4">
-          {title}
-        </Typography>
-      )}
+    <div className="md:m-4 md:p-4">
+      {title && <h1 className="text-3xl font-bold">{title}</h1>}
       <br />
-      <InputLabel>Search Test</InputLabel>
-      <LegacyTextInputField
-        value={searchFilter}
+      <TextFormField
+        name="test_search"
+        label="Search Test"
+        className="mt-2"
         placeholder="Search test"
-        errors=""
-        variant="outlined"
-        margin="dense"
-        onChange={(e) => setSearchFilter(e.target.value)}
+        value={searchFilter}
+        onChange={(e) => setSearchFilter(e.value)}
       />
       <br />
-      <TableContainer component={Paper}>
-        <Table aria-label="simple table" size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell align="right">value</TableCell>
-              <TableCell align="left">Unit</TableCell>
-              <TableCell align="right">Min</TableCell>
-              <TableCell align="right">Max</TableCell>
-              <TableCell align="right">Ideal</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+      <div className="overflow-x-scroll border-b border-gray-200 shadow sm:overflow-x-visible sm:rounded-lg">
+        <table className="block min-w-full divide-y divide-gray-200 overflow-scroll">
+          <thead className="bg-gray-50">
+            <tr>
+              {["Name", "Value", "Unit", "Min", "Max", "Ideal"].map(
+                (heading) => (
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-800"
+                  >
+                    {heading}
+                  </th>
+                )
+              )}
+            </tr>
+          </thead>
+          <tbody x-max="2">
             {filterTests.length > 0 ? (
-              filterTests.map((t: any) => {
+              filterTests.map((t: any, i: number) => {
                 return (
                   <TestRow
                     data={t}
+                    i={i}
                     key={t.external_id}
-                    value={state[t.external_id] && state[t.external_id].value}
-                    onChange={(e: { target: { value: any } }) =>
+                    value={
+                      state[t.external_id] &&
+                      (state[t.external_id].value ?? state[t.external_id].notes)
+                    }
+                    onChange={(e: FieldChangeEvent<string>) =>
                       handleValueChange(
-                        e.target.value,
+                        t.investigation_type === "Float"
+                          ? Number(e.value)
+                          : e.value,
                         `${t.external_id}.${
                           t.investigation_type === "Float" ? "value" : "notes"
                         }`
@@ -147,17 +118,13 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
                 );
               })
             ) : (
-              <TableRow>
-                <TableCell component="th" scope="row">
-                  No test
-                </TableCell>
-              </TableRow>
+              <tr className="text-center text-gray-500">No tests taken</tr>
             )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 
-export default Table;
+export default TestTable;

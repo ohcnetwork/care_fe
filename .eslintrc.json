@@ -15,7 +15,8 @@
     "plugin:prettier/recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:i18next/recommended"
+    "plugin:i18next/recommended",
+    "plugin:tailwindcss/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -53,8 +54,14 @@
           "exclude": [".*"]
         }
       }
-    ]
+    ],
+    "tailwindcss/no-custom-classname": "off",
+    "tailwindcss/migration-from-tailwind-2": "error",
+    "tailwindcss/classnames-order": "error",
+    "tailwindcss/enforces-shorthand": "error",
+    "tailwindcss/no-contradicting-classname": "error"
   },
+  
   "ignorePatterns": [
     "dist",
     "public",

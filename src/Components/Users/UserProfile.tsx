@@ -1,8 +1,7 @@
-import loadable from "@loadable/component";
-import React, { useState, useCallback, useReducer } from "react";
+import { useState, useCallback, useReducer, lazy, FormEvent } from "react";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   getUserDetails,
   getUserListSkills,
@@ -20,11 +19,12 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import moment from "moment";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
+import dayjs from "../../Utils/dayjs";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 type EditForm = {
   firstName: string;
@@ -37,6 +37,7 @@ type EditForm = {
   doctor_qualification: string | undefined;
   doctor_experience_commenced_on: number | string | undefined;
   doctor_medical_council_registration: string | undefined;
+  weekly_working_hours: string | undefined;
 };
 type State = {
   form: EditForm;
@@ -57,6 +58,7 @@ const initForm: EditForm = {
   doctor_qualification: undefined,
   doctor_experience_commenced_on: undefined,
   doctor_medical_council_registration: undefined,
+  weekly_working_hours: undefined,
 };
 
 const initError: EditForm = Object.assign(
@@ -93,9 +95,7 @@ export default function UserProfile() {
     isUpdateAvailable: false,
   });
 
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-  const username = currentUser.data.username;
+  const authUser = useAuthUser();
 
   const [changePasswordForm, setChangePasswordForm] = useState<{
     username: string;
@@ -103,7 +103,7 @@ export default function UserProfile() {
     new_password_1: string;
     new_password_2: string;
   }>({
-    username: username,
+    username: authUser.username,
     old_password: "",
     new_password_1: "",
     new_password_2: "",
@@ -128,8 +128,10 @@ export default function UserProfile() {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const res = await dispatchAction(getUserDetails(username));
-      const resSkills = await dispatchAction(getUserListSkills({ username }));
+      const res = await dispatchAction(getUserDetails(authUser.username));
+      const resSkills = await dispatchAction(
+        getUserListSkills({ username: authUser.username })
+      );
       if (!status.aborted) {
         if (res && res.data && resSkills) {
           res.data.skills = resSkills.data.results.map(
@@ -145,12 +147,13 @@ export default function UserProfile() {
             phoneNumber: res.data.phone_number,
             altPhoneNumber: res.data.alt_phone_number,
             doctor_qualification: res.data.doctor_qualification,
-            doctor_experience_commenced_on: moment().diff(
-              moment(res.data.doctor_experience_commenced_on),
+            doctor_experience_commenced_on: dayjs().diff(
+              dayjs(res.data.doctor_experience_commenced_on),
               "years"
             ),
             doctor_medical_council_registration:
               res.data.doctor_medical_council_registration,
+            weekly_working_hours: res.data.weekly_working_hours,
           };
           dispatch({
             type: "set_form",
@@ -160,7 +163,7 @@ export default function UserProfile() {
         setIsLoading(false);
       }
     },
-    [dispatchAction, username]
+    [dispatchAction, authUser.username]
   );
   useAbortableEffect(
     (status: statusType) => {
@@ -251,6 +254,20 @@ export default function UserProfile() {
             invalidForm = true;
           }
           return;
+        case "weekly_working_hours":
+          if (!states.form[field]) {
+            errors[field] = "This field is required";
+            invalidForm = true;
+          } else if (
+            Number(states.form[field]) < 0 ||
+            Number(states.form[field]) > 168 ||
+            !/^\d+$/.test(states.form[field] ?? "")
+          ) {
+            errors[field] =
+              "Weekly working hours must be a number between 0 and 168";
+            invalidForm = true;
+          }
+          return;
       }
     });
     dispatch({ type: "set_error", errors });
@@ -274,12 +291,12 @@ export default function UserProfile() {
     };
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const validForm = validateForm();
     if (validForm) {
       const data = {
-        username: username,
+        username: authUser.username,
         first_name: states.form.firstName,
         last_name: states.form.lastName,
         email: states.form.email,
@@ -298,16 +315,25 @@ export default function UserProfile() {
             : undefined,
         doctor_experience_commenced_on:
           details.user_type === "Doctor"
-            ? moment()
-                .subtract(states.form.doctor_experience_commenced_on, "years")
+            ? dayjs()
+                .subtract(
+                  parseInt(
+                    (states.form.doctor_experience_commenced_on as string) ??
+                      "0"
+                  ),
+                  "years"
+                )
                 .format("YYYY-MM-DD")
             : undefined,
         doctor_medical_council_registration:
           details.user_type === "Doctor"
             ? states.form.doctor_medical_council_registration
             : undefined,
+        weekly_working_hours: states.form.weekly_working_hours,
       };
-      const res = await dispatchAction(partialUpdateUser(username, data));
+      const res = await dispatchAction(
+        partialUpdateUser(authUser.username, data)
+      );
       if (res && res.data) {
         Notification.Success({
           msg: "Details updated successfully",
@@ -364,7 +390,7 @@ export default function UserProfile() {
       setIsLoading(true);
       const form = {
         old_password: changePasswordForm.old_password,
-        username: username,
+        username: authUser.username,
         new_password: changePasswordForm.new_password_1,
       };
       reduxDispatch(updateUserPassword(form)).then((resp: any) => {
@@ -390,14 +416,14 @@ export default function UserProfile() {
   };
   return (
     <div>
-      <div className="lg:p-20 p-10">
+      <div className="p-10 lg:p-20">
         <div className="lg:grid lg:grid-cols-3 lg:gap-6">
           <div className="lg:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
                 Personal Information
               </h3>
-              <p className="mt-1 text-sm leading-5 text-gray-600 mb-1">
+              <p className="my-1 text-sm leading-5 text-gray-600">
                 Local Body, District and State are Non Editable Settings.
               </p>
               <div className="flex flex-col gap-2">
@@ -411,20 +437,20 @@ export default function UserProfile() {
               </div>
             </div>
           </div>
-          <div className="mt-5 lg:mt-0 lg:col-span-2">
+          <div className="mt-5 lg:col-span-2 lg:mt-0">
             {!showEdit && (
-              <div className="px-4 py-5 sm:px-6 bg-white shadow overflow-hidden  sm:rounded-lg m-2 rounded-lg">
-                <dl className="grid grid-cols-1 col-gap-4 row-gap-8 sm:grid-cols-2">
-                  <div className="sm:col-span-1 my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+              <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5  shadow sm:rounded-lg sm:px-6">
+                <dl className="col-gap-4 row-gap-8 grid grid-cols-1 sm:grid-cols-2">
+                  <div className="my-2 sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Username
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.username || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Contact No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
@@ -432,106 +458,114 @@ export default function UserProfile() {
                     </dd>
                   </div>
 
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Whatsapp No
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.alt_phone_number || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Email address
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.email || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       First Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.first_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Last Name
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.last_name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Age
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.age || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Access Level
                     </dt>
-                    <dd className="mt-1 badge badge-pill bg-primary-500 text-sm text-white">
+                    <dd className="badge badge-pill mt-1 bg-primary-500 text-sm text-white">
                       <i className="fa-solid fa-user-check mr-1"></i>{" "}
                       {details.user_type || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Gender
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.gender || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       Local Body
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.local_body_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       District
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.district_object?.name || "-"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-1  my-2">
-                    <dt className="text-sm leading-5 font-medium text-black">
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
                       State
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.state_object?.name || "-"}
                     </dd>
                   </div>
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
+                      Skills
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      <div className="flex flex-wrap gap-2">
+                        {details.skills && details.skills.length
+                          ? details.skills?.map((skill: SkillObjectModel) => {
+                              return (
+                                <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
+                                  <p className="py-1.5">{skill.name}</p>
+                                </span>
+                              );
+                            })
+                          : "-"}
+                      </div>
+                    </dd>
+                  </div>
+                  <div className="my-2  sm:col-span-1">
+                    <dt className="text-sm font-medium leading-5 text-black">
+                      Weekly working hours
+                    </dt>
+                    <dd className="mt-1 text-sm leading-5 text-gray-900">
+                      {details.weekly_working_hours ?? "-"}
+                    </dd>
+                  </div>
                 </dl>
-                <div className="sm:col-span-1  my-2">
-                  <dt className="text-sm leading-5 font-medium text-black">
-                    Skills
-                  </dt>
-                  <dd className="mt-1 text-sm leading-5 text-gray-900">
-                    <div className="flex flex-wrap gap-2">
-                      {details.skills && details.skills.length
-                        ? details.skills?.map((skill: SkillObjectModel) => {
-                            return (
-                              <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-700 rounded-full text-xs px-3">
-                                <p className="py-1.5">{skill.name}</p>
-                              </span>
-                            );
-                          })
-                        : "-"}
-                    </div>
-                  </dd>
-                </div>
               </div>
             )}
 
@@ -539,7 +573,7 @@ export default function UserProfile() {
               <div className="space-y-4">
                 <form action="#" method="POST">
                   <div className="shadow sm:rounded-md">
-                    <div className="px-4 pt-5 bg-white">
+                    <div className="bg-white px-4 pt-5">
                       <div className="grid grid-cols-6 gap-4">
                         <TextFormField
                           {...fieldProps("firstName")}
@@ -579,12 +613,14 @@ export default function UserProfile() {
                           className="col-span-6 sm:col-span-3"
                           required
                           placeholder="Phone Number"
+                          types={["mobile", "landline"]}
                         />
                         <PhoneNumberFormField
                           {...fieldProps("altPhoneNumber")}
                           label="Whatsapp Number"
                           className="col-span-6 sm:col-span-3"
                           placeholder="WhatsApp Number"
+                          types={["mobile"]}
                         />
                         <TextFormField
                           {...fieldProps("email")}
@@ -622,16 +658,25 @@ export default function UserProfile() {
                             />
                           </>
                         )}
+                        <TextFormField
+                          {...fieldProps("weekly_working_hours")}
+                          required
+                          label="Weekly working hours"
+                          className="col-span-6 sm:col-span-3"
+                          type="number"
+                          min={0}
+                          max={168}
+                        />
                       </div>
                     </div>
-                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
+                    <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                       <Submit onClick={handleSubmit} label="Update" />
                     </div>
                   </div>
                 </form>
                 <form action="#" method="POST">
-                  <div className="shadow overflow-hidden sm:rounded-md">
-                    <div className="px-4 pt-5 bg-white">
+                  <div className="overflow-hidden shadow sm:rounded-md">
+                    <div className="bg-white px-4 pt-5">
                       <div className="grid grid-cols-6 gap-4">
                         <TextFormField
                           name="old_password"
@@ -679,7 +724,7 @@ export default function UserProfile() {
                         />
                       </div>
                     </div>
-                    <div className="px-4 sm:px-6 py-3 bg-gray-50 text-right">
+                    <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                       <Submit
                         onClick={changePassword}
                         label="Change Password"
@@ -692,7 +737,7 @@ export default function UserProfile() {
           </div>
         </div>
 
-        <div className="md:grid md:grid-cols-3 md:gap-6 mt-6 mb-8">
+        <div className="mb-8 mt-6 md:grid md:grid-cols-3 md:gap-6">
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
@@ -703,11 +748,11 @@ export default function UserProfile() {
               </p>
             </div>
           </div>
-          <div className="mt-5 md:mt-0 md:col-span-2">
-            <LanguageSelector className="bg-white w-full" />
+          <div className="mt-5 md:col-span-2 md:mt-0">
+            <LanguageSelector className="w-full bg-white" />
           </div>
         </div>
-        <div className="md:grid md:grid-cols-3 md:gap-6 mt-6 mb-8">
+        <div className="mb-8 mt-6 md:grid md:grid-cols-3 md:gap-6">
           <div className="md:col-span-1">
             <div className="px-4 sm:px-0">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
@@ -728,7 +773,7 @@ export default function UserProfile() {
               </ButtonV2>
             </UpdatableApp>
           )}
-          <div className="mt-5 md:mt-0 md:col-span-2">
+          <div className="mt-5 md:col-span-2 md:mt-0">
             {!updateStatus.isUpdateAvailable && (
               <ButtonV2
                 disabled={updateStatus.isChecking}

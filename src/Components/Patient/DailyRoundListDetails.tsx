@@ -1,15 +1,13 @@
-import { Button } from "@material-ui/core";
-import { navigate } from "raviger";
-import loadable from "@loadable/component";
-import moment from "moment";
-import React, { useCallback, useState } from "react";
+import { lazy, useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { CURRENT_HEALTH_CHANGE, SYMPTOM_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
 import { DailyRoundsModel } from "./models";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import Page from "../Common/components/Page";
+import ButtonV2 from "../Common/components/ButtonV2";
+import { formatDateTime } from "../../Utils/utils";
+const Loading = lazy(() => import("../Common/Loading"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];
 
@@ -46,10 +44,7 @@ export const DailyRoundListDetails = (props: any) => {
               ? currentHealth.desc
               : res.data.current_health,
           };
-          if (
-            res.data.additional_symptoms &&
-            res.data.additional_symptoms.length
-          ) {
+          if (res.data.additional_symptoms?.length) {
             const symptoms = res.data.additional_symptoms.map(
               (symptom: number) => {
                 const option = symptomChoices.find((i) => i.id === symptom);
@@ -77,89 +72,80 @@ export const DailyRoundListDetails = (props: any) => {
   }
 
   return (
-    <div className="px-2">
-      <PageTitle
-        title={`Consultation Update #${id}`}
-        backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
-      />
-      <div className="border rounded-lg bg-white shadow h-full hover:border-primary-500 text-black mt-4 p-4">
+    <Page
+      title={`Consultation Update #${id}`}
+      backUrl={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`}
+    >
+      <div className="mt-4 h-full rounded-lg border bg-white p-4 text-black shadow hover:border-primary-500">
         <div className="flex justify-between">
           <div className="max-w-md">
             <div>
               <span className="font-semibold leading-relaxed">
                 Patient Category:{" "}
               </span>
-              {dailyRoundListDetailsData.patient_category || "-"}
+              {dailyRoundListDetailsData.patient_category ?? "-"}
             </div>
           </div>
 
           <div>
             <div className="mt-2">
-              <Button
-                fullWidth
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={() =>
-                  navigate(
-                    `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${id}/update`
-                  )
-                }
+              <ButtonV2
+                href={`/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds/${id}/update`}
               >
                 Update Details
-              </Button>
+              </ButtonV2>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Temperature: </span>
-            {dailyRoundListDetailsData.temperature || "-"}
+            {dailyRoundListDetailsData.temperature ?? "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Taken at: </span>
             {dailyRoundListDetailsData.taken_at
-              ? moment(dailyRoundListDetailsData.taken_at).format("lll")
+              ? formatDateTime(dailyRoundListDetailsData.taken_at)
               : "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">SpO2: </span>
-            {dailyRoundListDetailsData.ventilator_spo2 || "-"}
+            {dailyRoundListDetailsData.ventilator_spo2 ?? "-"}
           </div>
-          <div className="md:col-span-2 capitalize">
+          <div className="capitalize md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Additional Symptoms:{" "}
             </span>
-            {dailyRoundListDetailsData.additional_symptoms_text || "-"}
+            {dailyRoundListDetailsData.additional_symptoms_text ?? "-"}
           </div>
-          <div className="md:col-span-2 capitalize">
+          <div className="capitalize md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Admitted To *:{" "}
             </span>
-            {dailyRoundListDetailsData.admitted_to || "-"}
+            {dailyRoundListDetailsData.admitted_to ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Physical Examination Info:{" "}
             </span>
-            {dailyRoundListDetailsData.physical_examination_info || "-"}
+            {dailyRoundListDetailsData.physical_examination_info ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Other Symptoms:{" "}
             </span>
-            {dailyRoundListDetailsData.other_symptoms || "-"}
+            {dailyRoundListDetailsData.other_symptoms ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Other Details:{" "}
             </span>
-            {dailyRoundListDetailsData.other_details || "-"}
+            {dailyRoundListDetailsData.other_details ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Pulse(bpm): </span>
-            {dailyRoundListDetailsData.pulse || "-"}
+            {dailyRoundListDetailsData.pulse ?? "-"}
           </div>
           <div className="md:col-span-2 ">
             <span className="font-semibold leading-relaxed">BP</span>
@@ -168,14 +154,14 @@ export const DailyRoundListDetails = (props: any) => {
                 <span className="font-semibold leading-relaxed">
                   Systolic:{" "}
                 </span>
-                {dailyRoundListDetailsData.bp?.systolic || "-"}
+                {dailyRoundListDetailsData.bp?.systolic ?? "-"}
               </div>
               <div className="flex">
                 {" "}
                 <span className="font-semibold leading-relaxed">
                   Diastolic:
                 </span>
-                {dailyRoundListDetailsData.bp?.diastolic || "-"}
+                {dailyRoundListDetailsData.bp?.diastolic ?? "-"}
               </div>
             </div>
           </div>
@@ -185,17 +171,17 @@ export const DailyRoundListDetails = (props: any) => {
               Respiratory Rate (bpm):
             </span>
 
-            {dailyRoundListDetailsData.resp || "-"}
+            {dailyRoundListDetailsData.resp ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">Rhythm: </span>
-            {dailyRoundListDetailsData.rhythm || "-"}
+            {dailyRoundListDetailsData.rhythm ?? "-"}
           </div>
           <div className="md:col-span-2">
             <span className="font-semibold leading-relaxed">
               Rhythm Description:{" "}
             </span>
-            {dailyRoundListDetailsData.rhythm_detail || "-"}
+            {dailyRoundListDetailsData.rhythm_detail ?? "-"}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">
@@ -209,6 +195,6 @@ export const DailyRoundListDetails = (props: any) => {
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 };

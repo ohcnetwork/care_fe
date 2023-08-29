@@ -1,22 +1,22 @@
 import * as Sentry from "@sentry/browser";
 
-import React, { useEffect, useState } from "react";
+import { FC, Suspense, lazy, useEffect, useState } from "react";
 import { getConfig, getCurrentUser } from "./Redux/actions";
 import { statusType, useAbortableEffect } from "./Common/utils";
 import { useDispatch, useSelector } from "react-redux";
 
 import AppRouter from "./Router/AppRouter";
 import { HistoryAPIProvider } from "./CAREUI/misc/HistoryAPIProvider";
-import { IConfig } from "./Common/hooks/useConfig";
+import { AppConfigContext, IConfig } from "./Common/hooks/useConfig";
 import { LocalStorageKeys } from "./Common/constants";
 import Plausible from "./Components/Common/Plausible";
 import SessionRouter from "./Router/SessionRouter";
 import axios from "axios";
-import loadable from "@loadable/component";
+import { AuthUserContext } from "./Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("./Components/Common/Loading"));
+const Loading = lazy(() => import("./Components/Common/Loading"));
 
-const App: React.FC = () => {
+const App: FC = () => {
   const dispatch: any = useDispatch();
   const state: any = useSelector((state) => state);
   const { currentUser, config } = state;
@@ -40,7 +40,7 @@ const App: React.FC = () => {
 
   const updateRefreshToken = () => {
     const refresh = localStorage.getItem(LocalStorageKeys.refreshToken);
-    const access = localStorage.getItem(LocalStorageKeys.accessToken);
+    // const access = localStorage.getItem(LocalStorageKeys.accessToken);
     // if (!access && refresh) {
     //   localStorage.removeItem(LocalStorageKeys.refreshToken);
     //   document.location.reload();
@@ -79,7 +79,7 @@ const App: React.FC = () => {
     if (darkThemeMq.matches) {
       favicon.href = "/favicon-light.ico";
     } else {
-      favicon.href = "/favicon-dark.ico";
+      favicon.href = "/favicon.ico";
     }
   }, []);
 
@@ -94,10 +94,20 @@ const App: React.FC = () => {
   }
 
   return (
-    <HistoryAPIProvider>
-      {currentUser?.data ? <AppRouter /> : <SessionRouter />}
-      <Plausible />
-    </HistoryAPIProvider>
+    <Suspense fallback={<Loading />}>
+      <HistoryAPIProvider>
+        <AppConfigContext.Provider value={config.data}>
+          {currentUser?.data ? (
+            <AuthUserContext.Provider value={currentUser.data}>
+              <AppRouter />
+            </AuthUserContext.Provider>
+          ) : (
+            <SessionRouter />
+          )}
+          <Plausible />
+        </AppConfigContext.Provider>
+      </HistoryAPIProvider>
+    </Suspense>
   );
 };
 

@@ -1,8 +1,8 @@
-import React from "react";
-import { Listbox } from "@headlessui/react";
-import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { DropdownTransition } from "../Common/components/HelperComponents";
+import { Listbox } from "@headlessui/react";
 import { classNames } from "../../Utils/utils";
+import { ReactNode } from "react";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 
@@ -10,15 +10,15 @@ type Props<T, V = T> = {
   id?: string;
   options: T[];
   value: V[] | undefined;
-  placeholder?: React.ReactNode;
-  optionLabel: OptionCallback<T, React.ReactNode>;
-  optionSelectedLabel?: OptionCallback<T, React.ReactNode>;
-  optionDescription?: OptionCallback<T, React.ReactNode>;
-  optionIcon?: OptionCallback<T, React.ReactNode>;
+  placeholder?: ReactNode;
+  optionLabel: OptionCallback<T, ReactNode>;
+  optionSelectedLabel?: OptionCallback<T, ReactNode>;
+  optionDescription?: OptionCallback<T, ReactNode>;
+  optionIcon?: OptionCallback<T, ReactNode>;
   optionValue?: OptionCallback<T, V>;
   className?: string;
   disabled?: boolean;
-  renderSelectedOptions?: OptionCallback<T[], React.ReactNode>;
+  renderSelectedOptions?: OptionCallback<T[], ReactNode>;
   onChange: OptionCallback<V[]>;
 };
 
@@ -47,7 +47,7 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
       value,
       isSelected: props.value?.includes(value as any) ?? false,
       displayChip: (
-        <div className="px-2 bg-secondary-100 rounded-full text-xs text-gray-900 border border-secondary-400">
+        <div className="rounded-full border border-secondary-400 bg-secondary-100 px-2 text-xs text-gray-900">
           {selectedLabel}
         </div>
       ),
@@ -83,18 +83,18 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
             </Listbox.Label>
             <div className="relative">
               <div>
-                <Listbox.Button className="cui-input-base w-full flex rounded">
-                  <div className="relative z-0 flex items-center w-full">
-                    <div className="relative flex-1 flex items-center pr-4 focus:z-10">
+                <Listbox.Button className="cui-input-base flex w-full rounded">
+                  <div className="relative z-0 flex w-full items-center">
+                    <div className="relative flex flex-1 items-center pr-4 focus:z-10">
                       <p className="ml-2.5 text-sm font-normal text-gray-600">
                         <Placeholder />
                       </p>
                     </div>
-                    <CareIcon className="-mb-0.5 care-l-angle-down text-lg text-gray-900" />
+                    <CareIcon className="care-l-angle-down -mb-0.5 text-lg text-gray-900" />
                   </div>
                 </Listbox.Button>
                 {selectedOptions.length !== 0 && (
-                  <div className="p-2 flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 p-2">
                     {selectedOptions.map((option) => (
                       <MultiSelectOptionChip label={option.selectedLabel} />
                     ))}
@@ -147,13 +147,13 @@ const MultiSelectMenuV2 = <T, V>(props: Props<T, V>) => {
 export default MultiSelectMenuV2;
 
 interface MultiSelectOptionChipProps {
-  label: React.ReactNode;
+  label: ReactNode;
   onRemove?: () => void;
 }
 
 export const MultiSelectOptionChip = (props: MultiSelectOptionChipProps) => {
   return (
-    <span className="flex gap-2 items-center bg-gray-200 border-gray-300 text-gray-700 rounded-full text-xs px-3">
+    <span className="flex items-center gap-2 rounded-full border-gray-300 bg-gray-200 px-3 text-xs text-gray-700">
       <p className="py-1.5">{props.label}</p>
       {props.onRemove && (
         <p
@@ -177,8 +177,8 @@ export const dropdownOptionClassNames = ({
   selected,
 }: OptionRenderPropArg) => {
   return classNames(
-    "cursor-default select-none relative p-4 text-sm",
-    active && "text-white bg-primary-500",
+    "group/option relative w-full cursor-default select-none p-4 text-sm transition-colors duration-75 ease-in-out",
+    active && "bg-primary-500 text-white",
     !active && selected && "text-primary-500",
     !active && !selected && "text-gray-900",
     selected ? "font-semibold" : "font-normal"

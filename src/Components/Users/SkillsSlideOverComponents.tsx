@@ -1,18 +1,18 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { SkillModel } from "./models";
+import { Fragment } from "react";
 
 export const AddSkillsPlaceholder = () => {
   const { t } = useTranslation();
   return (
-    <div className="mb-2 mt-2 flex flex-col justify-center align-middle content-center h-96">
+    <div className="my-2 flex h-96 flex-col content-center justify-center align-middle">
       <div className="w-full">
-        <img src="/images/404.svg" alt="Error 404" className="w-80 mx-auto" />
+        <img src="/images/404.svg" alt="Error 404" className="mx-auto w-80" />
       </div>
-      <p className="text-lg font-semibold text-center text-primary pt-4">
+      <p className="pt-4 text-center text-lg font-semibold text-primary">
         {t("select_skills")}
       </p>
     </div>
@@ -33,12 +33,12 @@ export const SkillsArray = ({
   setDeleteSkill,
 }: SkillsArrayProps) => {
   return (
-    <React.Fragment>
+    <Fragment>
       {skills.map((skill, i) => (
         <div
           key={`facility_${i}`}
           className={classNames(
-            "relative py-5 px-4 lg:px-8 hover:bg-gray-200 focus:bg-gray-200 transition ease-in-out duration-200 rounded md:rounded-lg cursor-pointer"
+            "relative cursor-pointer rounded px-4 py-5 transition duration-200 ease-in-out hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg lg:px-8"
           )}
         >
           <div className="flex justify-between">
@@ -57,6 +57,6 @@ export const SkillsArray = ({
           </div>
         </div>
       ))}
-    </React.Fragment>
+    </Fragment>
   );
 };

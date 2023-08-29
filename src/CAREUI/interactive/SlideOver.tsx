@@ -13,6 +13,8 @@ export type SlideOverProps = {
   dialogClass?: string;
   title?: React.ReactNode;
   onlyChild?: boolean;
+  backdropBlur?: boolean;
+  closeOnBackdropClick?: boolean;
   onCloseClick?: () => void;
 };
 
@@ -24,6 +26,8 @@ export default function SlideOver({
   dialogClass,
   title,
   onlyChild = false,
+  backdropBlur = true,
+  closeOnBackdropClick = true,
   onCloseClick,
 }: SlideOverProps) {
   const directionClasses = {
@@ -55,7 +59,12 @@ export default function SlideOver({
 
   return (
     <Transition.Root show={open} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={setOpen}>
+      <Dialog
+        as="div"
+        className="relative z-10"
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        onClose={closeOnBackdropClick ? setOpen : () => {}}
+      >
         <Transition.Child
           as={Fragment}
           enter="ease-in-out duration-500"
@@ -65,7 +74,12 @@ export default function SlideOver({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-all" />
+          <div
+            className={classNames(
+              "fixed transition-all",
+              backdropBlur && "inset-0 bg-black/75 backdrop-blur-sm"
+            )}
+          />
         </Transition.Child>
         <Transition.Child
           as={Fragment}
@@ -78,7 +92,7 @@ export default function SlideOver({
         >
           <Dialog.Panel
             className={classNames(
-              "fixed pointer-events-auto",
+              "pointer-events-auto fixed",
               directionClasses[slideFrom].stick,
               !onlyChild && "md:p-2"
             )}
@@ -88,14 +102,14 @@ export default function SlideOver({
             ) : (
               <div
                 className={classNames(
-                  "bg-white md:rounded-xl flex flex-col",
+                  "flex flex-col bg-white md:rounded-xl",
                   directionClasses[slideFrom].proportions,
                   dialogClass
                 )}
               >
-                <div className="flex items-center p-2 gap-2 pt-4">
+                <div className="flex items-center gap-2 p-2 pt-4">
                   <button
-                    className="w-8 h-8 rounded-lg flex justify-center items-center text-2xl hover:bg-black/20"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-2xl hover:bg-black/20"
                     onClick={() => {
                       setOpen(false);
                       onCloseClick && onCloseClick();
@@ -104,10 +118,10 @@ export default function SlideOver({
                     <CareIcon className="care-l-arrow-left" />
                   </button>
                   <div className="flex w-full">
-                    <h1 className="text-xl font-black w-full">{title}</h1>
+                    <h1 className="w-full text-xl font-black">{title}</h1>
                   </div>
                 </div>
-                <div className="overflow-auto flex-1 p-4">{children}</div>
+                <div className="flex-1 overflow-auto p-4">{children}</div>
               </div>
             )}
           </Dialog.Panel>

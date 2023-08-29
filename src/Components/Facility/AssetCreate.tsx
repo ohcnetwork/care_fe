@@ -1,36 +1,46 @@
-import React, { useReducer, useState, useEffect, LegacyRef } from "react";
+import * as Notification from "../../Utils/Notifications.js";
+
+import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import {
+  LegacyRef,
+  RefObject,
+  createRef,
+  lazy,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import {
   createAsset,
   getAsset,
   listFacilityAssetLocation,
   updateAsset,
 } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
-import * as Notification from "../../Utils/Notifications.js";
 
-import Page from "../Common/components/Page";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { validateEmailAddress } from "../../Common/validation";
-import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
-import loadable from "@loadable/component";
-import { navigate } from "raviger";
-import QrReader from "react-qr-reader";
-import { parseQueryParams } from "../../Utils/primitives";
-import moment from "moment";
-import SwitchV2 from "../Common/components/Switch";
-import useVisibility from "../../Utils/useVisibility";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import useAppHistory from "../../Common/hooks/useAppHistory";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import { LocationSelect } from "../Common/LocationSelect";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import { useTranslation } from "react-i18next";
+import Page from "../Common/components/Page";
+import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
+import QrReader from "react-qr-reader";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import SwitchV2 from "../Common/components/Switch";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
 
-const Loading = loadable(() => import("../Common/Loading"));
+import { navigate } from "raviger";
+import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parseQueryParams } from "../../Utils/primitives";
+import useAppHistory from "../../Common/hooks/useAppHistory";
+import { useDispatch } from "react-redux";
+import useVisibility from "../../Utils/useVisibility";
+import { validateEmailAddress } from "../../Common/validation";
+import { dateQueryString } from "../../Utils/utils.js";
+import dayjs from "../../Utils/dayjs";
+import DateInputV2 from "../Common/DateInputV2.js";
+
+const Loading = lazy(() => import("../Common/Loading"));
 
 const formErrorKeys = [
   "name",
@@ -59,8 +69,8 @@ const initError = formErrorKeys.reduce(
 );
 
 const fieldRef = formErrorKeys.reduce(
-  (acc: { [key: string]: React.RefObject<any> }, key) => {
-    acc[key] = React.createRef();
+  (acc: { [key: string]: RefObject<any> }, key) => {
+    acc[key] = createRef();
     return acc;
   },
   {}
@@ -95,7 +105,6 @@ type AssetFormSection =
 
 const AssetCreate = (props: AssetProps) => {
   const { goBack } = useAppHistory();
-  const { t } = useTranslation();
   const { facilityId, assetId } = props;
 
   let assetTypeInitial: AssetType;
@@ -203,8 +212,9 @@ const AssetCreate = (props: AssetProps) => {
       setManufacturer(asset.manufacturer);
       asset.warranty_amc_end_of_validity &&
         setWarrantyAmcEndOfValidity(asset.warranty_amc_end_of_validity);
-      asset.last_serviced_on && setLastServicedOn(asset.last_serviced_on);
-      setNotes(asset.notes);
+      asset.last_service?.serviced_on &&
+        setLastServicedOn(asset.last_service?.serviced_on);
+      asset.last_service?.note && setNotes(asset.last_service?.note);
     }
   }, [asset]);
 
@@ -265,6 +275,12 @@ const AssetCreate = (props: AssetProps) => {
             invalidForm = true;
           }
           return;
+        case "last_serviced_on":
+          if (notes && !last_serviced_on) {
+            errors[field] = "Last serviced on date is require with notes";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -311,7 +327,7 @@ const AssetCreate = (props: AssetProps) => {
     const validated = validateForm();
     if (validated) {
       setIsLoading(true);
-      const data = {
+      const data: any = {
         name: name,
         asset_type: asset_type,
         asset_class: asset_class || "",
@@ -329,13 +345,15 @@ const AssetCreate = (props: AssetProps) => {
         qr_code_id: qrCodeId !== "" ? qrCodeId : null,
         manufacturer: manufacturer,
         warranty_amc_end_of_validity: warranty_amc_end_of_validity
-          ? moment(warranty_amc_end_of_validity).format("YYYY-MM-DD")
+          ? dateQueryString(warranty_amc_end_of_validity)
           : null,
-        last_serviced_on: last_serviced_on
-          ? moment(last_serviced_on).format("YYYY-MM-DD")
-          : last_serviced_on,
-        notes: notes,
       };
+
+      if (last_serviced_on) {
+        data["last_serviced_on"] = dateQueryString(last_serviced_on);
+        data["note"] = notes ?? "";
+      }
+
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
         if (res && res.data && res.status === 201) {
@@ -396,8 +414,8 @@ const AssetCreate = (props: AssetProps) => {
         backUrl={`/facility/${facilityId}`}
       >
         <section className="text-center">
-          <h1 className="text-6xl flex items-center flex-col py-10">
-            <div className="p-5 rounded-full flex items-center justify-center bg-gray-200 w-40 h-40">
+          <h1 className="flex flex-col items-center py-10 text-6xl">
+            <div className="flex h-40 w-40 items-center justify-center rounded-full bg-gray-200 p-5">
               <CareIcon className="care-l-map-marker text-green-600" />
             </div>
           </h1>
@@ -408,7 +426,7 @@ const AssetCreate = (props: AssetProps) => {
             className="btn-primary btn mt-5"
             onClick={() => navigate(`/facility/${facilityId}/location/add`)}
           >
-            <i className="fas fa-plus text-white mr-2"></i>
+            <i className="fas fa-plus mr-2 text-white"></i>
             Add Location
           </button>
         </section>
@@ -418,7 +436,7 @@ const AssetCreate = (props: AssetProps) => {
 
   if (isScannerActive)
     return (
-      <div className="md:w-1/2 w-full my-2 mx-auto flex flex-col justify-start items-end">
+      <div className="mx-auto my-2 flex w-full flex-col items-end justify-start md:w-1/2">
         <button
           onClick={() => setIsScannerActive(false)}
           className="btn btn-default mb-2"
@@ -435,7 +453,7 @@ const AssetCreate = (props: AssetProps) => {
           }
           style={{ width: "100%" }}
         />
-        <h2 className="text-center text-lg self-center">Scan Asset QR!</h2>
+        <h2 className="self-center text-center text-lg">Scan Asset QR!</h2>
       </div>
     );
 
@@ -447,14 +465,14 @@ const AssetCreate = (props: AssetProps) => {
     return (
       <div
         id={sectionId(sectionTitle)}
-        className="col-span-6 flex flex-row items-center mb-6 -ml-2"
+        className="col-span-6 -ml-2 mb-6 flex flex-row items-center"
         ref={section.ref as LegacyRef<HTMLDivElement>}
       >
-        <i className={`${section.iconClass} text-lg mr-3`} />
-        <label className="font-bold text-lg text-gray-900">
+        <i className={`${section.iconClass} mr-3 text-lg`} />
+        <label className="text-lg font-bold text-gray-900">
           {sectionTitle}
         </label>
-        <hr className="ml-6 flex-1 border-gray-400 border" />
+        <hr className="ml-6 flex-1 border border-gray-400" />
       </div>
     );
   };
@@ -463,7 +481,7 @@ const AssetCreate = (props: AssetProps) => {
     <div className="relative flex flex-col">
       <Page
         title={`${assetId ? "Update" : "Create"} Asset`}
-        className="pl-6 flex-grow-0"
+        className="grow-0 pl-6"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           assets: { style: "text-gray-200 pointer-events-none" },
@@ -475,16 +493,16 @@ const AssetCreate = (props: AssetProps) => {
             : `/facility/${facilityId}`
         }
       >
-        <div className="mt-5 flex top-0 sm:mx-auto flex-grow-0">
-          <div className="hidden xl:flex flex-col w-72 fixed h-full mt-4">
+        <div className="top-0 mt-5 flex grow-0 sm:mx-auto">
+          <div className="fixed mt-4 hidden h-full w-72 flex-col xl:flex">
             {Object.keys(sections).map((sectionTitle) => {
               const isCurrent = currentSection === sectionTitle;
               const section = sections[sectionTitle as AssetFormSection];
               return (
                 <button
-                  className={`rounded-l-lg flex items-center justify-start gap-3 px-5 py-3 w-full font-medium ${
+                  className={`flex w-full items-center justify-start gap-3 rounded-l-lg px-5 py-3 font-medium ${
                     isCurrent ? "bg-white text-primary-500" : "bg-transparent"
-                  } hover:bg-white hover:tracking-wider transition-all duration-100 ease-in`}
+                  } transition-all duration-100 ease-in hover:bg-white hover:tracking-wider`}
                   onClick={() => {
                     section.ref.current?.scrollIntoView({
                       behavior: "smooth",
@@ -499,18 +517,22 @@ const AssetCreate = (props: AssetProps) => {
               );
             })}
           </div>
-          <div className="w-full h-full flex overflow-auto xl:ml-72">
+          <div className="flex h-full w-full overflow-auto xl:ml-72">
             <div className="w-full max-w-3xl 2xl:max-w-4xl">
               <form
                 onSubmit={(e) => handleSubmit(e, false)}
-                className="rounded sm:rounded-xl bg-white p-6 sm:p-12 transition-all"
+                className="rounded bg-white p-6 transition-all sm:rounded-xl sm:p-12"
               >
-                <div className="grid grid-cols-1 gap-x-12 items-start">
+                <div className="grid grid-cols-1 items-start gap-x-12">
                   <div className="grid grid-cols-6 gap-x-6">
                     {/* General Details Section */}
                     {sectionTitle("General Details")}
                     {/* Asset Name */}
-                    <div className="col-span-6" ref={fieldRef["name"]}>
+                    <div
+                      className="col-span-6"
+                      ref={fieldRef["name"]}
+                      data-testid="asset-name-input"
+                    >
                       <TextFormField
                         name="name"
                         label="Asset Name"
@@ -522,25 +544,33 @@ const AssetCreate = (props: AssetProps) => {
                     </div>
 
                     {/* Location */}
-                    <FieldLabel className="text-sm w-max" required>
+                    <FieldLabel className="w-max text-sm" required>
                       Asset Location
                     </FieldLabel>
-                    <div ref={fieldRef["location"]} className="col-span-6">
+                    <div
+                      ref={fieldRef["location"]}
+                      className="col-span-6"
+                      data-testid="asset-location-input"
+                    >
                       <LocationSelect
                         name="Facilities"
                         setSelected={(selectedId) =>
                           setLocation((selectedId as string) || "")
                         }
                         selected={location}
-                        errors=""
                         showAll={false}
                         multiple={false}
                         facilityId={facilityId as unknown as number}
+                        errors={state.errors.location}
                       />
                     </div>
                     {/* Asset Type */}
-                    <div className="col-span-6 flex flex-col lg:flex-row gap-x-12 xl:gap-x-16 transition-all">
-                      <div ref={fieldRef["asset_type"]} className="flex-1">
+                    <div className="col-span-6 flex flex-col gap-x-12 transition-all lg:flex-row xl:gap-x-16">
+                      <div
+                        ref={fieldRef["asset_type"]}
+                        className="flex-1"
+                        data-testid="asset-type-input"
+                      >
                         <SelectFormField
                           label="Asset Type"
                           name="asset_type"
@@ -569,10 +599,13 @@ const AssetCreate = (props: AssetProps) => {
                       </div>
 
                       {/* Asset Class */}
-                      <div ref={fieldRef["asset_class"]} className="flex-1">
+                      <div
+                        ref={fieldRef["asset_class"]}
+                        className="flex-1"
+                        data-testid="asset-class-input"
+                      >
                         <SelectFormField
-                          disabled={!!props.assetId}
-                          placeholder={props.assetId ? t("none") : undefined}
+                          disabled={!!(props.assetId && asset_class)}
                           name="asset_class"
                           label="Asset Class"
                           value={asset_class}
@@ -581,6 +614,10 @@ const AssetCreate = (props: AssetProps) => {
                             {
                               title: "HL7 Vitals Monitor",
                               value: AssetClass.HL7MONITOR,
+                            },
+                            {
+                              title: "Ventilator",
+                              value: AssetClass.VENTILATOR,
                             },
                           ]}
                           optionLabel={({ title }) => title}
@@ -591,7 +628,10 @@ const AssetCreate = (props: AssetProps) => {
                       </div>
                     </div>
                     {/* Description */}
-                    <div className="col-span-6">
+                    <div
+                      className="col-span-6"
+                      data-testid="asset-description-input"
+                    >
                       <TextAreaFormField
                         name="asset_description"
                         label="Description"
@@ -602,18 +642,25 @@ const AssetCreate = (props: AssetProps) => {
                       />
                     </div>
                     {/* Divider */}
-                    <div className="col-span-6">
+                    <div
+                      className="col-span-6"
+                      data-testid="asset-divider-input"
+                    >
                       <hr
                         className={
                           "transition-all " +
                           (is_working === "true"
-                            ? "opacity-0 my-0"
-                            : "opacity-100 my-4")
+                            ? "my-0 opacity-0"
+                            : "my-4 opacity-100")
                         }
                       />
                     </div>
                     {/* Working Status */}
-                    <div ref={fieldRef["is_working"]} className="col-span-6">
+                    <div
+                      ref={fieldRef["is_working"]}
+                      className="col-span-6"
+                      data-testid="asset-working-status-input"
+                    >
                       <SwitchV2
                         className="col-span-6"
                         required
@@ -659,14 +706,14 @@ const AssetCreate = (props: AssetProps) => {
                         className={
                           "transition-all " +
                           (is_working === "true"
-                            ? "opacity-0 my-0"
-                            : "opacity-100 mb-7")
+                            ? "my-0 opacity-0"
+                            : "mb-7 opacity-100")
                         }
                       />
                     </div>
                     {/* Asset QR ID */}
                     <div className="col-span-6 flex flex-row items-center gap-3">
-                      <div className="w-full">
+                      <div className="w-full" data-testid="asset-qr-id-input">
                         <TextFormField
                           id="qr_code_id"
                           name="qr_code_id"
@@ -678,7 +725,7 @@ const AssetCreate = (props: AssetProps) => {
                         />
                       </div>
                       <div
-                        className="flex items-center justify-self-end ml-1 mt-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200"
+                        className="ml-1 mt-1 flex h-10 cursor-pointer items-center justify-self-end rounded border border-gray-400 px-4 hover:bg-gray-200"
                         onClick={() => setIsScannerActive(true)}
                       >
                         <CareIcon className="care-l-focus cursor-pointer text-lg" />
@@ -692,6 +739,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["manufacturer"]}
+                      data-testid="asset-manufacturer-input"
                     >
                       <TextFormField
                         id="manufacturer"
@@ -708,6 +756,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["warranty_amc_end_of_validity"]}
+                      data-testid="asset-warranty-input"
                     >
                       <TextFormField
                         name="WarrantyAMCExpiry"
@@ -715,7 +764,7 @@ const AssetCreate = (props: AssetProps) => {
                         label="Warranty / AMC Expiry"
                         error={state.errors.warranty_amc_end_of_validity}
                         onChange={(event) => {
-                          const value = moment(event.value);
+                          const value = dayjs(event.value);
                           const date = new Date(value.toDate().toDateString());
                           const today = new Date(new Date().toDateString());
                           if (date < today) {
@@ -723,13 +772,11 @@ const AssetCreate = (props: AssetProps) => {
                               msg: "Warranty / AMC Expiry date can't be in past",
                             });
                           } else {
-                            setWarrantyAmcEndOfValidity(
-                              value.format("YYYY-MM-DD")
-                            );
+                            setWarrantyAmcEndOfValidity(dateQueryString(value));
                           }
                         }}
                         type="date"
-                        min={moment().format("YYYY-MM-DD")}
+                        min={dayjs().format("YYYY-MM-DD")}
                       />
                     </div>
 
@@ -737,6 +784,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["support_name"]}
+                      data-testid="asset-support-name-input"
                     >
                       <TextFormField
                         id="support-name"
@@ -753,6 +801,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["support_phone"]}
+                      id="customer-support-phone-div"
                     >
                       <PhoneNumberFormField
                         name="support_phone"
@@ -761,6 +810,7 @@ const AssetCreate = (props: AssetProps) => {
                         value={support_phone}
                         onChange={(e) => setSupportPhone(e.value)}
                         error={state.errors.support_phone}
+                        types={["mobile", "landline", "support"]}
                       />
                     </div>
 
@@ -768,6 +818,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["support_email"]}
+                      data-testid="asset-support-email-input"
                     >
                       <TextFormField
                         id="support-email"
@@ -786,6 +837,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["vendor_name"]}
+                      data-testid="asset-vendor-name-input"
                     >
                       <TextFormField
                         id="vendor-name"
@@ -802,6 +854,7 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["serial_number"]}
+                      data-testid="asset-serial-number-input"
                     >
                       <TextFormField
                         id="serial-number"
@@ -820,34 +873,39 @@ const AssetCreate = (props: AssetProps) => {
                     <div
                       className="col-span-6 sm:col-span-3"
                       ref={fieldRef["last_serviced_on"]}
+                      data-testid="asset-last-serviced-on-input"
                     >
-                      <TextFormField
+                      <FieldLabel>Last Serviced On</FieldLabel>
+                      <DateInputV2
                         name="last_serviced_on"
-                        label="Last Serviced On"
                         className="mt-2"
-                        value={last_serviced_on}
-                        error={state.errors.last_serviced_on}
+                        position="RIGHT"
+                        value={last_serviced_on && new Date(last_serviced_on)}
                         onChange={(date) => {
                           if (
-                            moment(date.value).format("YYYY-MM-DD") >
+                            dayjs(date).format("YYYY-MM-DD") >
                             new Date().toLocaleDateString("en-ca")
                           ) {
                             Notification.Error({
                               msg: "Last Serviced date can't be in future",
                             });
                           } else {
-                            setLastServicedOn(
-                              moment(date.value).format("YYYY-MM-DD")
-                            );
+                            setLastServicedOn(dayjs(date).format("YYYY-MM-DD"));
                           }
                         }}
-                        type="date"
-                        max={moment(new Date()).format("YYYY-MM-DD")}
+                        max={new Date()}
                       />
+                      <FieldErrorText
+                        error={state.errors.last_serviced_on}
+                      ></FieldErrorText>
                     </div>
 
                     {/* Notes */}
-                    <div className="col-span-6 mt-6" ref={fieldRef["notes"]}>
+                    <div
+                      className="col-span-6 mt-6"
+                      ref={fieldRef["notes"]}
+                      data-testid="asset-notes-input"
+                    >
                       <TextAreaFormField
                         name="notes"
                         label="Notes"
@@ -859,7 +917,7 @@ const AssetCreate = (props: AssetProps) => {
                     </div>
                   </div>
 
-                  <div className="mt-12 flex justify-end gap-x-2 gap-y-2 flex-wrap">
+                  <div className="mt-12 flex flex-wrap justify-end gap-2">
                     <Cancel
                       onClick={() =>
                         navigate(
@@ -875,6 +933,7 @@ const AssetCreate = (props: AssetProps) => {
                     />
                     {!assetId && (
                       <Submit
+                        data-testid="create-asset-add-more-button"
                         onClick={(e) => handleSubmit(e, true)}
                         label="Create & Add More"
                       />

@@ -58,10 +58,10 @@ export default function ConsultationClaims({
   });
 
   return (
-    <div className="pb-2 relative flex flex-col">
+    <div className="relative flex flex-col pb-2">
       <PageTitle
         title="Claims"
-        className="pl-6 flex-grow-0"
+        className="grow-0 pl-6"
         onBackClick={() => {
           navigate(
             `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
@@ -70,8 +70,8 @@ export default function ConsultationClaims({
         }}
       />
 
-      <div className="flex flex-col justify-center gap-16 w-full max-w-5xl mx-auto">
-        <div className="p-8 bg-white rounded-lg">
+      <div className="mx-auto flex w-full max-w-5xl flex-col justify-center gap-16">
+        <div className="rounded-lg bg-white p-8">
           <CreateClaimCard
             consultationId={consultationId}
             patientId={patientId}
@@ -80,9 +80,9 @@ export default function ConsultationClaims({
           />
         </div>
 
-        <div className="flex flex-col gap-8 w-full max-w-3xl mx-auto">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
           {claims?.map((claim) => (
-            <div className="p-8 bg-white rounded-lg">
+            <div className="rounded-lg bg-white p-8">
               <ClaimDetailCard claim={claim} />
             </div>
           ))}

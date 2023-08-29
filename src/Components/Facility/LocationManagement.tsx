@@ -1,15 +1,15 @@
-import React, { useCallback, useState } from "react";
-import loadable from "@loadable/component";
+import { useCallback, useState, ReactElement, lazy } from "react";
+
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { listFacilityAssetLocation, getAnyFacility } from "../../Redux/actions";
-import { navigate } from "raviger";
 import Pagination from "../Common/Pagination";
-import { RoleButton } from "../Common/RoleButton";
 import { LocationModel } from "./models";
-import { ReactElement } from "react";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
-const Loading = loadable(() => import("../Common/Loading"));
+import ButtonV2 from "../Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import Page from "../Common/components/Page";
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface LocationManagementProps {
   facilityId: string;
@@ -28,41 +28,34 @@ const LocationRow = (props: LocationRowProps) => {
   return (
     <div
       key={id}
-      className="w-full border-b lg:flex justify-between items-center py-4"
+      className="w-full items-center justify-between border-b py-4 lg:flex"
     >
       <div className="px-4 lg:w-3/4">
-        <div className="lg:flex items-baseline w-full">
-          <p className="text-xl break-words lg:w-1/4 lg:mr-4">{name}</p>
-          <p className="text-sm break-all lg:w-3/4">{description}</p>
+        <div className="w-full items-baseline lg:flex">
+          <p className="break-words text-xl lg:mr-4 lg:w-1/4">{name}</p>
+          <p className="break-all text-sm lg:w-3/4">{description}</p>
         </div>
       </div>
-      <div className="sm:flex">
-        <div className="px-2 py-2 w-full">
-          <RoleButton
-            className="btn btn-default bg-white w-full"
-            handleClickCB={() =>
-              navigate(`/facility/${facilityId}/location/${id}/update`)
-            }
-            disableFor="readOnly"
-            buttonType="html"
-          >
-            <i className="fas fa-pencil-alt w-4 mr-2"></i>
-            Edit
-          </RoleButton>
-        </div>
-        <div className="px-2 py-2 w-full">
-          <RoleButton
-            className="btn btn-default bg-white w-full"
-            handleClickCB={() =>
-              navigate(`/facility/${facilityId}/location/${id}/beds`)
-            }
-            disableFor="readOnly"
-            buttonType="html"
-          >
-            <i className="fas fa-bed-pulse w-4 mr-2"></i>
-            Manage Beds
-          </RoleButton>
-        </div>
+      <div className="mt-4 flex flex-col gap-2 lg:mt-0 lg:flex-row">
+        <ButtonV2
+          variant="secondary"
+          border
+          className="w-full lg:w-auto"
+          href={`/facility/${facilityId}/location/${id}/update`}
+          authorizeFor={NonReadOnlyUsers}
+        >
+          <CareIcon className="care-l-pen text-lg" />
+          Edit
+        </ButtonV2>
+        <ButtonV2
+          variant="secondary"
+          border
+          className="w-full lg:w-auto"
+          href={`/facility/${facilityId}/location/${id}/beds`}
+        >
+          <CareIcon className="care-l-bed text-lg" />
+          Manage Beds
+        </ButtonV2>
       </div>
     </div>
   );
@@ -95,7 +88,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
         )
       );
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           setLocations(res.data.results);
           setTotalCount(res.data.count);
         }
@@ -118,9 +111,10 @@ export const LocationManagement = (props: LocationManagementProps) => {
     setOffset(offset);
   };
 
-  if (locations && locations.length) {
+  if (locations?.length) {
     locationsList = locations.map((locationItem: LocationModel) => (
       <LocationRow
+        key={locationItem.id}
         id={locationItem.id || ""}
         facilityId={facilityId || ""}
         name={locationItem.name || ""}
@@ -129,7 +123,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
     ));
   } else if (locations && locations.length === 0) {
     locationsList = (
-      <p className="bg-white flex justify-center text-2xl w-full font-bold px-5 py-5 border-b border-gray-200 text-center text-gray-500">
+      <p className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
         No locations available
       </p>
     );
@@ -138,7 +132,7 @@ export const LocationManagement = (props: LocationManagementProps) => {
   if (locations) {
     location = (
       <>
-        <div className="grow mt-5 bg-white p-4 flex flex-wrap">
+        <div className="mt-5 flex grow flex-wrap bg-white p-4">
           {locationsList}
         </div>
         {totalCount > limit && (
@@ -160,29 +154,23 @@ export const LocationManagement = (props: LocationManagementProps) => {
   }
 
   return (
-    <div>
-      <PageTitle
-        title="Location Management"
-        className="mx-3 md:mx-8"
-        crumbsReplacements={{ [facilityId]: { name: facilityName } }}
-        backUrl={`/facility/${facilityId}`}
-      />
+    <Page
+      title="Location Management"
+      crumbsReplacements={{ [facilityId]: { name: facilityName } }}
+      backUrl={`/facility/${facilityId}`}
+    >
       <div className="container mx-auto px-4 py-2 sm:px-8">
         <div className="flex justify-end">
-          <RoleButton
-            className="px-4 py-1 rounded-md bg-primary-500 text-white text-lg font-semibold shadow"
-            handleClickCB={() =>
-              navigate(`/facility/${facilityId}/location/add`)
-            }
-            disableFor="readOnly"
-            buttonType="html"
+          <ButtonV2
+            href={`/facility/${facilityId}/location/add`}
+            authorizeFor={NonReadOnlyUsers}
           >
-            <i className="fas fa-plus mr-2"></i>
+            <CareIcon className="care-l-plus text-lg" />
             Add New Location
-          </RoleButton>
+          </ButtonV2>
         </div>
         {location}
       </div>
-    </div>
+    </Page>
   );
 };

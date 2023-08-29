@@ -1,14 +1,5 @@
-import { useCallback, useState, useReducer } from "react";
-import {
-  CardContent,
-  CircularProgress,
-  InputLabel,
-  Radio,
-  RadioGroup,
-  Box,
-  FormControlLabel,
-} from "@material-ui/core";
-import loadable from "@loadable/component";
+import { useCallback, useState, useReducer, lazy } from "react";
+
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -18,16 +9,16 @@ import {
   externalResult,
   partialUpdateExternalResult,
 } from "../../Redux/actions";
-import {
-  LegacyMultilineInputField,
-  LegacySelectField,
-} from "../Common/HelperInputFields";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField.js";
+import CircularProgress from "../Common/components/CircularProgress.js";
+import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
+import RadioFormField from "../Form/FormFields/RadioFormField.js";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import Page from "../Common/components/Page.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
   address: "",
@@ -192,8 +183,8 @@ export default function UpdateResult(props: any) {
 
   const handleChange = (e: any) => {
     const form = { ...state.form };
-    form[e.target.name] = e.target.value;
-    if (e.target.name === "local_body") {
+    form[e.name] = e.value;
+    if (e.name === "local_body") {
       form["ward"] = "0";
     }
     dispatch({ type: "set_form", form });
@@ -228,115 +219,101 @@ export default function UpdateResult(props: any) {
 
   return (
     <div>
-      <PageTitle
+      <Page
         title="Update External Result"
-        className="px-6 mb-2"
+        className="mb-2 px-6"
         backUrl={`/external_results/${id}`}
-      />
-      <CardContent>
-        <div className="px-4 py-5 border-b border-gray-200 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">
-            {state.form.name} - {state.form.age} {state.form.age_in}
-          </h3>
-          <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
-            SRF ID: {state.form.srf_id}
-          </p>
-          <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
-            Care external results ID: {id}
-          </p>
-        </div>
-        <form onSubmit={(e) => handleSubmit(e)}>
-          <div className="px-4 py-5 grid gap-4 grid-cols-1 md:grid-cols-2">
-            <div data-testid="current-address">
-              <InputLabel id="address-label">Current Address*</InputLabel>
-              <LegacyMultilineInputField
-                rows={2}
-                name="address"
-                variant="outlined"
-                margin="dense"
-                type="text"
-                placeholder="Enter the current address"
-                value={state.form.address}
-                onChange={handleChange}
-                errors={state.errors.address}
-              />
-            </div>
-            <div data-testid="localbody">
-              <InputLabel id="local_body-label">Localbody*</InputLabel>
-              {isLocalbodyLoading ? (
-                <CircularProgress size={20} />
-              ) : (
-                <LegacySelectField
-                  name="local_body"
-                  variant="outlined"
-                  margin="dense"
-                  value={state.form.local_body}
-                  options={localBody}
-                  optionValue="name"
-                  onChange={(e) => [
-                    handleChange(e),
-                    fetchWards(String(e.target.value)),
-                  ]}
-                  errors={state.errors.local_body}
-                />
-              )}
-            </div>
-            <div data-testid="ward-respective-lsgi">
-              <InputLabel id="ward-label">
-                Ward/Division of respective LSGI*
-              </InputLabel>
-              {isWardLoading ? (
-                <CircularProgress size={20} />
-              ) : (
-                <LegacySelectField
-                  name="ward"
-                  variant="outlined"
-                  margin="dense"
-                  options={ward
-                    .sort((a, b) => a.number - b.number)
-                    .map((e) => {
-                      return { id: e.id, name: e.number + ": " + e.name };
-                    })}
-                  value={state.form.ward}
-                  optionValue="name"
+      >
+        <div className="md:p-4">
+          <div className="border-b border-gray-200 px-4 py-5 sm:px-6">
+            <h3 className="text-lg font-medium leading-6 text-gray-900">
+              {state.form.name} - {state.form.age} {state.form.age_in}
+            </h3>
+            <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+              SRF ID: {state.form.srf_id}
+            </p>
+            <p className="mt-1 max-w-2xl text-sm leading-5 text-gray-500">
+              Care external results ID: {id}
+            </p>
+          </div>
+          <form onSubmit={(e) => handleSubmit(e)}>
+            <div className="grid grid-cols-1 gap-4 px-4 py-5 md:grid-cols-2">
+              <div data-testid="current-address">
+                <TextAreaFormField
+                  rows={2}
+                  name="address"
+                  label="Current Address"
+                  required
+                  placeholder="Enter the current address"
+                  value={state.form.address}
                   onChange={handleChange}
-                  errors={state.errors.ward}
+                  error={state.errors.address}
                 />
-              )}
-            </div>
-            <div data-testid="patient_created">
-              <InputLabel id="patient_created-label">
-                Is the patient created?
-              </InputLabel>
-
-              <RadioGroup
-                aria-label="patient_created"
-                name="patient_created"
-                value={state.form.patient_created === "true"}
-                onChange={handleChange}
-                style={{ padding: "0px 5px" }}
-              >
-                <Box display="flex" flexDirection="row">
-                  <FormControlLabel
-                    value={true}
-                    control={<Radio />}
-                    label="Yes"
+              </div>
+              <div data-testid="localbody">
+                {isLocalbodyLoading ? (
+                  <CircularProgress />
+                ) : (
+                  <SelectFormField
+                    name="local_body"
+                    label="Localbody"
+                    required
+                    value={state.form.local_body}
+                    options={localBody}
+                    optionLabel={(localBody) => localBody.name}
+                    optionValue={(localBody) => localBody.id}
+                    onChange={(e) => [
+                      handleChange(e),
+                      fetchWards(String(e.value)),
+                    ]}
+                    error={state.errors.local_body}
                   />
-                  <FormControlLabel
-                    value={false}
-                    control={<Radio />}
-                    label="No"
+                )}
+              </div>
+              <div data-testid="ward-respective-lsgi">
+                {isWardLoading ? (
+                  <CircularProgress />
+                ) : (
+                  <SelectFormField
+                    name="ward"
+                    label="Ward/Division of respective LSGI"
+                    required
+                    options={ward
+                      .sort((a, b) => a.number - b.number)
+                      .map((e) => {
+                        return { id: e.id, name: e.number + ": " + e.name };
+                      })}
+                    value={state.form.ward}
+                    optionLabel={(ward) => ward.name}
+                    optionValue={(ward) => ward.id}
+                    onChange={handleChange}
+                    error={state.errors.ward}
                   />
-                </Box>
-              </RadioGroup>
+                )}
+              </div>
+              <div data-testid="patient_created">
+                <RadioFormField
+                  name="patient_created"
+                  label={"Is the patient created?"}
+                  options={[
+                    { label: "Yes", value: "true" },
+                    { label: "No", value: "false" },
+                  ]}
+                  value={state.form.patient_created}
+                  onChange={handleChange}
+                  optionDisplay={(option) => option.label}
+                  optionValue={(option) => option.value}
+                  error={state.errors.patient_created}
+                />
+              </div>
             </div>
-          </div>
-          <div className="flex flex-col md:flex-row gap-2 justify-end mt-4">
-            <Cancel onClick={() => goBack()} />
-            <Submit onClick={handleSubmit} />
-          </div>
-        </form>
-      </CardContent>
+            <div className="mt-4 flex flex-col justify-end gap-2 md:flex-row">
+              <Cancel onClick={() => goBack()} />
+              <Submit onClick={handleSubmit} />
+            </div>
+          </form>
+        </div>
+      </Page>
     </div>
   );
 }

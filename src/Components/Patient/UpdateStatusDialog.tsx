@@ -1,46 +1,33 @@
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from "@material-ui/core";
-import React, { useEffect, useState, useReducer } from "react";
+import { useEffect, useState, useReducer } from "react";
 import axios from "axios";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
 } from "../../Common/constants";
-import {
-  LegacyCheckboxField,
-  LegacySelectField,
-} from "../Common/HelperInputFields";
 import { SampleTestModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
-import { createUpload } from "../../Redux/actions";
+import { createUpload, editUpload } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import ConfirmDialog from "../Common/ConfirmDialog";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import TextFormField from "../Form/FormFields/TextFormField";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   sample: SampleTestModel;
   handleOk: (sample: SampleTestModel, status: number, result: number) => void;
   handleCancel: () => void;
-  userType: "Staff" | "DistrictAdmin" | "StateLabAdmin";
 }
 
 const statusChoices = [...SAMPLE_TEST_STATUS];
 
 const statusFlow = { ...SAMPLE_FLOW_RULES };
-
-const resultTypes = [
-  {
-    id: 0,
-    text: "Select",
-  },
-  ...SAMPLE_TEST_RESULT,
-];
 
 const initForm: any = {
   confirm: false,
@@ -67,6 +54,7 @@ const updateStatusReducer = (state = initialState, action: any) => {
 };
 
 const UpdateStatusDialog = (props: Props) => {
+  const { t } = useTranslation();
   const { sample, handleOk, handleCancel } = props;
   const [state, dispatch] = useReducer(updateStatusReducer, initialState);
   const [file, setfile] = useState<File>();
@@ -91,14 +79,6 @@ const UpdateStatusDialog = (props: Props) => {
     dispatch({ type: "set_form", form });
   }, []);
 
-  const newStatusChoices = [
-    {
-      id: 0,
-      desc: "Select",
-    },
-    ...validStatusChoices,
-  ];
-
   const okClicked = () => {
     handleOk(sample, state.form.status, state.form.result);
     dispatch({ type: "set_form", form: initForm });
@@ -109,7 +89,7 @@ const UpdateStatusDialog = (props: Props) => {
     dispatch({ type: "set_form", form: initForm });
   };
 
-  const handleChange = (name: string, value: any) => {
+  const handleChange = ({ name, value }: FieldChangeEvent<unknown>) => {
     const form = { ...state.form };
     form[name] = name === "status" || name === "result" ? Number(value) : value;
     form.disabled =
@@ -141,6 +121,14 @@ const UpdateStatusDialog = (props: Props) => {
       .then(() => {
         setUploadStarted(false);
         setUploadDone(true);
+        redux_dispatch(
+          editUpload(
+            { upload_completed: true },
+            response.data.id,
+            "SAMPLE_MANAGEMENT",
+            sample.id?.toString() ?? ""
+          )
+        );
         Notification.Success({
           msg: "File Uploaded Successfully",
         });
@@ -148,12 +136,6 @@ const UpdateStatusDialog = (props: Props) => {
       .catch(() => {
         setUploadStarted(false);
       });
-  };
-
-  const handleEscKeyPress = (event: any) => {
-    if (event.key === "Escape") {
-      cancelClicked();
-    }
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
@@ -188,89 +170,81 @@ const UpdateStatusDialog = (props: Props) => {
   };
 
   return (
-    <Dialog open={true} onKeyDown={(e) => handleEscKeyPress(e)}>
-      <DialogTitle id="test-sample-title">
-        Update Sample Test Status
-      </DialogTitle>
-      <DialogContent>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-          <div className="font-semibold leading-relaxed">Current Status :</div>
-          <div className="md:col-span-2">{currentStatus?.desc}</div>
-          <div className="font-semibold leading-relaxed">New Status :</div>
-          <div className="md:col-span-2">
-            <LegacySelectField
-              name="status"
-              variant="standard"
-              optionValue="desc"
-              value={state.form.status}
-              options={newStatusChoices}
-              onChange={(e: any) => handleChange(e.target.name, e.target.value)}
+    <ConfirmDialog
+      title="Update Sample Test Status"
+      show
+      onClose={cancelClicked}
+      onConfirm={okClicked}
+      disabled={state.form.disabled}
+      action="Update Status"
+    >
+      <div className="mt-4 flex flex-col">
+        <TextFormField
+          label="Current Status"
+          name="currentStatus"
+          value={currentStatus?.desc}
+          disabled
+          onChange={handleChange}
+        />
+        <SelectFormField
+          label="New Status"
+          name="status"
+          value={state.form.status}
+          options={validStatusChoices}
+          optionLabel={(i) => i.desc}
+          optionValue={(i) => i.id}
+          onChange={handleChange}
+        />
+        {Number(state.form.status) === 7 && (
+          <>
+            <SelectFormField
+              label="Result"
+              name="result"
+              value={state.form.result}
+              options={SAMPLE_TEST_RESULT}
+              optionLabel={(i) => i.text}
+              optionValue={(i) => i.id}
+              onChange={handleChange}
             />
-          </div>
-          {Number(state.form.status) === 7 && (
-            <>
-              <div className="font-semibold leading-relaxed text-right">
-                Result :
-              </div>
-              <div className="md:col-span-2">
-                <LegacySelectField
-                  name="result"
-                  variant="standard"
-                  value={state.form.result}
-                  options={resultTypes}
-                  onChange={(e: any) =>
-                    handleChange(e.target.name, e.target.value)
-                  }
-                />
-              </div>
-            </>
-          )}
-          {Number(state.form.status) === 7 && (
-            <>
-              <div className="font-semibold leading-relaxed text-right">
-                Upload Report :
-              </div>
-              <div className="md:col-span-2">
-                <input title="reportFile" onChange={onFileChange} type="file" />
-              </div>
-              <div className="col-start-2 col-span-2">
-                {uploadStarted && (
-                  <LinearProgressWithLabel value={uploadPercent} />
-                )}
-              </div>
-              <div className="flex justify-end col-start-2 col-span-2">
+            <span className="font-semibold leading-relaxed">
+              Upload Report :
+            </span>
+            {uploadStarted ? (
+              <LinearProgressWithLabel value={uploadPercent} />
+            ) : (
+              <div className="mb-4 mt-3 flex flex-wrap justify-between gap-2">
+                <label className="button-size-default button-shape-square button-primary-default inline-flex h-min max-w-full cursor-pointer items-center justify-center gap-2 whitespace-pre font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500">
+                  <CareIcon className="care-l-file-upload-alt text-lg" />
+                  <span className="max-w-full truncate">
+                    {file ? file.name : t("choose_file")}
+                  </span>
+                  <input
+                    title="changeFile"
+                    onChange={onFileChange}
+                    type="file"
+                    hidden
+                  />
+                </label>
                 <Submit
                   type="submit"
                   onClick={handleUpload}
                   disabled={uploadDone}
                 >
-                  <CareIcon className="care-l-cloud-upload text-2xl font-bold" />
+                  <CareIcon className="care-l-cloud-upload text-lg" />
                   <span>Upload</span>
                 </Submit>
               </div>
-            </>
-          )}
-          <div className="md:col-span-3">
-            <LegacyCheckboxField
-              checked={state.form.confirm}
-              onChange={(e: any) =>
-                handleChange(e.target.name, e.target.checked)
-              }
-              name="confirm"
-              label="I agree to update the sample test status."
-            />
-          </div>
-        </div>
-      </DialogContent>
-      <DialogActions style={{ justifyContent: "space-between" }}>
-        <Cancel onClick={cancelClicked} />
-        <Submit
-          onClick={okClicked}
-          disabled={state.form.disabled}
-          label="Update Status"
+            )}
+          </>
+        )}
+        <CheckBoxFormField
+          label="I agree to update the sample test status."
+          name="confirm"
+          value={state.form.confirm}
+          onChange={handleChange}
         />
-      </DialogActions>
-    </Dialog>
+      </div>
+    </ConfirmDialog>
   );
 };
 

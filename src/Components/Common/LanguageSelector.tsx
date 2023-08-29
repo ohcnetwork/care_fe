@@ -20,11 +20,11 @@ export const LanguageSelector = (props: any) => {
   };
 
   return (
-    <div className="flex justify-end items-center relative w-full">
+    <div className="relative flex w-full items-center justify-end">
       <select
         className={classNames(
           props.className,
-          "py-2 pl-2 pr-10 appearance-none rounded-md shadow-lg cursor-pointer focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+          "cursor-pointer appearance-none rounded-md py-2 pl-2 pr-10 shadow-lg focus:border-primary-500 focus:outline-none focus:ring-primary-500"
         )}
         id="language-selector"
         name="language"
@@ -37,7 +37,7 @@ export const LanguageSelector = (props: any) => {
           </option>
         ))}
       </select>
-      <div className="absolute right-0 mr-1 z-10 h-auto w-8 pointer-events-none">
+      <div className="pointer-events-none absolute right-0 z-10 mr-1 h-auto w-8">
         <CareIcon className={`care-l-angle-down text-xl ${props.className}`} />
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
 import SidebarUserCard from "./SidebarUserCard";
 import NotificationItem from "../../Notifications/NotificationsList";
@@ -49,7 +49,7 @@ const StatelessSidebar = ({
   setShrinked,
   onItemClick,
 }: StatelessSidebarProps) => {
-  const { static_light_logo } = useConfig();
+  const { main_logo } = useConfig();
   const activeLink = useActiveLink();
   const Item = shrinked ? ShrinkedSidebarItem : SidebarItem;
   const { dashboard_url } = useConfig();
@@ -116,7 +116,7 @@ const StatelessSidebar = ({
 
   return (
     <nav
-      className={`h-screen group flex flex-col bg-primary-800 py-3 md:py-5 ${
+      className={`group flex h-screen flex-col bg-primary-800 py-3 md:py-5 ${
         shrinked ? "w-14" : "w-60"
       } transition-all duration-300 ease-in-out ${
         isOverflowVisible && shrinked
@@ -129,18 +129,18 @@ const StatelessSidebar = ({
         <img
           className={`${
             shrinked ? "mx-auto" : "ml-5"
-          } h-5 md:h-8 self-start transition mb-2 md:mb-5`}
-          src={shrinked ? LOGO_COLLAPSE : static_light_logo}
+          } mb-2 h-5 self-start transition md:mb-5 md:h-8`}
+          src={shrinked ? LOGO_COLLAPSE : main_logo.light}
         />
       </Link>
       <div className="h-3" /> {/* flexible spacing */}
-      <div className="flex flex-col relative h-full mb-4 md:mb-0">
-        <div className="flex flex-col relative flex-1 md:flex-none">
+      <div className="relative mb-4 flex h-full flex-col md:mb-0">
+        <div className="relative flex flex-1 flex-col md:flex-none">
           <div
             ref={indicatorRef}
             // className="absolute left-2 w-1 hidden md:block bg-primary-400 rounded z-10 transition-all"
             className={classNames(
-              "block absolute left-2 w-1 bg-primary-400 rounded z-10 transition-all",
+              "absolute left-2 z-10 block w-1 rounded bg-primary-400 transition-all",
               activeLink ? "opacity-0 md:opacity-100" : "opacity-0"
             )}
           />
@@ -177,7 +177,7 @@ const StatelessSidebar = ({
             <div
               className={`${
                 shrinked ? "mx-auto" : "self-end"
-              } flex self-end h-12 translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-200 ease-in-out`}
+              } flex h-12 translate-y-4 self-end opacity-0 transition-all duration-200 ease-in-out group-hover:translate-y-0 group-hover:opacity-100`}
             >
               <ToggleShrink
                 shrinked={shrinked}
@@ -192,18 +192,17 @@ const StatelessSidebar = ({
   );
 };
 
+export const SidebarShrinkContext = createContext<{
+  shrinked: boolean;
+  setShrinked: (state: boolean) => void;
+}>({
+  shrinked: false,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setShrinked: () => {},
+});
+
 export const DesktopSidebar = () => {
-  const [shrinked, setShrinked] = useState(
-    () => localStorage.getItem(SIDEBAR_SHRINK_PREFERENCE_KEY) === "true"
-  );
-
-  useEffect(() => {
-    localStorage.setItem(
-      SIDEBAR_SHRINK_PREFERENCE_KEY,
-      shrinked ? "true" : "false"
-    );
-  }, [shrinked]);
-
+  const { shrinked, setShrinked } = useContext(SidebarShrinkContext);
   return (
     <StatelessSidebar
       shrinked={shrinked}
@@ -233,7 +232,7 @@ interface ToggleShrinkProps {
 
 const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
   <div
-    className={`flex items-center justify-center w-10 h-10 self-end cursor-pointer rounded text-gray-100 text-opacity-70 hover:text-opacity-100 bg-primary-800 hover:bg-primary-700 ${
+    className={`flex h-10 w-10 cursor-pointer items-center justify-center self-end rounded bg-primary-800 text-gray-100 text-opacity-70 hover:bg-primary-700 hover:text-opacity-100 ${
       shrinked ? "mx-auto" : "mr-4"
     } transition-all duration-200 ease-in-out`}
     onClick={toggle}
@@ -241,7 +240,7 @@ const ToggleShrink = ({ shrinked, toggle }: ToggleShrinkProps) => (
     <i
       className={`fa-solid fa-chevron-up ${
         shrinked ? "rotate-90 text-sm" : "-rotate-90 text-base"
-      } transition-all duration-300 delay-150 ease-out`}
+      } transition-all delay-150 duration-300 ease-out`}
     />
   </div>
 );

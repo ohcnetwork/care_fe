@@ -1,5 +1,6 @@
-import { Tooltip } from "@material-ui/core";
 import { CameraPTZ } from "../../../Common/constants";
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { classNames } from "../../../Utils/utils";
 
 export default function FeedButton(props: {
   camProp: any;
@@ -37,23 +38,26 @@ export default function FeedButton(props: {
   }
 
   return (
-    <Tooltip
-      key={props.camProp.action}
-      placement="left"
-      arrow={true}
-      title={
-        <span className="text-sm font-semibold">
-          {`${props.camProp.label}  (${shortcutKeyDescription(props.camProp)})`}
-        </span>
-      }
+    <button
+      className={classNames("tooltip", buttonClass)}
+      onClick={props.clickAction}
     >
-      <button className={buttonClass} onClick={props.clickAction}>
-        {props.camProp.icon ? (
-          <i className={"fas fa-" + props.camProp.icon} />
-        ) : (
-          <span className="font-bold">{props.camProp.value}x</span>
+      {props.camProp.icon ? (
+        <CareIcon className={`care-${props.camProp.icon}`} />
+      ) : (
+        <span className="font-bold">{props.camProp.value}x</span>
+      )}
+
+      <span
+        className={classNames(
+          "tooltip-text top-2.5 text-sm font-semibold",
+          props.camProp.label.includes("Move")
+            ? "tooltip-right"
+            : "tooltip-left"
         )}
-      </button>
-    </Tooltip>
+      >
+        {`${props.camProp.label}  (${shortcutKeyDescription(props.camProp)})`}
+      </span>
+    </button>
   );
 }

@@ -1,5 +1,5 @@
-import { useReducer, useState, useEffect } from "react";
-import loadable from "@loadable/component";
+import { useReducer, useState, useEffect, lazy } from "react";
+
 import { FacilitySelect } from "../Common/FacilitySelect";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
@@ -10,7 +10,6 @@ import {
   RESOURCE_SUBCATEGORIES,
 } from "../../Common/constants";
 import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { Card, CardContent } from "@material-ui/core";
 import { phonePreg } from "../../Common/validation";
 
 import { createResource, getAnyFacility } from "../../Redux/actions";
@@ -24,9 +23,10 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import RadioFormField from "../Form/FormFields/RadioFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
+import Card from "../../CAREUI/display/Card";
+import Page from "../Common/components/Page";
 
-const PageTitle = loadable(() => import("../Common/PageTitle"));
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface resourceProps {
   facilityId: number;
@@ -186,7 +186,7 @@ export default function ResourceCreate(props: resourceProps) {
         status: "PENDING",
         category: state.form.category,
         sub_category: state.form.sub_category,
-        orgin_facility: props.facilityId,
+        origin_facility: props.facilityId,
         approving_facility: (state.form.approving_facility || {}).id,
         assigned_facility: (state.form.assigned_facility || {}).id,
         emergency: state.form.emergency === "true",
@@ -219,121 +219,113 @@ export default function ResourceCreate(props: resourceProps) {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={t("create_resource_request")}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          resource: { style: "pointer-events-none" },
-        }}
-        backUrl={`/facility/${facilityId}`}
-      />
-      <div className="mt-4">
-        <Card>
-          <CardContent>
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-              <TextFormField
-                required
-                label={t("contact_person")}
-                name="refering_facility_contact_name"
-                value={state.form.refering_facility_contact_name}
-                onChange={handleChange}
-                error={state.errors.refering_facility_contact_name}
-              />
-              <PhoneNumberFormField
-                label={t("contact_phone")}
-                name="refering_facility_contact_number"
-                required
-                onlyIndia
-                value={state.form.refering_facility_contact_number}
-                onChange={handleFormFieldChange}
-                error={state.errors.refering_facility_contact_number}
-              />
+    <Page
+      title={t("create_resource_request")}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        resource: { style: "pointer-events-none" },
+      }}
+      backUrl={`/facility/${facilityId}`}
+    >
+      <Card className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <TextFormField
+          required
+          label={t("contact_person")}
+          name="refering_facility_contact_name"
+          value={state.form.refering_facility_contact_name}
+          onChange={handleChange}
+          error={state.errors.refering_facility_contact_name}
+        />
+        <PhoneNumberFormField
+          label={t("contact_phone")}
+          name="refering_facility_contact_number"
+          required
+          value={state.form.refering_facility_contact_number}
+          onChange={handleFormFieldChange}
+          error={state.errors.refering_facility_contact_number}
+          types={["mobile", "landline"]}
+        />
 
-              <div className="md:col-span-2">
-                <FieldLabel required>{t("approving_facility")}</FieldLabel>
-                <FacilitySelect
-                  multiple={false}
-                  facilityType={1500}
-                  name="approving_facility"
-                  selected={state.form.approving_facility}
-                  setSelected={(value: any) =>
-                    handleValueChange(value, "approving_facility")
-                  }
-                  errors={state.errors.approving_facility}
-                />
-              </div>
+        <div>
+          <FieldLabel required>{t("approving_facility")}</FieldLabel>
+          <FacilitySelect
+            multiple={false}
+            facilityType={1500}
+            name="approving_facility"
+            selected={state.form.approving_facility}
+            setSelected={(value: any) =>
+              handleValueChange(value, "approving_facility")
+            }
+            errors={state.errors.approving_facility}
+          />
+        </div>
 
-              <SelectFormField
-                label={t("category")}
-                name="category"
-                required
-                value={state.form.category}
-                options={RESOURCE_CATEGORY_CHOICES}
-                optionLabel={(option: string) => option}
-                optionValue={(option: string) => option}
-                onChange={({ value }) => handleValueChange(value, "category")}
-              />
-              <SelectFormField
-                label={t("sub_category")}
-                name="sub_category"
-                required
-                value={state.form.sub_category}
-                options={RESOURCE_SUBCATEGORIES}
-                optionLabel={(option: OptionsType) => option.text}
-                optionValue={(option: OptionsType) => option.id}
-                onChange={({ value }) =>
-                  handleValueChange(value, "sub_category")
-                }
-              />
+        <RadioFormField
+          label={t("is_this_an_emergency")}
+          name="emergency"
+          options={[true, false]}
+          optionDisplay={(o) => (o ? t("yes") : t("no"))}
+          optionValue={(o) => String(o)}
+          value={state.form.emergency}
+          onChange={handleChange}
+        />
 
-              <TextFormField
-                label={t("request_title")}
-                name="title"
-                placeholder={t("request_title_placeholder")}
-                value={state.form.title}
-                onChange={handleChange}
-                error={state.errors.title}
-              />
+        <SelectFormField
+          label={t("category")}
+          name="category"
+          required
+          value={state.form.category}
+          options={RESOURCE_CATEGORY_CHOICES}
+          optionLabel={(option: string) => option}
+          optionValue={(option: string) => option}
+          onChange={({ value }) => handleValueChange(value, "category")}
+        />
+        <SelectFormField
+          label={t("sub_category")}
+          name="sub_category"
+          required
+          value={state.form.sub_category}
+          options={RESOURCE_SUBCATEGORIES}
+          optionLabel={(option: OptionsType) => option.text}
+          optionValue={(option: OptionsType) => option.id}
+          onChange={({ value }) => handleValueChange(value, "sub_category")}
+        />
 
-              <TextFormField
-                label={t("required_quantity")}
-                name="requested_quantity"
-                value={state.form.required_quantity}
-                onChange={handleChange}
-              />
+        <TextFormField
+          label={t("request_title")}
+          name="title"
+          placeholder={t("request_title_placeholder")}
+          value={state.form.title}
+          onChange={handleChange}
+          error={state.errors.title}
+          required
+        />
 
-              <div className="md:col-span-2">
-                <TextAreaFormField
-                  label={t("request_description")}
-                  name="reason"
-                  rows={5}
-                  required
-                  placeholder={t("request_description_placeholder")}
-                  value={state.form.reason}
-                  onChange={handleChange}
-                  error={state.errors.reason}
-                />
-              </div>
+        <TextFormField
+          label={t("required_quantity")}
+          name="requested_quantity"
+          value={state.form.required_quantity}
+          onChange={handleChange}
+        />
 
-              <RadioFormField
-                label={t("is_this_an_emergency")}
-                name="emergency"
-                options={[true, false]}
-                optionDisplay={(o) => (o ? t("yes") : t("no"))}
-                optionValue={(o) => String(o)}
-                value={state.form.emergency}
-                onChange={handleChange}
-              />
+        <div className="md:col-span-2">
+          <TextAreaFormField
+            label={t("request_description")}
+            name="reason"
+            rows={5}
+            required
+            placeholder={t("request_description_placeholder")}
+            value={state.form.reason}
+            onChange={handleChange}
+            error={state.errors.reason}
+          />
+        </div>
 
-              <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <Cancel onClick={() => goBack()} />
-                <Submit onClick={handleSubmit} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        <div className="mt-4 flex flex-col justify-end gap-2 md:col-span-2 md:flex-row">
+          <Cancel onClick={() => goBack()} />
+          <Submit onClick={handleSubmit} />
+        </div>
+      </Card>
+    </Page>
   );
 }

@@ -85,73 +85,69 @@ const Pagination = ({
     });
   };
 
-  const NavButtons = {
-    First: () => (
-      <NavButton
-        tooltip="Jump to first page"
-        children={<CareIcon className="care-l-angle-double-left text-lg" />}
-        onClick={() => goToPage(1)}
-        disabled={currentPage === 1}
-      />
-    ),
-
-    Previous: () => (
-      <NavButton
-        tooltip="Previous"
-        onClick={() => goToPage(currentPage - 1)}
-        disabled={currentPage - 1 <= 0}
-        children={<CareIcon className="care-l-angle-left text-lg" />}
-      />
-    ),
-
-    Page: ({ page }: { page: number }) => (
-      <NavButton
-        onClick={() => goToPage(page)}
-        selected={currentPage === page}
-        tooltip={`Move to page ${page}`}
-      >
-        {page}
-      </NavButton>
-    ),
-
-    Next: () => (
-      <NavButton
-        tooltip="Next"
-        children={<CareIcon className="care-l-angle-right text-lg" />}
-        onClick={() => goToPage(currentPage + 1)}
-        disabled={currentPage + 1 > totalPage}
-      />
-    ),
-
-    Last: () => (
-      <NavButton
-        tooltip="Jump to last page"
-        children={<CareIcon className="care-l-angle-double-right text-lg" />}
-        onClick={() => goToPage(totalPage)}
-        disabled={totalPage === 0 || currentPage === totalPage}
-      />
-    ),
-  };
-
   return (
     <div className={className}>
       {/* Mobile view */}
-      <div className="flex-1 flex justify-between sm:hidden">
-        <NavButtons.Previous />
-        <NavButtons.Next />
+      <div className="flex flex-1 justify-between sm:hidden">
+        <NavButton
+          id="prev-page"
+          tooltip="Previous"
+          onClick={() => goToPage(currentPage - 1)}
+          disabled={currentPage - 1 <= 0}
+          children={<CareIcon className="care-l-angle-left text-lg" />}
+        />
+        <NavButton
+          id="next-page"
+          tooltip="Next"
+          children={<CareIcon className="care-l-angle-right text-lg" />}
+          onClick={() => goToPage(currentPage + 1)}
+          disabled={currentPage + 1 > totalPage}
+        />
       </div>
 
       {/* Desktop view */}
-      <nav className="hidden sm:flex-1 sm:items-center sm:justify-between relative sm:inline-flex rounded-lg bg-white border border-secondary-300">
-        <NavButtons.First />
-        <NavButtons.Previous />
+      <nav className="relative hidden rounded-lg border border-secondary-300 bg-white sm:inline-flex sm:flex-1 sm:items-center sm:justify-between">
+        <NavButton
+          id="first-page"
+          tooltip="Jump to first page"
+          children={<CareIcon className="care-l-angle-double-left text-lg" />}
+          onClick={() => goToPage(1)}
+          disabled={currentPage === 1}
+        />
+        <NavButton
+          id="prev-pages"
+          tooltip="Previous"
+          onClick={() => goToPage(currentPage - 1)}
+          disabled={currentPage - 1 <= 0}
+          children={<CareIcon className="care-l-angle-left text-lg" />}
+        />
 
         {pageNumbers.map((page) => (
-          <NavButtons.Page key={page} page={page} />
+          <NavButton
+            id={`page-${page}`}
+            key={page}
+            onClick={() => goToPage(page)}
+            selected={currentPage === page}
+            tooltip={`Move to page ${page}`}
+          >
+            {page}
+          </NavButton>
         ))}
 
-        <NavButtons.Next />
-        <NavButtons.Last />
+        <NavButton
+          id="next-pages"
+          tooltip="Next"
+          children={<CareIcon className="care-l-angle-right text-lg" />}
+          onClick={() => goToPage(currentPage + 1)}
+          disabled={currentPage + 1 > totalPage}
+        />
+        <NavButton
+          id="last-page"
+          tooltip="Jump to last page"
+          children={<CareIcon className="care-l-angle-double-right text-lg" />}
+          onClick={() => goToPage(totalPage)}
+          disabled={totalPage === 0 || currentPage === totalPage}
+        />
       </nav>
     </div>
   );
@@ -160,6 +156,7 @@ const Pagination = ({
 export default Pagination;
 
 interface NavButtonProps {
+  id?: string;
   onClick: () => void;
   children: React.ReactNode;
   tooltip: string;
@@ -170,11 +167,12 @@ interface NavButtonProps {
 const NavButton = (props: NavButtonProps) => {
   return (
     <ButtonV2
+      id={props.id}
       disabled={props.disabled}
       onClick={props.onClick}
       ghost={!props.selected}
       variant={props.selected === undefined ? "secondary" : "primary"}
-      className="rounded-none text-sm font-bold tooltip"
+      className="tooltip rounded-none text-sm font-bold"
     >
       {props.children}
       <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs font-normal">
