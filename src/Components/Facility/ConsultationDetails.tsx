@@ -1133,6 +1133,7 @@ export const ConsultationDetails = (props: any) => {
               breadcrumbs={false}
               hideBack={true}
               focusOnLoad={true}
+              className="px-0"
               options={
                 <PatientPrivacyToggle
                   consultationId={consultationId}

@@ -477,7 +477,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     return (
       <div className="flex h-[calc(90vh-1.5rem)] flex-col items-center justify-center px-2">
         <CareIcon className="care-l-lock text-center text-9xl text-gray-500 " />
-        <div className="text-lg font-semibold">Privacy Mode: ON</div>
+        <div className="text-md font-semibold">
+          Feed is unavailable due to privacy mode
+        </div>
       </div>
     );
   };

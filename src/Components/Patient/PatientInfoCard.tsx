@@ -21,7 +21,6 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useState } from "react";
 import { formatDate, formatDateTime } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
-import PatientPrivacyToggle from "./PatientPrivacyToggle.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -39,7 +38,6 @@ export default function PatientInfoCard(props: {
   const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
   const patient = props.patient;
-  const consultationId = props.consultationId;
   const consultation = props.consultation;
   const ip_no = consultation?.ip_no;
   const op_no = consultation?.op_no;
@@ -427,11 +425,6 @@ export default function PatientInfoCard(props: {
                 />
               </>
             ))}
-          <PatientPrivacyToggle
-            consultation={consultation}
-            consultationId={consultationId}
-            fetchPatientData={props.fetchPatientData}
-          />
         </div>
       </section>
     </>
