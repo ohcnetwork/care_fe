@@ -69,7 +69,9 @@ export default function PrescriptionAdministrationsTable({
     );
 
     setState({
-      prescriptions: res.data.results,
+      prescriptions: (res.data.results as Prescription[]).sort(
+        (a, b) => (a.discontinued ? 1 : 0) - (b.discontinued ? 1 : 0)
+      ),
       administrationsTimeBounds: getAdministrationBounds(res.data.results),
     });
   }, [consultation_id, dispatch]);
