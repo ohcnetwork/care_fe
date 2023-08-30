@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { PrescriptionActions } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { MedicineAdministrationRecord, Prescription } from "./models";
@@ -63,16 +63,20 @@ export default function PrescriptionAdministrationsTable({
     [consultation_id]
   );
 
-  useEffect(() => {
-    dispatch(list({ is_prn: prn, prescription_type: "REGULAR" })).then(
-      (res: any) => {
-        setState({
-          prescriptions: res.data.results,
-          administrationsTimeBounds: getAdministrationBounds(res.data.results),
-        });
-      }
+  const refetch = useCallback(async () => {
+    const res = await dispatch(
+      list({ is_prn: prn, prescription_type: "REGULAR" })
     );
+
+    setState({
+      prescriptions: res.data.results,
+      administrationsTimeBounds: getAdministrationBounds(res.data.results),
+    });
   }, [consultation_id, dispatch]);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   return (
     <div>
@@ -86,7 +90,10 @@ export default function PrescriptionAdministrationsTable({
           <MedicineAdministration
             prescriptions={state.prescriptions}
             action={prescription}
-            onDone={() => setShowBulkAdminister(false)}
+            onDone={() => {
+              setShowBulkAdminister(false);
+              refetch();
+            }}
           />
         </SlideOver>
       )}
@@ -209,6 +216,7 @@ export default function PrescriptionAdministrationsTable({
                 prescription={item}
                 intervals={pagination.slots!}
                 actions={prescription(item.id ?? "")}
+                refetch={refetch}
               />
             ))}
             {state?.prescriptions.length === 0 && (
@@ -232,6 +240,7 @@ interface PrescriptionRowProps {
   prescription: Prescription;
   intervals: DateRange[];
   actions: ReturnType<ReturnType<typeof PrescriptionActions>["prescription"]>;
+  refetch: () => void;
 }
 
 const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
@@ -278,14 +287,24 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
         <DiscontinuePrescription
           prescription={prescription}
           actions={props.actions}
-          onClose={() => setShowDiscontinue(false)}
+          onClose={(success) => {
+            setShowDiscontinue(false);
+            if (success) {
+              props.refetch();
+            }
+          }}
         />
       )}
       {showAdminister && (
         <AdministerMedicine
           prescription={prescription}
           actions={props.actions}
-          onClose={() => setShowAdminister(false)}
+          onClose={(success) => {
+            setShowAdminister(false);
+            if (success) {
+              props.refetch();
+            }
+          }}
         />
       )}
       {showDetails && (
