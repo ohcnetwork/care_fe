@@ -35,7 +35,6 @@ import { FileUpload } from "../Patient/FileUpload";
 import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import InvestigationTab from "./Investigations/investigationsTab";
 import { make as Link } from "../Common/components/Link.bs";
-import MedicineAdministrationsTable from "../Medicine/MedicineAdministrationsTable";
 import { NeurologicalTable } from "./Consultations/NeurologicalTables";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { NursingPlot } from "./Consultations/NursingPlot";
@@ -59,13 +58,13 @@ import { useTranslation } from "react-i18next";
 import { triggerGoal } from "../Common/Plausible";
 import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import PrescriptionAdministrationsTable from "../Medicine/PrescriptionAdministrationsTable";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 
 export const ConsultationDetails = (props: any) => {
-  const [medicinesKey, setMedicinesKey] = useState(0);
   const { t } = useTranslation();
   const { facilityId, patientId, consultationId } = props;
   const tab = props.tab.toUpperCase();
@@ -858,7 +857,7 @@ export const ConsultationDetails = (props: any) => {
                       </div>
                     </div>
                   )}
-                  {consultationData.prescribed_medication && (
+                  {consultationData.treatment_plan && (
                     <div className="overflow-hidden rounded-lg bg-white shadow">
                       <div className="px-4 py-5 sm:p-6">
                         <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
@@ -866,7 +865,7 @@ export const ConsultationDetails = (props: any) => {
                         </h3>
                         <div className="mt-2">
                           <ReadMore
-                            text={consultationData.prescribed_medication}
+                            text={consultationData.treatment_plan}
                             minChars={250}
                           />
                         </div>
@@ -1161,30 +1160,17 @@ export const ConsultationDetails = (props: any) => {
           </div>
         )}
         {tab === "MEDICINES" && (
-          <div>
-            <div className="mt-4">
-              <PrescriptionsTable
-                key={medicinesKey}
-                consultation_id={consultationId}
-                onChange={() => setMedicinesKey((k) => k + 1)}
-                readonly={!!consultationData.discharge_date}
-              />
-            </div>
-            <div className="mt-8">
-              <PrescriptionsTable
-                key={medicinesKey}
-                consultation_id={consultationId}
-                is_prn
-                onChange={() => setMedicinesKey((k) => k + 1)}
-                readonly={!!consultationData.discharge_date}
-              />
-            </div>
-            <div className="mt-8">
-              <MedicineAdministrationsTable
-                key={medicinesKey}
-                consultation_id={consultationId}
-              />
-            </div>
+          <div className="my-4 flex flex-col gap-16">
+            <PrescriptionAdministrationsTable
+              consultation_id={consultationId}
+              readonly={!!consultationData.discharge_date}
+              prn={false}
+            />
+            <PrescriptionAdministrationsTable
+              consultation_id={consultationId}
+              prn={true}
+              readonly={!!consultationData.discharge_date}
+            />
           </div>
         )}
         {tab === "FILES" && (
