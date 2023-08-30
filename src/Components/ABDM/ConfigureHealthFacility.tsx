@@ -6,7 +6,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
-import Page from "../Common/components/Page";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
@@ -121,33 +120,25 @@ export const ConfigureHealthFacility = (props: any) => {
   }
 
   return (
-    <Page
-      title="Configure Health Facility"
-      crumbsReplacements={{
-        [facilityId]: { name: state.form.name },
-      }}
-      className="mx-auto max-w-3xl"
-    >
-      <div className="cui-card mt-4">
-        <form onSubmit={(e) => handleSubmit(e)}>
-          <div className="mt-2 grid grid-cols-1 gap-4">
-            <div>
-              <TextFormField
-                name="hf_id"
-                label="Health Facility Id"
-                required
-                value={state.form.hf_id}
-                onChange={(e) => handleChange(e)}
-                error={state.errors?.hf_id}
-              />
-            </div>
+    <div className="cui-card mt-4">
+      <form onSubmit={(e) => handleSubmit(e)}>
+        <div className="mt-2 grid grid-cols-1 gap-4">
+          <div>
+            <TextFormField
+              name="hf_id"
+              label="Health Facility Id"
+              required
+              value={state.form.hf_id}
+              onChange={(e) => handleChange(e)}
+              error={state.errors?.hf_id}
+            />
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
-            <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
-            <Submit onClick={handleSubmit} label="Update" />
-          </div>
-        </form>
-      </div>
-    </Page>
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+          <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
+          <Submit onClick={handleSubmit} label="Update" />
+        </div>
+      </form>
+    </div>
   );
 };
