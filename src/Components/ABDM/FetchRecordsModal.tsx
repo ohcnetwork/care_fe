@@ -93,8 +93,7 @@ export default function FetchRecordsModal({ patient, show, onClose }: IProps) {
             setIsMakingConsentRequest(true);
             const res = await dispatch(
               consentActions.create({
-                patient_health_id: patient?.abha_number_object
-                  ?.health_id as string,
+                patient_abha: patient?.abha_number_object?.health_id as string,
                 hi_types: hiTypes,
                 purpose,
                 from_time: fromDate,
