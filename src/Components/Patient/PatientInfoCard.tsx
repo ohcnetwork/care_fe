@@ -7,6 +7,7 @@ import {
   RESPIRATORY_SUPPORT,
 } from "../../Common/constants";
 import { ConsultationModel, PatientCategory } from "../Facility/models";
+
 import ABHAProfileModal from "../ABDM/ABHAProfileModal";
 import Beds from "../Facility/Consultations/Beds";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -34,6 +35,7 @@ export default function PatientInfoCard(props: {
   const [showABHAProfile, setShowABHAProfile] = useState(
     !!props.showAbhaProfile
   );
+
   const { enable_hcx, enable_abdm } = useConfig();
   const [showLinkCareContext, setShowLinkCareContext] = useState(false);
 
@@ -117,7 +119,7 @@ export default function PatientInfoCard(props: {
               {bedDialogTitle}
             </ButtonV2>
           </div>
-          <div className="item-center flex flex-col gap-4 lg:items-start lg:gap-0 lg:pl-6">
+          <div className="flex flex-col items-center gap-4 lg:items-start lg:gap-0 lg:pl-6">
             <div className="mb-1 font-semibold sm:text-xl md:text-4xl">
               {patient.name}
             </div>
@@ -250,7 +252,6 @@ export default function PatientInfoCard(props: {
               </div>
             )}
           </div>
-          <div></div>
         </div>
 
         <div className="flex w-full flex-col gap-2 px-4 py-1 lg:w-fit lg:p-6">
