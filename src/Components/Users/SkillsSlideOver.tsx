@@ -121,18 +121,17 @@ export default ({ show, setShow, username }: IProps) => {
                 setSelected={setSelectedSkill}
                 errors=""
               />
-              <ButtonV2
-                disabled={!authorizeForAddSkill}
-                onClick={() => addSkill(username, selectedSkill)}
-                className="w-6rem"
-              >
-                {/* Replace "Add" in button with CircularProgress */}
-                {isLoading ? (
-                  <CircularProgress className="h-5 w-5" />
-                ) : (
-                  t("add")
-                )}
-              </ButtonV2>
+              {isLoading ? (
+                <CircularProgress className="h-5 w-5" />
+              ) : (
+                <ButtonV2
+                  disabled={!authorizeForAddSkill}
+                  onClick={() => addSkill(username, selectedSkill)}
+                  className="w-6rem"
+                >
+                  {t("add")}
+                </ButtonV2>
+              )}
               {!authorizeForAddSkill && (
                 <span className="tooltip-text tooltip-bottom -translate-x-24 translate-y-2">
                   {t("contact_your_admin_to_add_skills")}
