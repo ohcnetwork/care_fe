@@ -120,6 +120,7 @@ export default ({ show, setShow, username }: IProps) => {
                 selected={selectedSkill}
                 setSelected={setSelectedSkill}
                 errors=""
+                username={username}
               />
               {isLoading ? (
                 <CircularProgress className="h-5 w-5" />
