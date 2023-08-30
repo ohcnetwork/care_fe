@@ -135,9 +135,21 @@ export const ConsultationDetails = (props: any) => {
         );
       }
 
-      const ventilatorBedData = assetBeds.find(
-        (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
-      );
+      const consultationBedVentilator =
+        consultationData?.current_bed?.assets_objects?.find(
+          (i) => i.asset_class === AssetClass.VENTILATOR
+        );
+      let ventilatorBedData;
+      if (consultationBedVentilator) {
+        ventilatorBedData = {
+          asset_object: consultationBedVentilator,
+          bed_object: consultationData?.current_bed?.bed_object,
+        } as AssetBedModel;
+      } else {
+        ventilatorBedData = assetBeds.find(
+          (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
+        );
+      }
       setVentilatorBedData(ventilatorBedData);
       const ventilatorMeta = ventilatorBedData?.asset_object?.meta;
       const ventilatorMiddleware =

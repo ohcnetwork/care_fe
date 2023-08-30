@@ -87,8 +87,7 @@ type FormDetails = {
   history_of_present_illness: string;
   prescribed_medication: string;
   consultation_notes: string;
-  ip_no: string;
-  op_no: string;
+  patient_no: string;
   procedure: ProcedureType[];
   investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
@@ -132,8 +131,7 @@ const initForm: FormDetails = {
   history_of_present_illness: "",
   prescribed_medication: "",
   consultation_notes: "",
-  ip_no: "",
-  op_no: "",
+  patient_no: "",
   procedure: [],
   investigation: [],
   is_telemedicine: "false",
@@ -314,8 +312,7 @@ export const ConsultationForm = (props: any) => {
               ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
                   ?.id ?? "Comfort"
               : "Comfort",
-            ip_no: res.data.ip_no ? res.data.ip_no : "",
-            op_no: res.data.op_no ? res.data.op_no : "",
+            patient_no: res.data.patient_no ?? "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`,
@@ -387,7 +384,7 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "ip_no":
+        case "patient_no":
           if (state.form.suggestion !== "A") return;
           if (!state.form[field]) {
             errors[field] = "IP Number is required as person is admitted";
@@ -612,8 +609,7 @@ export const ConsultationForm = (props: any) => {
         history_of_present_illness: state.form.history_of_present_illness,
         prescribed_medication: state.form.prescribed_medication,
         discharge_date: state.form.discharge_date,
-        ip_no: state.form.ip_no,
-        op_no: state.form.op_no,
+        patient_no: state.form.patient_no,
         icd11_diagnoses: state.form.icd11_diagnoses_object.map(
           (o: ICD11DiagnosisModel) => o.id
         ),
@@ -1101,19 +1097,17 @@ export const ConsultationForm = (props: any) => {
                       )}
                     </>
                   )}
-                  {state.form.suggestion !== "A" ? (
-                    <div className="col-span-6 mb-6" ref={fieldRef["op_no"]}>
-                      <TextFormField {...field("op_no")} label="OP Number" />
-                    </div>
-                  ) : (
-                    <div className="col-span-6 mb-6" ref={fieldRef["ip_no"]}>
-                      <TextFormField
-                        {...field("ip_no")}
-                        label="IP Number"
-                        required={state.form.suggestion === "A"}
-                      />
-                    </div>
-                  )}
+                  <div className="col-span-6 mb-6" ref={fieldRef["patient_no"]}>
+                    <TextFormField
+                      {...field("patient_no")}
+                      label={
+                        state.form.suggestion === "A"
+                          ? "IP Number"
+                          : "OP Number"
+                      }
+                      required={state.form.suggestion === "A"}
+                    />
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-4 pb-4">
