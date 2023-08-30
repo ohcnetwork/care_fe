@@ -855,7 +855,7 @@ export const ConsultationDetails = (props: any) => {
                       </div>
                     </div>
                   )}
-                  {consultationData.prescribed_medication && (
+                  {consultationData.treatment_plan && (
                     <div className="overflow-hidden rounded-lg bg-white shadow">
                       <div className="px-4 py-5 sm:p-6">
                         <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
@@ -863,7 +863,7 @@ export const ConsultationDetails = (props: any) => {
                         </h3>
                         <div className="mt-2">
                           <ReadMore
-                            text={consultationData.prescribed_medication}
+                            text={consultationData.treatment_plan}
                             minChars={250}
                           />
                         </div>
