@@ -57,6 +57,7 @@ import { useTranslation } from "react-i18next";
 import { triggerGoal } from "../Common/Plausible";
 import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import ABDMRecordsTab from "../ABDM/ABDMRecordsTab";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -1305,6 +1306,15 @@ export const ConsultationDetails = (props: any) => {
               patientId={patientId}
               patientData={patientData}
             />
+          </div>
+        )}
+        {tab === "ABDM" && (
+          <div>
+            <div className="justify-between sm:flex">
+              <PageTitle title="ABDM" hideBack={true} breadcrumbs={false} />
+              <div className="pt-6"></div>
+            </div>
+            <ABDMRecordsTab />
           </div>
         )}
       </div>

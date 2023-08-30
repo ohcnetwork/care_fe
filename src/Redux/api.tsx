@@ -931,6 +931,23 @@ const routes: Routes = {
     method: "PATCH",
   },
 
+  // ABDM Consent
+
+  listConsents: {
+    path: "/api/v1/abdm/consent/",
+    method: "GET",
+  },
+
+  createConsent: {
+    path: "/api/v1/abdm/consent/",
+    method: "POST",
+  },
+
+  getConsent: {
+    path: "/api/v1/abdm/consent/{id}/",
+    method: "GET",
+  },
+
   // Asset Availability endpoints
 
   listAssetAvailability: {

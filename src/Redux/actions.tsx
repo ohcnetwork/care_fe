@@ -977,6 +977,20 @@ export const healthFacilityActions = {
   },
 };
 
+export const consentActions = {
+  list: (params: object) => {
+    return fireRequest("listConsents", [], params);
+  },
+
+  create: (data: object) => {
+    return fireRequest("createConsent", [], data);
+  },
+
+  read: (id: string) => {
+    return fireRequest("getConsent", [], {}, { id });
+  },
+};
+
 export const listAssetAvailability = (params: object) =>
   fireRequest("listAssetAvailability", [], params);
 export const getAssetAvailability = (id: string) =>

@@ -22,6 +22,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useState } from "react";
 import { formatDate, formatDateTime } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
+import FetchRecordsModal from "../ABDM/FetchRecordsModal.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -35,6 +36,7 @@ export default function PatientInfoCard(props: {
   const [showABHAProfile, setShowABHAProfile] = useState(
     !!props.showAbhaProfile
   );
+  const [showFetchABDMRecords, setShowFetchABDMRecords] = useState(false);
 
   const { enable_hcx, enable_abdm } = useConfig();
   const [showLinkCareContext, setShowLinkCareContext] = useState(false);
@@ -382,6 +384,15 @@ export default function PatientInfoCard(props: {
                   </span>
                 </ButtonV2>
                 <ButtonV2
+                  className="flex justify-start gap-3 font-semibold hover:text-white"
+                  onClick={() => setShowFetchABDMRecords(true)}
+                >
+                  <span className="flex w-full items-center justify-start gap-2">
+                    <CareIcon className="care-l-user-square" />
+                    <p>Fetch Records over ABDM</p>
+                  </span>
+                </ButtonV2>
+                <ButtonV2
                   className="mt-0 flex justify-start gap-3 font-semibold hover:text-white"
                   onClick={() => setShowLinkCareContext(true)}
                 >
@@ -401,6 +412,11 @@ export default function PatientInfoCard(props: {
                   patient={patient}
                   show={showLinkCareContext}
                   onClose={() => setShowLinkCareContext(false)}
+                />
+                <FetchRecordsModal
+                  patient={patient}
+                  show={showFetchABDMRecords}
+                  onClose={() => setShowFetchABDMRecords(false)}
                 />
               </>
             ) : (

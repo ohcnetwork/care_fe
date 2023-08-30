@@ -696,6 +696,7 @@ export const CONSULTATION_TABS: Array<OptionsType> = [
   { id: 10, text: "NUTRITION", desc: "Nutrition" },
   { id: 11, text: "PRESSURE_SORE", desc: "Pressure Sore" },
   { id: 12, text: "DIALYSIS", desc: "Dialysis" },
+  { id: 14, text: "ABDM", desc: "ABDM Records" },
 ];
 
 export const RHYTHM_CHOICES: Array<OptionsType> = [
@@ -1000,3 +1001,24 @@ export const XLSXAssetImportSchema = {
     },
   },
 };
+
+// ABDM
+
+export const ABDM_CONSENT_PURPOSE = [
+  { value: "CAREMGT", label: "Care Management" },
+  { value: "BTG", label: "Break The Glass" },
+  { value: "PUBHLTH", label: "Public Health" },
+  { value: "HPAYMT", label: "Healthcare Payment" },
+  { value: "DSRCH", label: "Disease Specific Healthcare Research" },
+  { value: "PATRQT", label: "Self Requested" },
+];
+
+export const ABDM_HI_TYPE = [
+  { value: "Prescription", label: "Prescription" },
+  { value: "DiagnosticReport", label: "Diagnostic Report" },
+  { value: "OPConsultation", label: "Op Consultation" },
+  { value: "DischargeSummary", label: "Discharge Summary" },
+  { value: "ImmunizationRecord", label: "Immunization Record" },
+  { value: "HealthDocumentRecord", label: "Record Artifact" },
+  { value: "WellnessRecord", label: "Wellness Record" },
+];
