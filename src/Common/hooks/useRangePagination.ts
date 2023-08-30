@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface DateRange {
   start: Date;
@@ -16,6 +16,10 @@ const useRangePagination = ({ bounds, perPage, ...props }: Props) => {
   const [currentRange, setCurrentRange] = useState(
     getInitialBounds(bounds, perPage, props.defaultEnd)
   );
+
+  useEffect(() => {
+    setCurrentRange(getInitialBounds(bounds, perPage, props.defaultEnd));
+  }, [bounds, perPage, props.defaultEnd]);
 
   const next = () => {
     const { end } = currentRange;
@@ -88,8 +92,7 @@ const getInitialBounds = (
   perPage: number,
   defaultEnd?: boolean
 ) => {
-  const { start, end } = bounds;
-  const deltaBounds = end.valueOf() - start.valueOf();
+  const deltaBounds = bounds.end.valueOf() - bounds.start.valueOf();
 
   if (deltaBounds < perPage) {
     return bounds;
@@ -97,13 +100,13 @@ const getInitialBounds = (
 
   if (defaultEnd) {
     return {
-      start: new Date(end.valueOf() - perPage),
-      end,
+      start: new Date(bounds.end.valueOf() - perPage),
+      end: bounds.end,
     };
   }
 
   return {
-    start,
-    end: new Date(start.valueOf() + perPage),
+    start: bounds.start,
+    end: new Date(bounds.start.valueOf() + perPage),
   };
 };
