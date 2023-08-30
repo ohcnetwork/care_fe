@@ -134,7 +134,7 @@ export default function ExternalResultUpload() {
             })}
           </div>
           <div className=""></div>
-          <div className="mt-2 flex flex-col justify-between gap-2 text-center md:flex-row">
+          <div className="mt-2 flex flex-col justify-end gap-2 text-center md:flex-row">
             <Cancel onClick={() => goBack()} />
             <Submit
               onClick={handleSubmit}
