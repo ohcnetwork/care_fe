@@ -138,7 +138,7 @@ export const PatientManager = () => {
 
     if (emergency_phone_number === "+91" || emergency_phone_number === "") {
       setEmergencyPhoneNumberError("");
-      updateQuery({ emergency_phone_number: "" });
+      updateQuery({ emergency_phone_number: null });
       return;
     }
 
