@@ -132,7 +132,7 @@ const initForm: any = {
   test_id: "",
   srf_id: "",
   test_type: testType[0],
-  prescribed_medication: false,
+  treatment_plan: false,
   ongoing_medication: "",
   designation_of_health_care_worker: "",
   instituion_of_health_care_worker: "",

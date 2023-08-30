@@ -64,6 +64,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                     msg: `Please check the row ${error.row} of column ${error.column}`,
                   });
                 });
+                setSelectedFile(undefined);
               } else {
                 setPreview(parsedData.rows as AssetData[]);
               }
@@ -89,6 +90,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
         Notification.Error({
           msg: "Invalid file",
         });
+        setSelectedFile(undefined);
       }
     };
     readFile();
@@ -327,7 +329,10 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
               }}
               disabled={isImporting}
             />
-            <Submit onClick={handleUpload} disabled={isImporting}>
+            <Submit
+              onClick={handleUpload}
+              disabled={isImporting || !selectedFile}
+            >
               {isImporting ? (
                 <i className="fa-solid fa-spinner animate-spin" />
               ) : (
