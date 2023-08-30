@@ -53,7 +53,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
         setIsLoading(false);
         props.onClose(true);
       }}
-      className="w-full max-w-4xl"
+      className="w-full md:max-w-4xl"
     >
       <div className="mt-4 flex flex-col gap-8">
         <PrescriptionDetailCard

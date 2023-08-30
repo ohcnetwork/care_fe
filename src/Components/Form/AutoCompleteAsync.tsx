@@ -3,7 +3,10 @@ import { Combobox } from "@headlessui/react";
 import { debounce } from "lodash";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
+import {
+  MultiSelectOptionChip,
+  dropdownOptionClassNames,
+} from "./MultiSelectMenuV2";
 
 interface Props {
   name?: string;
@@ -143,19 +146,14 @@ const AutoCompleteAsync = (props: Props) => {
           {multiple && selected?.length > 0 && (
             <div className="flex flex-wrap gap-2 p-2">
               {selected?.map((option: any) => (
-                <span className="rounded-full border border-gray-400 bg-gray-200 px-2 py-1 text-xs text-gray-800">
-                  {optionLabel(option)}
-                  <i
-                    className="ml-1 h-3 w-3 cursor-pointer text-lg text-gray-700"
-                    onClick={() => {
-                      onChange(
-                        selected.filter((item: any) => item.id !== option.id)
-                      );
-                    }}
-                  >
-                    <CareIcon className="care-l-multiply" />
-                  </i>
-                </span>
+                <MultiSelectOptionChip
+                  label={optionLabel(option)}
+                  onRemove={() =>
+                    onChange(
+                      selected.filter((item: any) => item.id !== option.id)
+                    )
+                  }
+                />
               ))}
             </div>
           )}
