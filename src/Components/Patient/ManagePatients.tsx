@@ -93,7 +93,7 @@ export const PatientManager = () => {
     FilterBadges,
     resultsPerPage,
   } = useFilters({
-    limit: null,
+    limit: 12,
   });
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
