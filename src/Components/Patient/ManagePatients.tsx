@@ -122,7 +122,6 @@ export const PatientManager = () => {
     if (phone_number === "+91" || phone_number === "") {
       setPhoneNumberError("");
       qParams.phone_number && updateQuery({ phone_number: null });
-      // updateQuery({ phone_number: "" });
       return;
     }
 
