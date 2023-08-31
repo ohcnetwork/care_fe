@@ -948,6 +948,11 @@ const routes: Routes = {
     method: "GET",
   },
 
+  checkConsentStatus: {
+    path: "/api/v1/abdm/consent/{id}/status/",
+    method: "GET",
+  },
+
   // Asset Availability endpoints
 
   listAssetAvailability: {

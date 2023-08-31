@@ -1314,7 +1314,7 @@ export const ConsultationDetails = (props: any) => {
               <PageTitle title="ABDM" hideBack={true} breadcrumbs={false} />
               <div className="pt-6"></div>
             </div>
-            <ABDMRecordsTab />
+            <ABDMRecordsTab patientId={patientId} />
           </div>
         )}
       </div>

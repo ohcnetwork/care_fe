@@ -989,6 +989,10 @@ export const consentActions = {
   read: (id: string) => {
     return fireRequest("getConsent", [], {}, { id });
   },
+
+  status: (id: string) => {
+    return fireRequest("checkConsentStatus", [], {}, { id }, undefined, true);
+  },
 };
 
 export const listAssetAvailability = (params: object) =>

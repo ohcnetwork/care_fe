@@ -31,6 +31,16 @@ export type UserModel = {
   doctor_medical_council_registration?: string;
 };
 
+export type UserBaseModel = {
+  email: string;
+  first_name: string;
+  last_name: string;
+  id: number;
+  user_type: UserRole;
+  username: string;
+  last_login: string | undefined;
+};
+
 export interface SkillObjectModel {
   id: string;
   name: string;
