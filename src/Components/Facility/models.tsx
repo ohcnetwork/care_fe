@@ -2,6 +2,7 @@ import { AssignedToObjectModel } from "../Patient/models";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssetData } from "../Assets/AssetTypes";
+import { UserBareMinimum } from "../Users/models";
 
 export interface LocalBodyModel {
   name: string;
@@ -112,7 +113,9 @@ export interface ConsultationModel {
   diagnosis?: string;
   icd11_diagnoses_object?: ICD11DiagnosisModel[];
   icd11_provisional_diagnoses_object?: ICD11DiagnosisModel[];
+  deprecated_verified_by?: string;
   verified_by?: string;
+  verified_by_object?: UserBareMinimum;
   suggestion_text?: string;
   symptoms?: Array<number>;
   symptoms_text?: string;
