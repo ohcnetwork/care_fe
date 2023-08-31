@@ -1240,7 +1240,7 @@ export const ConsultationForm = (props: any) => {
                               onChange={handleDoctorSelect}
                               showActiveStatus
                               userType={"Doctor"}
-                              facilityId={facilityId}
+                              homeFacility={facilityId}
                               error={state.errors.verified_by}
                             />
                           </div>
