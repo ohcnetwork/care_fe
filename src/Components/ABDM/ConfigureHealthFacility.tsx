@@ -47,7 +47,7 @@ export const ConfigureHealthFacility = (props: any) => {
       setIsLoading(true);
       const res = await dispatchAction(healthFacilityActions.read(facilityId));
 
-      if (res.status === 200 && res?.data) {
+      if (res?.status === 200 && res?.data) {
         const formData = {
           ...state.form,
           hf_id: res.data.hf_id,

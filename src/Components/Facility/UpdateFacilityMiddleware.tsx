@@ -11,7 +11,6 @@ import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import Page from "../Common/components/Page";
-import useConfig from "../../Common/hooks/useConfig";
 import { ConfigureHealthFacility } from "../ABDM/ConfigureHealthFacility";
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -52,7 +51,6 @@ export const UpdateFacilityMiddleware = (props: any) => {
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
-  const config = useConfig();
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -169,11 +167,8 @@ export const UpdateFacilityMiddleware = (props: any) => {
           </div>
         </form>
       </div>
-      {config.enable_abdm ? (
-        <ConfigureHealthFacility facilityId={facilityId} />
-      ) : (
-        <></>
-      )}
+
+      <ConfigureHealthFacility facilityId={facilityId} />
     </Page>
   );
 };
