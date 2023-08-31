@@ -69,11 +69,11 @@ export default function UserAutocompleteFormField(props: Props) {
           onQuery={(query) =>
             fetchOptions(
               props.facilityId
-                ? getFacilityUsers(props.facilityId)
-                : getUserList({
+                ? getFacilityUsers(props.facilityId, {
                     ...search_filter,
                     search_text: query,
                   })
+                : getUserList({ ...search_filter, search_text: query })
             )
           }
           isLoading={isLoading}
