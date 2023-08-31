@@ -40,10 +40,7 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  FieldChangeEvent,
-  FieldChangeEventHandler,
-} from "../Form/FormFields/Utils";
+import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
 import { FormAction } from "../Form/Utils";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -84,7 +81,6 @@ type FormDetails = {
   icd11_diagnoses_object: ICD11DiagnosisModel[];
   icd11_provisional_diagnoses_object: ICD11DiagnosisModel[];
   verified_by: string;
-  verified_by_object: UserModel | null;
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
@@ -129,7 +125,6 @@ const initForm: FormDetails = {
   icd11_diagnoses_object: [],
   icd11_provisional_diagnoses_object: [],
   verified_by: "",
-  verified_by_object: null,
   is_kasp: "false",
   kasp_enabled_date: null,
   examination_details: "",
@@ -318,13 +313,12 @@ export const ConsultationForm = (props: any) => {
                   ?.id ?? "Comfort"
               : "Comfort",
             patient_no: res.data.patient_no ?? "",
+            verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`,
             is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
             assigned_to_object: res.data.assigned_to_object,
-            verified_by: res.data.verified_by || "",
-            verified_by_object: res.data.verified_by_object,
             ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
@@ -719,14 +713,14 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleDoctorSelect = (event: FieldChangeEvent<UserModel | null>) => {
-    if (event.value?.id) {
+  const handleDoctorSelect = (doctor: UserModel | null) => {
+    if (doctor?.id) {
       dispatch({
         type: "set_form",
         form: {
           ...state.form,
-          [event.name]: event.value.id.toString(),
-          [`${event.name}_object`]: event.value,
+          assigned_to: doctor.id.toString(),
+          assigned_to_object: doctor,
         },
       });
     } else {
@@ -734,8 +728,8 @@ export const ConsultationForm = (props: any) => {
         type: "set_form",
         form: {
           ...state.form,
-          [event.name]: "",
-          [`${event.name}_object`]: null,
+          assigned_to: "",
+          assigned_to_object: null,
         },
       });
     }
@@ -1231,17 +1225,11 @@ export const ConsultationForm = (props: any) => {
                             className="col-span-6"
                             ref={fieldRef["verified_by"]}
                           >
-                            <UserAutocompleteFormField
-                              name={"verified_by"}
+                            <TextAreaFormField
+                              {...field("verified_by")}
                               label="Verified by"
-                              placeholder="Attending Doctors Name and Designation"
                               required
-                              value={state.form.verified_by_object ?? undefined}
-                              onChange={handleDoctorSelect}
-                              showActiveStatus
-                              userType={"Doctor"}
-                              facilityId={facilityId}
-                              error={state.errors.verified_by}
+                              placeholder="Attending Doctors Name and Designation"
                             />
                           </div>
 
@@ -1286,10 +1274,11 @@ export const ConsultationForm = (props: any) => {
                                 value={
                                   state.form.assigned_to_object ?? undefined
                                 }
-                                onChange={handleDoctorSelect}
+                                onChange={(option) =>
+                                  handleDoctorSelect(option.value)
+                                }
                                 userType={"Doctor"}
                                 name={"assigned_to"}
-                                label="Assigned to"
                               />
                             </div>
                           )}
