@@ -701,6 +701,7 @@ function UserFacilities(props: { user: any }) {
           setSelected={setFacility}
           errors=""
           className="z-40"
+          username={username}
         />
         <ButtonV2
           id="link-facility"

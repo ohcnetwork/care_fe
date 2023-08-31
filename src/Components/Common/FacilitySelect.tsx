@@ -1,6 +1,10 @@
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { getAllFacilities, getPermittedFacilities } from "../../Redux/actions";
+import {
+  getAllFacilities,
+  getPermittedFacilities,
+  getUserListFacility,
+} from "../../Redux/actions";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { FacilityModel } from "../Facility/models";
 
@@ -15,6 +19,7 @@ interface FacilitySelectProps {
   showAll?: boolean;
   showNOptions?: number;
   freeText?: boolean;
+  username?: string;
   selected: FacilityModel | FacilityModel[] | null;
   setSelected: (selected: FacilityModel | FacilityModel[] | null) => void;
 }
@@ -33,6 +38,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
     district,
     freeText = false,
     errors = "",
+    username,
   } = props;
 
   const dispatchAction: any = useDispatch();
@@ -51,12 +57,21 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
       const res = await dispatchAction(
         showAll ? getAllFacilities(params) : getPermittedFacilities(params)
       );
+
+      const linkedFacilities = await dispatchAction(
+        getUserListFacility({ username })
+      );
+      const linkedIDs: string[] = [];
+      linkedFacilities.data.map((fac: any) => linkedIDs.push(fac.id));
+
       if (freeText)
         res?.data?.results?.push({
           id: -1,
           name: text,
         });
-      return res?.data?.results;
+      return res?.data?.results.filter(
+        (facility: any) => !linkedIDs.includes(facility.id)
+      );
     },
     [dispatchAction, searchAll, showAll, facilityType, district]
   );
