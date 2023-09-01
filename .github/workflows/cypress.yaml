@@ -46,12 +46,13 @@ jobs:
         with:
           env: SKIP_PREFLIGHT_CHECK=true
           install: false
-          start: 'CARE_API="http://localhost:9000" npx vite preview --host'
+          start: "npx vite preview --host"
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: chrome
           record: true
         env:
+          CARE_API: http://localhost:9000
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
