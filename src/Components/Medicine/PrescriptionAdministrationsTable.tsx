@@ -126,6 +126,9 @@ export default function PrescriptionAdministrationsTable({
                 border
                 onClick={() => setShowBulkAdminister(true)}
                 className="w-full"
+                disabled={
+                  state === undefined || state.prescriptions.length === 0
+                }
               >
                 <CareIcon className="care-l-syringe text-lg" />
                 <span className="hidden lg:block">
@@ -221,18 +224,19 @@ export default function PrescriptionAdministrationsTable({
                 refetch={refetch}
               />
             ))}
-            {state?.prescriptions.length === 0 && (
-              <div className="my-16 flex flex-col items-center justify-center gap-4 text-gray-500">
-                <CareIcon className="care-l-tablets text-5xl" />
-                <h3 className="text-lg font-medium">
-                  {prn
-                    ? "No PRN Prescriptions Prescribed"
-                    : "No Prescriptions Prescribed"}
-                </h3>
-              </div>
-            )}
           </tbody>
         </table>
+
+        {state?.prescriptions.length === 0 && (
+          <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-gray-500">
+            <CareIcon className="care-l-tablets text-5xl" />
+            <h3 className="text-lg font-medium">
+              {prn
+                ? "No PRN Prescriptions Prescribed"
+                : "No Prescriptions Prescribed"}
+            </h3>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -547,7 +551,7 @@ function getAdministrationBounds(prescriptions: Prescription[]) {
           curr.last_administered_on && curr.last_administered_on > latest
             ? curr.last_administered_on
             : latest,
-        prescriptions[0].created_date ?? new Date()
+        prescriptions[0]?.created_date ?? new Date()
       )
   );
 
