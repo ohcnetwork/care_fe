@@ -497,7 +497,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("treatment_summary")}:{" "}
               </span>
-              {consultation.prescribed_medication || "-"}
+              {consultation.treatment_plan || "-"}
             </div>
           </div>
           <div className="mt-6 flex justify-between">
