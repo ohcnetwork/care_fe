@@ -35,9 +35,6 @@ jobs:
       - name: Check care is up ♻
         run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
 
-      - name: Change api proxy url 📝
-        run: 'sed --in-place "s^target: .*,^target: \"http://localhost:9000\",^g" vite.config.ts'
-
       - name: Install dependencies 📦
         run: npm install
 
@@ -49,7 +46,7 @@ jobs:
         with:
           env: SKIP_PREFLIGHT_CHECK=true
           install: false
-          start: "npx vite preview --host"
+          start: CARE_API="http://localhost:9000\" npx vite preview --host
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: chrome
