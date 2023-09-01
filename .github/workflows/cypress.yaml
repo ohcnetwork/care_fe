@@ -46,7 +46,7 @@ jobs:
         with:
           env: SKIP_PREFLIGHT_CHECK=true
           install: false
-          start: CARE_API="http://localhost:9000\" npx vite preview --host
+          start: 'CARE_API="http://localhost:9000" npx vite preview --host'
           wait-on: "http://localhost:4000"
           wait-on-timeout: 300
           browser: chrome
