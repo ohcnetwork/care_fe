@@ -7,7 +7,7 @@ import { externalResultList } from "../../Redux/actions";
 import ListFilter from "./ListFilter";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
-import parsePhoneNumberFromString from "libphonenumber-js";
+import { parsePhoneNumber } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -66,7 +66,7 @@ export default function ResultList() {
       page: qParams.page || 1,
       name: qParams.name || "",
       mobile_number: qParams.mobile_number
-        ? parsePhoneNumberFromString(qParams.mobile_number)?.format("E.164")
+        ? parsePhoneNumber(qParams.mobile_number) ?? ""
         : "",
       wards: qParams.wards || undefined,
       local_bodies: qParams.local_bodies || undefined,

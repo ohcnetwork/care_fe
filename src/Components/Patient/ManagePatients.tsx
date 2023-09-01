@@ -39,7 +39,7 @@ import SwitchTabs from "../Common/components/SwitchTabs";
 import SwipeableViews from "react-swipeable-views";
 import loadable from "@loadable/component";
 import { parseOptionId } from "../../Common/utils";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parsePhoneNumber } from "../../Utils/utils.js";
 import { useDispatch, useSelector } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
@@ -161,12 +161,10 @@ export const PatientManager = () => {
       (qParams.is_active || "True"),
     disease_status: qParams.disease_status || undefined,
     phone_number: qParams.phone_number
-      ? parsePhoneNumberFromString(qParams.phone_number)?.format("E.164")
+      ? parsePhoneNumber(qParams.phone_number)
       : undefined,
     emergency_phone_number: qParams.emergency_phone_number
-      ? parsePhoneNumberFromString(qParams.emergency_phone_number)?.format(
-          "E.164"
-        )
+      ? parsePhoneNumber(qParams.emergency_phone_number)
       : undefined,
     local_body: qParams.lsgBody || undefined,
     facility: qParams.facility,
