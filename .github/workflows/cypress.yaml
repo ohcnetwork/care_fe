@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        parallelism: [1,2,3,4,5]
+        containers: [1,2,3,4,5]
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v3
@@ -58,12 +58,12 @@ jobs:
           wait-on-timeout: 300
           browser: chrome
           record: true
-          parallel: true
-          group: ${{ matrix.parallelism }}
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
+          SPLIT: ${{ strategy.job-total }}
+          SPLIT_INDEX: ${{ strategy.job-index }}
 
       - name: Remove cypress passed label on failure 🏷️
         uses: actions-ecosystem/action-remove-labels@v1
