@@ -264,18 +264,6 @@ export const parsePhoneNumber = (phoneNumber: string, countryCode?: string) => {
   return parsedNumber;
 };
 
-export const isValidPhoneNumber = (phoneNumber: string) => {
-  if (phoneNumber === null) return false;
-  phoneNumber = phoneNumber.replace(/[-+.() ]/g, "");
-  if (phoneNumber.startsWith("+91")) {
-    return phoneNumber.length === 13;
-  } else if (phoneNumber.startsWith("1800")) {
-    return phoneNumber.length === 10 || phoneNumber.length === 11;
-  } else {
-    return phoneNumber.length <= 15 && phoneNumber.length >= 12;
-  }
-};
-
 export const formatPhoneNumber = (phoneNumber: string) => {
   if (phoneNumber.startsWith("+91")) {
     phoneNumber = phoneNumber.startsWith("+910")

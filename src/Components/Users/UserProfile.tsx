@@ -14,12 +14,7 @@ import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import {
-  classNames,
-  handleSignOut,
-  isValidPhoneNumber,
-  parsePhoneNumber,
-} from "../../Utils/utils";
+import { classNames, handleSignOut, parsePhoneNumber } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -27,6 +22,7 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import { SkillModel, SkillObjectModel } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 import dayjs from "../../Utils/dayjs";
+import { PhoneNumberValidator } from "../Form/FieldValidators";
 
 const Loading = loadable(() => import("../Common/Loading"));
 
@@ -208,7 +204,7 @@ export default function UserProfile() {
           // eslint-disable-next-line no-case-declarations
           let is_valid = false;
           if (phoneNumber) {
-            is_valid = isValidPhoneNumber(phoneNumber);
+            is_valid = PhoneNumberValidator()(phoneNumber) === undefined;
           }
 
           if (!states.form[field] || !is_valid) {
@@ -222,7 +218,8 @@ export default function UserProfile() {
           if (states.form[field] && states.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumber(states.form[field]);
             if (altPhoneNumber) {
-              alt_is_valid = isValidPhoneNumber(altPhoneNumber);
+              alt_is_valid =
+                PhoneNumberValidator(["mobile"])(altPhoneNumber) === undefined;
             }
           }
 

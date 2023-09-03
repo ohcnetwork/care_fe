@@ -25,7 +25,6 @@ import {
   dateQueryString,
   getPincodeDetails,
   includesIgnoreCase,
-  isValidPhoneNumber,
   parsePhoneNumber,
 } from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
@@ -42,7 +41,11 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
 import { DupPatientModel } from "../Facility/models";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
-import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
+import {
+  FieldError,
+  PhoneNumberValidator,
+  RequiredFieldValidator,
+} from "../Form/FieldValidators";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import Form from "../Form/Form";
 import { HCXPolicyModel } from "../HCX/models";
@@ -601,7 +604,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           if (
             !form[field] ||
             !phoneNumber ||
-            !isValidPhoneNumber(phoneNumber)
+            !PhoneNumberValidator()(phoneNumber) === undefined
           ) {
             errors[field] = "Please enter valid phone number";
           }
@@ -611,7 +614,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           if (
             !form[field] ||
             !emergency_phone_number ||
-            !isValidPhoneNumber(emergency_phone_number)
+            !PhoneNumberValidator()(emergency_phone_number) === undefined
           ) {
             errors[field] = "Please enter valid phone number";
           }
@@ -963,7 +966,10 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   const duplicateCheck = useCallback(
     debounce(async (phoneNo: string) => {
-      if (phoneNo && isValidPhoneNumber(parsePhoneNumber(phoneNo) ?? "")) {
+      if (
+        phoneNo &&
+        PhoneNumberValidator()(parsePhoneNumber(phoneNo) ?? "") === undefined
+      ) {
         const query = {
           phone_number: parsePhoneNumber(phoneNo),
         };

@@ -1,8 +1,9 @@
 import { IConfig } from "./hooks/useConfig";
 import { PatientCategory } from "../Components/Facility/models";
 import { SortOption } from "../Components/Common/SortDropdown";
-import { dateQueryString, isValidPhoneNumber } from "../Utils/utils";
+import { dateQueryString } from "../Utils/utils";
 import { IconName } from "../CAREUI/icons/CareIcon";
+import { PhoneNumberValidator } from "../Components/Form/FieldValidators";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -937,7 +938,10 @@ export const XLSXAssetImportSchema = {
     type: String,
     parse: (phone: number | string) => {
       phone = String(phone);
-      if (!phone.startsWith("1800") || !isValidPhoneNumber(phone)) {
+      if (
+        !phone.startsWith("1800") ||
+        !PhoneNumberValidator(["support"])(phone) === undefined
+      ) {
         throw new Error("Invalid Support Phone Number");
       }
 
