@@ -1,7 +1,6 @@
-import loadable from "@loadable/component";
 import { Link, navigate } from "raviger";
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { lazy, useCallback, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import {
   GENDER_TYPES,
   USER_TYPES,
@@ -44,9 +43,10 @@ import Card from "../../CAREUI/display/Card";
 import CircularProgress from "../Common/components/CircularProgress";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import dayjs from "../../Utils/dayjs";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 import { PhoneNumberValidator } from "../Form/FieldValidators";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface UserProps {
   userId?: number;
@@ -225,28 +225,21 @@ export const UserAdd = (props: UserProps) => {
     }
   }, [usernameInput]);
 
-  const rootState: any = useSelector((rootState) => rootState);
-  const { currentUser } = rootState;
-  const isSuperuser = currentUser.data.is_superuser;
+  const authUser = useAuthUser();
 
-  const username = currentUser.data.username;
-
-  const userType = currentUser.data.user_type;
-
-  const userIndex = USER_TYPES.indexOf(userType);
-
+  const userIndex = USER_TYPES.indexOf(authUser.user_type);
   const readOnlyUsers = USER_TYPE_OPTIONS.filter((user) => user.readOnly);
 
   const defaultAllowedUserTypes = USER_TYPE_OPTIONS.slice(0, userIndex + 1);
-  const userTypes = isSuperuser
+  const userTypes = authUser.is_superuser
     ? [...USER_TYPE_OPTIONS]
-    : userType === "StaffReadOnly"
+    : authUser.user_type === "StaffReadOnly"
     ? readOnlyUsers.slice(0, 1)
-    : userType === "DistrictReadOnlyAdmin"
+    : authUser.user_type === "DistrictReadOnlyAdmin"
     ? readOnlyUsers.slice(0, 2)
-    : userType === "StateReadOnlyAdmin"
+    : authUser.user_type === "StateReadOnlyAdmin"
     ? readOnlyUsers.slice(0, 3)
-    : userType === "Pharmacist"
+    : authUser.user_type === "Pharmacist"
     ? USER_TYPE_OPTIONS.slice(0, 1)
     : // Exception to allow Staff to Create Doctors
       defaultAllowedUserTypes;
@@ -270,8 +263,8 @@ export const UserAdd = (props: UserProps) => {
           if (userIndex <= USER_TYPES.indexOf("DistrictAdmin")) {
             setDistricts([
               {
-                id: currentUser.data.district,
-                name: currentUser.data.district_object.name,
+                id: authUser.district!,
+                name: authUser.district_object?.name as string,
               },
             ]);
           } else {
@@ -296,8 +289,8 @@ export const UserAdd = (props: UserProps) => {
           if (userIndex <= USER_TYPES.indexOf("LocalBodyAdmin")) {
             setLocalBodies([
               {
-                id: currentUser.data.local_body,
-                name: currentUser.data.local_body_object.name,
+                id: authUser.local_body!,
+                name: authUser.local_body_object?.name as string,
               },
             ]);
           } else {
@@ -317,8 +310,8 @@ export const UserAdd = (props: UserProps) => {
         if (userIndex <= USER_TYPES.indexOf("StateAdmin")) {
           setStates([
             {
-              id: currentUser.data.state,
-              name: currentUser.data.state_object.name,
+              id: authUser.state!,
+              name: authUser.state_object?.name as string,
             },
           ]);
         } else {
@@ -333,19 +326,24 @@ export const UserAdd = (props: UserProps) => {
   const fetchFacilities = useCallback(
     async (status: any) => {
       setIsStateLoading(true);
-      const res = await dispatchAction(getUserListFacility({ username }));
+      const res = await dispatchAction(
+        getUserListFacility({ username: authUser.username })
+      );
       if (!status.aborted && res && res.data) {
         setFacilities(res.data);
       }
       setIsStateLoading(false);
     },
-    [dispatchAction, username]
+    [dispatchAction, authUser.username]
   );
 
   useAbortableEffect(
     (status: statusType) => {
       fetchStates(status);
-      if (userType === "Staff" || userType === "StaffReadOnly") {
+      if (
+        authUser.user_type === "Staff" ||
+        authUser.user_type === "StaffReadOnly"
+      ) {
         fetchFacilities(status);
       }
     },
@@ -400,7 +398,8 @@ export const UserAdd = (props: UserProps) => {
         case "facilities":
           if (
             state.form[field].length === 0 &&
-            (userType === "Staff" || userType === "StaffReadOnly") &&
+            (authUser.user_type === "Staff" ||
+              authUser.user_type === "StaffReadOnly") &&
             (state.form["user_type"] === "Staff" ||
               state.form["user_type"] === "StaffReadOnly")
           ) {

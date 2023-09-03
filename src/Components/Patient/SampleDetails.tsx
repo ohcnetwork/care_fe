@@ -1,7 +1,7 @@
 import { FlowModel, SampleTestModel } from "./models";
 import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useState } from "react";
+import { lazy, useCallback, useState } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
 import Card from "../../CAREUI/display/Card";
@@ -10,11 +10,11 @@ import Page from "../Common/components/Page";
 import _ from "lodash";
 import { formatDateTime } from "../../Utils/utils";
 import { getTestSample } from "../../Redux/actions";
-import loadable from "@loadable/component";
+
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface SampleDetailsProps {
   id: number;

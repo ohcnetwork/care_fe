@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function CollapseV2(props: {
   children: JSX.Element | JSX.Element[];
   opened: boolean;
   className?: string;
 }) {
-  const content = React.useRef<HTMLDivElement>(null);
+  const content = useRef<HTMLDivElement>(null);
   const [innerDivState, setInnerDivState] = useState(false);
   const [outerDivState, setOuterDivState] = useState(false);
 

@@ -1,7 +1,6 @@
-import loadable from "@loadable/component";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
 import ListFilter from "./ListFilter";
@@ -17,7 +16,7 @@ import CountBlock from "../../CAREUI/display/Count";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import Page from "../Common/components/Page";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultList() {
   const dispatch: any = useDispatch();

@@ -1,5 +1,5 @@
-import { useReducer, useState, useEffect } from "react";
-import loadable from "@loadable/component";
+import { useReducer, useState, useEffect, lazy } from "react";
+
 import { FacilitySelect } from "../Common/FacilitySelect";
 import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
@@ -27,7 +27,7 @@ import Card from "../../CAREUI/display/Card";
 import Page from "../Common/components/Page";
 import { PhoneNumberValidator } from "../Form/FieldValidators";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface resourceProps {
   facilityId: number;

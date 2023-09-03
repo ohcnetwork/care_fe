@@ -1,13 +1,12 @@
-import loadable from "@loadable/component";
 import _ from "lodash";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { lazy, useState } from "react";
 import CSVReader from "react-csv-reader";
 import { useDispatch } from "react-redux";
 import useConfig from "../../Common/hooks/useConfig";
 import { externalResultUploadCsv } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const PageTitle = lazy(() => import("../Common/PageTitle"));
 import { useTranslation } from "react-i18next";
 
 export default function ExternalResultUpload() {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useReducer } from "react";
+import { useEffect, useState, useReducer } from "react";
 import axios from "axios";
 import {
   SAMPLE_TEST_STATUS,
@@ -23,7 +23,6 @@ interface Props {
   sample: SampleTestModel;
   handleOk: (sample: SampleTestModel, status: number, result: number) => void;
   handleCancel: () => void;
-  userType: "Staff" | "DistrictAdmin" | "StateLabAdmin";
 }
 
 const statusChoices = [...SAMPLE_TEST_STATUS];

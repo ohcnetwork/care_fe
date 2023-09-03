@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import { lazy, useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   getPatient,
@@ -8,10 +8,10 @@ import {
 import { ConsultationModel } from "./models";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { PatientModel } from "../Patient/models";
-import loadable from "@loadable/component";
+
 import { GENDER_TYPES } from "../../Common/constants";
 import { formatDate, formatDateTime } from "../../Utils/utils";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const TreatmentSummary = (props: any) => {
   const { consultationId, patientId } = props;
@@ -354,10 +354,8 @@ const TreatmentSummary = (props: any) => {
 
               <div className="border-b-2 border-gray-800 px-5 py-2">
                 <b>Treatment :</b>
-                {consultationData.prescribed_medication ? (
-                  <p className="ml-4">
-                    {consultationData.prescribed_medication}
-                  </p>
+                {consultationData.treatment_plan ? (
+                  <p className="ml-4">{consultationData.treatment_plan}</p>
                 ) : (
                   <p className="ml-4">---</p>
                 )}

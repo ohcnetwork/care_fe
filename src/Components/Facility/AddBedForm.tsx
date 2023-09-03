@@ -1,6 +1,6 @@
 import Card from "../../CAREUI/display/Card";
-import loadable from "@loadable/component";
-import React, { useState, useEffect } from "react";
+
+import { useState, useEffect, lazy, SyntheticEvent } from "react";
 import { useDispatch } from "react-redux";
 import {
   createFacilityBed,
@@ -18,7 +18,7 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import Page from "../Common/components/Page";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface BedFormProps {
   facilityId: string;
@@ -118,7 +118,7 @@ export const AddBedForm = (props: BedFormProps) => {
       replace: true,
     });
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
+  const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
 
     const data = {
@@ -215,8 +215,8 @@ export const AddBedForm = (props: BedFormProps) => {
                 <CheckBoxFormField
                   label="Do you want to make multiple beds?"
                   onChange={() => {
+                    if (multipleBeds) setNumberOfBeds(1);
                     setMultipleBeds(!multipleBeds);
-                    if (!multipleBeds) setNumberOfBeds(1);
                   }}
                   name={"multipleBeds"}
                 />

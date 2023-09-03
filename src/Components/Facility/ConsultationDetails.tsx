@@ -19,7 +19,7 @@ import {
   listAssetBeds,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useEffect, useState } from "react";
+import { lazy, useCallback, useEffect, useState } from "react";
 
 import { ABGPlots } from "./Consultations/ABGPlots";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -35,7 +35,6 @@ import { FileUpload } from "../Patient/FileUpload";
 import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import InvestigationTab from "./Investigations/investigationsTab";
 import { make as Link } from "../Common/components/Link.bs";
-import MedicineAdministrationsTable from "../Medicine/MedicineAdministrationsTable";
 import { NeurologicalTable } from "./Consultations/NeurologicalTables";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { NursingPlot } from "./Consultations/NursingPlot";
@@ -49,20 +48,21 @@ import ReadMore from "../Common/components/Readmore";
 import VentilatorPatientVitalsMonitor from "../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import { VentilatorPlot } from "./Consultations/VentilatorPlot";
 import { formatDate, formatDateTime, relativeTime } from "../../Utils/utils";
-import loadable from "@loadable/component";
+
 import { navigate } from "raviger";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
 import { triggerGoal } from "../Common/Plausible";
 import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import PrescriptionAdministrationsTable from "../Medicine/PrescriptionAdministrationsTable";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = lazy(() => import("../Common/Loading"));
+const PageTitle = lazy(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 
 export const ConsultationDetails = (props: any) => {
-  const [medicinesKey, setMedicinesKey] = useState(0);
   const { t } = useTranslation();
   const { facilityId, patientId, consultationId } = props;
   const tab = props.tab.toUpperCase();
@@ -99,8 +99,7 @@ export const ConsultationDetails = (props: any) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const authUser = useAuthUser();
 
   useEffect(() => {
     if (
@@ -136,9 +135,21 @@ export const ConsultationDetails = (props: any) => {
         );
       }
 
-      const ventilatorBedData = assetBeds.find(
-        (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
-      );
+      const consultationBedVentilator =
+        consultationData?.current_bed?.assets_objects?.find(
+          (i) => i.asset_class === AssetClass.VENTILATOR
+        );
+      let ventilatorBedData;
+      if (consultationBedVentilator) {
+        ventilatorBedData = {
+          asset_object: consultationBedVentilator,
+          bed_object: consultationData?.current_bed?.bed_object,
+        } as AssetBedModel;
+      } else {
+        ventilatorBedData = assetBeds.find(
+          (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
+        );
+      }
       setVentilatorBedData(ventilatorBedData);
       const ventilatorMeta = ventilatorBedData?.asset_object?.meta;
       const ventilatorMiddleware =
@@ -214,9 +225,8 @@ export const ConsultationDetails = (props: any) => {
     fetchData(status);
     triggerGoal("Patient Consultation Viewed", {
       facilityId: facilityId,
-      patientId: patientId,
       consultationId: consultationId,
-      userID: currentUser.data.id,
+      userID: authUser.id,
     });
   }, []);
 
@@ -332,8 +342,7 @@ export const ConsultationDetails = (props: any) => {
                     triggerGoal("Doctor Connect Clicked", {
                       consultationId,
                       facilityId: patientData.facility,
-                      patientId: patientData.id,
-                      userId: currentUser.data.id,
+                      userId: authUser.id,
                       page: "ConsultationDetails",
                     });
                     setShowDoctors(true);
@@ -846,7 +855,7 @@ export const ConsultationDetails = (props: any) => {
                       </div>
                     </div>
                   )}
-                  {consultationData.prescribed_medication && (
+                  {consultationData.treatment_plan && (
                     <div className="overflow-hidden rounded-lg bg-white shadow">
                       <div className="px-4 py-5 sm:p-6">
                         <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
@@ -854,7 +863,7 @@ export const ConsultationDetails = (props: any) => {
                         </h3>
                         <div className="mt-2">
                           <ReadMore
-                            text={consultationData.prescribed_medication}
+                            text={consultationData.treatment_plan}
                             minChars={250}
                           />
                         </div>
@@ -1122,11 +1131,7 @@ export const ConsultationDetails = (props: any) => {
               hideBack={true}
               focusOnLoad={true}
             />
-            <Feed
-              facilityId={facilityId}
-              patientId={patientId}
-              consultationId={consultationId}
-            />
+            <Feed facilityId={facilityId} consultationId={consultationId} />
           </div>
         )}
         {tab === "SUMMARY" && (
@@ -1144,30 +1149,17 @@ export const ConsultationDetails = (props: any) => {
           </div>
         )}
         {tab === "MEDICINES" && (
-          <div>
-            <div className="mt-4">
-              <PrescriptionsTable
-                key={medicinesKey}
-                consultation_id={consultationId}
-                onChange={() => setMedicinesKey((k) => k + 1)}
-                readonly={!!consultationData.discharge_date}
-              />
-            </div>
-            <div className="mt-8">
-              <PrescriptionsTable
-                key={medicinesKey}
-                consultation_id={consultationId}
-                is_prn
-                onChange={() => setMedicinesKey((k) => k + 1)}
-                readonly={!!consultationData.discharge_date}
-              />
-            </div>
-            <div className="mt-8">
-              <MedicineAdministrationsTable
-                key={medicinesKey}
-                consultation_id={consultationId}
-              />
-            </div>
+          <div className="my-4 flex flex-col gap-16">
+            <PrescriptionAdministrationsTable
+              consultation_id={consultationId}
+              readonly={!!consultationData.discharge_date}
+              prn={false}
+            />
+            <PrescriptionAdministrationsTable
+              consultation_id={consultationId}
+              prn={true}
+              readonly={!!consultationData.discharge_date}
+            />
           </div>
         )}
         {tab === "FILES" && (

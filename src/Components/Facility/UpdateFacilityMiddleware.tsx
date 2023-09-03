@@ -1,6 +1,6 @@
-import { useCallback, useReducer, useState } from "react";
+import { lazy, useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import loadable from "@loadable/component";
+
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getPermittedFacility,
@@ -11,7 +11,9 @@ import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import Page from "../Common/components/Page";
-const Loading = loadable(() => import("../Common/Loading"));
+import useConfig from "../../Common/hooks/useConfig";
+import { ConfigureHealthFacility } from "../ABDM/ConfigureHealthFacility";
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
   name: "",
@@ -50,6 +52,7 @@ export const UpdateFacilityMiddleware = (props: any) => {
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const config = useConfig();
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -141,7 +144,7 @@ export const UpdateFacilityMiddleware = (props: any) => {
 
   return (
     <Page
-      title="Update Middleware"
+      title="Configure Facility"
       crumbsReplacements={{
         [facilityId]: { name: state.form.name },
       }}
@@ -166,6 +169,11 @@ export const UpdateFacilityMiddleware = (props: any) => {
           </div>
         </form>
       </div>
+      {config.enable_abdm ? (
+        <ConfigureHealthFacility facilityId={facilityId} />
+      ) : (
+        <></>
+      )}
     </Page>
   );
 };

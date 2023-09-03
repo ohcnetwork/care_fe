@@ -1,8 +1,13 @@
-import { useCallback, useReducer, useState, useEffect } from "react";
+import { useCallback, useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
-import loadable from "@loadable/component";
+
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getItems, setMinQuantity, getAnyFacility } from "../../Redux/actions";
+import {
+  getItems,
+  setMinQuantity,
+  getAnyFacility,
+  getMinQuantity,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -12,7 +17,7 @@ import Card from "../../CAREUI/display/Card";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
   id: "",
@@ -57,13 +62,27 @@ export const SetInventoryForm = (props: any) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
+
+      const existingItemIDs: number[] = [];
+      const resMinQuantity = await dispatchAction(
+        getMinQuantity(facilityId, {})
+      );
+
+      resMinQuantity.data.results.map((item: any) =>
+        existingItemIDs.push(item.item_object.id)
+      );
+
       const res = await dispatchAction(getItems({ limit, offset }));
+
       if (!status.aborted) {
         if (res && res.data) {
-          setData(res.data.results);
+          const filteredData = res.data.results.filter(
+            (item: any) => !existingItemIDs.includes(item.id)
+          );
+          setData(filteredData);
           dispatch({
             type: "set_form",
-            form: { ...state.form, id: res.data.results[0]?.id },
+            form: { ...state.form, id: filteredData[0]?.id },
           });
         }
         setIsLoading(false);
@@ -113,7 +132,7 @@ export const SetInventoryForm = (props: any) => {
 
     const res = await dispatchAction(setMinQuantity(data, { facilityId }));
     setIsLoading(false);
-    if (res && res.data) {
+    if (res && res.data && res.data.id) {
       Notification.Success({
         msg: "Minimum quantiy updated successfully",
       });

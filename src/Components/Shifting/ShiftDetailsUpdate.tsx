@@ -12,7 +12,7 @@ import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { getShiftDetails, getUserList, updateShift } from "../../Redux/actions";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { lazy, useCallback, useEffect, useReducer, useState } from "react";
 import { ConsultationModel } from "../Facility/models.js";
 import DischargeModal from "../Facility/DischargeModal.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -23,7 +23,6 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import loadable from "@loadable/component";
 import { parsePhoneNumber } from "../../Utils/utils.js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
@@ -36,7 +35,7 @@ import Page from "../Common/components/Page.js";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField.js";
 import { UserModel } from "../Users/models.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface patientShiftProps {
   id: string;

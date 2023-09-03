@@ -2,7 +2,15 @@ import * as Notification from "../../Utils/Notifications.js";
 
 import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import React, { LegacyRef, useEffect, useReducer, useState } from "react";
+import {
+  LegacyRef,
+  RefObject,
+  createRef,
+  lazy,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
 import {
   createAsset,
   getAsset,
@@ -11,7 +19,7 @@ import {
 } from "../../Redux/actions";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import { LocationSelect } from "../Common/LocationSelect";
 import Page from "../Common/components/Page";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
@@ -20,7 +28,7 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import SwitchV2 from "../Common/components/Switch";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import loadable from "@loadable/component";
+
 import { navigate } from "raviger";
 import { parseQueryParams } from "../../Utils/primitives";
 import useAppHistory from "../../Common/hooks/useAppHistory";
@@ -29,8 +37,9 @@ import useVisibility from "../../Utils/useVisibility";
 import { validateEmailAddress } from "../../Common/validation";
 import { dateQueryString, parsePhoneNumber } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
+import DateInputV2 from "../Common/DateInputV2.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const formErrorKeys = [
   "name",
@@ -59,8 +68,8 @@ const initError = formErrorKeys.reduce(
 );
 
 const fieldRef = formErrorKeys.reduce(
-  (acc: { [key: string]: React.RefObject<any> }, key) => {
-    acc[key] = React.createRef();
+  (acc: { [key: string]: RefObject<any> }, key) => {
+    acc[key] = createRef();
     return acc;
   },
   {}
@@ -202,8 +211,9 @@ const AssetCreate = (props: AssetProps) => {
       setManufacturer(asset.manufacturer);
       asset.warranty_amc_end_of_validity &&
         setWarrantyAmcEndOfValidity(asset.warranty_amc_end_of_validity);
-      asset.last_serviced_on && setLastServicedOn(asset.last_serviced_on);
-      setNotes(asset.notes);
+      asset.last_service?.serviced_on &&
+        setLastServicedOn(asset.last_service?.serviced_on);
+      asset.last_service?.note && setNotes(asset.last_service?.note);
     }
   }, [asset]);
 
@@ -264,6 +274,12 @@ const AssetCreate = (props: AssetProps) => {
             invalidForm = true;
           }
           return;
+        case "last_serviced_on":
+          if (notes && !last_serviced_on) {
+            errors[field] = "Last serviced on date is require with notes";
+            invalidForm = true;
+          }
+          return;
         default:
           return;
       }
@@ -310,7 +326,7 @@ const AssetCreate = (props: AssetProps) => {
     const validated = validateForm();
     if (validated) {
       setIsLoading(true);
-      const data = {
+      const data: any = {
         name: name,
         asset_type: asset_type,
         asset_class: asset_class || "",
@@ -330,11 +346,13 @@ const AssetCreate = (props: AssetProps) => {
         warranty_amc_end_of_validity: warranty_amc_end_of_validity
           ? dateQueryString(warranty_amc_end_of_validity)
           : null,
-        last_serviced_on: last_serviced_on
-          ? dateQueryString(last_serviced_on)
-          : last_serviced_on,
-        notes: notes,
       };
+
+      if (last_serviced_on) {
+        data["last_serviced_on"] = dateQueryString(last_serviced_on);
+        data["note"] = notes ?? "";
+      }
+
       if (!assetId) {
         const res = await dispatchAction(createAsset(data));
         if (res && res.data && res.status === 201) {
@@ -856,29 +874,29 @@ const AssetCreate = (props: AssetProps) => {
                       ref={fieldRef["last_serviced_on"]}
                       data-testid="asset-last-serviced-on-input"
                     >
-                      <TextFormField
+                      <FieldLabel>Last Serviced On</FieldLabel>
+                      <DateInputV2
                         name="last_serviced_on"
-                        label="Last Serviced On"
                         className="mt-2"
-                        value={last_serviced_on}
-                        error={state.errors.last_serviced_on}
+                        position="RIGHT"
+                        value={last_serviced_on && new Date(last_serviced_on)}
                         onChange={(date) => {
                           if (
-                            dayjs(date.value).format("YYYY-MM-DD") >
+                            dayjs(date).format("YYYY-MM-DD") >
                             new Date().toLocaleDateString("en-ca")
                           ) {
                             Notification.Error({
                               msg: "Last Serviced date can't be in future",
                             });
                           } else {
-                            setLastServicedOn(
-                              dayjs(date.value).format("YYYY-MM-DD")
-                            );
+                            setLastServicedOn(dayjs(date).format("YYYY-MM-DD"));
                           }
                         }}
-                        type="date"
-                        max={dayjs(new Date()).format("YYYY-MM-DD")}
+                        max={new Date()}
                       />
+                      <FieldErrorText
+                        error={state.errors.last_serviced_on}
+                      ></FieldErrorText>
                     </div>
 
                     {/* Notes */}

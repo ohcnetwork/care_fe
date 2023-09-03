@@ -1,6 +1,6 @@
-import React from "react";
 import { useDispatch } from "react-redux";
 import { getNotificationData } from "../../Redux/actions";
+import { useEffect } from "react";
 
 export default function ShowPushNotification({ external_id }: any) {
   const dispatch: any = useDispatch();
@@ -31,11 +31,13 @@ export default function ShowPushNotification({ external_id }: any) {
     }
   };
 
-  resultUrl()
-    .then((url) => {
-      window.location.href = url;
-    })
-    .catch((err) => console.log(err));
+  useEffect(() => {
+    resultUrl()
+      .then((url) => {
+        window.location.href = url;
+      })
+      .catch((err) => console.log(err));
+  }, []);
 
   return <></>;
 }
