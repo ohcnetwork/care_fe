@@ -16,7 +16,8 @@ describe("Patient Creation with consultation", () => {
   const updatePatientPage = new UpdatePatientPage();
   const patientConsultationPage = new PatientConsultationPage();
   const phone_number = "9" + Math.floor(100000000 + Math.random() * 900000000);
-  const emergency_phone_number = "9430123487";
+  const emergency_phone_number =
+    "9" + Math.floor(100000000 + Math.random() * 900000000);
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -68,8 +69,8 @@ describe("Patient Creation with consultation", () => {
     updatePatientPage.enterPatientDetails(
       "Test E2E User Edited",
       "O+",
-      "+919846856666",
-      "+919120330220",
+      phone_number,
+      emergency_phone_number,
       "Test Patient Address Edited",
       "Severe Cough",
       "Paracetamol",
@@ -100,7 +101,7 @@ describe("Patient Creation with consultation", () => {
 
     updatePatientPage.verifyPatientDetails(
       "Test E2E User Edited",
-      "+919120330220",
+      phone_number,
       patientDetails_values
     );
   });

@@ -67,9 +67,10 @@ export class AssetPage {
     cy.get("[data-testid=asset-support-email-input] input").type(supportEmail);
     cy.get("[data-testid=asset-vendor-name-input] input").type(vendorName);
     cy.get("[data-testid=asset-serial-number-input] input").type(serialNumber);
-    cy.get("[data-testid=asset-last-serviced-on-input] input").type(
-      lastServicedOn
-    );
+    cy.get(
+      "[data-testid=asset-last-serviced-on-input] input[type='text']"
+    ).click();
+    cy.get("#date-input").click().type(lastServicedOn);
     cy.get("[data-testid=asset-notes-input] textarea").type(notes);
   }
 

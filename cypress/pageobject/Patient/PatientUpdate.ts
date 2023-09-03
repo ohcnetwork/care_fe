@@ -4,8 +4,8 @@ export class UpdatePatientPage {
   enterPatientDetails(
     patientName: string,
     bloodGroup: string,
-    emergencyPhoneNumber: string,
     phoneNumber: string,
+    emergencyPhoneNumber: string,
     address: string,
     currentHealthCondition: string,
     ongoingMedication: string,
@@ -23,9 +23,11 @@ export class UpdatePatientPage {
     cy.get("[data-testid=name] input").clear();
     cy.get("[data-testid=name] input").type(patientName);
     cy.get("#phone_number-div").clear();
-    cy.get("#phone_number-div").type(phoneNumber);
+    cy.get("#phone_number-div").type("+91").type(phoneNumber);
     cy.get("#emergency_phone_number-div").clear();
-    cy.get("#emergency_phone_number-div").type(emergencyPhoneNumber);
+    cy.get("#emergency_phone_number-div")
+      .type("+91")
+      .type(emergencyPhoneNumber);
     cy.get("#present_health").type(currentHealthCondition);
     cy.get("#ongoing_medication").type(ongoingMedication);
     cy.get("#allergies").type(allergies);

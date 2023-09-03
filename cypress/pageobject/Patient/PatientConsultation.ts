@@ -16,6 +16,7 @@ export class PatientConsultationPage {
   }
 
   fillIllnessHistory(history: string) {
+    cy.get("#history_of_present_illness").scrollIntoView;
     cy.get("#history_of_present_illness").should("be.visible");
     cy.get("#history_of_present_illness").click().type(history);
   }
