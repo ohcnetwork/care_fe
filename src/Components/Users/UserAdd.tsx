@@ -27,7 +27,6 @@ import { FacilityModel } from "../Facility/models";
 import {
   classNames,
   dateQueryString,
-  isValidPhoneNumber,
   parsePhoneNumber,
 } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -45,6 +44,7 @@ import CircularProgress from "../Common/components/CircularProgress";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import { PhoneNumberValidator } from "../Form/FieldValidators";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -479,7 +479,7 @@ export const UserAdd = (props: UserProps) => {
           // eslint-disable-next-line no-case-declarations
           let is_valid = false;
           if (phoneNumber) {
-            is_valid = isValidPhoneNumber(phoneNumber);
+            is_valid = PhoneNumberValidator()(phoneNumber) === undefined;
           }
           if (!state.form[field] || !is_valid) {
             errors[field] = "Please enter valid phone number";
@@ -493,7 +493,8 @@ export const UserAdd = (props: UserProps) => {
           if (state.form[field] && state.form[field] !== "+91") {
             const altPhoneNumber = parsePhoneNumber(state.form[field]);
             if (altPhoneNumber) {
-              alt_is_valid = isValidPhoneNumber(altPhoneNumber);
+              alt_is_valid =
+                PhoneNumberValidator(["mobile"])(altPhoneNumber) === undefined;
             }
           }
           if (

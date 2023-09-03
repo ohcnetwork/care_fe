@@ -5,7 +5,6 @@ import {
   classNames,
   parsePhoneNumber,
   formatPhoneNumber as formatPhoneNumberUtil,
-  isValidPhoneNumber,
   getCountryCode,
   CountryData,
 } from "../../../Utils/utils";
@@ -89,7 +88,7 @@ export default function PhoneNumberFormField(props: Props) {
           )}
           maxLength={field.value?.startsWith("1800") ? 11 : 15}
           placeholder={props.placeholder}
-          value={formatPhoneNumber(field.value)}
+          value={formatPhoneNumber(field.value, props.types)}
           onChange={(e) => setValue(e.target.value)}
           disabled={field.disabled}
           onBlur={() => setError(validate(field.value, "blur"))}
@@ -159,12 +158,12 @@ const conditionPhoneCode = (code: string) => {
   return code.startsWith("+") ? code : "+" + code;
 };
 
-const formatPhoneNumber = (value: string) => {
+const formatPhoneNumber = (value: string, types: PhoneNumberType[]) => {
   if (value === undefined || value === null) {
     return "+91 ";
   }
 
-  if (!isValidPhoneNumber(value)) {
+  if (PhoneNumberValidator(types)(value) !== undefined || value.length < 13) {
     return value;
   }
 

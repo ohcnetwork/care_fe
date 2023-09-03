@@ -18,7 +18,7 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { navigate } from "raviger";
-import { parsePhoneNumber, isValidPhoneNumber } from "../../Utils/utils.js";
+import { parsePhoneNumber } from "../../Utils/utils.js";
 import { phonePreg } from "../../Common/validation";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
@@ -28,6 +28,7 @@ import Page from "../Common/components/Page.js";
 import Card from "../../CAREUI/display/Card.js";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField.js";
 import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
+import { PhoneNumberValidator } from "../Form/FieldValidators.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -162,7 +163,9 @@ export const ShiftCreate = (props: patientShiftProps) => {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
           } else if (
-            !isValidPhoneNumber(parsePhoneNumber(state.form[field]) ?? "") ||
+            !PhoneNumberValidator()(
+              parsePhoneNumber(state.form[field]) ?? ""
+            ) === undefined ||
             !phonePreg(String(parsePhoneNumber(state.form[field])))
           ) {
             errors[field] = requiredFields[field].invalidText;

@@ -9,7 +9,7 @@ import {
   RESOURCE_CATEGORY_CHOICES,
   RESOURCE_SUBCATEGORIES,
 } from "../../Common/constants";
-import { parsePhoneNumber, isValidPhoneNumber } from "../../Utils/utils";
+import { parsePhoneNumber } from "../../Utils/utils";
 import { phonePreg } from "../../Common/validation";
 
 import { createResource, getAnyFacility } from "../../Redux/actions";
@@ -25,6 +25,7 @@ import RadioFormField from "../Form/FormFields/RadioFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import Card from "../../CAREUI/display/Card";
 import Page from "../Common/components/Page";
+import { PhoneNumberValidator } from "../Form/FieldValidators";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -137,7 +138,7 @@ export default function ResourceCreate(props: resourceProps) {
             isInvalidForm = true;
           } else if (
             !phoneNumber ||
-            !isValidPhoneNumber(phoneNumber) ||
+            !PhoneNumberValidator()(phoneNumber) === undefined ||
             !phonePreg(String(phoneNumber))
           ) {
             errors[field] = requiredFields[field].invalidText;

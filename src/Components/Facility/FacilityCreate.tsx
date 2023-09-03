@@ -29,7 +29,6 @@ import {
 import {
   getPincodeDetails,
   includesIgnoreCase,
-  isValidPhoneNumber,
   parsePhoneNumber,
 } from "../../Utils/utils";
 import {
@@ -60,6 +59,7 @@ import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { PhoneNumberValidator } from "../Form/FieldValidators.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -441,7 +441,7 @@ export const FacilityCreate = (props: FacilityProps) => {
           const phoneNumber = state.form[field];
           if (
             !phoneNumber ||
-            !isValidPhoneNumber(phoneNumber) ||
+            !PhoneNumberValidator()(phoneNumber) === undefined ||
             !phonePreg(phoneNumber)
           ) {
             errors[field] = t("invalid_phone_number");
