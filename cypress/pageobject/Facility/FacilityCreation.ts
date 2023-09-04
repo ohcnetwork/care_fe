@@ -134,7 +134,7 @@ class FacilityPage {
   }
 
   clickupdateMiddleWare() {
-    cy.get("button#submit").click();
+    cy.get("button#submit").first().click();
   }
 
   verifySuccessNotification(message: string) {
