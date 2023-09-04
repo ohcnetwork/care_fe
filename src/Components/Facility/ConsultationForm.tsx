@@ -57,6 +57,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import dayjs from "../../Utils/dayjs";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -80,6 +81,7 @@ type FormDetails = {
   referred_to_external?: string;
   icd11_diagnoses_object: ICD11DiagnosisModel[];
   icd11_provisional_diagnoses_object: ICD11DiagnosisModel[];
+  icd11_principal_diagnosis?: ICD11DiagnosisModel["id"];
   verified_by: string;
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
@@ -124,6 +126,7 @@ const initForm: FormDetails = {
   referred_to_external: "",
   icd11_diagnoses_object: [],
   icd11_provisional_diagnoses_object: [],
+  icd11_principal_diagnosis: undefined,
   verified_by: "",
   is_kasp: "false",
   kasp_enabled_date: null,
@@ -538,6 +541,42 @@ export const ConsultationForm = (props: any) => {
           return;
         }
 
+        case "icd11_principal_diagnosis": {
+          if (!state.form[field]) {
+            errors[field] = "Please select Principal Diagnosis";
+            invalidForm = true;
+            break;
+          }
+
+          if (
+            state.form[field] &&
+            state.form["icd11_diagnoses_object"].length &&
+            !state.form["icd11_diagnoses_object"]
+              .map((d) => d.id)
+              .includes(state.form[field]!)
+          ) {
+            errors[field] =
+              "Please select Principal Diagnosis from Final Diagnosis";
+            invalidForm = true;
+            break;
+          }
+
+          if (
+            state.form[field] &&
+            state.form["icd11_provisional_diagnoses_object"].length &&
+            !state.form["icd11_provisional_diagnoses_object"]
+              .map((d) => d.id)
+              .includes(state.form[field]!)
+          ) {
+            errors[field] =
+              "Please select Principal Diagnosis from Provisional Diagnosis";
+            invalidForm = true;
+            break;
+          }
+
+          return;
+        }
+
         default:
           return;
       }
@@ -617,6 +656,7 @@ export const ConsultationForm = (props: any) => {
           state.form.icd11_provisional_diagnoses_object.map(
             (o: ICD11DiagnosisModel) => o.id
           ),
+        icd11_principal_diagnosis: state.form.icd11_principal_diagnosis,
         verified_by: state.form.verified_by,
         investigation: state.form.InvestigationAdvice,
         procedure: state.form.procedures,
@@ -703,6 +743,18 @@ export const ConsultationForm = (props: any) => {
           suggestion: "DD",
           consultation_notes: "Patient declared dead",
           verified_by: "Declared Dead",
+        },
+      });
+    } else if (
+      event.name === "icd11_diagnoses_object" ||
+      event.name === "icd11_provisional_diagnoses_object"
+    ) {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          [event.name]: event.value,
+          icd11_principal_diagnosis: undefined,
         },
       });
     } else {
@@ -1134,6 +1186,22 @@ export const ConsultationForm = (props: any) => {
                       {...field("icd11_diagnoses_object")}
                       multiple
                       label="Final Diagnosis"
+                    />
+                  </div>
+
+                  <div ref={fieldRef["icd11_principal_diagnosis"]}>
+                    <AutocompleteFormField
+                      {...field("icd11_principal_diagnosis")}
+                      label="Principal Diagnosis"
+                      placeholder="Search for diagnosis"
+                      options={
+                        state.form.icd11_diagnoses_object.length
+                          ? state.form.icd11_diagnoses_object
+                          : state.form.icd11_provisional_diagnoses_object
+                      }
+                      optionLabel={(option) => option.label}
+                      optionValue={(option) => option.id}
+                      required
                     />
                   </div>
                 </div>
