@@ -134,12 +134,14 @@ describe("Asset", () => {
   });
 
   it("Import new asset", () => {
+    assetPage.spyAssetConfigureApi();
     assetPage.selectImportOption();
     assetPage.selectImportFacility("Dummy Facility 1");
     assetPage.importAssetFile();
     assetPage.selectImportLocation("Camera Locations");
     assetPage.clickImportAsset();
 
+    assetPage.verifyAssetConfiguration();
     assetPage.verifySuccessNotification("Assets imported successfully");
   });
 

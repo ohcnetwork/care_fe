@@ -18,6 +18,14 @@ export class PatientPage {
     cy.get("button").get("#submit").click();
   }
 
+  interceptCreatePatientAPI() {
+    cy.intercept("GET", "**/facility/*/patient/**").as("createPatient");
+  }
+
+  verifyCreatedPatientResponse() {
+    cy.wait("@createPatient").its("response.statusCode").should("eq", 200);
+  }
+
   enterPatientDetails(
     phoneNumber: string,
     emergencyPhoneNumber: string,

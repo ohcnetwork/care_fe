@@ -3,6 +3,10 @@ import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 import { UpdatePatientPage } from "../../pageobject/Patient/PatientUpdate";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
+import {
+  emergency_phone_number,
+  phone_number,
+} from "../../pageobject/constants";
 const yearOfBirth = "2023";
 
 const calculateAge = () => {
@@ -15,9 +19,6 @@ describe("Patient Creation with consultation", () => {
   const patientPage = new PatientPage();
   const updatePatientPage = new UpdatePatientPage();
   const patientConsultationPage = new PatientConsultationPage();
-  const phone_number = "9" + Math.floor(100000000 + Math.random() * 900000000);
-  const emergency_phone_number =
-    "9" + Math.floor(100000000 + Math.random() * 900000000);
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -43,14 +44,18 @@ describe("Patient Creation with consultation", () => {
       "O+",
       "01012001"
     );
+    patientPage.interceptCreatePatientAPI();
     patientPage.clickCreatePatient();
+    patientPage.verifyCreatedPatientResponse();
 
     patientPage.verifyPatientIsCreated();
     patientPage.saveCreatedPatientUrl();
   });
 
   it("Patient Detail verification post registration", () => {
+    patientPage.interceptFacilities();
     patientPage.visitCreatedPatient();
+    patientPage.verifyStatusCode();
     const age = calculateAge();
     patientPage.verifyPatientDetails(
       age,
