@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { PrescriptionActions } from "../../Redux/actions";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import ConfirmDialog from "../Common/ConfirmDialog";
 import { Prescription } from "./models";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Success } from "../../Utils/Notifications";
@@ -21,7 +21,7 @@ export default function DiscontinuePrescription(props: Props) {
   const [discontinuedReason, setDiscontinuedReason] = useState<string>("");
 
   return (
-    <ConfirmDialogV2
+    <ConfirmDialog
       action={t("discontinue")}
       title={t("discontinue_caution_note")}
       show
@@ -38,9 +38,9 @@ export default function DiscontinuePrescription(props: Props) {
         setIsDiscontinuing(false);
         props.onClose(true);
       }}
-      className="max-w-4xl w-full"
+      className="w-full md:max-w-4xl"
     >
-      <div className="flex flex-col gap-8 mt-4">
+      <div className="mt-4 flex flex-col gap-8">
         <PrescriptionDetailCard
           prescription={props.prescription}
           readonly
@@ -55,6 +55,6 @@ export default function DiscontinuePrescription(props: Props) {
           disabled={isDiscontinuing}
         />
       </div>
-    </ConfirmDialogV2>
+    </ConfirmDialog>
   );
 }

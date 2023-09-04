@@ -1,6 +1,7 @@
 import { AssignedToObjectModel } from "../Patient/models";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
+import { AssetData } from "../Assets/AssetTypes";
 
 export interface LocalBodyModel {
   name: string;
@@ -88,22 +89,23 @@ export interface ConsultationModel {
   created_date?: string;
   discharge_date?: string;
   discharge_reason?: string;
-  discharge_prescription: NormalPrescription;
-  discharge_prn_prescription: PRNPrescription;
+  discharge_prescription?: NormalPrescription;
+  discharge_prn_prescription?: PRNPrescription;
   discharge_notes?: string;
   examination_details?: string;
   history_of_present_illness?: string;
   facility?: number;
   facility_name?: string;
-  id: string;
+  id?: string;
   modified_date?: string;
   other_symptoms?: string;
-  patient: string;
-  prescribed_medication?: string;
+  patient?: string;
+  treatment_plan?: string;
   referred_to?: number | null;
+  referred_to_object?: FacilityModel;
+  referred_to_external?: string;
   suggestion?: string;
-  ip_no?: string;
-  op_no?: string;
+  patient_no?: string;
   consultation_status?: number;
   is_kasp?: boolean;
   kasp_enabled_date?: string;
@@ -152,7 +154,7 @@ export interface DupPatientModel {
   id: number;
   gender: string;
   phone_number: string;
-  patient_id: number;
+  patient_id: string;
   name: string;
   date_of_birth: string;
   year_of_birth: number;
@@ -192,6 +194,7 @@ export interface BedModel {
   facility?: string;
   location_object?: {
     name: string;
+    id?: string;
   };
   location?: string;
   is_occupied?: boolean;
@@ -202,6 +205,7 @@ export interface CurrentBed {
   consultation: string;
   bed?: string;
   bed_object: BedModel;
+  assets_objects?: AssetData[];
   created_date: string;
   modified_date: string;
   start_date: string;

@@ -1,7 +1,6 @@
-import loadable from "@loadable/component";
-import { Button } from "@material-ui/core";
+import ButtonV2 from "../Common/components/ButtonV2";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
 import ListFilter from "./ListFilter";
@@ -14,9 +13,10 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import ExportMenu from "../Common/Export";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import CountBlock from "../../CAREUI/display/Count";
+import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
+import Page from "../Common/components/Page";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultList() {
   const dispatch: any = useDispatch();
@@ -37,6 +37,26 @@ export default function ResultList() {
   });
   const [resultId, setResultId] = useState(-1);
   const [dataList, setDataList] = useState({ lsgList: [], wardList: [] });
+
+  const [phone_number, setPhoneNumber] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+
+  const setPhoneNum = (mobile_number: string) => {
+    setPhoneNumber(mobile_number);
+    if (mobile_number.length >= 13) {
+      setPhoneNumberError("");
+      updateQuery({ mobile_number });
+      return;
+    }
+
+    if (mobile_number === "+91" || mobile_number === "") {
+      setPhoneNumberError("");
+      updateQuery({ mobile_number: "" });
+      return;
+    }
+
+    setPhoneNumberError("Enter a valid number");
+  };
 
   let manageResults: any = null;
   useEffect(() => {
@@ -72,6 +92,10 @@ export default function ResultList() {
       .catch(() => {
         setIsLoading(false);
       });
+
+    if (!params.mobile_number) {
+      setPhoneNum("+91");
+    }
   }, [
     dispatch,
     qParams.name,
@@ -115,11 +139,11 @@ export default function ResultList() {
       value && (
         <span
           key={`${key}-${value.id}`}
-          className="inline-flex h-full items-center px-3 py-1 rounded-full text-xs font-medium leading-4 bg-white text-gray-600 border"
+          className="inline-flex h-full items-center rounded-full border bg-white px-3 py-1 text-xs font-medium leading-4 text-gray-600"
         >
           {`${key}: ${value.name}`}
           <i
-            className="fas fa-times ml-2 rounded-full cursor-pointer hover:bg-gray-500 px-1 py-0.5"
+            className="fas fa-times ml-2 cursor-pointer rounded-full px-1 py-0.5 hover:bg-gray-500"
             onClick={() =>
               paramKey === "local_bodies"
                 ? removeLSGFilter(paramKey, value.id)
@@ -141,48 +165,49 @@ export default function ResultList() {
         <tr key={`usr_${result.id}`} className="bg-white">
           <td
             onClick={() => navigate(resultUrl)}
-            className="px-6 py-4 whitespace-nowrap text-md leading-5 text-gray-900"
+            className="text-md whitespace-nowrap px-6 py-4 leading-5 text-gray-900"
           >
             <div className="flex">
               <a
                 href="#"
                 className="group inline-flex space-x-2 text-sm leading-5"
               >
-                <p className="text-gray-800 group-hover:text-gray-900 transition ease-in-out duration-150">
+                <p className="text-gray-800 transition duration-150 ease-in-out group-hover:text-gray-900">
                   {result.name} - {result.age} {result.age_in}
                 </p>
               </a>
             </div>
           </td>
-          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
-            <span className="text-gray-900 font-medium">
+          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+            <span className="font-medium text-gray-900">
               {result.test_type}
             </span>
           </td>
-          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-blue-100 text-blue-800 capitalize">
+          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+            <span className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium capitalize leading-4 text-blue-800">
               {result.result}
             </span>
             {result.patient_created ? (
-              <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium leading-4 bg-green-100 text-green-800 capitalize">
+              <span className="ml-2 inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium capitalize leading-4 text-green-800">
                 Patient Created
               </span>
             ) : null}
           </td>
-          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-800">
+          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-800">
             {result.result_date || "-"}
           </td>
-          <td className="px-6 py-4 text-left whitespace-nowrap text-sm leading-5 text-gray-500">
-            <Button
-              variant="outlined"
-              color="primary"
+          <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+            <ButtonV2
+              variant="primary"
+              border
+              ghost
               onClick={() => {
                 setShowDialog(true);
                 setResultId(result.id);
               }}
             >
-              Create
-            </Button>
+              CREATE
+            </ButtonV2>
           </td>
         </tr>
       );
@@ -203,8 +228,8 @@ export default function ResultList() {
     manageResults = (
       <tr className="bg-white">
         <td colSpan={5}>
-          <div className="w-full bg-white rounded-lg p-3">
-            <div className="text-2xl mt-4 text-gray-600  font-bold flex justify-center w-full">
+          <div className="w-full rounded-lg bg-white p-3">
+            <div className="mt-4 flex w-full  justify-center text-2xl font-bold text-gray-600">
               No Results Found
             </div>
           </div>
@@ -214,7 +239,7 @@ export default function ResultList() {
   }
 
   return (
-    <div className="px-6">
+    <div>
       <FacilitiesSelectDialogue
         show={showDialog}
         setSelected={(e) => setSelectedFacility(e)}
@@ -226,9 +251,12 @@ export default function ResultList() {
         }
         handleCancel={() => setShowDialog(false)}
       />
-      <div className="flex flex-wrap items-center justify-between">
-        <PageTitle title="External Results" hideBack breadcrumbs={false} />
-        <div className="w-full sm:w-auto">
+
+      <Page
+        title="External Results"
+        hideBack
+        breadcrumbs={false}
+        options={
           <ExportMenu
             label="Import/Export"
             exportItems={[
@@ -253,92 +281,90 @@ export default function ResultList() {
               },
             ]}
           />
-        </div>
-      </div>
-      <div className="lg:grid grid-cols-1 gap-5 sm:grid-cols-3 my-4 px-2 md:px-0 relative">
-        <CountBlock
-          text="Total Results"
-          count={totalCount}
-          loading={isLoading}
-          icon={"clipboard-notes"}
-        />
-        <div className="mt-2">
-          <SearchInput
-            name="name"
-            onChange={(e) => updateQuery({ [e.name]: e.value })}
-            value={qParams.name}
-            placeholder="Search by name"
+        }
+      >
+        <div className="relative my-4 grid-cols-1 gap-5 px-2 sm:grid-cols-3 md:px-0 lg:grid">
+          <CountBlock
+            text="Total Results"
+            count={totalCount}
+            loading={isLoading}
+            icon="l-clipboard-notes"
+            className="flex-1"
           />
-          <div className="text-sm font-medium my-2">Search by number</div>
-          <div className="w-full max-w-sm">
-            <PhoneNumberFormField
-              name="mobile_number"
-              labelClassName="hidden"
-              value={qParams.mobile_number || "+91"}
-              onChange={(event) => updateQuery({ [event.name]: event.value })}
-              placeholder="Search by Phone Number"
-              noAutoFormat
+          <div className="mt-2">
+            <SearchInput
+              name="name"
+              onChange={(e) => updateQuery({ [e.name]: e.value })}
+              value={qParams.name}
+              placeholder="Search by name"
+            />
+            <div className="my-2 text-sm font-medium">Search by number</div>
+            <div className="w-full max-w-sm">
+              <PhoneNumberFormField
+                name="mobile_number"
+                labelClassName="hidden"
+                value={phone_number}
+                onChange={(e) => setPhoneNum(e.value)}
+                error={phoneNumberError}
+                placeholder="Search by Phone Number"
+                types={["mobile", "landline"]}
+              />
+            </div>
+          </div>
+          <div className="ml-auto mt-4 flex flex-col justify-evenly gap-4 lg:mt-0">
+            <AdvancedFilterButton
+              onClick={() => advancedFilter.setShow(true)}
             />
           </div>
         </div>
-        <div className="mt-4 lg:mt-0 ml-auto flex flex-col justify-evenly gap-4">
-          <div className="flex ml-auto gap-2 md:pt-0 pt-2">
-            <button
-              className="flex leading-none border-2 border-gray-200 bg-white rounded-full items-center transition-colors duration-300 ease-in focus:outline-none hover:text-primary-600 focus:text-primary-600 focus:border-gray-400 hover:border-gray-400 rounded-r-full px-4 py-2 text-sm"
-              onClick={() => advancedFilter.setShow(true)}
-            >
-              <i className="fa fa-filter mr-1" aria-hidden="true"></i>
-              <span>Filters</span>
-            </button>
-          </div>
+
+        <FilterBadges
+          badges={({ badge, phoneNumber, dateRange }) => [
+            badge("Name", "name"),
+            phoneNumber("Phone no.", "mobile_number"),
+            ...dateRange("Created", "created_date"),
+            ...dateRange("Result", "result_date"),
+            ...dateRange("Sample created", "sample_collection_date"),
+            badge("SRF ID", "srf_id"),
+          ]}
+        />
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
+          {dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
         </div>
-      </div>
-      <FilterBadges
-        badges={({ badge, phoneNumber, dateRange }) => [
-          badge("Name", "name"),
-          phoneNumber("Phone no.", "mobile_number"),
-          ...dateRange("Created", "created_date"),
-          ...dateRange("Result", "result_date"),
-          ...dateRange("Sample created", "sample_collection_date"),
-          badge("SRF ID", "srf_id"),
-        ]}
-      />
-      <div className="flex items-center flex-wrap gap-2 mb-4">
-        {dataList.lsgList.map((x) => lsgWardBadge("LSG", x, "local_bodies"))}
-        {dataList.wardList.map((x) => lsgWardBadge("Ward", x, "wards"))}
-      </div>
-      <div className="align-middle min-w-full overflow-x-auto shadow overflow-hidden sm:rounded-t-lg">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead>
-            <tr>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                Test Type
-              </th>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wide">
-                Status
-              </th>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                Result Date
-              </th>
-              <th className="px-6 py-3 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-500 uppercase tracking-wider">
-                Create Patient
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {manageResults}
-          </tbody>
-        </table>
-      </div>
-      <Pagination totalCount={totalCount} />
-      <ListFilter
-        {...advancedFilter}
-        dataList={lsgWardData}
-        key={window.location.search}
-      />
+        <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-t-lg">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                  Name
+                </th>
+                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                  Test Type
+                </th>
+                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wide text-gray-500">
+                  Status
+                </th>
+                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                  Result Date
+                </th>
+                <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                  Create Patient
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {manageResults}
+            </tbody>
+          </table>
+        </div>
+        <Pagination totalCount={totalCount} />
+        <ListFilter
+          {...advancedFilter}
+          dataList={lsgWardData}
+          key={window.location.search}
+        />
+      </Page>
     </div>
   );
 }

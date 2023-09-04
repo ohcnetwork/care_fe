@@ -16,9 +16,9 @@ const RadioFormField = <T,>(props: Props<T>) => {
           const value = props.optionValue(option);
           const optionId = `${props.name}-${idx}`;
           return (
-            <div className="flex gap-2 items-center">
+            <div className="flex items-center gap-2">
               <input
-                className="w-4 h-4 text-primary-600 border-gray-300 focus:ring-primary-500 rounded-full focus:ring-2"
+                className="h-4 w-4 rounded-full border-gray-600 text-primary-600 focus:ring-2 focus:ring-primary-500"
                 type="radio"
                 id={optionId}
                 name={props.name}

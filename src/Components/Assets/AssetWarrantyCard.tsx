@@ -1,6 +1,6 @@
-import moment from "moment";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AssetData } from "./AssetTypes";
+import { classNames, formatDate } from "../../Utils/utils";
 
 export default function AssetWarrantyCard(props: { asset: AssetData }) {
   const { asset } = props;
@@ -9,20 +9,20 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
     "Serial Number": asset.serial_number,
     Expiry:
       asset.warranty_amc_end_of_validity &&
-      moment(asset.warranty_amc_end_of_validity).format("DD/MM/YYYY"),
+      formatDate(asset.warranty_amc_end_of_validity),
     Vendor: asset.vendor_name,
   };
 
   return (
-    <div className="warranty-card md:rounded-xl relative overflow-hidden z-10 hover:scale-[1.01] hover:from-primary-600 hover:to-primary-700 text-white p-6 md:w-full xl:w-96 h-full w-screen transition-all flex flex-col">
-      <div className="text-right font-bold text-lg italic mb-3">
+    <div className="warranty-card relative z-10 flex h-full w-screen flex-col overflow-hidden p-6 text-white transition-all hover:scale-[1.01] hover:from-primary-600 hover:to-primary-700 md:w-full md:rounded-xl xl:w-96">
+      <div className="mb-3 text-right text-lg font-bold italic">
         {asset.manufacturer}
       </div>
-      <div className="flex flex-col md:flex-row xl:flex-col justify-between gap-6 h-full">
-        <div className="flex flex-col gap-4 border-b md:border-r md:border-b-0 xl:border-r-0 xl:border-b border-white/40 h-full w-full xl:w-auto">
+      <div className="flex h-full flex-col justify-between gap-6 md:flex-row xl:flex-col">
+        <div className="flex h-full w-full flex-col gap-4 border-b border-white/40 md:border-b-0 md:border-r xl:w-auto xl:border-b xl:border-r-0">
           {Object.keys(details).map((key) => (
             <div className="">
-              <div className="italic text-gray-200 uppercase text-xs tracking-widest mb-1">
+              <div className="mb-1 text-xs uppercase italic tracking-widest text-gray-200">
                 {key}
               </div>
               <div className="font-semibold">
@@ -33,7 +33,7 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
         </div>
         <div className="shrink-0">
           <div>
-            <div className="italic text-gray-200 uppercase text-xs tracking-widest mb-1">
+            <div className="mb-1 text-xs uppercase italic tracking-widest text-gray-200">
               Customer Support Details
             </div>
             <div className="font-semibold">{asset.support_name || "--"}</div>
@@ -46,14 +46,16 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
               <div className="flex items-center">
                 {item[1] && (
                   <>
-                    <div className="w-16 text-gray-200 italic">{item[0]} :</div>
+                    <div className="w-16 italic text-gray-200">{item[0]} :</div>
                     <a
                       href={
                         (item[0] === "Email" ? "mailto:" : "tel:") + item[1]
                       }
-                      className="text-primary-300 hover:text-primary-400 border-b border-primary-300"
+                      className="border-b border-primary-300 text-primary-300 hover:text-primary-400"
                     >
-                      <CareIcon className={"h-5 mr-1 care-l-" + item[2]} />
+                      <CareIcon
+                        className={classNames(`care-l-${item[2]}`, "mr-1")}
+                      />
                       {item[1]}
                     </a>
                   </>

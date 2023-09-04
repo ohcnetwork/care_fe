@@ -55,10 +55,6 @@ export default ({ show, setShow, username }: IProps) => {
         Notification.Error({
           msg: "Error while adding skill",
         });
-      } else {
-        Notification.Success({
-          msg: "Skill added successfully",
-        });
       }
       setSelectedSkill(null);
       setIsLoading(false);
@@ -69,7 +65,12 @@ export default ({ show, setShow, username }: IProps) => {
 
   const removeSkill = useCallback(
     async (username: string, skillId: string) => {
-      await dispatch(deleteUserSkill(username, skillId));
+      const res = await dispatch(deleteUserSkill(username, skillId));
+      if (res?.status !== 204) {
+        Notification.Error({
+          msg: "Error while unlinking skill",
+        });
+      }
       setDeleteSkill(null);
       fetchSkills(username);
     },
@@ -94,19 +95,21 @@ export default ({ show, setShow, username }: IProps) => {
         <UnlinkSkillDialog
           skillName={deleteSkill.skill_object.name || ""}
           userName={username}
-          handleCancel={() => setDeleteSkill(null)}
-          handleOk={() => removeSkill(username, deleteSkill.id)}
+          onCancel={() => setDeleteSkill(null)}
+          onSubmit={() => removeSkill(username, deleteSkill.id)}
         />
       )}
       <SlideOverCustom
         open={show}
-        setOpen={setShow}
+        setOpen={(openState) => {
+          !deleteSkill && setShow(openState);
+        }}
         slideFrom="right"
         title="Skills"
         dialogClass="md:w-[400px]"
       >
         <div>
-          <div className="sm:col-start-2 col-span-full sm:col-span-3">
+          <div className="col-span-full sm:col-span-3 sm:col-start-2">
             <div className="tooltip flex items-center gap-2">
               <SkillSelect
                 multiple={false}
@@ -117,19 +120,19 @@ export default ({ show, setShow, username }: IProps) => {
                 selected={selectedSkill}
                 setSelected={setSelectedSkill}
                 errors=""
+                username={username}
               />
-              <ButtonV2
-                disabled={!authorizeForAddSkill}
-                onClick={() => addSkill(username, selectedSkill)}
-                className="w-6rem"
-              >
-                {/* Replace "Add" in button with CircularProgress */}
-                {isLoading ? (
-                  <CircularProgress className="h-5 w-5" />
-                ) : (
-                  t("add")
-                )}
-              </ButtonV2>
+              {isLoading ? (
+                <CircularProgress className="h-5 w-5" />
+              ) : (
+                <ButtonV2
+                  disabled={!authorizeForAddSkill}
+                  onClick={() => addSkill(username, selectedSkill)}
+                  className="w-6rem"
+                >
+                  {t("add")}
+                </ButtonV2>
+              )}
               {!authorizeForAddSkill && (
                 <span className="tooltip-text tooltip-bottom -translate-x-24 translate-y-2">
                   {t("contact_your_admin_to_add_skills")}

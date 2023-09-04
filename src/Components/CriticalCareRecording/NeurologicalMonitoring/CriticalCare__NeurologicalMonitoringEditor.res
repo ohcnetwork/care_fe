@@ -153,7 +153,7 @@ let reducer = (state, action) => {
 }
 
 let handleProneSelect = (send, event) => {
-  ReactEvent.Form.target(event)["checked"] ? send(SetInPronePosition) : send(SetNotInPronePosition)
+  event ? send(SetInPronePosition) : send(SetNotInPronePosition)
 }
 
 let initialState = neurologicalMonitoring => {

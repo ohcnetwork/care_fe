@@ -4,7 +4,10 @@ import { navigate, useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { useDispatch } from "react-redux";
-import { getAnyFacility, getFacilityAssetLocation } from "../../Redux/actions";
+import {
+  getFacilityAssetLocation,
+  getPermittedFacility,
+} from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { LocationSelect } from "../Common/LocationSelect";
 import { AssetClass, AssetLocationObject } from "./AssetTypes";
@@ -41,7 +44,9 @@ function AssetFilter(props: any) {
 
   useEffect(() => {
     setFacilityId(facility?.id ? facility?.id : "");
-    setLocationId(location?.id ? location?.id : "");
+    setLocationId(
+      facility?.id === qParams.facility ? qParams.location ?? "" : ""
+    );
   }, [facility, location]);
 
   const clearFilter = useCallback(() => {
@@ -61,7 +66,9 @@ function AssetFilter(props: any) {
   const fetchFacility = useCallback(
     async (status: statusType) => {
       if (facilityId) {
-        const facilityData: any = await dispatch(getAnyFacility(facilityId));
+        const facilityData: any = await dispatch(
+          getPermittedFacility(facilityId)
+        );
         if (!status.aborted) {
           setFacility(facilityData?.data);
         }
@@ -78,7 +85,7 @@ function AssetFilter(props: any) {
             getFacilityAssetLocation(String(facilityId), String(locationId))
           ),
         ]);
-        if (!status.aborted) {
+        if (!status.aborted && locationData !== undefined) {
           if (!locationData.data)
             Notification.Error({
               msg: "Something went wrong..!",
@@ -87,6 +94,8 @@ function AssetFilter(props: any) {
             setLocation(locationData.data);
           }
         }
+      } else {
+        setLocation(initialLocation);
       }
     },
     [filter.location]
@@ -108,7 +117,8 @@ function AssetFilter(props: any) {
   };
 
   const handleFacilitySelect = (selected: FacilityModel) => {
-    setFacility(selected ? selected : { name: "" });
+    setFacility(selected ? selected : facility);
+    handleLocationSelect("");
   };
   const handleLocationSelect = (selectedId: string) => {
     setLocationId(selectedId);
@@ -186,6 +196,7 @@ function AssetFilter(props: any) {
             title: "HL7 Vitals Monitor",
             value: AssetClass.HL7MONITOR,
           },
+          { title: "Ventilator", value: AssetClass.VENTILATOR },
         ]}
         optionLabel={({ title }) => title}
         optionValue={({ value }) => value}

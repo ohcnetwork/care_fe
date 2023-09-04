@@ -1,39 +1,39 @@
-import React from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  Button,
-} from "@material-ui/core";
+import DialogModal from "./Dialog";
+import { ButtonVariant, Cancel, Submit } from "./components/ButtonV2";
 
-interface ConfirmDialogProps {
-  title: string;
-  message: string;
-  handleCancel: () => void;
-  handleOk: () => void;
-}
+type ConfirmDialogProps = {
+  className?: string;
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  disabled?: boolean;
+  show: boolean;
+  action: React.ReactNode;
+  variant?: ButtonVariant;
+  onClose: () => void;
+  onConfirm: () => void;
+  children?: React.ReactNode;
+  cancelLabel?: string;
+};
 
-const ConfirmDialog = (props: ConfirmDialogProps) => {
-  const { title, message, handleCancel, handleOk } = props;
+const ConfirmDialog = ({
+  disabled,
+  variant,
+  action,
+  onConfirm,
+  cancelLabel,
+  children,
+  ...props
+}: ConfirmDialogProps) => {
   return (
-    <Dialog open={true}>
-      <DialogTitle id="alert-dialog-title">{title || ""}</DialogTitle>
-      <DialogContent>
-        <DialogContentText id="alert-dialog-description">
-          {message}
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCancel} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={handleOk} color="primary">
-          OK
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <DialogModal {...props}>
+      {children}
+      <div className="mt-6 flex w-full flex-col justify-end gap-2 md:flex-row">
+        <Cancel onClick={props.onClose} label={cancelLabel} />
+        <Submit onClick={onConfirm} variant={variant} disabled={disabled}>
+          {action}
+        </Submit>
+      </div>
+    </DialogModal>
   );
 };
 

@@ -55,10 +55,10 @@ export default function ClaimsItemsBuilder(props: Props) {
           return (
             <div
               key={index}
-              className="border-2 border-gray-200 border-dashed p-4 rounded-lg"
+              className="rounded-lg border-2 border-dashed border-gray-200 p-4"
             >
-              <div className="flex justify-between items-center">
-                <FieldLabel className="!font-bold my-auto">
+              <div className="flex items-center justify-between">
+                <FieldLabel className="my-auto !font-bold">
                   Item {index + 1}
                 </FieldLabel>
                 {!props.disabled && (
@@ -75,7 +75,7 @@ export default function ClaimsItemsBuilder(props: Props) {
                 )}
               </div>
 
-              <div className="p-2 flex flex-row gap-2">
+              <div className="flex flex-row gap-2 p-2">
                 <AutocompleteFormField
                   className="flex-[2]"
                   required
@@ -142,7 +142,7 @@ export default function ClaimsItemsBuilder(props: Props) {
                       min={0}
                       label="Price"
                       placeholder="0.00"
-                      value={obj.price.toString()}
+                      value={obj.price?.toString()}
                       onChange={(event) =>
                         handleUpdate(index)({
                           name: event.name,

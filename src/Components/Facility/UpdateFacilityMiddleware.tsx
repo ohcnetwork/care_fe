@@ -1,6 +1,6 @@
-import { useCallback, useReducer, useState } from "react";
+import { lazy, useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import loadable from "@loadable/component";
+
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   getPermittedFacility,
@@ -11,7 +11,9 @@ import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import Page from "../Common/components/Page";
-const Loading = loadable(() => import("../Common/Loading"));
+import useConfig from "../../Common/hooks/useConfig";
+import { ConfigureHealthFacility } from "../ABDM/ConfigureHealthFacility";
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
   name: "",
@@ -23,6 +25,7 @@ const initForm = {
 };
 const initialState = {
   form: { ...initForm },
+  errors: {},
 };
 
 const FormReducer = (state = initialState, action: any) => {
@@ -49,6 +52,7 @@ export const UpdateFacilityMiddleware = (props: any) => {
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  const config = useConfig();
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -85,8 +89,9 @@ export const UpdateFacilityMiddleware = (props: any) => {
     e.preventDefault();
     setIsLoading(true);
     if (!state.form.middleware_address) {
-      Notification.Error({
-        msg: "Middleware Address is required",
+      dispatch({
+        type: "set_error",
+        errors: { middleware_address: ["Middleware Address is required"] },
       });
       setIsLoading(false);
       return;
@@ -96,8 +101,11 @@ export const UpdateFacilityMiddleware = (props: any) => {
         /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/
       ) === null
     ) {
-      Notification.Error({
-        msg: "Invalid Middleware Address",
+      dispatch({
+        type: "set_error",
+        errors: {
+          middleware_address: ["Invalid Middleware Address"],
+        },
       });
       setIsLoading(false);
       return;
@@ -136,21 +144,22 @@ export const UpdateFacilityMiddleware = (props: any) => {
 
   return (
     <Page
-      title="Update Middleware"
+      title="Configure Facility"
       crumbsReplacements={{
         [facilityId]: { name: state.form.name },
       }}
-      className="max-w-3xl mx-auto"
+      className="mx-auto max-w-3xl"
     >
       <div className="cui-card mt-4">
         <form onSubmit={(e) => handleSubmit(e)}>
-          <div className="mt-2 grid gap-4 grid-cols-1">
+          <div className="mt-2 grid grid-cols-1 gap-4">
             <div>
               <TextFormField
                 name="middleware_address"
                 label="Facility Middleware Address"
                 value={state.form.middleware_address}
                 onChange={(e) => handleChange(e)}
+                error={state.errors?.middleware_address}
               />
             </div>
           </div>
@@ -160,6 +169,11 @@ export const UpdateFacilityMiddleware = (props: any) => {
           </div>
         </form>
       </div>
+      {config.enable_abdm ? (
+        <ConfigureHealthFacility facilityId={facilityId} />
+      ) : (
+        <></>
+      )}
     </Page>
   );
 };

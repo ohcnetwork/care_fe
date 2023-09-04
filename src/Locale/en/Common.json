@@ -4,7 +4,7 @@
   "something_wrong": "Something went wrong! Try again later!",
   "try_again_later": "Try again later!",
   "contribute_github": "Contribute on Github",
-  "footer_body": "CoronaSafe Network is an open-source public utility designed by a multi-disciplinary team of innovators and volunteers. CoronaSafe CARE is a Digital Public Good recognised by the United Nations.",
+  "footer_body": "Open Healthcare Network is an open-source public utility designed by a multi-disciplinary team of innovators and volunteers. Open Healthcare Network CARE is a Digital Public Good recognised by the United Nations.",
   "reset": "Reset",
   "download": "Download",
   "downloads": "Downloads",
@@ -61,7 +61,7 @@
   "close": "Close",
   "print_referral_letter": "Print Referral Letter",
   "date_of_positive_covid_19_swab": "Date of Positive Covid 19 Swab",
-  "op_ip_no": "OP/IP No",
+  "patient_no": "OP/IP No",
   "date_of_admission": "Date of Admission",
   "india_1": "India",
   "unique_id": "Unique Id",
@@ -132,6 +132,7 @@
   "contact_your_admin_to_add_skills": "Contact your admin to add skills",
   "add": "Add",
   "sort_by": "Sort By",
+  "none": "None",
   "RESPIRATORY_SUPPORT_UNKNOWN": "None",
   "RESPIRATORY_SUPPORT_OXYGEN_SUPPORT": "O2 Support",
   "RESPIRATORY_SUPPORT_NON_INVASIVE": "NIV",
@@ -150,5 +151,7 @@
   "not_specified": "Not Specified",
   "all_changes_have_been_saved": "All changes have been saved",
   "no_data_found": "No data found",
-  "edit": "Edit"
+  "edit": "Edit",
+  "clear_selection": "Clear selection"
 }
+

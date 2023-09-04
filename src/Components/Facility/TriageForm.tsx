@@ -1,8 +1,8 @@
-import { Card, CardContent, InputLabel, Modal } from "@material-ui/core";
+import ConfirmDialog from "../Common/ConfirmDialog";
+import Card from "../../CAREUI/display/Card";
 
-import loadable from "@loadable/component";
-import moment from "moment";
-import { useCallback, useReducer, useState, useEffect } from "react";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useCallback, useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -12,15 +12,16 @@ import {
   getTriageInfo,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { LegacyTextInputField } from "../Common/HelperInputFields";
+import TextFormField from "../Form/FormFields/TextFormField";
 import { PatientStatsModel } from "./models";
-import ButtonV2 from "../Common/components/ButtonV2";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = lazy(() => import("../Common/Loading"));
+import Page from "../Common/components/Page";
+import dayjs from "dayjs";
+import { dateQueryString } from "../../Utils/utils";
 
 interface triageFormProps extends PatientStatsModel {
   facilityId: number;
@@ -89,7 +90,7 @@ export const TriageForm = (props: triageFormProps) => {
             type: "set_form",
             form: {
               entry_date: res.data.entry_date
-                ? moment(res.data.entry_date).toDate()
+                ? dayjs(res.data.entry_date).toDate()
                 : null,
               num_patients_visited: res.data.num_patients_visited,
               num_patients_home_quarantine:
@@ -187,13 +188,12 @@ export const TriageForm = (props: triageFormProps) => {
     return false;
   };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setOpenModalForExistingTriage(false);
     const validForm = validateForm();
     if (validForm) {
       const data = {
-        entry_date: `${moment(state.form.entry_date).format("YYYY-MM-DD")}`,
+        entry_date: dateQueryString(state.form.entry_date),
         num_patients_visited: Number(state.form.num_patients_visited),
         num_patients_home_quarantine: Number(
           state.form.num_patients_home_quarantine
@@ -207,7 +207,7 @@ export const TriageForm = (props: triageFormProps) => {
       //proceed if the triage does not exist or proceed has allowed to proceed after seeing the modal or it's a edit feature of the same date
       if (
         !isTriageExist(data) ||
-        e.target.id === "triageConfirm" ||
+        openModalForExistingTriage ||
         buttonText === "Update Triage"
       ) {
         setOpenModalForExistingTriage(false);
@@ -242,75 +242,47 @@ export const TriageForm = (props: triageFormProps) => {
     });
   };
 
-  const handleChange = (e: any) => {
-    const form = { ...state.form };
-    form[e.target.name] = e.target.value;
-    dispatch({ type: "set_form", form });
-  };
-
   if (isLoading) {
     return <Loading />;
   }
 
   return (
-    <div className="px-2">
-      <PageTitle
+    <div>
+      <Page
         title={headerText}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           [id || "????"]: {
-            name: moment(state.form.entry_date).format("YYYY-MM-DD"),
+            name: dateQueryString(state.form.entry_date),
           },
         }}
         backUrl={`/facility/${facilityId}`}
-      />
-
-      <Modal
-        open={openModalForExistingTriage}
-        aria-labelledby="Triage Check"
-        aria-describedby=""
-        className=""
       >
-        <div className="h-screen w-full absolute flex items-center justify-center bg-modal">
-          <div className="bg-white rounded shadow p-8 m-4 max-h-full text-center flex flex-col max-w-lg w-2/3 min-w-max-content">
-            <div className="mb-4">
-              <i className="fa-solid fa-triangle-exclamation text-red-500 fa-4x"></i>
-              <h1 className="sm:text-xl text-sm">
-                A Triage already exist on this date
-              </h1>
-              <p className="text-base">
-                If you wish to proceed then the existing triage will be over
-                written!
-              </p>
+        <ConfirmDialog
+          title={
+            <div className="flex gap-2">
+              <CareIcon className="care-l-exclamation-triangle text-xl text-red-500" />
+              <p>A Triage already exist on this date</p>
             </div>
-            <div></div>
-            <div className="flex flex-col-reverse md:flex-row gap-2 mt-4 justify-end">
-              <ButtonV2
-                variant="secondary"
-                onClick={() => {
-                  setOpenModalForExistingTriage(false);
-                }}
-              >
-                Cancel
-              </ButtonV2>
-              <ButtonV2
-                variant="danger"
-                id="triageConfirm"
-                onClick={(e) => {
-                  handleSubmit(e);
-                }}
-              >
-                Proceed
-              </ButtonV2>
-            </div>
-          </div>
-        </div>
-      </Modal>
+          }
+          description="A Triage already exist on this date,  If you wish to proceed then the existing triage will be over
+          written!"
+          variant="danger"
+          show={openModalForExistingTriage}
+          onClose={() => setOpenModalForExistingTriage(false)}
+          className="w-[48rem]"
+          action="Proceed"
+          onConfirm={handleSubmit}
+        />
 
-      <div className="mt-4">
-        <Card>
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <CardContent>
+        <div className="mt-4">
+          <Card>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
+            >
               <div className="max-w-[250px] pb-4">
                 <DateFormField
                   required
@@ -324,101 +296,66 @@ export const TriageForm = (props: triageFormProps) => {
                   error={state.errors.entry_date}
                 />
               </div>
-              <div className="mt-2 grid gap-4 grid-cols-1 md:grid-cols-2">
+              <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <InputLabel id="num-patients-visited-label">
-                    Patients Visited in Triage
-                  </InputLabel>
-                  <LegacyTextInputField
+                  <TextFormField
                     name="num_patients_visited"
-                    variant="outlined"
-                    margin="dense"
                     type="number"
-                    InputLabelProps={{
-                      shrink: !!state.form.num_patients_visited,
-                    }}
+                    label="Patients Visited in Triage"
                     value={state.form.num_patients_visited}
-                    onChange={handleChange}
-                    errors={state.errors.num_patients_visited}
+                    onChange={handleFormFieldChange}
+                    error={state.errors.num_patients_visited}
                   />
                 </div>
                 <div>
-                  <InputLabel id="num-patients-home-quarantine-label">
-                    Patients in Home Quarantine
-                  </InputLabel>
-                  <LegacyTextInputField
+                  <TextFormField
                     name="num_patients_home_quarantine"
-                    variant="outlined"
-                    margin="dense"
                     type="number"
-                    InputLabelProps={{
-                      shrink: !!state.form.num_patients_home_quarantine,
-                    }}
+                    label="Patients in Home Quarantine"
                     value={state.form.num_patients_home_quarantine}
-                    onChange={handleChange}
-                    errors={state.errors.num_patients_home_quarantine}
+                    onChange={handleFormFieldChange}
+                    error={state.errors.num_patients_home_quarantine}
                   />
                 </div>
                 <div>
-                  <InputLabel id="num-patients-isolation-label">
-                    Suspected Isolated
-                  </InputLabel>
-                  <LegacyTextInputField
+                  <TextFormField
                     name="num_patients_isolation"
-                    variant="outlined"
-                    margin="dense"
                     type="number"
-                    InputLabelProps={{
-                      shrink: !!state.form.num_patients_isolation,
-                    }}
+                    label="Suspected Isolated"
                     value={state.form.num_patients_isolation}
-                    onChange={handleChange}
-                    errors={state.errors.num_patients_isolation}
+                    onChange={handleFormFieldChange}
+                    error={state.errors.num_patients_isolation}
                   />
                 </div>
                 <div>
-                  <InputLabel id="num-patient-referred-label">
-                    Patients Referred
-                  </InputLabel>
-                  <LegacyTextInputField
+                  <TextFormField
                     name="num_patient_referred"
-                    variant="outlined"
-                    margin="dense"
                     type="number"
-                    InputLabelProps={{
-                      shrink: !!state.form.num_patient_referred,
-                    }}
+                    label="Patients Referred"
                     value={state.form.num_patient_referred}
-                    onChange={handleChange}
-                    errors={state.errors.num_patient_referred}
+                    onChange={handleFormFieldChange}
+                    error={state.errors.num_patient_referred}
                   />
                 </div>
                 <div>
-                  <InputLabel id="num-patient-referred-label">
-                    Confirmed Positive
-                  </InputLabel>
-                  <LegacyTextInputField
+                  <TextFormField
                     name="num_patient_confirmed_positive"
-                    variant="outlined"
-                    margin="dense"
                     type="number"
-                    InputLabelProps={{
-                      shrink: !!state.form.num_patient_confirmed_positive,
-                    }}
+                    label="Confirmed Positive"
                     value={state.form.num_patient_confirmed_positive}
-                    onChange={handleChange}
-                    errors={state.errors.num_patient_confirmed_positive}
+                    onChange={handleFormFieldChange}
+                    error={state.errors.num_patient_confirmed_positive}
                   />
                 </div>
               </div>
-              <div className="flex flex-col md:flex-row gap-2 justify-between mt-4">
+              <div className="mt-4 flex flex-col justify-between gap-2 md:flex-row">
                 <Cancel onClick={() => goBack()} />
-                <Submit onClick={handleSubmit} label={buttonText} />
+                <Submit label={buttonText} />
               </div>
-            </CardContent>
-          </form>
-        </Card>
-      </div>
+            </form>
+          </Card>
+        </div>
+      </Page>
     </div>
   );
 };

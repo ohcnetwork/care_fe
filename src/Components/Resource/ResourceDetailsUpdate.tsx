@@ -1,39 +1,32 @@
-import React, { useReducer, useEffect, useState, useCallback } from "react";
-import loadable from "@loadable/component";
-
-import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  LegacyTextInputField,
-  LegacyMultilineInputField,
-  LegacyErrorHelperText,
-} from "../Common/HelperInputFields";
-
 import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
-import { navigate, useQueryParams } from "raviger";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { lazy, useCallback, useEffect, useReducer, useState } from "react";
 import {
   getResourceDetails,
-  updateResource,
   getUserList,
+  updateResource,
 } from "../../Redux/actions";
-import { LegacySelectField } from "../Common/HelperInputFields";
+import { navigate, useQueryParams } from "raviger";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import Card from "../../CAREUI/display/Card";
+import CircularProgress from "../Common/components/CircularProgress";
+import { FacilitySelect } from "../Common/FacilitySelect";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import { FieldLabel } from "../Form/FormFields/FormField";
+import Page from "../Common/components/Page";
 import { RESOURCE_CHOICES } from "../../Common/constants";
-import { UserSelect } from "../Common/UserSelect";
-import { CircularProgress } from "@material-ui/core";
-import {
-  Card,
-  CardContent,
-  InputLabel,
-  Radio,
-  RadioGroup,
-  Box,
-  FormControlLabel,
-} from "@material-ui/core";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import RadioFormField from "../Form/FormFields/RadioFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
+
 import useAppHistory from "../../Common/hooks/useAppHistory";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import { useDispatch } from "react-redux";
+
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface resourceProps {
   id: string;
@@ -134,17 +127,17 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     return isInvalidForm;
   };
 
-  const handleChange = (e: any) => {
-    const form = { ...state.form };
-    const { name, value } = e.target;
-    form[name] = value;
-    dispatch({ type: "set_form", form });
+  const handleChange = (e: FieldChangeEvent<unknown>) => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [e.name]: e.value },
+    });
   };
 
   const handleOnSelect = (user: any) => {
     const form = { ...state.form };
-    form["assigned_to"] = user?.id;
-    SetAssignedUser(user);
+    form["assigned_to"] = user?.value?.id;
+    SetAssignedUser(user.value);
     dispatch({ type: "set_form", form });
   };
 
@@ -163,7 +156,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
       const data = {
         category: "OXYGEN",
         status: state.form.status,
-        orgin_facility: state.form.orgin_facility_object?.id,
+        origin_facility: state.form.origin_facility_object?.id,
         approving_facility: state.form?.approving_facility_object?.id,
         assigned_facility: state.form?.assigned_facility_object?.id,
         emergency: [true, "true"].includes(state.form.emergency),
@@ -223,164 +216,132 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title={"Update Resource Request"}
-        crumbsReplacements={{ [props.id]: { name: requestTitle } }}
-        backUrl={`/resource/${props.id}`}
-      />
+    <Page
+      title="Update Resource Request"
+      backUrl={`/resource/${props.id}`}
+      crumbsReplacements={{ [props.id]: { name: requestTitle } }}
+    >
       <div className="mt-4">
-        <Card>
-          <CardContent>
-            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-              <div className="md:col-span-1">
-                <InputLabel>Status</InputLabel>
-                <LegacySelectField
-                  name="status"
-                  variant="outlined"
-                  margin="dense"
-                  optionArray={true}
-                  value={state.form.status}
-                  options={resourceStatusOptions}
-                  fullWidth
-                  onChange={handleChange}
-                  className="bg-white h-14 w-full mt-2 shadow-sm md:text-sm md:leading-5"
-                />
-              </div>
-              <div className="md:col-span-1">
-                <InputLabel>Assigned To</InputLabel>
-                <div className="">
-                  {assignedUserLoading ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                    <UserSelect
-                      multiple={false}
-                      selected={assignedUser}
-                      setSelected={handleOnSelect}
-                      errors={""}
-                      facilityId={state.form?.approving_facility_object?.id}
-                    />
-                  )}
-                </div>
-              </div>
-              <div>
-                <InputLabel>Name of resource approving facility</InputLabel>
-                <FacilitySelect
-                  multiple={false}
-                  name="approving_facility"
-                  facilityType={1500}
-                  selected={state.form.approving_facility_object}
-                  setSelected={(obj) =>
-                    setFacility(obj, "approving_facility_object")
-                  }
-                  errors={state.errors.approving_facility}
-                />
-              </div>
-
-              <div>
-                <InputLabel>
-                  What facility would you like to assign the request to
-                </InputLabel>
-                <FacilitySelect
-                  multiple={false}
-                  name="assigned_facility"
-                  facilityType={1510}
-                  selected={state.form.assigned_facility_object}
-                  setSelected={(obj) =>
-                    setFacility(obj, "assigned_facility_object")
-                  }
-                  errors={state.errors.assigned_facility}
-                />
-              </div>
-              <div>
-                <InputLabel>Required Quantity</InputLabel>
-                <LegacyTextInputField
-                  name="requested_quantity"
-                  variant="outlined"
-                  margin="dense"
-                  type="number"
-                  value={state.form.requested_quantity}
-                  onChange={handleChange}
-                  errors=""
-                />
-              </div>
-              <div>
-                <InputLabel>Approved Quantity</InputLabel>
-                <LegacyTextInputField
-                  name="assigned_quantity"
-                  variant="outlined"
-                  margin="dense"
-                  type="number"
-                  value={state.form.assigned_quantity}
-                  onChange={handleChange}
-                  disabled={state.form.status !== "PENDING"}
-                  errors=""
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel>Request Title*</InputLabel>
-                <LegacyTextInputField
-                  rows={5}
-                  name="title"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Type your title here"
-                  value={state.form.title}
-                  onChange={handleChange}
-                  errors={state.errors.title}
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <InputLabel>Description of request*</InputLabel>
-                <LegacyMultilineInputField
-                  rows={5}
-                  name="reason"
-                  variant="outlined"
-                  margin="dense"
-                  type="text"
-                  placeholder="Type your description here"
-                  value={state.form.reason}
-                  onChange={handleChange}
-                  errors={state.errors.reason}
-                />
-              </div>
-
-              <div>
-                <InputLabel>Is this an emergency?</InputLabel>
-                <RadioGroup
-                  aria-label="emergency"
-                  name="emergency"
-                  value={[true, "true"].includes(state.form.emergency)}
-                  onChange={handleChange}
-                  style={{ padding: "0px 5px" }}
-                >
-                  <Box>
-                    <FormControlLabel
-                      value={true}
-                      control={<Radio />}
-                      label="Yes"
-                    />
-                    <FormControlLabel
-                      value={false}
-                      control={<Radio />}
-                      label="No"
-                    />
-                  </Box>
-                </RadioGroup>
-                <LegacyErrorHelperText error={state.errors.emergency} />
-              </div>
-
-              <div className="md:col-span-2 flex flex-col md:flex-row gap-2 justify-between mt-4">
-                <Cancel variant="secondary" onClick={() => goBack()} />
-                <Submit onClick={handleSubmit} />
+        <Card className="flex w-full flex-col">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="md:col-span-1">
+              <SelectFormField
+                label="Status"
+                name="status"
+                value={state.form.status}
+                options={resourceStatusOptions}
+                onChange={handleChange}
+                optionLabel={(option) => option}
+              />
+            </div>
+            <div className="md:col-span-1">
+              <div className="">
+                {assignedUserLoading ? (
+                  <CircularProgress />
+                ) : (
+                  <UserAutocompleteFormField
+                    label="Assigned To"
+                    value={assignedUser === null ? undefined : assignedUser}
+                    onChange={handleOnSelect}
+                    error=""
+                    name="assigned_to"
+                  />
+                )}
               </div>
             </div>
-          </CardContent>
+            <div>
+              <FieldLabel>Name of resource approving facility</FieldLabel>
+              <FacilitySelect
+                multiple={false}
+                name="approving_facility"
+                facilityType={1500}
+                selected={state.form.approving_facility_object}
+                setSelected={(obj) =>
+                  setFacility(obj, "approving_facility_object")
+                }
+                errors={state.errors.approving_facility}
+              />
+            </div>
+
+            <div>
+              <FieldLabel>
+                What facility would you like to assign the request to
+              </FieldLabel>
+              <FacilitySelect
+                multiple={false}
+                name="assigned_facility"
+                facilityType={1510}
+                selected={state.form.assigned_facility_object}
+                setSelected={(obj) =>
+                  setFacility(obj, "assigned_facility_object")
+                }
+                errors={state.errors.assigned_facility}
+              />
+            </div>
+            <div>
+              <TextFormField
+                label="Required Quantity"
+                name="requested_quantity"
+                type="number"
+                value={state.form.requested_quantity}
+                onChange={handleChange}
+              />
+            </div>
+            <div>
+              <TextFormField
+                name="assigned_quantity"
+                type="number"
+                label="Approved Quantity"
+                value={state.form.assigned_quantity}
+                onChange={handleChange}
+                disabled={state.form.status !== "PENDING"}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <TextFormField
+                name="title"
+                type="text"
+                label="Request Title*"
+                placeholder="Type your title here"
+                value={state.form.title}
+                onChange={handleChange}
+                error={state.errors.title}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <TextAreaFormField
+                rows={5}
+                name="reason"
+                placeholder="Type your description here"
+                value={state.form.reason}
+                onChange={handleChange}
+                label="Description of request*"
+                error={state.errors.reason}
+              />
+            </div>
+
+            <div>
+              <RadioFormField
+                name="emergency"
+                onChange={handleChange}
+                label={"Is this an emergency?"}
+                options={[true, false]}
+                optionDisplay={(o) => (o ? "Yes" : "No")}
+                optionValue={(o) => String(o)}
+                value={String(state.form.emergency)}
+                error={state.errors.emergency}
+              />
+            </div>
+
+            <div className="mt-4 flex flex-col justify-between gap-2 md:col-span-2 md:flex-row">
+              <Cancel variant="secondary" onClick={() => goBack()} />
+              <Submit onClick={handleSubmit} />
+            </div>
+          </div>
         </Card>
       </div>
-    </div>
+    </Page>
   );
 };

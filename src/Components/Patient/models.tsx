@@ -1,4 +1,5 @@
 import { ConsultationModel, PatientCategory } from "../Facility/models";
+import { PerformedByModel } from "../HCX/misc";
 
 export interface FlowModel {
   id?: number;
@@ -23,9 +24,28 @@ export interface AssignedToObjectModel {
   user_type: string;
 }
 
+export interface AbhaObject {
+  id: number;
+  created_date: string;
+  modified_date: string;
+  abha_number: string;
+  email: string | null;
+  first_name: string;
+  date_of_birth: string;
+  gender: "M" | "F" | "O";
+  address: string;
+  district: string;
+  state: string;
+  health_id: string | null;
+  name: string;
+  last_name: string;
+  middle_name: string;
+  profile_photo: string;
+}
+
 export interface PatientModel {
   test_id?: string;
-  id?: number;
+  id?: string;
   name?: string;
   age?: number;
   allow_transfer?: boolean;
@@ -56,6 +76,8 @@ export interface PatientModel {
   tele_consultation_history?: Array<any>;
   last_consultation?: ConsultationModel;
   address?: string;
+  permanent_address?: string;
+  sameAddress?: boolean;
   village?: string;
   pincode?: number;
   contact_with_confirmed_carrier?: boolean;
@@ -100,20 +122,14 @@ export interface PatientModel {
   fit_for_blood_donation?: boolean;
   date_declared_positive?: string;
   is_declared_positive?: boolean;
-  last_edited?: {
-    first_name?: string;
-    username?: string;
-    last_name?: string;
-    user_type?: string;
-  };
-  created_by?: {
-    first_name?: string;
-    username?: string;
-    last_name?: string;
-    user_type?: string;
-  };
+  last_edited?: PerformedByModel;
+  created_by?: PerformedByModel;
   assigned_to?: { first_name?: string; username?: string; last_name?: string };
   assigned_to_object?: AssignedToObjectModel;
+
+  // ABDM related
+  abha_number?: string;
+  abha_number_object?: AbhaObject;
 }
 
 export interface SampleTestModel {
@@ -142,7 +158,7 @@ export interface SampleTestModel {
   patient_has_sari?: boolean;
   patient_has_confirmed_contact?: boolean;
   patient_has_suspected_contact?: boolean;
-  patient_travel_history?: string;
+  patient_travel_history?: string[];
   facility?: number;
   facility_object?: {
     id: number;
@@ -172,7 +188,7 @@ export interface SampleReportModel {
     address?: string;
     pincode?: string;
     passport_no?: string;
-    aadhar_no?: string;
+    aadhaar_no?: string;
     local_body_name?: string;
     district_name?: string;
     state_name?: string;
@@ -247,6 +263,11 @@ export interface SampleListModel {
   fast_track?: string;
 }
 
+export interface DailyRoundsOutput {
+  name: string;
+  quantity: number;
+}
+
 export interface DailyRoundsModel {
   ventilator_spo2?: number;
   spo2?: string;
@@ -272,6 +293,7 @@ export interface DailyRoundsModel {
   other_symptoms?: string;
   admitted_to?: string;
   patient_category?: PatientCategory;
+  output?: DailyRoundsOutput;
   recommend_discharge?: boolean;
   created_date?: string;
   modified_date?: string;

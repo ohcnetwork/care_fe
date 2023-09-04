@@ -1,25 +1,26 @@
-import { Card, CardContent, Button } from "@material-ui/core";
-import loadable from "@loadable/component";
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getTestSample } from "../../Redux/actions";
 import { FlowModel, SampleTestModel } from "./models";
-import { FileUpload } from "./FileUpload";
-import { navigate } from "raviger";
 import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
-import _ from "lodash";
-import { formatDate } from "../../Utils/utils";
+import { statusType, useAbortableEffect } from "../../Common/utils";
+import { lazy, useCallback, useState } from "react";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import ButtonV2 from "../Common/components/ButtonV2";
+import Card from "../../CAREUI/display/Card";
+import { FileUpload } from "./FileUpload";
+import Page from "../Common/components/Page";
+import _ from "lodash";
+import { formatDateTime } from "../../Utils/utils";
+import { getTestSample } from "../../Redux/actions";
+
+import { navigate } from "raviger";
+import { useDispatch } from "react-redux";
+
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface SampleDetailsProps {
   id: number;
 }
 
-export const SampleDetails = (props: SampleDetailsProps) => {
-  const { id } = props;
+export const SampleDetails = ({ id }: SampleDetailsProps) => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [sampleDetails, setSampleDetails] = useState<SampleTestModel>({});
@@ -46,7 +47,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
     },
     [dispatch, fetchData, id]
   );
-  const yesornoBadge = (param: any) =>
+  const yesOrNoBadge = (param: any) =>
     param ? (
       <span className="badge badge-pill badge-warning">Yes</span>
     ) : (
@@ -62,7 +63,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
     )?.text;
 
     return (
-      <div className="border rounded-lg bg-white shadow h-full text-black mt-2 mr-3 md:mr-8 p-4">
+      <div className="mr-3 mt-2 h-full rounded-lg border bg-white p-4 text-black shadow md:mr-8">
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="mt-2 flex flex-col gap-2">
             <div>
@@ -99,7 +100,7 @@ export const SampleDetails = (props: SampleDetailsProps) => {
                 Date of Test:{" "}
               </span>
               {(patientData?.date_of_test &&
-                formatDate(patientData?.date_of_test)) ||
+                formatDateTime(patientData?.date_of_test)) ||
                 "-"}
             </div>
 
@@ -180,33 +181,33 @@ export const SampleDetails = (props: SampleDetailsProps) => {
               <span className="font-semibold leading-relaxed">
                 Contact with confirmed carrier:{" "}
               </span>
-              {yesornoBadge(patientData?.contact_with_confirmed_carrier)}
+              {yesOrNoBadge(patientData?.contact_with_confirmed_carrier)}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
                 Contact with suspected carrier:{" "}
               </span>
-              {yesornoBadge(patientData?.contact_with_suspected_carrier)}
+              {yesOrNoBadge(patientData?.contact_with_suspected_carrier)}
             </div>
             {patientData?.estimated_contact_date && (
               <div>
                 <span className="font-semibold leading-relaxed">
                   Estimated contact date:{" "}
                 </span>
-                {formatDate(patientData?.estimated_contact_date)}
+                {formatDateTime(patientData?.estimated_contact_date)}
               </div>
             )}
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
                 Has SARI (Severe Acute Respiratory illness)?:{" "}
               </span>
-              {yesornoBadge(patientData?.has_SARI)}
+              {yesOrNoBadge(patientData?.has_SARI)}
             </div>
             <div className="md:col-span-2">
               <span className="font-semibold leading-relaxed">
                 Domestic/international Travel (within last 28 days):{" "}
               </span>
-              {yesornoBadge(patientData?.past_travel)}
+              {yesOrNoBadge(patientData?.past_travel)}
             </div>
             {patientData?.countries_travelled &&
               !!patientData?.countries_travelled.length && (
@@ -257,31 +258,25 @@ export const SampleDetails = (props: SampleDetailsProps) => {
 
   const renderFlow = (flow: FlowModel) => {
     return (
-      <Card className="mt-4" key={flow.id}>
-        <CardContent>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-            <div>
-              <span className="font-semibold leading-relaxed">Status: </span>{" "}
-              {_.startCase(_.camelCase(flow.status))}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">Label:</span>{" "}
-              {_.capitalize(flow.notes)}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Created On :
-              </span>{" "}
-              {flow.created_date ? formatDate(flow.created_date) : "-"}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Modified on:
-              </span>{" "}
-              {flow.modified_date ? formatDate(flow.modified_date) : "-"}
-            </div>
+      <Card key={flow.id}>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <span className="font-semibold leading-relaxed">Status: </span>{" "}
+            {_.startCase(_.camelCase(flow.status))}
           </div>
-        </CardContent>
+          <div>
+            <span className="font-semibold leading-relaxed">Label:</span>{" "}
+            {_.capitalize(flow.notes)}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Created On :</span>{" "}
+            {flow.created_date ? formatDateTime(flow.created_date) : "-"}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Modified on:</span>{" "}
+            {flow.modified_date ? formatDateTime(flow.modified_date) : "-"}
+          </div>
+        </div>
       </Card>
     );
   };
@@ -291,162 +286,153 @@ export const SampleDetails = (props: SampleDetailsProps) => {
   }
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle title="Sample Test Details" backUrl="/sample" />
-      {sampleDetails.patient && (
-        <div className="flex justify-end">
-          <Button
-            color="primary"
-            variant="contained"
-            size="small"
-            onClick={() =>
-              navigate(
-                `/patient/${sampleDetails.patient}/test_sample/${id}/icmr_sample`
-              )
-            }
-          >
-            ICMR Specimen Referral Form
-          </Button>
-        </div>
-      )}
-      <Card className="mt-4">
-        <CardContent>
-          <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-            <div>
-              <span className="font-semibold leading-relaxed">Status: </span>
-              {_.startCase(_.camelCase(sampleDetails.status))}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">Result: </span>
-              {_.startCase(_.camelCase(sampleDetails.result))}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">Patient: </span>
-              {sampleDetails.patient_name}
-            </div>
-            {sampleDetails.facility_object && (
-              <div>
-                <span className="font-semibold leading-relaxed">
-                  Facility:{" "}
-                </span>
-                {sampleDetails.facility_object.name}
-              </div>
-            )}
-            <div>
-              <span className="font-semibold leading-relaxed">Tested on: </span>
-              {sampleDetails.date_of_result
-                ? formatDate(sampleDetails.date_of_result)
-                : "-"}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">Result on: </span>
-              {sampleDetails.date_of_result
-                ? formatDate(sampleDetails.date_of_result)
-                : "-"}
-            </div>
-            {sampleDetails.fast_track && (
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  Fast track testing reason:{" "}
-                </span>
-                {sampleDetails.fast_track}
-              </div>
-            )}
-            {sampleDetails.doctor_name && (
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  Doctor&apos;s Name:{" "}
-                </span>
-                {_.startCase(_.camelCase(sampleDetails.doctor_name))}
-              </div>
-            )}
-            {sampleDetails.diagnosis && (
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  Diagnosis:{" "}
-                </span>
-                {sampleDetails.diagnosis}
-              </div>
-            )}
-            {sampleDetails.diff_diagnosis && (
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  Differential diagnosis:{" "}
-                </span>
-                {sampleDetails.diff_diagnosis}
-              </div>
-            )}
-            {sampleDetails.etiology_identified && (
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  Etiology identified:{" "}
-                </span>
-                {sampleDetails.etiology_identified}
-              </div>
-            )}
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Is Atypical presentation{" "}
-              </span>
-              {yesornoBadge(sampleDetails.is_atypical_presentation)}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Is unusual course{" "}
-              </span>
-              {yesornoBadge(sampleDetails.is_unusual_course)}
-            </div>
-            {sampleDetails.atypical_presentation && (
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  Atypical presentation details:{" "}
-                </span>
-                {sampleDetails.atypical_presentation}
-              </div>
-            )}
-            <div>
-              <span className="font-semibold leading-relaxed">
-                SARI - Severe Acute Respiratory illness{" "}
-              </span>
-              {yesornoBadge(sampleDetails.has_sari)}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                ARI - Acute Respiratory illness{" "}
-              </span>
-              {yesornoBadge(sampleDetails.has_ari)}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Contact with confirmed carrier{" "}
-              </span>
-              {yesornoBadge(sampleDetails.patient_has_confirmed_contact)}
-            </div>
-            <div>
-              <span className="font-semibold leading-relaxed">
-                Contact with suspected carrier{" "}
-              </span>
-              {yesornoBadge(sampleDetails.patient_has_suspected_contact)}
-            </div>
-            {sampleDetails.patient_travel_history &&
-              sampleDetails.patient_travel_history.length !== 0 && (
-                <div className="md:col-span-2">
-                  <span className="font-semibold leading-relaxed">
-                    Countries travelled:{" "}
-                  </span>
-                  {JSON.parse(sampleDetails.patient_travel_history).join(", ")}
-                </div>
-              )}
-            {sampleDetails.sample_type && (
-              <div className="md:col-span-2">
-                <span className="font-semibold leading-relaxed">
-                  Sample Type:{" "}
-                </span>
-                {_.startCase(_.camelCase(sampleDetails.sample_type))}
-              </div>
-            )}
+    <Page
+      title="Sample Test Details"
+      backUrl="/sample"
+      options={
+        sampleDetails.patient && (
+          <div className="flex justify-end">
+            <ButtonV2
+              href={`/patient/${sampleDetails.patient}/test_sample/${id}/icmr_sample`}
+            >
+              ICMR Specimen Referral Form
+            </ButtonV2>
           </div>
-        </CardContent>
+        )
+      }
+    >
+      <Card>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <span className="font-semibold leading-relaxed">Status: </span>
+            {_.startCase(_.camelCase(sampleDetails.status))}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Result: </span>
+            {_.startCase(_.camelCase(sampleDetails.result))}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Patient: </span>
+            {sampleDetails.patient_name}
+          </div>
+          {sampleDetails.facility_object && (
+            <div>
+              <span className="font-semibold leading-relaxed">Facility: </span>
+              {sampleDetails.facility_object.name}
+            </div>
+          )}
+          <div>
+            <span className="font-semibold leading-relaxed">Tested on: </span>
+            {sampleDetails.date_of_result
+              ? formatDateTime(sampleDetails.date_of_result)
+              : "-"}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">Result on: </span>
+            {sampleDetails.date_of_result
+              ? formatDateTime(sampleDetails.date_of_result)
+              : "-"}
+          </div>
+          {sampleDetails.fast_track && (
+            <div className="md:col-span-2">
+              <span className="font-semibold leading-relaxed">
+                Fast track testing reason:{" "}
+              </span>
+              {sampleDetails.fast_track}
+            </div>
+          )}
+          {sampleDetails.doctor_name && (
+            <div className="md:col-span-2">
+              <span className="font-semibold leading-relaxed">
+                Doctor&apos;s Name:{" "}
+              </span>
+              {_.startCase(_.camelCase(sampleDetails.doctor_name))}
+            </div>
+          )}
+          {sampleDetails.diagnosis && (
+            <div className="md:col-span-2">
+              <span className="font-semibold leading-relaxed">Diagnosis: </span>
+              {sampleDetails.diagnosis}
+            </div>
+          )}
+          {sampleDetails.diff_diagnosis && (
+            <div className="md:col-span-2">
+              <span className="font-semibold leading-relaxed">
+                Differential diagnosis:{" "}
+              </span>
+              {sampleDetails.diff_diagnosis}
+            </div>
+          )}
+          {sampleDetails.etiology_identified && (
+            <div className="md:col-span-2">
+              <span className="font-semibold leading-relaxed">
+                Etiology identified:{" "}
+              </span>
+              {sampleDetails.etiology_identified}
+            </div>
+          )}
+          <div>
+            <span className="font-semibold leading-relaxed">
+              Is Atypical presentation{" "}
+            </span>
+            {yesOrNoBadge(sampleDetails.is_atypical_presentation)}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">
+              Is unusual course{" "}
+            </span>
+            {yesOrNoBadge(sampleDetails.is_unusual_course)}
+          </div>
+          {sampleDetails.atypical_presentation && (
+            <div className="md:col-span-2">
+              <span className="font-semibold leading-relaxed">
+                Atypical presentation details:{" "}
+              </span>
+              {sampleDetails.atypical_presentation}
+            </div>
+          )}
+          <div>
+            <span className="font-semibold leading-relaxed">
+              SARI - Severe Acute Respiratory illness{" "}
+            </span>
+            {yesOrNoBadge(sampleDetails.has_sari)}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">
+              ARI - Acute Respiratory illness{" "}
+            </span>
+            {yesOrNoBadge(sampleDetails.has_ari)}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">
+              Contact with confirmed carrier{" "}
+            </span>
+            {yesOrNoBadge(sampleDetails.patient_has_confirmed_contact)}
+          </div>
+          <div>
+            <span className="font-semibold leading-relaxed">
+              Contact with suspected carrier{" "}
+            </span>
+            {yesOrNoBadge(sampleDetails.patient_has_suspected_contact)}
+          </div>
+          {sampleDetails.patient_travel_history &&
+            sampleDetails.patient_travel_history.length !== 0 && (
+              <div className="md:col-span-2">
+                <span className="font-semibold leading-relaxed">
+                  Countries travelled:{" "}
+                </span>
+                {sampleDetails.patient_travel_history.join(", ")}
+              </div>
+            )}
+          {sampleDetails.sample_type && (
+            <div className="md:col-span-2">
+              <span className="font-semibold leading-relaxed">
+                Sample Type:{" "}
+              </span>
+              {_.startCase(_.camelCase(sampleDetails.sample_type))}
+            </div>
+          )}
+        </div>
       </Card>
 
       <div>
@@ -454,13 +440,11 @@ export const SampleDetails = (props: SampleDetailsProps) => {
         {showPatientCard(sampleDetails.patient_object)}
       </div>
 
-      <PageTitle
-        title="Sample Test History"
-        hideBack={true}
-        breadcrumbs={false}
-      />
-      {sampleDetails.flow &&
-        sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
+      <div>
+        <h4 className="mt-8">Sample Test History</h4>
+        {sampleDetails.flow &&
+          sampleDetails.flow.map((flow: FlowModel) => renderFlow(flow))}
+      </div>
 
       <FileUpload
         sampleId={id}
@@ -472,6 +456,6 @@ export const SampleDetails = (props: SampleDetailsProps) => {
         unspecified={true}
         audio={true}
       />
-    </div>
+    </Page>
   );
 };

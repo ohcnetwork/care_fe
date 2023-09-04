@@ -5,7 +5,7 @@ import {
 } from "../Components/Medicine/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
-import { LocalStorageKeys } from "../Common/constants";
+import { ICreateHealthIdRequest } from "../Components/ABDM/models";
 
 export const getConfig = () => {
   return fireRequestForFiles("config");
@@ -67,8 +67,8 @@ export const deleteFacility = (id: string) => {
 export const deleteFacilityCoverImage = (id: string) => {
   return fireRequest("deleteFacilityCoverImage", [], {}, { id });
 };
-export const getUserList = (params: object) => {
-  return fireRequest("userList", [], params);
+export const getUserList = (params: object, key?: string) => {
+  return fireRequest("userList", [], params, null, key);
 };
 
 export const getUserListSkills = (pathParam: object) => {
@@ -238,6 +238,11 @@ export const deleteAssetBed = (asset_id: string) =>
     }
   );
 
+export const listPatientAssetBeds = (
+  facility_external_id: string,
+  params: object
+) => fireRequest("listPatientAssetBeds", [], params, { facility_external_id });
+
 // Facility Beds
 export const listFacilityBeds = (params: object) =>
   fireRequest("listFacilityBeds", [], params, {});
@@ -287,7 +292,7 @@ export const listConsultationBeds = (params: object) =>
   fireRequest("listConsultationBeds", [], params, {});
 export const createConsultationBed = (
   params: object,
-  consultation_id: number,
+  consultation_id: string,
   bed_id: string
 ) =>
   fireRequest(
@@ -679,8 +684,8 @@ export const partialUpdateExternalResult = (id: number, params: object) => {
 };
 
 // Notifications
-export const getNotifications = (params: object) => {
-  return fireRequest("getNotifications", [], params);
+export const getNotifications = (params: object, altKey?: string) => {
+  return fireRequest("getNotifications", [], params, {}, altKey);
 };
 
 export const getNotificationData = (pathParam: object) => {
@@ -797,6 +802,10 @@ export const editInvestigation = (
 export const listICD11Diagnosis = (params: object, key: string) => {
   return fireRequest("listICD11Diagnosis", [], params, null, key);
 };
+// Medibase
+export const listMedibaseMedicines = (query: string) => {
+  return fireRequest("listMedibaseMedicines", [], { query });
+};
 
 // Resource
 export const createResource = (params: object) => {
@@ -848,6 +857,131 @@ export const listAssetTransaction = (params: object) =>
 export const getAssetTransaction = (id: string) =>
   fireRequest("getAssetTransaction", [], {}, { id });
 
+export const listAssetService = (params: object, asset_external_id: string) =>
+  fireRequest("listAssetService", [], params, { asset_external_id });
+export const getAssetService = (
+  params: object,
+  asset_external_id: string,
+  external_id: string
+) =>
+  fireRequest("getAssetService", [], params, {
+    asset_external_id,
+    external_id,
+  });
+export const updateAssetService = (
+  asset_external_id: string,
+  external_id: string,
+  params: object
+) =>
+  fireRequest("updateAssetService", [], params, {
+    asset_external_id,
+    external_id,
+  });
+
+// ABDM related
+export const generateAadhaarOtp = (aadhaar: string) =>
+  fireRequest("generateAadhaarOtp", [], { aadhaar });
+
+export const resentAadhaarOtp = (txnId: string) =>
+  fireRequest("resendAadhaarOtp", [], { txnId });
+
+export const verifyAadhaarOtp = (txnId: string, otp: string) =>
+  fireRequest("verifyAadhaarOtp", [], { txnId, otp });
+
+export const generateMobileOtp = (txnId: string, mobile: string) =>
+  fireRequest("generateMobileOtp", [], { txnId, mobile });
+
+export const checkAndGenerateMobileOtp = (txnId: string, mobile: string) =>
+  fireRequest("checkAndGenerateMobileOtp", [], { txnId, mobile });
+
+export const verifyMobileOtp = (txnId: string, otp: string) =>
+  fireRequest("verifyMobileOtp", [], { txnId, otp });
+
+export const createHealthId = (data: ICreateHealthIdRequest) =>
+  fireRequest("createHealthId", [], data);
+
+export const searchByHealthId = (healthId: string) =>
+  fireRequest("searchByHealthId", [], { healthId });
+
+export const initiateAbdmAuthentication = (
+  authMethod: string,
+  healthid: string
+) => fireRequest("initiateAbdmAuthentication", [], { authMethod, healthid });
+
+export const confirmWithAadhaarOtp = (
+  txnId: string,
+  otp: string,
+  patientId?: string
+) => fireRequest("confirmWithAadhaarOtp", [], { txnId, otp, patientId });
+
+export const confirmWithMobileOtp = (
+  txnId: string,
+  otp: string,
+  patientId?: string
+) => fireRequest("confirmWithMobileOtp", [], { txnId, otp, patientId });
+
+export const linkViaQR = (abha_details: any, patientId?: string) => {
+  return fireRequest("linkViaQR", [], {
+    ...abha_details,
+    patientId,
+  });
+};
+
+export const linkCareContext = (
+  consultationId: string,
+  data: { name?: string; gender?: "M" | "F" | "O"; dob?: string }
+) => {
+  return fireRequest("linkCareContext", [], {
+    consultation: consultationId,
+    ...data,
+  });
+};
+
+export const getAbhaCard = (patient: string, type: "pdf" | "png") => {
+  return fireRequest("getAbhaCard", [], {
+    patient,
+    type,
+  });
+};
+
+export const healthFacilityActions = {
+  list: (params: object) => {
+    return fireRequest("listHealthFacilities", [], params);
+  },
+
+  create: (data: object) => {
+    return fireRequest("createHealthFacility", [], data);
+  },
+
+  read: (id: string) => {
+    return fireRequest(
+      "getHealthFacility",
+      [],
+      {},
+      { facility_id: id },
+      undefined,
+      true
+    );
+  },
+
+  update: (id: string, data: object) => {
+    return fireRequest("updateHealthFacility", [], data, {
+      facility_id: id,
+    });
+  },
+
+  partialUpdate: (id: string, data: object) => {
+    return fireRequest("partialUpdateHealthFacility", [], data, {
+      facility_id: id,
+    });
+  },
+};
+
+export const listAssetAvailability = (params: object) =>
+  fireRequest("listAssetAvailability", [], params);
+export const getAssetAvailability = (id: string) =>
+  fireRequest("getAssetAvailability", [], {}, { id });
+
 export const listPMJYPackages = (query?: string) =>
   fireRequest("listPMJYPackages", [], { query });
 
@@ -893,6 +1027,18 @@ export const PrescriptionActions = (consultation_external_id: string) => {
             `administer-medicine-${external_id}`
           ),
 
+        listAdministrations: (query?: {
+          administered_date_after?: string;
+          administered_date_before?: string;
+        }) =>
+          fireRequest(
+            "listAdministrations",
+            [],
+            { prescription: external_id, ...query },
+            pathParams,
+            `list-administrations-${external_id}`
+          ),
+
         /** Discontinue a prescription */
         discontinue: (discontinued_reason: string | undefined) =>
           fireRequest(
@@ -908,7 +1054,6 @@ export const PrescriptionActions = (consultation_external_id: string) => {
 };
 
 // HCX Actions
-
 export const HCXActions = {
   checkEligibility: (policy: string) => {
     return fireRequest("hcxCheckEligibility", [], { policy });

@@ -1,32 +1,14 @@
-import {
-  CardContent,
-  RadioGroup,
-  Box,
-  FormControlLabel,
-  Radio,
-} from "@material-ui/core";
 import { navigate } from "raviger";
-import moment from "moment";
-import loadable from "@loadable/component";
-import { useCallback, useReducer, useState, useEffect } from "react";
+
+import { useCallback, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
 import {
-  SYMPTOM_CHOICES,
   TELEMEDICINE_ACTIONS,
   REVIEW_AT_CHOICES,
   RHYTHM_CHOICES,
   PATIENT_CATEGORIES,
 } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  LegacyNativeSelectField,
-  LegacyCheckboxField,
-  LegacySelectField,
-  LegacyErrorHelperText,
-  LegacyDateTimeFiled,
-  LegacyMultiSelectField,
-  LegacyAutoCompleteAsyncField,
-} from "../Common/HelperInputFields";
 import {
   createDailyReport,
   getConsultationDailyRoundsDetails,
@@ -35,16 +17,27 @@ import {
   getPatient,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
-import { formatDate } from "../../Utils/utils";
-import { FieldLabel } from "../Form/FormFields/FormField";
+import { formatDateTime } from "../../Utils/utils";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
+import Page from "../Common/components/Page";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import PatientCategorySelect from "./PatientCategorySelect";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import { SymptomsSelect } from "../Common/SymptomsSelect";
+import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
+import BloodPressureFormField, {
+  meanArterialPressure,
+} from "../Common/BloodPressureFormField";
+import TemperatureFormField from "../Common/TemperatureFormField";
+import dayjs from "dayjs";
+const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
-  otherSymptom: false,
   additional_symptoms: [],
   other_symptoms: "",
   physical_examination_info: "",
@@ -62,7 +55,6 @@ const initForm: any = {
   diastolic: null,
   pulse: null,
   resp: null,
-  tempInCelcius: false,
   temperature: null,
   rhythm: "0",
   rhythm_detail: "",
@@ -80,8 +72,6 @@ const initialState = {
   errors: { ...initError },
 };
 
-const symptomChoices = [...SYMPTOM_CHOICES];
-
 const DailyRoundsFormReducer = (state = initialState, action: any) => {
   switch (action.type) {
     case "set_form": {
@@ -90,11 +80,15 @@ const DailyRoundsFormReducer = (state = initialState, action: any) => {
         form: action.form,
       };
     }
-    case "set_error": {
+    case "set_errors": {
       return {
         ...state,
         errors: action.errors,
       };
+    }
+    case "set_state": {
+      if (action.state) return action.state;
+      return state;
     }
     default:
       return state;
@@ -105,7 +99,10 @@ export const DailyRounds = (props: any) => {
   const { goBack } = useAppHistory();
   const dispatchAction: any = useDispatch();
   const { facilityId, patientId, consultationId, id } = props;
-  const [state, dispatch] = useReducer(DailyRoundsFormReducer, initialState);
+  const [state, dispatch] = useAutoSaveReducer<any>(
+    DailyRoundsFormReducer,
+    initialState
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [facilityName, setFacilityName] = useState("");
   const [patientName, setPatientName] = useState("");
@@ -153,6 +150,10 @@ export const DailyRounds = (props: any) => {
                   (i) => i.text === res.data.patient_category
                 )?.id || "Comfort"
               : "Comfort",
+            rhythm:
+              (res.data.rhythm &&
+                RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
+              "0",
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "Select",
           };
           dispatch({ type: "set_form", form: data });
@@ -187,7 +188,12 @@ export const DailyRounds = (props: any) => {
                   (i) => i.text === res.data.patient_category
                 )?.id || "Comfort"
               : "Comfort",
-            clone_last: res.data.count > 0 ? "true" : "false",
+            rhythm:
+              (res.data.rhythm &&
+                RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
+              "0",
+            temperature: parseFloat(res.data.temperature),
+            clone_last: res.data.count > 0 ? true : false,
           },
         });
       }
@@ -200,7 +206,10 @@ export const DailyRounds = (props: any) => {
     Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "other_symptoms":
-          if (state.form.otherSymptom && !state.form[field]) {
+          if (
+            state.form.additional_symptoms?.includes(9) &&
+            !state.form[field]
+          ) {
             errors[field] = "Please enter the other symptom details";
             invalidForm = true;
           }
@@ -215,7 +224,7 @@ export const DailyRounds = (props: any) => {
           if (
             state.form.resp === null &&
             state.form.rounds_type === "NORMAL" &&
-            state.form.clone_last !== "true"
+            state.form.clone_last !== true
           ) {
             errors[field] = "Please enter a respiratory rate";
             invalidForm = true;
@@ -225,26 +234,8 @@ export const DailyRounds = (props: any) => {
           return;
       }
     });
-    dispatch({ type: "set_error", errors });
+    dispatch({ type: "set_errors", errors });
     return !invalidForm;
-  };
-
-  const fahrenheitToCelcius = (x: any) => {
-    const t = (Number(x) - 32.0) * (5.0 / 9.0);
-    return String(t.toFixed(1));
-  };
-
-  const celciusToFahrenheit = (x: any) => {
-    const t = (Number(x) * 9.0) / 5.0 + 32.0;
-    return String(t.toFixed(1));
-  };
-
-  const calculateMAP = (systolic: any, diastolic: any) => {
-    let map = 0;
-    if (systolic && diastolic) {
-      map = (Number(systolic) + 2 * Number(diastolic)) / 3.0;
-    }
-    return map.toFixed(2);
   };
 
   const handleSubmit = async (e: any) => {
@@ -253,7 +244,7 @@ export const DailyRounds = (props: any) => {
     if (validForm) {
       setIsLoading(true);
       const baseData = {
-        clone_last: state.form.clone_last === "true" ? true : false,
+        clone_last: state.form.clone_last,
         rounds_type: state.form.rounds_type,
         patient_category: state.form.patient_category,
         taken_at: state.form.taken_at
@@ -263,11 +254,11 @@ export const DailyRounds = (props: any) => {
 
       let data: any;
 
-      if (state.form.clone_last !== "true") {
+      if (state.form.clone_last !== true) {
         data = {
           ...baseData,
           additional_symptoms: state.form.additional_symptoms,
-          other_symptoms: state.form.otherSymptom
+          other_symptoms: state.form.additional_symptoms?.includes(9)
             ? state.form.other_symptoms
             : undefined,
           admitted_to:
@@ -289,19 +280,14 @@ export const DailyRounds = (props: any) => {
                 ? {
                     systolic: Number(state.form.bp.systolic),
                     diastolic: Number(state.form.bp.diastolic),
-                    mean: Number(
-                      calculateMAP(
-                        state.form.bp.systolic,
-                        state.form.bp.diastolic
-                      )
+                    mean: parseFloat(
+                      meanArterialPressure(state.form.bp).toFixed(2)
                     ),
                   }
                 : undefined,
             pulse: state.form.pulse,
             resp: Number(state.form.resp),
-            temperature: state.form.tempInCelcius
-              ? celciusToFahrenheit(state.form.temperature)
-              : state.form.temperature,
+            temperature: state.form.temperature,
             rhythm: Number(state.form.rhythm) || 0,
             rhythm_detail: state.form.rhythm_detail,
             ventilator_spo2: state.form.ventilator_spo2,
@@ -369,104 +355,21 @@ export const DailyRounds = (props: any) => {
     }
   };
 
-  const handleChange = (e: any) => {
-    const form = { ...state.form };
-    const { name, value } = e.target;
-    form[name] = value;
-    dispatch({ type: "set_form", form });
+  const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
+    dispatch({
+      type: "set_form",
+      form: { ...state.form, [event.name]: event.value },
+    });
   };
 
-  const handleTextAreaChange = (e: any) => {
-    const form = { ...state.form };
-    const { name, value } = e;
-    form[name] = value;
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleAutoComplete = (name: string, value: any) => {
-    const form = { ...state.form };
-    if (name.includes(".")) {
-      const splitName = name.split(".");
-      splitName.reduce((prev, curr, index) => {
-        if (index === splitName.length - 1) {
-          prev[curr] = value;
-        } else {
-          prev[curr] = prev[curr] || {};
-        }
-        return prev[curr];
-      }, form);
-    } else {
-      form[name] = value;
-    }
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleDateChange = (date: any, key: string) => {
-    const form = { ...state.form };
-    form[key] = date;
-    dispatch({ type: "set_form", form });
-  };
-
-  const handleCheckboxFieldChange = (e: any) => {
-    const form = { ...state.form };
-    const { checked, name } = e.target;
-    form[name] = checked;
-    dispatch({ type: "set_form", form });
-  };
-
-  const generateOptions = (start: any, end: any, step: any, decimals: any) => {
-    const len = Math.floor((end - start) / step) + 1;
-    return Array(len)
-      .fill(0)
-      .map((_, idx) => (start + idx * step).toFixed(decimals).toString());
-  };
-
-  const handleSymptomChange = (e: any, child?: any) => {
-    const form = { ...state.form };
-    const { value } = e?.target;
-    const otherSymptoms = value.filter((i: number) => i !== 1);
-    // prevent user from selecting asymptomatic along with other options
-    form.additional_symptoms =
-      child?.props?.value === 1
-        ? otherSymptoms.length
-          ? [1]
-          : value
-        : otherSymptoms;
-    form.otherSymptom = !!form.additional_symptoms.filter(
-      (i: number) => i === 9
-    ).length;
-    dispatch({ type: "set_form", form });
-  };
-
-  const getStatus = (
-    min: any,
-    minText: string,
-    max: any,
-    maxText: string,
-    name: any
-  ) => {
-    if (state.form[name]) {
-      const val = Number(state.form[name]);
-      if (val >= min && val <= max) {
-        return (
-          <p className="text-xs" style={{ color: "#059669" }}>
-            Normal
-          </p>
-        );
-      } else if (val < min) {
-        return (
-          <p className="text-xs" style={{ color: "#DC2626" }}>
-            {minText}
-          </p>
-        );
-      } else {
-        return (
-          <p className="text-xs" style={{ color: "#DC2626" }}>
-            {maxText}
-          </p>
-        );
-      }
-    }
+  const field = (name: string) => {
+    return {
+      id: name,
+      name,
+      value: state.form[name],
+      error: state.errors[name],
+      onChange: handleFormFieldChange,
+    };
   };
 
   const getExpectedReviewTime = () => {
@@ -474,22 +377,8 @@ export const DailyRounds = (props: any) => {
       state.form.review_interval || prevReviewInterval
     );
     if (nextReviewTime > 0)
-      return `Review before ${formatDate(
-        moment().add(nextReviewTime, "minutes").toDate()
-      )}`;
+      return formatDateTime(dayjs().add(nextReviewTime, "minutes").toDate());
     return "No Reviews Planned!";
-  };
-
-  const toggleTemperature = () => {
-    const isCelcius = state.form.tempInCelcius;
-    const temp = state.form.temperature;
-
-    const form = { ...state.form };
-    form.temperature = isCelcius
-      ? celciusToFahrenheit(temp)
-      : fahrenheitToCelcius(temp);
-    form.tempInCelcius = !isCelcius;
-    dispatch({ type: "set_form", form });
   };
 
   if (isLoading) {
@@ -497,465 +386,254 @@ export const DailyRounds = (props: any) => {
   }
 
   return (
-    <div className="px-2 pb-2 max-w-3xl mx-auto">
-      <PageTitle
-        title={headerText}
-        crumbsReplacements={{
-          [facilityId]: { name: facilityName },
-          [patientId]: { name: patientName },
-        }}
-        backUrl={
-          id
-            ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
-            : `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
-        }
-      />
-      <div className="mt-4">
-        <div className="bg-white rounded shadow">
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <CardContent>
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="w-full md:w-1/3">
-                  <LegacyDateTimeFiled
-                    label="Measured At"
-                    margin="dense"
-                    value={state.form.taken_at}
-                    fullWidth
-                    disableFuture={true}
-                    showTodayButton={true}
-                    onChange={(date) => handleDateChange(date, "taken_at")}
-                    errors={state.errors.taken_at}
-                  />
-                </div>
-                <div className="w-full md:w-1/3">
-                  <LegacySelectField
-                    className=""
-                    name="rounds_type"
-                    variant="standard"
-                    margin="dense"
-                    label="Round Type"
-                    options={[
-                      {
-                        id: "NORMAL",
-                        name: "Normal",
-                      },
-                      {
-                        id: "VENTILATOR",
-                        name: "Critical Care",
-                      },
-                    ]}
-                    optionValue="name"
-                    value={state.form.rounds_type}
-                    onChange={handleChange}
-                    errors={state.errors.rounds_type}
-                  />
-                </div>
-                <div className="w-full md:w-1/3">
-                  <LegacySelectField
-                    name="patient_category"
-                    variant="standard"
-                    margin="dense"
-                    label="Category"
-                    value={state.form.patient_category}
-                    options={PATIENT_CATEGORIES}
-                    onChange={handleChange}
-                    errors={state.errors.patient_category}
-                  />
-                </div>
-              </div>
-              {!id && hasPreviousLog && (
-                <div id="clone_last-div" className="mt-4">
-                  <FieldLabel id="clone_last">
-                    Do you want to copy Values from Previous Log?
-                  </FieldLabel>
-                  <RadioGroup
-                    aria-label="clone_last"
-                    name="clone_last"
-                    value={state.form.clone_last}
-                    onChange={handleChange}
-                    style={{ padding: "0px 5px" }}
-                  >
-                    <Box display="flex" flexDirection="row">
-                      <FormControlLabel
-                        value="true"
-                        control={<Radio />}
-                        label="Yes"
-                      />
-                      <FormControlLabel
-                        value="false"
-                        control={<Radio />}
-                        label="No"
-                      />
-                    </Box>
-                  </RadioGroup>
-                  <LegacyErrorHelperText error={state.errors.clone_last} />
-                </div>
+    <Page
+      title={headerText}
+      crumbsReplacements={{
+        [facilityId]: { name: facilityName },
+        [patientId]: { name: patientName },
+      }}
+      backUrl={
+        id
+          ? `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}/daily-rounds`
+          : `/facility/${facilityId}/patient/${patientId}/consultation/${consultationId}`
+      }
+      className="mx-auto max-w-4xl"
+    >
+      <form
+        onSubmit={(e) => handleSubmit(e)}
+        className="w-full max-w-4xl rounded-lg bg-white px-8 py-5 shadow md:m-4 md:px-16 md:py-11"
+      >
+        <DraftSection
+          handleDraftSelect={(newState) => {
+            dispatch({ type: "set_state", state: newState });
+          }}
+          formData={state.form}
+        />
+        <div className="flex flex-col gap-6 md:flex-row">
+          <div className="w-full md:w-1/3">
+            <TextFormField
+              {...field("taken_at")}
+              required
+              className="w-full"
+              label="Measured at"
+              type="datetime-local"
+              value={dayjs(state.form.taken_at || undefined).format(
+                "YYYY-MM-DDTHH:mm"
               )}
-              {(state.form.clone_last === "false" || id) && (
-                <div>
-                  <div className="md:grid gap-4 grid-cols-1 md:grid-cols-2 my-4">
-                    <div>
-                      <TextAreaFormField
-                        rows={5}
-                        label=" Physical Examination Info"
-                        name="physical_examination_info"
-                        value={state.form.physical_examination_info}
-                        onChange={handleTextAreaChange}
-                        error={state.errors.physical_examination_info}
-                      />
-                    </div>
-
-                    <div>
-                      <TextAreaFormField
-                        rows={5}
-                        label=" Other Details"
-                        name="other_details"
-                        value={state.form.other_details}
-                        onChange={handleTextAreaChange}
-                        error={state.errors.other_details}
-                      />
-                    </div>
-
-                    <div className="md:col-span-2">
-                      <FieldLabel id="symptoms-label">Symptoms</FieldLabel>
-                      <LegacyMultiSelectField
-                        name="additional_symptoms"
-                        variant="outlined"
-                        value={state.form.additional_symptoms}
-                        options={symptomChoices}
-                        onChange={handleSymptomChange}
-                      />
-                      <LegacyErrorHelperText
-                        error={state.errors.additional_symptoms}
-                      />
-                    </div>
-
-                    {state.form.otherSymptom && (
-                      <div className="md:col-span-2">
-                        <TextAreaFormField
-                          rows={5}
-                          label="Other Symptom Details"
-                          name="other_symptoms"
-                          placeholder="Enter the other symptoms here"
-                          value={state.form.other_symptoms}
-                          onChange={handleTextAreaChange}
-                          error={state.errors.other_symptoms}
-                        />
-                      </div>
-                    )}
-
-                    <div className="flex-1">
-                      <FieldLabel id="action-label">Action </FieldLabel>
-                      <LegacyNativeSelectField
-                        name="action"
-                        variant="outlined"
-                        value={prevAction}
-                        optionKey="text"
-                        optionValue="desc"
-                        options={TELEMEDICINE_ACTIONS}
-                        onChange={(e) => setPreviousAction(e.target.value)}
-                      />
-                      <LegacyErrorHelperText error={state.errors.action} />
-                    </div>
-
-                    <div className="flex-1">
-                      <FieldLabel id="review_interval-label">
-                        Review After{" "}
-                      </FieldLabel>
-                      <LegacySelectField
-                        name="review_interval"
-                        variant="standard"
-                        value={prevReviewInterval}
-                        options={[
-                          { id: -1, text: "select" },
-                          ...REVIEW_AT_CHOICES,
-                        ]}
-                        onChange={(e) =>
-                          setPreviousReviewInterval(Number(e.target.value))
-                        }
-                        errors={state.errors.review_interval}
-                        className="mt-1"
-                      />
-                      <div className="text-gray-500 text-sm">
-                        {getExpectedReviewTime()}
-                      </div>
-                    </div>
-                    <div>
-                      <LegacyCheckboxField
-                        checked={state.form.recommend_discharge}
-                        onChange={handleCheckboxFieldChange}
-                        name="recommend_discharge"
-                        label="Recommend Discharge"
-                      />
-                    </div>
-                  </div>
-
-                  {state.form.rounds_type === "NORMAL" && (
-                    <div className="mt-4">
-                      <h3>Vitals</h3>
-
-                      <div className="md:grid gap-x-4 grid-cols-1 md:grid-cols-2 gap-y-2 items-end">
-                        <div>
-                          <div className="flex flex-row justify-between">
-                            <h4>BP</h4>
-                            <p className="text-sm font-semibold">{`MAP: ${calculateMAP(
-                              state.form.bp?.systolic,
-                              state.form.bp?.diastolic
-                            )}`}</p>
-                          </div>
-                          <div className="md:grid gap-2 grid-cols-1 md:grid-cols-2">
-                            <div>
-                              <FieldLabel className="flex flex-row justify-between">
-                                Systolic
-                                {getStatus(100, "Low", 140, "High", "systolic")}
-                              </FieldLabel>
-                              <LegacyAutoCompleteAsyncField
-                                name="systolic"
-                                multiple={false}
-                                variant="standard"
-                                value={state.form.bp?.systolic}
-                                options={generateOptions(0, 250, 1, 0)}
-                                onChange={(e: any, value: any) =>
-                                  handleAutoComplete("bp.systolic", value)
-                                }
-                                placeholder="Enter value"
-                                noOptionsText={"Invalid value"}
-                                renderOption={(option: any) => (
-                                  <div>{option} </div>
-                                )}
-                                freeSolo={false}
-                                getOptionSelected={(option: any, value: any) =>
-                                  option == value
-                                }
-                                getOptionLabel={(option: any) =>
-                                  option.toString()
-                                }
-                                className="-mt-3"
-                              />
-                            </div>
-                            <div>
-                              <FieldLabel className="flex flex-row justify-between">
-                                Diastolic{" "}
-                                {getStatus(50, "Low", 90, "High", "diastolic")}
-                              </FieldLabel>
-                              <LegacyAutoCompleteAsyncField
-                                name="diastolic"
-                                multiple={false}
-                                variant="standard"
-                                value={state.form.bp?.diastolic}
-                                options={generateOptions(30, 180, 1, 0)}
-                                onChange={(e: any, value: any) =>
-                                  handleAutoComplete("bp.diastolic", value)
-                                }
-                                placeholder="Enter value"
-                                noOptionsText={"Invalid value"}
-                                renderOption={(option: any) => (
-                                  <div>{option}</div>
-                                )}
-                                freeSolo={false}
-                                getOptionSelected={(option: any, value: any) =>
-                                  option == value
-                                }
-                                getOptionLabel={(option: any) =>
-                                  option.toString()
-                                }
-                                className="-mt-3"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <FieldLabel className="flex flex-row justify-between">
-                            {"Pulse (bpm)"}
-                            {getStatus(
-                              40,
-                              "Bradycardia",
-                              100,
-                              "Tachycardia",
-                              "pulse"
-                            )}
-                          </FieldLabel>
-                          <LegacyAutoCompleteAsyncField
-                            name="pulse"
-                            multiple={false}
-                            variant="standard"
-                            value={state.form.pulse}
-                            options={generateOptions(0, 200, 1, 0)}
-                            onChange={(e: any, value: any) =>
-                              handleAutoComplete("pulse", value)
-                            }
-                            placeholder="Enter value"
-                            noOptionsText={"Invalid value"}
-                            renderOption={(option: any) => <div>{option}</div>}
-                            freeSolo={false}
-                            getOptionSelected={(option: any, value: any) =>
-                              option == value
-                            }
-                            getOptionLabel={(option: any) => option.toString()}
-                            className="-mt-3"
-                          />
-                        </div>
-                        <div>
-                          <FieldLabel className="flex flex-row justify-between">
-                            Temperature{" "}
-                            {state.form.tempInCelcius
-                              ? getStatus(
-                                  36.4,
-                                  "Low",
-                                  37.5,
-                                  "High",
-                                  "temperature"
-                                )
-                              : getStatus(
-                                  97.6,
-                                  "Low",
-                                  99.6,
-                                  "High",
-                                  "temperature"
-                                )}
-                          </FieldLabel>
-                          <div className="flex flex-row">
-                            <div className="grow mr-2">
-                              <LegacyAutoCompleteAsyncField
-                                name="temperature"
-                                multiple={false}
-                                variant="standard"
-                                value={state.form.temperature}
-                                options={
-                                  state.form.tempInCelcius
-                                    ? generateOptions(35, 41, 0.1, 1)
-                                    : generateOptions(95, 106, 0.1, 1)
-                                }
-                                onChange={(e: any, value: any) =>
-                                  handleAutoComplete("temperature", value)
-                                }
-                                placeholder="Enter value"
-                                noOptionsText={"Invalid value"}
-                                renderOption={(option: any) => (
-                                  <div>{option}</div>
-                                )}
-                                freeSolo={false}
-                                getOptionSelected={(option: any, value: any) =>
-                                  option == value
-                                }
-                                getOptionLabel={(option: any) =>
-                                  option.toString()
-                                }
-                                className="-mt-3"
-                              />
-                            </div>
-                            <div
-                              className="flex items-center ml-1 border border-gray-400 rounded px-4 h-10 cursor-pointer hover:bg-gray-200 max-w-min-content"
-                              onClick={toggleTemperature}
-                            >
-                              <span className="text-blue-700">
-                                {" "}
-                                {state.form.tempInCelcius ? "C" : "F"}{" "}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <FieldLabel className="flex flex-row justify-between">
-                            {"Respiratory Rate (bpm) *"}
-                            {getStatus(12, "Low", 16, "High", "resp")}
-                          </FieldLabel>
-                          <LegacyAutoCompleteAsyncField
-                            name="resp"
-                            multiple={false}
-                            variant="standard"
-                            value={state.form.resp}
-                            options={generateOptions(10, 50, 1, 0)}
-                            onChange={(e: any, value: any) =>
-                              handleAutoComplete("resp", value)
-                            }
-                            placeholder="Enter value"
-                            noOptionsText={"Invalid value"}
-                            renderOption={(option: any) => <div>{option}</div>}
-                            freeSolo={false}
-                            getOptionSelected={(option: any, value: any) =>
-                              option == value
-                            }
-                            getOptionLabel={(option: any) => option.toString()}
-                            className="-mt-3"
-                            errors={state.errors.resp}
-                          />
-                        </div>
-                        <div>
-                          <FieldLabel className="flex flex-row justify-between">
-                            {"SPO2 (%)"}
-                            {getStatus(
-                              90,
-                              "Low",
-                              100,
-                              "High",
-                              "ventilator_spo2"
-                            )}
-                          </FieldLabel>
-                          <LegacyAutoCompleteAsyncField
-                            name="ventilator_spo2"
-                            multiple={false}
-                            variant="standard"
-                            value={state.form.ventilator_spo2}
-                            options={generateOptions(0, 100, 1, 0)}
-                            onChange={(e: any, value: any) =>
-                              handleAutoComplete("ventilator_spo2", value)
-                            }
-                            placeholder="Enter value"
-                            noOptionsText={"Invalid value"}
-                            renderOption={(option: any) => <div>{option}</div>}
-                            freeSolo={false}
-                            getOptionSelected={(option: any, value: any) =>
-                              option == value
-                            }
-                            getOptionLabel={(option: any) => option.toString()}
-                            className="-mt-3"
-                          />
-                        </div>
-                        <div className="">
-                          <FieldLabel className="flex flex-row justify-between">
-                            Rhythm
-                          </FieldLabel>
-                          <LegacySelectField
-                            name="rhythm"
-                            variant="standard"
-                            value={
-                              RHYTHM_CHOICES.find(
-                                (choice) =>
-                                  choice.text.toUpperCase() ===
-                                  state.form.rhythm
-                              )?.id
-                            }
-                            options={RHYTHM_CHOICES}
-                            onChange={handleChange}
-                            errors={state.errors.rhythm}
-                            className="mb-8"
-                          />
-                        </div>
-                        <div className="md:col-span-2 mt-2">
-                          <TextAreaFormField
-                            rows={5}
-                            label="Rhythm Description"
-                            name="rhythm_detail"
-                            value={state.form.rhythm_detail}
-                            onChange={handleTextAreaChange}
-                            error={state.errors.rhythm_detail}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="mt-4 flex flex-col md:flex-row gap-2 justify-between">
-                <Cancel onClick={() => goBack()} />
-                <Submit onClick={(e) => handleSubmit(e)} label={buttonText} />
-              </div>
-            </CardContent>
-          </form>
+              max={dayjs().format("YYYY-MM-DDTHH:mm")}
+            />
+          </div>
+          <div className="w-full md:w-1/3">
+            <SelectFormField
+              {...field("rounds_type")}
+              required
+              className="w-full"
+              label="Round Type"
+              options={[
+                { id: "NORMAL", text: "Normal" },
+                { id: "VENTILATOR", text: "Critical Care" },
+              ]}
+              optionLabel={(option) => option.text}
+              optionValue={(option) => option.id}
+            />
+          </div>
+          <div className="w-full md:w-1/3">
+            <PatientCategorySelect
+              {...field("patient_category")}
+              required
+              label="Category"
+            />
+          </div>
         </div>
-      </div>
-    </div>
+
+        {!id && hasPreviousLog && (
+          <CheckBoxFormField
+            {...field("clone_last")}
+            label="Copy values from previous log?"
+          />
+        )}
+
+        {(state.form.clone_last === false || id) && (
+          <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
+            <TextAreaFormField
+              {...field("physical_examination_info")}
+              label="Physical Examination Info"
+              rows={5}
+            />
+            <TextAreaFormField
+              {...field("other_details")}
+              label="Other Details"
+              rows={5}
+            />
+            <SymptomsSelect
+              {...field("additional_symptoms")}
+              label="Symptoms"
+              className="md:col-span-2"
+            />
+
+            {state.form.additional_symptoms?.includes(9) && (
+              <div className="md:col-span-2">
+                <TextAreaFormField
+                  {...field("other_symptoms")}
+                  required
+                  label="Other Symptoms Details"
+                  placeholder="Enter the other symptoms here"
+                />
+              </div>
+            )}
+
+            <SelectFormField
+              {...field("action")}
+              label="Action"
+              options={TELEMEDICINE_ACTIONS}
+              optionLabel={(option) => option.desc}
+              optionValue={(option) => option.text}
+              value={prevAction}
+              onChange={(event) => {
+                handleFormFieldChange(event);
+                setPreviousAction(event.value);
+              }}
+            />
+
+            <SelectFormField
+              {...field("review_interval")}
+              required
+              label="Review After"
+              labelSuffix={getExpectedReviewTime()}
+              options={REVIEW_AT_CHOICES}
+              optionLabel={(option) => option.text}
+              optionValue={(option) => option.id}
+              value={prevReviewInterval}
+              onChange={(event) => {
+                handleFormFieldChange(event);
+                setPreviousReviewInterval(Number(event.value));
+              }}
+            />
+
+            <CheckBoxFormField
+              {...field("recommend_discharge")}
+              className="md:col-span-2"
+              label="Discharge Recommended"
+            />
+
+            {state.form.rounds_type === "NORMAL" && (
+              <>
+                <h3 className="mb-6 md:col-span-2">Vitals</h3>
+
+                <BloodPressureFormField
+                  {...field("bp")}
+                  label="Blood Pressure"
+                />
+
+                <RangeAutocompleteFormField
+                  {...field("pulse")}
+                  label="Pulse"
+                  unit="bpm"
+                  start={0}
+                  end={200}
+                  step={1}
+                  thresholds={[
+                    {
+                      value: 0,
+                      className: "text-danger-500",
+                      label: "Bradycardia",
+                    },
+                    {
+                      value: 40,
+                      className: "text-primary-500",
+                      label: "Normal",
+                    },
+                    {
+                      value: 100,
+                      className: "text-danger-500",
+                      label: "Tachycardia",
+                    },
+                  ]}
+                />
+
+                <TemperatureFormField
+                  {...field("temperature")}
+                  label="Temperature"
+                />
+
+                <RangeAutocompleteFormField
+                  {...field("resp")}
+                  label="Respiratory Rate"
+                  unit="bpm"
+                  required
+                  start={0}
+                  end={50}
+                  step={1}
+                  thresholds={[
+                    {
+                      value: 0,
+                      className: "text-danger-500",
+                      label: "Bradypnea",
+                    },
+                    {
+                      value: 12,
+                      className: "text-primary-500",
+                      label: "Normal",
+                    },
+                    {
+                      value: 16,
+                      className: "text-danger-500",
+                      label: "Tachypnea",
+                    },
+                  ]}
+                />
+
+                <RangeAutocompleteFormField
+                  {...field("ventilator_spo2")}
+                  label="SPO2"
+                  unit="%"
+                  start={0}
+                  end={100}
+                  step={1}
+                  thresholds={[
+                    {
+                      value: 0,
+                      className: "text-danger-500",
+                      label: "Low",
+                    },
+                    {
+                      value: 90,
+                      className: "text-primary-500",
+                      label: "Normal",
+                    },
+                    {
+                      value: 100,
+                      className: "text-danger-500",
+                      label: "High",
+                    },
+                  ]}
+                />
+
+                <SelectFormField
+                  {...field("rhythm")}
+                  required
+                  label="Rhythm"
+                  options={RHYTHM_CHOICES}
+                  optionLabel={(option) => option.desc}
+                  optionValue={(option) => option.id}
+                />
+
+                <TextAreaFormField
+                  {...field("rhythm_detail")}
+                  className="md:col-span-2"
+                  label="Rhythm Description"
+                  rows={5}
+                />
+              </>
+            )}
+          </div>
+        )}
+
+        <div className="mt-4 flex flex-col-reverse justify-end gap-2 md:flex-row">
+          <Cancel onClick={() => goBack()} />
+          <Submit onClick={(e) => handleSubmit(e)} label={buttonText} />
+        </div>
+      </form>
+    </Page>
   );
 };

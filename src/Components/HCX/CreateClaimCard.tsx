@@ -52,7 +52,7 @@ export default function CreateClaimCard({
         ).find((o) => o.outcome === "Processing Complete");
         if (latestApprovedPreAuth) {
           setPolicy(latestApprovedPreAuth.policy_object);
-          setItems(latestApprovedPreAuth.items || []);
+          setItems(latestApprovedPreAuth.items ?? []);
           return;
         }
       }
@@ -166,7 +166,7 @@ export default function CreateClaimCard({
       {/* Procedures */}
       <div className="flex flex-col gap-4">
         <div className="flex w-full items-center justify-between">
-          <h1 className="font-bold text-left text-lg">Items</h1>
+          <h1 className="text-left text-lg font-bold">Items</h1>
           <ButtonV2
             type="button"
             variant="alert"
@@ -174,7 +174,7 @@ export default function CreateClaimCard({
             ghost={items?.length !== 0}
             disabled={items === undefined || !policy}
             onClick={() =>
-              setItems([...(items || []), { name: "", id: "", price: 0 }])
+              setItems([...(items ?? []), { name: "", id: "", price: 0 }])
             }
           >
             <CareIcon className="care-l-plus text-lg" />
@@ -210,7 +210,7 @@ export default function CreateClaimCard({
         </div>
       </div>
 
-      <div className="flex gap-4 mt-4 items-center justify-between">
+      <div className="mt-4 flex items-center justify-between gap-4">
         <SelectFormField
           name="use"
           label="Use"
@@ -219,9 +219,7 @@ export default function CreateClaimCard({
             { id: "claim", label: "Claim" },
           ]}
           value={use_}
-          onChange={({ value }) =>
-            setUse_(value as "preauthorization" | "claim")
-          }
+          onChange={({ value }) => setUse_(value)}
           position="below"
           optionLabel={(value) => value.label}
           optionValue={(value) => value.id as "preauthorization" | "claim"}

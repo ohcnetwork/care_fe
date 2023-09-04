@@ -27,7 +27,8 @@ interface Props {
 const AssetImportModal = ({ open, onClose, facility }: Props) => {
   const [isImporting, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>();
-  const [preview, setPreview] = useState<AssetData[]>();
+  const [preview, setPreview] =
+    useState<(AssetData & { notes?: string; last_serviced_on?: string })[]>();
   const [location, setLocation] = useState("");
   const [locations, setLocations] = useState<any>([]);
   const dispatchAction: any = useDispatch();
@@ -64,6 +65,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                     msg: `Please check the row ${error.row} of column ${error.column}`,
                   });
                 });
+                setSelectedFile(undefined);
               } else {
                 setPreview(parsedData.rows as AssetData[]);
               }
@@ -89,6 +91,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
         Notification.Error({
           msg: "Invalid file",
         });
+        setSelectedFile(undefined);
       }
     };
     readFile();
@@ -128,7 +131,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
         meta: { ...asset.meta },
         warranty_amc_end_of_validity: asset.warranty_amc_end_of_validity,
         last_serviced_on: asset.last_serviced_on,
-        notes: asset.notes,
+        note: asset.notes,
         cancelToken: { promise: {} },
       });
 
@@ -166,8 +169,14 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
     e.preventDefault();
     dragProps.setDragOver(false);
     const dropedFile = e?.dataTransfer?.files[0];
-    if (dropedFile.type.split("/")[1] !== "json")
-      return dragProps.setFileDropError("Please drop a JSON file to upload!");
+    if (
+      !["xlsx", "csv", "json"].includes(
+        dropedFile?.name?.split(".")?.pop() || ""
+      )
+    )
+      return dragProps.setFileDropError(
+        "Please drop a JSON / Excel file to upload!"
+      );
     setSelectedFile(dropedFile);
   };
 
@@ -182,29 +191,29 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
       <span className="mt-1 text-gray-700">{facility.name}</span>
       {locations.length === 0 ? (
         <>
-          <div className="flex flex-col items-center justify-center h-full">
-            <h1 className="text-2xl font-medium text-gray-700 m-7">
+          <div className="flex h-full flex-col items-center justify-center">
+            <h1 className="m-7 text-2xl font-medium text-gray-700">
               You need at least one location to import an assest.
             </h1>
             <Link href={`/facility/${facility.id}/location/add`}>
-              <a className="bg-primary text-white px-4 py-2 rounded-md">
+              <a className="rounded-md bg-primary px-4 py-2 text-white">
                 Add Asset Location
               </a>
             </Link>
           </div>
-          <div className="mt-6 flex flex-col justify-center items-center">
+          <div className="mt-6 flex flex-col items-center justify-center">
             <Cancel
               onClick={closeModal}
               disabled={isImporting}
-              className="px-4 py-2 w-1/4"
+              className="w-1/4 px-4 py-2"
             />
           </div>
         </>
       ) : (
         <>
           {preview && preview?.length > 0 ? (
-            <div className="flex flex-col rounded-lg items-center justify-center">
-              <h1 className="text-2xl font-medium text-gray-700 m-7">
+            <div className="flex flex-col items-center justify-center rounded-lg">
+              <h1 className="m-7 text-2xl font-medium text-gray-700">
                 {preview.length} assets will be imported
               </h1>
               <div className="w-1/2 p-4">
@@ -233,18 +242,18 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                   />
                 </div>
               </div>
-              <div className="bg-white rounded overflow-y-scroll h-80 border border-gray-500 md:min-w-[500px]">
-                <div className="p-2 border-b flex">
-                  <div className="p-2 mr-2 font-bold">#</div>
-                  <div className="p-2 mr-2 md:w-1/2 font-bold">Name</div>
-                  <div className="p-2 mr-2 md:w-1/2 font-bold">Description</div>
+              <div className="my-4 h-80 overflow-y-scroll rounded border border-gray-500 bg-white md:min-w-[500px]">
+                <div className="flex border-b p-2">
+                  <div className="mr-2 p-2 font-bold">#</div>
+                  <div className="mr-2 p-2 font-bold md:w-1/2">Name</div>
+                  <div className="mr-2 p-2 font-bold md:w-1/2">Description</div>
                 </div>
                 {preview.map((data: AssetData, index: number) => {
                   return (
-                    <div key={index} className="p-2 border-b flex">
-                      <div className="p-2 mr-2">{index + 1}</div>
-                      <div className="p-2 mr-2 md:w-1/2">{data.name}</div>
-                      <div className="p-2 mr-2 md:w-1/2">
+                    <div key={index} className="flex border-b p-2">
+                      <div className="mr-2 p-2">{index + 1}</div>
+                      <div className="mr-2 p-2 md:w-1/2">{data.name}</div>
+                      <div className="mr-2 p-2 md:w-1/2">
                         {data.description}
                       </div>
                     </div>
@@ -257,7 +266,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
               onDragOver={dragProps.onDragOver}
               onDragLeave={dragProps.onDragLeave}
               onDrop={onDrop}
-              className={`px-3 py-6 flex-1 flex flex-col mb-8 mt-5 rounded-lg items-center justify-center border-[3px] border-dashed ${
+              className={`mb-8 mt-5 flex flex-1 flex-col items-center justify-center rounded-lg border-[3px] border-dashed px-3 py-6 ${
                 dragProps.dragOver && "border-primary-500"
               } ${
                 dragProps.fileDropError !== ""
@@ -270,7 +279,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                 fill="none"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
-                className={`w-12 h-12 ${
+                className={`h-12 w-12 ${
                   dragProps.dragOver && "text-primary-500"
                 } ${
                   dragProps.fileDropError !== ""
@@ -294,7 +303,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                   : "Drag & drop JSON / Excel (xlsx, csv)  file to upload"}
               </p>
               <a
-                className="mt-4 ml-auto mr-auto max-w-xs items-center px-3 py-2 border border-primary-500 text-sm leading-4 font-medium rounded-md text-primary-700 bg-white hover:text-primary-500 focus:outline-none focus:border-primary-300 focus:ring-blue active:text-primary-800 active:bg-gray-50 transition ease-in-out duration-150 hover:shadow"
+                className="focus:ring-blue mx-auto mt-4 max-w-xs items-center rounded-md border border-primary-500 bg-white px-3 py-2 text-sm font-medium leading-4 text-primary-700 transition duration-150 ease-in-out hover:text-primary-500 hover:shadow focus:border-primary-300 focus:outline-none active:bg-gray-50 active:text-primary-800"
                 href={sample_format_asset_import}
               >
                 <i className="fa fa-download mr-1" aria-hidden="true"></i>{" "}
@@ -303,9 +312,9 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <div>
-              <label className="rounded-lg bg-white py-2 px-4 text-primary-500 font-medium border border-primary-500 hover:text-primary-400 hover:border-primary-400 text-sm flex gap-1 items-center justify-center cursor-pointer transition-all">
+              <label className="flex cursor-pointer items-center justify-center gap-1 rounded-lg border border-primary-500 bg-white px-4 py-2 text-sm font-medium text-primary-500 transition-all hover:border-primary-400 hover:text-primary-400">
                 <i className="fas fa-cloud-upload-alt mr-2"></i>Upload a file
                 <input
                   title="changeFile"
@@ -327,7 +336,10 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
               }}
               disabled={isImporting}
             />
-            <Submit onClick={handleUpload} disabled={isImporting}>
+            <Submit
+              onClick={handleUpload}
+              disabled={isImporting || !selectedFile}
+            >
               {isImporting ? (
                 <i className="fa-solid fa-spinner animate-spin" />
               ) : (

@@ -1,28 +1,18 @@
+import dayjs from "../../Utils/dayjs";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import CSVLink from "../../Components/Common/CSVLink";
-
-interface CSVLinkProps {
-  id: string;
-  filename: string;
-  data: string;
-}
 
 export default function useExport() {
   const dispatch: any = useDispatch();
   const [isExporting, setIsExporting] = useState(false);
-  const [csvLinkProps, setCsvLinkProps] = useState<CSVLinkProps>({
-    id: "csv-download-link",
-    filename: "",
-    data: "",
-  });
 
-  const _CSVLink = () => {
-    const { filename, data, id } = csvLinkProps;
-    return <CSVLink id={id} filename={filename} data={data} />;
+  const getTimestamp = () => {
+    const now = dayjs();
+    const date = now.format("YYYY-MM-DD");
+    const time = now.format("HH:mm:ss");
+
+    return date + "_" + time;
   };
-
-  const getTimestamp = () => new Date().toISOString();
 
   const exportCSV = async (
     filenamePrefix: string,
@@ -35,8 +25,13 @@ export default function useExport() {
 
     const res = await dispatch(action);
     if (res.status === 200) {
-      setCsvLinkProps({ ...csvLinkProps, filename, data: parse(res.data) });
-      document.getElementById(csvLinkProps.id)?.click();
+      const a = document.createElement("a");
+      const blob = new Blob([parse(res.data)], {
+        type: "text/csv",
+      });
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
     }
 
     setIsExporting(false);
@@ -85,9 +80,6 @@ export default function useExport() {
 
   return {
     isExporting,
-
-    _CSVLink,
-
     exportCSV,
     exportJSON,
     exportFile,

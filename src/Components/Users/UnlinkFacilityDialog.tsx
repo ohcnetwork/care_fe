@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import ConfirmDialogV2 from "../Common/ConfirmDialogV2";
+import { useState } from "react";
+import ConfirmDialog from "../Common/ConfirmDialog";
 
 interface ConfirmDialogProps {
   facilityName: string;
@@ -20,7 +20,7 @@ const UnlinkFacilityDialog = (props: ConfirmDialogProps) => {
     setDisable(true);
   };
   return (
-    <ConfirmDialogV2
+    <ConfirmDialog
       title={
         <span>
           {isHomeFacility ? "Clear Home Facility" : "Unlink User Facility"}
@@ -33,7 +33,7 @@ const UnlinkFacilityDialog = (props: ConfirmDialogProps) => {
       disabled={disable}
       variant="danger"
     >
-      <div className="flex text-gray-800 leading-relaxed">
+      <div className="flex leading-relaxed text-gray-800">
         <div>
           Are you sure you want to{" "}
           {isHomeFacility ? "clear the home facility" : "unlink the facility"}{" "}
@@ -43,7 +43,7 @@ const UnlinkFacilityDialog = (props: ConfirmDialogProps) => {
           {!isHomeFacility && "The user will lose access to the facility."}
         </div>
       </div>
-    </ConfirmDialogV2>
+    </ConfirmDialog>
   );
 };
 

@@ -2,7 +2,9 @@ import { PerformedByModel } from "../HCX/misc";
 
 interface BasePrescription {
   readonly id?: string;
-  medicine: string;
+  medicine?: string;
+  medicine_object?: MedibaseMedicine;
+  medicine_old?: string;
   route?: "ORAL" | "IV" | "IM" | "SC";
   dosage: string;
   notes?: string;
@@ -10,12 +12,12 @@ interface BasePrescription {
   readonly prescription_type?: "DISCHARGE" | "REGULAR";
   readonly discontinued?: boolean;
   discontinued_reason?: string;
-  readonly prescribed_by?: PerformedByModel;
+  readonly prescribed_by: PerformedByModel;
   readonly discontinued_date: string;
   readonly last_administered_on?: string;
-  readonly is_migrated?: boolean;
-  readonly created_date?: string;
-  readonly modified_date?: string;
+  readonly is_migrated: boolean;
+  readonly created_date: string;
+  readonly modified_date: string;
 }
 
 export interface NormalPrescription extends BasePrescription {
@@ -55,4 +57,15 @@ export type MedicineAdministrationRecord = {
   readonly administered_date?: string;
   readonly created_date?: string;
   readonly modified_date?: string;
+};
+
+export type MedibaseMedicine = {
+  id: string;
+  name: string;
+  type: "brand" | "generic";
+  company?: string;
+  contents: string;
+  cims_class: string;
+  atc_classification?: string;
+  generic?: string;
 };

@@ -14,25 +14,27 @@ describe("Resource filter", () => {
 
   it("filter by origin facility", () => {
     cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-    cy.get("[name='orgin_facility']").type("harsha").wait("@facilities_filter");
-    cy.get("[name='orgin_facility']").type("{downarrow}{enter}");
+    cy.get("[name='origin_facility']")
+      .type("Dummy Facility 1")
+      .wait("@facilities_filter");
+    cy.get("[role='option']").first().click();
     cy.contains("Apply").click();
   });
 
   it("filter by resource approval facility", () => {
     cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
     cy.get("[name='approving_facility']")
-      .type("test")
+      .type("Dummy Shifting Center")
       .wait("@facilities_filter");
-    cy.get("[name='approving_facility']").type("{downarrow}{enter}");
+    cy.get("[role='option']").first().click();
     cy.contains("Apply").click();
   });
 
   it("filter by assigned facility", () => {
     cy.intercept(/\/api\/v1\/getallfacilities/).as("facilities_filter");
-    cy.get("[name='assigned_facility']").type("center");
+    cy.get("[name='assigned_facility']").type("Dummy Shifting Center");
     cy.wait("@facilities_filter");
-    cy.get("[name='assigned_facility']").type("{downarrow}{enter}");
+    cy.get("[role='option']").first().click();
     cy.contains("Apply").click();
   });
 
@@ -42,8 +44,9 @@ describe("Resource filter", () => {
       "ASC Modified Date",
       "DESC Modified Date",
       "ASC Created Date",
-    ].forEach((select) => {
-      cy.get("[name='ordering']").select(select);
+    ].forEach((option) => {
+      cy.get("div [id='ordering'] > div > button").click();
+      cy.get("li").contains(option).click();
       cy.intercept(/\/api\/v1\/resource/).as("resource_filter");
       cy.contains("Apply").click().wait("@resource_filter");
       cy.contains("Filters").click();
@@ -51,8 +54,9 @@ describe("Resource filter", () => {
   });
 
   it("filter by emergency case", () => {
-    ["yes", "no"].forEach((select) => {
-      cy.get("[name='emergency']").select(select);
+    ["yes", "no"].forEach((option) => {
+      cy.get("div [id='emergency'] > div > button").click();
+      cy.get("li").contains(option).click();
       cy.intercept(/\/api\/v1\/resource/).as("resource_filter");
       cy.contains("Apply").click().wait("@resource_filter");
       cy.contains("Filters").click();
@@ -61,16 +65,18 @@ describe("Resource filter", () => {
 
   it("filter by created date", () => {
     cy.intercept(/\/api\/v1\/resource/).as("resource_filter");
-    cy.get("[name='created_date_after']").type("22/05/2020");
-    cy.get("[name='created_date_before']").type("09/09/2021");
+    cy.get("input[name='created_date_start']").click();
+    cy.get("#date-1").click();
+    cy.get("#date-1").click();
     cy.contains("Apply").click();
     cy.wait("@resource_filter");
   });
 
   it("filter by modified date", () => {
     cy.intercept(/\/api\/v1\/resource/).as("resource_filter");
-    cy.get("[name='modified_date_after']").type("22/05/2020");
-    cy.get("[name='modified_date_before']").type("09/09/2021");
+    cy.get("input[name='modified_date_start']").click();
+    cy.get("#date-1").click();
+    cy.get("#date-1").click();
     cy.contains("Apply").click();
     cy.wait("@resource_filter");
   });

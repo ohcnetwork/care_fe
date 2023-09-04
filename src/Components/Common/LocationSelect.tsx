@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { listFacilityAssetLocation } from "../../Redux/actions";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
@@ -10,10 +10,11 @@ interface LocationSelectProps {
   className?: string;
   searchAll?: boolean;
   multiple?: boolean;
-  facilityId: number;
+  facilityId: number | string;
   showAll?: boolean;
   selected: string | string[] | null;
   setSelected: (selected: string | string[] | null) => void;
+  errorClassName?: string;
 }
 
 export const LocationSelect = (props: LocationSelectProps) => {
@@ -66,6 +67,7 @@ export const LocationSelect = (props: LocationSelectProps) => {
       optionValue={(option) => option.id}
       error={errors}
       className={className}
+      errorClassName={props.errorClassName}
     />
   ) : (
     <AutocompleteFormField
@@ -82,6 +84,7 @@ export const LocationSelect = (props: LocationSelectProps) => {
       optionValue={(option) => option.id}
       error={errors}
       className={className}
+      errorClassName={props.errorClassName}
     />
   );
 };

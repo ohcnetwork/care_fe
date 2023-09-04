@@ -3,7 +3,10 @@ import { Combobox } from "@headlessui/react";
 import { debounce } from "lodash";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
+import {
+  MultiSelectOptionChip,
+  dropdownOptionClassNames,
+} from "./MultiSelectMenuV2";
 
 interface Props {
   name?: string;
@@ -76,7 +79,7 @@ const AutoCompleteAsync = (props: Props) => {
           <div className="flex">
             <Combobox.Input
               name={name}
-              className="cui-input-base pr-16 truncate"
+              className="cui-input-base truncate pr-16"
               placeholder={
                 multiple && hasSelection
                   ? `${selected.length} selected`
@@ -89,13 +92,16 @@ const AutoCompleteAsync = (props: Props) => {
               }
               onChange={({ target }) => setQuery(target.value)}
               onFocus={props.onFocus}
-              onBlur={props.onBlur}
+              onBlur={() => {
+                setQuery("");
+                props.onBlur?.();
+              }}
               autoComplete="off"
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <div className="absolute top-1 right-0 flex items-center mr-2 text-lg text-secondary-900">
+              <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-secondary-900">
                 {loading ? (
-                  <CareIcon className="care-l-spinner animate-spin -mb-1.5" />
+                  <CareIcon className="care-l-spinner -mb-1.5 animate-spin" />
                 ) : (
                   <CareIcon className="care-l-angle-down -mb-1.5" />
                 )}
@@ -103,9 +109,9 @@ const AutoCompleteAsync = (props: Props) => {
             </Combobox.Button>
           </div>
           <DropdownTransition>
-            <Combobox.Options className="cui-dropdown-base top-12 absolute z-10 text-sm">
+            <Combobox.Options className="cui-dropdown-base absolute top-12 z-10 text-sm">
               {data?.length === 0 ? (
-                <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                <div className="relative cursor-default select-none px-4 py-2 text-gray-700">
                   {query !== ""
                     ? "Nothing found."
                     : "Start typing to search..."}
@@ -118,13 +124,15 @@ const AutoCompleteAsync = (props: Props) => {
                     value={item}
                   >
                     {({ selected }) => (
-                      <div className="flex justify-between align-center">
-                        {optionLabel(item)}
-                        {optionLabelChip(item) && (
-                          <div className="px-2 mt-1 sm:mt-0 text-center bg-secondary-100 h-fit max-w-fit rounded-full text-xs text-gray-900 border border-secondary-400">
-                            {optionLabelChip(item)}
-                          </div>
-                        )}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {optionLabel(item)}
+                          {optionLabelChip(item) && (
+                            <div className="mt-1 h-fit max-w-fit rounded-full border border-secondary-400 bg-secondary-100 px-2 text-center text-xs text-gray-900 sm:mt-0">
+                              {optionLabelChip(item)}
+                            </div>
+                          )}
+                        </div>
                         {selected && (
                           <CareIcon className="care-l-check text-lg" />
                         )}
@@ -136,26 +144,21 @@ const AutoCompleteAsync = (props: Props) => {
             </Combobox.Options>
           </DropdownTransition>
           {multiple && selected?.length > 0 && (
-            <div className="p-2 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 p-2">
               {selected?.map((option: any) => (
-                <span className="bg-gray-200 border border-gray-400 text-gray-800 rounded-full text-xs px-2 py-1">
-                  {optionLabel(option)}
-                  <i
-                    className="h-3 w-3 ml-1 text-lg text-gray-700 cursor-pointer"
-                    onClick={() => {
-                      onChange(
-                        selected.filter((item: any) => item.id !== option.id)
-                      );
-                    }}
-                  >
-                    <CareIcon className="care-l-multiply" />
-                  </i>
-                </span>
+                <MultiSelectOptionChip
+                  label={optionLabel(option)}
+                  onRemove={() =>
+                    onChange(
+                      selected.filter((item: any) => item.id !== option.id)
+                    )
+                  }
+                />
               ))}
             </div>
           )}
           {error && (
-            <div className="text-red-500 text-sm font-medium mt-1">{error}</div>
+            <div className="mt-1 text-sm font-medium text-red-500">{error}</div>
           )}
         </div>
       </Combobox>

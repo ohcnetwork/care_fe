@@ -1,12 +1,13 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { getResourceComments, addResourceComments } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import Pagination from "../Common/Pagination";
-import { formatDate } from "../../Utils/utils";
+import { formatDateTime } from "../../Utils/utils";
 import CircularProgress from "../Common/components/CircularProgress";
 import ButtonV2 from "../Common/components/ButtonV2";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 
 interface CommentSectionProps {
   id: string;
@@ -71,39 +72,38 @@ const CommentSection = (props: CommentSectionProps) => {
   };
 
   return (
-    <div className="w-full flex flex-col">
-      <textarea
-        rows={3}
+    <div className="flex w-full flex-col">
+      <TextAreaFormField
+        name="comment"
         placeholder="Type your comment"
-        className="mt-4 border border-gray-500 rounded-lg p-4 focus:border-primary-600 focus:ring-primary-600"
         value={commentBox}
-        onChange={(e) => setCommentBox(e.target.value)}
+        onChange={(e) => setCommentBox(e.value)}
       />
       <div className="flex w-full justify-end">
         <ButtonV2 onClick={onSubmitComment}>Post Your Comment</ButtonV2>
       </div>
-      <div className=" w-full">
+      <div className="w-full">
         {isLoading ? (
           <CircularProgress className="h-12 w-12" />
         ) : (
           comments.map((comment: any) => (
             <div
               key={comment.id}
-              className="flex p-4 bg-white rounded-lg text-gray-800 mt-4 flex-col w-full border border-gray-300"
+              className="mt-4 flex w-full flex-col rounded-lg border border-gray-300 bg-white p-4 text-gray-800"
             >
               <div className="flex  w-full ">
                 <p className="text-justify">{comment.comment}</p>
               </div>
               <div className="mt-3">
                 <span className="text-xs text-gray-500">
-                  {formatDate(comment.modified_date) || "-"}
+                  {formatDateTime(comment.modified_date) || "-"}
                 </span>
               </div>
-              <div className=" flex mr-auto bg-gray-100 border items-center rounded-md py-1 pl-2 pr-3">
-                <div className="flex justify-center items-center w-8 h-8 rounded-full bg-primary-700 uppercase text-white p-1">
+              <div className=" mr-auto flex items-center rounded-md border bg-gray-100 py-1 pl-2 pr-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-700 p-1 uppercase text-white">
                   {comment.created_by_object?.first_name?.charAt(0) || "U"}
                 </div>
-                <span className="text-gray-700 text-sm pl-2">
+                <span className="pl-2 text-sm text-gray-700">
                   {comment.created_by_object?.first_name || "Unknown"}{" "}
                   {comment.created_by_object?.last_name}
                 </span>
