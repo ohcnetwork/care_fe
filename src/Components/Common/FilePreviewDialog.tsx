@@ -4,6 +4,7 @@ import CircularProgress from "./components/CircularProgress";
 import { useTranslation } from "react-i18next";
 import { StateInterface } from "../Patient/FileUpload";
 import { Dispatch, Fragment, ReactNode, SetStateAction } from "react";
+import ButtonV2 from "./components/ButtonV2";
 
 export const zoom_values = [
   "h-1/6 w-1/6 my-40",
@@ -67,29 +68,28 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   };
 
   return (
-    <div>
+    <div className="">
       <Transition appear show={show} as={Fragment}>
-        <Dialog as="div" className="relative z-10" onClose={onClose}>
+        <Dialog as="div" className="relative z-10 " onClose={onClose}>
           <Transition.Child
             as={Fragment}
-            enter="ease-out duration-300"
+            enter="translate-y-[100%] duration-400"
             enterFrom="opacity-0"
             enterTo="opacity-100"
-            leave="ease-in duration-200"
+            leave="translate-y-[100%] duration-300"
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-all" />
+            <div className="fixed inset-0 mt-6 rounded-t-3xl border-t-2 border-gray-400/50 bg-white shadow-[0_3px_10px_rgb(0,0,0,0.2)] transition-all" />
           </Transition.Child>
-
-          <div className="fixed inset-0 overflow-y-auto">
+          <div className="fixed inset-0 mt-10 overflow-y-auto  ">
             <div className="flex min-h-full items-center justify-center p-4 text-center">
               <Transition.Child
                 as={Fragment}
-                enter="ease-out duration-300"
+                enter="translate-y-[100%] duration-400"
                 enterFrom="opacity-0 scale-95"
                 enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
+                leave="translate-y-[100%] duration-300"
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
@@ -144,15 +144,15 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                                   false,
                                 ],
                               ].map((button, index) => (
-                                <button
+                                <ButtonV2
                                   key={index}
                                   onClick={button[2] as () => void}
-                                  className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
                                   disabled={button[3] as boolean}
+                                  variant="primary"
                                 >
                                   <i className={`fas fa-${button[1]} mr-2`} />
                                   {button[0] as string}
-                                </button>
+                                </ButtonV2>
                               ))}
                             </>
                           )}
@@ -170,10 +170,9 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                           )}
                           <button
                             onClick={onClose}
-                            className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
+                            className="h-8 w-8 rounded-full bg-red-100 transition hover:bg-red-200"
                           >
-                            <i className="fas fa-times mr-2" />
-                            Close
+                            <i className="fas fa-times z-50 rounded-full text-red-500" />
                           </button>
                         </div>
                       </div>
