@@ -73,10 +73,9 @@ import { handleSignOut } from "../Utils/utils";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
 import ManagePrescriptions from "../Components/Medicine/ManagePrescriptions";
 import CentralNursingStation from "../Components/Facility/CentralNursingStation";
-import { ConfigureHealthFacility } from "../Components/ABDM/ConfigureHealthFacility";
 
 export default function AppRouter() {
-  const { main_logo, enable_hcx, enable_abdm } = useConfig();
+  const { main_logo, enable_hcx } = useConfig();
 
   const routes = {
     "/": () => <HospitalList />,
@@ -99,15 +98,6 @@ export default function AppRouter() {
     "/facility/:facilityId/update": ({ facilityId }: any) => (
       <FacilityCreate facilityId={facilityId} />
     ),
-    ...(enable_abdm
-      ? {
-          "/facility/:facilityId/health_facility": ({
-            facilityId,
-          }: {
-            facilityId: string;
-          }) => <ConfigureHealthFacility facilityId={facilityId} />,
-        }
-      : {}),
     "/facility/:facilityId/middleware/update": ({ facilityId }: any) => (
       <UpdateFacilityMiddleware facilityId={facilityId} />
     ),
