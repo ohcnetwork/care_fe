@@ -698,7 +698,6 @@ export const ConsultationForm = (props: any) => {
           symptoms_onset_date: new Date(),
           category: "Critical",
           suggestion: "DD",
-          verified_by: "Brought Dead",
         },
       });
     } else if (event.name === "suggestion" && event.value === "DD") {
