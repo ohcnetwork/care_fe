@@ -57,7 +57,7 @@ describe("Asset", () => {
       "email@support.com",
       "Vendor's Name",
       serialNumber,
-      "2021-12-25",
+      "25122021",
       "Test note for asset creation!"
     );
 
@@ -81,7 +81,7 @@ describe("Asset", () => {
       "email@support.com",
       "Vendor's Name",
       serialNumber,
-      "2021-12-25",
+      "25122021",
       "Test note for asset creation!"
     );
 

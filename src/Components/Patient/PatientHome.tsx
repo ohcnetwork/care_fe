@@ -1,6 +1,6 @@
 import { navigate } from "raviger";
 import { lazy, useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
@@ -222,7 +222,6 @@ export const PatientHome = (props: any) => {
       fetchpatient(status);
       triggerGoal("Patient Profile Viewed", {
         facilityId: facilityId,
-        patientId: patientData.id,
         userID: authUser.id,
       });
     },

@@ -20,9 +20,12 @@ import { useDispatch } from "react-redux";
 import dayjs from "../../../Utils/dayjs";
 import { AssetSelect } from "../../Common/AssetSelect.js";
 import DialogModal from "../../Common/Dialog.js";
-import AssetsList from "../../Assets/AssetsList.js";
 import { Link } from "raviger";
-import { AssetData, assetClassProps } from "../../Assets/AssetTypes.js";
+import {
+  AssetClass,
+  AssetData,
+  assetClassProps,
+} from "../../Assets/AssetTypes.js";
 import Chip from "../../../CAREUI/display/Chip.js";
 
 interface BedsProps {
@@ -229,6 +232,7 @@ const Beds = (props: BedsProps) => {
                 setSelected={setAssets}
                 selected={assets}
                 multiple={true}
+                asset_class={AssetClass.VENTILATOR}
                 facility={facilityId}
                 in_use_by_consultation={false}
                 is_permanent={false}
@@ -271,11 +275,13 @@ const Beds = (props: BedsProps) => {
                   {bed?.bed_object?.name}
                   {bed?.assets_objects && bed.assets_objects.length > 0 && (
                     <span
-                    className={` bg-primary-500 font-semibold text-white ml-2 h-6 cursor-pointer rounded-md px-2 text-xs`}
-                    onClick={() => setShowBedDetails(bed)}
-                  >
-                    {bed.assets_objects.length}
-                  </span>
+                      className={
+                        " ml-2 h-6 cursor-pointer rounded-md bg-primary-500 px-2 text-xs font-semibold text-white"
+                      }
+                      onClick={() => setShowBedDetails(bed)}
+                    >
+                      {bed.assets_objects.length}
+                    </span>
                   )}
                 </div>
                 <div className="bg-primary-100 py-2 text-center">

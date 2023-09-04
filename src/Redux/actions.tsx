@@ -857,6 +857,27 @@ export const listAssetTransaction = (params: object) =>
 export const getAssetTransaction = (id: string) =>
   fireRequest("getAssetTransaction", [], {}, { id });
 
+export const listAssetService = (params: object, asset_external_id: string) =>
+  fireRequest("listAssetService", [], params, { asset_external_id });
+export const getAssetService = (
+  params: object,
+  asset_external_id: string,
+  external_id: string
+) =>
+  fireRequest("getAssetService", [], params, {
+    asset_external_id,
+    external_id,
+  });
+export const updateAssetService = (
+  asset_external_id: string,
+  external_id: string,
+  params: object
+) =>
+  fireRequest("updateAssetService", [], params, {
+    asset_external_id,
+    external_id,
+  });
+
 // ABDM related
 export const generateAadhaarOtp = (aadhaar: string) =>
   fireRequest("generateAadhaarOtp", [], { aadhaar });
@@ -923,6 +944,39 @@ export const getAbhaCard = (patient: string, type: "pdf" | "png") => {
   });
 };
 
+export const healthFacilityActions = {
+  list: (params: object) => {
+    return fireRequest("listHealthFacilities", [], params);
+  },
+
+  create: (data: object) => {
+    return fireRequest("createHealthFacility", [], data);
+  },
+
+  read: (id: string) => {
+    return fireRequest(
+      "getHealthFacility",
+      [],
+      {},
+      { facility_id: id },
+      undefined,
+      true
+    );
+  },
+
+  update: (id: string, data: object) => {
+    return fireRequest("updateHealthFacility", [], data, {
+      facility_id: id,
+    });
+  },
+
+  partialUpdate: (id: string, data: object) => {
+    return fireRequest("partialUpdateHealthFacility", [], data, {
+      facility_id: id,
+    });
+  },
+};
+
 export const listAssetAvailability = (params: object) =>
   fireRequest("listAssetAvailability", [], params);
 export const getAssetAvailability = (id: string) =>
@@ -971,6 +1025,18 @@ export const PrescriptionActions = (consultation_external_id: string) => {
             obj,
             pathParams,
             `administer-medicine-${external_id}`
+          ),
+
+        listAdministrations: (query?: {
+          administered_date_after?: string;
+          administered_date_before?: string;
+        }) =>
+          fireRequest(
+            "listAdministrations",
+            [],
+            { prescription: external_id, ...query },
+            pathParams,
+            `list-administrations-${external_id}`
           ),
 
         /** Discontinue a prescription */
