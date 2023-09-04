@@ -85,7 +85,7 @@ type FormDetails = {
   kasp_enabled_date: null;
   examination_details: string;
   history_of_present_illness: string;
-  prescribed_medication: string;
+  treatment_plan: string;
   consultation_notes: string;
   patient_no: string;
   procedure: ProcedureType[];
@@ -129,7 +129,7 @@ const initForm: FormDetails = {
   kasp_enabled_date: null,
   examination_details: "",
   history_of_present_illness: "",
-  prescribed_medication: "",
+  treatment_plan: "",
   consultation_notes: "",
   patient_no: "",
   procedure: [],
@@ -620,7 +620,7 @@ export const ConsultationForm = (props: any) => {
         kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
         examination_details: state.form.examination_details,
         history_of_present_illness: state.form.history_of_present_illness,
-        prescribed_medication: state.form.prescribed_medication,
+        treatment_plan: state.form.treatment_plan,
         discharge_date: state.form.discharge_date,
         patient_no: state.form.patient_no,
         icd11_diagnoses: state.form.icd11_diagnoses_object.map(
@@ -1198,10 +1198,10 @@ export const ConsultationForm = (props: any) => {
                           </div>
                           <div
                             className="col-span-6"
-                            ref={fieldRef["prescribed_medication"]}
+                            ref={fieldRef["treatment_plan"]}
                           >
                             <TextAreaFormField
-                              {...field("prescribed_medication")}
+                              {...field("treatment_plan")}
                               label="Treatment Plan / Treatment Summary"
                               placeholder="Optional information"
                             />
