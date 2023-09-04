@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { getAllSkills } from "../../Redux/actions";
+import { getAllSkills, getUserListSkills } from "../../Redux/actions";
 import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { SkillObjectModel } from "../Users/models";
 
@@ -15,6 +15,7 @@ interface SkillSelectProps {
   disabled?: boolean;
   selected: SkillObjectModel | SkillObjectModel[] | null;
   setSelected: (selected: SkillObjectModel) => void;
+  username?: string;
 }
 
 export const SkillSelect = (props: SkillSelectProps) => {
@@ -29,6 +30,7 @@ export const SkillSelect = (props: SkillSelectProps) => {
     disabled = false,
     className = "",
     errors = "",
+    username,
   } = props;
 
   const dispatchAction: any = useDispatch();
@@ -44,7 +46,18 @@ export const SkillSelect = (props: SkillSelectProps) => {
 
       const res = await dispatchAction(getAllSkills(params));
 
-      return res?.data?.results;
+      const linkedSkills = await dispatchAction(
+        getUserListSkills({ username: username })
+      );
+
+      const skillsList = linkedSkills?.data?.results;
+      const skillsID: string[] = [];
+      skillsList.map((skill: any) => skillsID.push(skill.skill_object.id));
+      const skills = res?.data?.results.filter(
+        (skill: any) => !skillsID.includes(skill.id)
+      );
+
+      return skills;
     },
     [dispatchAction, searchAll, showAll]
   );

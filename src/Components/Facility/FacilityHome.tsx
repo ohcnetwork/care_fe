@@ -549,20 +549,6 @@ export const FacilityHome = (props: any) => {
                 >
                   Configure Facility
                 </DropdownItem>
-                {config.enable_abdm ? (
-                  <DropdownItem
-                    id="configure-health-facility"
-                    onClick={() =>
-                      navigate(`/facility/${facilityId}/health_facility`)
-                    }
-                    authorizeFor={NonReadOnlyUsers}
-                    icon={<CareIcon className="care-l-setting text-lg" />}
-                  >
-                    Configure Health Facility
-                  </DropdownItem>
-                ) : (
-                  <></>
-                )}
                 <DropdownItem
                   id="inventory-management"
                   onClick={() => navigate(`/facility/${facilityId}/inventory`)}
