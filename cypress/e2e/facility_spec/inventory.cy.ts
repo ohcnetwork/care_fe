@@ -14,6 +14,7 @@ describe("Inventory Management Section", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/");
+    cy.viewport(1280, 720);
   });
 
   it("Adds Inventory", () => {

@@ -55,10 +55,6 @@ export default ({ show, setShow, username }: IProps) => {
         Notification.Error({
           msg: "Error while adding skill",
         });
-      } else {
-        Notification.Success({
-          msg: "Skill added successfully",
-        });
       }
       setSelectedSkill(null);
       setIsLoading(false);
@@ -69,7 +65,12 @@ export default ({ show, setShow, username }: IProps) => {
 
   const removeSkill = useCallback(
     async (username: string, skillId: string) => {
-      await dispatch(deleteUserSkill(username, skillId));
+      const res = await dispatch(deleteUserSkill(username, skillId));
+      if (res?.status !== 204) {
+        Notification.Error({
+          msg: "Error while unlinking skill",
+        });
+      }
       setDeleteSkill(null);
       fetchSkills(username);
     },
@@ -100,7 +101,9 @@ export default ({ show, setShow, username }: IProps) => {
       )}
       <SlideOverCustom
         open={show}
-        setOpen={setShow}
+        setOpen={(openState) => {
+          !deleteSkill && setShow(openState);
+        }}
         slideFrom="right"
         title="Skills"
         dialogClass="md:w-[400px]"
@@ -117,19 +120,19 @@ export default ({ show, setShow, username }: IProps) => {
                 selected={selectedSkill}
                 setSelected={setSelectedSkill}
                 errors=""
+                username={username}
               />
-              <ButtonV2
-                disabled={!authorizeForAddSkill}
-                onClick={() => addSkill(username, selectedSkill)}
-                className="w-6rem"
-              >
-                {/* Replace "Add" in button with CircularProgress */}
-                {isLoading ? (
-                  <CircularProgress className="h-5 w-5" />
-                ) : (
-                  t("add")
-                )}
-              </ButtonV2>
+              {isLoading ? (
+                <CircularProgress className="h-5 w-5" />
+              ) : (
+                <ButtonV2
+                  disabled={!authorizeForAddSkill}
+                  onClick={() => addSkill(username, selectedSkill)}
+                  className="w-6rem"
+                >
+                  {t("add")}
+                </ButtonV2>
+              )}
               {!authorizeForAddSkill && (
                 <span className="tooltip-text tooltip-bottom -translate-x-24 translate-y-2">
                   {t("contact_your_admin_to_add_skills")}
