@@ -432,7 +432,7 @@ export const ConsultationDetails = (props: any) => {
 
                 {consultationData.icd11_principal_diagnosis && (
                   <ShowDiagnosis
-                    label="Principle Diagnosis (as per ICD-11 recommended by WHO)"
+                    label="Principal Diagnosis (as per ICD-11 recommended by WHO)"
                     diagnoses={[
                       [
                         ...(consultationData?.icd11_diagnoses_object ?? []),
