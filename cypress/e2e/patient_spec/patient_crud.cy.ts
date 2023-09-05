@@ -196,7 +196,12 @@ describe("Patient Creation with consultation", () => {
       .contains("1A03 Intestinal infections due to Escherichia coli")
       .click();
     cy.get("#consultation_notes").click().type("generalnote");
-    cy.get("#verified_by").click().type("generalnote");
+    cy.get("#verified_by")
+      .click()
+      .type("Dev Doctor")
+      .then(() => {
+        cy.get("[role='option']").contains("Dev Doctor").click();
+      });
     cy.get("#submit").click();
     // Below code for the prescription module only present while creating a new consultation
     cy.contains("button", "Add Prescription Medication")
