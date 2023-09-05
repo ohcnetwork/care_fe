@@ -91,7 +91,11 @@ export class PatientConsultationPage {
   }
 
   submitPrescriptionAndReturn() {
+    cy.intercept("POST", "**/api/v1/consultation/*/prescriptions/").as(
+      "submitPrescription"
+    );
     cy.get("button#submit").should("be.visible").click();
     cy.get("[data-testid='return-to-patient-dashboard']").click();
+    cy.wait("@submitPrescription").its("response.statusCode").should("eq", 201);
   }
 }

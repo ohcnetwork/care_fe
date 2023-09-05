@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import { AssetPage } from "../../pageobject/Asset/AssetCreation";
 import { v4 as uuidv4 } from "uuid";
 import LoginPage from "../../pageobject/Login/LoginPage";
@@ -84,7 +85,9 @@ describe("Asset", () => {
       "Test note for asset creation!"
     );
 
+    assetPage.interceptAssetCreation();
     assetPage.clickCreateAsset();
+    assetPage.verifyAssetCreation();
     assetPage.verifySuccessNotification("Asset created successfully");
 
     assetSearchPage.typeSearchKeyword("New Test Asset 2");
@@ -113,13 +116,6 @@ describe("Asset", () => {
     assetPage.verifySuccessNotification("Asset updated successfully");
   });
 
-  it("Delete an Asset", () => {
-    assetPage.openCreatedAsset();
-    assetPage.deleteAsset();
-
-    assetPage.verifySuccessNotification("Asset deleted successfully");
-  });
-
   it("Configure an asset", () => {
     assetPage.openCreatedAsset();
     assetPage.spyAssetConfigureApi();
@@ -134,15 +130,56 @@ describe("Asset", () => {
     assetPage.verifyAssetConfiguration(200);
   });
 
+  it("Add an vital monitor asset and configure it", () => {
+    assetPage.createAsset();
+    assetPage.selectFacility("Dummy Facility 1");
+    assetPage.selectLocation("Camera Loc");
+    assetPage.selectAssetType("Internal");
+    assetPage.selectAssetClass("HL7 Vitals Monitor");
+
+    const qr_id_1 = uuidv4();
+
+    assetPage.enterAssetDetails(
+      "New Test Asset Vital",
+      "Test Description",
+      "Working",
+      qr_id_1,
+      "Manufacturer's Name",
+      "2025-12-25",
+      "Customer Support's Name",
+      phone_number,
+      "email@support.com",
+      "Vendor's Name",
+      serialNumber,
+      "25122021",
+      "Test note for asset creation!"
+    );
+    assetPage.interceptAssetCreation();
+    assetPage.clickCreateAsset();
+    assetPage.verifyAssetCreation();
+
+    assetSearchPage.typeSearchKeyword("New Test Asset Vital");
+    assetSearchPage.pressEnter();
+
+    assetPage.openCreatedAsset();
+    assetPage.configureVitalAsset("Host name", "192.168.1.64");
+    assetPage.clickConfigureVital();
+  });
+
+  it("Delete an Asset", () => {
+    assetPage.openCreatedAsset();
+    assetPage.interceptDeleteAssetApi();
+    assetPage.deleteAsset();
+    assetPage.verifyDeleteStatus();
+  });
+
   it("Import new asset", () => {
-    assetPage.spyAssetConfigureApi();
     assetPage.selectImportOption();
     assetPage.selectImportFacility("Dummy Facility 1");
     assetPage.importAssetFile();
     assetPage.selectImportLocation("Camera Locations");
     assetPage.clickImportAsset();
 
-    assetPage.verifyAssetConfiguration(201);
     assetPage.verifySuccessNotification("Assets imported successfully");
   });
 

@@ -1,4 +1,5 @@
 // assetPage.ts
+import { cy, expect } from "local-cypress";
 
 export class AssetPage {
   createAsset() {
@@ -74,6 +75,14 @@ export class AssetPage {
     cy.get("[data-testid=asset-notes-input] textarea").type(notes);
   }
 
+  interceptAssetCreation() {
+    cy.intercept("POST", "**/api/v1/asset/").as("createAsset");
+  }
+
+  verifyAssetCreation() {
+    cy.wait("@createAsset").its("response.statusCode").should("eq", 201);
+  }
+
   clickCreateAsset() {
     cy.get("#submit").contains("Create Asset").click();
   }
@@ -139,6 +148,12 @@ export class AssetPage {
     cy.get("[name=stream_uuid]").type(streamUuid);
   }
 
+  configureVitalAsset(hostName: string, localIp: string) {
+    cy.get("[data-testid=asset-configure-button]").click();
+    cy.get("#middlewareHostname").type(hostName);
+    cy.get("#localipAddress").type(localIp);
+  }
+
   spyAssetConfigureApi() {
     cy.intercept(/\/api\/v1\/asset/).as("asset");
   }
@@ -153,13 +168,27 @@ export class AssetPage {
     cy.get("#submit").contains("Set Configuration").click();
   }
 
+  clickConfigureVital() {
+    cy.intercept("PATCH", "**/api/v1/asset/**").as("postConfiguration");
+    cy.get("#submit").contains("Save Configuration").click();
+    cy.wait("@postConfiguration").its("response.statusCode").should("eq", 200);
+  }
+
   clickUpdateAsset() {
     cy.get("#submit").contains("Update").click();
+  }
+
+  interceptDeleteAssetApi() {
+    cy.intercept("DELETE", "**/api/v1/asset/**").as("deleteAsset");
   }
 
   deleteAsset() {
     cy.get("[data-testid=asset-delete-button]").click();
     cy.get("#submit").contains("Confirm").click();
+  }
+
+  verifyDeleteStatus() {
+    cy.wait("@deleteAsset").its("response.statusCode").should("eq", 204);
   }
 
   verifyEmptyAssetNameError() {
@@ -222,6 +251,8 @@ export class AssetPage {
   }
 
   clickImportAsset() {
+    cy.intercept("POST", "**/api/v1/asset/").as("importAsset");
     cy.get("#submit").contains("Import").click();
+    cy.wait("@importAsset").its("response.statusCode").should("eq", 201);
   }
 }
