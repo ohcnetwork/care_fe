@@ -38,7 +38,7 @@ import useVisibility from "../../Utils/useVisibility";
 import { validateEmailAddress } from "../../Common/validation";
 import { dateQueryString } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
-import DateInputV2 from "../Common/DateInputV2.js";
+import DateFormField from "../Form/FormFields/DateFormField.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -876,24 +876,25 @@ const AssetCreate = (props: AssetProps) => {
                       data-testid="asset-last-serviced-on-input"
                     >
                       <FieldLabel>Last Serviced On</FieldLabel>
-                      <DateInputV2
+                      <DateFormField
                         name="last_serviced_on"
                         className="mt-2"
                         position="RIGHT"
                         value={last_serviced_on && new Date(last_serviced_on)}
                         onChange={(date) => {
                           if (
-                            dayjs(date).format("YYYY-MM-DD") >
+                            dayjs(date.value).format("YYYY-MM-DD") >
                             new Date().toLocaleDateString("en-ca")
                           ) {
                             Notification.Error({
                               msg: "Last Serviced date can't be in future",
                             });
                           } else {
-                            setLastServicedOn(dayjs(date).format("YYYY-MM-DD"));
+                            setLastServicedOn(
+                              dayjs(date.value).format("YYYY-MM-DD")
+                            );
                           }
                         }}
-                        max={new Date()}
                       />
                       <FieldErrorText
                         error={state.errors.last_serviced_on}

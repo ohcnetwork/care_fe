@@ -7,10 +7,10 @@ import DialogModal from "../Common/Dialog";
 import { AssetData, AssetService, AssetServiceEdit } from "./AssetTypes";
 import dayjs from "dayjs";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import DateInputV2 from "../Common/DateInputV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { formatDate, formatDateTime } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import DateFormField from "../Form/FormFields/DateFormField";
 
 export const AssetServiceEditModal = (props: {
   asset?: AssetData;
@@ -170,18 +170,30 @@ export const AssetServiceEditModal = (props: {
               data-testid="asset-last-serviced-on-input"
             >
               <FieldLabel>Serviced On</FieldLabel>
-              <DateInputV2
+              <DateFormField
                 name="serviced_on"
                 className="mt-2"
                 position="LEFT"
                 value={new Date(form.serviced_on)}
                 onChange={(date) => {
-                  setForm({
-                    ...form,
-                    serviced_on: dayjs(date).format("YYYY-MM-DD"),
-                  });
+                  if (
+                    dayjs(date.value).format("YYYY-MM-DD") >
+                    new Date(
+                      props.service_record.created_date
+                    ).toLocaleDateString("en-ca")
+                  ) {
+                    Notification.Error({
+                      msg: `Service date can't be after ${dayjs(
+                        props.service_record.created_date
+                      ).format("DD/MM/YYYY")} (Creation date)`,
+                    });
+                  } else {
+                    setForm({
+                      ...form,
+                      serviced_on: dayjs(date.value).format("YYYY-MM-DD"),
+                    });
+                  }
                 }}
-                max={new Date(props.service_record.created_date)}
               />
             </div>
 
