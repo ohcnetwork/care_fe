@@ -86,7 +86,6 @@ export interface AssetData {
   manufacturer: string;
   warranty_amc_end_of_validity: string;
   last_service: AssetService;
-  note: string;
   meta?: {
     [key: string]: any;
   };

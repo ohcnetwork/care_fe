@@ -38,7 +38,7 @@ describe("User management", () => {
     cy.intercept(/\/api\/v1\/facility/).as("facility");
     cy.get("[name='facilities']")
       .click()
-      .type("cypress facility")
+      .type("Dummy Facility 1")
       .wait("@facility");
     cy.get("li[role='option']").first().click();
     cy.get("input[type='checkbox']").click();
@@ -93,7 +93,7 @@ describe("User management", () => {
       cy.get("button[id='facilities']").click();
       cy.wait("@userFacility")
         .getAttached("div[id=facility_0] > div > span")
-        .contains("cypress facility");
+        .contains("Dummy Facility 1");
     });
   });
 
@@ -102,7 +102,7 @@ describe("User management", () => {
     cy.intercept(/\/api\/v1\/facility/).as("getFacilities");
     cy.get("[name='facility']")
       .click()
-      .type("cypress facility")
+      .type("Dummy Facility 1")
       .wait("@getFacilities");
     cy.get("li[role='option']").first().click();
     cy.intercept(/\/api\/v1\/users\/\w+\/add_facility\//).as("addFacility");
