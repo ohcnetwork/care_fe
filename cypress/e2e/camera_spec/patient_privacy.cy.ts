@@ -13,6 +13,8 @@ describe("Patient Privacy", () => {
     cy.get("input[id='name']").type("Dummy Patient");
     cy.contains("a", "Dummy Patient").contains("a", "Dummy Facility 1").click();
     cy.wait("@consultation");
+    cy.get("a").contains("Camera Feed").click();
+    cy.wait("@consultation");
   });
 
   it("Toggle privacy", () => {
