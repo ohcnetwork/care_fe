@@ -18,6 +18,8 @@ import {
   partialUpdateAssetBed,
 } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
+import ButtonV2 from "../../Common/components/ButtonV2.js";
+import Spinner from "../../Common/Spinner.js";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon.js";
 import { ConsultationModel } from "../models";
@@ -30,16 +32,27 @@ import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import useFullscreen from "../../../Common/hooks/useFullscreen.js";
 import { triggerGoal } from "../../Common/Plausible.js";
+import { useMessageListener } from "../../../Common/hooks/useMessageListener.js";
+import useNotificationSubscribe from "../../../Common/hooks/useNotificationSubscribe.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 
 interface IFeedProps {
   facilityId: string;
   consultationId: any;
 }
+
+interface cameraOccupier {
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  homeFacility?: string;
+}
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
 export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const dispatch: any = useDispatch();
+  const CAMERA_ACCESS_TIMEOUT = 10 * 60; //seconds
 
   const videoWrapper = useRef<HTMLDivElement>(null);
 
@@ -57,9 +70,131 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [boundaryPreset, setBoundaryPreset] = useState<any>();
   const [isFullscreen, setFullscreen] = useFullscreen();
 
+  // Information about subscription and camera occupier in case asset is not occupied by the current user
+  const [showSubscriptionInfo, setShowSubscriptionInfo] = useState(false);
+  const [showCameraOccupierInfo, setShowCameraOccupierInfo] = useState(false);
+  const [cameraOccupier, setCameraOccupier] = useState<cameraOccupier>({});
+  const [timeoutSeconds, setTimeoutSeconds] = useState(CAMERA_ACCESS_TIMEOUT);
+  const [isRequestingAccess, setIsRequestingAccess] = useState<boolean>(false);
+
   const [borderAlert, setBorderAlert] = useState<any>(null);
   const [privacy, setPrivacy] = useState<boolean>(false);
   const authUser = useAuthUser();
+
+  // Notification hook to get subscription info
+  const { isSubscribed, isSubscribing, intialSubscriptionState, subscribe } =
+    useNotificationSubscribe();
+
+  useEffect(() => {
+    intialSubscriptionState();
+  }, [dispatch, isSubscribed]);
+
+  // display subscription info
+  const subscriptionInfo = () => {
+    return (
+      <div className="relative mb-1 flex flex-col justify-end">
+        {showSubscriptionInfo && (
+          <div
+            className="absolute z-10 flex -translate-x-16 translate-y-10 flex-col gap-2 rounded-md bg-white p-2  drop-shadow-md"
+            onMouseLeave={() => {
+              setShowSubscriptionInfo(false);
+            }}
+          >
+            <div className="text-xs">
+              {isSubscribed != "SubscribedOnThisDevice"
+                ? "Subscribe to get real time information about camera access"
+                : "You are subscribed, and will get real time information about camera access"}
+            </div>
+            {isSubscribed != "SubscribedOnThisDevice" && (
+              <ButtonV2
+                onClick={subscribe}
+                ghost
+                variant="secondary"
+                disabled={isSubscribing}
+                size="small"
+                border
+              >
+                {isSubscribing && <Spinner />}
+                <CareIcon className="care-l-bell" />
+                Subscribe
+              </ButtonV2>
+            )}
+          </div>
+        )}
+        <div
+          onMouseEnter={() => {
+            setShowSubscriptionInfo(true);
+          }}
+        >
+          <CareIcon className="care-l-info-circle text-xl" />
+        </div>
+      </div>
+    );
+  };
+
+  //display current cameraoccupier info incase the asset is not occupied by the current user
+  const currentCameraOccupierInfo = () => {
+    return (
+      <div
+        className="relative mb-1 flex flex-row-reverse"
+        onMouseLeave={() => {
+          setShowCameraOccupierInfo(false);
+        }}
+      >
+        {showCameraOccupierInfo && (
+          <div className="absolute z-10 flex w-48 -translate-x-12 flex-col gap-2 rounded-md bg-white p-2 drop-shadow-md">
+            <div className="text-xs text-gray-600">
+              Camera is being used by...
+            </div>
+
+            <div className="flex flex-row gap-1 text-sm font-semibold">
+              <div>{`${cameraOccupier.firstName} ${cameraOccupier.lastName}-`}</div>
+              <div className="text-green-600">{`${cameraOccupier.role}`}</div>
+            </div>
+            {cameraOccupier.homeFacility && (
+              <div className="text-sm">{`${cameraOccupier.homeFacility}`}</div>
+            )}
+            <ButtonV2
+              onClick={() => {
+                setIsRequestingAccess(true);
+                requestAccess({
+                  onSuccess: () => {
+                    Notification.Success({ msg: "Request sent" });
+                    setIsRequestingAccess(false);
+                  },
+                  onError: () => {
+                    Notification.Error({ msg: "Request failed" });
+                    setIsRequestingAccess(false);
+                  },
+                });
+              }}
+              ghost
+              variant="secondary"
+              size="small"
+              border
+            >
+              {isRequestingAccess && <Spinner />}
+              Request Access
+            </ButtonV2>
+          </div>
+        )}
+        <div
+          className="h-12 w-12 flex-col items-center justify-center  rounded-full border-2 border-green-500 bg-white text-center"
+          onMouseEnter={() => {
+            setShowCameraOccupierInfo(true);
+          }}
+        >
+          <div className="text-4xl font-bold text-green-600">
+            {cameraOccupier?.firstName?.[0] ? (
+              cameraOccupier?.firstName?.[0].toUpperCase()
+            ) : (
+              <CareIcon className="care-l-user" />
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -203,6 +338,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     getPTZPayload,
     getPresets,
     relativeMove,
+    lockAsset,
+    unlockAsset,
+    requestAccess,
   } = useFeedPTZ({
     config: cameraAsset,
     dispatch,
@@ -230,8 +368,16 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   useEffect(() => {
     if (cameraAsset.id) {
       getPresets({
-        onSuccess: (resp) => setPresets(resp),
-        onError: (_) => {
+        onSuccess: (resp) => {
+          setPresets(resp);
+          setCameraOccupier({});
+        },
+        onError: (resp) => {
+          if (resp.status === 409) {
+            setCameraOccupier(resp.data as cameraOccupier);
+          } else {
+            setCameraOccupier({});
+          }
           Notification.Error({
             msg: "Fetching presets failed",
           });
@@ -240,6 +386,106 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       getBedPresets(cameraAsset);
     }
   }, [cameraAsset, cameraMiddlewareHostname]);
+
+  //lock and unlock asset on mount and unmount
+  useEffect(() => {
+    if (cameraAsset.id) {
+      lockAsset({
+        onError: async (resp) => {
+          if (resp.status === 409) {
+            setCameraOccupier(resp.data as cameraOccupier);
+          }
+        },
+        onSuccess() {
+          setCameraOccupier({});
+        },
+      });
+    }
+
+    window.addEventListener("beforeunload", () => {
+      if (cameraAsset.id) {
+        unlockAsset({});
+      }
+    });
+
+    return () => {
+      if (cameraAsset.id) {
+        unlockAsset({});
+      }
+      window.removeEventListener("beforeunload", () => {
+        if (cameraAsset.id) {
+          unlockAsset({});
+        }
+      });
+    };
+  }, [cameraAsset, cameraMiddlewareHostname]);
+
+  //count down from CAMERA_ACCESS_TIMEOUT when mouse is idle to unlock asset after timeout
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeoutSeconds((prevSeconds) => prevSeconds - 1);
+    }, 1000);
+
+    const resetTimer = () => {
+      setTimeoutSeconds(CAMERA_ACCESS_TIMEOUT);
+    };
+
+    document.addEventListener("mousemove", resetTimer);
+
+    if (cameraOccupier.username) {
+      clearInterval(interval);
+      setTimeoutSeconds(CAMERA_ACCESS_TIMEOUT);
+      removeEventListener("mousemove", resetTimer);
+    }
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("mousemove", resetTimer);
+    };
+  }, [cameraOccupier]);
+
+  //unlock asset after timeout
+  useEffect(() => {
+    if (timeoutSeconds === 0) {
+      unlockAsset({});
+      setTimeoutSeconds(CAMERA_ACCESS_TIMEOUT);
+      setTimeout(() => {
+        lockAsset({
+          onError: async (resp) => {
+            if (resp.status === 409) {
+              setCameraOccupier(resp.data as cameraOccupier);
+            }
+          },
+          onSuccess() {
+            setCameraOccupier({});
+          },
+        });
+      }, 2000);
+    }
+  }, [timeoutSeconds]);
+
+  //Listen to push notifications for-
+  //1) camera access request
+  //2) camera access granted
+  useMessageListener((data) => {
+    if (data?.status == "success" && data?.asset_id === cameraAsset?.id) {
+      lockAsset({
+        onError: async (resp) => {
+          if (resp.status === 409) {
+            setCameraOccupier(resp.data as cameraOccupier);
+          }
+        },
+        onSuccess: () => {
+          setCameraOccupier({});
+          setTimeoutSeconds(CAMERA_ACCESS_TIMEOUT);
+        },
+      });
+    } else if (data.status == "request") {
+      Notification.Warn({
+        msg: `${data?.firstName} ${data?.lastName} is requesting access to the camera`,
+      });
+    }
+  });
 
   useEffect(() => {
     let tId: any;
@@ -277,8 +523,14 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           onSuccess: () => {
             setLoading(CAMERA_STATES.IDLE);
             setCurrentPreset(preset);
+            setCameraOccupier({});
           },
           onError: (err: Record<any, any>) => {
+            if (err.status === 409) {
+              setCameraOccupier(err.data as cameraOccupier);
+            } else {
+              setCameraOccupier({});
+            }
             setLoading(CAMERA_STATES.IDLE);
             const responseData = err.data.result;
             if (responseData.status) {
@@ -343,6 +595,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     updatePreset: (option) => {
       getCameraStatus({
         onSuccess: async (data) => {
+          setCameraOccupier({});
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
             const response = await dispatch(
@@ -361,15 +614,32 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             if (response && response.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
               getBedPresets(cameraAsset?.id);
-              getPresets({});
+              getPresets({
+                onSuccess: () => {
+                  setCameraOccupier({});
+                },
+                onError: (resp) => {
+                  if (resp.status === 409) {
+                    setCameraOccupier(resp.data as cameraOccupier);
+                  } else {
+                    setCameraOccupier({});
+                  }
+                },
+              });
             }
             setLoading(CAMERA_STATES.IDLE);
+          }
+        },
+        onError: (resp) => {
+          if (resp.status === 409) {
+            setCameraOccupier(resp.data as cameraOccupier);
+          } else {
+            setCameraOccupier({});
           }
         },
       });
     },
     other: (option, value) => {
-      // TODO: Check border flash once camera is active
       setLoading(option.loadingLabel);
       let payLoad = getPTZPayload(option.action, precision, value);
       if (boundaryPreset?.meta?.range && cameraState) {
@@ -418,8 +688,18 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       }
 
       relativeMove(payLoad, {
-        onSuccess: () => setLoading(CAMERA_STATES.IDLE),
-        onError: () => setLoading(CAMERA_STATES.IDLE),
+        onSuccess: () => {
+          setLoading(CAMERA_STATES.IDLE);
+          setCameraOccupier({});
+        },
+        onError: async (resp) => {
+          if (resp.status === 409) {
+            setCameraOccupier(resp.data as cameraOccupier);
+          } else {
+            setCameraOccupier({});
+          }
+          setLoading(CAMERA_STATES.IDLE);
+        },
       });
       if (cameraState) {
         let x = cameraState.x;
@@ -505,6 +785,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                   absoluteMove(preset.meta.position, {
                     onSuccess: () => {
                       setLoading(CAMERA_STATES.IDLE);
+                      setCameraOccupier({});
                       setCurrentPreset(preset);
                       console.log(
                         "onSuccess: Set Preset to " + preset?.meta?.preset_name
@@ -516,7 +797,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                         result: "success",
                       });
                     },
-                    onError: () => {
+                    onError: async (resp) => {
+                      if (resp.status === 409) {
+                        setCameraOccupier(resp.data as cameraOccupier);
+                      } else {
+                        setCameraOccupier({});
+                      }
                       setLoading(CAMERA_STATES.IDLE);
                       setCurrentPreset(preset);
                       console.log(
@@ -530,7 +816,18 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                       });
                     },
                   });
-                  getCameraStatus({});
+                  getCameraStatus({
+                    onSuccess: () => {
+                      setCameraOccupier({});
+                    },
+                    onError: (resp) => {
+                      if (resp.status === 409) {
+                        setCameraOccupier(resp.data as cameraOccupier);
+                      } else {
+                        setCameraOccupier({});
+                      }
+                    },
+                  });
                 }}
                 className={classNames(
                   "block border border-gray-500 px-4 py-2",
@@ -544,10 +841,14 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             ))}
           </div>
         </div>
+        <div className="flex flex-row gap-2">
+          {cameraOccupier?.username && currentCameraOccupierInfo()}
+          {subscriptionInfo()}
+        </div>
       </div>
       <div className={`${borderAlert == null ? "" : borderAlert}-border-flash`}>
         <div
-          className="relative flex h-[calc(100vh-1.5rem-90px)] grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
+          className="relative z-0 flex h-[calc(100vh-1.5rem-90px)] grow-0 items-center justify-center overflow-hidden rounded-xl bg-black"
           ref={videoWrapper}
         >
           {isIOS ? (

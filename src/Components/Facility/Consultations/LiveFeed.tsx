@@ -364,6 +364,7 @@ const LiveFeed = (props: any) => {
       }
       relativeMove(getPTZPayload(option.action, precision), {
         onSuccess: () => setLoading(undefined),
+        onError: () => setLoading(undefined),
       });
     },
   };
