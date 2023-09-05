@@ -16,9 +16,7 @@ const PatientNoteCard = ({ note }: { note: any }) => {
           {note.created_by_object?.last_name}
         </span>
         <span className="pl-2 text-sm text-gray-700">
-          {"("}
-          {USER_TYPES_MAP[note.user_type]}
-          {")"}
+          {`(${USER_TYPES_MAP[note.user_type]})`}
         </span>
       </div>
       <span className="whitespace-pre-wrap break-words">{note.note}</span>
