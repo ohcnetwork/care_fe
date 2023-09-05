@@ -9,6 +9,7 @@ import { classNames } from "../../Utils/utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { make as Link } from "../Common/components/Link.bs";
+import { useMessageListener } from "../../Common/hooks/useMessageListener";
 
 interface PatientNotesProps {
   patientId: string;
@@ -42,6 +43,16 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
       setReload(!reload);
     });
   };
+
+  useMessageListener((data) => {
+    if (
+      data?.status == "updated" &&
+      data?.facility_id == facilityId &&
+      data?.patient_id == patientId
+    ) {
+      setReload(true);
+    }
+  });
 
   useEffect(() => {
     async function fetchPatientName() {
