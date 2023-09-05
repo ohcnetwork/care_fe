@@ -1,4 +1,6 @@
 // FacilityPage.ts
+import { cy } from "local-cypress";
+
 class FacilityPage {
   visitCreateFacilityPage() {
     cy.visit("/facility/create");
@@ -99,12 +101,92 @@ class FacilityPage {
     cy.get("#update-facility").contains("Update Facility").click();
   }
 
+  clickConfigureFacilityOption() {
+    cy.get("#configure-facility").contains("Configure Facility").click();
+  }
+
+  clickInventoryManagementOption() {
+    cy.get("[id=inventory-management]").click();
+  }
+
+  clickResourceRequestOption() {
+    cy.get("#resource-request").contains("Resource Request").click();
+  }
+
+  clickDeleteFacilityOption() {
+    cy.get("#delete-facility").contains("Delete Facility").click();
+  }
+
+  confirmDeleteFacility() {
+    cy.get("#submit").contains("Delete").click();
+  }
+
   selectLocation(location: string) {
     cy.get("span > svg.care-svg-icon__baseline.care-l-map-marker").click();
     cy.intercept("https://maps.googleapis.com/maps/api/mapsjs/*").as("mapApi");
     cy.wait("@mapApi").its("response.statusCode").should("eq", 200);
     cy.get("input#pac-input").type(location).type("{enter}");
     cy.get("div#map-close").click();
+  }
+
+  fillMiddleWareAddress(url: string) {
+    cy.get("#middleware_address").type(url);
+  }
+
+  clickupdateMiddleWare() {
+    cy.get("button#submit").first().click();
+  }
+
+  verifySuccessNotification(message: string) {
+    cy.verifyNotification(message);
+  }
+
+  visitAlreadyCreatedFacility() {
+    cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
+    cy.get("[id='facility-details']").first().click();
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+    cy.get("#manage-facility-dropdown button").should("be.visible");
+    cy.get("[id=manage-facility-dropdown]").scrollIntoView().click();
+  }
+
+  clickManageInventory() {
+    cy.contains("Manage Inventory").click();
+  }
+
+  fillInventoryDetails(name: string, status: string, quantity: string) {
+    cy.get("div#id").click();
+    cy.get("div#id ul li").contains(name).click();
+    cy.get("div#isIncoming").click();
+    cy.get("div#isIncoming ul li").contains(status).click();
+    cy.get("[name='quantity']").type(quantity);
+  }
+
+  clickAddInventory() {
+    cy.get("button").contains("Add/Update Inventory").click();
+  }
+
+  fillResourceRequestDetails(
+    name: string,
+    phone_number: string,
+    facility: string,
+    title: string,
+    quantity: string,
+    description: string
+  ) {
+    cy.get("#refering_facility_contact_name").type(name);
+    cy.get("#refering_facility_contact_number").type(phone_number);
+    cy.get("[name='approving_facility']")
+      .type(facility)
+      .then(() => {
+        cy.get("[role='option']").first().click();
+      });
+    cy.get("#title").type(title);
+    cy.get("#requested_quantity").type(quantity);
+    cy.get("#reason").type(description);
+  }
+
+  clickSubmitRequestButton() {
+    cy.get("button").contains("Submit").click();
   }
 }
 
