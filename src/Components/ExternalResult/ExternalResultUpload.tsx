@@ -71,7 +71,7 @@ export default function ExternalResultUpload() {
         className="mt-4"
       />
       <div className="mx-auto mt-6 flex max-w-3xl justify-center">
-        <div className="w-full py-4 ">
+        <div className="py-4 md:w-[500px]">
           <div className="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2">
             <div className="my-2 sm:col-span-2 sm:mt-0">
               <div className="mx-auto flex flex-col justify-center rounded-md border-2 border-dashed border-gray-300 pb-6 pt-5 text-center">
