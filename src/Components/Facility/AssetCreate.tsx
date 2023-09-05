@@ -859,6 +859,7 @@ const AssetCreate = (props: AssetProps) => {
                       <TextFormField
                         id="serial-number"
                         name="serial_number"
+                        // eslint-disable-next-line i18next/no-literal-string
                         label="Serial Number"
                         value={serial_number}
                         onChange={(e) => setSerialNumber(e.value)}
@@ -875,8 +876,8 @@ const AssetCreate = (props: AssetProps) => {
                       ref={fieldRef["last_serviced_on"]}
                       data-testid="asset-last-serviced-on-input"
                     >
-                      <FieldLabel>Last Serviced On</FieldLabel>
                       <DateFormField
+                        label="Last Serviced On"
                         name="last_serviced_on"
                         className="mt-2"
                         position="RIGHT"

@@ -7,7 +7,6 @@ import DialogModal from "../Common/Dialog";
 import { AssetData, AssetService, AssetServiceEdit } from "./AssetTypes";
 import dayjs from "dayjs";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
 import { formatDate, formatDateTime } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DateFormField from "../Form/FormFields/DateFormField";
@@ -169,8 +168,9 @@ export const AssetServiceEditModal = (props: {
               className="col-span-6 sm:col-span-3"
               data-testid="asset-last-serviced-on-input"
             >
-              <FieldLabel>Serviced On</FieldLabel>
               <DateFormField
+                // eslint-disable-next-line i18next/no-literal-string
+                label="Serviced On"
                 name="serviced_on"
                 className="mt-2"
                 position="LEFT"
