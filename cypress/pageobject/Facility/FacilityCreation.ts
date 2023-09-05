@@ -13,6 +13,14 @@ class FacilityPage {
     cy.get("#manage-facility-dropdown button").should("be.visible");
   }
 
+  clickUpdateFacilityType() {
+    cy.get("#facility_type")
+      .click()
+      .then(() => {
+        cy.get("[role='option']").contains("Request Approving Center").click();
+      });
+  }
+
   fillFacilityName(name: string) {
     cy.get("#name").clear().type(name);
   }
