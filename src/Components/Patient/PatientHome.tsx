@@ -222,7 +222,6 @@ export const PatientHome = (props: any) => {
       fetchpatient(status);
       triggerGoal("Patient Profile Viewed", {
         facilityId: facilityId,
-        patientId: patientData.id,
         userID: authUser.id,
       });
     },
