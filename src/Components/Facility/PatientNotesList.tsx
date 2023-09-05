@@ -56,7 +56,6 @@ const PatientNotesList = (props: PatientNotesProps) => {
         }
         setIsLoading(false);
       }
-      console.log(res);
     },
     [props.patientId, dispatch]
   );
