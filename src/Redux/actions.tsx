@@ -975,6 +975,15 @@ export const healthFacilityActions = {
       facility_id: id,
     });
   },
+
+  registerService: (id: string) => {
+    return fireRequest(
+      "registerHealthFacilityAsService",
+      [],
+      {},
+      { facility_id: id }
+    );
+  },
 };
 
 export const listAssetAvailability = (params: object) =>
