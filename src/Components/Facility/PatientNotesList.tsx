@@ -6,6 +6,7 @@ import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import CircularProgress from "../Common/components/CircularProgress";
 import PatientNoteCard from "./PatientNoteCard";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { NoteType } from "./PatientNoteCard";
 
 interface PatientNotesProps {
   patientId: any;
@@ -14,13 +15,19 @@ interface PatientNotesProps {
   setReload?: any;
 }
 
+interface StateType {
+  notes: NoteType[];
+  cPage: number;
+  totalPages: number;
+}
+
 const pageSize = RESULTS_PER_PAGE_LIMIT;
 
 const PatientNotesList = (props: PatientNotesProps) => {
   const { reload, setReload } = props;
 
   const dispatch: any = useDispatch();
-  const initialData: any = { notes: [], cPage: 1, totalPages: 1 };
+  const initialData: StateType = { notes: [], cPage: 1, totalPages: 1 };
   const [state, setState] = useState(initialData);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -49,6 +56,7 @@ const PatientNotesList = (props: PatientNotesProps) => {
         }
         setIsLoading(false);
       }
+      console.log(res);
     },
     [props.patientId, dispatch]
   );
