@@ -195,6 +195,11 @@ describe("Patient Creation with consultation", () => {
     cy.get("#icd11_diagnoses_object [role='option']")
       .contains("1A03 Intestinal infections due to Escherichia coli")
       .click();
+    cy.get("#icd11_principal_diagnosis [role='combobox']").click().type("1A");
+    cy.wait(1000);
+    cy.get("#icd11_principal_diagnosis [role='option']")
+      .contains("1A03 Intestinal infections due to Escherichia coli")
+      .click();
     cy.get("#consultation_notes").click().type("generalnote");
     cy.get("#verified_by").click().type("generalnote");
     cy.get("#submit").click();
