@@ -3,7 +3,11 @@ import { cy } from "local-cypress";
 
 class FacilityPage {
   visitCreateFacilityPage() {
+    cy.intercept("GET", "**/facility/create").as("getCreateFacilities");
     cy.visit("/facility/create");
+    cy.wait("@getCreateFacilities")
+      .its("response.statusCode")
+      .should("eq", 200);
   }
 
   visitUpdateFacilityPage(url: string) {
