@@ -87,7 +87,9 @@ export class AssetPage {
   }
 
   openCreatedAsset() {
+    cy.intercept("GET", "**/api/v1/asset/**").as("getAsset");
     cy.get("[data-testid=created-asset-list]").first().click();
+    cy.wait("@getAsset").its("response.statusCode").should("eq", 200);
   }
 
   editAssetDetails(
@@ -97,9 +99,9 @@ export class AssetPage {
     manufacturer: string,
     supportName: string,
     vendorName: string,
-    notes: string
+    notes: string,
+    lastServicedOn: string
   ) {
-    cy.wait(3000);
     cy.get("[data-testid=asset-update-button]").click();
     cy.get("[data-testid=asset-name-input] input").clear().type(name);
     cy.get("[data-testid=asset-description-input] textarea")
@@ -115,6 +117,10 @@ export class AssetPage {
     cy.get("[data-testid=asset-vendor-name-input] input")
       .clear()
       .type(vendorName);
+    cy.get(
+      "[data-testid=asset-last-serviced-on-input] input[type='text']"
+    ).click();
+    cy.get("#date-input").click().type(lastServicedOn);
     cy.get("[data-testid=asset-notes-input] textarea").clear().type(notes);
   }
 
@@ -137,9 +143,9 @@ export class AssetPage {
     cy.intercept(/\/api\/v1\/asset/).as("asset");
   }
 
-  verifyAssetConfiguration() {
+  verifyAssetConfiguration(statusCode: number) {
     cy.wait("@asset").then((interception) => {
-      expect(interception.response.statusCode).to.equal(200);
+      expect(interception.response.statusCode).to.equal(statusCode);
     });
   }
 

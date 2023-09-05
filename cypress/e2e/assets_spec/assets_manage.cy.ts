@@ -104,7 +104,8 @@ describe("Asset", () => {
       "Manufacturer's Name Edited",
       "Customer Support's Name Edited",
       "Vendor's Name Edited",
-      "Test note for asset creation edited!"
+      "Test note for asset creation edited!",
+      "25122021"
     );
 
     assetPage.clickUpdateAsset();
@@ -130,7 +131,7 @@ describe("Asset", () => {
       "d5694af2-21e2-4a39-9bad-2fb98d9818bd"
     );
     assetPage.clickConfigureAsset();
-    assetPage.verifyAssetConfiguration();
+    assetPage.verifyAssetConfiguration(200);
   });
 
   it("Import new asset", () => {
@@ -141,7 +142,7 @@ describe("Asset", () => {
     assetPage.selectImportLocation("Camera Locations");
     assetPage.clickImportAsset();
 
-    assetPage.verifyAssetConfiguration();
+    assetPage.verifyAssetConfiguration(201);
     assetPage.verifySuccessNotification("Assets imported successfully");
   });
 

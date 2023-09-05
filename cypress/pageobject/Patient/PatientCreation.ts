@@ -4,8 +4,10 @@ let patient_url = "";
 
 export class PatientPage {
   createPatient() {
+    cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.get("#add-patient-details").should("be.visible");
     cy.get("#add-patient-details").click();
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
   }
 
   selectFacility(facilityName: string) {
@@ -69,7 +71,9 @@ export class PatientPage {
   }
 
   clickCreatePatient() {
+    cy.intercept("POST", "**/api/v1/patient/").as("createPatient");
     cy.get("button[data-testid='submit-button']").click();
+    cy.wait("@createPatient").its("response.statusCode").should("eq", 201);
   }
 
   verifyPatientIsCreated() {

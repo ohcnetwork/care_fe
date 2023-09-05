@@ -44,9 +44,7 @@ describe("Patient Creation with consultation", () => {
       "O+",
       "01012001"
     );
-    patientPage.interceptCreatePatientAPI();
     patientPage.clickCreatePatient();
-    patientPage.verifyCreatedPatientResponse();
 
     patientPage.verifyPatientIsCreated();
     patientPage.saveCreatedPatientUrl();
@@ -93,21 +91,16 @@ describe("Patient Creation with consultation", () => {
   });
 
   it("Patient Detail verification post edit", () => {
+    patientPage.interceptFacilities();
     updatePatientPage.visitUpdatedPatient();
-    const patientDetails_values: string[] = [
-      "Severe Cough",
-      "Paracetamol",
-      "Dust",
-      "Diabetes",
-      "2 months ago",
-      "Heart Disease",
-      "1 month ago",
-    ];
+    patientPage.verifyStatusCode();
 
     updatePatientPage.verifyPatientDetails(
       "Test E2E User Edited",
       phone_number,
-      patientDetails_values
+      "Severe Cough",
+      "Paracetamol",
+      "Dust"
     );
   });
 

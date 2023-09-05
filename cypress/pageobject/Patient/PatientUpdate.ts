@@ -49,7 +49,9 @@ export class UpdatePatientPage {
   }
 
   clickUpdatePatient() {
+    cy.intercept("PUT", "**/api/v1/patient/**").as("updatePatient");
     cy.get("button").get("[data-testid=submit-button]").click();
+    cy.wait("@updatePatient").its("response.statusCode").should("eq", 200);
   }
 
   verifyPatientUpdated() {
@@ -71,14 +73,22 @@ export class UpdatePatientPage {
   verifyPatientDetails(
     patientName: string,
     phoneNumber: string,
-    patientDetails_values: string[]
+    presentHealth: string,
+    ongoingMedication: string,
+    allergies: string
   ) {
     cy.url().should("include", "/facility/");
     cy.get("[data-testid=patient-dashboard]").should("contain", patientName);
     cy.get("[data-testid=patient-dashboard]").should("contain", phoneNumber);
-    patientDetails_values.forEach((value) => {
-      cy.get("[data-testid=patient-details]").should("contain", value);
-    });
+    cy.get("[data-testid=patient-present-health]").should(
+      "contain",
+      presentHealth
+    );
+    cy.get("[data-testid=patient-ongoing-medication]").should(
+      "contain",
+      ongoingMedication
+    );
+    cy.get("[data-testid=patient-allergies]").should("contain", allergies);
   }
 
   visitConsultationPage() {

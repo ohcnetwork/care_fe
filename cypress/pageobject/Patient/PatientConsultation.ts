@@ -34,12 +34,13 @@ export class PatientConsultationPage {
     cy.get("#weight").click().type(height);
     cy.get("#height").click().type(weight);
     cy.get("#patient_no").type(ipNumber);
+    cy.intercept("GET", "**/api/v1/icd/**").as("getIcdQuery");
     cy.get(
       "#icd11_diagnoses_object input[placeholder='Select'][role='combobox']"
     )
       .click()
       .type("1A");
-    cy.wait(1000);
+    cy.wait("@getIcdQuery").its("response.statusCode").should("eq", 200);
     cy.get("#icd11_diagnoses_object [role='option']")
       .contains("1A03 Intestinal infections due to Escherichia coli")
       .click();
