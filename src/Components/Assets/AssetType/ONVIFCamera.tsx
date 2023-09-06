@@ -51,6 +51,8 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [toUpdateBoundary, setToUpdateBoundary] = useState<boolean>(false);
   const [loadingAddBoundaryPreset, setLoadingAddBoundaryPreset] =
     useState<boolean>(false);
+  const [updateBoundaryError, setUpdateBoundaryError] =
+    useState<boolean>(false);
   const [presets, setPresets] = useState<any[]>([]);
   const dispatch = useDispatch<any>();
 
@@ -59,9 +61,9 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
       [key: string]: number;
     }
     const bufferAtMaxZoom: bufferAtZoom = {
-      "0.3": 0.5,
-      "0.4": 0.25,
-      "0.5": 0.125,
+      "0.3": 0.2,
+      "0.4": 0.1,
+      "0.5": 0.05,
     };
     let buffer = 0;
     Object.keys(bufferAtMaxZoom).forEach((key: string) => {
@@ -285,10 +287,9 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
           dispatch(partialUpdateAssetBed(data, boundaryPreset.id as string))
         );
         if (res?.status === 200) {
-          Notification.Success({
-            msg: "Boundary Preset Modified Successfully",
-          });
+          setUpdateBoundaryError(false);
         } else {
+          setUpdateBoundaryError(true);
           Notification.Error({
             msg: "Failed to modify Boundary Preset",
           });
@@ -441,6 +442,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
               toUpdateBoundary={toUpdateBoundary}
               setToUpdateBoundary={setToUpdateBoundary}
               loadingAddBoundaryPreset={loadingAddBoundaryPreset}
+              updateBoundaryError={updateBoundaryError}
             />
           </Card>
         </>

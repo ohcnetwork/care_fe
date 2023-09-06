@@ -85,6 +85,7 @@ export default defineConfig({
     proxy: {
       "/api": {
         target: "https://careapi.ohc.network",
+        // target:"http://localhost:9000",
         changeOrigin: true,
       },
     },

@@ -3,6 +3,7 @@ import { BedModel } from "../../Facility/models";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { direction } from "../../../Common/constants";
+import * as Notification from "../../../Utils/Notifications.js";
 interface CameraBoundaryConfigureProps {
   addBoundaryPreset: () => void;
   deleteBoundaryPreset: () => void;
@@ -23,6 +24,7 @@ interface UpdateCameraBoundaryConfigureProps {
   setToUpdateBoundary: (toUpdate: boolean) => void;
   updateBoundaryInfo: Record<string, boolean>;
   setUpdateBoundaryInfo: (info: Record<string, boolean>) => void;
+  updateBoundaryError: boolean;
 }
 export default function CameraBoundaryConfigure(
   props: CameraBoundaryConfigureProps
@@ -142,6 +144,7 @@ export function UpdateCameraBoundaryConfigure(
     setToUpdateBoundary,
     updateBoundaryInfo,
     setUpdateBoundaryInfo,
+    updateBoundaryError,
   } = props;
 
   const translation: Record<string, string> = {
@@ -204,6 +207,22 @@ export function UpdateCameraBoundaryConfigure(
   };
 
   const handleNextButtonClick = () => {
+    const prevDir: any = {
+      left: null,
+      right: "left",
+      up: "right",
+      down: "up",
+    };
+
+    if (
+      !updateBoundaryError &&
+      prevDir[direction as string] &&
+      updateBoundaryInfo[prevDir[direction as string]]
+    ) {
+      Notification.Success({
+        msg: `${translation[direction as string]} boundary updated`,
+      });
+    }
     switch (direction) {
       case "left":
         setDirection("right");

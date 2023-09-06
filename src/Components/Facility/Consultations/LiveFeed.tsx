@@ -71,6 +71,7 @@ const LiveFeed = (props: any) => {
   const setBoundaryPreset: (preset: any) => void = props?.setBoundaryPreset;
   const fetchBoundaryBedPreset: () => void = props?.fetchBoundaryBedPreset;
   const updateBoundaryPreset: () => void = props?.updateBoundaryPreset;
+  const updateBoundaryError: boolean = props.updateBoundaryError;
   const [updateBoundaryInfo, setUpdateBoundaryInfo] = useState<
     Record<string, boolean>
   >({
@@ -295,13 +296,7 @@ const LiveFeed = (props: any) => {
         { x: (max_x + min_x) / 2, y: min_y, zoom: 0.2 },
       ];
       for (const edge of edegs) {
-        await runFunctionWithDelay(
-          () =>
-            absoluteMove(edge, {
-              onSuccess: () => setLoading(undefined),
-            }),
-          3000
-        );
+        await runFunctionWithDelay(() => absoluteMove(edge, {}), 3000);
       }
       setIsPreview(false);
       setLoading(undefined);
@@ -393,25 +388,6 @@ const LiveFeed = (props: any) => {
     setToUpdateBoundary(false);
     setDirection(null);
   }, [page.offset, cameraAsset.id, refreshPresetsHash, bed]);
-
-  useEffect(() => {
-    const position = bedPresets?.filter((preset: any) => {
-      if (preset?.meta?.position && preset?.meta?.type != "boundary") {
-        return true;
-      }
-      return false;
-    })?.[0]?.meta?.position;
-    if (position) {
-      setLoading("Moving to default preset");
-      absoluteMove(position, {
-        onSuccess: () => setLoading(undefined),
-        onError: () => {
-          Notification.Error({ msg: "Something went wrong" });
-          setLoading(undefined);
-        },
-      });
-    }
-  }, [bedPresets]);
 
   //hook move to directional boundary when modifying the boundary
   useEffect(() => {
@@ -684,6 +660,7 @@ const LiveFeed = (props: any) => {
                     setToUpdateBoundary={setToUpdateBoundary}
                     updateBoundaryInfo={updateBoundaryInfo}
                     setUpdateBoundaryInfo={setUpdateBoundaryInfo}
+                    updateBoundaryError={updateBoundaryError}
                   />
                 ) : (
                   <>
