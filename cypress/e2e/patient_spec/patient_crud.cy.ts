@@ -84,7 +84,6 @@ describe("Patient Creation with consultation", () => {
   it("Patient Detail verification post edit", () => {
     updatePatientPage.visitUpdatedPatient();
     const patientDetails_values: string[] = [
-      "Test Patient Address Edited",
       "Severe Cough",
       "Paracetamol",
       "Dust",

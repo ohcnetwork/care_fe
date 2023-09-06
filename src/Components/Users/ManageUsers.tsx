@@ -11,7 +11,7 @@ import {
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { lazy, useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -387,7 +387,10 @@ export default function ManageUsers() {
                   )}
                 </div>
                 <div>
-                  <UserDetails id="working-hours" title="Weekly working hours">
+                  <UserDetails
+                    id="working-hours"
+                    title="Average weekly working hours"
+                  >
                     {user.weekly_working_hours ? (
                       <span className="font-semibold">
                         {user.weekly_working_hours} hours
@@ -438,7 +441,7 @@ export default function ManageUsers() {
                         }}
                       >
                         <CareIcon className="care-l-clock text-xl" />
-                        <p>Set weekly working hours</p>
+                        <p>Set Average weekly working hours</p>
                       </ButtonV2>
                     </div>
                   )}
@@ -492,7 +495,7 @@ export default function ManageUsers() {
         open={expandWorkingHours}
         setOpen={setExpandWorkingHours}
         slideFrom="right"
-        title="Weekly working hours"
+        title="Average weekly working hours"
         dialogClass="md:w-[400px]"
         onCloseClick={() => {
           setWeeklyHours(0);
@@ -500,7 +503,7 @@ export default function ManageUsers() {
       >
         <div className="px-2">
           <dt className="mb-3 text-sm font-medium leading-5 text-black">
-            Set weekly working hours for {selectedUser}
+            Set Average weekly working hours for {selectedUser}
           </dt>
           <TextFormField
             name="weekly_working_hours"
@@ -511,7 +514,7 @@ export default function ManageUsers() {
             }}
             error={
               weeklyHours < 0 || weeklyHours > 168
-                ? "Weekly working hours should be between 0 and 168"
+                ? "Average weekly working hours should be between 0 and 168"
                 : ""
             }
             required
