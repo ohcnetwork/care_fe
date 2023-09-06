@@ -226,7 +226,7 @@ export const ConsultationDetails = (props: any) => {
     triggerGoal("Patient Consultation Viewed", {
       facilityId: facilityId,
       consultationId: consultationId,
-      userID: authUser.id,
+      userId: authUser.id,
     });
   }, []);
 
