@@ -186,21 +186,24 @@ describe("Patient Creation with consultation", () => {
     cy.get("#weight").click().type("70");
     cy.get("#height").click().type("170");
     cy.get("#patient_no").type("IP007");
+
+    cy.intercept("GET", "**/icd/**").as("getIcdResults");
     cy.get(
       "#icd11_diagnoses_object input[placeholder='Select'][role='combobox']"
     )
       .click()
       .type("1A");
-    cy.wait(1000);
     cy.get("#icd11_diagnoses_object [role='option']")
       .contains("1A03 Intestinal infections due to Escherichia coli")
       .click();
-    cy.wait(1000);
+    cy.get("label[for='icd11_diagnoses_object']").click();
+    cy.wait("@getIcdResults").its("response.statusCode").should("eq", 200);
+
     cy.get("#icd11_principal_diagnosis [role='combobox']").click().type("1A");
-    cy.wait(1000);
     cy.get("#icd11_principal_diagnosis [role='option']")
       .contains("1A03 Intestinal infections due to Escherichia coli")
       .click();
+
     cy.get("#consultation_notes").click().type("generalnote");
     cy.get("#verified_by").click().type("generalnote");
     cy.get("#submit").click();
