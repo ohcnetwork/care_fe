@@ -32,7 +32,7 @@ describe("Patient Creation with consultation", () => {
 
   it("Create a new patient with no consultation", () => {
     patientPage.createPatient();
-    patientPage.selectFacility("cypress facility");
+    patientPage.selectFacility("dummy facility");
     patientPage.enterPatientDetails(
       phone_number,
       emergency_phone_number,
