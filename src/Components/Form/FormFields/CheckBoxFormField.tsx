@@ -14,6 +14,7 @@ export default function CheckBoxFormField(props: FormFieldBaseProps<boolean>) {
           name={field.name}
           checked={field.value}
           onChange={(e) => field.handleChange(e.target.checked)}
+          disabled={field.disabled}
         />
         <FieldLabel
           htmlFor={field.id}
