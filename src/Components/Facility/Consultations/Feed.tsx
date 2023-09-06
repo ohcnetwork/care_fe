@@ -92,14 +92,14 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   // display subscription info
   const subscriptionInfo = () => {
     return (
-      <div className="relative mb-1 flex flex-col justify-end">
+      <div
+        className="relative mb-1 flex flex-col justify-end"
+        onMouseLeave={() => {
+          setShowSubscriptionInfo(false);
+        }}
+      >
         {showSubscriptionInfo && (
-          <div
-            className="absolute z-10 flex -translate-x-16 translate-y-10 flex-col gap-2 rounded-md bg-white p-2  drop-shadow-md"
-            onMouseLeave={() => {
-              setShowSubscriptionInfo(false);
-            }}
-          >
+          <div className="absolute z-10 flex -translate-x-16 translate-y-32 flex-col gap-2 rounded-md bg-white p-2  drop-shadow-md">
             <div className="text-xs">
               {isSubscribed != "SubscribedOnThisDevice"
                 ? "Subscribe to get real time information about camera access"
@@ -136,13 +136,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const currentCameraOccupierInfo = () => {
     return (
       <div
-        className="relative mb-1 flex flex-row-reverse"
+        className="relative flex flex-row-reverse"
         onMouseLeave={() => {
           setShowCameraOccupierInfo(false);
         }}
       >
         {showCameraOccupierInfo && (
-          <div className="absolute z-10 flex w-48 -translate-x-12 flex-col gap-2 rounded-md bg-white p-2 drop-shadow-md">
+          <div className="absolute z-10 flex w-48 -translate-x-8 flex-col gap-2 rounded-md bg-white p-2 drop-shadow-md">
             <div className="text-xs text-gray-600">
               Camera is being used by...
             </div>
@@ -179,12 +179,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           </div>
         )}
         <div
-          className="h-12 w-12 flex-col items-center justify-center  rounded-full border-2 border-green-500 bg-white text-center"
+          className="h-8 w-8 items-center  rounded-full border-2 border-green-500 bg-white text-center"
           onMouseEnter={() => {
             setShowCameraOccupierInfo(true);
           }}
         >
-          <div className="text-4xl font-bold text-green-600">
+          <div className="mb-1 text-2xl font-bold text-green-600">
             {cameraOccupier?.firstName?.[0] ? (
               cameraOccupier?.firstName?.[0].toUpperCase()
             ) : (
@@ -375,6 +375,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         onError: (resp) => {
           if (resp.status === 409) {
             setCameraOccupier(resp.data as cameraOccupier);
+            Notification.Error({
+              msg: `Camera is being used by ${cameraOccupier?.firstName} ${cameraOccupier?.lastName}`,
+            });
           } else {
             setCameraOccupier({});
           }
@@ -528,12 +531,15 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
           onError: (err: Record<any, any>) => {
             if (err.status === 409) {
               setCameraOccupier(err.data as cameraOccupier);
+              Notification.Error({
+                msg: `Camera is being used by ${cameraOccupier?.firstName} ${cameraOccupier?.lastName}`,
+              });
             } else {
               setCameraOccupier({});
             }
             setLoading(CAMERA_STATES.IDLE);
             const responseData = err.data.result;
-            if (responseData.status) {
+            if (responseData?.status) {
               switch (responseData.status) {
                 case "error":
                   if (responseData.error.code === "EHOSTUNREACH") {
@@ -621,6 +627,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                 onError: (resp) => {
                   if (resp.status === 409) {
                     setCameraOccupier(resp.data as cameraOccupier);
+                    Notification.Error({
+                      msg: `Camera is being used by ${cameraOccupier?.firstName} ${cameraOccupier?.lastName}`,
+                    });
                   } else {
                     setCameraOccupier({});
                   }
@@ -633,6 +642,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         onError: (resp) => {
           if (resp.status === 409) {
             setCameraOccupier(resp.data as cameraOccupier);
+            Notification.Error({
+              msg: `Camera is being used by ${cameraOccupier?.firstName} ${cameraOccupier?.lastName}`,
+            });
           } else {
             setCameraOccupier({});
           }
@@ -695,6 +707,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         onError: async (resp) => {
           if (resp.status === 409) {
             setCameraOccupier(resp.data as cameraOccupier);
+            Notification.Error({
+              msg: `Camera is being used by ${cameraOccupier?.firstName} ${cameraOccupier?.lastName}`,
+            });
           } else {
             setCameraOccupier({});
           }
@@ -800,6 +815,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                     onError: async (resp) => {
                       if (resp.status === 409) {
                         setCameraOccupier(resp.data as cameraOccupier);
+                        Notification.Error({
+                          msg: `Camera is being used by ${cameraOccupier?.firstName} ${cameraOccupier?.lastName}`,
+                        });
                       } else {
                         setCameraOccupier({});
                       }
@@ -823,6 +841,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                     onError: (resp) => {
                       if (resp.status === 409) {
                         setCameraOccupier(resp.data as cameraOccupier);
+                        Notification.Error({
+                          msg: `Camera is being used by ${cameraOccupier?.firstName} ${cameraOccupier?.lastName}`,
+                        });
                       } else {
                         setCameraOccupier({});
                       }

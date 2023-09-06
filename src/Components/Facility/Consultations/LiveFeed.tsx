@@ -71,7 +71,9 @@ const LiveFeed = (props: any) => {
   const setBoundaryPreset: (preset: any) => void = props?.setBoundaryPreset;
   const fetchBoundaryBedPreset: () => void = props?.fetchBoundaryBedPreset;
   const updateBoundaryPreset: () => void = props?.updateBoundaryPreset;
-  const updateBoundaryError: boolean = props.updateBoundaryError;
+  const updateBoundaryNotif: string = props.updateBoundaryNotif;
+  const setUpdateBoundaryNotif: (notif: string) => void =
+    props.setUpdateBoundaryNotif;
   const [updateBoundaryInfo, setUpdateBoundaryInfo] = useState<
     Record<string, boolean>
   >({
@@ -660,7 +662,8 @@ const LiveFeed = (props: any) => {
                     setToUpdateBoundary={setToUpdateBoundary}
                     updateBoundaryInfo={updateBoundaryInfo}
                     setUpdateBoundaryInfo={setUpdateBoundaryInfo}
-                    updateBoundaryError={updateBoundaryError}
+                    updateBoundaryNotif={updateBoundaryNotif}
+                    setUpdateBoundaryNotif={setUpdateBoundaryNotif}
                   />
                 ) : (
                   <>

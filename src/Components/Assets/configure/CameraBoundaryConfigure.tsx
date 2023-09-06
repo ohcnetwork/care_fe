@@ -24,7 +24,8 @@ interface UpdateCameraBoundaryConfigureProps {
   setToUpdateBoundary: (toUpdate: boolean) => void;
   updateBoundaryInfo: Record<string, boolean>;
   setUpdateBoundaryInfo: (info: Record<string, boolean>) => void;
-  updateBoundaryError: boolean;
+  updateBoundaryNotif: string;
+  setUpdateBoundaryNotif: (notif: string) => void;
 }
 export default function CameraBoundaryConfigure(
   props: CameraBoundaryConfigureProps
@@ -144,7 +145,8 @@ export function UpdateCameraBoundaryConfigure(
     setToUpdateBoundary,
     updateBoundaryInfo,
     setUpdateBoundaryInfo,
-    updateBoundaryError,
+    updateBoundaryNotif,
+    setUpdateBoundaryNotif,
   } = props;
 
   const translation: Record<string, string> = {
@@ -155,6 +157,12 @@ export function UpdateCameraBoundaryConfigure(
   };
 
   const handlePrevButtonClick = () => {
+    if (updateBoundaryNotif === "updated") {
+      Notification.Success({
+        msg: `${translation[direction as string]} boundary updated`,
+      });
+    }
+    setUpdateBoundaryNotif("notUpdated");
     switch (direction) {
       case "left":
         setToUpdateBoundary(false);
@@ -207,22 +215,12 @@ export function UpdateCameraBoundaryConfigure(
   };
 
   const handleNextButtonClick = () => {
-    const prevDir: any = {
-      left: null,
-      right: "left",
-      up: "right",
-      down: "up",
-    };
-
-    if (
-      !updateBoundaryError &&
-      prevDir[direction as string] &&
-      updateBoundaryInfo[prevDir[direction as string]]
-    ) {
+    if (updateBoundaryNotif === "updated") {
       Notification.Success({
         msg: `${translation[direction as string]} boundary updated`,
       });
     }
+    setUpdateBoundaryNotif("notUpdated");
     switch (direction) {
       case "left":
         setDirection("right");
