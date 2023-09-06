@@ -203,7 +203,8 @@ const consultationFormReducer = (state = initialState, action: FormAction) => {
 type ConsultationFormSection =
   | "Consultation Details"
   | "Diagnosis"
-  | "Treatment Plan";
+  | "Treatment Plan"
+  | "Bed Status";
 
 export const ConsultationForm = (props: any) => {
   const { goBack } = useAppHistory();
@@ -228,6 +229,7 @@ export const ConsultationForm = (props: any) => {
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
   const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
   const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
+  const [bedStatusVisible, bedStatusRef] = useVisibility(-300);
   const [disabledFields, setDisabledFields] = useState<string[]>([]);
 
   const sections = {
@@ -246,6 +248,11 @@ export const ConsultationForm = (props: any) => {
       visible: treatmentPlanVisible,
       ref: treatmentPlanRef,
     },
+    "Bed Status": {
+      iconClass: "care-l-bed",
+      visible: bedStatusVisible,
+      ref: bedStatusRef,
+    },
   };
 
   useEffect(() => {
@@ -253,9 +260,15 @@ export const ConsultationForm = (props: any) => {
       if (consultationDetailsVisible) return "Consultation Details";
       if (diagnosisVisible) return "Diagnosis";
       if (treatmentPlanVisible) return "Treatment Plan";
+      if (bedStatusVisible) return "Bed Status";
       return prev;
     });
-  }, [consultationDetailsVisible, diagnosisVisible, treatmentPlanVisible]);
+  }, [
+    consultationDetailsVisible,
+    diagnosisVisible,
+    treatmentPlanVisible,
+    bedStatusVisible,
+  ]);
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -822,6 +835,9 @@ export const ConsultationForm = (props: any) => {
             if (state.form.consultation_status === 1) {
               return null;
             }
+            if (!isUpdate && sectionTitle === "Bed Status") {
+              return null;
+            }
             const isCurrent = currentSection === sectionTitle;
             const section = sections[sectionTitle as ConsultationFormSection];
             return (
@@ -1316,7 +1332,7 @@ export const ConsultationForm = (props: any) => {
             {isUpdate && (
               <>
                 <div className="mx-auto mt-4 max-w-4xl rounded bg-white px-11 py-8">
-                  <h4>Update Bed</h4>
+                  {sectionTitle("Bed Status")}
                   <Beds
                     facilityId={facilityId}
                     patientId={patientId}
