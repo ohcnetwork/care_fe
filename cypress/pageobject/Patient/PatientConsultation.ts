@@ -122,7 +122,9 @@ export class PatientConsultationPage {
   }
 
   updateConsultation() {
+    cy.intercept("PUT", "**/api/v1/consultation/**").as("updateConsultation");
     cy.get("#submit").contains("Update Consultation").click();
+    cy.wait("@updateConsultation").its("response.statusCode").should("eq", 200);
   }
 
   verifySuccessNotification(message: string) {
@@ -155,7 +157,9 @@ export class PatientConsultationPage {
   }
 
   createShiftRequest() {
+    cy.intercept("PUT", "**/api/v1/shift/").as("createShiftRequest");
     cy.get("#submit").click();
+    cy.wait("@createShiftRequest").its("response.statusCode").should("eq", 200);
   }
 
   visitDoctorNotesPage() {
@@ -167,7 +171,9 @@ export class PatientConsultationPage {
   }
 
   postDoctorNotes() {
+    cy.intercept("POST", "**/api/v1/patient/*/notes").as("postDoctorNotes");
     cy.get("#submit").contains("Post Your Note").click();
+    cy.wait("@postDoctorNotes").its("response.statusCode").should("eq", 201);
   }
 
   clickDischargePatient() {
@@ -187,12 +193,21 @@ export class PatientConsultationPage {
   }
 
   confirmDischarge() {
+    cy.intercept("POST", "**/api/v1/consultation/*/discharge_patient/").as(
+      "dischargePatient"
+    );
     cy.get("#submit").contains("Confirm Discharge").click();
+    cy.wait("@dischargePatient").its("response.statusCode").should("eq", 200);
   }
 
   discontinuePreviousPrescription() {
+    cy.intercept(
+      "POST",
+      "**/api/v1/consultation/*/prescriptions/*/discontinue/"
+    ).as("deletePrescription");
     cy.get("button").contains("Discontinue").click();
     cy.get("#submit").contains("Discontinue").click();
+    cy.wait("@deletePrescription").its("response.statusCode").should("eq", 200);
   }
 
   visitEditPrescriptionPage() {
@@ -201,6 +216,10 @@ export class PatientConsultationPage {
   }
 
   submitPrescription() {
+    cy.intercept("POST", "**/api/v1/consultation/*/prescriptions/").as(
+      "submitPrescription"
+    );
     cy.get("#submit").contains("Submit").click();
+    cy.wait("@submitPrescription").its("response.statusCode").should("eq", 201);
   }
 }
