@@ -283,20 +283,20 @@ export const TriageForm = (props: triageFormProps) => {
                 handleSubmit();
               }}
             >
-              <div className="max-w-[250px] pb-4">
-                <DateFormField
-                  required
-                  name="entry_date"
-                  label="Entry Date"
-                  value={state.form.entry_date}
-                  disableFuture
-                  onChange={handleFormFieldChange}
-                  position="LEFT"
-                  placeholder="Entry Date"
-                  error={state.errors.entry_date}
-                />
-              </div>
               <div className="mt-2 grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="pb-4">
+                  <DateFormField
+                    required
+                    name="entry_date"
+                    label="Entry Date"
+                    value={state.form.entry_date}
+                    disableFuture
+                    onChange={handleFormFieldChange}
+                    position="LEFT"
+                    placeholder="Entry Date"
+                    error={state.errors.entry_date}
+                  />
+                </div>
                 <div>
                   <TextFormField
                     name="num_patients_visited"
@@ -348,7 +348,7 @@ export const TriageForm = (props: triageFormProps) => {
                   />
                 </div>
               </div>
-              <div className="mt-4 flex flex-col justify-between gap-2 md:flex-row">
+              <div className="mt-4 flex flex-col justify-end gap-2 md:flex-row">
                 <Cancel onClick={() => goBack()} />
                 <Submit label={buttonText} />
               </div>
