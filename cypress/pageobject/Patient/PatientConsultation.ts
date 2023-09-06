@@ -34,16 +34,23 @@ export class PatientConsultationPage {
     cy.get("#weight").click().type(height);
     cy.get("#height").click().type(weight);
     cy.get("#patient_no").type(ipNumber);
-    cy.intercept("GET", "**/api/v1/icd/**").as("getIcdQuery");
+    cy.intercept("GET", "**/icd/**").as("getIcdResults");
     cy.get(
       "#icd11_diagnoses_object input[placeholder='Select'][role='combobox']"
     )
       .click()
       .type("1A");
-    cy.wait("@getIcdQuery").its("response.statusCode").should("eq", 200);
     cy.get("#icd11_diagnoses_object [role='option']")
       .contains("1A03 Intestinal infections due to Escherichia coli")
       .click();
+    cy.get("label[for='icd11_diagnoses_object']").click();
+    cy.wait("@getIcdResults").its("response.statusCode").should("eq", 200);
+
+    cy.get("#icd11_principal_diagnosis [role='combobox']").click().type("1A");
+    cy.get("#icd11_principal_diagnosis [role='option']")
+      .contains("1A03 Intestinal infections due to Escherichia coli")
+      .click();
+
     cy.get("#consultation_notes").click().type(consulationNotes);
     cy.get("#verified_by").click().type(verificationBy);
   }
