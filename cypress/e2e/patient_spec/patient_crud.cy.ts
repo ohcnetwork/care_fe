@@ -28,7 +28,7 @@ describe("Patient Creation with consultation", () => {
     cy.get("#add-patient-details").should("be.visible");
     cy.get("#add-patient-details").click();
     cy.get("input[name='facilities']")
-      .type("cypress facility")
+      .type("dummy facility")
       .then(() => {
         cy.get("[role='option']").first().click();
       });

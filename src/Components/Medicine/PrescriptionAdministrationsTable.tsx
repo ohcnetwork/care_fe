@@ -85,7 +85,7 @@ export default function PrescriptionAdministrationsTable({
       {state?.prescriptions && (
         <SlideOver
           title={t("administer_medicines")}
-          dialogClass="w-full max-w-sm sm:max-w-md md:max-w-[1200px]"
+          dialogClass="w-full max-w-sm sm:max-w-md md:max-w-[1300px]"
           open={showBulkAdminister}
           setOpen={setShowBulkAdminister}
         >

@@ -1,5 +1,6 @@
 import { HCXClaimModel, HCXPolicyModel } from "../Components/HCX/models";
 import {
+  MedibaseMedicine,
   MedicineAdministrationRecord,
   Prescription,
 } from "../Components/Medicine/models";
@@ -813,8 +814,11 @@ export const listICD11Diagnosis = (params: object, key: string) => {
   return fireRequest("listICD11Diagnosis", [], params, null, key);
 };
 // Medibase
-export const listMedibaseMedicines = (query: string) => {
-  return fireRequest("listMedibaseMedicines", [], { query });
+export const listMedibaseMedicines = (
+  query: string,
+  type?: MedibaseMedicine["type"]
+) => {
+  return fireRequest("listMedibaseMedicines", [], { query, type });
 };
 
 // Resource
