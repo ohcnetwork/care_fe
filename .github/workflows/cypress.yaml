@@ -35,9 +35,6 @@ jobs:
       - name: Check care is up ♻
         run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
 
-      - name: Change api proxy url 📝
-        run: 'sed --in-place "s^target: .*,^target: \"http://localhost:9000\",^g" vite.config.ts'
-
       - name: Install dependencies 📦
         run: npm install
 
@@ -55,6 +52,7 @@ jobs:
           browser: chrome
           record: true
         env:
+          CARE_API: http://localhost:9000
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
