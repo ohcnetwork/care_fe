@@ -19,6 +19,7 @@ describe("Inventory Management Section", () => {
 
   it("Adds Inventory", () => {
     facilityPage.visitAlreadyCreatedFacility();
+    facilityPage.clickManageFacilityDropdown();
     facilityPage.clickInventoryManagementOption();
     facilityPage.clickManageInventory();
     facilityPage.fillInventoryDetails("Liquid Oxygen", "Add Stock", "120");

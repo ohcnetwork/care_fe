@@ -60,7 +60,9 @@ class ResourcePage {
   }
 
   clickSubmitButton() {
+    cy.intercept("PUT", "**/api/v1/resource/**/").as("updateResource");
     cy.get("#submit").contains("Submit").click();
+    cy.wait("@updateResource").its("response.statusCode").should("eq", 200);
   }
 
   verifySuccessNotification(message: string) {
@@ -72,7 +74,9 @@ class ResourcePage {
   }
 
   clickPostCommentButton() {
+    cy.intercept("POST", "**/api/v1/resource/*/comment/").as("postComment");
     cy.contains("Post Your Comment").click();
+    cy.wait("@postComment").its("response.statusCode").should("eq", 201);
   }
 }
 

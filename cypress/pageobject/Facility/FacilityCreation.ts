@@ -130,7 +130,9 @@ class FacilityPage {
   }
 
   confirmDeleteFacility() {
+    cy.intercept("DELETE", "**/api/v1/facility/**").as("deleteFacility");
     cy.get("#submit").contains("Delete").click();
+    cy.wait("@deleteFacility").its("response.statusCode").should("eq", 403);
   }
 
   selectLocation(location: string) {
@@ -146,7 +148,9 @@ class FacilityPage {
   }
 
   clickupdateMiddleWare() {
+    cy.intercept("PATCH", "**/api/v1/facility/**").as("updateMiddleWare");
     cy.get("button#submit").first().click();
+    cy.wait("@updateMiddleWare").its("response.statusCode").should("eq", 200);
   }
 
   verifySuccessNotification(message: string) {
@@ -174,7 +178,11 @@ class FacilityPage {
   }
 
   clickAddInventory() {
+    cy.intercept("POST", "**/api/v1/facility/*/inventory/").as(
+      "createInventory"
+    );
     cy.get("button").contains("Add/Update Inventory").click();
+    cy.wait("@createInventory").its("response.statusCode").should("eq", 201);
   }
 
   fillResourceRequestDetails(
@@ -198,7 +206,11 @@ class FacilityPage {
   }
 
   clickSubmitRequestButton() {
+    cy.intercept("POST", "**/api/v1/resource/").as("createResourceRequest");
     cy.get("button").contains("Submit").click();
+    cy.wait("@createResourceRequest")
+      .its("response.statusCode")
+      .should("eq", 201);
   }
 }
 
