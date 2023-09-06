@@ -17,8 +17,13 @@ export class PatientConsultationPage {
       });
   }
 
+  fillIllnessHistory(history: string) {
+    cy.get("#history_of_present_illness").scrollIntoView;
+    cy.get("#history_of_present_illness").should("be.visible");
+    cy.get("#history_of_present_illness").click().type(history);
+  }
+
   enterConsultationDetails(
-    illnessHistory: string,
     examinationDetails: string,
     weight: string,
     height: string,
@@ -27,20 +32,27 @@ export class PatientConsultationPage {
     verificationBy: string
   ) {
     cy.get("#symptoms").click();
-    cy.get("#history_of_present_illness").click().type(illnessHistory);
     cy.get("#examination_details").click().type(examinationDetails);
     cy.get("#weight").click().type(height);
     cy.get("#height").click().type(weight);
-    cy.get("#ip_no").type(ipNumber);
+    cy.get("#patient_no").type(ipNumber);
+    cy.intercept("GET", "**/icd/**").as("getIcdResults");
     cy.get(
       "#icd11_diagnoses_object input[placeholder='Select'][role='combobox']"
     )
       .click()
       .type("1A");
-    cy.wait(1000);
     cy.get("#icd11_diagnoses_object [role='option']")
       .contains("1A03 Intestinal infections due to Escherichia coli")
       .click();
+    cy.get("label[for='icd11_diagnoses_object']").click();
+    cy.wait("@getIcdResults").its("response.statusCode").should("eq", 200);
+
+    cy.get("#icd11_principal_diagnosis [role='combobox']").click().type("1A");
+    cy.get("#icd11_principal_diagnosis [role='option']")
+      .contains("1A03 Intestinal infections due to Escherichia coli")
+      .click();
+
     cy.get("#consultation_notes").click().type(consulationNotes);
     cy.get("#verified_by").click().type(verificationBy);
   }
@@ -55,10 +67,24 @@ export class PatientConsultationPage {
       .click();
   }
 
+  interceptMediaBase() {
+    cy.intercept("GET", "**/api/v1/medibase/**").as("getMediaBase");
+  }
+
   prescribeMedicine() {
     cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
       .click()
       .type("dolo{enter}");
+  }
+
+  selectMedicinebox() {
+    cy.get(
+      "div#medicine_object input[placeholder='Select'][role='combobox']"
+    ).click();
+  }
+
+  waitForMediabaseStatusCode() {
+    cy.wait("@getMediaBase").its("response.statusCode").should("eq", 200);
   }
 
   enterDosage(doseAmount: string) {
@@ -74,8 +100,12 @@ export class PatientConsultationPage {
   }
 
   submitPrescriptionAndReturn() {
+    cy.intercept("POST", "**/api/v1/consultation/*/prescriptions/").as(
+      "submitPrescription"
+    );
     cy.get("button#submit").should("be.visible").click();
     cy.get("[data-testid='return-to-patient-dashboard']").click();
+    cy.wait("@submitPrescription").its("response.statusCode").should("eq", 201);
   }
 
   visitEditConsultationPage() {

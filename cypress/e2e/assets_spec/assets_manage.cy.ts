@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import { AssetPage } from "../../pageobject/Asset/AssetCreation";
 import { v4 as uuidv4 } from "uuid";
 import LoginPage from "../../pageobject/Login/LoginPage";
@@ -84,7 +85,9 @@ describe("Asset", () => {
       "Test note for asset creation!"
     );
 
+    assetPage.interceptAssetCreation();
     assetPage.clickCreateAsset();
+    assetPage.verifyAssetCreation();
     assetPage.verifySuccessNotification("Asset created successfully");
 
     assetSearchPage.typeSearchKeyword("New Test Asset 2");
@@ -104,19 +107,13 @@ describe("Asset", () => {
       "Manufacturer's Name Edited",
       "Customer Support's Name Edited",
       "Vendor's Name Edited",
-      "Test note for asset creation edited!"
+      "Test note for asset creation edited!",
+      "25122021"
     );
 
     assetPage.clickUpdateAsset();
 
     assetPage.verifySuccessNotification("Asset updated successfully");
-  });
-
-  it("Delete an Asset", () => {
-    assetPage.openCreatedAsset();
-    assetPage.deleteAsset();
-
-    assetPage.verifySuccessNotification("Asset deleted successfully");
   });
 
   it("Configure an asset", () => {
@@ -130,7 +127,50 @@ describe("Asset", () => {
       "d5694af2-21e2-4a39-9bad-2fb98d9818bd"
     );
     assetPage.clickConfigureAsset();
-    assetPage.verifyAssetConfiguration();
+    assetPage.verifyAssetConfiguration(200);
+  });
+
+  it("Add an vital monitor asset and configure it", () => {
+    assetPage.createAsset();
+    assetPage.selectFacility("Dummy Facility 1");
+    assetPage.selectLocation("Camera Loc");
+    assetPage.selectAssetType("Internal");
+    assetPage.selectAssetClass("HL7 Vitals Monitor");
+
+    const qr_id_1 = uuidv4();
+
+    assetPage.enterAssetDetails(
+      "New Test Asset Vital",
+      "Test Description",
+      "Working",
+      qr_id_1,
+      "Manufacturer's Name",
+      "2025-12-25",
+      "Customer Support's Name",
+      phone_number,
+      "email@support.com",
+      "Vendor's Name",
+      serialNumber,
+      "25122021",
+      "Test note for asset creation!"
+    );
+    assetPage.interceptAssetCreation();
+    assetPage.clickCreateAsset();
+    assetPage.verifyAssetCreation();
+
+    assetSearchPage.typeSearchKeyword("New Test Asset Vital");
+    assetSearchPage.pressEnter();
+
+    assetPage.openCreatedAsset();
+    assetPage.configureVitalAsset("Host name", "192.168.1.64");
+    assetPage.clickConfigureVital();
+  });
+
+  it("Delete an Asset", () => {
+    assetPage.openCreatedAsset();
+    assetPage.interceptDeleteAssetApi();
+    assetPage.deleteAsset();
+    assetPage.verifyDeleteStatus();
   });
 
   it("Import new asset", () => {

@@ -4,8 +4,10 @@ let patient_url = "";
 
 export class PatientPage {
   createPatient() {
-    cy.get("button").should("contain", "Add Patient Details");
-    cy.get("#add-patient-div").click();
+    cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
+    cy.get("#add-patient-details").should("be.visible");
+    cy.get("#add-patient-details").click();
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
   }
 
   selectFacility(facilityName: string) {
@@ -18,6 +20,14 @@ export class PatientPage {
     cy.get("button").get("#submit").click();
   }
 
+  interceptCreatePatientAPI() {
+    cy.intercept("GET", "**/facility/*/patient/**").as("createPatient");
+  }
+
+  verifyCreatedPatientResponse() {
+    cy.wait("@createPatient").its("response.statusCode").should("eq", 200);
+  }
+
   enterPatientDetails(
     phoneNumber: string,
     emergencyPhoneNumber: string,
@@ -26,12 +36,13 @@ export class PatientPage {
     address: string,
     pincode: string,
     wardName: string,
-    bloodGroup: string
+    bloodGroup: string,
+    dateOfBirth: string
   ) {
     cy.get("#phone_number-div").type(phoneNumber);
     cy.get("#emergency_phone_number-div").type(emergencyPhoneNumber);
-    cy.get("[data-testid=date-of-birth] button").click();
-    cy.get("#date-1").click();
+    cy.get("#date_of_birth").should("be.visible").click();
+    cy.get("#date-input").click().type(dateOfBirth);
     cy.get("[data-testid=name] input").type(patientName);
     cy.get("[data-testid=Gender] button")
       .click()
@@ -60,7 +71,9 @@ export class PatientPage {
   }
 
   clickCreatePatient() {
+    cy.intercept("POST", "**/api/v1/patient/").as("createPatient");
     cy.get("button[data-testid='submit-button']").click();
+    cy.wait("@createPatient").its("response.statusCode").should("eq", 201);
   }
 
   verifyPatientIsCreated() {
@@ -102,5 +115,13 @@ export class PatientPage {
 
   visitUpdatePatientUrl() {
     cy.awaitUrl(patient_url + "/update");
+  }
+
+  interceptFacilities() {
+    cy.intercept("GET", "**/facility/*/patient/**").as("getFacilities");
+  }
+
+  verifyStatusCode() {
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
   }
 }

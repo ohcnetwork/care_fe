@@ -3,6 +3,8 @@ let patient_url = "";
 export class UpdatePatientPage {
   enterPatientDetails(
     patientName: string,
+    bloodGroup: string,
+    phoneNumber: string,
     emergencyPhoneNumber: string,
     address: string,
     currentHealthCondition: string,
@@ -14,15 +16,18 @@ export class UpdatePatientPage {
     insuranceId: string,
     insuranceName: string
   ) {
+    cy.wait(10000);
+    cy.get("#address").scrollIntoView();
+    cy.get("#address").should("be.visible");
+    cy.get("#address").type(address);
     cy.get("[data-testid=name] input").clear();
     cy.get("[data-testid=name] input").type(patientName);
+    cy.get("#phone_number-div").clear();
+    cy.get("#phone_number-div").type("+91").type(phoneNumber);
+    cy.get("#emergency_phone_number-div").clear();
     cy.get("#emergency_phone_number-div")
-      .clear()
-      .then(() => {
-        cy.get("#emergency_phone_number__country").select("IN");
-      });
-    cy.get("#emergency_phone_number-div").type(emergencyPhoneNumber);
-    cy.get("#address").clear().type(address);
+      .type("+91")
+      .type(emergencyPhoneNumber);
     cy.get("#present_health").type(currentHealthCondition);
     cy.get("#ongoing_medication").type(ongoingMedication);
     cy.get("#allergies").type(allergies);
@@ -36,10 +41,17 @@ export class UpdatePatientPage {
     cy.get("#policy_id").type(policyId);
     cy.get("#insurer_id").type(insuranceId);
     cy.get("#insurer_name").type(insuranceName);
+    cy.get("[data-testid=blood-group] button")
+      .click()
+      .then(() => {
+        cy.get("[role='option']").contains(bloodGroup).click();
+      });
   }
 
   clickUpdatePatient() {
+    cy.intercept("PUT", "**/api/v1/patient/**").as("updatePatient");
     cy.get("button").get("[data-testid=submit-button]").click();
+    cy.wait("@updatePatient").its("response.statusCode").should("eq", 200);
   }
 
   verifyPatientUpdated() {
@@ -61,14 +73,22 @@ export class UpdatePatientPage {
   verifyPatientDetails(
     patientName: string,
     phoneNumber: string,
-    patientDetails_values: string[]
+    presentHealth: string,
+    ongoingMedication: string,
+    allergies: string
   ) {
     cy.url().should("include", "/facility/");
     cy.get("[data-testid=patient-dashboard]").should("contain", patientName);
     cy.get("[data-testid=patient-dashboard]").should("contain", phoneNumber);
-    patientDetails_values.forEach((value) => {
-      cy.get("[data-testid=patient-details]").should("contain", value);
-    });
+    cy.get("[data-testid=patient-present-health]").should(
+      "contain",
+      presentHealth
+    );
+    cy.get("[data-testid=patient-ongoing-medication]").should(
+      "contain",
+      ongoingMedication
+    );
+    cy.get("[data-testid=patient-allergies]").should("contain", allergies);
   }
 
   visitConsultationPage() {
