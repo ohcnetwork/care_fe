@@ -58,6 +58,16 @@ describe("Patient", () => {
     patientConsultationPage.submitPrescription();
   });
 
+  it("Upload consultations file ", () => {
+    patientPage.visitPatient();
+    patientConsultationPage.visitFilesPage();
+    patientConsultationPage.uploadFile();
+    patientConsultationPage.clickUploadFile();
+    patientConsultationPage.verifySuccessNotification(
+      "File Uploaded Successfully"
+    );
+  });
+
   it("Discharge a patient", () => {
     patientPage.visitPatient();
     patientConsultationPage.clickDischargePatient();

@@ -1523,6 +1523,7 @@ export const FileUpload = (props: FileUploadProps) => {
                             <CareIcon className="care-l-file-upload-alt text-lg" />
                             {t("choose_file")}
                             <input
+                              id="file_upload_patient"
                               title="changeFile"
                               onChange={onFileChange}
                               type="file"
@@ -1542,6 +1543,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       Open Camera
                     </ButtonV2>
                     <ButtonV2
+                      id="upload_file_button"
                       authorizeFor={NonReadOnlyUsers}
                       disabled={!file || !uploadFileName || !isActive}
                       onClick={() => handleUpload({ status })}

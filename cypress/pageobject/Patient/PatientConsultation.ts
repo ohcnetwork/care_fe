@@ -83,6 +83,23 @@ export class PatientConsultationPage {
     ).click();
   }
 
+  visitFilesPage() {
+    cy.get("a").contains("Files").click();
+  }
+
+  uploadFile() {
+    cy.get("#file_upload_patient").selectFile(
+      "cypress/fixtures/sampleAsset.xlsx",
+      { force: true }
+    );
+  }
+
+  clickUploadFile() {
+    cy.intercept("POST", "**/api/v1/files/").as("uploadFile");
+    cy.get("#upload_file_button").click();
+    cy.wait("@uploadFile").its("response.statusCode").should("eq", 201);
+  }
+
   waitForMediabaseStatusCode() {
     cy.wait("@getMediaBase").its("response.statusCode").should("eq", 200);
   }
