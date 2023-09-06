@@ -3,7 +3,8 @@ import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 const username = "devdistrictadmin";
 const password = "Coronasafe@123";
 const phone_number = "9" + Math.floor(100000000 + Math.random() * 900000000);
-const emergency_phone_number = "9430123487";
+const emergency_phone_number =
+  "9" + Math.floor(100000000 + Math.random() * 900000000);
 const yearOfBirth = "2023";
 let patient_url = "";
 
@@ -27,7 +28,7 @@ describe("Patient Creation with consultation", () => {
     cy.get("#add-patient-details").should("be.visible");
     cy.get("#add-patient-details").click();
     cy.get("input[name='facilities']")
-      .type("cypress facility")
+      .type("dummy facility")
       .then(() => {
         cy.get("[role='option']").first().click();
       });
@@ -104,9 +105,11 @@ describe("Patient Creation with consultation", () => {
     cy.get("[data-testid=name] input").clear();
     cy.get("[data-testid=name] input").type("Test E2E User Edited");
     cy.get("#phone_number-div").clear();
-    cy.get("#phone_number-div").type("+919846856666");
+    cy.get("#phone_number-div").type("+91").type(phone_number);
     cy.get("#emergency_phone_number-div").clear();
-    cy.get("#emergency_phone_number-div").type("+919120330220");
+    cy.get("#emergency_phone_number-div")
+      .type("+91")
+      .type(emergency_phone_number);
     cy.get("#present_health").type("Severe Cough");
     cy.get("#ongoing_medication").type("Paracetamol");
     cy.get("#allergies").type("Dust");
@@ -142,10 +145,7 @@ describe("Patient Creation with consultation", () => {
       "contain",
       "Test E2E User Edited"
     );
-    cy.get("[data-testid=patient-dashboard]").should(
-      "contain",
-      "+919120330220"
-    );
+    cy.get("[data-testid=patient-dashboard]").should("contain", phone_number);
     const patientDetails_values: string[] = [
       "Severe Cough",
       "Paracetamol",
@@ -165,6 +165,7 @@ describe("Patient Creation with consultation", () => {
     cy.intercept("GET", "**/api/v1/patient/**").as("getFacilities");
     cy.visit(patient_url + "/consultation");
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+    cy.get("#history_of_present_illness").scrollIntoView;
     cy.get("#history_of_present_illness").should("be.visible");
     cy.get("#history_of_present_illness").click().type("histroy");
     cy.get("#consultation_status")

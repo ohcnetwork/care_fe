@@ -53,8 +53,8 @@ export type MedicineAdministrationRecord = {
   readonly id?: string;
   readonly prescription?: Prescription;
   notes: string;
+  administered_date?: string;
   readonly administered_by?: PerformedByModel;
-  readonly administered_date?: string;
   readonly created_date?: string;
   readonly modified_date?: string;
 };
