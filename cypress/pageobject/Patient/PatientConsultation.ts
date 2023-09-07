@@ -174,9 +174,9 @@ export class PatientConsultationPage {
   }
 
   createShiftRequest() {
-    cy.intercept("PUT", "**/api/v1/shift/").as("createShiftRequest");
+    cy.intercept("POST", "**/api/v1/shift/").as("createShiftRequest");
     cy.get("#submit").click();
-    cy.wait("@createShiftRequest").its("response.statusCode").should("eq", 200);
+    cy.wait("@createShiftRequest").its("response.statusCode").should("eq", 201);
   }
 
   visitDoctorNotesPage() {

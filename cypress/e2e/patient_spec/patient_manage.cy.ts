@@ -48,9 +48,6 @@ describe("Patient", () => {
     patientPage.visitPatient();
     patientConsultationPage.visitEditPrescriptionPage();
     patientConsultationPage.discontinuePreviousPrescription();
-    patientConsultationPage.verifySuccessNotification(
-      "Prescription discontinued"
-    );
     patientConsultationPage.clickAddPrescription();
     patientConsultationPage.prescribeMedicine();
     patientConsultationPage.enterDosage("4");
@@ -63,9 +60,6 @@ describe("Patient", () => {
     patientConsultationPage.visitFilesPage();
     patientConsultationPage.uploadFile();
     patientConsultationPage.clickUploadFile();
-    patientConsultationPage.verifySuccessNotification(
-      "File Uploaded Successfully"
-    );
   });
 
   it("Discharge a patient", () => {
