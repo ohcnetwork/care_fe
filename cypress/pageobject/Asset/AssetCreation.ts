@@ -1,4 +1,5 @@
 // assetPage.ts
+import { cy, expect } from "local-cypress";
 
 export class AssetPage {
   createAsset() {
@@ -74,6 +75,14 @@ export class AssetPage {
     cy.get("[data-testid=asset-notes-input] textarea").type(notes);
   }
 
+  interceptAssetCreation() {
+    cy.intercept("POST", "**/api/v1/asset/").as("createAsset");
+  }
+
+  verifyAssetCreation() {
+    cy.wait("@createAsset").its("response.statusCode").should("eq", 201);
+  }
+
   clickCreateAsset() {
     cy.get("#submit").contains("Create Asset").click();
   }
@@ -87,7 +96,9 @@ export class AssetPage {
   }
 
   openCreatedAsset() {
+    cy.intercept("GET", "**/api/v1/asset/**").as("getAsset");
     cy.get("[data-testid=created-asset-list]").first().click();
+    cy.wait("@getAsset").its("response.statusCode").should("eq", 200);
   }
 
   editAssetDetails(
@@ -97,7 +108,8 @@ export class AssetPage {
     manufacturer: string,
     supportName: string,
     vendorName: string,
-    notes: string
+    notes: string,
+    lastServicedOn: string
   ) {
     cy.get("[data-testid=asset-update-button]").click();
     cy.get("[data-testid=asset-name-input] input").clear().type(name);
@@ -114,16 +126,69 @@ export class AssetPage {
     cy.get("[data-testid=asset-vendor-name-input] input")
       .clear()
       .type(vendorName);
+    cy.get(
+      "[data-testid=asset-last-serviced-on-input] input[type='text']"
+    ).click();
+    cy.get("#date-input").click().type(lastServicedOn);
     cy.get("[data-testid=asset-notes-input] textarea").clear().type(notes);
+  }
+
+  configureAsset(
+    hostName: string,
+    localIp: string,
+    userName: string,
+    password: string,
+    streamUuid: string
+  ) {
+    cy.get("[data-testid=asset-configure-button]").click();
+    cy.get("[name=middleware_hostname]").type(hostName);
+    cy.get("[name=camera_address]").type(localIp);
+    cy.get("[name=username]").type(userName);
+    cy.get("[name=password]").type(password);
+    cy.get("[name=stream_uuid]").type(streamUuid);
+  }
+
+  configureVitalAsset(hostName: string, localIp: string) {
+    cy.get("[data-testid=asset-configure-button]").click();
+    cy.get("#middlewareHostname").type(hostName);
+    cy.get("#localipAddress").type(localIp);
+  }
+
+  spyAssetConfigureApi() {
+    cy.intercept(/\/api\/v1\/asset/).as("asset");
+  }
+
+  verifyAssetConfiguration(statusCode: number) {
+    cy.wait("@asset").then((interception) => {
+      expect(interception.response.statusCode).to.equal(statusCode);
+    });
+  }
+
+  clickConfigureAsset() {
+    cy.get("#submit").contains("Set Configuration").click();
+  }
+
+  clickConfigureVital() {
+    cy.intercept("PATCH", "**/api/v1/asset/**").as("postConfiguration");
+    cy.get("#submit").contains("Save Configuration").click();
+    cy.wait("@postConfiguration").its("response.statusCode").should("eq", 200);
   }
 
   clickUpdateAsset() {
     cy.get("#submit").contains("Update").click();
   }
 
+  interceptDeleteAssetApi() {
+    cy.intercept("DELETE", "**/api/v1/asset/**").as("deleteAsset");
+  }
+
   deleteAsset() {
     cy.get("[data-testid=asset-delete-button]").click();
     cy.get("#submit").contains("Confirm").click();
+  }
+
+  verifyDeleteStatus() {
+    cy.wait("@deleteAsset").its("response.statusCode").should("eq", 204);
   }
 
   verifyEmptyAssetNameError() {
@@ -159,5 +224,35 @@ export class AssetPage {
       "contain",
       "Please enter valid phone number"
     );
+  }
+
+  selectImportFacility(facilityName: string) {
+    cy.get("input[name='facilities']")
+      .type(facilityName)
+      .then(() => {
+        cy.get("[role='option']").contains(facilityName).click();
+      });
+  }
+
+  selectImportOption() {
+    cy.get("[data-testid=import-asset-button]").click();
+    cy.get(".import-assets-button").click();
+  }
+
+  importAssetFile() {
+    cy.get("[data-testid=import-asset-file]")
+      .selectFile("cypress/fixtures/sampleAsset.xlsx", { force: true })
+      .wait(100);
+  }
+
+  selectImportLocation(locationName: string) {
+    cy.get("[data-testid=select-import-location]").click();
+    cy.get("li[role=option]").contains(locationName).click();
+  }
+
+  clickImportAsset() {
+    cy.intercept("POST", "**/api/v1/asset/").as("importAsset");
+    cy.get("#submit").contains("Import").click();
+    cy.wait("@importAsset").its("response.statusCode").should("eq", 201);
   }
 }

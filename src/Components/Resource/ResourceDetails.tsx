@@ -271,6 +271,7 @@ export default function ResourceDetails(props: { id: string }) {
             <div className="mb-4 flex flex-col sm:flex-row sm:justify-between">
               <div className="text-xl font-semibold">{data.title || "--"}</div>
               <ButtonV2
+                data-testid="update-status"
                 className="mt-4 w-full sm:mt-2"
                 href={`/resource/${data.external_id}/update`}
               >
