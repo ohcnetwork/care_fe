@@ -119,7 +119,6 @@ class FacilityPage {
   }
 
   clickInventoryManagementOption() {
-    cy.get("[id=inventory-management]").scrollIntoView();
     cy.get("[id=inventory-management]").click();
   }
 
