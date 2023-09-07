@@ -119,7 +119,7 @@ class FacilityPage {
   }
 
   clickInventoryManagementOption() {
-    cy.get("[id=inventory-management]").click();
+    cy.get("#inventory-management").click();
   }
 
   clickResourceRequestOption() {
