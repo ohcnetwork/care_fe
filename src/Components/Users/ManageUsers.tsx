@@ -144,7 +144,8 @@ export default function ManageUsers() {
 
   const handleWorkingHourSubmit = async () => {
     const username = selectedUser;
-    if (!username || weeklyHours < 0 || weeklyHours > 168) return;
+    if (!username || !weeklyHours || weeklyHours < 0 || weeklyHours > 168)
+      return;
     const res = await dispatch(
       partialUpdateUser(username, {
         weekly_working_hours: weeklyHours,
@@ -513,7 +514,7 @@ export default function ManageUsers() {
               setWeeklyHours(e.value);
             }}
             error={
-              weeklyHours < 0 || weeklyHours > 168
+              !weeklyHours || weeklyHours < 0 || weeklyHours > 168
                 ? "Average weekly working hours should be between 0 and 168"
                 : ""
             }
