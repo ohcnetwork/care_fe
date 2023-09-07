@@ -1,10 +1,8 @@
 export class PatientConsultationPage {
   selectConsultationStatus(status: string) {
-    cy.wait(1000);
-    cy.get("#consultation_status button")
+    cy.get("#consultation_status")
       .click()
       .then(() => {
-        cy.get("[role='option']", { timeout: 3000 }).should("be.visible");
         cy.get("[role='option']").contains(status).click();
       });
   }
