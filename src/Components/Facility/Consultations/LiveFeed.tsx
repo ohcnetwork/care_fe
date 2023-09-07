@@ -336,7 +336,7 @@ const LiveFeed = (props: any) => {
         <div className="relative mt-4 flex flex-col gap-4 lg:flex-row">
           <div className="flex-1">
             {/* ADD VIDEO PLAYER HERE */}
-            <div className="feed-aspect-ratio relative mb-4 w-full rounded bg-primary-100 lg:mb-0">
+            <div className="relative mb-4 aspect-video w-full rounded bg-primary-100 lg:mb-0">
               <video
                 id="mse-video"
                 autoPlay

@@ -27,7 +27,8 @@ interface Props {
 const AssetImportModal = ({ open, onClose, facility }: Props) => {
   const [isImporting, setIsUploading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<any>();
-  const [preview, setPreview] = useState<AssetData[]>();
+  const [preview, setPreview] =
+    useState<(AssetData & { notes?: string; last_serviced_on?: string })[]>();
   const [location, setLocation] = useState("");
   const [locations, setLocations] = useState<any>([]);
   const dispatchAction: any = useDispatch();
@@ -64,6 +65,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                     msg: `Please check the row ${error.row} of column ${error.column}`,
                   });
                 });
+                setSelectedFile(undefined);
               } else {
                 setPreview(parsedData.rows as AssetData[]);
               }
@@ -89,6 +91,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
         Notification.Error({
           msg: "Invalid file",
         });
+        setSelectedFile(undefined);
       }
     };
     readFile();
@@ -128,7 +131,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
         meta: { ...asset.meta },
         warranty_amc_end_of_validity: asset.warranty_amc_end_of_validity,
         last_serviced_on: asset.last_serviced_on,
-        notes: asset.notes,
+        note: asset.notes,
         cancelToken: { promise: {} },
       });
 
@@ -166,8 +169,14 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
     e.preventDefault();
     dragProps.setDragOver(false);
     const dropedFile = e?.dataTransfer?.files[0];
-    if (dropedFile.type.split("/")[1] !== "json")
-      return dragProps.setFileDropError("Please drop a JSON file to upload!");
+    if (
+      !["xlsx", "csv", "json"].includes(
+        dropedFile?.name?.split(".")?.pop() || ""
+      )
+    )
+      return dragProps.setFileDropError(
+        "Please drop a JSON / Excel file to upload!"
+      );
     setSelectedFile(dropedFile);
   };
 
@@ -233,7 +242,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
                   />
                 </div>
               </div>
-              <div className="h-80 overflow-y-scroll rounded border border-gray-500 bg-white md:min-w-[500px]">
+              <div className="my-4 h-80 overflow-y-scroll rounded border border-gray-500 bg-white md:min-w-[500px]">
                 <div className="flex border-b p-2">
                   <div className="mr-2 p-2 font-bold">#</div>
                   <div className="mr-2 p-2 font-bold md:w-1/2">Name</div>
@@ -327,7 +336,10 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
               }}
               disabled={isImporting}
             />
-            <Submit onClick={handleUpload} disabled={isImporting}>
+            <Submit
+              onClick={handleUpload}
+              disabled={isImporting || !selectedFile}
+            >
               {isImporting ? (
                 <i className="fa-solid fa-spinner animate-spin" />
               ) : (

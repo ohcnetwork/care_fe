@@ -35,7 +35,6 @@ import { FileUpload } from "../Patient/FileUpload";
 import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import InvestigationTab from "./Investigations/investigationsTab";
 import { make as Link } from "../Common/components/Link.bs";
-import MedicineAdministrationsTable from "../Medicine/MedicineAdministrationsTable";
 import { NeurologicalTable } from "./Consultations/NeurologicalTables";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import { NursingPlot } from "./Consultations/NursingPlot";
@@ -57,13 +56,13 @@ import { useTranslation } from "react-i18next";
 import { triggerGoal } from "../Common/Plausible";
 import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import PrescriptionAdministrationsTable from "../Medicine/PrescriptionAdministrationsTable";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 
 export const ConsultationDetails = (props: any) => {
-  const [medicinesKey, setMedicinesKey] = useState(0);
   const { t } = useTranslation();
   const { facilityId, patientId, consultationId } = props;
   const tab = props.tab.toUpperCase();
@@ -121,10 +120,10 @@ export const ConsultationDetails = (props: any) => {
       ]);
 
       const { middleware_address } = facilityRes.data as FacilityModel;
-      const assetBeds = assetBedRes.data.results as AssetBedModel[];
+      const assetBeds = assetBedRes?.data?.results as AssetBedModel[];
 
-      const monitorBedData = assetBeds.find(
-        (i) => i.asset_object.asset_class === AssetClass.HL7MONITOR
+      const monitorBedData = assetBeds?.find(
+        (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR
       );
       setMonitorBedData(monitorBedData);
       const assetDataForMonitor = monitorBedData?.asset_object;
@@ -136,9 +135,21 @@ export const ConsultationDetails = (props: any) => {
         );
       }
 
-      const ventilatorBedData = assetBeds.find(
-        (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
-      );
+      const consultationBedVentilator =
+        consultationData?.current_bed?.assets_objects?.find(
+          (i) => i.asset_class === AssetClass.VENTILATOR
+        );
+      let ventilatorBedData;
+      if (consultationBedVentilator) {
+        ventilatorBedData = {
+          asset_object: consultationBedVentilator,
+          bed_object: consultationData?.current_bed?.bed_object,
+        } as AssetBedModel;
+      } else {
+        ventilatorBedData = assetBeds?.find(
+          (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
+        );
+      }
       setVentilatorBedData(ventilatorBedData);
       const ventilatorMeta = ventilatorBedData?.asset_object?.meta;
       const ventilatorMiddleware =
@@ -215,7 +226,7 @@ export const ConsultationDetails = (props: any) => {
     triggerGoal("Patient Consultation Viewed", {
       facilityId: facilityId,
       consultationId: consultationId,
-      userID: authUser.id,
+      userId: authUser.id,
     });
   }, []);
 
@@ -418,6 +429,22 @@ export const ConsultationDetails = (props: any) => {
                     {consultationData.other_symptoms}
                   </div>
                 )*/}
+
+                {consultationData.icd11_principal_diagnosis && (
+                  <ShowDiagnosis
+                    label="Principal Diagnosis (as per ICD-11 recommended by WHO)"
+                    diagnoses={[
+                      [
+                        ...(consultationData?.icd11_diagnoses_object ?? []),
+                        ...(consultationData?.icd11_provisional_diagnoses_object ??
+                          []),
+                      ].find(
+                        (d) =>
+                          d.id === consultationData.icd11_principal_diagnosis
+                      )!,
+                    ]}
+                  />
+                )}
 
                 <ShowDiagnosis
                   diagnoses={
@@ -844,7 +871,7 @@ export const ConsultationDetails = (props: any) => {
                       </div>
                     </div>
                   )}
-                  {consultationData.prescribed_medication && (
+                  {consultationData.treatment_plan && (
                     <div className="overflow-hidden rounded-lg bg-white shadow">
                       <div className="px-4 py-5 sm:p-6">
                         <h3 className="text-lg font-semibold leading-relaxed text-gray-900">
@@ -852,7 +879,7 @@ export const ConsultationDetails = (props: any) => {
                         </h3>
                         <div className="mt-2">
                           <ReadMore
-                            text={consultationData.prescribed_medication}
+                            text={consultationData.treatment_plan}
                             minChars={250}
                           />
                         </div>
@@ -1138,30 +1165,17 @@ export const ConsultationDetails = (props: any) => {
           </div>
         )}
         {tab === "MEDICINES" && (
-          <div>
-            <div className="mt-4">
-              <PrescriptionsTable
-                key={medicinesKey}
-                consultation_id={consultationId}
-                onChange={() => setMedicinesKey((k) => k + 1)}
-                readonly={!!consultationData.discharge_date}
-              />
-            </div>
-            <div className="mt-8">
-              <PrescriptionsTable
-                key={medicinesKey}
-                consultation_id={consultationId}
-                is_prn
-                onChange={() => setMedicinesKey((k) => k + 1)}
-                readonly={!!consultationData.discharge_date}
-              />
-            </div>
-            <div className="mt-8">
-              <MedicineAdministrationsTable
-                key={medicinesKey}
-                consultation_id={consultationId}
-              />
-            </div>
+          <div className="my-4 flex flex-col gap-16">
+            <PrescriptionAdministrationsTable
+              consultation_id={consultationId}
+              readonly={!!consultationData.discharge_date}
+              prn={false}
+            />
+            <PrescriptionAdministrationsTable
+              consultation_id={consultationId}
+              prn={true}
+              readonly={!!consultationData.discharge_date}
+            />
           </div>
         )}
         {tab === "FILES" && (

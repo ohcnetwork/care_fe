@@ -57,6 +57,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import dayjs from "../../Utils/dayjs";
+import AutocompleteFormField from "../Form/FormFields/Autocomplete.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -80,15 +81,15 @@ type FormDetails = {
   referred_to_external?: string;
   icd11_diagnoses_object: ICD11DiagnosisModel[];
   icd11_provisional_diagnoses_object: ICD11DiagnosisModel[];
+  icd11_principal_diagnosis?: ICD11DiagnosisModel["id"];
   verified_by: string;
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
   history_of_present_illness: string;
-  prescribed_medication: string;
+  treatment_plan: string;
   consultation_notes: string;
-  ip_no: string;
-  op_no: string;
+  patient_no: string;
   procedure: ProcedureType[];
   investigation: InvestigationType[];
   is_telemedicine: BooleanStrings;
@@ -125,15 +126,15 @@ const initForm: FormDetails = {
   referred_to_external: "",
   icd11_diagnoses_object: [],
   icd11_provisional_diagnoses_object: [],
+  icd11_principal_diagnosis: undefined,
   verified_by: "",
   is_kasp: "false",
   kasp_enabled_date: null,
   examination_details: "",
   history_of_present_illness: "",
-  prescribed_medication: "",
+  treatment_plan: "",
   consultation_notes: "",
-  ip_no: "",
-  op_no: "",
+  patient_no: "",
   procedure: [],
   investigation: [],
   is_telemedicine: "false",
@@ -200,7 +201,8 @@ const consultationFormReducer = (state = initialState, action: FormAction) => {
 type ConsultationFormSection =
   | "Consultation Details"
   | "Diagnosis"
-  | "Treatment Plan";
+  | "Treatment Plan"
+  | "Bed Status";
 
 export const ConsultationForm = (props: any) => {
   const { goBack } = useAppHistory();
@@ -225,6 +227,7 @@ export const ConsultationForm = (props: any) => {
   const [consultationDetailsVisible, consultationDetailsRef] = useVisibility();
   const [diagnosisVisible, diagnosisRef] = useVisibility(-300);
   const [treatmentPlanVisible, treatmentPlanRef] = useVisibility(-300);
+  const [bedStatusVisible, bedStatusRef] = useVisibility(-300);
   const [disabledFields, setDisabledFields] = useState<string[]>([]);
 
   const sections = {
@@ -243,6 +246,11 @@ export const ConsultationForm = (props: any) => {
       visible: treatmentPlanVisible,
       ref: treatmentPlanRef,
     },
+    "Bed Status": {
+      iconClass: "care-l-bed",
+      visible: bedStatusVisible,
+      ref: bedStatusRef,
+    },
   };
 
   useEffect(() => {
@@ -250,9 +258,15 @@ export const ConsultationForm = (props: any) => {
       if (consultationDetailsVisible) return "Consultation Details";
       if (diagnosisVisible) return "Diagnosis";
       if (treatmentPlanVisible) return "Treatment Plan";
+      if (bedStatusVisible) return "Bed Status";
       return prev;
     });
-  }, [consultationDetailsVisible, diagnosisVisible, treatmentPlanVisible]);
+  }, [
+    consultationDetailsVisible,
+    diagnosisVisible,
+    treatmentPlanVisible,
+    bedStatusVisible,
+  ]);
 
   useEffect(() => {
     async function fetchPatientName() {
@@ -314,8 +328,7 @@ export const ConsultationForm = (props: any) => {
               ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
                   ?.id ?? "Comfort"
               : "Comfort",
-            ip_no: res.data.ip_no ? res.data.ip_no : "",
-            op_no: res.data.op_no ? res.data.op_no : "",
+            patient_no: res.data.patient_no ?? "",
             verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`,
@@ -387,7 +400,7 @@ export const ConsultationForm = (props: any) => {
             invalidForm = true;
           }
           return;
-        case "ip_no":
+        case "patient_no":
           if (state.form.suggestion !== "A") return;
           if (!state.form[field]) {
             errors[field] = "IP Number is required as person is admitted";
@@ -541,6 +554,42 @@ export const ConsultationForm = (props: any) => {
           return;
         }
 
+        case "icd11_principal_diagnosis": {
+          if (!state.form[field]) {
+            errors[field] = "Please select Principal Diagnosis";
+            invalidForm = true;
+            break;
+          }
+
+          if (
+            state.form[field] &&
+            state.form["icd11_diagnoses_object"].length &&
+            !state.form["icd11_diagnoses_object"]
+              .map((d) => d.id)
+              .includes(state.form[field]!)
+          ) {
+            errors[field] =
+              "Please select Principal Diagnosis from Final Diagnosis";
+            invalidForm = true;
+            break;
+          }
+
+          if (
+            state.form[field] &&
+            state.form["icd11_provisional_diagnoses_object"].length &&
+            !state.form["icd11_provisional_diagnoses_object"]
+              .map((d) => d.id)
+              .includes(state.form[field]!)
+          ) {
+            errors[field] =
+              "Please select Principal Diagnosis from Provisional Diagnosis";
+            invalidForm = true;
+            break;
+          }
+
+          return;
+        }
+
         default:
           return;
       }
@@ -610,10 +659,9 @@ export const ConsultationForm = (props: any) => {
         kasp_enabled_date: JSON.parse(state.form.is_kasp) ? new Date() : null,
         examination_details: state.form.examination_details,
         history_of_present_illness: state.form.history_of_present_illness,
-        prescribed_medication: state.form.prescribed_medication,
+        treatment_plan: state.form.treatment_plan,
         discharge_date: state.form.discharge_date,
-        ip_no: state.form.ip_no,
-        op_no: state.form.op_no,
+        patient_no: state.form.patient_no,
         icd11_diagnoses: state.form.icd11_diagnoses_object.map(
           (o: ICD11DiagnosisModel) => o.id
         ),
@@ -621,6 +669,7 @@ export const ConsultationForm = (props: any) => {
           state.form.icd11_provisional_diagnoses_object.map(
             (o: ICD11DiagnosisModel) => o.id
           ),
+        icd11_principal_diagnosis: state.form.icd11_principal_diagnosis,
         verified_by: state.form.verified_by,
         investigation: state.form.InvestigationAdvice,
         procedure: state.form.procedures,
@@ -707,6 +756,18 @@ export const ConsultationForm = (props: any) => {
           suggestion: "DD",
           consultation_notes: "Patient declared dead",
           verified_by: "Declared Dead",
+        },
+      });
+    } else if (
+      event.name === "icd11_diagnoses_object" ||
+      event.name === "icd11_provisional_diagnoses_object"
+    ) {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          [event.name]: event.value,
+          icd11_principal_diagnosis: undefined,
         },
       });
     } else {
@@ -819,6 +880,9 @@ export const ConsultationForm = (props: any) => {
         <div className="fixed hidden h-full w-72 flex-col xl:flex">
           {Object.keys(sections).map((sectionTitle) => {
             if (state.form.consultation_status === 1) {
+              return null;
+            }
+            if (!isUpdate && sectionTitle === "Bed Status") {
               return null;
             }
             const isCurrent = currentSection === sectionTitle;
@@ -1101,19 +1165,17 @@ export const ConsultationForm = (props: any) => {
                       )}
                     </>
                   )}
-                  {state.form.suggestion !== "A" ? (
-                    <div className="col-span-6 mb-6" ref={fieldRef["op_no"]}>
-                      <TextFormField {...field("op_no")} label="OP Number" />
-                    </div>
-                  ) : (
-                    <div className="col-span-6 mb-6" ref={fieldRef["ip_no"]}>
-                      <TextFormField
-                        {...field("ip_no")}
-                        label="IP Number"
-                        required={state.form.suggestion === "A"}
-                      />
-                    </div>
-                  )}
+                  <div className="col-span-6 mb-6" ref={fieldRef["patient_no"]}>
+                    <TextFormField
+                      {...field("patient_no")}
+                      label={
+                        state.form.suggestion === "A"
+                          ? "IP Number"
+                          : "OP Number"
+                      }
+                      required={state.form.suggestion === "A"}
+                    />
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-4 pb-4">
@@ -1140,6 +1202,22 @@ export const ConsultationForm = (props: any) => {
                       {...field("icd11_diagnoses_object")}
                       multiple
                       label="Final Diagnosis"
+                    />
+                  </div>
+
+                  <div ref={fieldRef["icd11_principal_diagnosis"]}>
+                    <AutocompleteFormField
+                      {...field("icd11_principal_diagnosis")}
+                      label="Principal Diagnosis"
+                      placeholder="Search for diagnosis"
+                      options={
+                        state.form.icd11_diagnoses_object.length
+                          ? state.form.icd11_diagnoses_object
+                          : state.form.icd11_provisional_diagnoses_object
+                      }
+                      optionLabel={(option) => option.label}
+                      optionValue={(option) => option.id}
+                      required
                     />
                   </div>
                 </div>
@@ -1188,10 +1266,10 @@ export const ConsultationForm = (props: any) => {
                           </div>
                           <div
                             className="col-span-6"
-                            ref={fieldRef["prescribed_medication"]}
+                            ref={fieldRef["treatment_plan"]}
                           >
                             <TextAreaFormField
-                              {...field("prescribed_medication")}
+                              {...field("treatment_plan")}
                               label="Treatment Plan / Treatment Summary"
                               placeholder="Optional information"
                             />
@@ -1312,7 +1390,7 @@ export const ConsultationForm = (props: any) => {
             {isUpdate && (
               <>
                 <div className="mx-auto mt-4 max-w-4xl rounded bg-white px-11 py-8">
-                  <h4>Update Bed</h4>
+                  {sectionTitle("Bed Status")}
                   <Beds
                     facilityId={facilityId}
                     patientId={patientId}

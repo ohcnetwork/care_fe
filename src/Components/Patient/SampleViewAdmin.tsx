@@ -1,7 +1,7 @@
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
 import { useCallback, useState, useEffect, lazy } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,

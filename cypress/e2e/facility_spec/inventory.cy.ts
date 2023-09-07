@@ -9,8 +9,12 @@ describe("Inventory Management Section", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/");
+    cy.viewport(1280, 720);
+    cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.get("[id='facility-details']").first().click();
-    cy.get("[id=manage-facility-dropdown]").should("exist").click();
+    cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+    cy.get("#manage-facility-dropdown button").should("be.visible");
+    cy.get("[id='manage-facility-dropdown']").scrollIntoView().click();
     cy.get("[id=inventory-management]").click();
   });
 

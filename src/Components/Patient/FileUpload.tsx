@@ -8,7 +8,7 @@ import {
   lazy,
   ChangeEvent,
 } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   viewUpload,
@@ -481,15 +481,20 @@ export const FileUpload = (props: FileUploadProps) => {
     };
     const responseData = await dispatch(retrieveUpload(data, id));
     const file_extension = getExtension(responseData.data.read_signed_url);
-    setFileState({
-      ...file_state,
-      open: true,
-      name: responseData.data.name,
-      extension: file_extension,
-      isImage: ExtImage.includes(file_extension),
-    });
-    downloadFileUrl(responseData.data.read_signed_url);
-    setFileUrl(responseData.data.read_signed_url);
+    if (file_extension === "pdf") {
+      window.open(responseData.data.read_signed_url, "_blank");
+      setFileState({ ...file_state, open: false });
+    } else {
+      setFileState({
+        ...file_state,
+        open: true,
+        name: responseData.data.name,
+        extension: file_extension,
+        isImage: ExtImage.includes(file_extension),
+      });
+      downloadFileUrl(responseData.data.read_signed_url);
+      setFileUrl(responseData.data.read_signed_url);
+    }
   };
 
   const validateEditFileName = (name: any) => {
@@ -1457,7 +1462,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       </ButtonV2>
                     </div>
                   )}
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-center gap-4 md:flex-row">
                     <VoiceRecorder
                       createAudioBlob={createAudioBlob}
                       confirmAudioBlobExists={confirmAudioBlobExists}
