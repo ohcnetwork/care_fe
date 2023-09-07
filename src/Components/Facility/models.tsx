@@ -113,6 +113,7 @@ export interface ConsultationModel {
   diagnosis?: string;
   icd11_diagnoses_object?: ICD11DiagnosisModel[];
   icd11_provisional_diagnoses_object?: ICD11DiagnosisModel[];
+  icd11_principal_diagnosis?: ICD11DiagnosisModel["id"];
   deprecated_verified_by?: string;
   verified_by?: string;
   verified_by_object?: UserBareMinimum;
