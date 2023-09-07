@@ -118,7 +118,7 @@ describe("Patient Creation with consultation", () => {
       "170",
       "IP007",
       "generalnote",
-      "generalnote"
+      "Dev Doctor"
     );
     patientConsultationPage.submitConsultation();
 
