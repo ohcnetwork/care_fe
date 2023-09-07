@@ -104,6 +104,7 @@ class FacilityPage {
   }
 
   clickManageFacilityDropdown() {
+    cy.get("#manage-facility-dropdown button").scrollIntoView();
     cy.get("#manage-facility-dropdown button")
       .contains("Manage Facility")
       .click();
@@ -118,7 +119,7 @@ class FacilityPage {
   }
 
   clickInventoryManagementOption() {
-    cy.get("[id=inventory-management]").click();
+    cy.get("#inventory-management").click();
   }
 
   clickResourceRequestOption() {
