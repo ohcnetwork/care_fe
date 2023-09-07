@@ -120,10 +120,10 @@ export const ConsultationDetails = (props: any) => {
       ]);
 
       const { middleware_address } = facilityRes.data as FacilityModel;
-      const assetBeds = assetBedRes.data.results as AssetBedModel[];
+      const assetBeds = assetBedRes?.data?.results as AssetBedModel[];
 
-      const monitorBedData = assetBeds.find(
-        (i) => i.asset_object.asset_class === AssetClass.HL7MONITOR
+      const monitorBedData = assetBeds?.find(
+        (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR
       );
       setMonitorBedData(monitorBedData);
       const assetDataForMonitor = monitorBedData?.asset_object;
@@ -146,7 +146,7 @@ export const ConsultationDetails = (props: any) => {
           bed_object: consultationData?.current_bed?.bed_object,
         } as AssetBedModel;
       } else {
-        ventilatorBedData = assetBeds.find(
+        ventilatorBedData = assetBeds?.find(
           (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
         );
       }
