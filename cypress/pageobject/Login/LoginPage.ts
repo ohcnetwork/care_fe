@@ -1,4 +1,6 @@
 // LoginPage.ts
+import { cy } from "local-cypress";
+
 class LoginPage {
   loginAsDisctrictAdmin(): void {
     cy.loginByApi("devdistrictadmin", "Coronasafe@123");
