@@ -49,6 +49,9 @@ describe("Patient", () => {
     patientConsultationPage.visitEditPrescriptionPage();
     patientConsultationPage.discontinuePreviousPrescription();
     patientConsultationPage.clickAddPrescription();
+    patientConsultationPage.interceptMediaBase();
+    patientConsultationPage.selectMedicinebox();
+    patientConsultationPage.waitForMediabaseStatusCode();
     patientConsultationPage.prescribeMedicine();
     patientConsultationPage.enterDosage("4");
     patientConsultationPage.selectDosageFrequency("Twice daily");
