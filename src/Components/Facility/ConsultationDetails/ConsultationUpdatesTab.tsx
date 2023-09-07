@@ -79,7 +79,7 @@ export default function ConsultationUpdatesTab(props: ConsultationTabProps) {
           bed_object: props.consultationData?.current_bed?.bed_object,
         } as AssetBedModel;
       } else {
-        ventilatorBedData = assetBeds.find(
+        ventilatorBedData = assetBeds?.find(
           (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
         );
       }
