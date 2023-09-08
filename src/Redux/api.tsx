@@ -933,6 +933,11 @@ const routes = {
     method: "PATCH",
   },
 
+  registerHealthFacilityAsService: {
+    path: "/api/v1/abdm/health_facility/{facility_id}/register_service/",
+    method: "POST",
+  },
+
   // Asset Availability endpoints
 
   listAssetAvailability: {
