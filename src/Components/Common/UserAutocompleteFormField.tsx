@@ -8,11 +8,13 @@ import {
 } from "../Form/FormFields/Utils";
 import { UserModel } from "../Users/models";
 import { isUserOnline } from "../../Utils/utils";
+import { UserRole } from "../../Common/constants";
 
 type Props = FormFieldBaseProps<UserModel> & {
   placeholder?: string;
   facilityId?: string;
-  userType?: string;
+  homeFacility?: string;
+  userType?: UserRole;
   showActiveStatus?: boolean;
 };
 
@@ -26,12 +28,17 @@ export default function UserAutocompleteFormField(props: Props) {
   let search_filter: {
     limit: number;
     offset: number;
+    home_facility?: string;
     user_type?: string;
     search_text?: string;
   } = { limit: 5, offset: 0 };
 
   if (props.showActiveStatus && props.userType) {
     search_filter = { ...search_filter, user_type: props.userType };
+  }
+
+  if (props.homeFacility) {
+    search_filter = { ...search_filter, home_facility: props.homeFacility };
   }
 
   const getStatusIcon = (option: UserModel) => {
@@ -69,11 +76,11 @@ export default function UserAutocompleteFormField(props: Props) {
           onQuery={(query) =>
             fetchOptions(
               props.facilityId
-                ? getFacilityUsers(props.facilityId)
-                : getUserList({
+                ? getFacilityUsers(props.facilityId, {
                     ...search_filter,
                     search_text: query,
                   })
+                : getUserList({ ...search_filter, search_text: query })
             )
           }
           isLoading={isLoading}
