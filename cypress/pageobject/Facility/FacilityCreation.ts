@@ -119,6 +119,7 @@ class FacilityPage {
   }
 
   clickInventoryManagementOption() {
+    cy.get("#inventory-management", { timeout: 10000 }).should("be.visible");
     cy.get("#inventory-management").click();
   }
 
@@ -162,8 +163,6 @@ class FacilityPage {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.get("[id='facility-details']").first().click();
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
-    cy.get("#manage-facility-dropdown button").should("be.visible");
-    cy.get("[id=manage-facility-dropdown]").scrollIntoView().click();
   }
 
   clickManageInventory() {
