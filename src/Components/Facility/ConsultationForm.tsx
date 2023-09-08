@@ -538,7 +538,7 @@ export const ConsultationForm = (props: any) => {
         }
 
         case "verified_by": {
-          if (!state.form[field].replace(/\s/g, "").length) {
+          if (!state.form[field]) {
             errors[field] = "Please fill verified by";
             invalidForm = true;
             break;
@@ -570,6 +570,8 @@ export const ConsultationForm = (props: any) => {
           if (
             state.form[field] &&
             state.form["icd11_diagnoses_object"].length &&
+            !state.form["icd11_provisional_diagnoses_object"] &&
+            !state.form["icd11_provisional_diagnoses_object"] &&
             !state.form["icd11_diagnoses_object"]
               .map((d) => d.id)
               .includes(state.form[field]!)
@@ -583,6 +585,8 @@ export const ConsultationForm = (props: any) => {
           if (
             state.form[field] &&
             state.form["icd11_provisional_diagnoses_object"].length &&
+            !state.form["icd11_diagnoses_object"] &&
+            !state.form["icd11_diagnoses_object"] &&
             !state.form["icd11_provisional_diagnoses_object"]
               .map((d) => d.id)
               .includes(state.form[field]!)
