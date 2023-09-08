@@ -410,7 +410,6 @@ export const ConsultationDetails = (props: any) => {
                     {consultationData.verified_by_object
                       ? `${consultationData.verified_by_object.first_name} ${consultationData.verified_by_object.last_name}`
                       : consultationData.deprecated_verified_by}
-                    {consultationData.verified_by}
                     <i className="fas fa-check ml-2 fill-current text-lg text-green-500"></i>
                   </div>
                 )}

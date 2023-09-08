@@ -58,7 +58,6 @@ export default function ConsultationUpdatesTab(props: ConsultationTabProps) {
       const monitorBedData = assetBeds?.find(
         (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR
       );
-
       setMonitorBedData(monitorBedData);
       const assetDataForMonitor = monitorBedData?.asset_object;
       const hl7Meta = assetDataForMonitor?.meta;
