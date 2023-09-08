@@ -571,7 +571,6 @@ export const ConsultationForm = (props: any) => {
             state.form[field] &&
             state.form["icd11_diagnoses_object"].length &&
             !state.form["icd11_provisional_diagnoses_object"] &&
-            !state.form["icd11_provisional_diagnoses_object"] &&
             !state.form["icd11_diagnoses_object"]
               .map((d) => d.id)
               .includes(state.form[field]!)
@@ -585,7 +584,6 @@ export const ConsultationForm = (props: any) => {
           if (
             state.form[field] &&
             state.form["icd11_provisional_diagnoses_object"].length &&
-            !state.form["icd11_diagnoses_object"] &&
             !state.form["icd11_diagnoses_object"] &&
             !state.form["icd11_provisional_diagnoses_object"]
               .map((d) => d.id)
