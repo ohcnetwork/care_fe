@@ -538,7 +538,7 @@ export const ConsultationForm = (props: any) => {
         }
 
         case "verified_by": {
-          if (!state.form[field]) {
+          if (state.form.suggestion !== "DD" && !state.form[field]) {
             errors[field] = "Please fill verified by";
             invalidForm = true;
             break;
