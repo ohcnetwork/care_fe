@@ -471,12 +471,15 @@ export const ConsultationDetails = (props: any) => {
                   label="Diagnosis (as per ICD-11 recommended by WHO)"
                 />
 
-                {consultationData.verified_by && (
+                {(consultationData.verified_by_object ||
+                  consultationData.deprecated_verified_by) && (
                   <div className="mt-2 text-sm">
                     <span className="font-semibold leading-relaxed">
                       Verified By:{" "}
                     </span>
-                    {consultationData.verified_by}
+                    {consultationData.verified_by_object
+                      ? `${consultationData.verified_by_object.first_name} ${consultationData.verified_by_object.last_name}`
+                      : consultationData.deprecated_verified_by}
                     <i className="fas fa-check ml-2 fill-current text-lg text-green-500"></i>
                   </div>
                 )}

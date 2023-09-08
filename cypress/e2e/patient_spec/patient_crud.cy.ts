@@ -118,9 +118,10 @@ describe("Patient Creation with consultation", () => {
       "170",
       "IP007",
       "generalnote",
-      "generalnote"
+      "Dev Doctor"
     );
     patientConsultationPage.submitConsultation();
+
     // Below code for the prescription module only present while creating a new consultation
     patientConsultationPage.clickAddPrescription();
     patientConsultationPage.interceptMediaBase();

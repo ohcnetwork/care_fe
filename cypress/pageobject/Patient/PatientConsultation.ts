@@ -16,7 +16,7 @@ export class PatientConsultationPage {
   }
 
   fillIllnessHistory(history: string) {
-    cy.get("#history_of_present_illness").scrollIntoView;
+    cy.get("#history_of_present_illness").scrollIntoView();
     cy.get("#history_of_present_illness").should("be.visible");
     cy.get("#history_of_present_illness").click().type(history);
   }
@@ -52,7 +52,12 @@ export class PatientConsultationPage {
       .click();
 
     cy.get("#consultation_notes").click().type(consulationNotes);
-    cy.get("#verified_by").click().type(verificationBy);
+    cy.get("#verified_by")
+      .click()
+      .type(verificationBy)
+      .then(() => {
+        cy.get("[role='option']").contains("Dev Doctor").click();
+      });
   }
 
   submitConsultation() {
