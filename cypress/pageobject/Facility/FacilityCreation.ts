@@ -119,6 +119,7 @@ class FacilityPage {
   }
 
   clickInventoryManagementOption() {
+    cy.get("inventory-management", { timeout: 10000 }).should("be.visible");
     cy.get("#inventory-management").click();
   }
 
