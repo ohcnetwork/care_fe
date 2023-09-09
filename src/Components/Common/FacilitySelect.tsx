@@ -6,6 +6,7 @@ import { FacilityModel } from "../Facility/models";
 
 interface FacilitySelectProps {
   name: string;
+  username: string;
   errors?: string | undefined;
   className?: string;
   searchAll?: boolean;
@@ -22,6 +23,7 @@ interface FacilitySelectProps {
 export const FacilitySelect = (props: FacilitySelectProps) => {
   const {
     name,
+    username,
     multiple,
     selected,
     setSelected,
@@ -45,6 +47,7 @@ export const FacilitySelect = (props: FacilitySelectProps) => {
         search_text: text,
         all: searchAll,
         facility_type: facilityType,
+        username: username,
         district,
       };
 
