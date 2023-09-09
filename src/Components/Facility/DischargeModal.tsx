@@ -87,7 +87,7 @@ const DischargeModal = ({
       })
     );
 
-    if (res.data?.results?.length) {
+    if (res?.data?.results?.length > 0) {
       setLatestClaim(res.data.results[0]);
       if (isCreateClaimLoading)
         Notification.Success({ msg: "Fetched Claim Approval Results" });
