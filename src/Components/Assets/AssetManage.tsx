@@ -451,6 +451,7 @@ const AssetManage = (props: AssetManageProps) => {
                     )
                   }
                   id="configure-asset"
+                  data-testid="asset-configure-button"
                   authorizeFor={NonReadOnlyUsers}
                 >
                   <CareIcon className="care-l-setting h-4" />
