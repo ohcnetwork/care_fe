@@ -1,17 +1,22 @@
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AssetData } from "./AssetTypes";
 import { classNames, formatDate } from "../../Utils/utils";
+import CopyToClipboard from "react-copy-to-clipboard";
+import { t } from "i18next";
+import { useState } from "react";
 
 export default function AssetWarrantyCard(props: { asset: AssetData }) {
   const { asset } = props;
 
   const details = {
     "Serial Number": asset.serial_number,
-    Expiry:
+    "Warranty/AMC Expiry":
       asset.warranty_amc_end_of_validity &&
       formatDate(asset.warranty_amc_end_of_validity),
     Vendor: asset.vendor_name,
   };
+
+  const [isCopied, setIsCopied] = useState(false);
 
   return (
     <div className="warranty-card relative z-10 flex h-full w-screen flex-col overflow-hidden p-6 text-white transition-all hover:scale-[1.01] hover:from-primary-600 hover:to-primary-700 md:w-full md:rounded-xl xl:w-96">
@@ -25,8 +30,25 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
               <div className="mb-1 text-xs uppercase italic tracking-widest text-gray-200">
                 {key}
               </div>
-              <div className="font-semibold">
+              <div className="flex items-center gap-2 font-semibold">
                 {details[key as keyof typeof details] || "--"}
+                {key === "Serial Number" && (
+                  <button className="tooltip tooltip-bottom">
+                    <CopyToClipboard
+                      text={details[key as keyof typeof details] || "--"}
+                      onCopy={() => setIsCopied(true)}
+                    >
+                      {isCopied ? (
+                        <span className="text-sm text-white">
+                          {t("copied_to_clipboard")}
+                        </span>
+                      ) : (
+                        <CareIcon className="care-l-copy text-lg" />
+                      )}
+                    </CopyToClipboard>
+                    <span className="tooltip-text">Copy to clipboard</span>
+                  </button>
+                )}
               </div>
             </div>
           ))}
