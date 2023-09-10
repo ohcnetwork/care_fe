@@ -122,10 +122,10 @@ export const ConsultationDetails = (props: any) => {
       ]);
 
       const { middleware_address } = facilityRes.data as FacilityModel;
-      const assetBeds = assetBedRes.data.results as AssetBedModel[];
+      const assetBeds = assetBedRes?.data?.results as AssetBedModel[];
 
-      const monitorBedData = assetBeds.find(
-        (i) => i.asset_object.asset_class === AssetClass.HL7MONITOR
+      const monitorBedData = assetBeds?.find(
+        (i) => i.asset_object?.asset_class === AssetClass.HL7MONITOR
       );
       setMonitorBedData(monitorBedData);
       const assetDataForMonitor = monitorBedData?.asset_object;
@@ -148,7 +148,7 @@ export const ConsultationDetails = (props: any) => {
           bed_object: consultationData?.current_bed?.bed_object,
         } as AssetBedModel;
       } else {
-        ventilatorBedData = assetBeds.find(
+        ventilatorBedData = assetBeds?.find(
           (i) => i.asset_object.asset_class === AssetClass.VENTILATOR
         );
       }
@@ -471,12 +471,15 @@ export const ConsultationDetails = (props: any) => {
                   label="Diagnosis (as per ICD-11 recommended by WHO)"
                 />
 
-                {consultationData.verified_by && (
+                {(consultationData.verified_by_object ||
+                  consultationData.deprecated_verified_by) && (
                   <div className="mt-2 text-sm">
                     <span className="font-semibold leading-relaxed">
                       Verified By:{" "}
                     </span>
-                    {consultationData.verified_by}
+                    {consultationData.verified_by_object
+                      ? `${consultationData.verified_by_object.first_name} ${consultationData.verified_by_object.last_name}`
+                      : consultationData.deprecated_verified_by}
                     <i className="fas fa-check ml-2 fill-current text-lg text-green-500"></i>
                   </div>
                 )}

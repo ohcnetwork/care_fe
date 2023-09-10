@@ -565,6 +565,7 @@ export const FacilityHome = (props: any) => {
                   Location Management
                 </DropdownItem>
                 <DropdownItem
+                  id="resource-request"
                   onClick={() =>
                     navigate(`/facility/${facilityId}/resource/new`)
                   }
@@ -593,6 +594,7 @@ export const FacilityHome = (props: any) => {
                   View Users
                 </DropdownItem>
                 <DropdownItem
+                  id="delete-facility"
                   variant="danger"
                   onClick={() => setOpenDeleteDialog(true)}
                   className="flex items-center gap-3"

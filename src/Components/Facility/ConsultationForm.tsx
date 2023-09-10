@@ -40,7 +40,10 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import DateFormField from "../Form/FormFields/DateFormField";
 import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
 import { FacilitySelect } from "../Common/FacilitySelect";
-import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
+import {
+  FieldChangeEvent,
+  FieldChangeEventHandler,
+} from "../Form/FormFields/Utils";
 import { FormAction } from "../Form/Utils";
 import PatientCategorySelect from "../Patient/PatientCategorySelect";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
@@ -83,6 +86,7 @@ type FormDetails = {
   icd11_provisional_diagnoses_object: ICD11DiagnosisModel[];
   icd11_principal_diagnosis?: ICD11DiagnosisModel["id"];
   verified_by: string;
+  verified_by_object: UserModel | null;
   is_kasp: BooleanStrings;
   kasp_enabled_date: null;
   examination_details: string;
@@ -128,6 +132,7 @@ const initForm: FormDetails = {
   icd11_provisional_diagnoses_object: [],
   icd11_principal_diagnosis: undefined,
   verified_by: "",
+  verified_by_object: null,
   is_kasp: "false",
   kasp_enabled_date: null,
   examination_details: "",
@@ -329,12 +334,13 @@ export const ConsultationForm = (props: any) => {
                   ?.id ?? "Comfort"
               : "Comfort",
             patient_no: res.data.patient_no ?? "",
-            verified_by: res.data.verified_by ? res.data.verified_by : "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`,
             is_kasp: `${res.data.is_kasp}`,
             assigned_to: res.data.assigned_to || "",
             assigned_to_object: res.data.assigned_to_object,
+            verified_by: res.data.verified_by || "",
+            verified_by_object: res.data.verified_by_object,
             ett_tt: res.data.ett_tt ? Number(res.data.ett_tt) : 3,
             special_instruction: res.data.special_instruction || "",
             weight: res.data.weight ? res.data.weight : "",
@@ -532,7 +538,7 @@ export const ConsultationForm = (props: any) => {
         }
 
         case "verified_by": {
-          if (!state.form[field].replace(/\s/g, "").length) {
+          if (state.form.suggestion !== "DD" && !state.form[field]) {
             errors[field] = "Please fill verified by";
             invalidForm = true;
             break;
@@ -564,6 +570,7 @@ export const ConsultationForm = (props: any) => {
           if (
             state.form[field] &&
             state.form["icd11_diagnoses_object"].length &&
+            !state.form["icd11_provisional_diagnoses_object"] &&
             !state.form["icd11_diagnoses_object"]
               .map((d) => d.id)
               .includes(state.form[field]!)
@@ -577,6 +584,7 @@ export const ConsultationForm = (props: any) => {
           if (
             state.form[field] &&
             state.form["icd11_provisional_diagnoses_object"].length &&
+            !state.form["icd11_diagnoses_object"] &&
             !state.form["icd11_provisional_diagnoses_object"]
               .map((d) => d.id)
               .includes(state.form[field]!)
@@ -610,6 +618,7 @@ export const ConsultationForm = (props: any) => {
   };
 
   const declareThePatientDead = async (
+    id: string,
     cause_of_death: string,
     death_datetime: string,
     death_confirmed_doctor: string
@@ -621,6 +630,7 @@ export const ConsultationForm = (props: any) => {
           discharge_notes: cause_of_death,
           death_datetime: death_datetime,
           death_confirmed_doctor: death_confirmed_doctor,
+          discharge_date: dayjs().toISOString(),
         },
         { id }
       )
@@ -706,6 +716,7 @@ export const ConsultationForm = (props: any) => {
 
         if (data.suggestion === "DD") {
           await declareThePatientDead(
+            res.data.id,
             state.form.cause_of_death,
             state.form.death_datetime,
             state.form.death_confirmed_doctor
@@ -745,7 +756,6 @@ export const ConsultationForm = (props: any) => {
           symptoms_onset_date: new Date(),
           category: "Critical",
           suggestion: "DD",
-          verified_by: "Brought Dead",
         },
       });
     } else if (event.name === "suggestion" && event.value === "DD") {
@@ -778,14 +788,14 @@ export const ConsultationForm = (props: any) => {
     }
   };
 
-  const handleDoctorSelect = (doctor: UserModel | null) => {
-    if (doctor?.id) {
+  const handleDoctorSelect = (event: FieldChangeEvent<UserModel | null>) => {
+    if (event.value?.id) {
       dispatch({
         type: "set_form",
         form: {
           ...state.form,
-          assigned_to: doctor.id.toString(),
-          assigned_to_object: doctor,
+          [event.name]: event.value.id.toString(),
+          [`${event.name}_object`]: event.value,
         },
       });
     } else {
@@ -793,8 +803,8 @@ export const ConsultationForm = (props: any) => {
         type: "set_form",
         form: {
           ...state.form,
-          assigned_to: "",
-          assigned_to_object: null,
+          [event.name]: "",
+          [`${event.name}_object`]: null,
         },
       });
     }
@@ -1309,11 +1319,17 @@ export const ConsultationForm = (props: any) => {
                             className="col-span-6"
                             ref={fieldRef["verified_by"]}
                           >
-                            <TextAreaFormField
-                              {...field("verified_by")}
+                            <UserAutocompleteFormField
+                              name={"verified_by"}
                               label="Verified by"
-                              required
                               placeholder="Attending Doctors Name and Designation"
+                              required
+                              value={state.form.verified_by_object ?? undefined}
+                              onChange={handleDoctorSelect}
+                              showActiveStatus
+                              userType={"Doctor"}
+                              homeFacility={facilityId}
+                              error={state.errors.verified_by}
                             />
                           </div>
 
@@ -1358,11 +1374,10 @@ export const ConsultationForm = (props: any) => {
                                 value={
                                   state.form.assigned_to_object ?? undefined
                                 }
-                                onChange={(option) =>
-                                  handleDoctorSelect(option.value)
-                                }
+                                onChange={handleDoctorSelect}
                                 userType={"Doctor"}
                                 name={"assigned_to"}
+                                label="Assigned to"
                               />
                             </div>
                           )}
