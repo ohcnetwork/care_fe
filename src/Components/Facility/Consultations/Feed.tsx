@@ -98,7 +98,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     async (status: statusType) => {
       setIsLoading(true);
       const res = await dispatch(getConsultation(consultationId));
-      if (!status.aborted && res.data) {
+      if (!status.aborted && res?.data) {
         const consultation = res.data as ConsultationModel;
         const consultationBedId = consultation.current_bed?.bed_object?.id;
         if (consultationBedId) {
@@ -302,6 +302,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       });
     },
     fullScreen: () => {
+      if (isIOS) {
+        const element = document.querySelector("video");
+        if (!element) return;
+        setFullscreen(true, element as HTMLElement);
+        return;
+      }
       if (!liveFeedPlayerRef.current) return;
       setFullscreen(
         !isFullscreen,
@@ -500,6 +506,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         <div className="absolute right-8 top-8 z-10 flex flex-col gap-4">
           {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
             (button, index) => {
+              if (isIOS && button === "reset") return null;
               const option = cameraPTZ.find(
                 (option) => option.action === button
               );
