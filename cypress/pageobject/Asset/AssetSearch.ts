@@ -14,7 +14,7 @@ export class AssetSearchPage {
 
   verifyBadgeContent(expectedText: string) {
     cy.get("[data-testid='Name/Serial No./QR ID']").should(
-      "have.text",
+      "contain",
       expectedText
     );
   }

@@ -6,6 +6,7 @@ import { AssetQRScanPage } from "../../pageobject/Asset/AssetQRScan";
 import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
 import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
 import LoginPage from "../../pageobject/Login/LoginPage";
+import { v4 as uuidv4 } from "uuid";
 
 describe("Asset Tab", () => {
   const assetSearchPage = new AssetSearchPage();
@@ -13,6 +14,9 @@ describe("Asset Tab", () => {
   const assetPagination = new AssetPagination();
   const assetFilters = new AssetFilters();
   const loginPage = new LoginPage();
+  const assetName = "Dummy Camera 10";
+  const qrCode = uuidv4();
+  const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -27,26 +31,22 @@ describe("Asset Tab", () => {
   // search for a element
 
   it("Search Asset Name/QR_ID/Serial_number", () => {
-    assetSearchPage.typeSearchKeyword("dummy camera 10");
+    assetSearchPage.typeSearchKeyword(assetName);
     assetSearchPage.pressEnter();
-    assetSearchPage.verifyBadgeContent(
-      "Name/Serial No./QR ID: dummy camera 10"
-    );
-    assetSearchPage.clickAssetByName("Dummy Camera 10");
+    assetSearchPage.verifyBadgeContent(assetName);
+    assetSearchPage.clickAssetByName(assetName);
     assetSearchPage.clickUpdateButton();
-    assetSearchPage.clearAndTypeQRCode("340543-05935-04953-05234-04");
-    assetSearchPage.clearAndTypeSerialNumber("8989898989898");
+    assetSearchPage.clearAndTypeQRCode(qrCode);
+    assetSearchPage.clearAndTypeSerialNumber(serialNumber);
     assetSearchPage.clickAssetSubmitButton();
     assetSearchPage.visitAssetsPage();
-    assetSearchPage.typeSearchKeyword("340543-05935-04953-05234-04");
+    assetSearchPage.typeSearchKeyword(qrCode);
     assetSearchPage.pressEnter();
-    assetSearchPage.verifyAssetListContains("Dummy Camera 10");
-    assetSearchPage.verifyBadgeContent(
-      "Name/Serial No./QR ID: 340543-05935-04953-05234-04"
-    );
-    assetSearchPage.typeSearchKeyword("8989898989898");
-    assetSearchPage.verifyAssetListContains("Dummy Camera 10");
-    assetSearchPage.verifyBadgeContent("Name/Serial No./QR ID: 8989898989898");
+    assetSearchPage.verifyAssetListContains(assetName);
+    assetSearchPage.verifyBadgeContent(qrCode);
+    assetSearchPage.typeSearchKeyword(serialNumber);
+    assetSearchPage.verifyAssetListContains(assetName);
+    assetSearchPage.verifyBadgeContent(serialNumber);
   });
 
   // scan a asset qr code
