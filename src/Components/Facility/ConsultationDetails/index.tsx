@@ -192,9 +192,16 @@ export const ConsultationDetails = (props: any) => {
       <div className="w-full text-sm">
         <p className="font-semibold leading-relaxed">{label}</p>
 
-        {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) => (
-          <p>{diagnosis.label}</p>
-        ))}
+        {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) =>
+          diagnosis.id === consultationData.icd11_principal_diagnosis ? (
+            <div className="flex items-center gap-1 text-primary-500">
+              <CareIcon className="care-l-star" />
+              <p className="font-bold">{diagnosis.label}</p>
+            </div>
+          ) : (
+            <p>{diagnosis.label}</p>
+          )
+        )}
         {diagnoses.length > nshow && (
           <>
             {!showMore ? (
@@ -359,7 +366,7 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )*/}
 
-                {consultationData.icd11_principal_diagnosis && (
+                {/* {consultationData.icd11_principal_diagnosis && (
                   <ShowDiagnosis
                     label="Principal Diagnosis (as per ICD-11 recommended by WHO)"
                     diagnoses={[
@@ -373,7 +380,7 @@ export const ConsultationDetails = (props: any) => {
                       )!,
                     ]}
                   />
-                )}
+                )} */}
 
                 <ShowDiagnosis
                   diagnoses={
