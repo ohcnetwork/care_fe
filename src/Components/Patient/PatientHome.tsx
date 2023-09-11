@@ -1105,23 +1105,29 @@ export const PatientHome = (props: any) => {
               <div
                 className={classNames(
                   "w-full rounded-lg border",
-                  patientData.is_active &&
-                    (!patientData?.last_consultation ||
-                      patientData?.last_consultation?.discharge_date)
-                    ? "cursor-pointer border-green-700 hover:bg-primary-400"
-                    : "border-gray-700 text-gray-700 hover:cursor-not-allowed"
+                  patientData.is_active
+                    ? "border-gray-700 text-gray-700 hover:cursor-not-allowed"
+                    : "cursor-pointer border-green-700 hover:bg-primary-400"
                 )}
                 onClick={() =>
-                  patientData.is_active &&
-                  (!patientData?.last_consultation ||
-                    patientData?.last_consultation?.discharge_date) &&
+                  !patientData.is_active &&
                   navigate(
                     `/facility/${patientData?.facility}/patient/${id}/consultation`
                   )
                 }
               >
-                <div className="h-full space-y-2 rounded-lg bg-white p-4 shadow">
-                  <div className="text-center">
+                <div
+                  className={classNames(
+                    "h-full space-y-2 rounded-lg bg-white p-4 shadow",
+                    !patientData.is_active && "hover:bg-gray-200"
+                  )}
+                >
+                  <div
+                    className={classNames(
+                      "text-center",
+                      !patientData.is_active && "text-green-700"
+                    )}
+                  >
                     <span>
                       <CareIcon className="care-l-chat-bubble-user text-5xl" />
                     </span>
