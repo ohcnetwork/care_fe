@@ -158,7 +158,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
                 />
               </div>
             </div>
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-between">
+            <div className="mt-4 cui-form-button-group">
               <Cancel
                 onClick={() =>
                   navigate(`/facility/${facilityId}/location`, {
