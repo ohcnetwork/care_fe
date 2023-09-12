@@ -10,7 +10,7 @@ interface Routes {
 
 const routes: Routes = {
   config: {
-    path: import.meta.env.REACT_APP_CONFIG || "/config.json",
+    path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
     method: "GET",
     noAuth: true,
   },
@@ -929,6 +929,11 @@ const routes: Routes = {
   partialUpdateHealthFacility: {
     path: "/api/v1/abdm/health_facility/{facility_id}/",
     method: "PATCH",
+  },
+
+  registerHealthFacilityAsService: {
+    path: "/api/v1/abdm/health_facility/{facility_id}/register_service/",
+    method: "POST",
   },
 
   // Asset Availability endpoints

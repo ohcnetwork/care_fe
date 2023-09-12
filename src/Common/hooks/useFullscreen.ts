@@ -18,11 +18,25 @@ export default function useFullscreen(): [
       document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
 
+  function openFullscreen(elem: HTMLElement) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (elem.webkitEnterFullscreen) elem.webkitEnterFullscreen(); // Safari
+    else elem.requestFullscreen();
+  }
+
+  function exitFullscreen(elem: HTMLElement) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    if (elem.webkitExitFullscreen) elem.webkitExitFullscreen(); // Safari
+    else document.exitFullscreen();
+  }
+
   const setFullscreen = (value: boolean, element?: HTMLElement) => {
     const fullscreenElement = element ?? document.documentElement;
 
-    if (value) fullscreenElement.requestFullscreen();
-    else document.exitFullscreen();
+    if (value) openFullscreen(fullscreenElement);
+    else exitFullscreen(fullscreenElement);
   };
 
   return [isFullscreen, setFullscreen];

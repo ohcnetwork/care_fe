@@ -29,7 +29,7 @@ import { useTranslation } from "react-i18next";
 const PageTitle = lazy(() => import("../Common/PageTitle"));
 const Loading = lazy(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Uptime from "../Common/Uptime";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import dayjs from "dayjs";
@@ -451,7 +451,8 @@ const AssetManage = (props: AssetManageProps) => {
                     )
                   }
                   id="configure-asset"
-                  authorizeFor={NonReadOnlyUsers}
+                  data-testid="asset-configure-button"
+                  authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
                 >
                   <CareIcon className="care-l-setting h-4" />
                   {t("configure")}
