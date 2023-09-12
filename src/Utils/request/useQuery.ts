@@ -3,7 +3,7 @@ import { QueryRoute, RequestOptions } from "./types";
 import request from "./request";
 import { mergeRequestOptions } from "./utils";
 
-interface QueryOptions extends RequestOptions {
+export interface QueryOptions extends RequestOptions {
   prefetch?: boolean;
   refetchOnWindowFocus?: boolean;
 }
@@ -57,7 +57,7 @@ export default function useQuery<TData>(
   }, [runQuery, options?.prefetch]);
 
   useEffect(() => {
-    if (options?.refetchOnWindowFocus ?? true) {
+    if (options?.refetchOnWindowFocus) {
       const onFocus = () => runQuery();
 
       window.addEventListener("focus", onFocus);

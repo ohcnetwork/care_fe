@@ -7,7 +7,7 @@ export function makeUrl(
   pathParams?: Record<string, string>
 ) {
   if (pathParams) {
-    Object.entries(pathParams).reduce(
+    path = Object.entries(pathParams).reduce(
       (acc, [key, value]) => acc.replace(`{${key}}`, value),
       path
     );
