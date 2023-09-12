@@ -68,7 +68,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
   };
 
   return (
-    <div className="">
+    <div className="no-scrollbar overflow-x-scroll ">
       <Transition appear show={show} as={Fragment}>
         <Dialog as="div" className="relative z-10 " onClose={onClose}>
           <Transition.Child
@@ -80,7 +80,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 mt-6 rounded-t-3xl border-t-2 border-gray-400/50 bg-white shadow-[0_3px_10px_rgb(0,0,0,0.2)] transition-all" />
+            <div className=" fixed inset-0 mt-6 rounded-t-3xl border-t-2 border-gray-400/50 bg-white shadow-[0_3px_10px_rgb(0,0,0,0.2)] transition-all" />
           </Transition.Child>
           <div className="fixed inset-0 mt-10 overflow-y-auto  ">
             <div className="flex min-h-full items-center justify-center p-4 text-center">
@@ -97,7 +97,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   className={classNames(
                     className,
                     fixedWidth && "w-full max-w-md",
-                    "transform rounded-2xl p-6 text-left align-middle shadow-xl transition-all"
+                    "transform rounded-2xl p-6 text-left align-middle transition-all"
                   )}
                 >
                   <Dialog.Title
@@ -115,7 +115,46 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   {fileUrl && fileUrl.length > 0 ? (
                     <div className="flex">
                       <div className="absolute flex h-full flex-col justify-between p-2 sm:inset-x-4 sm:top-4 sm:h-auto sm:flex-row sm:p-0">
-                        <div className="flex gap-3">
+                        <div className="flex justify-end gap-3">
+                          {downloadURL && downloadURL.length > 0 && (
+                            <a
+                              href={downloadURL}
+                              download={`${file_state.name}.${file_state.extension}`}
+                              className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
+                            >
+                              <i className="fas fa-download mr-2" />
+                              Download
+                            </a>
+                          )}
+                          <button
+                            onClick={onClose}
+                            className="h-8 w-8 rounded-full bg-red-100 transition hover:bg-red-200"
+                          >
+                            <i className="fas fa-times z-50 rounded-full text-red-500" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="h-[80vh] w-full">
+                        {file_state.isImage ? (
+                          <img
+                            src={fileUrl}
+                            alt="file"
+                            className={
+                              "mx-auto object-contain " +
+                              zoom_values[file_state.zoom]
+                            }
+                            style={{
+                              transform: `rotate(${file_state.rotation}deg)`,
+                            }}
+                          />
+                        ) : (
+                          <iframe
+                            title="Source Files"
+                            src={fileUrl}
+                            className="mx-auto h-5/6 w-5/6 border-2 border-black bg-white md:my-6 md:w-4/6"
+                          />
+                        )}
+                        <div className="relative bottom-5 flex items-center justify-center gap-3">
                           {file_state.isImage && (
                             <>
                               {[
@@ -157,45 +196,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                             </>
                           )}
                         </div>
-                        <div className="flex gap-3">
-                          {downloadURL && downloadURL.length > 0 && (
-                            <a
-                              href={downloadURL}
-                              download={`${file_state.name}.${file_state.extension}`}
-                              className="z-50 rounded bg-white/60 px-4 py-2 text-black backdrop-blur transition hover:bg-white/70"
-                            >
-                              <i className="fas fa-download mr-2" />
-                              Download
-                            </a>
-                          )}
-                          <button
-                            onClick={onClose}
-                            className="h-8 w-8 rounded-full bg-red-100 transition hover:bg-red-200"
-                          >
-                            <i className="fas fa-times z-50 rounded-full text-red-500" />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="h-[80vh] w-full">
-                        {file_state.isImage ? (
-                          <img
-                            src={fileUrl}
-                            alt="file"
-                            className={
-                              "mx-auto object-contain " +
-                              zoom_values[file_state.zoom]
-                            }
-                            style={{
-                              transform: `rotate(${file_state.rotation}deg)`,
-                            }}
-                          />
-                        ) : (
-                          <iframe
-                            title="Source Files"
-                            src={fileUrl}
-                            className="mx-auto h-5/6 w-5/6 border-2 border-black bg-white md:my-6 md:w-4/6"
-                          />
-                        )}
                       </div>
                     </div>
                   ) : (
