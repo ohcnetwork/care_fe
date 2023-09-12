@@ -538,7 +538,7 @@ export const ConsultationForm = (props: any) => {
         }
 
         case "verified_by": {
-          if (!state.form[field].replace(/\s/g, "").length) {
+          if (state.form.suggestion !== "DD" && !state.form[field]) {
             errors[field] = "Please fill verified by";
             invalidForm = true;
             break;
@@ -570,6 +570,7 @@ export const ConsultationForm = (props: any) => {
           if (
             state.form[field] &&
             state.form["icd11_diagnoses_object"].length &&
+            !state.form["icd11_provisional_diagnoses_object"] &&
             !state.form["icd11_diagnoses_object"]
               .map((d) => d.id)
               .includes(state.form[field]!)
@@ -583,6 +584,7 @@ export const ConsultationForm = (props: any) => {
           if (
             state.form[field] &&
             state.form["icd11_provisional_diagnoses_object"].length &&
+            !state.form["icd11_diagnoses_object"] &&
             !state.form["icd11_provisional_diagnoses_object"]
               .map((d) => d.id)
               .includes(state.form[field]!)
@@ -616,6 +618,7 @@ export const ConsultationForm = (props: any) => {
   };
 
   const declareThePatientDead = async (
+    id: string,
     cause_of_death: string,
     death_datetime: string,
     death_confirmed_doctor: string
@@ -627,6 +630,7 @@ export const ConsultationForm = (props: any) => {
           discharge_notes: cause_of_death,
           death_datetime: death_datetime,
           death_confirmed_doctor: death_confirmed_doctor,
+          discharge_date: dayjs().toISOString(),
         },
         { id }
       )
@@ -712,6 +716,7 @@ export const ConsultationForm = (props: any) => {
 
         if (data.suggestion === "DD") {
           await declareThePatientDead(
+            res.data.id,
             state.form.cause_of_death,
             state.form.death_datetime,
             state.form.death_confirmed_doctor

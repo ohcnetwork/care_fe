@@ -11,7 +11,7 @@ function Res<T>(): T {
 
 const routes = {
   config: {
-    path: import.meta.env.REACT_APP_CONFIG || "/config.json",
+    path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
     method: "GET",
     noAuth: true,
   },
