@@ -1,6 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import { QueryRoute } from "../../Utils/request/types";
-import { PaginatedResponse } from "../../Utils/request/usePaginatedQuery";
+import { PaginatedResponse, QueryRoute } from "../../Utils/request/types";
 import useQuery, { QueryOptions } from "../../Utils/request/useQuery";
 import ButtonV2, {
   CommonButtonProps,

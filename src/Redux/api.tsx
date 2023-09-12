@@ -1,5 +1,5 @@
-import { PaginatedResponse } from "../Utils/request/usePaginatedQuery";
 import { LocationModel } from "../Components/Facility/models";
+import { PaginatedResponse } from "../Utils/request/types";
 
 /**
  * A fake function that returns an empty object casted to type T
