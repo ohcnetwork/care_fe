@@ -5,8 +5,6 @@ const ECG_WAVENAME_KEYS = [
   "I",
   "II",
   "III",
-  "IV", // TODO: Check if this is correct
-  "V", // TODO: Check if this is correct
   "aVR",
   "aVL",
   "aVF",
