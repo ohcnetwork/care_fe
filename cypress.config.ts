@@ -1,5 +1,4 @@
 import { defineConfig } from "cypress";
-import cypressSplit from "cypress-split";
 import fs from "fs";
 
 export default defineConfig({
@@ -20,9 +19,6 @@ export default defineConfig({
           return null;
         },
       });
-
-      cypressSplit(on, config);
-
       return config;
     },
     baseUrl: "http://localhost:4000",
