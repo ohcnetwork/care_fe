@@ -28,10 +28,11 @@ jobs:
         run: |
           cd care
           make docker_config_file=docker-compose.pre-built.yaml up 
-          until docker-compose -f docker-compose.pre-built.yaml exec -T backend bash -c "python manage.py showmigrations | grep -q '\[ \]'"; do
+          while docker-compose -f docker-compose.pre-built.yaml exec -T backend bash -c "python manage.py showmigrations | grep -q '\[ \]'"; do
             >&2 echo "Migrations are not yet applied - sleeping"
             sleep 5
           done
+          echo "Migrations are applied"
           cd ..
 
       - name: Load dummy data into care backend 📂
