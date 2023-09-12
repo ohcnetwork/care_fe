@@ -56,7 +56,6 @@ jobs:
           browser: chrome
           record: true
           parallel: true
-          group: "UI-Chrome"
         env:
           CARE_API: http://localhost:9000
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
