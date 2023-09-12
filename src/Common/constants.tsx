@@ -993,7 +993,7 @@ export const XLSXAssetImportSchema = {
           return ip;
         },
       },
-      "Config: Camera Access Key": {
+      "Config - Camera Access Key": {
         prop: "camera_access_key",
         type: String,
       },
