@@ -108,9 +108,9 @@ function AssetFilter(props: any) {
   const applyFilter = () => {
     const data = {
       facility: facilityId,
-      asset_type: asset_type,
-      asset_class: asset_class,
-      status: asset_status,
+      asset_type: asset_type ?? "",
+      asset_class: asset_class ?? "",
+      status: asset_status ?? "",
       location: locationId,
     };
     onChange(data);

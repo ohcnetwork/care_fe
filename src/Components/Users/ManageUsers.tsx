@@ -73,6 +73,8 @@ export default function ManageUsers() {
     name: string;
   }>({ show: false, username: "", name: "" });
 
+  const [weeklyHoursError, setWeeklyHoursError] = useState<string>("");
+
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
@@ -144,7 +146,10 @@ export default function ManageUsers() {
 
   const handleWorkingHourSubmit = async () => {
     const username = selectedUser;
-    if (!username || weeklyHours < 0 || weeklyHours > 168) return;
+    if (!username || !weeklyHours || weeklyHours < 0 || weeklyHours > 168) {
+      setWeeklyHoursError("Value should be between 0 and 168");
+      return;
+    }
     const res = await dispatch(
       partialUpdateUser(username, {
         weekly_working_hours: weeklyHours,
@@ -163,6 +168,7 @@ export default function ManageUsers() {
       });
     }
     setWeeklyHours(0);
+    setWeeklyHoursError("");
     fetchData({ aborted: false });
   };
 
@@ -387,7 +393,10 @@ export default function ManageUsers() {
                   )}
                 </div>
                 <div>
-                  <UserDetails id="working-hours" title="Weekly working hours">
+                  <UserDetails
+                    id="working-hours"
+                    title="Average weekly working hours"
+                  >
                     {user.weekly_working_hours ? (
                       <span className="font-semibold">
                         {user.weekly_working_hours} hours
@@ -438,7 +447,7 @@ export default function ManageUsers() {
                         }}
                       >
                         <CareIcon className="care-l-clock text-xl" />
-                        <p>Set weekly working hours</p>
+                        <p>Set Average weekly working hours</p>
                       </ButtonV2>
                     </div>
                   )}
@@ -490,17 +499,18 @@ export default function ManageUsers() {
       </SlideOverCustom>
       <SlideOverCustom
         open={expandWorkingHours}
-        setOpen={setExpandWorkingHours}
-        slideFrom="right"
-        title="Weekly working hours"
-        dialogClass="md:w-[400px]"
-        onCloseClick={() => {
+        setOpen={(state) => {
+          setExpandWorkingHours(state);
           setWeeklyHours(0);
+          setWeeklyHoursError("");
         }}
+        slideFrom="right"
+        title="Average weekly working hours"
+        dialogClass="md:w-[400px]"
       >
         <div className="px-2">
           <dt className="mb-3 text-sm font-medium leading-5 text-black">
-            Set weekly working hours for {selectedUser}
+            Set Average weekly working hours for {selectedUser}
           </dt>
           <TextFormField
             name="weekly_working_hours"
@@ -509,11 +519,7 @@ export default function ManageUsers() {
             onChange={(e) => {
               setWeeklyHours(e.value);
             }}
-            error={
-              weeklyHours < 0 || weeklyHours > 168
-                ? "Weekly working hours should be between 0 and 168"
-                : ""
-            }
+            error={weeklyHoursError}
             required
             label=""
             type="number"

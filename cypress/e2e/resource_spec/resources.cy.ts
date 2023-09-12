@@ -1,8 +1,13 @@
 import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
+import LoginPage from "../../pageobject/Login/LoginPage";
+import ResourcePage from "../../pageobject/Resource/ResourcePage";
 
 describe("Resource Page", () => {
+  const loginPage = new LoginPage();
+  const resourcePage = new ResourcePage();
+
   before(() => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    loginPage.loginAsDisctrictAdmin();
     cy.saveLocalStorage();
   });
 
@@ -11,36 +16,39 @@ describe("Resource Page", () => {
     cy.awaitUrl("/resource");
   });
 
-  it("checks if all download button works", () => {
-    cy.get("svg.care-svg-icon__baseline.care-l-export").each(($button) => {
-      cy.intercept(/\/api\/v1\/resource/).as("resource_download");
-      cy.wrap($button).click({ force: true });
-      cy.wait("@resource_download").then((interception) => {
-        expect(interception.response.statusCode).to.equal(200);
-      });
-    });
+  it("Checks if all download button works", () => {
+    resourcePage.verifyDownloadButtonWorks();
   });
 
-  it("switch between active/completed", () => {
-    cy.intercept(/\/api\/v1\/resource/).as("resource");
-    cy.contains("Completed").click();
-    cy.wait("@resource").then((interception) => {
-      expect(interception.response.statusCode).to.equal(200);
-    });
-    cy.contains("Active").should("have.class", "text-primary-500");
-    cy.contains("Completed").should("have.class", "text-white");
-    cy.intercept(/\/api\/v1\/resource/).as("resource");
-    cy.contains("Active").click();
-    cy.wait("@resource").then((interception) => {
-      expect(interception.response.statusCode).to.equal(200);
-    });
-    cy.contains("Active").should("have.class", "text-white");
-    cy.contains("Completed").should("have.class", "text-primary-500");
+  it("Switch between active/completed", () => {
+    resourcePage.spyResourceApi();
+    resourcePage.clickCompletedResources();
+    resourcePage.verifyCompletedResources();
+    resourcePage.spyResourceApi();
+    resourcePage.clickActiveResources();
+    resourcePage.verifyActiveResources();
   });
 
-  it("switch between list view and board view", () => {
-    cy.contains("List View").click();
-    cy.contains("Board View").click();
+  it("Switch between list view and board view", () => {
+    resourcePage.clickListViewButton();
+    resourcePage.clickBoardViewButton();
+  });
+
+  it("Update the status of resource", () => {
+    resourcePage.openAlreadyCreatedResource();
+    resourcePage.clickUpdateStatus();
+    resourcePage.updateStatus("APPROVED");
+    resourcePage.clickSubmitButton();
+    resourcePage.verifySuccessNotification(
+      "Resource request updated successfully"
+    );
+  });
+
+  it("Post comment for a resource", () => {
+    resourcePage.openAlreadyCreatedResource();
+    resourcePage.addCommentForResource("Test comment");
+    resourcePage.clickPostCommentButton();
+    resourcePage.verifySuccessNotification("Comment added successfully");
   });
 
   afterEach(() => {

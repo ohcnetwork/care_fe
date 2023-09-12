@@ -222,7 +222,7 @@ export const PatientHome = (props: any) => {
       fetchpatient(status);
       triggerGoal("Patient Profile Viewed", {
         facilityId: facilityId,
-        userID: authUser.id,
+        userId: authUser.id,
       });
     },
     [dispatch, fetchpatient]
@@ -1050,7 +1050,10 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm font-semibold leading-5 text-zinc-400">
                       Present Health
                     </div>
-                    <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
+                    <div
+                      data-testid="patient-present-health"
+                      className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5"
+                    >
                       {patientData.present_health}
                     </div>
                   </div>
@@ -1060,7 +1063,10 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm font-semibold leading-5 text-zinc-400">
                       Ongoing Medications
                     </div>
-                    <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
+                    <div
+                      data-testid="patient-ongoing-medication"
+                      className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5"
+                    >
                       {patientData.ongoing_medication}
                     </div>
                   </div>
@@ -1070,7 +1076,10 @@ export const PatientHome = (props: any) => {
                     <div className="text-sm font-semibold leading-5 text-zinc-400">
                       Allergies
                     </div>
-                    <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
+                    <div
+                      data-testid="patient-allergies"
+                      className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5"
+                    >
                       {patientData.allergies}
                     </div>
                   </div>
