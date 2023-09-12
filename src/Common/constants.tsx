@@ -937,15 +937,12 @@ export const XLSXAssetImportSchema = {
     prop: "support_phone",
     type: String,
     parse: (phone: number | string) => {
-      phone = String(phone);
-      if (
-        !phone.startsWith("1800") ||
-        !PhoneNumberValidator(["support"])(phone) === undefined
-      ) {
+      phone = "+91" + String(phone);
+      if (!PhoneNumberValidator(["support"])(phone) === undefined) {
         throw new Error("Invalid Support Phone Number");
       }
 
-      return phone ? "+91" + phone : undefined;
+      return phone ? phone : undefined;
     },
     required: true,
   },
