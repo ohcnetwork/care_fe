@@ -48,6 +48,10 @@ export default function LocationManagement({ facilityId }: Props) {
           <PaginatedList.Items<LocationModel> className="m-8 flex grow flex-col gap-3">
             {(item) => <Location {...item} />}
           </PaginatedList.Items>
+
+          <div className="flex w-full items-center justify-center">
+            <PaginatedList.Paginator />
+          </div>
         </Page>
       )}
     </PaginatedList>

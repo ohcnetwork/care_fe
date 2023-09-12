@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 import { QueryRoute } from "../../Utils/request/types";
 import { PaginatedResponse } from "../../Utils/request/usePaginatedQuery";
 import useQuery, { QueryOptions } from "../../Utils/request/useQuery";
@@ -7,6 +7,7 @@ import ButtonV2, {
 } from "../../Components/Common/components/ButtonV2";
 import CareIcon from "../icons/CareIcon";
 import { classNames } from "../../Utils/utils";
+import Pagination from "../../Components/Common/Pagination";
 
 const DEFAULT_PER_PAGE_LIMIT = 14;
 
@@ -14,6 +15,8 @@ interface PaginatedListContext<TItem>
   extends ReturnType<typeof useQuery<PaginatedResponse<TItem>>> {
   items: TItem[];
   perPage: number;
+  currentPage: number;
+  setPage: (page: number) => void;
 }
 
 const context = createContext<PaginatedListContext<object> | null>(null);
@@ -44,11 +47,14 @@ export default function PaginatedList<TItem extends object>({
     ...queryOptions,
     query: { ...queryOptions.query, limit: perPage },
   });
+  const [currentPage, setPage] = useState(1);
 
   const items = query.data?.results ?? [];
 
   return (
-    <context.Provider value={{ ...query, items, perPage }}>
+    <context.Provider
+      value={{ ...query, items, perPage, currentPage, setPage }}
+    >
       <context.Consumer>
         {(ctx) => children(ctx as PaginatedListContext<TItem>)}
       </context.Consumer>
@@ -135,3 +141,23 @@ const Items = <TItem extends object>(props: ItemsProps<TItem>) => {
 };
 
 PaginatedList.Items = Items;
+
+interface PaginatorProps {
+  className?: string;
+}
+
+const Paginator = ({ className }: PaginatorProps) => {
+  const { data, perPage, currentPage, setPage } = useContextualized<object>();
+
+  return (
+    <Pagination
+      className={className}
+      cPage={currentPage}
+      data={{ totalCount: data?.count ?? 0 }}
+      defaultPerPage={perPage}
+      onChange={setPage}
+    />
+  );
+};
+
+PaginatedList.Paginator = Paginator;
