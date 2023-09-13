@@ -143,10 +143,15 @@ PaginatedList.Items = Items;
 
 interface PaginatorProps {
   className?: string;
+  hideIfSinglePage?: boolean;
 }
 
-const Paginator = ({ className }: PaginatorProps) => {
+const Paginator = ({ className, hideIfSinglePage }: PaginatorProps) => {
   const { data, perPage, currentPage, setPage } = useContextualized<object>();
+
+  if (hideIfSinglePage && (data?.count ?? 0) <= perPage) {
+    return null;
+  }
 
   return (
     <Pagination

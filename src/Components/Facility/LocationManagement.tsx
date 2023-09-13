@@ -24,18 +24,26 @@ export default function LocationManagement({ facilityId }: Props) {
           title="Location Management"
           backUrl={`/facility/${facilityId}`}
           options={
-            <div className="flex justify-end gap-2">
-
-              <ButtonV2
-                href={`/facility/${facilityId}/location/add`}
-                authorizeFor={NonReadOnlyUsers}
-              >
-                <CareIcon icon="l-plus" className="text-lg" />
-                Add New Location
-              </ButtonV2>
-            </div>
+            <ButtonV2
+              href={`/facility/${facilityId}/location/add`}
+              authorizeFor={NonReadOnlyUsers}
+              className="mr-8 hidden lg:block"
+            >
+              <CareIcon icon="l-plus" className="text-lg" />
+              Add New Location
+            </ButtonV2>
           }
         >
+          <div className="mx-auto">
+            <ButtonV2
+              href={`/facility/${facilityId}/location/add`}
+              authorizeFor={NonReadOnlyUsers}
+              className="w-full lg:hidden"
+            >
+              <CareIcon icon="l-plus" className="text-lg" />
+              Add New Location
+            </ButtonV2>
+          </div>
           <PaginatedList.WhenEmpty className="flex w-full justify-center border-b border-gray-200 bg-white p-5 text-center text-2xl font-bold text-gray-500">
             <span>No locations available</span>
           </PaginatedList.WhenEmpty>
@@ -44,12 +52,12 @@ export default function LocationManagement({ facilityId }: Props) {
             <Loading />
           </PaginatedList.WhenLoading>
 
-          <PaginatedList.Items<LocationModel> className="m-8 flex grow flex-col gap-3">
+          <PaginatedList.Items<LocationModel> className="my-8 flex grow flex-col gap-3 lg:mx-8">
             {(item) => <Location {...item} />}
           </PaginatedList.Items>
 
           <div className="flex w-full items-center justify-center">
-            <PaginatedList.Paginator />
+            <PaginatedList.Paginator hideIfSinglePage />
           </div>
         </Page>
       )}
