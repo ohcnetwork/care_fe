@@ -141,17 +141,20 @@ export default function PrescriptionAdministrationsTable({
         }
       />
 
-      <div className="overflow-x-auto rounded border border-white shadow">
+      <div className="relative overflow-x-auto rounded border border-white shadow">
         <table className="w-full overflow-x-scroll whitespace-nowrap rounded">
           <thead className="bg-white text-xs font-medium text-black">
             <tr>
-              <th className="py-3 pl-4 text-left text-sm">{t("medicine")}</th>
-
-              <th className="px-2 text-center leading-none">
-                <p>Dosage &</p>
-                <p>
-                  {!state?.prescriptions[0]?.is_prn ? "Frequency" : "Indicator"}
-                </p>
+              <th className="sticky left-0 z-10 flex justify-between gap-2 bg-white py-3 pl-4 text-left">
+                <span className="text-sm">{t("medicine")}</span>
+                <span className="px-2 text-center text-xs leading-none">
+                  <p>Dosage &</p>
+                  <p>
+                    {!state?.prescriptions[0]?.is_prn
+                      ? "Frequency"
+                      : "Indicator"}
+                  </p>
+                </span>
               </th>
 
               <th>
@@ -291,7 +294,7 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
   return (
     <tr
       className={classNames(
-        "border-separate border border-gray-300 bg-gray-100 transition-all duration-200 ease-in-out hover:border-primary-300 hover:bg-primary-100"
+        "group border-separate border border-gray-300 bg-gray-100 transition-all duration-200 ease-in-out hover:border-primary-300 hover:bg-primary-100"
         // prescription.discontinued && "opacity-60"
       )}
     >
@@ -363,7 +366,7 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
         </DialogModal>
       )}
       <td
-        className="cursor-pointer py-3 pl-4 text-left"
+        className="sticky left-0 z-10 flex cursor-pointer justify-between gap-2 bg-gray-100 py-3 pl-4 text-left transition-all duration-200 ease-in-out group-hover:bg-primary-100"
         onClick={() => setShowDetails(true)}
       >
         <div className="flex items-center gap-2">
@@ -388,15 +391,15 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
             </span>
           )}
         </div>
-      </td>
 
-      <td className="text-center text-xs font-semibold text-gray-900">
-        <p>{prescription.dosage}</p>
-        <p>
-          {!prescription.is_prn
-            ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
-            : prescription.indicator}
-        </p>
+        <span className="px-2 text-center text-xs font-semibold text-gray-900">
+          <p>{prescription.dosage}</p>
+          <p>
+            {!prescription.is_prn
+              ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
+              : prescription.indicator}
+          </p>
+        </span>
       </td>
 
       <td />
