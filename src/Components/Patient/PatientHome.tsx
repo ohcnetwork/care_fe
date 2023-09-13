@@ -374,6 +374,13 @@ export const PatientHome = (props: any) => {
     );
   };
 
+  const isPatientEligibleForNewConsultation = (patientData: PatientModel) => {
+    return !patientData.last_consultation ||
+      patientData.last_consultation?.discharge_date
+      ? true
+      : false;
+  };
+
   return (
     <Page
       title={"Patient Details"}
@@ -1105,23 +1112,31 @@ export const PatientHome = (props: any) => {
               <div
                 className={classNames(
                   "w-full rounded-lg border",
-                  patientData.is_active &&
-                    (!patientData?.last_consultation ||
-                      patientData?.last_consultation?.discharge_date)
+                  isPatientEligibleForNewConsultation(patientData)
                     ? "cursor-pointer border-green-700 hover:bg-primary-400"
                     : "border-gray-700 text-gray-700 hover:cursor-not-allowed"
                 )}
                 onClick={() =>
-                  patientData.is_active &&
-                  (!patientData?.last_consultation ||
-                    patientData?.last_consultation?.discharge_date) &&
+                  isPatientEligibleForNewConsultation(patientData) &&
                   navigate(
                     `/facility/${patientData?.facility}/patient/${id}/consultation`
                   )
                 }
               >
-                <div className="h-full space-y-2 rounded-lg bg-white p-4 shadow">
-                  <div className="text-center">
+                <div
+                  className={classNames(
+                    "h-full space-y-2 rounded-lg bg-white p-4 shadow",
+                    isPatientEligibleForNewConsultation(patientData) &&
+                      "hover:bg-gray-200"
+                  )}
+                >
+                  <div
+                    className={classNames(
+                      "text-center",
+                      isPatientEligibleForNewConsultation(patientData) &&
+                        "text-green-700"
+                    )}
+                  >
                     <span>
                       <CareIcon className="care-l-chat-bubble-user text-5xl" />
                     </span>
