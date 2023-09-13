@@ -388,7 +388,7 @@ export const PatientHome = (props: any) => {
         [facilityId]: { name: patientData?.facility_object?.name },
         [id]: { name: patientData?.name },
       }}
-      backUrl={facilityId ? `/patients?facility=${facilityId}/` : "/patients"}
+      backUrl={facilityId ? `/patients?facility=${facilityId}` : "/patients"}
     >
       <ConfirmDialog
         title="Confirm send sample to collection centre"
