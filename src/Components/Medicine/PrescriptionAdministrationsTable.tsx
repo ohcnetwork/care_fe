@@ -47,6 +47,10 @@ export default function PrescriptionAdministrationsTable({
   const { t } = useTranslation();
 
   const [state, setState] = useState<State>();
+
+  const [showDiscontinued, setShowDiscontinued] = useState(false);
+  const [discontinuedCount, setDiscontinuedCount] = useState<number>();
+
   const pagination = useRangePagination({
     bounds: state?.administrationsTimeBounds ?? {
       start: new Date(),
@@ -64,8 +68,13 @@ export default function PrescriptionAdministrationsTable({
   );
 
   const refetch = useCallback(async () => {
+    const filters = {
+      is_prn: prn,
+      prescription_type: "REGULAR",
+    };
+
     const res = await dispatch(
-      list({ is_prn: prn, prescription_type: "REGULAR" })
+      list(showDiscontinued ? filters : { ...filters, discontinued: false })
     );
 
     setState({
@@ -74,7 +83,14 @@ export default function PrescriptionAdministrationsTable({
       ),
       administrationsTimeBounds: getAdministrationBounds(res.data.results),
     });
-  }, [consultation_id, dispatch]);
+
+    if (showDiscontinued === false) {
+      const discontinuedRes = await dispatch(
+        list({ ...filters, discontinued: true, limit: 0 })
+      );
+      setDiscontinuedCount(discontinuedRes.data.count);
+    }
+  }, [consultation_id, showDiscontinued, dispatch]);
 
   useEffect(() => {
     refetch();
@@ -234,6 +250,29 @@ export default function PrescriptionAdministrationsTable({
               />
             ))}
           </tbody>
+
+          {showDiscontinued === false && !!discontinuedCount && (
+            <tfoot>
+              <tr>
+                <td colSpan={100}>
+                  <ButtonV2
+                    variant="secondary"
+                    className="w-full"
+                    ghost
+                    onClick={() => setShowDiscontinued(true)}
+                  >
+                    <span className="flex w-full justify-start gap-1 text-sm">
+                      <CareIcon icon="l-eye" className="text-lg" />
+                      <span>
+                        Show <strong>{discontinuedCount}</strong> other
+                        discontinued prescription(s)
+                      </span>
+                    </span>
+                  </ButtonV2>
+                </td>
+              </tr>
+            </tfoot>
+          )}
         </table>
 
         {state?.prescriptions.length === 0 && (
