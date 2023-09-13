@@ -25,7 +25,6 @@ export default function LocationManagement({ facilityId }: Props) {
           backUrl={`/facility/${facilityId}`}
           options={
             <div className="flex justify-end gap-2">
-              <PaginatedList.Refresh />
 
               <ButtonV2
                 href={`/facility/${facilityId}/location/add`}
