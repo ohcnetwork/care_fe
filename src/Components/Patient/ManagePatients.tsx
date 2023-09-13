@@ -601,6 +601,15 @@ export const PatientManager = () => {
                         text="Review Missed"
                       />
                     )}
+                  {patient.last_consultation?.is_readmission && (
+                    <Chip
+                      size="small"
+                      variant="custom"
+                      className="border-blue-600 bg-blue-100 text-blue-600"
+                      startIcon="l-repeat"
+                      text="Readmission"
+                    />
+                  )}
                   {patient.disease_status === "POSITIVE" && (
                     <Chip
                       size="small"
