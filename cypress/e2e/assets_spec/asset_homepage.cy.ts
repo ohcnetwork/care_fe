@@ -62,8 +62,18 @@ describe("Asset Tab", () => {
       "Dummy Facility 1",
       "INTERNAL",
       "ACTIVE",
-      "ONVIF Camera"
+      "ONVIF Camera",
+      "Camera Loc"
     );
+    assetFilters.clickadvancefilter();
+    assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
+    assetFilters.assertFacilityText("Dummy Facility 1");
+    assetFilters.assertAssetTypeText("INTERNAL");
+    assetFilters.assertAssetClassText("ONVIF");
+    assetFilters.assertStatusText("ACTIVE");
+    assetFilters.assertLocationText("Camera Locations");
+    assetFilters.clickadvancefilter();
+    assetFilters.clearFilters();
   });
 
   // Verify the pagination in the page
