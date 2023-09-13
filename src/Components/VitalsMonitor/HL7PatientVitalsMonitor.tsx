@@ -88,7 +88,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
           {/* Pulse Rate */}
           <NonWaveformData
             label="ECG"
-            attr={data.pulseRate ?? data.heartRate}
+            attr={data.pulseRate?.value ? data.pulseRate : data.heartRate}
             className="text-green-400"
             suffix={
               <span className="animate-pulse font-sans text-red-500">❤️</span>

@@ -1,11 +1,31 @@
 import { EventEmitter } from "events";
 import { VitalsDataBase, VitalsValueBase, VitalsWaveformBase } from "./types";
 
-const WAVEFORM_KEY_MAP: Record<string, EventName> = {
-  II: "ecg-waveform",
-  Pleth: "pleth-waveform",
-  Respiration: "spo2-waveform",
-};
+const ECG_WAVENAME_KEYS = [
+  "I",
+  "II",
+  "III",
+  "aVR",
+  "aVL",
+  "aVF",
+  "V1",
+  "V2",
+  "V3",
+  "V4",
+  "V5",
+  "V6",
+] as const;
+
+const WAVEFORM_KEY_MAP: Record<HL7VitalsWaveformData["wave-name"], EventName> =
+  {
+    Pleth: "pleth-waveform",
+    Respiration: "spo2-waveform",
+
+    // Maps each ECG wave name to the  event "ecg-waveform"
+    ...(Object.fromEntries(
+      ECG_WAVENAME_KEYS.map((key) => [key, "ecg-waveform"])
+    ) as Record<EcgWaveName, EventName>),
+  };
 
 /**
  * Provides the API for connecting to the Vitals Monitor WebSocket and emitting
@@ -74,8 +94,10 @@ export interface HL7VitalsValueData extends VitalsDataBase, VitalsValueBase {
     | "body-temperature2";
 }
 
+type EcgWaveName = (typeof ECG_WAVENAME_KEYS)[number];
+
 export interface HL7VitalsWaveformData extends VitalsWaveformBase {
-  "wave-name": "II" | "Pleth" | "Respiration";
+  "wave-name": EcgWaveName | "Pleth" | "Respiration";
 }
 
 export interface HL7VitalsBloodPressureData extends VitalsDataBase {
