@@ -162,8 +162,10 @@ export default function PrescriptionAdministrationsTable({
                   border
                   className="mx-2 px-1"
                   variant="secondary"
-                  disabled={!pagination.hasPrevious}
-                  onClick={pagination.previous}
+                  disabled={!pagination.hasNext}
+                  onClick={pagination.next}
+                  tooltip="Next 24 hours"
+                  tooltipClassName="tooltip-bottom -translate-x-1/2 text-xs"
                 >
                   <CareIcon icon="l-angle-left-b" className="text-base" />
                 </ButtonV2>
@@ -177,24 +179,26 @@ export default function PrescriptionAdministrationsTable({
                       <p className="h-4 w-6 animate-pulse rounded bg-gray-500" />
                     </th>
                   ))
-                : pagination.slots?.map(({ start, end }, index) => (
-                    <th
-                      className="tooltip px-0.5 py-2 text-center font-semibold leading-none text-gray-900"
-                      key={index}
-                    >
-                      <p>{formatDateTime(start, "DD/MM")}</p>
-                      <p>{formatDateTime(start, "HH:mm")}</p>
+                : pagination.slots
+                    ?.map(({ start, end }, index) => (
+                      <th
+                        className="tooltip px-0.5 py-2 text-center font-semibold leading-none text-gray-900"
+                        key={index}
+                      >
+                        <p>{formatDateTime(start, "DD/MM")}</p>
+                        <p>{formatDateTime(start, "HH:mm")}</p>
 
-                      <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs font-normal">
-                        Administration(s) between
-                        <br />
-                        <strong>{formatTime(start)}</strong> and{" "}
-                        <strong>{formatTime(end)}</strong>
-                        <br />
-                        on <strong>{formatDate(start)}</strong>
-                      </span>
-                    </th>
-                  ))}
+                        <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs font-normal">
+                          Administration(s) between
+                          <br />
+                          <strong>{formatTime(start)}</strong> and{" "}
+                          <strong>{formatTime(end)}</strong>
+                          <br />
+                          on <strong>{formatDate(start)}</strong>
+                        </span>
+                      </th>
+                    ))
+                    .reverse()}
               <th>
                 <ButtonV2
                   size="small"
@@ -203,8 +207,10 @@ export default function PrescriptionAdministrationsTable({
                   border
                   className="mx-2 px-1"
                   variant="secondary"
-                  disabled={!pagination.hasNext}
-                  onClick={pagination.next}
+                  disabled={!pagination.hasPrevious}
+                  onClick={pagination.previous}
+                  tooltip="Previous 24 hours"
+                  tooltipClassName="tooltip-bottom -translate-x-1/2 text-xs"
                 >
                   <CareIcon icon="l-angle-right-b" className="text-base" />
                 </ButtonV2>
@@ -395,22 +401,24 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
 
       <td />
       {/* Administration Cells */}
-      {props.intervals.map(({ start, end }, index) => (
-        <td className="text-center" key={index}>
-          {administrations === undefined ? (
-            <CareIcon
-              icon="l-spinner"
-              className="animate-spin text-lg text-gray-500"
-            />
-          ) : (
-            <AdministrationCell
-              administrations={administrations}
-              interval={{ start, end }}
-              prescription={prescription}
-            />
-          )}
-        </td>
-      ))}
+      {props.intervals
+        .map(({ start, end }, index) => (
+          <td className="text-center" key={index}>
+            {administrations === undefined ? (
+              <CareIcon
+                icon="l-spinner"
+                className="animate-spin text-lg text-gray-500"
+              />
+            ) : (
+              <AdministrationCell
+                administrations={administrations}
+                interval={{ start, end }}
+                prescription={prescription}
+              />
+            )}
+          </td>
+        ))
+        .reverse()}
       <td />
 
       {/* Action Buttons */}
