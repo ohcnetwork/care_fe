@@ -252,30 +252,24 @@ export default function PrescriptionAdministrationsTable({
               />
             ))}
           </tbody>
-
-          {showDiscontinued === false && !!discontinuedCount && (
-            <tfoot>
-              <tr>
-                <td colSpan={100}>
-                  <ButtonV2
-                    variant="secondary"
-                    className="w-full"
-                    ghost
-                    onClick={() => setShowDiscontinued(true)}
-                  >
-                    <span className="flex w-full justify-start gap-1 text-sm">
-                      <CareIcon icon="l-eye" className="text-lg" />
-                      <span>
-                        Show <strong>{discontinuedCount}</strong> other
-                        discontinued prescription(s)
-                      </span>
-                    </span>
-                  </ButtonV2>
-                </td>
-              </tr>
-            </tfoot>
-          )}
         </table>
+
+        {showDiscontinued === false && !!discontinuedCount && (
+          <ButtonV2
+            variant="secondary"
+            className="sticky left-0 z-10 w-full"
+            ghost
+            onClick={() => setShowDiscontinued(true)}
+          >
+            <span className="flex w-full justify-start gap-1 text-sm">
+              <CareIcon icon="l-eye" className="text-lg" />
+              <span>
+                Show <strong>{discontinuedCount}</strong> other discontinued
+                prescription(s)
+              </span>
+            </span>
+          </ButtonV2>
+        )}
 
         {state?.prescriptions.length === 0 && (
           <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-gray-500">
