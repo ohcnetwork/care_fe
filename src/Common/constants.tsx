@@ -345,6 +345,7 @@ export const ADMITTED_TO = [
   { id: "2", text: "ICU" },
   { id: "6", text: "Bed with oxygen support" },
   { id: "7", text: "Regular" },
+  { id: "None", text: "No bed assigned" },
 ];
 
 export const RESPIRATORY_SUPPORT = [
@@ -993,7 +994,7 @@ export const XLSXAssetImportSchema = {
           return ip;
         },
       },
-      "Config: Camera Access Key": {
+      "Config - Camera Access Key": {
         prop: "camera_access_key",
         type: String,
       },
