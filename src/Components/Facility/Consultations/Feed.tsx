@@ -240,7 +240,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   }, []);
 
   useEffect(() => {
-    if (streamStatus === StreamStatus.Playing) {
+    if (!currentPreset && streamStatus === StreamStatus.Playing) {
       setLoading(CAMERA_STATES.MOVING.GENERIC);
       const preset =
         bedPresets?.find(
@@ -506,7 +506,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         <div className="absolute right-8 top-8 z-10 flex flex-col gap-4">
           {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
             (button, index) => {
-              if (isIOS && button === "reset") return null;
               const option = cameraPTZ.find(
                 (option) => option.action === button
               );
