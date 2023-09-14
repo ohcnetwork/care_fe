@@ -4,7 +4,7 @@ import Loading from "../Components/Common/Loading";
 import routes from "../Redux/api";
 import useQuery from "../Utils/request/useQuery";
 import { LocalStorageKeys } from "../Common/constants";
-import axios from "axios";
+import request from "../Utils/request/request";
 
 interface Props {
   children: React.ReactNode;
@@ -39,19 +39,21 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
   );
 }
 
-const updateRefreshToken = () => {
+const updateRefreshToken = async () => {
   const refresh = localStorage.getItem(LocalStorageKeys.refreshToken);
 
   if (!refresh) {
     return;
   }
 
-  axios
-    .post("/api/v1/auth/token/refresh/", {
-      refresh,
-    })
-    .then((res) => {
-      localStorage.setItem(LocalStorageKeys.accessToken, res.data.access);
-      localStorage.setItem(LocalStorageKeys.refreshToken, res.data.refresh);
-    });
+  const { res, data } = await request(routes.token_refresh, {
+    body: { refresh },
+  });
+
+  if (res.status !== 200) {
+    return;
+  }
+
+  localStorage.setItem(LocalStorageKeys.accessToken, data.access);
+  localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
 };

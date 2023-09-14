@@ -11,6 +11,11 @@ function Res<T>(): T {
   return {} as T;
 }
 
+interface JwtTokenObtainPair {
+  access: string;
+  refresh: string;
+}
+
 const routes = {
   config: {
     path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
@@ -29,6 +34,7 @@ const routes = {
   token_refresh: {
     path: "/api/v1/auth/token/refresh",
     method: "POST",
+    TRes: Res<JwtTokenObtainPair>(),
   },
 
   token_verify: {
