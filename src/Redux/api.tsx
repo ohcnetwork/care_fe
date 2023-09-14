@@ -32,7 +32,7 @@ const routes = {
   },
 
   token_refresh: {
-    path: "/api/v1/auth/token/refresh",
+    path: "/api/v1/auth/token/refresh/",
     method: "POST",
     TRes: Res<JwtTokenObtainPair>(),
   },
