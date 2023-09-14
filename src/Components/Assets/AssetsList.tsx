@@ -337,6 +337,7 @@ const AssetsList = () => {
                     options: {
                       icon: <CareIcon className="care-l-export" />,
                       disabled: totalCount === 0 || !authorizedForImportExport,
+                      id: "export-json-option",
                     },
                   },
                   {
@@ -353,6 +354,7 @@ const AssetsList = () => {
                     options: {
                       icon: <CareIcon className="care-l-export" />,
                       disabled: totalCount === 0 || !authorizedForImportExport,
+                      id: "export-csv-option",
                     },
                   },
                 ]}
