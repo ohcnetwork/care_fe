@@ -28,7 +28,7 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
 const Loading = lazy(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Uptime from "../Common/Uptime";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import dayjs from "dayjs";
@@ -448,7 +448,7 @@ const AssetManage = (props: AssetManageProps) => {
                   }
                   id="configure-asset"
                   data-testid="asset-configure-button"
-                  authorizeFor={NonReadOnlyUsers}
+                  authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
                 >
                   <CareIcon className="care-l-setting h-4" />
                   {t("configure")}

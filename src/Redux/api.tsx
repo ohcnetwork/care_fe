@@ -1,16 +1,17 @@
-interface Route {
-  path: string;
-  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  noAuth?: boolean;
+import { LocationModel } from "../Components/Facility/models";
+import { PaginatedResponse } from "../Utils/request/types";
+
+/**
+ * A fake function that returns an empty object casted to type T
+ * @returns Empty object as type T
+ */
+function Res<T>(): T {
+  return {} as T;
 }
 
-interface Routes {
-  [name: string]: Route;
-}
-
-const routes: Routes = {
+const routes = {
   config: {
-    path: import.meta.env.REACT_APP_CONFIG || "/config.json",
+    path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
     method: "GET",
     noAuth: true,
   },
@@ -187,6 +188,7 @@ const routes: Routes = {
   listFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/",
     method: "GET",
+    TRes: Res<PaginatedResponse<LocationModel>>(),
   },
   createFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/",
@@ -1065,6 +1067,6 @@ const routes: Routes = {
     path: "/api/v1/hcx/make_claim/",
     method: "POST",
   },
-};
+} as const;
 
 export default routes;
