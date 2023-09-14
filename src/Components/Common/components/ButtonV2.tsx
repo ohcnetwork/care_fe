@@ -161,7 +161,7 @@ export default ButtonV2;
 
 // Common buttons
 
-type CommonButtonProps = ButtonProps & { label?: string };
+export type CommonButtonProps = ButtonProps & { label?: string };
 
 export const Submit = ({ label = "Submit", ...props }: CommonButtonProps) => {
   const { t } = useTranslation();

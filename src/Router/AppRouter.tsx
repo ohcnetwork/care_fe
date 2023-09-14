@@ -49,7 +49,7 @@ import ShowPushNotification from "../Components/Notifications/ShowPushNotificati
 import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
 import { AddBedForm } from "../Components/Facility/AddBedForm";
-import { LocationManagement } from "../Components/Facility/LocationManagement";
+import LocationManagement from "../Components/Facility/LocationManagement";
 import { BedManagement } from "../Components/Facility/BedManagement";
 import AssetsList from "../Components/Assets/AssetsList";
 import AssetManage from "../Components/Assets/AssetManage";

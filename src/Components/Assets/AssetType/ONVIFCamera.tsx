@@ -42,6 +42,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [refreshPresetsHash, setRefreshPresetsHash] = useState(
     Number(new Date())
   );
+  const [refreshHash, setRefreshHash] = useState(Number(new Date()));
   const dispatch = useDispatch<any>();
 
   useEffect(() => {
@@ -89,7 +90,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         Notification.Success({
           msg: "Asset Configured Successfully",
         });
-        window.location.reload();
+        setRefreshHash(Number(new Date()));
       } else {
         Notification.Error({
           msg: "Something went wrong..!",
@@ -200,6 +201,7 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
 
       {assetType === "ONVIF" ? (
         <CameraConfigure
+          key={refreshHash}
           asset={asset as AssetData}
           bed={bed}
           setBed={setBed}
