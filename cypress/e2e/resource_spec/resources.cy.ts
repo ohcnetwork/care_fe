@@ -49,7 +49,7 @@ describe("Resource Page", () => {
     facilityPage.fillResourceRequestDetails(
       "Test User",
       phone_number,
-      "cypress",
+      "Dummy",
       "Test title",
       "10",
       "Test description"
