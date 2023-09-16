@@ -37,7 +37,6 @@ import { ConsultationVentilatorTab } from "./ConsultationVentilatorTab";
 import { ConsultationPressureSoreTab } from "./ConsultationPressureSoreTab";
 import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
-import Chip from "../../../CAREUI/display/Chip";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -195,13 +194,9 @@ export const ConsultationDetails = (props: any) => {
 
         {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) =>
           diagnosis.id === consultationData.icd11_principal_diagnosis ? (
-            <div className="flex items-center">
-              <Chip
-                size="small"
-                variant="secondary"
-                startIcon="l-clock"
-                text={diagnosis.label}
-              />
+            <div className="flex items-center gap-2">
+              <p>{diagnosis.label}</p>
+              <CareIcon className="care-l-stethoscope rounded-lg bg-primary-500  p-1 text-2xl text-white" />
             </div>
           ) : (
             <p>{diagnosis.label}</p>
