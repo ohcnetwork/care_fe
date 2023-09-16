@@ -376,6 +376,9 @@ const AssetManage = (props: AssetManageProps) => {
                     <span className="tooltip-text">{assetClassProp.name}</span>
                   </div>
                 </div>
+                <div className="mb-2 w-full text-gray-700 sm:hidden">
+                  {asset?.description}
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {asset?.asset_type === "INTERNAL" ? (
                     <Chip text="Internal" startIcon="l-building" />
@@ -402,7 +405,9 @@ const AssetManage = (props: AssetManageProps) => {
                   )}
                 </div>
               </div>
-              <span className="text-gray-700">{asset?.description}</span>
+              <div className="mt-3 hidden text-gray-700 sm:block">
+                {asset?.description}
+              </div>
             </div>
             <div className="flex flex-col gap-6">
               {[

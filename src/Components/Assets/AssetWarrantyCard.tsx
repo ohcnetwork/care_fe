@@ -32,8 +32,8 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
       <div className="mb-3 text-right text-lg font-bold italic">
         {asset.manufacturer}
       </div>
-      <div className="flex h-full flex-col justify-between gap-6 md:flex-row xl:flex-col">
-        <div className="flex h-full w-full flex-col gap-4 border-b border-white/40 md:border-b-0 md:border-r xl:w-auto xl:border-b xl:border-r-0">
+      <div className="flex h-full flex-col justify-between gap-2 md:flex-row xl:flex-col">
+        <div className="flex h-full w-full flex-col gap-4 md:border-r xl:w-auto  xl:border-r-0">
           {Object.keys(details).map((key) => (
             <div className="">
               <div className="mb-1 text-xs uppercase italic tracking-widest text-gray-200">
@@ -62,6 +62,7 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
             </div>
           ))}
         </div>
+        <div className="mb-2 hidden h-[1px] w-full bg-white/40 xl:block" />
         <div className="shrink-0">
           <div>
             <div className="mb-1 text-xs uppercase italic tracking-widest text-gray-200">
