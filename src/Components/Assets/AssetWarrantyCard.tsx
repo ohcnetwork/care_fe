@@ -3,7 +3,7 @@ import { AssetData } from "./AssetTypes";
 import { classNames, formatDate } from "../../Utils/utils";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { t } from "i18next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function AssetWarrantyCard(props: { asset: AssetData }) {
   const { asset } = props;
@@ -17,6 +17,15 @@ export default function AssetWarrantyCard(props: { asset: AssetData }) {
   };
 
   const [isCopied, setIsCopied] = useState(false);
+
+  useEffect(() => {
+    if (isCopied) {
+      const timeout = setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isCopied]);
 
   return (
     <div className="warranty-card relative z-10 flex h-full w-screen flex-col overflow-hidden p-6 text-white transition-all hover:scale-[1.01] hover:from-primary-600 hover:to-primary-700 md:w-full md:rounded-xl xl:w-96">
