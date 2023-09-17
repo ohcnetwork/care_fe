@@ -148,7 +148,7 @@ function AssetFilter(props: any) {
         <div className="w-full flex-none">
           <FieldLabel>Location</FieldLabel>
           <LocationSelect
-            name="Facilities"
+            name="Facilities-location"
             setSelected={(selectedId) =>
               handleLocationSelect((selectedId as string) || "")
             }
