@@ -234,8 +234,29 @@ export class AssetPage {
       });
   }
 
-  selectImportOption() {
+  selectassetimportbutton() {
     cy.get("[data-testid=import-asset-button]").click();
+  }
+
+  selectjsonexportbutton() {
+    cy.intercept("GET", "**/api/v1/asset/?json=true**").as("getJsonexport");
+    cy.get("#export-json-option").click();
+    cy.wait("@getJsonexport").then(({ request, response }) => {
+      expect(response.statusCode).to.eq(200);
+      expect(request.url).to.include("json=true");
+    });
+  }
+
+  selectcsvexportbutton() {
+    cy.intercept("GET", "**/api/v1/asset/?csv=true**").as("getCsvexport");
+    cy.get("#export-csv-option").click();
+    cy.wait("@getCsvexport").then(({ request, response }) => {
+      expect(response.statusCode).to.eq(200);
+      expect(request.url).to.include("csv=true");
+    });
+  }
+
+  selectImportOption() {
     cy.get(".import-assets-button").click();
   }
 
