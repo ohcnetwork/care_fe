@@ -4,6 +4,7 @@ import { StateInterface } from "../Patient/FileUpload";
 import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import ButtonV2 from "./components/ButtonV2";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
+import CareIcon from "../../CAREUI/icons/CareIcon";
 
 export const zoom_values = [
   "h-1/6 w-1/6 my-40",
@@ -58,10 +59,6 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
 
   const [, setOpen] = useState(false);
 
-  // const toggleSetOpen = () => {
-  //   setOpen((prev) => !prev);
-  // };
-
   return (
     <SlideOver
       onCloseClick={onClose}
@@ -98,25 +95,25 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                   {[
                     [
                       t("Zoom In"),
-                      "magnifying-glass-plus",
+                      "search-plus",
                       handleZoomIn,
                       file_state.zoom === zoom_values.length,
                     ],
                     [
                       t("Zoom Out"),
-                      "magnifying-glass-minus",
+                      "search-minus",
                       handleZoomOut,
                       file_state.zoom === 1,
                     ],
                     [
                       t("Rotate Left"),
-                      "rotate-left",
+                      "corner-up-left",
                       () => handleRotate(-90),
                       false,
                     ],
                     [
                       t("Rotate Right"),
-                      "rotate-right",
+                      "corner-up-right",
                       () => handleRotate(90),
                       false,
                     ],
@@ -128,7 +125,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                       variant="secondary"
                       border={true}
                     >
-                      <i className={`fas fa-${button[1]} mr-2`} />
+                      <CareIcon className={`care-l-${button[1]} mr-2`} />
                       {button[0] as string}
                     </ButtonV2>
                   ))}
@@ -141,7 +138,7 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                     className="text-white"
                     download={`${file_state.name}.${file_state.extension}`}
                   >
-                    <i className="fas fa-download mr-2" />
+                    <CareIcon className="care-l-file-download mr-2" />
                     Download
                   </a>
                 </ButtonV2>
