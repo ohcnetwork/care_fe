@@ -1,4 +1,5 @@
-import { RequestOptions, Route } from "./types";
+import handleResponse from "./handleResponse";
+import { RequestOptions, RequestResult, Route } from "./types";
 import { makeHeaders, makeUrl } from "./utils";
 
 interface Options extends RequestOptions {
@@ -7,8 +8,8 @@ interface Options extends RequestOptions {
 
 export default async function request<TData>(
   { path, method, noAuth }: Route<TData>,
-  { query, body, pathParams, controller }: Options = {}
-) {
+  { query, body, pathParams, controller, onResponse, silent }: Options = {}
+): Promise<RequestResult<TData>> {
   const signal = controller?.signal;
 
   const headers = makeHeaders(noAuth ?? false);
@@ -20,8 +21,22 @@ export default async function request<TData>(
     options.body = JSON.stringify(body);
   }
 
-  const res = await fetch(url, options);
-  const data: TData = await res.json();
+  try {
+    const res = await fetch(url, options);
+    const data: TData = await res.json();
 
-  return { res, data };
+    const result = {
+      res,
+      data: res.ok ? data : undefined,
+      error: res.ok ? undefined : (data as Record<string, unknown>),
+    };
+
+    onResponse?.(result);
+    handleResponse(result, silent);
+
+    return result;
+  } catch (error: any) {
+    console.error(error);
+    return { error, res: undefined, data: undefined };
+  }
 }
