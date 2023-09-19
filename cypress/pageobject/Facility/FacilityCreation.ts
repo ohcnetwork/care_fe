@@ -100,7 +100,9 @@ class FacilityPage {
   }
 
   saveAndExitDoctorForm() {
+    cy.intercept("GET", "**/api/v1/facility/**").as("createFacilities");
     cy.get("button#save-and-exit").click();
+    cy.wait("@createFacilities").its("response.statusCode").should("eq", 200);
   }
 
   clickManageFacilityDropdown() {
@@ -129,6 +131,14 @@ class FacilityPage {
 
   clickDeleteFacilityOption() {
     cy.get("#delete-facility").contains("Delete Facility").click();
+  }
+
+  verifyfacilitynewurl() {
+    cy.url().should("match", /facility\/[a-z\d-]+/);
+  }
+
+  verifyresourcenewurl() {
+    cy.url().should("match", /resource\/[a-z\d-]+/);
   }
 
   confirmDeleteFacility() {
