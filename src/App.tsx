@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense } from "react";
 import Routers from "./Routers";
 import {
   AppConfigProvider,
@@ -7,8 +7,7 @@ import {
 } from "./Providers";
 import ThemedFavicon from "./CAREUI/misc/ThemedFavicon";
 import Intergrations from "./Integrations";
-
-const Loading = lazy(() => import("./Components/Common/Loading"));
+import Loading from "./Components/Common/Loading";
 
 const App = () => {
   return (
