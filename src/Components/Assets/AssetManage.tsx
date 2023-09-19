@@ -29,7 +29,7 @@ import { useTranslation } from "react-i18next";
 const PageTitle = lazy(() => import("../Common/PageTitle"));
 const Loading = lazy(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Uptime from "../Common/Uptime";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import dayjs from "dayjs";
@@ -360,6 +360,7 @@ const AssetManage = (props: AssetManageProps) => {
                     {asset?.name}
                   </span>
                   <ButtonV2
+                    id="export-asset"
                     onClick={handleDownload}
                     className="tooltip p-4"
                     variant="secondary"
@@ -452,7 +453,7 @@ const AssetManage = (props: AssetManageProps) => {
                   }
                   id="configure-asset"
                   data-testid="asset-configure-button"
-                  authorizeFor={NonReadOnlyUsers}
+                  authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
                 >
                   <CareIcon className="care-l-setting h-4" />
                   {t("configure")}
