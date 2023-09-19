@@ -15,6 +15,7 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
   const { res, data, loading } = useQuery(routes.currentUser, {
     refetchOnWindowFocus: false,
     prefetch: true,
+    silent: true,
   });
 
   useEffect(() => {
@@ -22,8 +23,8 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
       return;
     }
 
-    updateRefreshToken();
-    setInterval(updateRefreshToken, 5 * 60 * 1000); // TODO: move this interval to config.json
+    updateRefreshToken(true);
+    setInterval(() => updateRefreshToken(), 5 * 60 * 1000); // TODO: move this interval to config.json
   }, [data]);
 
   if (loading || !res) {
@@ -39,7 +40,7 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
   );
 }
 
-const updateRefreshToken = async () => {
+const updateRefreshToken = async (silent = false) => {
   const refresh = localStorage.getItem(LocalStorageKeys.refreshToken);
 
   if (!refresh) {
@@ -48,9 +49,12 @@ const updateRefreshToken = async () => {
 
   const { res, data } = await request(routes.token_refresh, {
     body: { refresh },
+    silent,
   });
 
-  if (res.status !== 200) {
+  if (res?.status !== 200 || !data) {
+    localStorage.removeItem(LocalStorageKeys.accessToken);
+    localStorage.removeItem(LocalStorageKeys.refreshToken);
     return;
   }
 

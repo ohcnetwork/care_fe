@@ -27,14 +27,12 @@ export default function handleResponse(
 
   // Other 400 Errors
   if (res.status >= 400) {
-    if (error?.detail) {
-      notify?.Error({ msg: error.detail });
-    } else {
-      notify?.Error({ msg: "Something went wrong...!" });
-    }
-
-    if (error?.code === "token_not_valid") {
+    // Invalid token
+    if (!silent && error?.code === "token_not_valid") {
       navigate("/session-expired");
     }
+
+    notify?.Error({ msg: error?.detail || "Something went wrong...!" });
+    return;
   }
 }
