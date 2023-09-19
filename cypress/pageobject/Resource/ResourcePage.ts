@@ -46,10 +46,6 @@ class ResourcePage {
     cy.contains("Board View").click();
   }
 
-  openAlreadyCreatedResource() {
-    cy.get("[data-testid='resource-details']").first().click();
-  }
-
   clickUpdateStatus() {
     cy.get("[data-testid='update-status']").click();
   }

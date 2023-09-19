@@ -360,6 +360,7 @@ const AssetManage = (props: AssetManageProps) => {
                     {asset?.name}
                   </span>
                   <ButtonV2
+                    id="export-asset"
                     onClick={handleDownload}
                     className="tooltip p-4"
                     variant="secondary"

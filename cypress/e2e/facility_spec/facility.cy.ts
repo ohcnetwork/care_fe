@@ -7,7 +7,6 @@ describe("Facility Creation", () => {
   let facilityUrl: string;
   const facilityPage = new FacilityPage();
   const loginPage = new LoginPage();
-  const phone_number = "9999999999";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -40,14 +39,9 @@ describe("Facility Creation", () => {
     facilityPage.selectAreaOfSpecialization("General Medicine");
     facilityPage.fillDoctorCount("5");
     facilityPage.saveAndExitDoctorForm();
-
-    cy.url().then((initialUrl) => {
-      cy.get("button#save-and-exit").should("not.exist");
-      cy.url()
-        .should("not.equal", initialUrl)
-        .then((newUrl) => {
-          facilityUrl = newUrl;
-        });
+    facilityPage.verifyfacilitynewurl();
+    cy.url().then((newUrl) => {
+      facilityUrl = newUrl;
     });
   });
 
@@ -73,24 +67,6 @@ describe("Facility Creation", () => {
     facilityPage.fillMiddleWareAddress("dev_middleware.coronasafe.live");
     facilityPage.clickupdateMiddleWare();
     facilityPage.verifySuccessNotification("Facility updated successfully");
-  });
-
-  it("Create a resource request", () => {
-    facilityPage.visitUpdateFacilityPage(facilityUrl);
-    facilityPage.clickManageFacilityDropdown();
-    facilityPage.clickResourceRequestOption();
-    facilityPage.fillResourceRequestDetails(
-      "Test User",
-      phone_number,
-      "cypress",
-      "Test title",
-      "10",
-      "Test description"
-    );
-    facilityPage.clickSubmitRequestButton();
-    facilityPage.verifySuccessNotification(
-      "Resource request created successfully"
-    );
   });
 
   it("Delete a facility", () => {
