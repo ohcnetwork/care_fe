@@ -402,7 +402,7 @@ export const ConsultationDetails = (props: any) => {
                   consultationData.deprecated_verified_by) && (
                   <div className="mt-2 text-sm">
                     <span className="font-semibold leading-relaxed">
-                      Verified By:{" "}
+                      Treating Physician:{" "}
                     </span>
                     {consultationData.verified_by_object
                       ? `${consultationData.verified_by_object.first_name} ${consultationData.verified_by_object.last_name}`
