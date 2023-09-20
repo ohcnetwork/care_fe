@@ -971,6 +971,11 @@ const routes = {
     method: "GET",
   },
 
+  archiveAdministration: {
+    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/{external_id}/archive/",
+    method: "POST",
+  },
+
   getPrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/",
     method: "GET",

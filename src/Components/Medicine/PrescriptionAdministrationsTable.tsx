@@ -20,6 +20,7 @@ import {
   formatTime,
 } from "../../Utils/utils";
 import useRangePagination from "../../Common/hooks/useRangePagination";
+import MedicineAdministrationEventsTimeline from "./MedicineAdministrationEventsTimeline";
 
 interface DateRange {
   start: Date;
@@ -273,6 +274,7 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
             props.intervals[props.intervals.length - 1].end,
             "YYYY-MM-DD"
           ),
+          archived: false,
         })
       );
 
@@ -283,12 +285,7 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
   }, [prescription.id, dispatch, props.intervals]);
 
   return (
-    <tr
-      className={classNames(
-        "border-separate border border-gray-300 bg-gray-100 transition-all duration-200 ease-in-out hover:border-primary-300 hover:bg-primary-100"
-        // prescription.discontinued && "opacity-60"
-      )}
-    >
+    <>
       {showDiscontinue && (
         <DiscontinuePrescription
           prescription={prescription}
@@ -317,15 +314,27 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
         <DialogModal
           title={t("prescription_details")}
           onClose={() => setShowDetails(false)}
-          className="w-full md:max-w-4xl"
+          className="w-full md:max-w-3xl"
           show
         >
-          <div className="mt-4 flex flex-col gap-4">
+          <div className="mt-4 flex flex-col gap-6">
             <PrescriptionDetailCard
               prescription={prescription}
               actions={props.actions}
               readonly
             />
+
+            {administrations && (
+              <MedicineAdministrationEventsTimeline
+                prescription={prescription}
+                actions={props.actions}
+                onArchiveAdministration={() => {
+                  setShowDetails(false);
+                  props.refetch();
+                }}
+              />
+            )}
+
             <div className="flex w-full flex-col items-center justify-end gap-2 md:flex-row">
               <Cancel
                 onClick={() => setShowDetails(false)}
@@ -356,77 +365,84 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
           </div>
         </DialogModal>
       )}
-      <td
-        className="cursor-pointer py-3 pl-4 text-left"
-        onClick={() => setShowDetails(true)}
+      <tr
+        className={classNames(
+          "border-separate border border-gray-300 bg-gray-100 transition-all duration-200 ease-in-out hover:border-primary-300 hover:bg-primary-100"
+          // prescription.discontinued && "opacity-60"
+        )}
       >
-        <div className="flex items-center gap-2">
-          <span
-            className={classNames(
-              "text-sm font-semibold",
-              prescription.discontinued ? "text-gray-700" : "text-gray-900"
-            )}
-          >
-            {prescription.medicine_object?.name ?? prescription.medicine_old}
-          </span>
-
-          {prescription.discontinued && (
-            <span className="rounded-full border border-gray-500 bg-gray-200 px-1.5 text-xs font-medium text-gray-700">
-              {t("discontinued")}
-            </span>
-          )}
-
-          {prescription.route && (
-            <span className="rounded-full border border-blue-500 bg-blue-100 px-1.5 text-xs font-medium text-blue-700">
-              {t(prescription.route)}
-            </span>
-          )}
-        </div>
-      </td>
-
-      <td className="text-center text-xs font-semibold text-gray-900">
-        <p>{prescription.dosage}</p>
-        <p>
-          {!prescription.is_prn
-            ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
-            : prescription.indicator}
-        </p>
-      </td>
-
-      <td />
-      {/* Administration Cells */}
-      {props.intervals.map(({ start, end }, index) => (
-        <td className="text-center" key={index}>
-          {administrations === undefined ? (
-            <CareIcon
-              icon="l-spinner"
-              className="animate-spin text-lg text-gray-500"
-            />
-          ) : (
-            <AdministrationCell
-              administrations={administrations}
-              interval={{ start, end }}
-              prescription={prescription}
-            />
-          )}
-        </td>
-      ))}
-      <td />
-
-      {/* Action Buttons */}
-      <td className="space-x-1 pr-2 text-right">
-        <ButtonV2
-          type="button"
-          size="small"
-          disabled={prescription.discontinued}
-          ghost
-          border
-          onClick={() => setShowAdminister(true)}
+        <td
+          className="cursor-pointer py-3 pl-4 text-left"
+          onClick={() => setShowDetails(true)}
         >
-          {t("administer")}
-        </ButtonV2>
-      </td>
-    </tr>
+          <div className="flex items-center gap-2">
+            <span
+              className={classNames(
+                "text-sm font-semibold",
+                prescription.discontinued ? "text-gray-700" : "text-gray-900"
+              )}
+            >
+              {prescription.medicine_object?.name ?? prescription.medicine_old}
+            </span>
+
+            {prescription.discontinued && (
+              <span className="rounded-full border border-gray-500 bg-gray-200 px-1.5 text-xs font-medium text-gray-700">
+                {t("discontinued")}
+              </span>
+            )}
+
+            {prescription.route && (
+              <span className="rounded-full border border-blue-500 bg-blue-100 px-1.5 text-xs font-medium text-blue-700">
+                {t(prescription.route)}
+              </span>
+            )}
+          </div>
+        </td>
+
+        <td className="text-center text-xs font-semibold text-gray-900">
+          <p>{prescription.dosage}</p>
+          <p>
+            {!prescription.is_prn
+              ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
+              : prescription.indicator}
+          </p>
+        </td>
+
+        <td />
+        {/* Administration Cells */}
+        {props.intervals.map(({ start, end }, index) => (
+          <td className="text-center" key={index}>
+            {administrations === undefined ? (
+              <CareIcon
+                icon="l-spinner"
+                className="animate-spin text-lg text-gray-500"
+              />
+            ) : (
+              <AdministrationCell
+                administrations={administrations}
+                interval={{ start, end }}
+                prescription={prescription}
+              />
+            )}
+          </td>
+        ))}
+        <td />
+
+        {/* Action Buttons */}
+        <td className="space-x-1 pr-2 text-right">
+          <ButtonV2
+            type="button"
+            size="small"
+            disabled={prescription.discontinued}
+            ghost
+            border
+            onClick={() => setShowAdminister(true)}
+          >
+            {t("administer")}
+          </ButtonV2>
+        </td>
+      </tr>
+    </>
   );
 };
 
@@ -446,67 +462,39 @@ const AdministrationCell = ({
     dayjs(administration.administered_date).isBetween(start, end)
   );
 
-  if (administered.length) {
-    return (
-      <div className="tooltip">
-        <div className="relative mx-auto max-w-min">
-          <CareIcon
-            icon="l-check-circle"
-            className="text-xl text-primary-500"
-          />
-          {administered.length > 1 && (
-            <span className="absolute -bottom-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary-500 text-xs font-semibold text-white">
-              {administered.length}
-            </span>
-          )}
-        </div>
-        <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs">
-          <p>
-            Administered on{" "}
-            <strong>{formatDateTime(administered[0].administered_date)}</strong>
-          </p>
-          <p>
-            {administered.length > 1
-              ? `Administered ${administered.length} times`
-              : `Administered ${formatTime(administered[0].administered_date)}`}
-          </p>
-        </span>
-      </div>
-    );
-  }
-
-  // Check if cell belongs to a discontinued prescription
+  // Check if cell belongs to a discontinued prescription and discontinued_date is not within the cell interval.
   if (
     prescription.discontinued &&
-    dayjs(end).isAfter(prescription.discontinued_date)
+    dayjs(end).isAfter(prescription.discontinued_date) &&
+    !dayjs(prescription.discontinued_date).isBetween(start, end)
   ) {
-    if (!dayjs(prescription.discontinued_date).isBetween(start, end)) return;
+    return;
+  }
 
+  if (administered.length || prescription.discontinued) {
     return (
-      <div className="tooltip">
-        <CareIcon
-          icon="l-ban"
-          className={classNames(
-            "text-xl",
-            dayjs(prescription.discontinued_date).isBetween(start, end)
-              ? "text-danger-700"
-              : "text-gray-400"
+      <div className="isolate flex cursor-pointer items-center justify-center -space-x-3 overflow-hidden">
+        {!!administered.length && (
+          <CareIcon
+            icon="l-check-circle"
+            className="relative z-30 inline-block rounded-full bg-white text-xl text-primary-500"
+          />
+        )}
+
+        {administered.length > 1 && (
+          <CareIcon
+            icon="l-check-circle"
+            className="relative z-20 inline-block rounded-full bg-white text-xl text-primary-500/70"
+          />
+        )}
+
+        {prescription.discontinued &&
+          dayjs(prescription.discontinued_date).isBetween(start, end) && (
+            <CareIcon
+              icon="l-ban"
+              className="relative z-0 inline-block rounded-full bg-white text-xl text-danger-700"
+            />
           )}
-        />
-        <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs">
-          <p>
-            Discontinued on{" "}
-            <strong>{formatDateTime(prescription.discontinued_date)}</strong>
-          </p>
-          <p>
-            Reason:{" "}
-            {prescription.discontinued_reason ? (
-              <strong>{prescription.discontinued_reason}</strong>
-            ) : (
-              <span className="italic">Not specified</span>
-            )}
-          </p>
-        </span>
       </div>
     );
   }
@@ -515,21 +503,6 @@ const AdministrationCell = ({
   if (dayjs(start).isAfter(prescription.created_date)) {
     return <CareIcon icon="l-minus-circle" className="text-xl text-gray-400" />;
   }
-
-  // Check if prescription.created_date is between start and end
-  // if (dayjs(prescription.created_date).isBetween(start, end)) {
-  //   return (
-  //     <div className="tooltip">
-  //       <CareIcon icon="l-play-circle" className="text-xl text-gray-500" />
-  //       <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs">
-  //         <p>
-  //           Prescribed on{" "}
-  //           <strong>{formatDateTime(prescription.created_date)}</strong>
-  //         </p>
-  //       </span>
-  //     </div>
-  //   );
-  // }
 };
 
 function getAdministrationBounds(prescriptions: Prescription[]) {

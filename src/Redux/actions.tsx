@@ -1031,7 +1031,7 @@ export const PrescriptionActions = (consultation_external_id: string) => {
         get: () => fireRequest("getPrescription", [], {}, pathParams),
 
         /** Administer a prescription */
-        administer: (obj: MedicineAdministrationRecord) =>
+        administer: (obj: Partial<MedicineAdministrationRecord>) =>
           fireRequest(
             "administerPrescription",
             [],
@@ -1040,9 +1040,18 @@ export const PrescriptionActions = (consultation_external_id: string) => {
             `administer-medicine-${external_id}`
           ),
 
+        archive: (mar: MedicineAdministrationRecord) =>
+          fireRequest(
+            "archiveAdministration",
+            [],
+            {},
+            { ...pathParams, external_id: mar.id }
+          ),
+
         listAdministrations: (query?: {
           administered_date_after?: string;
           administered_date_before?: string;
+          archived?: boolean;
         }) =>
           fireRequest(
             "listAdministrations",
