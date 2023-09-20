@@ -30,6 +30,7 @@ export interface RequestOptions<TData = unknown> {
   pathParams?: Record<string, string>;
   onResponse?: (res: RequestResult<TData>) => void;
   silent?: boolean;
+  reattempts?: number;
 }
 
 export interface PaginatedResponse<TItem> {
