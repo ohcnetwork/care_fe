@@ -8,7 +8,7 @@ import { ConsultationModel, ICD11DiagnosisModel } from "../models";
 import { getConsultation, getPatient } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { lazy, useCallback, useState } from "react";
-
+import ToolTip from "../../Common/utils/Tooltip";
 import ButtonV2 from "../../Common/components/ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import DischargeModal from "../DischargeModal";
@@ -191,10 +191,20 @@ export const ConsultationDetails = (props: any) => {
     return diagnoses.length ? (
       <div className="w-full text-sm">
         <p className="font-semibold leading-relaxed">{label}</p>
-
-        {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) => (
-          <p>{diagnosis.label}</p>
-        ))}
+        {diagnoses.slice(0, !showMore ? nshow : undefined).map((diagnosis) =>
+          diagnosis.id === consultationData.icd11_principal_diagnosis ? (
+            <div className="relative flex items-center gap-2">
+              <p>{diagnosis.label}</p>
+              <div>
+                <ToolTip text="Principal Diagnosis" position="BOTTOM">
+                  <CareIcon className="care-l-stethoscope rounded-lg bg-primary-500  p-1 text-2xl text-white" />
+                </ToolTip>
+              </div>
+            </div>
+          ) : (
+            <p>{diagnosis.label}</p>
+          )
+        )}
         {diagnoses.length > nshow && (
           <>
             {!showMore ? (
@@ -358,22 +368,6 @@ export const ConsultationDetails = (props: any) => {
                     {consultationData.other_symptoms}
                   </div>
                 )*/}
-
-                {consultationData.icd11_principal_diagnosis && (
-                  <ShowDiagnosis
-                    label="Principal Diagnosis (as per ICD-11 recommended by WHO)"
-                    diagnoses={[
-                      [
-                        ...(consultationData?.icd11_diagnoses_object ?? []),
-                        ...(consultationData?.icd11_provisional_diagnoses_object ??
-                          []),
-                      ].find(
-                        (d) =>
-                          d.id === consultationData.icd11_principal_diagnosis
-                      )!,
-                    ]}
-                  />
-                )}
 
                 <ShowDiagnosis
                   diagnoses={
