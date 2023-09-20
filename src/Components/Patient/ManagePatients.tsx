@@ -36,7 +36,6 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import SwipeableViews from "react-swipeable-views";
 import { parseOptionId } from "../../Common/utils";
 import { parsePhoneNumber } from "../../Utils/utils.js";
 import { useDispatch } from "react-redux";
@@ -985,14 +984,12 @@ export const PatientManager = () => {
       </div>
       <div>
         <PatientFilter {...advancedFilter} key={window.location.search} />
-        <SwipeableViews index={tabValue}>
-          <TabPanel value={tabValue} index={0}>
-            <div className="mb-4">{managePatients}</div>
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            <div className="mb-4">{managePatients}</div>
-          </TabPanel>
-        </SwipeableViews>
+        <TabPanel value={tabValue} index={0}>
+          <div className="mb-4">{managePatients}</div>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <div className="mb-4">{managePatients}</div>
+        </TabPanel>
         <DoctorVideoSlideover
           facilityId={params.facility}
           show={showDoctors}
