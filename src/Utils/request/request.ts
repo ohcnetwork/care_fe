@@ -19,11 +19,9 @@ export default async function request<TData>(
   }: Options = {}
 ): Promise<RequestResult<TData>> {
   const signal = controller?.signal;
-
-  const headers = makeHeaders(noAuth ?? false);
   const url = makeUrl(path, query, pathParams);
 
-  const options: RequestInit = { headers, method, signal };
+  const options: RequestInit = { method, signal };
 
   if (body) {
     options.body = JSON.stringify(body);
@@ -36,6 +34,8 @@ export default async function request<TData>(
   };
 
   for (let i = 0; i < reattempts + 1; i++) {
+    options.headers = makeHeaders(noAuth ?? false);
+
     try {
       const res = await fetch(url, options);
       const data: TData = await res.json();
