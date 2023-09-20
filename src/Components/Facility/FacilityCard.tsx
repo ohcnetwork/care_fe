@@ -9,7 +9,7 @@ import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import * as Notification from "../../Utils/Notifications.js";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { parsePhoneNumber } from "libphonenumber-js";
+import { formatPhoneNumber, parsePhoneNumber } from "../../Utils/utils";
 import DialogModal from "../Common/Dialog";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import useConfig from "../../Common/hooks/useConfig";
@@ -147,10 +147,9 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     href={`tel:${facility.phone_number}`}
                     className="text-sm font-semibold tracking-wider"
                   >
-                    {parsePhoneNumber(
-                      facility.phone_number as string,
-                      "IN"
-                    ).formatInternational() || "-"}
+                    {formatPhoneNumber(
+                      parsePhoneNumber(facility.phone_number as string) ?? "-"
+                    )}
                   </a>
                 </div>
               </div>

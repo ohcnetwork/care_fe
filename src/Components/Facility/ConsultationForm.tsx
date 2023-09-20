@@ -539,7 +539,7 @@ export const ConsultationForm = (props: any) => {
 
         case "verified_by": {
           if (state.form.suggestion !== "DD" && !state.form[field]) {
-            errors[field] = "Please fill verified by";
+            errors[field] = "Please fill treating physician";
             invalidForm = true;
             break;
           }
@@ -1321,7 +1321,7 @@ export const ConsultationForm = (props: any) => {
                           >
                             <UserAutocompleteFormField
                               name={"verified_by"}
-                              label="Verified by"
+                              label="Treating Physician"
                               placeholder="Attending Doctors Name and Designation"
                               required
                               value={state.form.verified_by_object ?? undefined}
