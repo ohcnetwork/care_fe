@@ -165,7 +165,7 @@ export default function PrescriptionAdministrationsTable({
               <th className="sticky left-0 z-10 bg-white py-3 pl-4 text-left">
                 <div className="flex justify-between gap-2">
                   <span className="text-sm">{t("medicine")}</span>
-                  <span className="px-2 text-center text-xs leading-none">
+                  <span className="hidden px-2 text-center text-xs leading-none lg:block">
                     <p>Dosage &</p>
                     <p>
                       {!state?.prescriptions[0]?.is_prn
@@ -328,12 +328,7 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
   }, [prescription.id, dispatch, props.intervals]);
 
   return (
-    <tr
-      className={classNames(
-        "group border-separate border border-gray-300 bg-gray-100 transition-all duration-200 ease-in-out hover:border-primary-300 hover:bg-primary-100"
-        // prescription.discontinued && "opacity-60"
-      )}
-    >
+    <>
       {showDiscontinue && (
         <DiscontinuePrescription
           prescription={prescription}
@@ -401,81 +396,89 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
           </div>
         </DialogModal>
       )}
-      <td
-        className="sticky left-0 z-10 cursor-pointer bg-gray-100 py-3 pl-4 text-left transition-all duration-200 ease-in-out group-hover:bg-primary-100"
-        onClick={() => setShowDetails(true)}
+      <tr
+        className={classNames(
+          "group border-separate border border-gray-300 bg-gray-100 transition-all duration-200 ease-in-out hover:border-primary-300 hover:bg-primary-100"
+          // prescription.discontinued && "opacity-60"
+        )}
       >
-        <div className="flex justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span
-              className={classNames(
-                "text-sm font-semibold",
-                prescription.discontinued ? "text-gray-700" : "text-gray-900"
-              )}
-            >
-              {prescription.medicine_object?.name ?? prescription.medicine_old}
-            </span>
-
-            {prescription.discontinued && (
-              <span className="rounded-full border border-gray-500 bg-gray-200 px-1.5 text-xs font-medium text-gray-700">
-                {t("discontinued")}
-              </span>
-            )}
-
-            {prescription.route && (
-              <span className="rounded-full border border-blue-500 bg-blue-100 px-1.5 text-xs font-medium text-blue-700">
-                {t(prescription.route)}
-              </span>
-            )}
-          </div>
-
-          <span className="px-2 text-center text-xs font-semibold text-gray-900">
-            <p>{prescription.dosage}</p>
-            <p>
-              {!prescription.is_prn
-                ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
-                : prescription.indicator}
-            </p>
-          </span>
-        </div>
-      </td>
-
-      <td />
-      {/* Administration Cells */}
-      {props.intervals
-        .map(({ start, end }, index) => (
-          <td className="text-center" key={index}>
-            {administrations === undefined ? (
-              <CareIcon
-                icon="l-spinner"
-                className="animate-spin text-lg text-gray-500"
-              />
-            ) : (
-              <AdministrationCell
-                administrations={administrations}
-                interval={{ start, end }}
-                prescription={prescription}
-              />
-            )}
-          </td>
-        ))
-        .reverse()}
-      <td />
-
-      {/* Action Buttons */}
-      <td className="space-x-1 pr-2 text-right">
-        <ButtonV2
-          type="button"
-          size="small"
-          disabled={prescription.discontinued}
-          ghost
-          border
-          onClick={() => setShowAdminister(true)}
+        <td
+          className="sticky left-0 z-10 cursor-pointer bg-gray-100 py-3 pl-4 text-left transition-all duration-200 ease-in-out group-hover:bg-primary-100"
+          onClick={() => setShowDetails(true)}
         >
-          {t("administer")}
-        </ButtonV2>
-      </td>
-    </tr>
+          <div className="flex flex-col gap-1 lg:flex-row lg:justify-between lg:gap-2">
+            <div className="flex items-center gap-2">
+              <span
+                className={classNames(
+                  "text-sm font-semibold",
+                  prescription.discontinued ? "text-gray-700" : "text-gray-900"
+                )}
+              >
+                {prescription.medicine_object?.name ??
+                  prescription.medicine_old}
+              </span>
+
+              {prescription.discontinued && (
+                <span className="hidden rounded-full border border-gray-500 bg-gray-200 px-1.5 text-xs font-medium text-gray-700 lg:block">
+                  {t("discontinued")}
+                </span>
+              )}
+
+              {prescription.route && (
+                <span className="hidden rounded-full border border-blue-500 bg-blue-100 px-1.5 text-xs font-medium text-blue-700 lg:block">
+                  {t(prescription.route)}
+                </span>
+              )}
+            </div>
+
+            <div className="flex gap-1 text-xs font-semibold text-gray-900 lg:flex-col lg:px-2 lg:text-center">
+              <p>{prescription.dosage}</p>
+              <p>
+                {!prescription.is_prn
+                  ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
+                  : prescription.indicator}
+              </p>
+            </div>
+          </div>
+        </td>
+
+        <td />
+        {/* Administration Cells */}
+        {props.intervals
+          .map(({ start, end }, index) => (
+            <td className="text-center" key={index}>
+              {administrations === undefined ? (
+                <CareIcon
+                  icon="l-spinner"
+                  className="animate-spin text-lg text-gray-500"
+                />
+              ) : (
+                <AdministrationCell
+                  administrations={administrations}
+                  interval={{ start, end }}
+                  prescription={prescription}
+                />
+              )}
+            </td>
+          ))
+          .reverse()}
+        <td />
+
+        {/* Action Buttons */}
+        <td className="space-x-1 pr-2 text-right">
+          <ButtonV2
+            type="button"
+            size="small"
+            disabled={prescription.discontinued}
+            ghost
+            border
+            onClick={() => setShowAdminister(true)}
+          >
+            {t("administer")}
+          </ButtonV2>
+        </td>
+      </tr>
+    </>
   );
 };
 
