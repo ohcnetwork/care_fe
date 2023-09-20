@@ -58,7 +58,8 @@ export default function PrescriptionAdministrationsTable({
     },
     perPage: 24 * 60 * 60 * 1000,
     slots: 24,
-    defaultEnd: true,
+    snapToLatest: true,
+    reverse: true,
   });
   const [showBulkAdminister, setShowBulkAdminister] = useState(false);
 
@@ -206,8 +207,8 @@ export default function PrescriptionAdministrationsTable({
                         className="tooltip px-0.5 py-2 text-center font-semibold leading-none text-gray-900"
                         key={index}
                       >
-                        <p>{formatDateTime(start, "DD/MM")}</p>
-                        <p>{formatDateTime(start, "HH:mm")}</p>
+                        <p>{formatDateTime(end, "DD/MM")}</p>
+                        <p>{formatDateTime(end, "HH:mm")}</p>
 
                         <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs font-normal">
                           Administration(s) between
