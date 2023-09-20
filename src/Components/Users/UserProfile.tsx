@@ -8,13 +8,12 @@ import {
   partialUpdateUser,
   updateUserPassword,
 } from "../../Redux/actions";
-import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { classNames, handleSignOut } from "../../Utils/utils";
+import { classNames, handleSignOut, parsePhoneNumber } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -23,6 +22,7 @@ import { SkillModel, SkillObjectModel } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import { PhoneNumberValidator } from "../Form/FieldValidators";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -199,15 +199,12 @@ export default function UserProfile() {
           return;
         case "phoneNumber":
           // eslint-disable-next-line no-case-declarations
-          const phoneNumber = parsePhoneNumberFromString(
-            states.form[field],
-            "IN"
-          );
+          const phoneNumber = parsePhoneNumber(states.form[field]);
 
           // eslint-disable-next-line no-case-declarations
           let is_valid = false;
           if (phoneNumber) {
-            is_valid = phoneNumber.isValid();
+            is_valid = PhoneNumberValidator()(phoneNumber) === undefined;
           }
 
           if (!states.form[field] || !is_valid) {
@@ -219,12 +216,10 @@ export default function UserProfile() {
           // eslint-disable-next-line no-case-declarations
           let alt_is_valid = false;
           if (states.form[field] && states.form[field] !== "+91") {
-            const altPhoneNumber = parsePhoneNumberFromString(
-              states.form[field],
-              "IN"
-            );
+            const altPhoneNumber = parsePhoneNumber(states.form[field]);
             if (altPhoneNumber) {
-              alt_is_valid = altPhoneNumber.isValid();
+              alt_is_valid =
+                PhoneNumberValidator(["mobile"])(altPhoneNumber) === undefined;
             }
           }
 
@@ -300,13 +295,8 @@ export default function UserProfile() {
         first_name: states.form.firstName,
         last_name: states.form.lastName,
         email: states.form.email,
-        phone_number: parsePhoneNumberFromString(
-          states.form.phoneNumber
-        )?.format("E.164"),
-        alt_phone_number:
-          parsePhoneNumberFromString(states.form.altPhoneNumber)?.format(
-            "E.164"
-          ) || "",
+        phone_number: parsePhoneNumber(states.form.phoneNumber) ?? "",
+        alt_phone_number: parsePhoneNumber(states.form.altPhoneNumber) ?? "",
         gender: states.form.gender,
         age: states.form.age,
         doctor_qualification:

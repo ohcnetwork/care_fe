@@ -26,7 +26,11 @@ import {
   listDoctor,
   updateFacility,
 } from "../../Redux/actions";
-import { getPincodeDetails, includesIgnoreCase } from "../../Utils/utils";
+import {
+  getPincodeDetails,
+  includesIgnoreCase,
+  parsePhoneNumber,
+} from "../../Utils/utils";
 import {
   phonePreg,
   validateLatitude,
@@ -51,11 +55,11 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 
 import { navigate } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { PhoneNumberValidator } from "../Form/FieldValidators.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -434,11 +438,11 @@ export const FacilityCreate = (props: FacilityProps) => {
           return;
         case "phone_number":
           // eslint-disable-next-line no-case-declarations
-          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
+          const phoneNumber = state.form[field];
           if (
-            !state.form[field] ||
-            !phoneNumber?.isPossible() ||
-            !phonePreg(String(phoneNumber?.number))
+            !phoneNumber ||
+            !PhoneNumberValidator()(phoneNumber) === undefined ||
+            !phonePreg(phoneNumber)
           ) {
             errors[field] = t("invalid_phone_number");
             invalidForm = true;
@@ -488,9 +492,7 @@ export const FacilityCreate = (props: FacilityProps) => {
         kasp_empanelled: JSON.parse(state.form.kasp_empanelled),
         latitude: state.form.latitude || null,
         longitude: state.form.longitude || null,
-        phone_number: parsePhoneNumberFromString(
-          state.form.phone_number
-        )?.format("E.164"),
+        phone_number: parsePhoneNumber(state.form.phone_number),
         oxygen_capacity: state.form.oxygen_capacity
           ? state.form.oxygen_capacity
           : 0,
