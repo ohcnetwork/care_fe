@@ -8,13 +8,12 @@ import {
   partialUpdateUser,
   updateUserPassword,
 } from "../../Redux/actions";
-import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { validateEmailAddress } from "../../Common/validation";
 import * as Notification from "../../Utils/Notifications.js";
 import LanguageSelector from "../../Components/Common/LanguageSelector";
 import TextFormField from "../Form/FormFields/TextFormField";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { classNames, handleSignOut } from "../../Utils/utils";
+import { classNames, handleSignOut, parsePhoneNumber } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
@@ -23,6 +22,7 @@ import { SkillModel, SkillObjectModel } from "../Users/models";
 import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import { PhoneNumberValidator } from "../Form/FieldValidators";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -199,15 +199,12 @@ export default function UserProfile() {
           return;
         case "phoneNumber":
           // eslint-disable-next-line no-case-declarations
-          const phoneNumber = parsePhoneNumberFromString(
-            states.form[field],
-            "IN"
-          );
+          const phoneNumber = parsePhoneNumber(states.form[field]);
 
           // eslint-disable-next-line no-case-declarations
           let is_valid = false;
           if (phoneNumber) {
-            is_valid = phoneNumber.isValid();
+            is_valid = PhoneNumberValidator()(phoneNumber) === undefined;
           }
 
           if (!states.form[field] || !is_valid) {
@@ -219,12 +216,10 @@ export default function UserProfile() {
           // eslint-disable-next-line no-case-declarations
           let alt_is_valid = false;
           if (states.form[field] && states.form[field] !== "+91") {
-            const altPhoneNumber = parsePhoneNumberFromString(
-              states.form[field],
-              "IN"
-            );
+            const altPhoneNumber = parsePhoneNumber(states.form[field]);
             if (altPhoneNumber) {
-              alt_is_valid = altPhoneNumber.isValid();
+              alt_is_valid =
+                PhoneNumberValidator(["mobile"])(altPhoneNumber) === undefined;
             }
           }
 
@@ -264,7 +259,7 @@ export default function UserProfile() {
             !/^\d+$/.test(states.form[field] ?? "")
           ) {
             errors[field] =
-              "Weekly working hours must be a number between 0 and 168";
+              "Average weekly working hours must be a number between 0 and 168";
             invalidForm = true;
           }
           return;
@@ -300,13 +295,8 @@ export default function UserProfile() {
         first_name: states.form.firstName,
         last_name: states.form.lastName,
         email: states.form.email,
-        phone_number: parsePhoneNumberFromString(
-          states.form.phoneNumber
-        )?.format("E.164"),
-        alt_phone_number:
-          parsePhoneNumberFromString(states.form.altPhoneNumber)?.format(
-            "E.164"
-          ) || "",
+        phone_number: parsePhoneNumber(states.form.phoneNumber) ?? "",
+        alt_phone_number: parsePhoneNumber(states.form.altPhoneNumber) ?? "",
         gender: states.form.gender,
         age: states.form.age,
         doctor_qualification:
@@ -416,7 +406,7 @@ export default function UserProfile() {
   };
   return (
     <div>
-      <div className="p-10 lg:p-20">
+      <div className="p-10 lg:p-16">
         <div className="lg:grid lg:grid-cols-3 lg:gap-6">
           <div className="lg:col-span-1">
             <div className="px-4 sm:px-0">
@@ -559,7 +549,7 @@ export default function UserProfile() {
                   </div>
                   <div className="my-2  sm:col-span-1">
                     <dt className="text-sm font-medium leading-5 text-black">
-                      Weekly working hours
+                      Average weekly working hours
                     </dt>
                     <dd className="mt-1 text-sm leading-5 text-gray-900">
                       {details.weekly_working_hours ?? "-"}
@@ -568,7 +558,6 @@ export default function UserProfile() {
                 </dl>
               </div>
             )}
-
             {showEdit && (
               <div className="space-y-4">
                 <form action="#" method="POST">
@@ -661,7 +650,7 @@ export default function UserProfile() {
                         <TextFormField
                           {...fieldProps("weekly_working_hours")}
                           required
-                          label="Weekly working hours"
+                          label="Average weekly working hours"
                           className="col-span-6 sm:col-span-3"
                           type="number"
                           min={0}

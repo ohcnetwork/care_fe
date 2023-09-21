@@ -143,7 +143,7 @@ export default function PatientInfoCard(props: {
                   </div>
                 )}
             </div>
-            <div className="flex flex-col items-center gap-1 sm:flex-row lg:mb-2">
+            <div className="flex flex-col items-center gap-2 sm:flex-row lg:mb-2">
               <Link
                 href={`/facility/${consultation?.facility}`}
                 className="font-semibold text-black hover:text-primary-600"
@@ -177,9 +177,18 @@ export default function PatientInfoCard(props: {
               {consultation?.suggestion === "DC" && (
                 <>
                   <span className="mx-2">•</span>
-                  <span className="space-x-2">
-                    Domiciliary Care{" "}
-                    <CareIcon className="care-l-estate text-base text-gray-700" />
+                  <span>
+                    <CareIcon icon="l-estate" className="mr-1 text-gray-700" />
+                    Domiciliary Care
+                  </span>
+                </>
+              )}
+              {consultation?.is_readmission && (
+                <>
+                  <span className="mx-2">•</span>
+                  <span>
+                    <CareIcon icon="l-repeat" className="mr-1 text-gray-600" />
+                    Readmitted
                   </span>
                 </>
               )}

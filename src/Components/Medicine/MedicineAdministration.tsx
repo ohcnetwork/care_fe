@@ -10,6 +10,8 @@ import { useDispatch } from "react-redux";
 import { Error, Success } from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
+import dayjs from "../../Utils/dayjs";
+import TextFormField from "../Form/FormFields/TextFormField";
 
 interface Props {
   prescriptions: Prescription[];
@@ -24,6 +26,8 @@ export default function MedicineAdministration(props: Props) {
   const [notes, setNotes] = useState<MedicineAdministrationRecord["notes"][]>(
     []
   );
+  const [isCustomTime, setIsCustomTime] = useState<boolean[]>([]);
+  const [customTime, setCustomTime] = useState<string[]>([]);
 
   const prescriptions = useMemo(
     () =>
@@ -36,13 +40,21 @@ export default function MedicineAdministration(props: Props) {
   useEffect(() => {
     setShouldAdminister(Array(prescriptions.length).fill(false));
     setNotes(Array(prescriptions.length).fill(""));
+    setIsCustomTime(Array(prescriptions.length).fill(false));
+    setCustomTime(
+      Array(prescriptions.length).fill(dayjs().format("YYYY-MM-DDTHH:mm"))
+    );
   }, [props.prescriptions]);
 
   const handleSubmit = () => {
     const records: MedicineAdministrationRecord[] = [];
     prescriptions.forEach((prescription, i) => {
       if (shouldAdminister[i]) {
-        records.push({ prescription, notes: notes[i] });
+        records.push({
+          prescription,
+          notes: notes[i],
+          administered_date: isCustomTime[i] ? customTime[i] : undefined,
+        });
       }
     });
 
@@ -73,7 +85,7 @@ export default function MedicineAdministration(props: Props) {
           actions={props.action(obj?.id ?? "")}
           selected={shouldAdminister[index]}
         >
-          <div className="mt-4 flex w-full max-w-[400px] flex-col gap-2 border-t-2 border-dashed border-gray-500 py-2 pt-4 md:ml-4 md:mt-0 md:border-l-2 md:border-t-0 md:pl-4 md:pt-0">
+          <div className="mt-4 flex w-full max-w-[600px] flex-col gap-2 border-t-2 border-dashed border-gray-500 py-2 pt-4 md:ml-4 md:mt-0 md:border-l-2 md:border-t-0 md:pl-4 md:pt-0">
             <CheckBoxFormField
               name="should_administer"
               label={t("select_for_administration")}
@@ -96,21 +108,63 @@ export default function MedicineAdministration(props: Props) {
                   : t("never")}
               </span>
             </div>
-            <TextAreaFormField
-              label={t("administration_notes")}
-              disabled={!shouldAdminister[index]}
-              name="administration_notes"
-              placeholder={t("add_notes")}
-              value={notes[index]}
-              onChange={(event) =>
-                setNotes((notes) => {
-                  const newNotes = [...notes];
-                  newNotes[index] = event.value;
-                  return newNotes;
-                })
-              }
-              errorClassName="hidden"
-            />
+            <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+              <TextAreaFormField
+                label={t("administration_notes")}
+                className="w-full"
+                disabled={!shouldAdminister[index]}
+                name="administration_notes"
+                placeholder={t("add_notes")}
+                value={notes[index]}
+                onChange={(event) =>
+                  setNotes((notes) => {
+                    const newNotes = [...notes];
+                    newNotes[index] = event.value;
+                    return newNotes;
+                  })
+                }
+                errorClassName="hidden"
+              />
+              <div className="flex flex-col gap-2 lg:max-w-min">
+                <CheckBoxFormField
+                  label="Administer for a time in the past"
+                  labelClassName="whitespace-nowrap"
+                  disabled={!shouldAdminister[index]}
+                  name="is_custom_time"
+                  value={isCustomTime[index]}
+                  onChange={({ value }) => {
+                    setIsCustomTime((arr) => {
+                      const newArr = [...arr];
+                      newArr[index] = value;
+                      return newArr;
+                    });
+                    if (!value) {
+                      setCustomTime((arr) => {
+                        const newArr = [...arr];
+                        newArr[index] = dayjs().format("YYYY-MM-DDTHH:mm");
+                        return newArr;
+                      });
+                    }
+                  }}
+                  errorClassName="hidden"
+                />
+                <TextFormField
+                  name="administered_date"
+                  type="datetime-local"
+                  value={customTime[index]}
+                  onChange={({ value }) => {
+                    setCustomTime((arr) => {
+                      const newArr = [...arr];
+                      newArr[index] = value;
+                      return newArr;
+                    });
+                  }}
+                  disabled={!shouldAdminister[index] || !isCustomTime[index]}
+                  min={dayjs(obj.created_date).format("YYYY-MM-DDTHH:mm")}
+                  max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                />
+              </div>
+            </div>
           </div>
         </PrescriptionDetailCard>
       ))}

@@ -36,15 +36,14 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import SwipeableViews from "react-swipeable-views";
 import { parseOptionId } from "../../Common/utils";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parsePhoneNumber } from "../../Utils/utils.js";
 import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
 import dayjs from "dayjs";
-import { triggerGoal } from "../Common/Plausible.js";
+import { triggerGoal } from "../../Integrations/Plausible.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
@@ -121,7 +120,7 @@ export const PatientManager = () => {
 
     if (phone_number === "+91" || phone_number === "") {
       setPhoneNumberError("");
-      updateQuery({ phone_number: "" });
+      qParams.phone_number && updateQuery({ phone_number: null });
       return;
     }
 
@@ -138,7 +137,8 @@ export const PatientManager = () => {
 
     if (emergency_phone_number === "+91" || emergency_phone_number === "") {
       setEmergencyPhoneNumberError("");
-      updateQuery({ emergency_phone_number: "" });
+      qParams.emergency_phone_number &&
+        updateQuery({ emergency_phone_number: null });
       return;
     }
 
@@ -160,12 +160,10 @@ export const PatientManager = () => {
       (qParams.is_active || "True"),
     disease_status: qParams.disease_status || undefined,
     phone_number: qParams.phone_number
-      ? parsePhoneNumberFromString(qParams.phone_number)?.format("E.164")
+      ? parsePhoneNumber(qParams.phone_number)
       : undefined,
     emergency_phone_number: qParams.emergency_phone_number
-      ? parsePhoneNumberFromString(qParams.emergency_phone_number)?.format(
-          "E.164"
-        )
+      ? parsePhoneNumber(qParams.emergency_phone_number)
       : undefined,
     local_body: qParams.lsgBody || undefined,
     facility: qParams.facility,
@@ -602,6 +600,15 @@ export const PatientManager = () => {
                         text="Review Missed"
                       />
                     )}
+                  {patient.last_consultation?.is_readmission && (
+                    <Chip
+                      size="small"
+                      variant="custom"
+                      className="border-blue-600 bg-blue-100 text-blue-600"
+                      startIcon="l-repeat"
+                      text="Readmission"
+                    />
+                  )}
                   {patient.disease_status === "POSITIVE" && (
                     <Chip
                       size="small"
@@ -977,14 +984,12 @@ export const PatientManager = () => {
       </div>
       <div>
         <PatientFilter {...advancedFilter} key={window.location.search} />
-        <SwipeableViews index={tabValue}>
-          <TabPanel value={tabValue} index={0}>
-            <div className="mb-4">{managePatients}</div>
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            <div className="mb-4">{managePatients}</div>
-          </TabPanel>
-        </SwipeableViews>
+        <TabPanel value={tabValue} index={0}>
+          <div className="mb-4">{managePatients}</div>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <div className="mb-4">{managePatients}</div>
+        </TabPanel>
         <DoctorVideoSlideover
           facilityId={params.facility}
           show={showDoctors}

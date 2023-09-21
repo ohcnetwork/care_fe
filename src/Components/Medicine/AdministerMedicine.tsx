@@ -9,6 +9,9 @@ import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import dayjs from "../../Utils/dayjs";
 
 interface Props {
   prescription: Prescription;
@@ -21,6 +24,10 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
   const dispatch = useDispatch<any>();
   const [isLoading, setIsLoading] = useState(false);
   const [notes, setNotes] = useState<string>("");
+  const [isCustomTime, setIsCustomTime] = useState(false);
+  const [customTime, setCustomTime] = useState<string>(
+    dayjs().format("YYYY-MM-DDTHH:mm")
+  );
 
   return (
     <ConfirmDialog
@@ -43,10 +50,14 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
       }
       show
       onClose={() => props.onClose(false)}
-      // variant="primary"
       onConfirm={async () => {
         setIsLoading(true);
-        const res = await dispatch(props.actions.administer({ notes }));
+        const res = await dispatch(
+          props.actions.administer({
+            notes,
+            administered_date: isCustomTime ? customTime : undefined,
+          })
+        );
         if (res.status === 201) {
           Success({ msg: t("medicines_administered") });
         }
@@ -61,15 +72,43 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
           readonly
           actions={props.actions}
         />
-        <TextAreaFormField
-          label={t("administration_notes")}
-          name="administration_notes"
-          placeholder={t("add_notes")}
-          value={notes}
-          onChange={({ value }) => setNotes(value)}
-          errorClassName="hidden"
-          disabled={isLoading}
-        />
+
+        <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+          <TextAreaFormField
+            label={t("administration_notes")}
+            className="w-full"
+            name="administration_notes"
+            placeholder={t("add_notes")}
+            value={notes}
+            onChange={({ value }) => setNotes(value)}
+            errorClassName="hidden"
+            disabled={isLoading}
+          />
+          <div className="flex flex-col gap-2 lg:max-w-min">
+            <CheckBoxFormField
+              label="Administer for a time in the past"
+              labelClassName="whitespace-nowrap"
+              name="is_custom_time"
+              value={isCustomTime}
+              onChange={({ value }) => {
+                setIsCustomTime(value);
+                if (!value) {
+                  setCustomTime(dayjs().format("YYYY-MM-DDTHH:mm"));
+                }
+              }}
+              errorClassName="hidden"
+            />
+            <TextFormField
+              name="administered_date"
+              type="datetime-local"
+              value={customTime}
+              onChange={({ value }) => setCustomTime(value)}
+              disabled={!isCustomTime}
+              min={dayjs(prescription.created_date).format("YYYY-MM-DDTHH:mm")}
+              max={dayjs().format("YYYY-MM-DDTHH:mm")}
+            />
+          </div>
+        </div>
       </div>
     </ConfirmDialog>
   );
