@@ -5,7 +5,11 @@ import {
   SYMPTOM_CHOICES,
 } from "../../../Common/constants";
 import { ConsultationModel, ICD11DiagnosisModel } from "../models";
-import { getConsultation, getPatient } from "../../../Redux/actions";
+import {
+  getConsultation,
+  getPatient,
+  listShiftRequests,
+} from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
 import { lazy, useCallback, useState } from "react";
 import ToolTip from "../../Common/utils/Tooltip";
@@ -63,6 +67,7 @@ export const ConsultationDetails = (props: any) => {
     {} as ConsultationModel
   );
   const [patientData, setPatientData] = useState<PatientModel>({});
+  const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
@@ -124,6 +129,16 @@ export const ConsultationDetails = (props: any) => {
             };
             setPatientData(data);
           }
+
+          // Get shifting data
+          const shiftingRes = await dispatch(
+            listShiftRequests({ patient: id }, "shift-list-call")
+          );
+          if (shiftingRes?.data?.results) {
+            const data = shiftingRes.data.results;
+            setActiveShiftingData(data);
+            console.log(data);
+          }
         } else {
           navigate("/not-found");
         }
@@ -167,6 +182,19 @@ export const ConsultationDetails = (props: any) => {
   };
 
   const SelectedTab = TABS[tab];
+
+  const hasActiveShiftingRequest = () => {
+    if (activeShiftingData.length > 0) {
+      return [
+        "PENDING",
+        "APPROVED",
+        "DESTINATION APPROVED",
+        "PATIENT TO BE PICKED UP",
+      ].includes(activeShiftingData[activeShiftingData.length - 1].status);
+    }
+
+    return false;
+  };
 
   if (isLoading) {
     return <Loading />;
@@ -265,17 +293,33 @@ export const ConsultationDetails = (props: any) => {
           <div className="-right-6 top-0 flex w-full flex-col space-y-1 sm:w-min sm:flex-row sm:items-center sm:space-y-0 sm:divide-x-2 lg:absolute xl:right-0">
             {!consultationData.discharge_date && (
               <div className="flex w-full flex-col px-2 sm:flex-row">
-                <ButtonV2
-                  onClick={() =>
-                    navigate(
-                      `/facility/${patientData.facility}/patient/${patientData.id}/shift/new`
-                    )
-                  }
-                  className="btn btn-primary m-1 w-full hover:text-white"
-                >
-                  <CareIcon className="care-l-ambulance h-5 w-5" />
-                  Shift Patient
-                </ButtonV2>
+                {hasActiveShiftingRequest() ? (
+                  <ButtonV2
+                    onClick={() =>
+                      navigate(
+                        `/shifting/${
+                          activeShiftingData[activeShiftingData.length - 1].id
+                        }`
+                      )
+                    }
+                    className="btn btn-primary m-1 w-full hover:text-white"
+                  >
+                    <CareIcon className="care-l-ambulance h-5 w-5" />
+                    Track Shifting
+                  </ButtonV2>
+                ) : (
+                  <ButtonV2
+                    onClick={() =>
+                      navigate(
+                        `/facility/${patientData.facility}/patient/${patientData.id}/shift/new`
+                      )
+                    }
+                    className="btn btn-primary m-1 w-full hover:text-white"
+                  >
+                    <CareIcon className="care-l-ambulance h-5 w-5" />
+                    Shift Patient
+                  </ButtonV2>
+                )}
                 <button
                   onClick={() => {
                     triggerGoal("Doctor Connect Clicked", {
