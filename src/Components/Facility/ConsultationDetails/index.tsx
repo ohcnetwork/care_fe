@@ -137,7 +137,6 @@ export const ConsultationDetails = (props: any) => {
           if (shiftingRes?.data?.results) {
             const data = shiftingRes.data.results;
             setActiveShiftingData(data);
-            console.log(data);
           }
         } else {
           navigate("/not-found");
