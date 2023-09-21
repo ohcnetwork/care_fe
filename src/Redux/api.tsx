@@ -1,4 +1,6 @@
+import { IConfig } from "../Common/hooks/useConfig";
 import { LocationModel } from "../Components/Facility/models";
+import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 
 /**
@@ -9,11 +11,17 @@ function Res<T>(): T {
   return {} as T;
 }
 
+interface JwtTokenObtainPair {
+  access: string;
+  refresh: string;
+}
+
 const routes = {
   config: {
     path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
     method: "GET",
     noAuth: true,
+    TRes: Res<IConfig>(),
   },
 
   // Auth Endpoints
@@ -24,8 +32,9 @@ const routes = {
   },
 
   token_refresh: {
-    path: "/api/v1/auth/token/refresh",
+    path: "/api/v1/auth/token/refresh/",
     method: "POST",
+    TRes: Res<JwtTokenObtainPair>(),
   },
 
   token_verify: {
@@ -55,6 +64,7 @@ const routes = {
   // User Endpoints
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
+    TRes: Res<UserModel>(),
   },
 
   userList: {

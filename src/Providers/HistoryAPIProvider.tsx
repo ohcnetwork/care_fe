@@ -5,7 +5,7 @@ export const HistoryContext = createContext<string[]>([]);
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const ResetHistoryContext = createContext(() => {});
 
-export const HistoryAPIProvider = (props: { children: ReactNode }) => {
+export default function HistoryAPIProvider(props: { children: ReactNode }) {
   const [history, setHistory] = useState<string[]>([]);
 
   useLocationChange(
@@ -36,4 +36,4 @@ export const HistoryAPIProvider = (props: { children: ReactNode }) => {
       </ResetHistoryContext.Provider>
     </HistoryContext.Provider>
   );
-};
+}
