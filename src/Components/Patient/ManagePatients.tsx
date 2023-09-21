@@ -43,7 +43,7 @@ import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
 import dayjs from "dayjs";
-import { triggerGoal } from "../Common/Plausible.js";
+import { triggerGoal } from "../../Integrations/Plausible.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
 const Loading = lazy(() => import("../Common/Loading"));

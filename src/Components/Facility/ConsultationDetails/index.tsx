@@ -23,7 +23,7 @@ import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
 import { useQueryParams } from "raviger";
 import { useTranslation } from "react-i18next";
-import { triggerGoal } from "../../Common/Plausible";
+import { triggerGoal } from "../../../Integrations/Plausible";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
 import { ConsultationUpdatesTab } from "./ConsultationUpdatesTab";
 import { ConsultationABGTab } from "./ConsultationABGTab";
