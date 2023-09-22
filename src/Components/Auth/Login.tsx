@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import useQuery from "../../Utils/request/useQuery";
 import { postForgotPassword, postLogin } from "../../Redux/actions";
 import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
@@ -13,6 +13,7 @@ import CircularProgress from "../Common/components/CircularProgress";
 import { LocalStorageKeys } from "../../Common/constants";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import routes from "../../Redux/api";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
@@ -25,7 +26,11 @@ export const Login = (props: { forgot?: boolean }) => {
     custom_logo_alt,
     custom_description,
   } = useConfig();
-  const dispatch: any = useDispatch();
+  const {
+    data: asset,
+    loading: queryLoading,
+    refetch,
+  } = useQuery(routes.getAsset);
   const initForm: any = {
     username: "",
     password: "",
@@ -37,7 +42,7 @@ export const Login = (props: { forgot?: boolean }) => {
   const [isCaptchaEnabled, setCaptcha] = useState(false);
   const { t } = useTranslation();
   // display spinner while login is under progress
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(queryLoading);
   const [forgotPassword, setForgotPassword] = useState(forgot);
 
   // Login form validation
@@ -86,7 +91,7 @@ export const Login = (props: { forgot?: boolean }) => {
   // set loading to false when component is dismounted
   useEffect(() => {
     return () => {
-      setLoading(false);
+      setLoading(queryLoading);
     };
   }, []);
 
@@ -95,15 +100,15 @@ export const Login = (props: { forgot?: boolean }) => {
     const valid = validateData();
     if (valid) {
       // replaces button with spinner
-      setLoading(true);
+      setLoading(queryLoading);
 
-      dispatch(postLogin(valid)).then((resp: any) => {
+      refetch().then((resp: any) => {
         const res = get(resp, "data", null);
         const statusCode = get(resp, "status", "");
         if (res && statusCode === 429) {
           setCaptcha(true);
           // captcha displayed set back to login button
-          setLoading(false);
+          setLoading(queryLoading);
         } else if (res && statusCode === 200) {
           localStorage.setItem(LocalStorageKeys.accessToken, res.access);
           localStorage.setItem(LocalStorageKeys.refreshToken, res.refresh);
@@ -118,7 +123,7 @@ export const Login = (props: { forgot?: boolean }) => {
           }
         } else {
           // error from server set back to login button
-          setLoading(false);
+          setLoading(queryLoading);
         }
       });
     }
@@ -150,9 +155,9 @@ export const Login = (props: { forgot?: boolean }) => {
     e.preventDefault();
     const valid = validateForgetData();
     if (valid) {
-      setLoading(true);
-      dispatch(postForgotPassword(valid)).then((resp: any) => {
-        setLoading(false);
+      setLoading(queryLoading);
+      refetch().then((resp: any) => {
+        setLoading(queryLoading);
         const res = resp && resp.data;
         if (res && res.status === "OK") {
           Notification.Success({
