@@ -104,6 +104,7 @@ describe("Asset Tab", () => {
   it("Export asset", () => {
     assetPage.selectassetimportbutton();
     assetPage.selectjsonexportbutton();
+    assetPage.selectassetimportbutton();
     assetPage.selectcsvexportbutton();
   });
 

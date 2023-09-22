@@ -1,12 +1,13 @@
 import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import FormField from "./FormField";
+import { useEffect, useMemo, useState } from "react";
 import {
-  AsYouType,
-  isValidPhoneNumber,
+  classNames,
   parsePhoneNumber,
-} from "libphonenumber-js";
-import { useMemo, useState } from "react";
-import { classNames } from "../../../Utils/utils";
+  formatPhoneNumber as formatPhoneNumberUtil,
+  getCountryCode,
+  CountryData,
+} from "../../../Utils/utils";
 import phoneCodesJson from "../../../Common/static/countryPhoneAndFlags.json";
 import {
   FieldError,
@@ -14,12 +15,6 @@ import {
   PhoneNumberType,
 } from "../FieldValidators";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
-
-interface CountryData {
-  flag: string;
-  name: string;
-  code: string;
-}
 
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 
@@ -38,21 +33,6 @@ export default function PhoneNumberFormField(props: Props) {
     () => PhoneNumberValidator(props.types),
     [props.types]
   );
-
-  const asYouType = useMemo(() => {
-    const asYouType = new AsYouType();
-
-    asYouType.reset();
-
-    if (field.value) {
-      asYouType.input(field.value);
-    } else {
-      asYouType.input("+91");
-      field.handleChange(asYouType.getNumberValue());
-    }
-
-    return asYouType;
-  }, []);
 
   const validate = useMemo(
     () => (value: string | undefined, event: "blur" | "change") => {
@@ -73,15 +53,17 @@ export default function PhoneNumberFormField(props: Props) {
 
   const setValue = (value: string) => {
     value = value.replaceAll(/[^0-9+]/g, "");
-
-    asYouType.reset();
-    asYouType.input(value);
+    if (value.length > 12 && value.startsWith("+910")) {
+      value = "+91" + value.slice(4);
+    }
 
     const error = validate(value, "change");
     field.handleChange(value);
 
     setError(error);
   };
+
+  useEffect(() => setValue(field.value || "+91"), []);
 
   return (
     <FormField
@@ -106,7 +88,7 @@ export default function PhoneNumberFormField(props: Props) {
           )}
           maxLength={field.value?.startsWith("1800") ? 11 : 15}
           placeholder={props.placeholder}
-          value={formatPhoneNumber(field.value)}
+          value={formatPhoneNumber(field.value, props.types)}
           onChange={(e) => setValue(e.target.value)}
           disabled={field.disabled}
           onBlur={() => setError(validate(field.value, "blur"))}
@@ -122,7 +104,7 @@ export default function PhoneNumberFormField(props: Props) {
             autoComplete="country"
             className="cui-input-base h-full border-0 bg-transparent pl-2 pr-8 text-end font-medium tracking-wider text-gray-700 focus:ring-2 focus:ring-inset"
             value={
-              asYouType.getCountry() ??
+              getCountryCode(field.value) ??
               (field.value?.startsWith("1800") ? "1800" : "Other")
             }
             onChange={(e) => {
@@ -176,15 +158,15 @@ const conditionPhoneCode = (code: string) => {
   return code.startsWith("+") ? code : "+" + code;
 };
 
-const formatPhoneNumber = (value: string) => {
+const formatPhoneNumber = (value: string, types: PhoneNumberType[]) => {
   if (value === undefined || value === null) {
     return "+91 ";
   }
 
-  if (!isValidPhoneNumber(value)) {
+  if (PhoneNumberValidator(types)(value) !== undefined || value.length < 13) {
     return value;
   }
 
   const phoneNumber = parsePhoneNumber(value);
-  return phoneNumber.formatInternational();
+  return phoneNumber ? formatPhoneNumberUtil(phoneNumber) : value;
 };
