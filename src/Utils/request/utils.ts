@@ -69,10 +69,10 @@ export function getAuthorizationHeader() {
   return null;
 }
 
-export function mergeRequestOptions(
-  options: RequestOptions,
-  overrides: RequestOptions
-): RequestOptions {
+export function mergeRequestOptions<TData>(
+  options: RequestOptions<TData>,
+  overrides: RequestOptions<TData>
+): RequestOptions<TData> {
   return {
     ...options,
     ...overrides,

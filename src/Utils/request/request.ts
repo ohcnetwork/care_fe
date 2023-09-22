@@ -2,7 +2,7 @@ import handleResponse from "./handleResponse";
 import { RequestOptions, RequestResult, Route } from "./types";
 import { makeHeaders, makeUrl } from "./utils";
 
-interface Options extends RequestOptions {
+interface Options<TData> extends RequestOptions<TData> {
   controller?: AbortController;
 }
 
@@ -16,7 +16,7 @@ export default async function request<TData>(
     onResponse,
     silent,
     reattempts = 3,
-  }: Options = {}
+  }: Options<TData> = {}
 ): Promise<RequestResult<TData>> {
   const signal = controller?.signal;
   const url = makeUrl(path, query, pathParams);

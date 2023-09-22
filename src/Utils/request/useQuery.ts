@@ -3,14 +3,14 @@ import { QueryRoute, RequestOptions, RequestResult } from "./types";
 import request from "./request";
 import { mergeRequestOptions } from "./utils";
 
-export interface QueryOptions extends RequestOptions {
+export interface QueryOptions<TData> extends RequestOptions<TData> {
   prefetch?: boolean;
   refetchOnWindowFocus?: boolean;
 }
 
 export default function useQuery<TData>(
   route: QueryRoute<TData>,
-  options?: QueryOptions
+  options?: QueryOptions<TData>
 ) {
   const [response, setResponse] = useState<RequestResult<TData>>();
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ export default function useQuery<TData>(
   const controllerRef = useRef<AbortController>();
 
   const runQuery = useCallback(
-    async (overrides?: QueryOptions) => {
+    async (overrides?: QueryOptions<TData>) => {
       controllerRef.current?.abort();
 
       const controller = new AbortController();
