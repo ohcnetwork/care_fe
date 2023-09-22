@@ -15,9 +15,7 @@ const AssetConfigure = ({ assetId, facilityId }: AssetConfigureProps) => {
     data: asset,
     loading,
     refetch,
-  } = useQuery(routes.getAsset, {
-    pathParams: { external_id: assetId },
-  });
+  } = useQuery(routes.getAsset, { pathParams: { external_id: assetId } });
 
   if (loading || !asset) {
     return <Loading />;
