@@ -253,6 +253,8 @@ export interface CountryData {
 }
 
 export const parsePhoneNumber = (phoneNumber: string, countryCode?: string) => {
+  if (!phoneNumber) return "";
+  if (phoneNumber === "+91") return "";
   const phoneCodes: Record<string, CountryData> = phoneCodesJson;
   let parsedNumber = phoneNumber.replace(/[-+() ]/g, "");
   if (countryCode && phoneCodes[countryCode]) {
