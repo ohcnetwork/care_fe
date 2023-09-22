@@ -18,14 +18,14 @@ import { Submit } from "../../Common/components/ButtonV2";
 import { SyntheticEvent } from "react";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
 
-interface ONVIFCameraProps {
+interface Props {
   assetId: string;
   facilityId: string;
   asset: any;
+  onUpdated?: () => void;
 }
 
-const ONVIFCamera = (props: ONVIFCameraProps) => {
-  const { assetId, facilityId, asset } = props;
+const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   const [isLoading, setIsLoading] = useState(true);
   const [assetType, setAssetType] = useState("");
   const [middlewareHostname, setMiddlewareHostname] = useState("");
@@ -43,7 +43,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
   const [refreshPresetsHash, setRefreshPresetsHash] = useState(
     Number(new Date())
   );
-  const [refreshHash, setRefreshHash] = useState(Number(new Date()));
   const dispatch = useDispatch<any>();
   const authUser = useAuthUser();
   useEffect(() => {
@@ -88,14 +87,10 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
         dispatch(partialUpdateAsset(assetId, data))
       );
       if (res?.status === 200) {
-        Notification.Success({
-          msg: "Asset Configured Successfully",
-        });
-        setRefreshHash(Number(new Date()));
+        Notification.Success({ msg: "Asset Configured Successfully" });
+        onUpdated?.();
       } else {
-        Notification.Error({
-          msg: "Something went wrong..!",
-        });
+        Notification.Error({ msg: "Something went wrong..!" });
       }
       setLoadingSetConfiguration(false);
     } else {
@@ -204,7 +199,6 @@ const ONVIFCamera = (props: ONVIFCameraProps) => {
 
       {assetType === "ONVIF" ? (
         <CameraConfigure
-          key={refreshHash}
           asset={asset as AssetData}
           bed={bed}
           setBed={setBed}

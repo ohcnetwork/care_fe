@@ -1,13 +1,9 @@
-import { useCallback, useState } from "react";
 import Loading from "../Common/Loading";
-import { AssetData } from "./AssetTypes";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useDispatch } from "react-redux";
-import { getAsset } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
 import HL7Monitor from "./AssetType/HL7Monitor";
 import ONVIFCamera from "./AssetType/ONVIFCamera";
 import Page from "../Common/components/Page";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 interface AssetConfigureProps {
   assetId: string;
@@ -16,45 +12,25 @@ interface AssetConfigureProps {
 
 const AssetConfigure = (props: AssetConfigureProps) => {
   const { assetId, facilityId } = props;
-  const [asset, setAsset] = useState<AssetData>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [assetType, setAssetType] = useState("");
-  const dispatch = useDispatch<any>();
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const [assetData]: any = await Promise.all([dispatch(getAsset(assetId))]);
-      if (!status.aborted) {
-        setIsLoading(false);
-        if (!assetData.data)
-          Notification.Error({
-            msg: "Something went wrong..!",
-          });
-        else {
-          setAsset(assetData.data);
-          setAssetType(assetData.data.asset_class);
-        }
-      }
-    },
-    [dispatch, assetId]
-  );
+  const {
+    data: asset,
+    loading,
+    refetch,
+  } = useQuery(routes.getAsset, {
+    pathParams: { external_id: assetId },
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [dispatch, fetchData]
-  );
+  if (loading || !asset) {
+    return <Loading />;
+  }
 
-  if (isLoading) return <Loading />;
-
-  if (assetType === "HL7MONITOR") {
+  if (asset.asset_class === "HL7MONITOR") {
     return (
       <Page
-        title={`Configure HL7 Monitor: ${asset?.name}`}
+        title={`Configure HL7 Monitor: ${asset.name}`}
         crumbsReplacements={{
-          [facilityId]: { name: asset?.location_object.facility.name },
+          [facilityId]: { name: asset.location_object.facility.name },
           assets: { uri: `/assets?facility=${facilityId}` },
           [assetId]: { name: asset?.name },
         }}
@@ -65,7 +41,7 @@ const AssetConfigure = (props: AssetConfigureProps) => {
     );
   }
 
-  if (assetType === "VENTILATOR") {
+  if (asset.asset_class === "VENTILATOR") {
     return (
       <Page
         title={`Configure Ventilator: ${asset?.name}`}
@@ -91,7 +67,12 @@ const AssetConfigure = (props: AssetConfigureProps) => {
       }}
       backUrl={`/facility/${facilityId}/assets/${assetId}`}
     >
-      <ONVIFCamera asset={asset} assetId={assetId} facilityId={facilityId} />
+      <ONVIFCamera
+        asset={asset}
+        assetId={assetId}
+        facilityId={facilityId}
+        onUpdated={() => refetch()}
+      />
     </Page>
   );
 };
