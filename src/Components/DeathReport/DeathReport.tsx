@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useDispatch } from "react-redux";
+import { useQuery } from "../../Utils/request/useQuery";
 import { getPatient } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
@@ -74,7 +74,7 @@ export default function PrintDeathReport(props: { id: string }) {
   const [_isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const { id } = props;
-  const dispatch: any = useDispatch();
+  const dispatch: any = useQuery();
   const { t } = useTranslation();
 
   const getPatientGender = (patientData: any) =>
