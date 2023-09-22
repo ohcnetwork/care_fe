@@ -10,9 +10,7 @@ interface AssetConfigureProps {
   facilityId: string;
 }
 
-const AssetConfigure = (props: AssetConfigureProps) => {
-  const { assetId, facilityId } = props;
-
+const AssetConfigure = ({ assetId, facilityId }: AssetConfigureProps) => {
   const {
     data: asset,
     loading,
