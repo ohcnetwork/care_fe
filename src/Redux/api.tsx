@@ -1,4 +1,5 @@
 import { IConfig } from "../Common/hooks/useConfig";
+import { AssetData } from "../Components/Assets/AssetTypes";
 import { LocationModel } from "../Components/Facility/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
@@ -804,6 +805,7 @@ const routes = {
   getAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "GET",
+    TRes: Res<AssetData>(),
   },
   deleteAsset: {
     path: "/api/v1/asset/{external_id}/",

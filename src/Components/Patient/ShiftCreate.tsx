@@ -145,6 +145,11 @@ export const ShiftCreate = (props: patientShiftProps) => {
           errors: action.errors,
         };
       }
+      case "set_field":
+        return {
+          form: { ...state.form, [action.name]: action.value },
+          errors: { ...state.errors, [action.name]: action.error },
+        };
       default:
         return state;
     }
@@ -188,8 +193,10 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
   const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
     dispatch({
-      type: "set_form",
-      form: { ...state.form, [event.name]: event.value },
+      type: "set_field",
+      name: event.name,
+      value: event.value,
+      error: "",
     });
   };
 
