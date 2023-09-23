@@ -30,6 +30,7 @@ const routes = {
     path: "/api/v1/auth/login/",
     method: "POST",
     noAuth: true,
+    TRes: Res<JwtTokenObtainPair>(),
   },
 
   token_refresh: {
@@ -57,6 +58,7 @@ const routes = {
   forgotPassword: {
     path: "/api/v1/password_reset/",
     method: "POST",
+    TRes: Res<IConfig>(),
   },
 
   updatePassword: {

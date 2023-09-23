@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import useQuery from "../../Utils/request/useQuery";
-import { postForgotPassword, postLogin } from "../../Redux/actions";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
 import * as Notification from "../../Utils/Notifications.js";
-import { get } from "lodash";
 import LegendInput from "../../CAREUI/interactive/LegendInput";
 import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -13,7 +12,6 @@ import CircularProgress from "../Common/components/CircularProgress";
 import { LocalStorageKeys } from "../../Common/constants";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import routes from "../../Redux/api";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
@@ -26,11 +24,6 @@ export const Login = (props: { forgot?: boolean }) => {
     custom_logo_alt,
     custom_description,
   } = useConfig();
-  const {
-    data: asset,
-    loading: queryLoading,
-    refetch,
-  } = useQuery(routes.getAsset);
   const initForm: any = {
     username: "",
     password: "",
@@ -42,7 +35,7 @@ export const Login = (props: { forgot?: boolean }) => {
   const [isCaptchaEnabled, setCaptcha] = useState(false);
   const { t } = useTranslation();
   // display spinner while login is under progress
-  const [loading, setLoading] = useState(queryLoading);
+  const [loading, setLoading] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(forgot);
 
   // Login form validation
@@ -91,41 +84,38 @@ export const Login = (props: { forgot?: boolean }) => {
   // set loading to false when component is dismounted
   useEffect(() => {
     return () => {
-      setLoading(queryLoading);
+      setLoading(false);
     };
   }, []);
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
       // replaces button with spinner
-      setLoading(queryLoading);
+      setLoading(true);
 
-      refetch().then((resp: any) => {
-        const res = get(resp, "data", null);
-        const statusCode = get(resp, "status", "");
-        if (res && statusCode === 429) {
-          setCaptcha(true);
-          // captcha displayed set back to login button
-          setLoading(queryLoading);
-        } else if (res && statusCode === 200) {
-          localStorage.setItem(LocalStorageKeys.accessToken, res.access);
-          localStorage.setItem(LocalStorageKeys.refreshToken, res.refresh);
+      const { res, data } = await request(routes.login);
+      if (res && res.status === 429) {
+        setCaptcha(true);
+        // captcha displayed set back to login button
+        setLoading(false);
+      } else if (res && res.status === 200 && data) {
+        localStorage.setItem(LocalStorageKeys.accessToken, data.access);
+        localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
 
-          if (
-            window.location.pathname === "/" ||
-            window.location.pathname === "/login"
-          ) {
-            window.location.href = "/facility";
-          } else {
-            window.location.href = window.location.pathname.toString();
-          }
+        if (
+          window.location.pathname === "/" ||
+          window.location.pathname === "/login"
+        ) {
+          window.location.href = "/facility";
         } else {
-          // error from server set back to login button
-          setLoading(queryLoading);
+          window.location.href = window.location.pathname.toString();
         }
-      });
+      } else {
+        // error from server set back to login button
+        setLoading(false);
+      }
     }
   };
 
@@ -151,26 +141,24 @@ export const Login = (props: { forgot?: boolean }) => {
     return form;
   };
 
-  const handleForgetSubmit = (e: any) => {
+  const handleForgetSubmit = async (e: any) => {
     e.preventDefault();
     const valid = validateForgetData();
     if (valid) {
-      setLoading(queryLoading);
-      refetch().then((resp: any) => {
-        setLoading(queryLoading);
-        const res = resp && resp.data;
-        if (res && res.status === "OK") {
-          Notification.Success({
-            msg: t("password_sent"),
-          });
-        } else if (res && res.data) {
-          setErrors(res.data);
-        } else {
-          Notification.Error({
-            msg: t("something_wrong"),
-          });
-        }
-      });
+      setLoading(true);
+      const { res, error } = await request(routes.forgotPassword);
+      setLoading(false);
+      if (res && res.statusText === "OK") {
+        Notification.Success({
+          msg: t("password_sent"),
+        });
+      } else if (res && error) {
+        setErrors(error);
+      } else {
+        Notification.Error({
+          msg: t("something_wrong"),
+        });
+      }
     }
   };
 
