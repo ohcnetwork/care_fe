@@ -48,19 +48,19 @@ const routes = {
   checkResetToken: {
     path: "/api/v1/password_reset/check/",
     method: "POST",
-    TRes: Res<IConfig>(),
+    TRes: Res<any>(),
   },
 
   resetPassword: {
     path: "/api/v1/password_reset/confirm/",
     method: "POST",
-    TRes: Res<IConfig>(),
+    TRes: Res<any>(),
   },
 
   forgotPassword: {
     path: "/api/v1/password_reset/",
     method: "POST",
-    TRes: Res<IConfig>(),
+    TRes: Res<any>(),
   },
 
   updatePassword: {

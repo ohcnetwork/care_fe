@@ -95,7 +95,9 @@ export const Login = (props: { forgot?: boolean }) => {
       // replaces button with spinner
       setLoading(true);
 
-      const { res, data } = await request(routes.login);
+      const { res, data } = await request(routes.login, {
+        pathParams: { ...valid },
+      });
       if (res && res.status === 429) {
         setCaptcha(true);
         // captcha displayed set back to login button
@@ -146,7 +148,9 @@ export const Login = (props: { forgot?: boolean }) => {
     const valid = validateForgetData();
     if (valid) {
       setLoading(true);
-      const { res, error } = await request(routes.forgotPassword);
+      const { res, error } = await request(routes.forgotPassword, {
+        pathParams: { ...valid },
+      });
       setLoading(false);
       if (res && res.statusText === "OK") {
         Notification.Success({
