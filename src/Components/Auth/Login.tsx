@@ -154,10 +154,6 @@ export const Login = (props: { forgot?: boolean }) => {
         });
       } else if (res && error) {
         setErrors(error);
-      } else {
-        Notification.Error({
-          msg: t("something_wrong"),
-        });
       }
     }
   };
