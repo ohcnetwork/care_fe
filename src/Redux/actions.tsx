@@ -1040,16 +1040,19 @@ export const PrescriptionActions = (consultation_external_id: string) => {
             `administer-medicine-${external_id}`
           ),
 
-        listAdministrations: (query?: {
-          administered_date_after?: string;
-          administered_date_before?: string;
-        }) =>
+        listAdministrations: (
+          query?: {
+            administered_date_after?: string;
+            administered_date_before?: string;
+          },
+          key?: string
+        ) =>
           fireRequest(
             "listAdministrations",
             [],
             { prescription: external_id, ...query },
             pathParams,
-            `list-administrations-${external_id}`
+            `list-administrations-${external_id}-${key}`
           ),
 
         /** Discontinue a prescription */
