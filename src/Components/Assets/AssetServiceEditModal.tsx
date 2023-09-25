@@ -169,7 +169,6 @@ export const AssetServiceEditModal = (props: {
               data-testid="asset-last-serviced-on-input"
             >
               <DateFormField
-                // eslint-disable-next-line i18next/no-literal-string
                 label="Serviced On"
                 name="serviced_on"
                 className="mt-2"
@@ -183,9 +182,9 @@ export const AssetServiceEditModal = (props: {
                     ).toLocaleDateString("en-ca")
                   ) {
                     Notification.Error({
-                      msg: `Service date can't be after ${dayjs(
+                      msg: `Service date can't be after ${formatDate(
                         props.service_record.created_date
-                      ).format("DD/MM/YYYY")} (Creation date)`,
+                      )} (Creation date)`,
                     });
                   } else {
                     setForm({
