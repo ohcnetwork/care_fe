@@ -1,4 +1,13 @@
 import { IConfig } from "../Common/hooks/useConfig";
+import {
+  IAadhaarOtp,
+  ICheckAndGenerateMobileOtp,
+  IConfirmMobileOtp,
+  ICreateHealthIdResponse,
+  IHealthFacility,
+  IHealthId,
+  ILinkABHANumber,
+} from "../Components/ABDM/models";
 import { AssetData } from "../Components/Assets/AssetTypes";
 import { LocationModel } from "../Components/Facility/models";
 import { UserModel } from "../Components/Users/models";
@@ -846,108 +855,127 @@ const routes = {
     method: "PUT",
   },
 
-  // ABDM HealthID endpoints
-  generateAadhaarOtp: {
-    path: "/api/v1/abdm/healthid/generate_aadhaar_otp/",
-    method: "POST",
-  },
+  abha: {
+    // ABDM HealthID endpoints
+    generateAadhaarOtp: {
+      path: "/api/v1/abdm/healthid/generate_aadhaar_otp/",
+      method: "POST",
+      TRes: Res<IAadhaarOtp>(),
+    },
 
-  resendAadhaarOtp: {
-    path: "/api/v1/abdm/healthid/resend_aadhaar_otp/",
-    method: "POST",
-  },
+    resendAadhaarOtp: {
+      path: "/api/v1/abdm/healthid/resend_aadhaar_otp/",
+      method: "POST",
+      TRes: Res<IAadhaarOtp>(),
+    },
 
-  verifyAadhaarOtp: {
-    path: "/api/v1/abdm/healthid/verify_aadhaar_otp/",
-    method: "POST",
-  },
+    verifyAadhaarOtp: {
+      path: "/api/v1/abdm/healthid/verify_aadhaar_otp/",
+      method: "POST",
+      TRes: Res<IAadhaarOtp>(),
+    },
 
-  generateMobileOtp: {
-    path: "/api/v1/abdm/healthid/generate_mobile_otp/",
-    method: "POST",
-  },
+    generateMobileOtp: {
+      path: "/api/v1/abdm/healthid/generate_mobile_otp/",
+      method: "POST",
+    },
 
-  checkAndGenerateMobileOtp: {
-    path: "/api/v1/abdm/healthid/check_and_generate_mobile_otp/",
-    method: "POST",
-  },
+    checkAndGenerateMobileOtp: {
+      path: "/api/v1/abdm/healthid/check_and_generate_mobile_otp/",
+      method: "POST",
+      TRes: Res<ICheckAndGenerateMobileOtp>(),
+    },
 
-  // TODO: resend mobile otp
-  verifyMobileOtp: {
-    path: "/api/v1/abdm/healthid/verify_mobile_otp/",
-    method: "POST",
-  },
+    // TODO: resend mobile otp
+    verifyMobileOtp: {
+      path: "/api/v1/abdm/healthid/verify_mobile_otp/",
+      method: "POST",
+      TRes: Res<IAadhaarOtp>(),
+    },
 
-  createHealthId: {
-    path: "/api/v1/abdm/healthid/create_health_id/",
-    method: "POST",
-  },
+    createHealthId: {
+      path: "/api/v1/abdm/healthid/create_health_id/",
+      method: "POST",
+      TRes: Res<ICreateHealthIdResponse>(),
+    },
 
-  searchByHealthId: {
-    path: "/api/v1/abdm/healthid/search_by_health_id/",
-    method: "POST",
-  },
+    searchByHealthId: {
+      path: "/api/v1/abdm/healthid/search_by_health_id/",
+      method: "POST",
+      TRes: Res<IHealthId>(),
+    },
 
-  initiateAbdmAuthentication: {
-    path: "/api/v1/abdm/healthid/auth_init/",
-    method: "POST",
-  },
+    initiateAbdmAuthentication: {
+      path: "/api/v1/abdm/healthid/auth_init/",
+      method: "POST",
+      TRes: Res<IConfirmMobileOtp>(),
+    },
 
-  confirmWithAadhaarOtp: {
-    path: "/api/v1/abdm/healthid/confirm_with_aadhaar_otp/",
-    method: "POST",
-  },
+    confirmWithAadhaarOtp: {
+      path: "/api/v1/abdm/healthid/confirm_with_aadhaar_otp/",
+      method: "POST",
+      TRes: Res<IConfirmMobileOtp>(),
+    },
 
-  confirmWithMobileOtp: {
-    path: "/api/v1/abdm/healthid/confirm_with_mobile_otp/",
-    method: "POST",
-  },
+    confirmWithMobileOtp: {
+      path: "/api/v1/abdm/healthid/confirm_with_mobile_otp/",
+      method: "POST",
+      TRes: Res<IConfirmMobileOtp>(),
+    },
 
-  linkViaQR: {
-    path: "/api/v1/abdm/healthid/link_via_qr/",
-    method: "POST",
-  },
+    linkViaQR: {
+      path: "/api/v1/abdm/healthid/link_via_qr/",
+      method: "POST",
+      TRes: Res<ILinkABHANumber>(),
+    },
 
-  linkCareContext: {
-    path: "/api/v1/abdm/healthid/add_care_context/",
-    method: "POST",
-  },
+    linkCareContext: {
+      path: "/api/v1/abdm/healthid/add_care_context/",
+      method: "POST",
+      TRes: Res<unknown>(),
+    },
 
-  getAbhaCard: {
-    path: "/api/v1/abdm/healthid/get_abha_card/",
-    method: "POST",
-  },
+    getAbhaCard: {
+      path: "/api/v1/abdm/healthid/get_abha_card/",
+      method: "POST",
+      TRes: Res<unknown>(),
+    },
 
-  // ABDM Health Facility
+    // ABDM Health Facility
 
-  listHealthFacility: {
-    path: "/api/v1/abdm/health_facility/",
-    method: "GET",
-  },
+    listHealthFacility: {
+      path: "/api/v1/abdm/health_facility/",
+      method: "GET",
+    },
 
-  createHealthFacility: {
-    path: "/api/v1/abdm/health_facility/",
-    method: "POST",
-  },
+    createHealthFacility: {
+      path: "/api/v1/abdm/health_facility/",
+      method: "POST",
+      TRes: Res<IHealthFacility>(),
+    },
 
-  getHealthFacility: {
-    path: "/api/v1/abdm/health_facility/{facility_id}/",
-    method: "GET",
-  },
+    getHealthFacility: {
+      path: "/api/v1/abdm/health_facility/{facility_id}/",
+      method: "GET",
+      TRes: Res<IHealthFacility>(),
+    },
 
-  updateHealthFacility: {
-    path: "/api/v1/abdm/health_facility/{facility_id}/",
-    method: "PUT",
-  },
+    updateHealthFacility: {
+      path: "/api/v1/abdm/health_facility/{facility_id}/",
+      method: "PUT",
+    },
 
-  partialUpdateHealthFacility: {
-    path: "/api/v1/abdm/health_facility/{facility_id}/",
-    method: "PATCH",
-  },
+    partialUpdateHealthFacility: {
+      path: "/api/v1/abdm/health_facility/{facility_id}/",
+      method: "PATCH",
+      TRes: Res<IHealthFacility>(),
+    },
 
-  registerHealthFacilityAsService: {
-    path: "/api/v1/abdm/health_facility/{facility_id}/register_service/",
-    method: "POST",
+    registerHealthFacilityAsService: {
+      path: "/api/v1/abdm/health_facility/{facility_id}/register_service/",
+      method: "POST",
+      TRes: Res<IHealthFacility>(),
+    },
   },
 
   // Asset Availability endpoints
