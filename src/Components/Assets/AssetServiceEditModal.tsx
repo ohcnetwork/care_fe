@@ -10,6 +10,7 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { formatDate, formatDateTime } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DateFormField from "../Form/FormFields/DateFormField";
+import { t } from "i18next";
 
 export const AssetServiceEditModal = (props: {
   asset?: AssetData;
@@ -60,12 +61,12 @@ export const AssetServiceEditModal = (props: {
       <DialogModal
         show={props.show}
         onClose={props.handleClose}
-        title="Edit History"
+        title={t("Edit History")}
       >
         <div>
           <div className="mb-4">
             <p className="text-md mt-1 text-gray-500">
-              Update record for asset
+              {t("Update record for asset")}
               <strong> {props.asset?.name}</strong>
             </p>
           </div>
@@ -106,13 +107,17 @@ export const AssetServiceEditModal = (props: {
             <div className="mb-4 rounded-lg border border-gray-300 p-4 py-2">
               <div className="my-2 flex justify-between">
                 <div className="grow">
-                  <p className="text-sm font-medium text-gray-500">Edited On</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    {t("Edited On")}
+                  </p>
                   <p className="text-gray-900">
                     {formatDateTime(editRecord.edited_on)}
                   </p>
                 </div>
                 <div className="grow">
-                  <p className="text-sm font-medium text-gray-500">Edited By</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    {t("Edited By")}
+                  </p>
                   <p className="text-gray-900">
                     {editRecord.edited_by.username}
                   </p>
@@ -121,14 +126,16 @@ export const AssetServiceEditModal = (props: {
               <div className="mt-4 flex flex-col justify-between">
                 <div className="grow">
                   <p className="text-sm font-medium text-gray-500">
-                    Serviced On
+                    {t("Serviced On")}
                   </p>
                   <p className="text-gray-900">
                     {formatDate(editRecord.serviced_on)}
                   </p>
                 </div>
                 <div className="mt-4 grow">
-                  <p className="text-sm font-medium text-gray-500">Notes</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    {t("Notes")}
+                  </p>
                   <p className="text-gray-900">{editRecord.note || "-"}</p>
                 </div>
               </div>
@@ -141,7 +148,7 @@ export const AssetServiceEditModal = (props: {
                 editRecord ? setEditRecord(undefined) : props.handleClose();
               }}
             >
-              {editRecord ? "Back" : "Close"}
+              {editRecord ? t("Back") : t("Close")}
             </ButtonV2>
           </div>
         </div>
@@ -153,12 +160,12 @@ export const AssetServiceEditModal = (props: {
     <DialogModal
       show={props.show}
       onClose={props.handleClose}
-      title="Update Asset Service Record"
+      title={t("Update Asset Service Record")}
     >
       <div>
         <div className="mb-4">
           <p className="text-md mt-1 text-gray-500">
-            Update record for asset
+            {t("Update record for asset")}
             <strong> {props.asset?.name}</strong>
           </p>
         </div>
@@ -169,7 +176,7 @@ export const AssetServiceEditModal = (props: {
               data-testid="asset-last-serviced-on-input"
             >
               <DateFormField
-                label="Serviced On"
+                label={t("Serviced On")}
                 name="serviced_on"
                 className="mt-2"
                 position="LEFT"
@@ -200,8 +207,8 @@ export const AssetServiceEditModal = (props: {
               <TextAreaFormField
                 name="notes"
                 rows={5}
-                label="Notes"
-                placeholder="Eg. Details on functionality, service, etc."
+                label={t("Notes")}
+                placeholder={t("Eg. Details on functionality, service, etc.")}
                 value={form.note}
                 onChange={(e) => {
                   setForm({ ...form, note: e.value });
@@ -212,7 +219,7 @@ export const AssetServiceEditModal = (props: {
         </div>
         <div className="flex flex-col justify-end gap-2 md:flex-row">
           <Submit
-            label={`${isLoading ? "Updating" : "Update"}`}
+            label={`${isLoading ? t("Updating") : t("Update")}`}
             onClick={handleSubmit}
             loading={isLoading}
           />
