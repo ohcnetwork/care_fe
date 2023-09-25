@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { MutableRefObject, useEffect, useState } from "react";
 import {
   addMonths,
   addYears,
@@ -60,7 +60,6 @@ const DateInputV2: React.FC<Props> = ({
   const [displayValue, setDisplayValue] = useState<string>(
     value ? dayjs(value).format("DDMMYYYY") : ""
   );
-  const popover = useRef<HTMLDivElement>(null);
 
   const decrement = () => {
     switch (type) {
@@ -241,7 +240,6 @@ const DateInputV2: React.FC<Props> = ({
                   onBlur={() => {
                     setIsOpen?.(false);
                   }}
-                  ref={popover}
                   static
                   className={classNames(
                     "cui-dropdown-base absolute mt-0.5 w-72 divide-y-0 p-4",
