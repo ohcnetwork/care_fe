@@ -30,7 +30,7 @@ import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
-import { triggerGoal } from "../Common/Plausible";
+import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const Loading = lazy(() => import("../Common/Loading"));

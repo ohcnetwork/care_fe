@@ -1,6 +1,6 @@
 import { useLocationChange } from "raviger";
-import useConfig from "../../Common/hooks/useConfig";
-import Script from "./Script";
+import useConfig from "../Common/hooks/useConfig";
+import Script from "../Components/Common/Script";
 import { useEffect } from "react";
 
 export default function Plausible() {

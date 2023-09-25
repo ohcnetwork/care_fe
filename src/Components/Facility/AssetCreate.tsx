@@ -30,13 +30,12 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 
 import { navigate } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { parseQueryParams } from "../../Utils/primitives";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import { validateEmailAddress } from "../../Common/validation";
-import { dateQueryString } from "../../Utils/utils.js";
+import { dateQueryString, parsePhoneNumber } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
 import DateFormField from "../Form/FormFields/DateFormField.js";
 import { t } from "i18next";
@@ -342,7 +341,7 @@ const AssetCreate = (props: AssetProps) => {
         support_email: support_email,
         support_phone: support_phone.startsWith("1800")
           ? support_phone
-          : parsePhoneNumberFromString(support_phone)?.format("E.164"),
+          : parsePhoneNumber(support_phone),
         qr_code_id: qrCodeId !== "" ? qrCodeId : null,
         manufacturer: manufacturer,
         warranty_amc_end_of_validity: warranty_amc_end_of_validity

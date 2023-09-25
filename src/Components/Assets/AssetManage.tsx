@@ -26,15 +26,15 @@ import { UserRole, USER_TYPES } from "../../Common/constants";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
-const PageTitle = lazy(() => import("../Common/PageTitle"));
 const Loading = lazy(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
-import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Uptime from "../Common/Uptime";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import dayjs from "dayjs";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import { AssetServiceEditModal } from "./AssetServiceEditModal";
+import Page from "../Common/components/Page";
 
 interface AssetManageProps {
   assetId: string;
@@ -329,18 +329,28 @@ const AssetManage = (props: AssetManageProps) => {
   };
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title="Asset Details"
-        crumbsReplacements={{
-          [facilityId]: { name: asset?.location_object.facility.name },
-          assets: { uri: `/assets?facility=${facilityId}` },
-          [assetId]: {
-            name: asset?.name,
-          },
-        }}
-        backUrl="/assets"
-      />
+    <Page
+      title="Asset Details"
+      crumbsReplacements={{
+        [facilityId]: { name: asset?.location_object.facility.name },
+        assets: { uri: `/assets?facility=${facilityId}` },
+        [assetId]: {
+          name: asset?.name,
+        },
+      }}
+      backUrl="/assets"
+      options={
+        <ButtonV2
+          onClick={handleDownload}
+          className="tooltip py-2"
+          ghost
+          border
+        >
+          <CareIcon className="care-l-export text-lg" />
+          Export as JSON
+        </ButtonV2>
+      }
+    >
       <ConfirmDialog
         title="Delete Asset"
         description="Are you sure you want to delete this asset?"
@@ -359,21 +369,22 @@ const AssetManage = (props: AssetManageProps) => {
                   <span className="break-words text-2xl font-bold md:text-3xl">
                     {asset?.name}
                   </span>
-                  <ButtonV2
-                    id="export-asset"
-                    onClick={handleDownload}
-                    className="tooltip p-4"
-                    variant="secondary"
-                    ghost
-                    circle
-                  >
-                    <CareIcon className="care-l-export text-lg" />
-                    <span className="tooltip-text tooltip-bottom -translate-x-16">
-                      Export as JSON
-                    </span>
-                  </ButtonV2>
+                  <div className="tooltip tooltip-bottom">
+                    <CareIcon
+                      className={`care-l-${assetClassProp.icon} fill-gray-700 text-3xl`}
+                    />
+                    <span className="tooltip-text">{assetClassProp.name}</span>
+                  </div>
+                </div>
+                <div className="mb-2 w-full text-gray-700 sm:hidden">
+                  {asset?.description}
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  {asset?.asset_type === "INTERNAL" ? (
+                    <Chip text="Internal" startIcon="l-building" />
+                  ) : (
+                    <Chip text="External" startIcon="l-globe" />
+                  )}
                   {asset?.status === "ACTIVE" ? (
                     <Chip text="Active" startIcon="l-check" />
                   ) : (
@@ -394,7 +405,9 @@ const AssetManage = (props: AssetManageProps) => {
                   )}
                 </div>
               </div>
-              <span className="text-gray-700">{asset?.description}</span>
+              <div className="mt-3 hidden text-gray-700 sm:block">
+                {asset?.description}
+              </div>
             </div>
             <div className="flex flex-col gap-6">
               {[
@@ -402,19 +415,6 @@ const AssetManage = (props: AssetManageProps) => {
                   label: asset?.location_object.facility.name,
                   icon: "location-pin-alt",
                   content: asset?.location_object.name,
-                },
-                {
-                  label: "Asset Type",
-                  icon: "apps",
-                  content:
-                    asset?.asset_type === "INTERNAL"
-                      ? "Internal Asset"
-                      : "External Asset",
-                },
-                {
-                  label: "Asset Class",
-                  icon: assetClassProp.icon,
-                  content: assetClassProp.name,
                 },
                 {
                   label: "Asset QR Code ID",
@@ -453,7 +453,6 @@ const AssetManage = (props: AssetManageProps) => {
                   }
                   id="configure-asset"
                   data-testid="asset-configure-button"
-                  authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
                 >
                   <CareIcon className="care-l-setting h-4" />
                   {t("configure")}
@@ -586,7 +585,7 @@ const AssetManage = (props: AssetManageProps) => {
           viewOnly={serviceEditData.viewOnly}
         />
       )}
-    </div>
+    </Page>
   );
 };
 
