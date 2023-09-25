@@ -252,10 +252,6 @@ const DateInputV2: React.FC<Props> = ({
                     <input
                       id="date-input"
                       autoFocus
-                      onBlur={(e) => {
-                        popover.current?.focus();
-                        e.preventDefault();
-                      }}
                       className="cui-input-base bg-gray-50"
                       value={
                         displayValue.replace(
