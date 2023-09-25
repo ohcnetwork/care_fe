@@ -37,7 +37,7 @@ import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
 import { parseOptionId } from "../../Common/utils";
-import { parsePhoneNumber } from "../../Utils/utils.js";
+import { formatAge, parsePhoneNumber } from "../../Utils/utils.js";
 import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
@@ -558,7 +558,9 @@ export const PatientManager = () => {
               <div className="flex w-full justify-between gap-2">
                 <div className="font-semibold">
                   <span className="text-xl capitalize">{patient.name}</span>
-                  <span className="ml-4 text-gray-800">{`${patient.age} yrs.`}</span>
+                  <span className="ml-4 text-gray-800">
+                    {formatAge(patient.age, patient.date_of_birth, true)}
+                  </span>
                 </div>
               </div>
 
