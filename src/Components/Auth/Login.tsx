@@ -98,7 +98,6 @@ export const Login = (props: { forgot?: boolean }) => {
       const { res, data, error } = await request(routes.login, {
         body: { ...valid },
       });
-      console.log(res, data, error);
       if (res && res.status === 429) {
         setCaptcha(true);
         // captcha displayed set back to login button
