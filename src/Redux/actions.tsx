@@ -6,8 +6,6 @@ import {
 } from "../Components/Medicine/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
-import { ICreateHealthIdRequest } from "../Components/ABDM/models";
-
 export const getConfig = () => {
   return fireRequestForFiles("config");
 };
@@ -883,53 +881,12 @@ export const updateAssetService = (
   });
 
 // ABDM related
-export const generateAadhaarOtp = (aadhaar: string) =>
-  fireRequest("generateAadhaarOtp", [], { aadhaar });
 
 export const resentAadhaarOtp = (txnId: string) =>
   fireRequest("resendAadhaarOtp", [], { txnId });
 
-export const verifyAadhaarOtp = (txnId: string, otp: string) =>
-  fireRequest("verifyAadhaarOtp", [], { txnId, otp });
-
 export const generateMobileOtp = (txnId: string, mobile: string) =>
   fireRequest("generateMobileOtp", [], { txnId, mobile });
-
-export const checkAndGenerateMobileOtp = (txnId: string, mobile: string) =>
-  fireRequest("checkAndGenerateMobileOtp", [], { txnId, mobile });
-
-export const verifyMobileOtp = (txnId: string, otp: string) =>
-  fireRequest("verifyMobileOtp", [], { txnId, otp });
-
-export const createHealthId = (data: ICreateHealthIdRequest) =>
-  fireRequest("createHealthId", [], data);
-
-export const searchByHealthId = (healthId: string) =>
-  fireRequest("searchByHealthId", [], { healthId });
-
-export const initiateAbdmAuthentication = (
-  authMethod: string,
-  healthid: string
-) => fireRequest("initiateAbdmAuthentication", [], { authMethod, healthid });
-
-export const confirmWithAadhaarOtp = (
-  txnId: string,
-  otp: string,
-  patientId?: string
-) => fireRequest("confirmWithAadhaarOtp", [], { txnId, otp, patientId });
-
-export const confirmWithMobileOtp = (
-  txnId: string,
-  otp: string,
-  patientId?: string
-) => fireRequest("confirmWithMobileOtp", [], { txnId, otp, patientId });
-
-export const linkViaQR = (abha_details: any, patientId?: string) => {
-  return fireRequest("linkViaQR", [], {
-    ...abha_details,
-    patientId,
-  });
-};
 
 export const linkCareContext = (
   consultationId: string,
@@ -941,52 +898,15 @@ export const linkCareContext = (
   });
 };
 
-export const getAbhaCard = (patient: string, type: "pdf" | "png") => {
-  return fireRequest("getAbhaCard", [], {
-    patient,
-    type,
-  });
-};
-
 export const healthFacilityActions = {
   list: (params: object) => {
     return fireRequest("listHealthFacilities", [], params);
-  },
-
-  create: (data: object) => {
-    return fireRequest("createHealthFacility", [], data);
-  },
-
-  read: (id: string) => {
-    return fireRequest(
-      "getHealthFacility",
-      [],
-      {},
-      { facility_id: id },
-      undefined,
-      true
-    );
   },
 
   update: (id: string, data: object) => {
     return fireRequest("updateHealthFacility", [], data, {
       facility_id: id,
     });
-  },
-
-  partialUpdate: (id: string, data: object) => {
-    return fireRequest("partialUpdateHealthFacility", [], data, {
-      facility_id: id,
-    });
-  },
-
-  registerService: (id: string) => {
-    return fireRequest(
-      "registerHealthFacilityAsService",
-      [],
-      {},
-      { facility_id: id }
-    );
   },
 };
 
