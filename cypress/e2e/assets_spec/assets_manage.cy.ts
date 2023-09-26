@@ -12,6 +12,9 @@ describe("Asset", () => {
   const assetSearchPage = new AssetSearchPage();
   const assetFilters = new AssetFilters();
   const fillFacilityName = "Dummy Facility 1";
+  const assetname = "Dummy Camera";
+  const locationName = "Dummy Location 1";
+  const initiallocationName = "Camera Location";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -23,11 +26,38 @@ describe("Asset", () => {
     cy.awaitUrl("/assets");
   });
 
-  it("Delete an Asset", () => {
-    assetPage.openCreatedAsset();
-    assetPage.interceptDeleteAssetApi();
-    assetPage.deleteAsset();
-    assetPage.verifyDeleteStatus();
+  it("Create & Edit a service history and verify reflection", () => {
+    assetSearchPage.typeSearchKeyword(assetname);
+    assetSearchPage.pressEnter();
+    assetSearchPage.verifyBadgeContent(assetname);
+    assetSearchPage.clickAssetByName(assetname);
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintonotes();
+    assetPage.enterAssetNotes("Dummy Notes");
+    assetPage.enterAssetservicedate("01092023");
+    assetPage.clickassetupdatebutton();
+    assetPage.scrollintoservicehistory();
+    assetPage.clickedithistorybutton();
+    assetPage.scrollintonotes();
+    assetPage.enterAssetNotes("Dummy Notes Editted");
+    assetPage.clickassetupdatebutton();
+    assetPage.scrollintoservicehistory();
+    assetPage.viewassetservicehistorybutton();
+    assetPage.openassetservicehistory();
+    assetPage.verifyassetupdateservicehistory();
+    assetPage.viewassetservicehistorybutton();
+  });
+
+  it("Create a asset transaction and verify history", () => {
+    assetSearchPage.typeSearchKeyword(assetname);
+    assetSearchPage.pressEnter();
+    assetSearchPage.verifyBadgeContent(assetname);
+    assetSearchPage.clickAssetByName(assetname);
+    assetPage.clickupdatedetailbutton();
+    assetPage.clickassetlocation(locationName);
+    assetPage.clickUpdateAsset();
+    assetPage.verifyassetlocation(locationName);
+    assetPage.verifytransactionStatus(initiallocationName, locationName);
   });
 
   it("Verify Facility Asset Page Redirection", () => {
@@ -45,6 +75,13 @@ describe("Asset", () => {
     facilityPage.verifyfacilityviewassetredirection();
     assetFilters.assertFacilityText(fillFacilityName);
     facilityPage.verifyassetfacilitybackredirection();
+  });
+
+  it("Delete an Asset", () => {
+    assetPage.openCreatedAsset();
+    assetPage.interceptDeleteAssetApi();
+    assetPage.deleteAsset();
+    assetPage.verifyDeleteStatus();
   });
 
   afterEach(() => {

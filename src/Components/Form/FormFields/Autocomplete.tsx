@@ -164,7 +164,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                 <span>{value?.icon}</span>
 
                 {value && !props.isLoading && !props.required && (
-                  <div className="tooltip">
+                  <div className="tooltip" id="clear-button">
                     <CareIcon
                       className="care-l-times-circle h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
                       onClick={(e) => {
