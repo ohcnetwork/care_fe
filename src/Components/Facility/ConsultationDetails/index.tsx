@@ -54,10 +54,26 @@ export interface ConsultationTabProps {
   patientData: PatientModel;
 }
 
+const TABS = {
+  UPDATES: ConsultationUpdatesTab,
+  FEED: ConsultationFeedTab,
+  SUMMARY: ConsultationSummaryTab,
+  MEDICINES: ConsultationMedicinesTab,
+  FILES: ConsultationFilesTab,
+  INVESTIGATIONS: ConsultationInvestigationsTab,
+  ABG: ConsultationABGTab,
+  NURSING: ConsultationNursingTab,
+  NEUROLOGICAL_MONITORING: ConsultationNeurologicalMonitoringTab,
+  VENTILATOR: ConsultationVentilatorTab,
+  NUTRITION: ConsultationNursingTab,
+  PRESSURE_SORE: ConsultationPressureSoreTab,
+  DIALYSIS: ConsultationDialysisTab,
+};
+
 export const ConsultationDetails = (props: any) => {
   const { t } = useTranslation();
   const { facilityId, patientId, consultationId } = props;
-  const tab = props.tab.toUpperCase();
+  const tab = props.tab.toUpperCase() as keyof typeof TABS;
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
@@ -155,22 +171,6 @@ export const ConsultationDetails = (props: any) => {
       userId: authUser.id,
     });
   }, []);
-
-  const TABS = {
-    UPDATES: ConsultationUpdatesTab,
-    FEED: ConsultationFeedTab,
-    SUMMARY: ConsultationSummaryTab,
-    MEDICINES: ConsultationMedicinesTab,
-    FILES: ConsultationFilesTab,
-    INVESTIGATIONS: ConsultationInvestigationsTab,
-    ABG: ConsultationABGTab,
-    NURSING: ConsultationNursingTab,
-    NEUROLOGICAL_MONITORING: ConsultationNeurologicalMonitoringTab,
-    VENTILATOR: ConsultationVentilatorTab,
-    NUTRITION: ConsultationNursingTab,
-    PRESSURE_SORE: ConsultationPressureSoreTab,
-    DIALYSIS: ConsultationDialysisTab,
-  };
 
   const consultationTabProps: ConsultationTabProps = {
     consultationId,
@@ -422,13 +422,7 @@ export const ConsultationDetails = (props: any) => {
                 <ShowDiagnosis
                   diagnoses={[
                     ...(consultationData?.diagnosis
-                      ? [
-                          {
-                            id: "0",
-                            label: consultationData?.diagnosis,
-                            parentId: null,
-                          },
-                        ]
+                      ? [{ id: "0", label: consultationData?.diagnosis }]
                       : []),
                     ...(consultationData?.icd11_diagnoses_object ?? []),
                   ]}
