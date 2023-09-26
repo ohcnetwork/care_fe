@@ -323,7 +323,7 @@ export const FacilityHome = (props: any) => {
       StaffUserTypeIndex;
 
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
-    <div className="absolute right-0 top-0 z-10 flex h-48 w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]">
+    <div className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]">
       <i className="fa-solid fa-pen" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
     </div>
