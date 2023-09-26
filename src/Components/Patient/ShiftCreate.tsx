@@ -18,7 +18,7 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { navigate } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parsePhoneNumber } from "../../Utils/utils.js";
 import { phonePreg } from "../../Common/validation";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
@@ -28,6 +28,7 @@ import Page from "../Common/components/Page.js";
 import Card from "../../CAREUI/display/Card.js";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField.js";
 import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
+import { PhoneNumberValidator } from "../Form/FieldValidators.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -56,13 +57,13 @@ export const ShiftCreate = (props: patientShiftProps) => {
     vehicle_preference: "",
     comments: "",
     refering_facility_contact_name: "",
-    refering_facility_contact_number: "+91",
+    refering_facility_contact_number: "",
     assigned_facility_type: null,
     preferred_vehicle_choice: null,
     breathlessness_level: null,
     patient_category: "",
     ambulance_driver_name: "",
-    ambulance_phone_number: undefined,
+    ambulance_phone_number: "",
     ambulance_number: "",
   };
 
@@ -144,6 +145,11 @@ export const ShiftCreate = (props: patientShiftProps) => {
           errors: action.errors,
         };
       }
+      case "set_field":
+        return {
+          form: { ...state.form, [action.name]: action.value },
+          errors: { ...state.errors, [action.name]: action.error },
+        };
       default:
         return state;
     }
@@ -162,10 +168,10 @@ export const ShiftCreate = (props: patientShiftProps) => {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
           } else if (
-            !parsePhoneNumberFromString(state.form[field])?.isPossible() ||
-            !phonePreg(
-              String(parsePhoneNumberFromString(state.form[field])?.number)
-            )
+            !PhoneNumberValidator()(
+              parsePhoneNumber(state.form[field]) ?? ""
+            ) === undefined ||
+            !phonePreg(String(parsePhoneNumber(state.form[field])))
           ) {
             errors[field] = requiredFields[field].invalidText;
             isInvalidForm = true;
@@ -187,8 +193,10 @@ export const ShiftCreate = (props: patientShiftProps) => {
 
   const handleFormFieldChange = (event: FieldChangeEvent<unknown>) => {
     dispatch({
-      type: "set_form",
-      form: { ...state.form, [event.name]: event.value },
+      type: "set_field",
+      name: event.name,
+      value: event.value,
+      error: "",
     });
   };
 
@@ -222,15 +230,15 @@ export const ShiftCreate = (props: patientShiftProps) => {
         preferred_vehicle_choice: state.form.preferred_vehicle_choice,
         refering_facility_contact_name:
           state.form.refering_facility_contact_name,
-        refering_facility_contact_number: parsePhoneNumberFromString(
+        refering_facility_contact_number: parsePhoneNumber(
           state.form.refering_facility_contact_number
-        )?.format("E.164"),
+        ),
         breathlessness_level: state.form.breathlessness_level,
         patient_category: patientCategory,
         ambulance_driver_name: state.form.ambulance_driver_name,
-        ambulance_phone_number: parsePhoneNumberFromString(
+        ambulance_phone_number: parsePhoneNumber(
           state.form.ambulance_phone_number
-        )?.format("E.164"),
+        ),
         ambulance_number: state.form.ambulance_number,
       };
 

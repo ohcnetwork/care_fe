@@ -1,5 +1,10 @@
 import { navigate } from "raviger";
-import { LocalStorageKeys } from "../Common/constants";
+import {
+  AREACODES,
+  IN_LANDLINE_AREA_CODES,
+  LocalStorageKeys,
+} from "../Common/constants";
+import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
 import dayjs from "./dayjs";
 
 interface ApacheParams {
@@ -239,4 +244,165 @@ export const formatCurrency = (price: number) =>
 
 export const isUserOnline = (user: { last_login: DateLike }) => {
   return dayjs().subtract(5, "minutes").isBefore(user.last_login);
+};
+
+export interface CountryData {
+  flag: string;
+  name: string;
+  code: string;
+}
+
+export const parsePhoneNumber = (phoneNumber: string, countryCode?: string) => {
+  if (!phoneNumber) return "";
+  if (phoneNumber === "+91") return "";
+  const phoneCodes: Record<string, CountryData> = phoneCodesJson;
+  let parsedNumber = phoneNumber.replace(/[-+() ]/g, "");
+  if (countryCode && phoneCodes[countryCode]) {
+    parsedNumber = phoneCodes[countryCode].code + parsedNumber;
+  } else if (!phoneNumber.startsWith("+")) {
+    return undefined;
+  }
+  parsedNumber = "+" + parsedNumber;
+  return parsedNumber;
+};
+
+export const formatPhoneNumber = (phoneNumber: string) => {
+  if (phoneNumber.startsWith("+91")) {
+    phoneNumber = phoneNumber.startsWith("+910")
+      ? phoneNumber.slice(4)
+      : phoneNumber.slice(3);
+    const landline_code = IN_LANDLINE_AREA_CODES.find((code) =>
+      phoneNumber.startsWith(code)
+    );
+    if (landline_code === undefined)
+      return "+91" + " " + phoneNumber.slice(0, 5) + " " + phoneNumber.slice(5);
+    const subscriber_no_length = 10 - landline_code.length;
+    return (
+      "+91" +
+      " " +
+      landline_code +
+      " " +
+      phoneNumber.slice(
+        landline_code.length,
+        subscriber_no_length / 2 + landline_code.length
+      ) +
+      " " +
+      phoneNumber.slice(subscriber_no_length / 2 + landline_code.length)
+    );
+  } else if (phoneNumber.startsWith("1800")) {
+    return "1800" + " " + phoneNumber.slice(4, 7) + " " + phoneNumber.slice(7);
+  } else if (phoneNumber.startsWith("+")) {
+    const countryCode = getCountryCode(phoneNumber);
+    if (!countryCode) return phoneNumber;
+    const phoneCodes: Record<string, CountryData> = phoneCodesJson;
+    return (
+      "+" +
+      phoneCodes[countryCode].code +
+      " " +
+      phoneNumber.slice(phoneCodes[countryCode].code.length + 1)
+    );
+  }
+  return phoneNumber;
+};
+
+export const getCountryCode = (phoneNumber: string) => {
+  if (phoneNumber.startsWith("+")) {
+    const phoneCodes: Record<string, CountryData> = phoneCodesJson;
+    const phoneCodesArr = Object.keys(phoneCodes);
+    phoneNumber = phoneNumber.slice(1);
+    const allMatchedCountries: { name: string; code: string }[] = [];
+    for (let i = 0; i < phoneCodesArr.length; i++) {
+      if (
+        phoneNumber.startsWith(
+          phoneCodes[phoneCodesArr[i]].code.replaceAll("-", "")
+        )
+      ) {
+        allMatchedCountries.push({
+          name: phoneCodesArr[i],
+          code: phoneCodes[phoneCodesArr[i]].code.replaceAll("-", ""),
+        });
+      }
+    }
+    // returns the country which is longest in case there are multiple matches
+    if (allMatchedCountries.length === 0) return undefined;
+    const matchedCountry = allMatchedCountries.reduce((max, country) =>
+      max.code > country.code ? max : country
+    );
+    const sameCodeCountries = allMatchedCountries.filter(
+      (country) => country.code === matchedCountry.code
+    );
+    if (matchedCountry === undefined) return undefined;
+    // some countries share same country code but differ in area codes
+    // The area codes are checked for such countries
+    if (matchedCountry.code == "1") {
+      const areaCode = phoneNumber.substring(1, 4);
+      return (
+        sameCodeCountries.find((country) =>
+          AREACODES[country.name]?.includes(areaCode)
+        )?.name ?? "US"
+      );
+    } else if (matchedCountry.code === "262") {
+      const areaCode = phoneNumber.substring(3, 6);
+      return sameCodeCountries.find((country) =>
+        AREACODES[country.name]?.includes(areaCode)
+      )?.name;
+    } else if (matchedCountry.code === "61") {
+      const areaCode = phoneNumber.substring(2, 7);
+      return (
+        sameCodeCountries.find((country) =>
+          AREACODES[country.name]?.includes(areaCode)
+        )?.name ?? "AU"
+      );
+    } else if (matchedCountry.code === "599") {
+      const areaCode = phoneNumber.substring(3, 4);
+      return (
+        sameCodeCountries.find((country) =>
+          AREACODES[country.name]?.includes(areaCode)
+        )?.name ?? "CW"
+      );
+    } else if (matchedCountry.code == "7") {
+      const areaCode = phoneNumber.substring(1, 2);
+      return (
+        sameCodeCountries.find((country) =>
+          AREACODES[country.name]?.includes(areaCode)
+        )?.name ?? "RU"
+      );
+    } else if (matchedCountry.code == "47") {
+      const areaCode = phoneNumber.substring(2, 4);
+      return (
+        sameCodeCountries.find((country) =>
+          AREACODES[country.name]?.includes(areaCode)
+        )?.name ?? "NO"
+      );
+    }
+    return matchedCountry.name;
+  }
+  return undefined;
+};
+
+export const formatAge = (
+  age?: number,
+  date_of_birth?: string,
+  abbreviated = false
+) => {
+  if (!age && !date_of_birth) return undefined;
+  if (!age) age = 0;
+
+  const daySuffix = abbreviated ? "d" : "days";
+  const monthSuffix = abbreviated ? "mo" : "months";
+  const yearSuffix = abbreviated ? "yr" : "years";
+
+  if (age < 1 && date_of_birth) {
+    const dob = new Date(date_of_birth);
+    const today = new Date();
+    const diffTime = Math.abs(today.getTime() - dob.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const months = Math.floor(diffDays / 30);
+    const days = diffDays % 30;
+    if (months === 0) {
+      return `${days} ${daySuffix}`;
+    }
+    return `${months} ${monthSuffix} ${days} ${daySuffix}`;
+  }
+  return `${age} ${yearSuffix}`;
 };

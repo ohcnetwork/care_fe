@@ -9,7 +9,7 @@ import {
   RESOURCE_CATEGORY_CHOICES,
   RESOURCE_SUBCATEGORIES,
 } from "../../Common/constants";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parsePhoneNumber } from "../../Utils/utils";
 import { phonePreg } from "../../Common/validation";
 
 import { createResource, getAnyFacility } from "../../Redux/actions";
@@ -25,6 +25,7 @@ import RadioFormField from "../Form/FormFields/RadioFormField";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import Card from "../../CAREUI/display/Card";
 import Page from "../Common/components/Page";
+import { PhoneNumberValidator } from "../Form/FieldValidators";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -41,7 +42,7 @@ const initForm: any = {
   title: "",
   reason: "",
   refering_facility_contact_name: "",
-  refering_facility_contact_number: "",
+  refering_facility_contact_number: "+91",
   required_quantity: null,
 };
 
@@ -131,13 +132,14 @@ export default function ResourceCreate(props: resourceProps) {
     Object.keys(requiredFields).forEach((field) => {
       switch (field) {
         case "refering_facility_contact_number": {
-          const phoneNumber = parsePhoneNumberFromString(state.form[field]);
+          const phoneNumber = parsePhoneNumber(state.form[field]);
           if (!state.form[field]) {
             errors[field] = requiredFields[field].errorText;
             isInvalidForm = true;
           } else if (
-            !phoneNumber?.isPossible() ||
-            !phonePreg(String(phoneNumber?.number))
+            !phoneNumber ||
+            !PhoneNumberValidator()(phoneNumber) === undefined ||
+            !phonePreg(String(phoneNumber))
           ) {
             errors[field] = requiredFields[field].invalidText;
             isInvalidForm = true;
@@ -194,9 +196,9 @@ export default function ResourceCreate(props: resourceProps) {
         reason: state.form.reason,
         refering_facility_contact_name:
           state.form.refering_facility_contact_name,
-        refering_facility_contact_number: parsePhoneNumberFromString(
+        refering_facility_contact_number: parsePhoneNumber(
           state.form.refering_facility_contact_number
-        )?.format("E.164"),
+        ),
         requested_quantity: state.form.requested_quantity || 0,
       };
 

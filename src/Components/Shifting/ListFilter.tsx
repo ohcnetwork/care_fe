@@ -19,13 +19,12 @@ import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { navigate } from "raviger";
-import parsePhoneNumberFromString from "libphonenumber-js";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import useMergeState from "../../Common/hooks/useMergeState";
 import { useTranslation } from "react-i18next";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
-import { dateQueryString } from "../../Utils/utils";
+import { dateQueryString, parsePhoneNumber } from "../../Utils/utils";
 import dayjs from "dayjs";
 
 const clearFilterState = {
@@ -207,10 +206,10 @@ export default function ListFilter(props: any) {
       assigned_facility: assigned_facility || "",
       emergency: emergency || "",
       is_up_shift: is_up_shift || "",
-      patient_phone_number: patient_phone_number
-        ? parsePhoneNumberFromString(patient_phone_number)?.format("E.164") ??
-          ""
-        : "",
+      patient_phone_number:
+        patient_phone_number === "+91"
+          ? ""
+          : parsePhoneNumber(patient_phone_number) ?? "",
       created_date_before: dateQueryString(created_date_before),
       created_date_after: dateQueryString(created_date_after),
       modified_date_before: dateQueryString(modified_date_before),
