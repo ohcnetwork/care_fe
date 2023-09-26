@@ -1,10 +1,10 @@
 import { SyntheticEvent, useEffect, useState } from "react";
 import { AssetData } from "../AssetTypes";
-import { useDispatch } from "react-redux";
-import {
-  partialUpdateAsset,
-  getPermittedFacility,
-} from "../../../Redux/actions";
+// import { useDispatch } from "react-redux";
+// import {
+//   partialUpdateAsset,
+//   getPermittedFacility,
+// } from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
 import MonitorConfigure from "../configure/MonitorConfigure";
 import Loading from "../../Common/Loading";
@@ -16,6 +16,8 @@ import TextFormField from "../../Form/FormFields/TextFormField";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
+import request from "../../../Utils/request/request";
+import routes from "../../../Redux/api";
 
 interface HL7MonitorProps {
   assetId: string;
@@ -33,19 +35,22 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   const [localipAddress, setLocalIPAddress] = useState("");
   const [ipadrdress_error, setIpAddress_error] = useState("");
   const authUser = useAuthUser();
-  const dispatch = useDispatch<any>();
+  // const dispatch = useDispatch<any>();
 
   useEffect(() => {
     const fetchFacility = async () => {
-      const res = await dispatch(getPermittedFacility(facilityId));
+      // const res = await dispatch(getPermittedFacility(facilityId));
+      const { res, data } = await request(routes.getPermittedFacility, {
+        body: { facilityId },
+      });
 
-      if (res.status === 200 && res.data) {
-        setFacilityMiddlewareHostname(res.data.middleware_address);
+      if (res?.status === 200 && data?.middleware_address) {
+        setFacilityMiddlewareHostname(data.middleware_address);
       }
     };
 
     if (facilityId) fetchFacility();
-  }, [dispatch, facilityId]);
+  }, [facilityId]);
 
   useEffect(() => {
     setAssetType(asset?.asset_class);
@@ -65,9 +70,12 @@ const HL7Monitor = (props: HL7MonitorProps) => {
           local_ip_address: localipAddress,
         },
       };
-      const res: any = await Promise.resolve(
-        dispatch(partialUpdateAsset(assetId, data))
-      );
+      // const res: any = await Promise.resolve(
+      //   dispatch(partialUpdateAsset(assetId, data))
+      // );
+      const { res } = await request(routes.partialUpdateAsset, {
+        body: { assetId, data },
+      });
       if (res?.status === 200) {
         Notification.Success({
           msg: "Asset Configured Successfully",

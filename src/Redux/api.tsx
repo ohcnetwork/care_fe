@@ -1,6 +1,6 @@
 import { IConfig } from "../Common/hooks/useConfig";
 import { AssetData } from "../Components/Assets/AssetTypes";
-import { LocationModel } from "../Components/Facility/models";
+import { FacilityModel, LocationModel } from "../Components/Facility/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 
@@ -171,6 +171,8 @@ const routes = {
 
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
+    method: "GET",
+    TRes: Res<FacilityModel>(),
   },
 
   getAnyFacility: {
@@ -818,6 +820,7 @@ const routes = {
   partialUpdateAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "PATCH",
+    TRes: Res<AssetData>(),
   },
 
   // Asset transaction endpoints
