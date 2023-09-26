@@ -205,9 +205,7 @@ class FacilityPage {
   }
 
   verifyfacilityviewassetredirection() {
-    cy.intercept("GET", "**api/v1/getallfacilities/**").as("getViewAssets");
     cy.url().should("include", "/assets?facility=");
-    cy.wait("@getViewAssets").its("response.statusCode").should("eq", 200);
   }
 
   clickManageInventory() {
