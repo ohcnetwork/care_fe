@@ -575,6 +575,7 @@ export const FacilityHome = (props: any) => {
                   Resource Request
                 </DropdownItem>
                 <DropdownItem
+                  id="create-assets"
                   onClick={() => navigate(`/facility/${facilityId}/assets/new`)}
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon className="care-l-plus-circle text-lg" />}
@@ -582,12 +583,14 @@ export const FacilityHome = (props: any) => {
                   Create Asset
                 </DropdownItem>
                 <DropdownItem
+                  id="view-assets"
                   onClick={() => navigate(`/assets?facility=${facilityId}`)}
                   icon={<CareIcon className="care-l-medkit text-lg" />}
                 >
                   View Assets
                 </DropdownItem>
                 <DropdownItem
+                  id="view-users"
                   onClick={() => navigate(`/facility/${facilityId}/users`)}
                   icon={<CareIcon className="care-l-users-alt text-lg" />}
                 >

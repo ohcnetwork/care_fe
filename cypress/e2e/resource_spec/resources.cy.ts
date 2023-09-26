@@ -1,10 +1,14 @@
 import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import ResourcePage from "../../pageobject/Resource/ResourcePage";
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 
 describe("Resource Page", () => {
+  let createdResource: string;
   const loginPage = new LoginPage();
   const resourcePage = new ResourcePage();
+  const facilityPage = new FacilityPage();
+  const phone_number = "9999999999";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -34,8 +38,34 @@ describe("Resource Page", () => {
     resourcePage.clickBoardViewButton();
   });
 
+  it("Create a resource request", () => {
+    cy.visit("/facility");
+    cy.get("#search").click().type("dummy facility 1");
+    cy.intercept("GET", "**/api/v1/facility/**").as("loadFacilities");
+    cy.get("#facility-details").click();
+    cy.wait("@loadFacilities").its("response.statusCode").should("eq", 200);
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickResourceRequestOption();
+    facilityPage.fillResourceRequestDetails(
+      "Test User",
+      phone_number,
+      "Dummy",
+      "Test title",
+      "10",
+      "Test description"
+    );
+    facilityPage.clickSubmitRequestButton();
+    facilityPage.verifySuccessNotification(
+      "Resource request created successfully"
+    );
+    facilityPage.verifyresourcenewurl();
+    cy.url().then((url) => {
+      createdResource = url;
+    });
+  });
+
   it("Update the status of resource", () => {
-    resourcePage.openAlreadyCreatedResource();
+    cy.visit(createdResource);
     resourcePage.clickUpdateStatus();
     resourcePage.updateStatus("APPROVED");
     resourcePage.clickSubmitButton();
@@ -45,7 +75,7 @@ describe("Resource Page", () => {
   });
 
   it("Post comment for a resource", () => {
-    resourcePage.openAlreadyCreatedResource();
+    cy.visit(createdResource);
     resourcePage.addCommentForResource("Test comment");
     resourcePage.clickPostCommentButton();
     resourcePage.verifySuccessNotification("Comment added successfully");
