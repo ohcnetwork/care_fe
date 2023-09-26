@@ -95,9 +95,10 @@ export const Login = (props: { forgot?: boolean }) => {
       // replaces button with spinner
       setLoading(true);
 
-      const { res, data } = await request(routes.login, {
-        pathParams: { ...valid },
+      const { res, data, error } = await request(routes.login, {
+        body: { ...valid },
       });
+      console.log(res, data, error);
       if (res && res.status === 429) {
         setCaptcha(true);
         // captcha displayed set back to login button
@@ -105,7 +106,6 @@ export const Login = (props: { forgot?: boolean }) => {
       } else if (res && res.status === 200 && data) {
         localStorage.setItem(LocalStorageKeys.accessToken, data.access);
         localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
-
         if (
           window.location.pathname === "/" ||
           window.location.pathname === "/login"
@@ -149,7 +149,7 @@ export const Login = (props: { forgot?: boolean }) => {
     if (valid) {
       setLoading(true);
       const { res, error } = await request(routes.forgotPassword, {
-        pathParams: { ...valid },
+        body: { ...valid },
       });
       setLoading(false);
       if (res && res.statusText === "OK") {

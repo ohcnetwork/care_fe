@@ -70,7 +70,7 @@ export const ResetPassword = (props: any) => {
     if (valid) {
       valid.token = props.token;
       const { res, error } = await request(routes.resetPassword, {
-        pathParams: { ...valid },
+        body: { ...valid },
       });
       if (res && res.statusText === "OK") {
         localStorage.removeItem(LocalStorageKeys.accessToken);
@@ -87,7 +87,7 @@ export const ResetPassword = (props: any) => {
   useEffect(() => {
     const checkResetToken = async () => {
       const { res } = await request(routes.checkResetToken, {
-        pathParams: { token: props.token },
+        body: { token: props.token },
       });
       if (!res || res.statusText !== "OK") {
         navigate("/invalid-reset");
