@@ -67,29 +67,12 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
       title={file_state.name}
       slideFrom="bottom"
       dialogClass="h-full"
+      backdropBlur
     >
       {fileUrl && fileUrl.length > 0 ? (
-        <div className="flex">
-          <div className="h-[80vh] w-full">
-            {file_state.isImage ? (
-              <img
-                src={fileUrl}
-                alt="file"
-                className={
-                  "mx-auto object-contain " + zoom_values[file_state.zoom]
-                }
-                style={{
-                  transform: `rotate(${file_state.rotation}deg)`,
-                }}
-              />
-            ) : (
-              <iframe
-                title="Source Files"
-                src={fileUrl}
-                className="mx-auto h-5/6 w-5/6 border-2 border-black bg-white md:my-6 md:w-4/6"
-              />
-            )}
-            <div className="relative bottom-5 flex items-center justify-center gap-3">
+        <div className="flex ">
+          <div className="h-[85vh] w-full">
+            <div className=" flex items-center justify-center gap-3 ">
               {file_state.isImage && (
                 <>
                   {[
@@ -144,6 +127,24 @@ const FilePreviewDialog = (props: FilePreviewProps) => {
                 </ButtonV2>
               )}
             </div>
+            {file_state.isImage ? (
+              <img
+                src={fileUrl}
+                alt="file"
+                className={
+                  "mx-auto object-contain " + zoom_values[file_state.zoom]
+                }
+                style={{
+                  transform: `rotate(${file_state.rotation}deg)`,
+                }}
+              />
+            ) : (
+              <iframe
+                title="Source Files"
+                src={fileUrl}
+                className="mx-auto h-5/6 w-5/6 border-2 border-black  md:my-6 md:w-4/6"
+              />
+            )}
           </div>
         </div>
       ) : (

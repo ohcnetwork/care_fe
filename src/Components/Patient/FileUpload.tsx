@@ -1133,7 +1133,7 @@ export const FileUpload = (props: FileUploadProps) => {
         downloadURL={downloadURL}
         onClose={handleClose}
         fixedWidth={false}
-        className="h-[80vh] w-full md:h-screen"
+        className="w-full md:h-screen"
       />
       <DialogModal
         show={modalOpenForCamera}
