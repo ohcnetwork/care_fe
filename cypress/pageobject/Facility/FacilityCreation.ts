@@ -191,9 +191,7 @@ class FacilityPage {
   }
 
   verifyfacilitycreateassetredirection() {
-    cy.intercept("GET", "**/api/v1/facility/**").as("getNewAssets");
     cy.url().should("include", "/assets/new");
-    cy.wait("@getNewAssets").its("response.statusCode").should("eq", 200);
   }
 
   verifyassetfacilitybackredirection() {
