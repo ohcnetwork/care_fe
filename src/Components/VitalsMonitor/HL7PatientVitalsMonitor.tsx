@@ -6,7 +6,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import WaveformLabels from "./WaveformLabels";
 import { classNames } from "../../Utils/utils";
 import { IVitalsComponentProps, VitalsValueBase } from "./types";
-import { triggerGoal } from "../Common/Plausible";
+import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 
 export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {

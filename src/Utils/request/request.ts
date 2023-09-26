@@ -1,27 +1,63 @@
-import { RequestOptions, Route } from "./types";
+import handleResponse from "./handleResponse";
+import { RequestOptions, RequestResult, Route } from "./types";
 import { makeHeaders, makeUrl } from "./utils";
 
-interface Options extends RequestOptions {
+interface Options<TData> extends RequestOptions<TData> {
   controller?: AbortController;
 }
 
 export default async function request<TData>(
   { path, method, noAuth }: Route<TData>,
-  { query, body, pathParams, controller }: Options = {}
-) {
+  {
+    query,
+    body,
+    pathParams,
+    controller,
+    onResponse,
+    silent,
+    reattempts = 3,
+  }: Options<TData> = {}
+): Promise<RequestResult<TData>> {
   const signal = controller?.signal;
-
-  const headers = makeHeaders(noAuth ?? false);
   const url = makeUrl(path, query, pathParams);
 
-  const options: RequestInit = { headers, method, signal };
+  const options: RequestInit = { method, signal };
 
   if (body) {
     options.body = JSON.stringify(body);
   }
 
-  const res = await fetch(url, options);
-  const data: TData = await res.json();
+  let result: RequestResult<TData> = {
+    res: undefined,
+    data: undefined,
+    error: undefined,
+  };
 
-  return { res, data };
+  for (let i = 0; i < reattempts + 1; i++) {
+    options.headers = makeHeaders(noAuth ?? false);
+
+    try {
+      const res = await fetch(url, options);
+      const data: TData = await res.json();
+
+      result = {
+        res,
+        data: res.ok ? data : undefined,
+        error: res.ok ? undefined : (data as Record<string, unknown>),
+      };
+
+      onResponse?.(result);
+      handleResponse(result, silent);
+
+      return result;
+    } catch (error: any) {
+      result = { error, res: undefined, data: undefined };
+    }
+  }
+
+  console.error(
+    `Request failed after ${reattempts + 1} attempts`,
+    result.error
+  );
+  return result;
 }
