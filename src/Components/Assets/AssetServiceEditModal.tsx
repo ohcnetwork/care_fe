@@ -97,7 +97,10 @@ export const AssetServiceEditModal = (props: {
                       {edit.edited_by.username}
                     </p>
                   </div>
-                  <div className="flex items-center justify-center">
+                  <div
+                    className="flex items-center justify-center"
+                    id="view-asset-edit-history"
+                  >
                     <CareIcon icon="l-eye" className="text-lg" />
                   </div>
                 </div>
@@ -128,7 +131,10 @@ export const AssetServiceEditModal = (props: {
                   <p className="text-sm font-medium text-gray-500">
                     {t("Serviced On")}
                   </p>
-                  <p className="text-gray-900">
+                  <p
+                    className="text-gray-900"
+                    id="edit-history-asset-servicedon"
+                  >
                     {formatDate(editRecord.serviced_on)}
                   </p>
                 </div>
@@ -136,13 +142,16 @@ export const AssetServiceEditModal = (props: {
                   <p className="text-sm font-medium text-gray-500">
                     {t("Notes")}
                   </p>
-                  <p className="text-gray-900">{editRecord.note || "-"}</p>
+                  <p className="text-gray-900" id="edit-history-asset-note">
+                    {editRecord.note || "-"}
+                  </p>
                 </div>
               </div>
             </div>
           )}
           <div className="flex justify-end">
             <ButtonV2
+              id="view-history-back-button"
               variant="secondary"
               onClick={() => {
                 editRecord ? setEditRecord(undefined) : props.handleClose();
