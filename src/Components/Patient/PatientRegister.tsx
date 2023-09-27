@@ -61,13 +61,18 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import countryList from "../../Common/static/countries.json";
+import { debounce } from "lodash";
+
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { validatePincode } from "../../Common/validation";
 import { FormContextValue } from "../Form/FormContext.js";
+
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
+
+// const debounce = require("lodash.debounce");
 
 interface PatientRegisterProps extends PatientModel {
   facilityId: string;
@@ -547,7 +552,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     fetchFacilityName();
   }, [dispatchAction, facilityId]);
 
-  const validateForm = async (form: any) => {
+  const validateForm = (form: any) => {
     const errors: Partial<Record<keyof any, FieldError>> = {};
 
     const insuranceDetailsError = insuranceDetails
@@ -555,7 +560,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
       .find((error) => !!error);
     setInsuranceDetailsError(insuranceDetailsError);
 
-    for (const field of Object.keys(form)) {
+    Object.keys(form).forEach((field) => {
       let phoneNumber, emergency_phone_number;
       switch (field) {
         case "address":
@@ -563,37 +568,37 @@ export const PatientRegister = (props: PatientRegisterProps) => {
         case "gender":
         case "date_of_birth":
           errors[field] = RequiredFieldValidator()(form[field]);
-          break;
+          return;
         case "permanent_address":
           if (!form.sameAddress) {
             errors[field] = RequiredFieldValidator()(form[field]);
           }
-          break;
+          return;
         case "local_body":
           if (form.nationality === "India" && !Number(form[field])) {
             errors[field] = "Please select a localbody";
           }
-          break;
+          return;
         case "district":
           if (form.nationality === "India" && !Number(form[field])) {
             errors[field] = "Please select district";
           }
-          break;
+          return;
         case "state":
           if (form.nationality === "India" && !Number(form[field])) {
             errors[field] = "Please enter the state";
           }
-          break;
+          return;
         case "pincode":
           if (!validatePincode(form[field])) {
             errors[field] = "Please enter valid pincode";
           }
-          break;
+          return;
         case "passport_no":
           if (form.nationality !== "India" && !form[field]) {
             errors[field] = "Please enter the passport number";
           }
-          break;
+          return;
         case "phone_number":
           phoneNumber = parsePhoneNumber(form[field]);
           if (
@@ -603,10 +608,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ) {
             errors[field] = "Please enter valid phone number";
           }
-          if (await duplicateCheck(form["phone_number"])) {
-            errors[field] = "Patient with same phone number already exists";
-          }
-          break;
+          return;
         case "emergency_phone_number":
           emergency_phone_number = parsePhoneNumber(form[field]);
           if (
@@ -616,7 +618,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           ) {
             errors[field] = "Please enter valid phone number";
           }
-          break;
+          return;
 
         case "estimated_contact_date":
           if (
@@ -627,7 +629,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               errors[field] = "Please enter the estimated date of contact";
             }
           }
-          break;
+          return;
         case "cluster_name":
           if (
             JSON.parse(form.contact_with_confirmed_carrier) ||
@@ -637,12 +639,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               errors[field] = "Please enter the name / cluster of the contact";
             }
           }
-          break;
+          return;
         case "blood_group":
           if (!form[field]) {
             errors[field] = "Please select a blood group";
           }
-          break;
+          return;
 
         case "is_vaccinated":
           if (form.is_vaccinated === "true") {
@@ -659,14 +661,14 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                 "Please enter last vaccinated date";
             }
           }
-          break;
+          return;
 
         case "date_of_result":
           if (form[field] < form.date_of_test) {
             errors[field] =
               "Date should not be before the date of sample collection";
           }
-          break;
+          return;
         case "disease_status":
           if (form[field] === "POSITIVE") {
             if (!form.date_of_test) {
@@ -676,16 +678,16 @@ export const PatientRegister = (props: PatientRegisterProps) => {
               errors["date_of_result"] = "Please fill the date of result";
             }
           }
-          break;
+          return;
         case "medical_history":
           if (!form[field].length) {
             errors[field] = "Please fill the medical history";
           }
-          break;
+          return;
         default:
-          break;
+          return;
       }
-    }
+    });
 
     const firstError = Object.keys(errors).find((e) => errors[e]);
     if (firstError) {
@@ -962,32 +964,33 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     });
   };
 
-  const duplicateCheck = async (phoneNo: string) => {
-    if (
-      phoneNo &&
-      PhoneNumberValidator()(parsePhoneNumber(phoneNo) ?? "") === undefined
-    ) {
-      const query = {
-        phone_number: parsePhoneNumber(phoneNo),
-      };
-      const res = await dispatchAction(searchPatient(query));
-      if (res?.data?.results) {
-        const duplicateList = !id
-          ? res.data.results
-          : res.data.results.filter(
-              (item: DupPatientModel) => item.patient_id !== id
-            );
-        if (duplicateList.length) {
-          setStatusDialog({
-            show: true,
-            patientList: duplicateList,
-          });
-          return true;
+  const duplicateCheck = useCallback(
+    debounce(async (phoneNo: string) => {
+      if (
+        phoneNo &&
+        PhoneNumberValidator()(parsePhoneNumber(phoneNo) ?? "") === undefined
+      ) {
+        const query = {
+          phone_number: parsePhoneNumber(phoneNo),
+        };
+        const res = await dispatchAction(searchPatient(query));
+        if (res?.data?.results) {
+          const duplicateList = !id
+            ? res.data.results
+            : res.data.results.filter(
+                (item: DupPatientModel) => item.patient_id !== id
+              );
+          if (duplicateList.length) {
+            setStatusDialog({
+              show: true,
+              patientList: duplicateList,
+            });
+          }
         }
       }
-    }
-    return false;
-  };
+    }, 300),
+    []
+  );
 
   const handleDialogClose = (action: string) => {
     if (action === "transfer") {
@@ -1257,6 +1260,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               required
                               label="Phone Number"
                               onChange={(event) => {
+                                duplicateCheck(event.value);
                                 field("phone_number").onChange(event);
                               }}
                               types={["mobile", "landline"]}
