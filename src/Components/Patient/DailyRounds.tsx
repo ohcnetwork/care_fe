@@ -508,12 +508,6 @@ export const DailyRounds = (props: any) => {
               }}
             />
 
-            <CheckBoxFormField
-              {...field("recommend_discharge")}
-              className="md:col-span-2"
-              label="Discharge Recommended"
-            />
-
             {state.form.rounds_type === "NORMAL" && (
               <>
                 <h3 className="mb-6 md:col-span-2">Vitals</h3>
