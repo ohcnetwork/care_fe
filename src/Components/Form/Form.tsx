@@ -13,7 +13,7 @@ type Props<T extends FormDetails> = {
   defaults: T;
   asyncGetDefaults?: (() => Promise<T>) | false;
   onlyChild?: boolean;
-  validate?: (form: T) => FormErrors<T>;
+  validate?: (form: T) => FormErrors<T> | Promise<FormErrors<T>>;
   onSubmit: (form: T) => Promise<FormErrors<T> | void>;
   onCancel?: () => void;
   noPadding?: true;
@@ -47,7 +47,8 @@ const Form = <T extends FormDetails>({
     event.stopPropagation();
 
     if (validate) {
-      const errors = omitBy(validate(state.form), isEmpty) as FormErrors<T>;
+      const validationResult = await Promise.resolve(validate(state.form));
+      const errors = omitBy(validationResult, isEmpty) as FormErrors<T>;
 
       if (Object.keys(errors).length) {
         dispatch({ type: "set_errors", errors });
