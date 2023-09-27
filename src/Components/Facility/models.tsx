@@ -142,6 +142,7 @@ export interface ConsultationModel {
   cause_of_death?: string;
   death_datetime?: string;
   death_confirmed_doctor?: string;
+  is_readmission?: boolean;
 }
 export interface PatientStatsModel {
   id?: number;
@@ -222,5 +223,4 @@ export interface CurrentBed {
 export type ICD11DiagnosisModel = {
   id: string;
   label: string;
-  parentId: string | null;
 };

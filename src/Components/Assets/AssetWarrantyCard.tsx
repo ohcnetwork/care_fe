@@ -1,36 +1,68 @@
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AssetData } from "./AssetTypes";
 import { classNames, formatDate } from "../../Utils/utils";
+import CopyToClipboard from "react-copy-to-clipboard";
+import { t } from "i18next";
+import { useEffect, useState } from "react";
 
 export default function AssetWarrantyCard(props: { asset: AssetData }) {
   const { asset } = props;
 
   const details = {
     "Serial Number": asset.serial_number,
-    Expiry:
+    "Warranty/AMC Expiry":
       asset.warranty_amc_end_of_validity &&
       formatDate(asset.warranty_amc_end_of_validity),
     Vendor: asset.vendor_name,
   };
+
+  const [isCopied, setIsCopied] = useState(false);
+
+  useEffect(() => {
+    if (isCopied) {
+      const timeout = setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [isCopied]);
 
   return (
     <div className="warranty-card relative z-10 flex h-full w-screen flex-col overflow-hidden p-6 text-white transition-all hover:scale-[1.01] hover:from-primary-600 hover:to-primary-700 md:w-full md:rounded-xl xl:w-96">
       <div className="mb-3 text-right text-lg font-bold italic">
         {asset.manufacturer}
       </div>
-      <div className="flex h-full flex-col justify-between gap-6 md:flex-row xl:flex-col">
-        <div className="flex h-full w-full flex-col gap-4 border-b border-white/40 md:border-b-0 md:border-r xl:w-auto xl:border-b xl:border-r-0">
+      <div className="flex h-full flex-col justify-between gap-2 md:flex-row xl:flex-col">
+        <div className="flex h-full w-full flex-col gap-4 md:border-r xl:w-auto  xl:border-r-0">
           {Object.keys(details).map((key) => (
             <div className="">
               <div className="mb-1 text-xs uppercase italic tracking-widest text-gray-200">
                 {key}
               </div>
-              <div className="font-semibold">
+              <div className="flex items-center gap-2 font-semibold">
                 {details[key as keyof typeof details] || "--"}
+                {key === "Serial Number" && (
+                  <button className="tooltip tooltip-bottom">
+                    <CopyToClipboard
+                      text={details[key as keyof typeof details] || "--"}
+                      onCopy={() => setIsCopied(true)}
+                    >
+                      {isCopied ? (
+                        <span className="text-sm text-white">
+                          {t("copied_to_clipboard")}
+                        </span>
+                      ) : (
+                        <CareIcon className="care-l-copy text-lg" />
+                      )}
+                    </CopyToClipboard>
+                    <span className="tooltip-text">Copy to clipboard</span>
+                  </button>
+                )}
               </div>
             </div>
           ))}
         </div>
+        <div className="mb-2 hidden h-[1px] w-full bg-white/40 xl:block" />
         <div className="shrink-0">
           <div>
             <div className="mb-1 text-xs uppercase italic tracking-widest text-gray-200">

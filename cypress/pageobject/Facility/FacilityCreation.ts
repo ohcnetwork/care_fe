@@ -100,7 +100,9 @@ class FacilityPage {
   }
 
   saveAndExitDoctorForm() {
+    cy.intercept("GET", "**/api/v1/facility/**").as("createFacilities");
     cy.get("button#save-and-exit").click();
+    cy.wait("@createFacilities").its("response.statusCode").should("eq", 200);
   }
 
   clickManageFacilityDropdown() {
@@ -118,6 +120,14 @@ class FacilityPage {
     cy.get("#configure-facility").contains("Configure Facility").click();
   }
 
+  clickCreateAssetFacilityOption() {
+    cy.get("#create-assets").contains("Create Asset").click();
+  }
+
+  clickviewAssetFacilityOption() {
+    cy.get("#view-assets").contains("View Assets").click();
+  }
+
   clickInventoryManagementOption() {
     cy.get("#inventory-management", { timeout: 10000 }).should("be.visible");
     cy.get("#inventory-management").click();
@@ -129,6 +139,14 @@ class FacilityPage {
 
   clickDeleteFacilityOption() {
     cy.get("#delete-facility").contains("Delete Facility").click();
+  }
+
+  verifyfacilitynewurl() {
+    cy.url().should("match", /facility\/[a-z\d-]+/);
+  }
+
+  verifyresourcenewurl() {
+    cy.url().should("match", /resource\/[a-z\d-]+/);
   }
 
   confirmDeleteFacility() {
@@ -163,6 +181,29 @@ class FacilityPage {
     cy.intercept("GET", "**/api/v1/facility/**").as("getFacilities");
     cy.get("[id='facility-details']").first().click();
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+  }
+
+  verifyFacilityBadgeContent(expectedText: string) {
+    cy.get("[data-testid='Facility/District Name']").should(
+      "contain",
+      expectedText
+    );
+  }
+
+  verifyfacilitycreateassetredirection() {
+    cy.url().should("include", "/assets/new");
+  }
+
+  verifyassetfacilitybackredirection() {
+    cy.intercept("GET", "**/api/v1/facility/**").as("getManagePage");
+    cy.go("back");
+    cy.wait("@getManagePage").its("response.statusCode").should("eq", 200);
+    cy.get("#manage-facility-dropdown").scrollIntoView();
+    cy.get("#manage-facility-dropdown").should("exist");
+  }
+
+  verifyfacilityviewassetredirection() {
+    cy.url().should("include", "/assets?facility=");
   }
 
   clickManageInventory() {
