@@ -2,8 +2,8 @@ import { getColorIndex, rowColor, transformData } from "./utils";
 
 import ButtonV2 from "../../../Common/components/ButtonV2";
 import { InvestigationResponse } from "./types";
-import React from "react";
-import { formatDateTime } from "../../../../Utils/utils";
+import { formatAge, formatDateTime } from "../../../../Utils/utils";
+import { FC } from "react";
 
 const ReportRow = ({ data, name, min, max }: any) => {
   return (
@@ -53,13 +53,14 @@ interface ReportTableProps {
   patientDetails?: {
     name: string;
     age: number;
+    date_of_birth: string;
     hospitalName: string;
   };
   investigationData: InvestigationResponse;
   hidePrint?: boolean;
 }
 
-const ReportTable: React.FC<ReportTableProps> = ({
+const ReportTable: FC<ReportTableProps> = ({
   title,
   investigationData,
   patientDetails,
@@ -83,7 +84,14 @@ const ReportTable: React.FC<ReportTableProps> = ({
         {patientDetails && (
           <div className="flex flex-col gap-1 p-1">
             <p>Name: {patientDetails.name}</p>
-            <p>Age: {patientDetails.age}</p>
+            <p>
+              Age:{" "}
+              {formatAge(
+                patientDetails.age,
+                patientDetails.date_of_birth,
+                true
+              )}
+            </p>
             <p>Hospital: {patientDetails.hospitalName}</p>
           </div>
         )}

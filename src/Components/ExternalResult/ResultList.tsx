@@ -1,13 +1,12 @@
-import loadable from "@loadable/component";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { navigate } from "raviger";
-import { useEffect, useState } from "react";
+import { lazy, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
 import ListFilter from "./ListFilter";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
-import parsePhoneNumberFromString from "libphonenumber-js";
+import { parsePhoneNumber } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -17,7 +16,7 @@ import CountBlock from "../../CAREUI/display/Count";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import Page from "../Common/components/Page";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultList() {
   const dispatch: any = useDispatch();
@@ -66,7 +65,7 @@ export default function ResultList() {
       page: qParams.page || 1,
       name: qParams.name || "",
       mobile_number: qParams.mobile_number
-        ? parsePhoneNumberFromString(qParams.mobile_number)?.format("E.164")
+        ? parsePhoneNumber(qParams.mobile_number) ?? ""
         : "",
       wards: qParams.wards || undefined,
       local_bodies: qParams.local_bodies || undefined,
@@ -289,7 +288,8 @@ export default function ResultList() {
             text="Total Results"
             count={totalCount}
             loading={isLoading}
-            icon={"clipboard-notes"}
+            icon="l-clipboard-notes"
+            className="flex-1"
           />
           <div className="mt-2">
             <SearchInput

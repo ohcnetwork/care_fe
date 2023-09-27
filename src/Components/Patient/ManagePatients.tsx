@@ -11,7 +11,7 @@ import {
 } from "../../Common/constants";
 import { FacilityModel, PatientCategory } from "../Facility/models";
 import { Link, navigate } from "raviger";
-import React, { useCallback, useEffect, useState } from "react";
+import { ReactNode, lazy, useCallback, useEffect, useState } from "react";
 import {
   getAllPatient,
   getAnyFacility,
@@ -36,21 +36,20 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import SwipeableViews from "react-swipeable-views";
-import loadable from "@loadable/component";
 import { parseOptionId } from "../../Common/utils";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
-import { useDispatch, useSelector } from "react-redux";
+import { formatAge, parsePhoneNumber } from "../../Utils/utils.js";
+import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
 import dayjs from "dayjs";
-import { triggerGoal } from "../Common/Plausible.js";
+import { triggerGoal } from "../../Integrations/Plausible.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 interface TabPanelProps {
-  children?: React.ReactNode;
+  children?: ReactNode;
   dir?: string;
   index: any;
   value: any;
@@ -98,8 +97,7 @@ export const PatientManager = () => {
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
     name: "",
   });
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
+  const authUser = useAuthUser();
   const [showDialog, setShowDialog] = useState(false);
   const [showDoctors, setShowDoctors] = useState(false);
   const [showDoctorConnect, setShowDoctorConnect] = useState(false);
@@ -122,7 +120,7 @@ export const PatientManager = () => {
 
     if (phone_number === "+91" || phone_number === "") {
       setPhoneNumberError("");
-      updateQuery({ phone_number: "" });
+      qParams.phone_number && updateQuery({ phone_number: null });
       return;
     }
 
@@ -139,7 +137,8 @@ export const PatientManager = () => {
 
     if (emergency_phone_number === "+91" || emergency_phone_number === "") {
       setEmergencyPhoneNumberError("");
-      updateQuery({ emergency_phone_number: "" });
+      qParams.emergency_phone_number &&
+        updateQuery({ emergency_phone_number: null });
       return;
     }
 
@@ -155,18 +154,16 @@ export const PatientManager = () => {
     page: qParams.page || 1,
     limit: resultsPerPage,
     name: qParams.name || undefined,
-    ip_or_op_no: qParams.ip_or_op_no || undefined,
+    patient_no: qParams.patient_no || undefined,
     is_active:
       !qParams.last_consultation_discharge_reason &&
       (qParams.is_active || "True"),
     disease_status: qParams.disease_status || undefined,
     phone_number: qParams.phone_number
-      ? parsePhoneNumberFromString(qParams.phone_number)?.format("E.164")
+      ? parsePhoneNumber(qParams.phone_number)
       : undefined,
     emergency_phone_number: qParams.emergency_phone_number
-      ? parsePhoneNumberFromString(qParams.emergency_phone_number)?.format(
-          "E.164"
-        )
+      ? parsePhoneNumber(qParams.emergency_phone_number)
       : undefined,
     local_body: qParams.lsgBody || undefined,
     facility: qParams.facility,
@@ -357,7 +354,7 @@ export const PatientManager = () => {
     qParams.is_active,
     qParams.disease_status,
     qParams.name,
-    qParams.ip_or_op_no,
+    qParams.patient_no,
     qParams.page,
     qParams.phone_number,
     qParams.emergency_phone_number,
@@ -478,7 +475,7 @@ export const PatientManager = () => {
       });
   };
 
-  let patientList: React.ReactNode[] = [];
+  let patientList: ReactNode[] = [];
   if (data && data.length) {
     patientList = data.map((patient: any) => {
       let patientUrl = "";
@@ -561,7 +558,9 @@ export const PatientManager = () => {
               <div className="flex w-full justify-between gap-2">
                 <div className="font-semibold">
                   <span className="text-xl capitalize">{patient.name}</span>
-                  <span className="ml-4 text-gray-800">{`${patient.age} yrs.`}</span>
+                  <span className="ml-4 text-gray-800">
+                    {formatAge(patient.age, patient.date_of_birth, true)}
+                  </span>
                 </div>
               </div>
 
@@ -598,16 +597,25 @@ export const PatientManager = () => {
                     dayjs().isAfter(patient.review_time) && (
                       <Chip
                         size="small"
-                        color="red"
-                        startIcon="clock"
+                        variant="danger"
+                        startIcon="l-clock"
                         text="Review Missed"
                       />
                     )}
+                  {patient.last_consultation?.is_readmission && (
+                    <Chip
+                      size="small"
+                      variant="custom"
+                      className="border-blue-600 bg-blue-100 text-blue-600"
+                      startIcon="l-repeat"
+                      text="Readmission"
+                    />
+                  )}
                   {patient.disease_status === "POSITIVE" && (
                     <Chip
                       size="small"
-                      color="red"
-                      startIcon="radiation"
+                      variant="danger"
+                      startIcon="l-coronavirus"
                       text="Positive"
                     />
                   )}
@@ -616,24 +624,26 @@ export const PatientManager = () => {
                     patient.is_active && (
                       <Chip
                         size="small"
-                        color="blue"
-                        startIcon="baby-carriage"
+                        variant="custom"
+                        className="bg-pink-100 text-pink-600"
+                        startIcon="l-baby-carriage"
                         text="Antenatal"
                       />
                     )}
                   {patient.is_medical_worker && patient.is_active && (
                     <Chip
                       size="small"
-                      color="blue"
-                      startIcon="user-md"
+                      variant="custom"
+                      className="bg-blue-100 text-blue-600"
+                      startIcon="l-user-md"
                       text="Medical Worker"
                     />
                   )}
                   {patient.disease_status === "EXPIRED" && (
                     <Chip
                       size="small"
-                      color="yellow"
-                      startIcon="exclamation-triangle"
+                      variant="warning"
+                      startIcon="l-exclamation-triangle"
                       text="Patient Expired"
                     />
                   )}
@@ -644,8 +654,8 @@ export const PatientManager = () => {
                     <span className="relative inline-flex">
                       <Chip
                         size="small"
-                        color="red"
-                        startIcon="notes-medical"
+                        variant="danger"
+                        startIcon="l-notes"
                         text="No Consultation Filed"
                       />
                       <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
@@ -667,8 +677,8 @@ export const PatientManager = () => {
                       <span className="relative inline-flex">
                         <Chip
                           size="small"
-                          color="red"
-                          startIcon="circle-exclamation"
+                          variant="danger"
+                          startIcon="l-exclamation-circle"
                           text="No update in 24 hours"
                         />
                         <span className="absolute -right-1 -top-1 flex h-3 w-3 items-center justify-center">
@@ -742,6 +752,7 @@ export const PatientManager = () => {
         <div className="flex w-full flex-col items-center justify-between lg:flex-row">
           <div className="mb-2 flex w-full flex-col items-center lg:mb-0 lg:w-fit lg:flex-row lg:gap-5">
             <ButtonV2
+              id="add-patient-details"
               onClick={() => {
                 qParams.facility
                   ? navigate(`/facility/${qParams.facility}/patient`)
@@ -768,7 +779,7 @@ export const PatientManager = () => {
                 onClick={() => {
                   triggerGoal("Doctor Connect Clicked", {
                     facilityId: qParams.facility,
-                    userId: currentUser.data.id,
+                    userId: authUser.id,
                     page: "FacilityPatientsList",
                   });
                   setShowDoctors(true);
@@ -856,8 +867,8 @@ export const PatientManager = () => {
               text="Total Patients"
               count={totalCount}
               loading={isLoading}
-              icon={"user-injured"}
-              containerClass="pb-10"
+              icon="l-user-injured"
+              className="pb-12"
             />
           </div>
         </div>
@@ -873,7 +884,7 @@ export const PatientManager = () => {
                 label="Search by IP/OP Number"
                 placeholder="Enter IP/OP Number"
                 secondary
-                {...queryField("ip_or_op_no")}
+                {...queryField("patient_no")}
               />
             </div>
             <div className="md:flex md:gap-4">
@@ -911,7 +922,7 @@ export const PatientManager = () => {
             phoneNumber("Primary number", "phone_number"),
             phoneNumber("Emergency number", "emergency_phone_number"),
             badge("Patient name", "name"),
-            badge("IP/OP number", "ip_or_op_no"),
+            badge("IP/OP number", "patient_no"),
             ...dateRange("Modified", "modified_date"),
             ...dateRange("Created", "created_date"),
             ...dateRange("Admitted", "last_consultation_admission_date"),
@@ -975,14 +986,12 @@ export const PatientManager = () => {
       </div>
       <div>
         <PatientFilter {...advancedFilter} key={window.location.search} />
-        <SwipeableViews index={tabValue}>
-          <TabPanel value={tabValue} index={0}>
-            <div className="mb-4">{managePatients}</div>
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            <div className="mb-4">{managePatients}</div>
-          </TabPanel>
-        </SwipeableViews>
+        <TabPanel value={tabValue} index={0}>
+          <div className="mb-4">{managePatients}</div>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <div className="mb-4">{managePatients}</div>
+        </TabPanel>
         <DoctorVideoSlideover
           facilityId={params.facility}
           show={showDoctors}

@@ -20,7 +20,7 @@ import { PatientModel } from "./models";
 import { getDimensionOrDash } from "../../Common/utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { useState } from "react";
-import { formatDate } from "../../Utils/utils.js";
+import { formatAge, formatDate, formatDateTime } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
 
 export default function PatientInfoCard(props: {
@@ -41,8 +41,6 @@ export default function PatientInfoCard(props: {
 
   const patient = props.patient;
   const consultation = props.consultation;
-  const ip_no = consultation?.ip_no;
-  const op_no = consultation?.op_no;
 
   const category: PatientCategory | undefined =
     consultation?.last_daily_round?.patient_category ?? consultation?.category;
@@ -141,11 +139,11 @@ export default function PatientInfoCard(props: {
                     {(dayjs().isBefore(patient.review_time)
                       ? "Review before: "
                       : "Review Missed: ") +
-                      dayjs(patient.review_time).format("lll")}
+                      formatDateTime(patient.review_time)}
                   </div>
                 )}
             </div>
-            <div className="flex flex-col items-center gap-1 sm:flex-row lg:mb-2">
+            <div className="flex flex-col items-center gap-2 sm:flex-row lg:mb-2">
               <Link
                 href={`/facility/${consultation?.facility}`}
                 className="font-semibold text-black hover:text-primary-600"
@@ -157,12 +155,12 @@ export default function PatientInfoCard(props: {
                 {consultation?.facility_name}
               </Link>
 
-              {(consultation?.suggestion === "A" || op_no) && (
+              {consultation?.patient_no && (
                 <span className="pl-2 capitalize md:col-span-2">
                   <span className="badge badge-pill badge-primary">
-                    {consultation?.suggestion !== "A"
-                      ? `OP: ${op_no}`
-                      : `IP: ${ip_no}`}
+                    {`${consultation?.suggestion === "A" ? "IP" : "OP"}: ${
+                      consultation?.patient_no
+                    }`}
                   </span>
                 </span>
               )}
@@ -173,15 +171,24 @@ export default function PatientInfoCard(props: {
               </p>
             )}
             <p className="text-sm text-gray-900 sm:text-sm">
-              <span>{patient.age} years</span>
+              <span>{formatAge(patient.age, patient.date_of_birth, true)}</span>
               <span className="mx-2">•</span>
               <span>{patient.gender}</span>
               {consultation?.suggestion === "DC" && (
                 <>
                   <span className="mx-2">•</span>
-                  <span className="space-x-2">
-                    Domiciliary Care{" "}
-                    <CareIcon className="care-l-estate text-base text-gray-700" />
+                  <span>
+                    <CareIcon icon="l-estate" className="mr-1 text-gray-700" />
+                    Domiciliary Care
+                  </span>
+                </>
+              )}
+              {consultation?.is_readmission && (
+                <>
+                  <span className="mx-2">•</span>
+                  <span>
+                    <CareIcon icon="l-repeat" className="mr-1 text-gray-600" />
+                    Readmitted
                   </span>
                 </>
               )}
@@ -354,11 +361,12 @@ export default function PatientInfoCard(props: {
                           setOpen(true);
                         }
                       }}
-                      align="start"
                       className="w-full"
                     >
-                      <CareIcon className={`care-l-${action[2]} text-lg`} />
-                      <p className="font-semibold">{action[1]}</p>
+                      <span className="flex w-full items-center justify-start gap-2">
+                        <CareIcon className={`care-l-${action[2]} text-lg`} />
+                        <p className="font-semibold">{action[1]}</p>
+                      </span>
                     </ButtonV2>
                     {action[4] && action[4][0] && (
                       <>
@@ -375,19 +383,21 @@ export default function PatientInfoCard(props: {
               <>
                 <ButtonV2
                   className="flex justify-start gap-3 font-semibold hover:text-white"
-                  align="start"
                   onClick={() => setShowABHAProfile(true)}
                 >
-                  <CareIcon className="care-l-user-square" />
-                  <p>Show ABHA Profile</p>
+                  <span className="flex w-full items-center justify-start gap-2">
+                    <CareIcon className="care-l-user-square" />
+                    <p>Show ABHA Profile</p>
+                  </span>
                 </ButtonV2>
                 <ButtonV2
                   className="mt-0 flex justify-start gap-3 font-semibold hover:text-white"
-                  align="start"
                   onClick={() => setShowLinkCareContext(true)}
                 >
-                  <CareIcon className="care-l-link" />
-                  <p>Link Care Context</p>
+                  <span className="flex w-full items-center justify-start gap-2">
+                    <CareIcon className="care-l-link" />
+                    <p>Link Care Context</p>
+                  </span>
                 </ButtonV2>
                 <ABHAProfileModal
                   patientId={patient.id}
@@ -406,11 +416,12 @@ export default function PatientInfoCard(props: {
               <>
                 <ButtonV2
                   className="flex justify-start gap-3 font-semibold hover:text-white"
-                  align="start"
                   onClick={() => setShowLinkABHANumber(true)}
                 >
-                  <CareIcon className="care-l-link" />
-                  <p>Link ABHA Number</p>
+                  <span className="flex w-full items-center justify-start gap-2">
+                    <CareIcon className="care-l-link" />
+                    <p>Link ABHA Number</p>
+                  </span>
                 </ButtonV2>
                 <LinkABHANumberModal
                   show={showLinkABHANumber}

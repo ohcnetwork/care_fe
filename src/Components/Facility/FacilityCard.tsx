@@ -9,10 +9,11 @@ import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import * as Notification from "../../Utils/Notifications.js";
 import Chip from "../../CAREUI/display/Chip";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { parsePhoneNumber } from "libphonenumber-js";
+import { formatPhoneNumber, parsePhoneNumber } from "../../Utils/utils";
 import DialogModal from "../Common/Dialog";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import useConfig from "../../Common/hooks/useConfig";
+import { classNames } from "../../Utils/utils";
 
 export const FacilityCard = (props: { facility: any; userType: any }) => {
   const { facility, userType } = props;
@@ -106,24 +107,24 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   <div className="mt-2 flex flex-wrap gap-1">
                     <Chip
                       text={facility.facility_type}
-                      color="blue"
+                      variant="custom"
+                      className="bg-blue-100 text-blue-900"
                       hideBorder
                       size="small"
                     />
                     {facility.features?.map(
-                      (feature: number, i: number) =>
+                      (feature: number) =>
                         FACILITY_FEATURE_TYPES.some(
                           (f) => f.id === feature
                         ) && (
                           <Chip
                             hideBorder
-                            key={i}
+                            key={feature}
                             text={
                               FACILITY_FEATURE_TYPES.filter(
                                 (f) => f.id === feature
                               )[0]?.name
                             }
-                            color="primary"
                             size="small"
                             startIcon={
                               FACILITY_FEATURE_TYPES.filter(
@@ -146,10 +147,9 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                     href={`tel:${facility.phone_number}`}
                     className="text-sm font-semibold tracking-wider"
                   >
-                    {parsePhoneNumber(
-                      facility.phone_number as string,
-                      "IN"
-                    ).formatInternational() || "-"}
+                    {formatPhoneNumber(
+                      parsePhoneNumber(facility.phone_number as string) ?? "-"
+                    )}
                   </a>
                 </div>
               </div>
@@ -168,11 +168,12 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                           Live Patients / Total beds
                         </span>{" "}
                         <CareIcon
-                          className={`care-l-bed text-${
+                          className={classNames(
+                            "care-l-bed mr-2",
                             facility.patient_count / facility.bed_count > 0.85
-                              ? "white"
-                              : "primary-600"
-                          } mr-2`}
+                              ? "text-white"
+                              : "text-primary-600"
+                          )}
                         />{" "}
                         <dt
                           className={`my-1 text-sm font-semibold ${

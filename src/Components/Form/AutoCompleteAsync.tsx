@@ -3,7 +3,11 @@ import { Combobox } from "@headlessui/react";
 import { debounce } from "lodash";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
+import {
+  MultiSelectOptionChip,
+  dropdownOptionClassNames,
+} from "./MultiSelectMenuV2";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   name?: string;
@@ -20,6 +24,7 @@ interface Props {
   placeholder?: string;
   disabled?: boolean;
   error?: string;
+  required?: boolean;
   onBlur?: () => void;
   onFocus?: () => void;
 }
@@ -39,11 +44,13 @@ const AutoCompleteAsync = (props: Props) => {
     className = "",
     placeholder,
     disabled = false,
+    required = false,
     error,
   } = props;
   const [data, setData] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const hasSelection =
     (!multiple && selected) || (multiple && selected?.length > 0);
@@ -83,9 +90,7 @@ const AutoCompleteAsync = (props: Props) => {
                   : placeholder || "Start typing to search..."
               }
               displayValue={() =>
-                hasSelection && !multiple
-                  ? optionLabel && optionLabel(selected)
-                  : ""
+                hasSelection && !multiple ? optionLabel?.(selected) : ""
               }
               onChange={({ target }) => setQuery(target.value)}
               onFocus={props.onFocus}
@@ -97,6 +102,20 @@ const AutoCompleteAsync = (props: Props) => {
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
               <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-secondary-900">
+                {hasSelection && !loading && !required && (
+                  <div className="tooltip">
+                    <CareIcon
+                      className="care-l-times-circle mb-[-5px] h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onChange(null);
+                      }}
+                    />
+                    <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs">
+                      {t("clear_selection")}
+                    </span>
+                  </div>
+                )}
                 {loading ? (
                   <CareIcon className="care-l-spinner -mb-1.5 animate-spin" />
                 ) : (
@@ -143,19 +162,14 @@ const AutoCompleteAsync = (props: Props) => {
           {multiple && selected?.length > 0 && (
             <div className="flex flex-wrap gap-2 p-2">
               {selected?.map((option: any) => (
-                <span className="rounded-full border border-gray-400 bg-gray-200 px-2 py-1 text-xs text-gray-800">
-                  {optionLabel(option)}
-                  <i
-                    className="ml-1 h-3 w-3 cursor-pointer text-lg text-gray-700"
-                    onClick={() => {
-                      onChange(
-                        selected.filter((item: any) => item.id !== option.id)
-                      );
-                    }}
-                  >
-                    <CareIcon className="care-l-multiply" />
-                  </i>
-                </span>
+                <MultiSelectOptionChip
+                  label={optionLabel(option)}
+                  onRemove={() =>
+                    onChange(
+                      selected.filter((item: any) => item.id !== option.id)
+                    )
+                  }
+                />
               ))}
             </div>
           )}

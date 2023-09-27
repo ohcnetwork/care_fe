@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from "react";
-import loadable from "@loadable/component";
+import { useState, useCallback, lazy } from "react";
+
 import { useDispatch } from "react-redux";
 import { classNames, formatDateTime } from "../../Utils/utils";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -10,7 +10,7 @@ import CommentSection from "./CommentSection";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResourceDetails(props: { id: string }) {
   const dispatch: any = useDispatch();
@@ -20,7 +20,7 @@ export default function ResourceDetails(props: { id: string }) {
   const [isPrintMode, setIsPrintMode] = useState(false);
 
   const [openDeleteResourceDialog, setOpenDeleteResourceDialog] =
-    React.useState(false);
+    useState(false);
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -271,6 +271,7 @@ export default function ResourceDetails(props: { id: string }) {
             <div className="mb-4 flex flex-col sm:flex-row sm:justify-between">
               <div className="text-xl font-semibold">{data.title || "--"}</div>
               <ButtonV2
+                data-testid="update-status"
                 className="mt-4 w-full sm:mt-2"
                 href={`/resource/${data.external_id}/update`}
               >

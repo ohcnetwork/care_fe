@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { classNames, formatDateTime } from "../../Utils/utils";
+import { useEffect, useState } from "react";
+import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
 import {
   completeTransfer,
   downloadShiftRequests,
@@ -11,10 +11,11 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { ExportButton } from "../Common/Export";
 import dayjs from "../../Utils/dayjs";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const limit = 14;
 
@@ -48,10 +49,7 @@ const ShiftCard = ({ shift, filter }: any) => {
     item: shift,
     collect: (monitor) => ({ isDragging: !!monitor.isDragging() }),
   }));
-  const rootState: any = useSelector((rootState) => rootState);
-  const { currentUser } = rootState;
-  const userHomeFacilityId = currentUser.data.home_facility;
-  const userType = currentUser.data.user_type;
+  const authUser = useAuthUser();
   const { t } = useTranslation();
 
   const handleTransferComplete = (shift: any) => {
@@ -80,7 +78,12 @@ const ShiftCard = ({ shift, filter }: any) => {
           <div>
             <div className="flex justify-between">
               <div className="mb-2 text-xl font-bold capitalize">
-                {shift.patient_object.name} - {shift.patient_object.age}
+                {shift.patient_object.name} -{" "}
+                {formatAge(
+                  shift.patient_object?.age,
+                  shift.patient_object?.age.date_of_birth,
+                  true
+                )}
               </div>
               <div>
                 {shift.emergency && (
@@ -216,8 +219,11 @@ const ShiftCard = ({ shift, filter }: any) => {
                 disabled={
                   !shift.patient_object.allow_transfer ||
                   !(
-                    ["DistrictAdmin", "StateAdmin"].includes(userType) ||
-                    userHomeFacilityId === shift.assigned_facility
+                    ["DistrictAdmin", "StateAdmin"].includes(
+                      authUser.user_type
+                    ) ||
+                    authUser.home_facility_object?.id ===
+                      shift.assigned_facility
                   )
                 }
                 onClick={() => setModalFor(shift.external_id)}

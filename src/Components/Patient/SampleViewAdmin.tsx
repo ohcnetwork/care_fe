@@ -1,8 +1,7 @@
 import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
-import loadable from "@loadable/component";
-import { useCallback, useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useCallback, useState, useEffect, lazy } from "react";
+import { useDispatch } from "react-redux";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
@@ -27,7 +26,7 @@ import CountBlock from "../../CAREUI/display/Count";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import Page from "../Common/components/Page";
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function SampleViewAdmin() {
   const {
@@ -52,10 +51,6 @@ export default function SampleViewAdmin() {
     show: boolean;
     sample: SampleTestModel;
   }>({ show: false, sample: {} });
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-  const userType: "Staff" | "DistrictAdmin" | "StateLabAdmin" =
-    currentUser.data.user_type;
 
   useEffect(() => {
     async function fetchData() {
@@ -346,7 +341,6 @@ export default function SampleViewAdmin() {
           sample={statusDialog.sample}
           handleOk={handleApproval}
           handleCancel={dismissUpdateStatus}
-          userType={userType}
         />
       )}
       <div className="mt-5 gap-5 lg:grid lg:grid-cols-1">
@@ -356,7 +350,8 @@ export default function SampleViewAdmin() {
               text="Total Samples Taken"
               count={totalCount}
               loading={isLoading}
-              icon={"thermometer"}
+              icon="l-thermometer"
+              className="flex-1"
             />
           </div>
 

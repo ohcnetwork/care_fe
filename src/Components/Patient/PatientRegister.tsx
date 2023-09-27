@@ -25,10 +25,11 @@ import {
   dateQueryString,
   getPincodeDetails,
   includesIgnoreCase,
+  parsePhoneNumber,
 } from "../../Utils/utils";
 import { navigate, useQueryParams } from "raviger";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { lazy, useCallback, useEffect, useReducer, useState } from "react";
 
 import AccordionV2 from "../Common/components/AccordionV2";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -40,7 +41,11 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
 import { DupPatientModel } from "../Facility/models";
 import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
-import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
+import {
+  FieldError,
+  PhoneNumberValidator,
+  RequiredFieldValidator,
+} from "../Form/FieldValidators";
 import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
 import Form from "../Form/Form";
 import { HCXPolicyModel } from "../HCX/models";
@@ -57,16 +62,15 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import countryList from "../../Common/static/countries.json";
 import { debounce } from "lodash";
-import loadable from "@loadable/component";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { validatePincode } from "../../Common/validation";
 import { FormContextValue } from "../Form/FormContext.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const Loading = lazy(() => import("../Common/Loading"));
+const PageTitle = lazy(() => import("../Common/PageTitle"));
 
 // const debounce = require("lodash.debounce");
 
@@ -98,7 +102,7 @@ const initForm: any = {
   age: "",
   gender: "",
   phone_number: "+91",
-  emergency_phone_number: null,
+  emergency_phone_number: "+91",
   blood_group: "",
   disease_status: diseaseStatus[2],
   is_declared_positive: "false",
@@ -132,7 +136,7 @@ const initForm: any = {
   test_id: "",
   srf_id: "",
   test_type: testType[0],
-  prescribed_medication: false,
+  treatment_plan: false,
   ongoing_medication: "",
   designation_of_health_care_worker: "",
   instituion_of_health_care_worker: "",
@@ -596,14 +600,22 @@ export const PatientRegister = (props: PatientRegisterProps) => {
           }
           return;
         case "phone_number":
-          phoneNumber = parsePhoneNumberFromString(form[field]);
-          if (!form[field] || !phoneNumber?.isPossible()) {
+          phoneNumber = parsePhoneNumber(form[field]);
+          if (
+            !form[field] ||
+            !phoneNumber ||
+            !PhoneNumberValidator()(phoneNumber) === undefined
+          ) {
             errors[field] = "Please enter valid phone number";
           }
           return;
         case "emergency_phone_number":
-          emergency_phone_number = parsePhoneNumberFromString(form[field]);
-          if (!form[field] || !emergency_phone_number?.isPossible()) {
+          emergency_phone_number = parsePhoneNumber(form[field]);
+          if (
+            !form[field] ||
+            !emergency_phone_number ||
+            !PhoneNumberValidator()(emergency_phone_number) === undefined
+          ) {
             errors[field] = "Please enter valid phone number";
           }
           return;
@@ -729,12 +741,8 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     });
     const data = {
       abha_number: state.form.abha_number,
-      phone_number: parsePhoneNumberFromString(formData.phone_number)?.format(
-        "E.164"
-      ),
-      emergency_phone_number: parsePhoneNumberFromString(
-        formData.emergency_phone_number
-      )?.format("E.164"),
+      phone_number: parsePhoneNumber(formData.phone_number),
+      emergency_phone_number: parsePhoneNumber(formData.emergency_phone_number),
       date_of_birth: dateQueryString(formData.date_of_birth),
       disease_status: formData.disease_status,
       date_of_test: formData.date_of_test ? formData.date_of_test : undefined,
@@ -912,12 +920,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (mobile) {
       field("phone_number").onChange({
         name: "phone_number",
-        value: parsePhoneNumberFromString(mobile, "IN")?.format("E.164"),
+        value: parsePhoneNumber(mobile),
       });
 
       field("emergency_phone_number").onChange({
         name: "emergency_phone_number",
-        value: parsePhoneNumberFromString(mobile, "IN")?.format("E.164"),
+        value: parsePhoneNumber(mobile),
       });
     }
 
@@ -958,9 +966,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
 
   const duplicateCheck = useCallback(
     debounce(async (phoneNo: string) => {
-      if (phoneNo && parsePhoneNumberFromString(phoneNo)?.isPossible()) {
+      if (
+        phoneNo &&
+        PhoneNumberValidator()(parsePhoneNumber(phoneNo) ?? "") === undefined
+      ) {
         const query = {
-          phone_number: parsePhoneNumberFromString(phoneNo)?.format("E.164"),
+          phone_number: parsePhoneNumber(phoneNo),
         };
         const res = await dispatchAction(searchPatient(query));
         if (res?.data?.results) {

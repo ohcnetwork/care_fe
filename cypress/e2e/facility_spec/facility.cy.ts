@@ -1,16 +1,20 @@
 // FacilityCreation
+import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
+import LoginPage from "../../pageobject/Login/LoginPage";
 
 describe("Facility Creation", () => {
   let facilityUrl: string;
   const facilityPage = new FacilityPage();
+  const loginPage = new LoginPage();
 
   before(() => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    loginPage.loginAsDisctrictAdmin();
     cy.saveLocalStorage();
   });
 
   beforeEach(() => {
+    cy.viewport(1280, 720);
     cy.restoreLocalStorage();
     cy.awaitUrl("/facility");
   });
@@ -35,14 +39,9 @@ describe("Facility Creation", () => {
     facilityPage.selectAreaOfSpecialization("General Medicine");
     facilityPage.fillDoctorCount("5");
     facilityPage.saveAndExitDoctorForm();
-
-    cy.url().then((initialUrl) => {
-      cy.get("button#save-and-exit").should("not.exist");
-      cy.url()
-        .should("not.equal", initialUrl)
-        .then((newUrl) => {
-          facilityUrl = newUrl;
-        });
+    facilityPage.verifyfacilitynewurl();
+    cy.url().then((newUrl) => {
+      facilityUrl = newUrl;
     });
   });
 
@@ -50,6 +49,7 @@ describe("Facility Creation", () => {
     facilityPage.visitUpdateFacilityPage(facilityUrl);
     facilityPage.clickManageFacilityDropdown();
     facilityPage.clickUpdateFacilityOption();
+    facilityPage.clickUpdateFacilityType();
     facilityPage.fillFacilityName("cypress facility updated");
     facilityPage.fillAddress("Cypress Facility Updated Address");
     facilityPage.fillOxygenCapacity("100");
@@ -58,6 +58,22 @@ describe("Facility Creation", () => {
     facilityPage.submitForm();
 
     cy.url().should("not.include", "/update");
+  });
+
+  it("Configure the existing facility", () => {
+    facilityPage.visitUpdateFacilityPage(facilityUrl);
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickConfigureFacilityOption();
+    facilityPage.fillMiddleWareAddress("dev_middleware.coronasafe.live");
+    facilityPage.clickupdateMiddleWare();
+    facilityPage.verifySuccessNotification("Facility updated successfully");
+  });
+
+  it("Delete a facility", () => {
+    facilityPage.visitUpdateFacilityPage(facilityUrl);
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickDeleteFacilityOption();
+    facilityPage.confirmDeleteFacility();
   });
 
   afterEach(() => {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useReducer } from "react";
+import { useEffect, useState, useReducer } from "react";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
@@ -8,7 +8,7 @@ import { SampleTestModel } from "./models";
 import * as Notification from "../../Utils/Notifications.js";
 import { createUpload, editUpload } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
-import { FileUpload, header_content_type, LinearProgressWithLabel } from "./FileUpload";
+import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
 import { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import ConfirmDialog from "../Common/ConfirmDialog";
@@ -23,7 +23,6 @@ interface Props {
   sample: SampleTestModel;
   handleOk: (sample: SampleTestModel, status: number, result: number) => void;
   handleCancel: () => void;
-  userType: "Staff" | "DistrictAdmin" | "StateLabAdmin";
 }
 
 const statusChoices = [...SAMPLE_TEST_STATUS];
@@ -105,23 +104,25 @@ const UpdateStatusDialog = (props: Props) => {
     if (f === undefined) return;
     const newFile = new File([f], `${internal_name}`);
 
-    uploadFile(url, newFile, contentType, setUploadPercent).then(() => {
-      setUploadStarted(false);
-      setUploadDone(true);
-      redux_dispatch(
-        editUpload(
-          { upload_completed: true },
-          response.data.id,
-          "SAMPLE_MANAGEMENT",
-          sample.id?.toString() ?? ""
-        )
-      );
-      Notification.Success({
-        msg: "File Uploaded Successfully",
+    uploadFile(url, newFile, contentType, setUploadPercent)
+      .then(() => {
+        setUploadStarted(false);
+        setUploadDone(true);
+        redux_dispatch(
+          editUpload(
+            { upload_completed: true },
+            response.data.id,
+            "SAMPLE_MANAGEMENT",
+            sample.id?.toString() ?? ""
+          )
+        );
+        Notification.Success({
+          msg: "File Uploaded Successfully",
+        });
+      })
+      .catch(() => {
+        setUploadStarted(false);
       });
-    }).catch(() => {
-      setUploadStarted(false);
-    });
   };
 
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {

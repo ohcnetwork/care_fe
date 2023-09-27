@@ -10,9 +10,8 @@ import {
   partialUpdateUser,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-
+import { lazy, useCallback, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2, { Submit } from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -29,7 +28,6 @@ import UserDeleteDialog from "./UserDeleteDialog";
 import UserDetails from "../Common/UserDetails";
 import UserFilter from "./UserFilter";
 import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
-import loadable from "@loadable/component";
 import { navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
 import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
@@ -37,8 +35,9 @@ import CircularProgress from "../Common/components/CircularProgress.js";
 import Page from "../Common/components/Page.js";
 import dayjs from "dayjs";
 import TextFormField from "../Form/FormFields/TextFormField.js";
+import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ManageUsers() {
   const { width } = useWindowDimensions();
@@ -61,13 +60,10 @@ export default function ManageUsers() {
   const [expandFacilityList, setExpandFacilityList] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [expandWorkingHours, setExpandWorkingHours] = useState(false);
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-  const isSuperuser = currentUser.data.is_superuser;
-  const userType = currentUser.data.user_type;
+  const authUser = useAuthUser();
   const [weeklyHours, setWeeklyHours] = useState<any>(0);
-  const userIndex = USER_TYPES.indexOf(userType);
-  const userTypes = isSuperuser
+  const userIndex = USER_TYPES.indexOf(authUser.user_type);
+  const userTypes = authUser.is_superuser
     ? [...USER_TYPES]
     : USER_TYPES.slice(0, userIndex + 1);
 
@@ -76,6 +72,8 @@ export default function ManageUsers() {
     username: string;
     name: string;
   }>({ show: false, username: "", name: "" });
+
+  const [weeklyHoursError, setWeeklyHoursError] = useState<string>("");
 
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
@@ -148,7 +146,10 @@ export default function ManageUsers() {
 
   const handleWorkingHourSubmit = async () => {
     const username = selectedUser;
-    if (!username || weeklyHours < 0 || weeklyHours > 168) return;
+    if (!username || !weeklyHours || weeklyHours < 0 || weeklyHours > 168) {
+      setWeeklyHoursError("Value should be between 0 and 168");
+      return;
+    }
     const res = await dispatch(
       partialUpdateUser(username, {
         weekly_working_hours: weeklyHours,
@@ -167,6 +168,7 @@ export default function ManageUsers() {
       });
     }
     setWeeklyHours(0);
+    setWeeklyHoursError("");
     fetchData({ aborted: false });
   };
 
@@ -199,10 +201,9 @@ export default function ManageUsers() {
     if (user.is_superuser) return true;
 
     if (
-      USER_TYPES.indexOf(currentUser.data.user_type) >=
-      USER_TYPES.indexOf("StateAdmin")
+      USER_TYPES.indexOf(authUser.user_type) >= USER_TYPES.indexOf("StateAdmin")
     )
-      return user.state_object?.id === currentUser?.data?.state;
+      return user.state_object?.id === authUser.state;
 
     return false;
   };
@@ -220,11 +221,11 @@ export default function ManageUsers() {
           className=" mt-6 w-full md:px-4 lg:w-1/2 xl:w-1/3"
         >
           <div className="relative block h-full overflow-visible rounded-lg bg-white shadow hover:border-primary-500">
-            <div className="flex h-full flex-col justify-between">
+            <div className="flex h-full flex-col justify-between @container">
               <div className="px-6 py-4">
                 <div
-                  className="flex-wra p flex
-                flex-col justify-between gap-3 lg:flex-row"
+                  className="flex flex-col
+                flex-wrap justify-between gap-3 @sm:flex-row"
                 >
                   {user.username && (
                     <div
@@ -392,7 +393,10 @@ export default function ManageUsers() {
                   )}
                 </div>
                 <div>
-                  <UserDetails id="working-hours" title="Weekly working hours">
+                  <UserDetails
+                    id="working-hours"
+                    title="Average weekly working hours"
+                  >
                     {user.weekly_working_hours ? (
                       <span className="font-semibold">
                         {user.weekly_working_hours} hours
@@ -405,10 +409,10 @@ export default function ManageUsers() {
               </div>
               {user.username && (
                 <div className="mb-0 mt-auto flex w-full flex-col justify-between gap-2 p-4">
-                  <div className="flex flex-col md:flex-row">
+                  <div className="flex flex-col gap-2 @sm:flex-row">
                     <ButtonV2
                       id="facilities"
-                      className="flex w-full items-center md:w-1/2"
+                      className="flex w-full items-center @sm:w-1/2"
                       onClick={() => {
                         setExpandFacilityList(!expandFacilityList);
                         setSelectedUser(user);
@@ -417,10 +421,9 @@ export default function ManageUsers() {
                       <CareIcon className="care-l-hospital text-lg" />
                       <p>Linked Facilities</p>
                     </ButtonV2>
-                    <div className="mx-1 my-2 sm:my-0"></div>
                     <ButtonV2
                       id="skills"
-                      className="flex w-full items-center md:w-1/2"
+                      className="flex w-full items-center @sm:w-1/2"
                       onClick={() => {
                         setExpandSkillList(true);
                         setSelectedUser(user.username);
@@ -430,7 +433,9 @@ export default function ManageUsers() {
                       <p>Linked Skills</p>
                     </ButtonV2>
                   </div>
-                  {["DistrictAdmin", "StateAdmin"].includes(userType) && (
+                  {["DistrictAdmin", "StateAdmin"].includes(
+                    authUser.user_type
+                  ) && (
                     <div className="flex-col md:flex-row">
                       <ButtonV2
                         id="skills"
@@ -442,7 +447,7 @@ export default function ManageUsers() {
                         }}
                       >
                         <CareIcon className="care-l-clock text-xl" />
-                        <p>Set weekly working hours</p>
+                        <p>Set Average weekly working hours</p>
                       </ButtonV2>
                     </div>
                   )}
@@ -494,17 +499,18 @@ export default function ManageUsers() {
       </SlideOverCustom>
       <SlideOverCustom
         open={expandWorkingHours}
-        setOpen={setExpandWorkingHours}
-        slideFrom="right"
-        title="Weekly working hours"
-        dialogClass="md:w-[400px]"
-        onCloseClick={() => {
+        setOpen={(state) => {
+          setExpandWorkingHours(state);
           setWeeklyHours(0);
+          setWeeklyHoursError("");
         }}
+        slideFrom="right"
+        title="Average weekly working hours"
+        dialogClass="md:w-[400px]"
       >
         <div className="px-2">
           <dt className="mb-3 text-sm font-medium leading-5 text-black">
-            Set weekly working hours for {selectedUser}
+            Set Average weekly working hours for {selectedUser}
           </dt>
           <TextFormField
             name="weekly_working_hours"
@@ -513,11 +519,7 @@ export default function ManageUsers() {
             onChange={(e) => {
               setWeeklyHours(e.value);
             }}
-            error={
-              weeklyHours < 0 || weeklyHours > 168
-                ? "Weekly working hours should be between 0 and 168"
-                : ""
-            }
+            error={weeklyHoursError}
             required
             label=""
             type="number"
@@ -535,7 +537,8 @@ export default function ManageUsers() {
           text="Total Users"
           count={totalCount}
           loading={isLoading}
-          icon={"user-injured"}
+          icon="l-user-injured"
+          className="flex-1"
         />
         <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">
           <div className="w-full">

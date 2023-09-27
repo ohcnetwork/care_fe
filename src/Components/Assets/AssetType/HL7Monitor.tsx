@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { SyntheticEvent, useEffect, useState } from "react";
 import { AssetData } from "../AssetTypes";
 import { useDispatch } from "react-redux";
 import {
@@ -15,6 +15,7 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
 import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
+import useAuthUser from "../../../Common/hooks/useAuthUser";
 
 interface HL7MonitorProps {
   assetId: string;
@@ -31,7 +32,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [localipAddress, setLocalIPAddress] = useState("");
   const [ipadrdress_error, setIpAddress_error] = useState("");
-
+  const authUser = useAuthUser();
   const dispatch = useDispatch<any>();
 
   useEffect(() => {
@@ -53,7 +54,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
     setIsLoading(false);
   }, [asset]);
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
+  const handleSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
     if (checkIfValidIP(localipAddress)) {
       setIpAddress_error("");
@@ -87,40 +88,42 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   return (
     <div className="mx-auto flex w-full xl:mt-8">
       <div className="mx-auto flex flex-col gap-4 xl:flex-row-reverse">
-        <div className="flex w-full shrink-0 flex-col gap-4 xl:max-w-xs">
-          <Card className="flex w-full flex-col">
-            <form onSubmit={handleSubmit}>
-              <h2 className="mb-2 text-lg font-bold">Connection</h2>
-              <div className="flex flex-col">
-                <TextFormField
-                  name="middlewareHostname"
-                  label="Middleware Hostname"
-                  placeholder={facilityMiddlewareHostname}
-                  value={middlewareHostname}
-                  onChange={(e) => setMiddlewareHostname(e.value)}
-                  errorClassName="hidden"
-                />
-                <TextFormField
-                  name="localipAddress"
-                  label="Local IP Address"
-                  value={localipAddress}
-                  onChange={(e) => setLocalIPAddress(e.value)}
-                  required
-                  error={ipadrdress_error}
-                />
-                <Submit className="w-full">
-                  <CareIcon className="care-l-save" />
-                  <span>Save Configuration</span>
-                </Submit>
-              </div>
-            </form>
-          </Card>
-          <Card>
-            {["HL7MONITOR", "VENTILATOR"].includes(assetType) && (
-              <MonitorConfigure asset={asset as AssetData} />
+        {["DistrictAdmin", "StateAdmin"].includes(authUser.user_type) && (
+          <div className="flex w-full shrink-0 flex-col gap-4 xl:max-w-xs">
+            <Card className="flex w-full flex-col">
+              <form onSubmit={handleSubmit}>
+                <h2 className="mb-2 text-lg font-bold">Connection</h2>
+                <div className="flex flex-col">
+                  <TextFormField
+                    name="middlewareHostname"
+                    label="Middleware Hostname"
+                    placeholder={facilityMiddlewareHostname}
+                    value={middlewareHostname}
+                    onChange={(e) => setMiddlewareHostname(e.value)}
+                    errorClassName="hidden"
+                  />
+                  <TextFormField
+                    name="localipAddress"
+                    label="Local IP Address"
+                    value={localipAddress}
+                    onChange={(e) => setLocalIPAddress(e.value)}
+                    required
+                    error={ipadrdress_error}
+                  />
+                  <Submit className="w-full">
+                    <CareIcon className="care-l-save" />
+                    <span>Save Configuration</span>
+                  </Submit>
+                </div>
+              </form>
+            </Card>
+            {["HL7MONITOR"].includes(assetType) && (
+              <Card>
+                <MonitorConfigure asset={asset as AssetData} />
+              </Card>
             )}
-          </Card>
-        </div>
+          </div>
+        )}
 
         {assetType === "HL7MONITOR" && (
           <HL7PatientVitalsMonitor

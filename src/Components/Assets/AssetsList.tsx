@@ -9,9 +9,8 @@ import {
   getAsset,
 } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, lazy } from "react";
 import { Link, navigate } from "raviger";
-import loadable from "@loadable/component";
 import AssetFilter from "./AssetFilter";
 import { parseQueryParams } from "../../Utils/primitives";
 import Chip from "../../CAREUI/display/Chip";
@@ -30,7 +29,7 @@ import Page from "../Common/components/Page";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import { useTranslation } from "react-i18next";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 const AssetsList = () => {
   const { t } = useTranslation();
@@ -285,9 +284,9 @@ const AssetsList = () => {
 
               <div className="mt-2 flex flex-wrap gap-2">
                 {asset.is_working ? (
-                  <Chip color="green" startIcon="cog" text="Working" />
+                  <Chip startIcon="l-cog" text="Working" />
                 ) : (
-                  <Chip color="red" startIcon="cog" text="Not Working" />
+                  <Chip variant="danger" startIcon="l-cog" text="Not Working" />
                 )}
               </div>
             </div>
@@ -311,19 +310,21 @@ const AssetsList = () => {
       options={
         <>
           {authorizedForImportExport && (
-            <div className="tooltip">
+            <div className="tooltip" data-testid="import-asset-button">
               <ExportMenu
                 label={importAssetModalOpen ? "Importing..." : "Import/Export"}
                 exportItems={[
                   {
                     label: "Import Assets",
                     options: {
-                      icon: <CareIcon className="care-l-import" />,
+                      icon: (
+                        <CareIcon className="care-l-import import-assets-button" />
+                      ),
                       onClick: () => setImportAssetModalOpen(true),
                     },
                   },
                   {
-                    label: "Export Assets",
+                    label: "Export Assets (JSON)",
                     action: () =>
                       authorizedForImportExport &&
                       listAssets({
@@ -332,10 +333,28 @@ const AssetsList = () => {
                         limit: totalCount,
                       }),
                     type: "json",
-                    filePrefix: `assets_${facility?.name}`,
+                    filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
                       icon: <CareIcon className="care-l-export" />,
                       disabled: totalCount === 0 || !authorizedForImportExport,
+                      id: "export-json-option",
+                    },
+                  },
+                  {
+                    label: "Export Assets (CSV)",
+                    action: () =>
+                      authorizedForImportExport &&
+                      listAssets({
+                        ...qParams,
+                        csv: true,
+                        limit: totalCount,
+                      }),
+                    type: "csv",
+                    filePrefix: `assets_${facility?.name ?? "all"}`,
+                    options: {
+                      icon: <CareIcon className="care-l-export" />,
+                      disabled: totalCount === 0 || !authorizedForImportExport,
+                      id: "export-csv-option",
                     },
                   },
                 ]}
@@ -350,7 +369,8 @@ const AssetsList = () => {
           text="Total Assets"
           count={totalCount}
           loading={isLoading}
-          icon={"monitor-heart-rate"}
+          icon="l-monitor-heart-rate"
+          className="flex-1"
         />
         <div className="flex-1">
           <SearchInput

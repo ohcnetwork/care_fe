@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import {
   listResourceRequests,
@@ -139,6 +139,7 @@ const ResourceCard = ({ resource }: any) => {
 
           <div className="mt-2 flex">
             <button
+              data-testid="resource-details"
               onClick={(_) => navigate(`/resource/${resource.external_id}`)}
               className="btn btn-default mr-2 w-full bg-white"
             >
@@ -234,7 +235,7 @@ export default function ResourceBoard({
     <div
       ref={drop}
       className={classNames(
-        "mr-2 h-full w-full shrink-0 overflow-y-auto rounded-md bg-gray-200 pb-4 sm:w-1/2 md:w-3/4 lg:w-1/3 xl:w-1/4",
+        "mr-2 h-full w-full shrink-0 overflow-y-auto rounded-md bg-gray-200 pb-4 @lg:w-1/2 @3xl:w-1/3 @7xl:w-1/4",
         isOver && "cursor-move"
       )}
     >

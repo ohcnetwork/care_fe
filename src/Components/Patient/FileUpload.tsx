@@ -1,7 +1,13 @@
 import CircularProgress from "../Common/components/CircularProgress";
-import loadable from "@loadable/component";
-import React, { useCallback, useState, useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import {
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+  lazy,
+  ChangeEvent,
+} from "react";
+import { useDispatch } from "react-redux";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   viewUpload,
@@ -32,8 +38,9 @@ import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
 import Page from "../Common/components/Page";
 import FilePreviewDialog from "../Common/FilePreviewDialog";
 import { uploadFile } from "../../Redux/fireRequest";
+import useAuthUser from "../../Common/hooks/useAuthUser";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export const header_content_type: URLS = {
   pdf: "application/pdf",
@@ -211,10 +218,7 @@ export const FileUpload = (props: FileUploadProps) => {
   const [editFileNameError, setEditFileNameError] = useState("");
   const [btnloader, setbtnloader] = useState(false);
   const [sortFileState, setSortFileState] = useState("UNARCHIVED");
-  const state: any = useSelector((state) => state);
-  const { currentUser } = state;
-  const currentuser_username = currentUser.data.username;
-  const currentuser_type = currentUser.data.user_type;
+  const authUser = useAuthUser();
   const limit = RESULTS_PER_PAGE_LIMIT;
   const [isActive, setIsActive] = useState(true);
   const [tabs, setTabs] = useState([
@@ -477,15 +481,20 @@ export const FileUpload = (props: FileUploadProps) => {
     };
     const responseData = await dispatch(retrieveUpload(data, id));
     const file_extension = getExtension(responseData.data.read_signed_url);
-    setFileState({
-      ...file_state,
-      open: true,
-      name: responseData.data.name,
-      extension: file_extension,
-      isImage: ExtImage.includes(file_extension),
-    });
-    downloadFileUrl(responseData.data.read_signed_url);
-    setFileUrl(responseData.data.read_signed_url);
+    if (file_extension === "pdf") {
+      window.open(responseData.data.read_signed_url, "_blank");
+      setFileState({ ...file_state, open: false });
+    } else {
+      setFileState({
+        ...file_state,
+        open: true,
+        name: responseData.data.name,
+        extension: file_extension,
+        isImage: ExtImage.includes(file_extension),
+      });
+      downloadFileUrl(responseData.data.read_signed_url);
+      setFileUrl(responseData.data.read_signed_url);
+    }
   };
 
   const validateEditFileName = (name: any) => {
@@ -638,10 +647,9 @@ export const FileUpload = (props: FileUploadProps) => {
                             <CareIcon className="care-l-arrow-circle-down text-lg" />{" "}
                             DOWNLOAD
                           </a>
-                          {item?.uploaded_by?.username ===
-                            currentuser_username ||
-                          currentuser_type === "DistrictAdmin" ||
-                          currentuser_type === "StateAdmin" ? (
+                          {item?.uploaded_by?.username === authUser.username ||
+                          authUser.user_type === "DistrictAdmin" ||
+                          authUser.user_type === "StateAdmin" ? (
                             <>
                               <ButtonV2
                                 onClick={() => {
@@ -661,10 +669,9 @@ export const FileUpload = (props: FileUploadProps) => {
                           ) : (
                             <></>
                           )}
-                          {item?.uploaded_by?.username ===
-                            currentuser_username ||
-                          currentuser_type === "DistrictAdmin" ||
-                          currentuser_type === "StateAdmin" ? (
+                          {item?.uploaded_by?.username === authUser.username ||
+                          authUser.user_type === "DistrictAdmin" ||
+                          authUser.user_type === "StateAdmin" ? (
                             <>
                               <ButtonV2
                                 onClick={() => {
@@ -739,9 +746,9 @@ export const FileUpload = (props: FileUploadProps) => {
                       <CareIcon className="care-l-eye text-lg" />
                       PREVIEW FILE
                     </ButtonV2>
-                    {item?.uploaded_by?.username === currentuser_username ||
-                    currentuser_type === "DistrictAdmin" ||
-                    currentuser_type === "StateAdmin" ? (
+                    {item?.uploaded_by?.username === authUser.username ||
+                    authUser.user_type === "DistrictAdmin" ||
+                    authUser.user_type === "StateAdmin" ? (
                       <>
                         {" "}
                         <ButtonV2
@@ -760,9 +767,9 @@ export const FileUpload = (props: FileUploadProps) => {
                       <></>
                     )}
                     {sortFileState != "DISCHARGE_SUMMARY" &&
-                    (item?.uploaded_by?.username === currentuser_username ||
-                      currentuser_type === "DistrictAdmin" ||
-                      currentuser_type === "StateAdmin") ? (
+                    (item?.uploaded_by?.username === authUser.username ||
+                      authUser.user_type === "DistrictAdmin" ||
+                      authUser.user_type === "StateAdmin") ? (
                       <>
                         <ButtonV2
                           onClick={() => {
@@ -894,7 +901,7 @@ export const FileUpload = (props: FileUploadProps) => {
     return <Loading />;
   }
 
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>): any => {
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>): any => {
     if (e.target.files == null) {
       throw new Error("Error finding e.target.files");
     }
@@ -1440,7 +1447,7 @@ export const FileUpload = (props: FileUploadProps) => {
                       </ButtonV2>
                     </div>
                   )}
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-center gap-4 md:flex-row">
                     <VoiceRecorder
                       createAudioBlob={createAudioBlob}
                       confirmAudioBlobExists={confirmAudioBlobExists}

@@ -7,7 +7,7 @@ import {
   TEST_TYPE_CHOICES,
 } from "../../Common/constants";
 import { Link, navigate } from "raviger";
-import React, { useCallback, useState } from "react";
+import { lazy, useCallback, useState } from "react";
 import { deleteShiftRecord, getShiftDetails } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 
@@ -18,13 +18,12 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "../Common/components/Page";
 import QRCode from "qrcode.react";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { formatDateTime } from "../../Utils/utils";
-import loadable from "@loadable/component";
+import { formatAge, formatDateTime } from "../../Utils/utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ShiftDetails(props: { id: string }) {
   const { header_logo, kasp_full_string, wartime_shifting, kasp_enabled } =
@@ -35,8 +34,7 @@ export default function ShiftDetails(props: { id: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [openDeleteShiftDialog, setOpenDeleteShiftDialog] =
-    React.useState(false);
+  const [openDeleteShiftDialog, setOpenDeleteShiftDialog] = useState(false);
   const { t } = useTranslation();
 
   const shiftStatusOptions = wartime_shifting
@@ -112,7 +110,13 @@ export default function ShiftDetails(props: { id: string }) {
       "\n" +
       t("age") +
       ":" +
-      data?.patient_object?.age +
+      +(
+        formatAge(
+          data?.patient_object?.age,
+          data?.patient_object?.date_of_birth,
+          true
+        ) ?? "-"
+      ) +
       "\n" +
       t("origin_facility") +
       ":" +
@@ -197,7 +201,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("age")}:{" "}
               </span>
-              {patientData?.age}
+              {formatAge(patientData?.age, patientData?.date_of_birth, true)}
             </div>
           )}
           {patientData?.gender === 2 && patientData?.is_antenatal && (
@@ -382,7 +386,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("age")}:{" "}
               </span>
-              {patientData?.age}
+              {formatAge(patientData.age, patientData.date_of_birth, true)}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
@@ -428,9 +432,9 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
-                {t("op_ip_no")}:{" "}
+                {t("patient_no")}:{" "}
               </span>
-              {consultation.ip_no || "-"}
+              {consultation.patient_no || "-"}
             </div>
           </div>
           <div className="mt-2 flex justify-between">
@@ -499,7 +503,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("treatment_summary")}:{" "}
               </span>
-              {consultation.prescribed_medication || "-"}
+              {consultation.treatment_plan || "-"}
             </div>
           </div>
           <div className="mt-6 flex justify-between">

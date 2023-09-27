@@ -1,9 +1,10 @@
 import CareIcon from "../icons/CareIcon";
 import { formatDateTime, isUserOnline, relativeTime } from "../../Utils/utils";
+import { ReactNode } from "react";
 
 interface Props {
   time?: string;
-  prefix?: React.ReactNode;
+  prefix?: ReactNode;
   className?: string;
   user?: {
     first_name: string;
@@ -22,7 +23,7 @@ const RecordMeta = ({ time, user, prefix, className }: Props) => {
   let child = (
     <div className="tooltip">
       <span className="underline">{relativeTime(time)}</span>
-      <span className="tooltip-text flex gap-1 text-xs font-medium tracking-wider">
+      <span className="tooltip-text tooltip-bottom flex -translate-x-1/2 gap-1 text-xs font-medium tracking-wider">
         {formatDateTime(time)}
         {user && (
           <>

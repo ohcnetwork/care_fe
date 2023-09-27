@@ -1,28 +1,30 @@
 import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
+import LoginPage from "../../pageobject/Login/LoginPage";
 
 describe("Inventory Management Section", () => {
+  const facilityPage = new FacilityPage();
+  const loginPage = new LoginPage();
+
   before(() => {
-    cy.loginByApi("devdistrictadmin", "Coronasafe@123");
+    loginPage.loginAsDisctrictAdmin();
     cy.saveLocalStorage();
   });
 
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/");
-    cy.get("[id='facility-details']").first().click();
-    cy.get("[id=manage-facility-dropdown]").should("exist").click();
-    cy.get("[id=inventory-management]").click();
+    cy.viewport(1280, 720);
   });
 
   it("Adds Inventory", () => {
-    cy.contains("Manage Inventory").click();
-    cy.get("div#id").click();
-    cy.get("div#id ul li").contains("Liquid Oxygen").click();
-    cy.get("div#isIncoming").click();
-    cy.get("div#isIncoming ul li").contains("Add Stock").click();
-    cy.get("[name='quantity']").type("120");
-    cy.get("button").contains("Add/Update Inventory").click();
-    cy.verifyNotification("Inventory created successfully");
+    facilityPage.visitAlreadyCreatedFacility();
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickInventoryManagementOption();
+    facilityPage.clickManageInventory();
+    facilityPage.fillInventoryDetails("Liquid Oxygen", "Add Stock", "120");
+    facilityPage.clickAddInventory();
+    facilityPage.verifySuccessNotification("Inventory created successfully");
   });
 
   afterEach(() => {

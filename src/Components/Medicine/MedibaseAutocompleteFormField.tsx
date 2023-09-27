@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import Switch from "../../CAREUI/interactive/Switch";
 import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
 import { listMedibaseMedicines } from "../../Redux/actions";
 import { Autocomplete } from "../Form/FormFields/Autocomplete";
@@ -15,15 +17,39 @@ export default function MedibaseAutocompleteFormField(
   const { isLoading, options, fetchOptions } =
     useAsyncOptions<MedibaseMedicine>("id");
 
+  const [query, setQuery] = useState("");
+  const [type, setType] = useState<MedibaseMedicine["type"]>();
+
+  useEffect(() => {
+    fetchOptions(listMedibaseMedicines(query, type));
+  }, [query, type]);
+
   return (
-    <FormField field={field}>
+    <FormField
+      field={{
+        ...field,
+        labelSuffix: (
+          <Switch
+            tabs={{
+              all: "All",
+              brand: "Brand",
+              generic: "Generic",
+            }}
+            selected={type ?? "all"}
+            onChange={(type) => {
+              setType(type === "all" ? undefined : type);
+            }}
+          />
+        ),
+      }}
+    >
       <Autocomplete
         id={field.id}
         disabled={field.disabled}
         value={field.value}
         required
         onChange={field.handleChange}
-        options={options(field.value && [field.value])}
+        options={options(field.value && !query && [field.value])}
         optionLabel={(option) => option.name.toUpperCase()}
         optionDescription={(option) => <OptionDescription medicine={option} />}
         optionValue={(option) => option}
@@ -34,7 +60,7 @@ export default function MedibaseAutocompleteFormField(
             <OptionChip value={option.type} />
           )
         }
-        onQuery={(query) => fetchOptions(listMedibaseMedicines(query))}
+        onQuery={setQuery}
         isLoading={isLoading}
       />
     </FormField>

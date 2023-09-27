@@ -1,14 +1,15 @@
-import loadable from "@loadable/component";
 import _ from "lodash";
 import { navigate } from "raviger";
-import { useState } from "react";
+import { lazy, useState } from "react";
 import CSVReader from "react-csv-reader";
 import { useDispatch } from "react-redux";
 import useConfig from "../../Common/hooks/useConfig";
 import { externalResultUploadCsv } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
+const PageTitle = lazy(() => import("../Common/PageTitle"));
 import { useTranslation } from "react-i18next";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 
 export default function ExternalResultUpload() {
   const { sample_format_external_result_import } = useConfig();
@@ -21,6 +22,7 @@ export default function ExternalResultUpload() {
     setCsvData(data);
   };
   const { t } = useTranslation();
+  const { goBack } = useAppHistory();
 
   const papaparseOptions = {
     header: true,
@@ -68,11 +70,11 @@ export default function ExternalResultUpload() {
         backUrl="/external_results"
         className="mt-4"
       />
-      <div className="mx-auto mt-6 max-w-3xl">
-        <div className="py-4">
+      <div className="mx-auto mt-6 flex max-w-3xl justify-center">
+        <div className="py-4 md:w-[500px]">
           <div className="block text-sm font-medium leading-5 text-gray-700 sm:mt-px sm:pt-2">
             <div className="my-2 sm:col-span-2 sm:mt-0">
-              <div className="mx-auto flex max-w-lg flex-col justify-center rounded-md border-2 border-dashed border-gray-300 pb-6 pt-5 text-center">
+              <div className="mx-auto flex flex-col justify-center rounded-md border-2 border-dashed border-gray-300 pb-6 pt-5 text-center">
                 <span className="flex justify-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -132,14 +134,14 @@ export default function ExternalResultUpload() {
             })}
           </div>
           <div className=""></div>
-          <div className="mt-2 text-center">
-            <button
-              disabled={loading}
-              className="btn btn-primary mx-auto block"
+          <div className="mt-2 flex flex-col justify-end gap-2 text-center md:flex-row">
+            <Cancel onClick={() => goBack()} />
+            <Submit
               onClick={handleSubmit}
-            >
-              {t("save")}
-            </button>
+              disabled={loading}
+              label={t("save")}
+              data-testid="submit-button"
+            />
           </div>
         </div>
       </div>

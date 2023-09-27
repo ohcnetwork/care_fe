@@ -1,17 +1,17 @@
-import { useState, useCallback, useEffect, ReactElement } from "react";
-
-import loadable from "@loadable/component";
+import { useState, useCallback, useEffect, ReactElement, lazy } from "react";
 import {
   AssetClass,
   assetClassProps,
   AssetData,
+  AssetService,
   AssetTransaction,
 } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   deleteAsset,
   getAsset,
+  listAssetService,
   listAssetTransaction,
 } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
@@ -26,11 +26,15 @@ import { UserRole, USER_TYPES } from "../../Common/constants";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
-const PageTitle = loadable(() => import("../Common/PageTitle"));
-const Loading = loadable(() => import("../Common/Loading"));
+const Loading = lazy(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Uptime from "../Common/Uptime";
+import useAuthUser from "../../Common/hooks/useAuthUser";
+import dayjs from "dayjs";
+import RelativeDateUserMention from "../Common/RelativeDateUserMention";
+import { AssetServiceEditModal } from "./AssetServiceEditModal";
+import Page from "../Common/components/Page";
 
 interface AssetManageProps {
   assetId: string;
@@ -55,12 +59,18 @@ const AssetManage = (props: AssetManageProps) => {
   const [transactionDetails, setTransactionDetails] = useState<
     ReactElement | ReactElement[]
   >();
+  const [services, setServices] = useState<AssetService[]>([]);
+  const [servicesDetails, setServiceDetails] = useState<
+    ReactElement | ReactElement[]
+  >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const dispatch = useDispatch<any>();
   const limit = 14;
-  const { currentUser }: any = useSelector((state) => state);
-  const user_type = currentUser.data.user_type;
+  const authUser = useAuthUser();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [serviceEditData, setServiceEditData] = useState<
+    AssetService & { open: boolean; viewOnly?: boolean }
+  >();
 
   const fetchData = useCallback(
     async (status: statusType) => {
@@ -75,19 +85,30 @@ const AssetManage = (props: AssetManageProps) => {
             ? { qr_code_id: assetData.qr_code_id }
             : { external_id: assetId };
 
-          const transactionsData = await dispatch(
-            listAssetTransaction({
-              ...transactionFilter,
-              limit,
-              offset,
-            })
-          );
+          const [transactionsData, servicesData] = await Promise.all([
+            dispatch(
+              listAssetTransaction({
+                ...transactionFilter,
+                limit,
+                offset,
+              })
+            ),
+            dispatch(listAssetService({}, assetId)),
+          ]);
+
           if (transactionsData?.data) {
             setTransactions(transactionsData.data.results);
             setTotalCount(transactionsData.data.count);
           } else {
             Notification.Error({
               msg: "Error fetching transactions",
+            });
+          }
+          if (servicesData?.data) {
+            setServices(servicesData.data.results);
+          } else {
+            Notification.Error({
+              msg: "Error fetching service logs",
             });
           }
         } else {
@@ -176,9 +197,90 @@ const AssetManage = (props: AssetManageProps) => {
     }
   };
 
+  const populateServiceTableRows = (txns: AssetService[]) => {
+    if (txns.length > 0) {
+      setServiceDetails(
+        services.map((service: AssetService) => (
+          <tr key={`service_id_${service.id}`}>
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
+              <span className="font-medium text-gray-900">
+                {dayjs(service.serviced_on).format("DD MMM YYYY")}
+              </span>
+            </td>
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
+              <span className="whitespace-break-spaces break-words font-medium text-gray-900">
+                {service.note || "--"}
+              </span>
+            </td>
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
+              <span className="font-medium text-gray-900">
+                {formatDate(service.created_date)}
+              </span>
+            </td>
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
+              <span className="flex justify-center font-medium text-gray-900">
+                {service.edits?.length > 1 ? (
+                  <RelativeDateUserMention
+                    actionDate={service.edits?.[0]?.edited_on}
+                    user={service.edits?.[0]?.edited_by}
+                  />
+                ) : (
+                  "--"
+                )}
+              </span>
+            </td>
+            <td className="gap-4 whitespace-nowrap px-6 py-4 text-left text-sm leading-5">
+              <ButtonV2
+                id="edit-service-history"
+                authorizeFor={NonReadOnlyUsers}
+                onClick={() => {
+                  setServiceEditData({ ...service, open: true });
+                }}
+                className="mr-2"
+              >
+                <CareIcon icon="l-pen" className="text-lg" />
+              </ButtonV2>
+              <ButtonV2
+                id="view-service-history"
+                authorizeFor={NonReadOnlyUsers}
+                tooltip={service.edits?.length < 2 ? "No previous edits" : ""}
+                tooltipClassName="tooltip-left"
+                disabled={service.edits?.length < 2}
+                onClick={() => {
+                  setServiceEditData({
+                    ...service,
+                    open: true,
+                    viewOnly: true,
+                  });
+                }}
+              >
+                <CareIcon icon="l-eye" className="text-lg" />
+              </ButtonV2>
+            </td>
+          </tr>
+        ))
+      );
+    } else {
+      setServiceDetails(
+        <tr>
+          <td
+            className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500"
+            colSpan={4}
+          >
+            <h5>No Service Logs Found</h5>
+          </td>
+        </tr>
+      );
+    }
+  };
+
   useEffect(() => {
     populateTableRows(transactions);
   }, [transactions]);
+
+  useEffect(() => {
+    populateServiceTableRows(services);
+  }, [services]);
 
   if (isLoading) return <Loading />;
   if (isPrintMode) return <PrintPreview />;
@@ -196,7 +298,10 @@ const AssetManage = (props: AssetManageProps) => {
           </div>
           <div className="break-words text-gray-700">{item.label}</div>
         </div>
-        <div className="ml-8 grow-0 break-words text-lg font-semibold">
+        <div
+          className="ml-8 grow-0 break-words text-lg font-semibold"
+          id="asset-current-location"
+        >
           {item.content || "--"}
         </div>
       </div>
@@ -229,18 +334,28 @@ const AssetManage = (props: AssetManageProps) => {
   };
 
   return (
-    <div className="px-2 pb-2">
-      <PageTitle
-        title="Asset Details"
-        crumbsReplacements={{
-          [facilityId]: { name: asset?.location_object.facility.name },
-          assets: { uri: `/assets?facility=${facilityId}` },
-          [assetId]: {
-            name: asset?.name,
-          },
-        }}
-        backUrl="/assets"
-      />
+    <Page
+      title="Asset Details"
+      crumbsReplacements={{
+        [facilityId]: { name: asset?.location_object.facility.name },
+        assets: { uri: `/assets?facility=${facilityId}` },
+        [assetId]: {
+          name: asset?.name,
+        },
+      }}
+      backUrl="/assets"
+      options={
+        <ButtonV2
+          onClick={handleDownload}
+          className="tooltip py-2"
+          ghost
+          border
+        >
+          <CareIcon className="care-l-export text-lg" />
+          Export as JSON
+        </ButtonV2>
+      }
+    >
       <ConfirmDialog
         title="Delete Asset"
         description="Are you sure you want to delete this asset?"
@@ -259,37 +374,45 @@ const AssetManage = (props: AssetManageProps) => {
                   <span className="break-words text-2xl font-bold md:text-3xl">
                     {asset?.name}
                   </span>
-                  <ButtonV2
-                    onClick={handleDownload}
-                    className="tooltip p-4"
-                    variant="secondary"
-                    ghost
-                    circle
-                  >
-                    <CareIcon className="care-l-export text-lg" />
-                    <span className="tooltip-text tooltip-bottom -translate-x-16">
-                      Export as JSON
-                    </span>
-                  </ButtonV2>
+                  <div className="tooltip tooltip-bottom">
+                    <CareIcon
+                      className={`care-l-${assetClassProp.icon} fill-gray-700 text-3xl`}
+                    />
+                    <span className="tooltip-text">{assetClassProp.name}</span>
+                  </div>
+                </div>
+                <div className="mb-2 w-full text-gray-700 sm:hidden">
+                  {asset?.description}
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  {asset?.asset_type === "INTERNAL" ? (
+                    <Chip text="Internal" startIcon="l-building" />
+                  ) : (
+                    <Chip text="External" startIcon="l-globe" />
+                  )}
                   {asset?.status === "ACTIVE" ? (
-                    <Chip color="green" text="Active" startIcon="check" />
+                    <Chip text="Active" startIcon="l-check" />
                   ) : (
                     <Chip
-                      color="yellow"
+                      variant="warning"
                       text="Transfer in progress"
-                      startIcon="exclamation"
+                      startIcon="l-exclamation"
                     />
                   )}
                   {asset?.is_working ? (
-                    <Chip color="green" text="Working" startIcon="check" />
+                    <Chip text="Working" startIcon="l-check" />
                   ) : (
-                    <Chip color="red" text="Not Working" startIcon="times" />
+                    <Chip
+                      variant="danger"
+                      text="Not Working"
+                      startIcon="l-times"
+                    />
                   )}
                 </div>
               </div>
-              <span className="text-gray-700">{asset?.description}</span>
+              <div className="mt-3 hidden text-gray-700 sm:block">
+                {asset?.description}
+              </div>
             </div>
             <div className="flex flex-col gap-6">
               {[
@@ -297,19 +420,6 @@ const AssetManage = (props: AssetManageProps) => {
                   label: asset?.location_object.facility.name,
                   icon: "location-pin-alt",
                   content: asset?.location_object.name,
-                },
-                {
-                  label: "Asset Type",
-                  icon: "apps",
-                  content:
-                    asset?.asset_type === "INTERNAL"
-                      ? "Internal Asset"
-                      : "External Asset",
-                },
-                {
-                  label: "Asset Class",
-                  icon: assetClassProp.icon,
-                  content: assetClassProp.name,
                 },
                 {
                   label: "Asset QR Code ID",
@@ -347,13 +457,13 @@ const AssetManage = (props: AssetManageProps) => {
                     )
                   }
                   id="configure-asset"
-                  authorizeFor={NonReadOnlyUsers}
+                  data-testid="asset-configure-button"
                 >
                   <CareIcon className="care-l-setting h-4" />
                   {t("configure")}
                 </ButtonV2>
               )}
-              {checkAuthority(user_type, "DistrictAdmin") && (
+              {checkAuthority(authUser.user_type, "DistrictAdmin") && (
                 <ButtonV2
                   authorizeFor={NonReadOnlyUsers}
                   onClick={() => setShowDeleteDialog(true)}
@@ -376,13 +486,13 @@ const AssetManage = (props: AssetManageProps) => {
                     label: "Last serviced on",
                     icon: "wrench",
                     content:
-                      asset?.last_serviced_on &&
-                      formatDate(asset?.last_serviced_on),
+                      asset?.last_service?.serviced_on &&
+                      formatDate(asset?.last_service?.serviced_on),
                   },
                   {
                     label: "Notes",
                     icon: "notes",
-                    content: asset?.notes,
+                    content: asset?.last_service?.note,
                   },
                 ].map(detailBlock)}
               </div>
@@ -407,8 +517,41 @@ const AssetManage = (props: AssetManageProps) => {
       {asset?.id &&
         asset?.asset_class &&
         asset?.asset_class != AssetClass.NONE && <Uptime assetId={asset?.id} />}
+      <div className="mb-4 mt-8 text-xl font-semibold">Service History</div>
+      <div
+        className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg"
+        id="service-history"
+      >
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead>
+            <tr>
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                Serviced on
+              </th>
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                Note
+              </th>
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                Created on
+              </th>
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                Last Updated
+              </th>
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+                Edit
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200 bg-white">
+            {servicesDetails}
+          </tbody>
+        </table>
+      </div>
       <div className="mb-4 mt-8 text-xl font-semibold">Transaction History</div>
-      <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg">
+      <div
+        className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg"
+        id="transaction-history"
+      >
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
@@ -441,7 +584,19 @@ const AssetManage = (props: AssetManageProps) => {
           />
         </div>
       )}
-    </div>
+      {serviceEditData && (
+        <AssetServiceEditModal
+          asset={asset}
+          service_record={serviceEditData}
+          handleClose={() =>
+            setServiceEditData({ ...serviceEditData, open: false })
+          }
+          handleUpdate={() => fetchData({ aborted: false })}
+          show={serviceEditData.open}
+          viewOnly={serviceEditData.viewOnly}
+        />
+      )}
+    </Page>
   );
 };
 

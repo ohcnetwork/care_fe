@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useState } from "react";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
 import {
   addMonths,
   addYears,
@@ -60,6 +60,7 @@ const DateInputV2: React.FC<Props> = ({
   const [displayValue, setDisplayValue] = useState<string>(
     value ? dayjs(value).format("DDMMYYYY") : ""
   );
+  const popover = useRef<HTMLDivElement>(null);
 
   const decrement = () => {
     switch (type) {
@@ -211,16 +212,12 @@ const DateInputV2: React.FC<Props> = ({
       >
         <Popover className="relative">
           {({ open, close }) => (
-            <div
-              onBlur={() => {
-                setIsOpen && setIsOpen(false);
-              }}
-            >
+            <div>
               <Popover.Button
                 disabled={disabled}
                 className="w-full"
                 onClick={() => {
-                  setIsOpen && setIsOpen(!isOpen);
+                  setIsOpen?.(!isOpen);
                 }}
               >
                 <input type="hidden" name="date" />
@@ -242,8 +239,9 @@ const DateInputV2: React.FC<Props> = ({
               {(open || isOpen) && (
                 <Popover.Panel
                   onBlur={() => {
-                    setIsOpen && setIsOpen(false);
+                    setIsOpen?.(false);
                   }}
+                  ref={popover}
                   static
                   className={classNames(
                     "cui-dropdown-base absolute mt-0.5 w-72 divide-y-0 p-4",
@@ -252,7 +250,12 @@ const DateInputV2: React.FC<Props> = ({
                 >
                   <div className="mb-4 flex w-full flex-col items-center justify-between">
                     <input
+                      id="date-input"
                       autoFocus
+                      onBlur={(e) => {
+                        popover.current?.focus();
+                        e.preventDefault();
+                      }}
                       className="cui-input-base bg-gray-50"
                       value={
                         displayValue.replace(
@@ -264,14 +267,11 @@ const DateInputV2: React.FC<Props> = ({
                       placeholder="DD/MM/YYYY"
                       onChange={(e) => {
                         setDisplayValue(e.target.value.replaceAll("/", ""));
-                        const value = dayjs(
-                          e.target.value,
-                          "DD/MM/YYYY",
-                          true
-                        );
+                        const value = dayjs(e.target.value, "DD/MM/YYYY", true);
                         if (value.isValid()) {
                           onChange(value.toDate());
                           close();
+                          setIsOpen?.(false);
                         }
                       }}
                     />
@@ -284,7 +284,7 @@ const DateInputV2: React.FC<Props> = ({
                             datePickerHeaderDate.getMonth() - 1
                           )
                         }
-                        className="aspect-square inline-flex cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
+                        className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
                         onClick={decrement}
                       >
                         <CareIcon className="care-l-angle-left-b text-lg" />
@@ -317,7 +317,7 @@ const DateInputV2: React.FC<Props> = ({
                             new Date().getFullYear() === year.getFullYear()) ||
                           !isDateWithinConstraints(getLastDay())
                         }
-                        className="aspect-square inline-flex cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
+                        className="inline-flex aspect-square cursor-pointer items-center justify-center rounded p-2 transition duration-100 ease-in-out hover:bg-gray-300"
                         onClick={increment}
                       >
                         <CareIcon className="care-l-angle-right-b text-lg" />
