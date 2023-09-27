@@ -36,6 +36,7 @@ const routes = {
     path: "/api/v1/auth/token/refresh/",
     method: "POST",
     TRes: Res<JwtTokenObtainPair>(),
+    TBody: Res<{ refresh: string }>(),
   },
 
   token_verify: {
