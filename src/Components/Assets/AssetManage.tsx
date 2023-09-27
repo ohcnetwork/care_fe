@@ -28,7 +28,7 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import { useTranslation } from "react-i18next";
 const Loading = lazy(() => import("../Common/Loading"));
 import * as Notification from "../../Utils/Notifications.js";
-import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Uptime from "../Common/Uptime";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import dayjs from "dayjs";
@@ -231,6 +231,7 @@ const AssetManage = (props: AssetManageProps) => {
             </td>
             <td className="gap-4 whitespace-nowrap px-6 py-4 text-left text-sm leading-5">
               <ButtonV2
+                id="edit-service-history"
                 authorizeFor={NonReadOnlyUsers}
                 onClick={() => {
                   setServiceEditData({ ...service, open: true });
@@ -240,6 +241,7 @@ const AssetManage = (props: AssetManageProps) => {
                 <CareIcon icon="l-pen" className="text-lg" />
               </ButtonV2>
               <ButtonV2
+                id="view-service-history"
                 authorizeFor={NonReadOnlyUsers}
                 tooltip={service.edits?.length < 2 ? "No previous edits" : ""}
                 tooltipClassName="tooltip-left"
@@ -296,7 +298,10 @@ const AssetManage = (props: AssetManageProps) => {
           </div>
           <div className="break-words text-gray-700">{item.label}</div>
         </div>
-        <div className="ml-8 grow-0 break-words text-lg font-semibold">
+        <div
+          className="ml-8 grow-0 break-words text-lg font-semibold"
+          id="asset-current-location"
+        >
           {item.content || "--"}
         </div>
       </div>
@@ -453,7 +458,6 @@ const AssetManage = (props: AssetManageProps) => {
                   }
                   id="configure-asset"
                   data-testid="asset-configure-button"
-                  authorizeFor={AuthorizeFor(["DistrictAdmin", "StateAdmin"])}
                 >
                   <CareIcon className="care-l-setting h-4" />
                   {t("configure")}
@@ -514,7 +518,10 @@ const AssetManage = (props: AssetManageProps) => {
         asset?.asset_class &&
         asset?.asset_class != AssetClass.NONE && <Uptime assetId={asset?.id} />}
       <div className="mb-4 mt-8 text-xl font-semibold">Service History</div>
-      <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg">
+      <div
+        className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg"
+        id="service-history"
+      >
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
@@ -541,7 +548,10 @@ const AssetManage = (props: AssetManageProps) => {
         </table>
       </div>
       <div className="mb-4 mt-8 text-xl font-semibold">Transaction History</div>
-      <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg">
+      <div
+        className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg"
+        id="transaction-history"
+      >
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>

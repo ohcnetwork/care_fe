@@ -36,15 +36,14 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import SwipeableViews from "react-swipeable-views";
 import { parseOptionId } from "../../Common/utils";
-import { parsePhoneNumber } from "../../Utils/utils.js";
+import { formatAge, parsePhoneNumber } from "../../Utils/utils.js";
 import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import Page from "../Common/components/Page.js";
 import dayjs from "dayjs";
-import { triggerGoal } from "../Common/Plausible.js";
+import { triggerGoal } from "../../Integrations/Plausible.js";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
@@ -559,7 +558,9 @@ export const PatientManager = () => {
               <div className="flex w-full justify-between gap-2">
                 <div className="font-semibold">
                   <span className="text-xl capitalize">{patient.name}</span>
-                  <span className="ml-4 text-gray-800">{`${patient.age} yrs.`}</span>
+                  <span className="ml-4 text-gray-800">
+                    {formatAge(patient.age, patient.date_of_birth, true)}
+                  </span>
                 </div>
               </div>
 
@@ -985,14 +986,12 @@ export const PatientManager = () => {
       </div>
       <div>
         <PatientFilter {...advancedFilter} key={window.location.search} />
-        <SwipeableViews index={tabValue}>
-          <TabPanel value={tabValue} index={0}>
-            <div className="mb-4">{managePatients}</div>
-          </TabPanel>
-          <TabPanel value={tabValue} index={1}>
-            <div className="mb-4">{managePatients}</div>
-          </TabPanel>
-        </SwipeableViews>
+        <TabPanel value={tabValue} index={0}>
+          <div className="mb-4">{managePatients}</div>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <div className="mb-4">{managePatients}</div>
+        </TabPanel>
         <DoctorVideoSlideover
           facilityId={params.facility}
           show={showDoctors}

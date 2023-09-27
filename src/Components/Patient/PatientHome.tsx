@@ -19,7 +19,7 @@ import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 import Chip from "../../CAREUI/display/Chip";
-import { classNames, formatDateTime } from "../../Utils/utils";
+import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
@@ -30,7 +30,7 @@ import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
-import { triggerGoal } from "../Common/Plausible";
+import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const Loading = lazy(() => import("../Common/Loading"));
@@ -476,7 +476,12 @@ export const PatientHome = (props: any) => {
               <div>
                 <div className="flex flex-row gap-4">
                   <h1 className="flex flex-row pb-3 text-2xl font-bold">
-                    {patientData.name} - {patientData.age}
+                    {patientData.name} -{" "}
+                    {formatAge(
+                      patientData.age,
+                      patientData.date_of_birth,
+                      true
+                    )}
                   </h1>
                   <div className="ml-auto mr-9 flex flex-wrap gap-3">
                     {patientData.is_vaccinated ? (
