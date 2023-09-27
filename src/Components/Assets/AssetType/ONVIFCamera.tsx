@@ -1,11 +1,5 @@
 import { useEffect, useState } from "react";
 import { AssetData } from "../AssetTypes";
-import { useDispatch } from "react-redux";
-import {
-  partialUpdateAsset,
-  createAssetBed,
-  getPermittedFacility,
-} from "../../../Redux/actions";
 import * as Notification from "../../../Utils/Notifications.js";
 import { BedModel } from "../../Facility/models";
 import axios from "axios";
@@ -17,6 +11,9 @@ import TextFormField from "../../Form/FormFields/TextFormField";
 import { Submit } from "../../Common/components/ButtonV2";
 import { SyntheticEvent } from "react";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
+import request from "../../../Utils/request/request";
+import routes from "../../../Redux/api";
+import useQuery from "../../../Utils/request/useQuery";
 
 interface Props {
   assetId: string;
@@ -43,19 +40,21 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   const [refreshPresetsHash, setRefreshPresetsHash] = useState(
     Number(new Date())
   );
-  const dispatch = useDispatch<any>();
+  const {
+    data: facility,
+    loading,
+    refetch,
+  } = useQuery(routes.getPermittedFacility, {
+    pathParams: { id: facilityId },
+  });
   const authUser = useAuthUser();
   useEffect(() => {
-    const fetchFacility = async () => {
-      const res = await dispatch(getPermittedFacility(facilityId));
-
-      if (res.status === 200 && res.data) {
-        setFacilityMiddlewareHostname(res.data.middleware_address);
-      }
-    };
-
-    if (facilityId) fetchFacility();
-  }, [dispatch, facilityId]);
+    if (facility?.middleware_address) {
+      setFacilityMiddlewareHostname(facility.middleware_address);
+    } else {
+      () => refetch();
+    }
+  }, [facility, facilityId, refetch]);
 
   useEffect(() => {
     if (asset) {
@@ -83,9 +82,10 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
           camera_access_key: `${username}:${password}:${streamUuid}`,
         },
       };
-      const res: any = await Promise.resolve(
-        dispatch(partialUpdateAsset(assetId, data))
-      );
+      const { res } = await request(routes.partialUpdateAsset, {
+        pathParams: { external_id: assetId },
+        body: data,
+      });
       if (res?.status === 200) {
         Notification.Success({ msg: "Asset Configured Successfully" });
         onUpdated?.();
@@ -110,15 +110,19 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
       const presetData = await axios.get(
         `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
       );
-      const res: any = await Promise.resolve(
-        dispatch(
-          createAssetBed(
-            { meta: { ...data, ...presetData.data } },
-            assetId,
-            bed?.id as string
-          )
-        )
-      );
+      // const res: any = await Promise.resolve(
+      //   dispatch(
+      //     createAssetBed(
+      //       { meta: { ...data, ...presetData.data } },
+      //       assetId,
+      //       bed?.id as string
+      //     )
+      //   )
+      // );
+      const { res } = await request(routes.createAssetBed, {
+        pathParams: { external_id: assetId },
+        body: { meta: { ...data, ...presetData.data } },
+      });
       if (res?.status === 201) {
         Notification.Success({
           msg: "Preset Added Successfully",
@@ -139,7 +143,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     setLoadingAddPreset(false);
   };
 
-  if (isLoading) return <Loading />;
+  if (isLoading || loading || !facility) return <Loading />;
 
   return (
     <div className="space-y-6">

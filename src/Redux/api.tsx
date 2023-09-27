@@ -228,6 +228,7 @@ const routes = {
   createAssetBed: {
     path: "/api/v1/assetbed/",
     method: "POST",
+    TRes: Res<AssetData>(),
   },
   getAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
