@@ -5,8 +5,6 @@ import { FacilityModel } from "../Facility/models";
 import { AssetData } from "./AssetTypes";
 import * as Notification from "../../Utils/Notifications.js";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { listFacilityAssetLocation } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { Link } from "raviger";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import readXlsxFile from "read-excel-file";
@@ -17,6 +15,9 @@ import {
 import { parseCsvFile } from "../../Utils/utils";
 import useConfig from "../../Common/hooks/useConfig";
 import DialogModal from "../Common/Dialog";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import Loading from "../Common/Loading";
 
 interface Props {
   open: boolean;
@@ -31,7 +32,6 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
     useState<(AssetData & { notes?: string; last_serviced_on?: string })[]>();
   const [location, setLocation] = useState("");
   const [locations, setLocations] = useState<any>([]);
-  const dispatchAction: any = useDispatch();
   const { sample_format_asset_import } = useConfig();
 
   const closeModal = () => {
@@ -39,16 +39,21 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
     setSelectedFile(undefined);
     onClose && onClose();
   };
+  const {
+    data: facilityAssetLocations,
+    loading,
+    refetch,
+  } = useQuery(routes.listFacilityAssetLocation, {
+    pathParams: { facility_external_id: `${facility.id}` },
+  });
 
   useEffect(() => {
-    dispatchAction(
-      listFacilityAssetLocation({}, { facility_external_id: facility.id })
-    ).then(({ data }: any) => {
-      if (data.count > 0) {
-        setLocations(data.results);
-      }
-    });
-  }, []);
+    if (!facilityAssetLocations) {
+      () => refetch();
+    } else if (facilityAssetLocations?.count) {
+      setLocations(facilityAssetLocations?.results);
+    }
+  }, [facilityAssetLocations, refetch]);
 
   useEffect(() => {
     const readFile = async () => {
@@ -179,6 +184,8 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
       );
     setSelectedFile(dropedFile);
   };
+
+  if (loading) return <Loading />;
 
   return (
     <DialogModal

@@ -1,5 +1,8 @@
 import { IConfig } from "../Common/hooks/useConfig";
-import { AssetData } from "../Components/Assets/AssetTypes";
+import {
+  AssetData,
+  AssetLocationObject,
+} from "../Components/Assets/AssetTypes";
 import { FacilityModel, LocationModel } from "../Components/Facility/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
@@ -210,6 +213,7 @@ const routes = {
   getFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "GET",
+    TRes: Res<AssetLocationObject>(),
   },
   updateFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
