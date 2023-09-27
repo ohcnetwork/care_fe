@@ -1,9 +1,8 @@
 import * as Notification from "../Utils/Notifications.js";
 
 import { LocalStorageKeys } from "../Common/constants.js";
-import api from "./api.js";
+import routes from "./api.js";
 
-const requestMap = api;
 export const actions = {
   FETCH_REQUEST: "FETCH_REQUEST",
   FETCH_REQUEST_SUCCESS: "FETCH_REQUEST_SUCCESS",
@@ -55,7 +54,7 @@ export const fireRequest = (
   params: any = {},
   pathParam?: any,
   altKey?: string,
-  suppressNotif: boolean = false
+  suppressNotif = false
 ) => {
   return (dispatch: any) => {
     // cancel previous api call
@@ -67,7 +66,11 @@ export const fireRequest = (
     isRunning[requestKey] = controller;
 
     // get api url / method
-    const request = Object.assign({}, requestMap[key]);
+    const request = Object.assign({}, (routes as any)[key]);
+
+    if (path.length > 0) {
+      request.path += "/" + path.join("/");
+    }
 
     if (request.method === undefined || request.method === "GET") {
       request.method = "GET";
@@ -177,7 +180,7 @@ export const legacyFireRequest = (
   pathParam?: any,
   altKey?: string
 ) => {
-  return (dispatch: any) => {
+  return () => {
     // cancel previous api call
     const requestKey = altKey || key;
     if (isRunning[requestKey]) {
@@ -187,7 +190,11 @@ export const legacyFireRequest = (
     isRunning[requestKey] = controller;
 
     // get api url / method
-    const request = Object.assign({}, requestMap[key]);
+    const request = Object.assign({}, (routes as any)[key]);
+
+    if (path.length > 0) {
+      request.path += "/" + path.join("/");
+    }
 
     if (request.method === undefined || request.method === "GET") {
       request.method = "GET";
@@ -301,7 +308,7 @@ export const uploadFile = async (
       }
     };
     xhr.onloadend = () => {
-      if (xhr.readyState === 4 && xhr.status === 200){
+      if (xhr.readyState === 4 && xhr.status === 200) {
         return resolve(xhr.response);
       }
       reject("failed to upload file");
