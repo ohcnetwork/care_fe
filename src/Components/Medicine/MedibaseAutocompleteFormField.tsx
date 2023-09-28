@@ -49,7 +49,7 @@ export default function MedibaseAutocompleteFormField(
         value={field.value}
         required
         onChange={field.handleChange}
-        options={options(field.value && [field.value])}
+        options={options(field.value && !query && [field.value])}
         optionLabel={(option) => option.name.toUpperCase()}
         optionDescription={(option) => <OptionDescription medicine={option} />}
         optionValue={(option) => option}

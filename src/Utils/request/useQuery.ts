@@ -1,26 +1,24 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QueryRoute, RequestOptions } from "./types";
+import { QueryRoute, RequestOptions, RequestResult } from "./types";
 import request from "./request";
 import { mergeRequestOptions } from "./utils";
 
-export interface QueryOptions extends RequestOptions {
+export interface QueryOptions<TData> extends RequestOptions<TData> {
   prefetch?: boolean;
   refetchOnWindowFocus?: boolean;
 }
 
 export default function useQuery<TData>(
   route: QueryRoute<TData>,
-  options?: QueryOptions
+  options?: QueryOptions<TData>
 ) {
-  const [res, setRes] = useState<Response>();
-  const [data, setData] = useState<TData>();
-  const [error, setError] = useState<any>();
+  const [response, setResponse] = useState<RequestResult<TData>>();
   const [loading, setLoading] = useState(false);
 
   const controllerRef = useRef<AbortController>();
 
   const runQuery = useCallback(
-    async (overrides?: QueryOptions) => {
+    async (overrides?: QueryOptions<TData>) => {
       controllerRef.current?.abort();
 
       const controller = new AbortController();
@@ -32,20 +30,8 @@ export default function useQuery<TData>(
           : options;
 
       setLoading(true);
-
-      try {
-        const { res, data } = await request<TData>(route, resolvedOptions);
-
-        setRes(res);
-        setData(res.ok ? data : undefined);
-        setError(res.ok ? undefined : data);
-      } catch (error) {
-        console.error(error);
-        setData(undefined);
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
+      setResponse(await request(route, resolvedOptions));
+      setLoading(false);
     },
     [route, JSON.stringify(options)]
   );
@@ -66,5 +52,5 @@ export default function useQuery<TData>(
     }
   }, [runQuery, options?.refetchOnWindowFocus]);
 
-  return { res, data, error, loading, refetch: runQuery };
+  return { ...response, loading, refetch: runQuery };
 }

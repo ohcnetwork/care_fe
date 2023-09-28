@@ -485,7 +485,7 @@ let make = (~updateCB, ~neurologicalMonitoring, ~id, ~consultationId) => {
       <div className="my-10">
         <div className="text-3xl font-bold"> {str("Glasgow Coma Scale")} </div>
         <div className="mt-4">
-          <div className="font-bold mt-4"> {str("Eye Open")} </div>
+          <div className="font-bold mt-4"> {str("Eye Opening Response")} </div>
           <div>
             {Js.Array.mapi(
               (x, i) =>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { classNames, formatDateTime } from "../../Utils/utils";
+import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
 import {
   completeTransfer,
   downloadShiftRequests,
@@ -78,7 +78,12 @@ const ShiftCard = ({ shift, filter }: any) => {
           <div>
             <div className="flex justify-between">
               <div className="mb-2 text-xl font-bold capitalize">
-                {shift.patient_object.name} - {shift.patient_object.age}
+                {shift.patient_object.name} -{" "}
+                {formatAge(
+                  shift.patient_object?.age,
+                  shift.patient_object?.age.date_of_birth,
+                  true
+                )}
               </div>
               <div>
                 {shift.emergency && (
