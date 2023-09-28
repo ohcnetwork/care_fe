@@ -17,6 +17,11 @@ interface JwtTokenObtainPair {
   refresh: string;
 }
 
+interface LoginInput {
+  username: string;
+  password: string;
+}
+
 const routes = {
   config: {
     path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
@@ -30,7 +35,8 @@ const routes = {
     path: "/api/v1/auth/login/",
     method: "POST",
     noAuth: true,
-    TRes: Res<JwtTokenObtainPair>(),
+    TRes: Type<JwtTokenObtainPair>(),
+    TBody: Type<LoginInput>(),
   },
 
   token_refresh: {
@@ -48,19 +54,22 @@ const routes = {
   checkResetToken: {
     path: "/api/v1/password_reset/check/",
     method: "POST",
-    TRes: Res<any>(),
+    TRes: Type<any>(),
+    TBody: Type<{ token: string }>(),
   },
 
   resetPassword: {
     path: "/api/v1/password_reset/confirm/",
     method: "POST",
-    TRes: Res<any>(),
+    TRes: Type<any>(),
+    TBody: Type<{ password: string; confirm: string }>(),
   },
 
   forgotPassword: {
     path: "/api/v1/password_reset/",
     method: "POST",
-    TRes: Res<any>(),
+    TRes: Type<any>(),
+    TBody: Type<{ username: string }>(),
   },
 
   updatePassword: {

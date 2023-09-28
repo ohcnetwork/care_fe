@@ -95,7 +95,7 @@ export const Login = (props: { forgot?: boolean }) => {
       // replaces button with spinner
       setLoading(true);
 
-      const { res, data, error } = await request(routes.login, {
+      const { res, data } = await request(routes.login, {
         body: { ...valid },
       });
       if (res && res.status === 429) {
