@@ -50,7 +50,6 @@ export default function PrescriptionAdministrationsTable({
 
   const [showDiscontinued, setShowDiscontinued] = useState(false);
   const [discontinuedCount, setDiscontinuedCount] = useState<number>();
-  const [latestAdministration, setLatestAdministration] = useState<Date>();
 
   const pagination = useRangePagination({
     bounds: state?.administrationsTimeBounds ?? {
@@ -79,42 +78,6 @@ export default function PrescriptionAdministrationsTable({
       list(showDiscontinued ? filters : { ...filters, discontinued: false })
     );
 
-    const prescriptions = res.data.results as Prescription[];
-    let latestDateAllPresc: Date | undefined;
-    prescriptions.forEach(async (presc, index) => {
-      const actions = prescription(presc.id ?? "");
-      const res = await dispatch(
-        actions.listAdministrations(
-          {
-            administered_date_after: formatDateTime(
-              pagination.slots[0].start,
-              "YYYY-MM-DD"
-            ),
-            administered_date_before: formatDateTime(
-              pagination.slots[pagination.slots.length - 1].end,
-              "YYYY-MM-DD"
-            ),
-          },
-          `toGetDate-${index}`
-        )
-      );
-      if (res.data.results.length > 0) {
-        const latestDateThisPresc = new Date(
-          res.data.results.reduce((prevMax: any, current: any) =>
-            prevMax.administered_date > current.administered_date
-              ? prevMax
-              : current
-          ).administered_date
-        );
-        latestDateThisPresc.setMinutes(0, 0, 0);
-        latestDateAllPresc =
-          latestDateAllPresc && latestDateAllPresc > latestDateThisPresc
-            ? latestDateAllPresc
-            : latestDateThisPresc;
-        setLatestAdministration(latestDateThisPresc);
-      }
-    });
-
     setState({
       prescriptions: (res.data.results as Prescription[]).sort(
         (a, b) => (a.discontinued ? 1 : 0) - (b.discontinued ? 1 : 0)
@@ -133,19 +96,6 @@ export default function PrescriptionAdministrationsTable({
   useEffect(() => {
     refetch();
   }, [refetch]);
-
-  useEffect(() => {
-    setState({
-      prescriptions: state?.prescriptions ?? [],
-      administrationsTimeBounds: {
-        start: state?.administrationsTimeBounds.start ?? new Date(),
-        end:
-          latestAdministration ??
-          state?.administrationsTimeBounds.end ??
-          new Date(),
-      },
-    });
-  }, [latestAdministration]);
 
   return (
     <div>
@@ -359,19 +309,16 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
 
     const getAdministrations = async () => {
       const res = await dispatch(
-        props.actions.listAdministrations(
-          {
-            administered_date_after: formatDateTime(
-              props.intervals[0].start,
-              "YYYY-MM-DD"
-            ),
-            administered_date_before: formatDateTime(
-              props.intervals[props.intervals.length - 1].end,
-              "YYYY-MM-DD"
-            ),
-          },
-          `toSetRow-${prescription.id}`
-        )
+        props.actions.listAdministrations({
+          administered_date_after: formatDateTime(
+            props.intervals[0].start,
+            "YYYY-MM-DD"
+          ),
+          administered_date_before: formatDateTime(
+            props.intervals[props.intervals.length - 1].end,
+            "YYYY-MM-DD"
+          ),
+        })
       );
 
       setAdministrations(res.data.results);
@@ -662,10 +609,10 @@ function getAdministrationBounds(prescriptions: Prescription[]) {
 
   // floor start to previous hour
   start.setMinutes(0, 0, 0);
-  start.setHours(start.getHours() - 1);
 
   // ceil end to next hour
   end.setMinutes(0, 0, 0);
+  end.setHours(end.getHours() + 1);
 
   return { start, end };
 }

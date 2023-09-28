@@ -69,8 +69,8 @@ const useRangePagination = ({ bounds, perPage, ...props }: Props) => {
     for (let i = 0; i < props.slots; i++) {
       if (props.snapToLatest) {
         slots.push({
-          start: new Date(end.valueOf() - delta * (i - 1)),
-          end: new Date(end.valueOf() - delta * i),
+          start: new Date(end.valueOf() - delta * i),
+          end: new Date(end.valueOf() - delta * (i + 1)),
         });
       } else {
         slots.push({
