@@ -69,7 +69,7 @@ export const fireRequest = (
     const request = Object.assign({}, (routes as any)[key]);
 
     if (path.length > 0) {
-      request.path += "/" + path.join("/");
+      request.path += path.join("/");
     }
 
     if (request.method === undefined || request.method === "GET") {
@@ -193,7 +193,7 @@ export const legacyFireRequest = (
     const request = Object.assign({}, (routes as any)[key]);
 
     if (path.length > 0) {
-      request.path += "/" + path.join("/");
+      request.path += path.join("/");
     }
 
     if (request.method === undefined || request.method === "GET") {
