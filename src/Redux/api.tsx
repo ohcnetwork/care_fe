@@ -58,6 +58,7 @@ const routes = {
   forgotPassword: {
     path: "/api/v1/password_reset/",
     method: "POST",
+    noAuth: true,
   },
 
   updatePassword: {
