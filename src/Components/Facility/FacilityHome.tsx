@@ -541,9 +541,7 @@ export const FacilityHome = (props: any) => {
                 </DropdownItem>
                 <DropdownItem
                   id="configure-facility"
-                  onClick={() =>
-                    navigate(`/facility/${facilityId}/middleware/update`)
-                  }
+                  onClick={() => navigate(`/facility/${facilityId}/configure`)}
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon className="care-l-setting text-lg" />}
                 >
