@@ -12,11 +12,14 @@ export interface QueryRoute<TData> extends RouteBase<TData> {
   method?: "GET";
 }
 
-export interface MutationRoute<TData> extends RouteBase<TData> {
+export interface MutationRoute<TData, TBody> extends RouteBase<TData> {
   method: "POST" | "PUT" | "PATCH" | "DELETE";
+  TBody?: TBody;
 }
 
-export type Route<TData> = QueryRoute<TData> | MutationRoute<TData>;
+export type Route<TData, TBody> =
+  | QueryRoute<TData>
+  | MutationRoute<TData, TBody>;
 
 export interface RequestResult<TData> {
   res: Response | undefined;
@@ -24,9 +27,9 @@ export interface RequestResult<TData> {
   error: undefined | Record<string, unknown>;
 }
 
-export interface RequestOptions<TData = unknown> {
+export interface RequestOptions<TData = unknown, TBody = unknown> {
   query?: QueryParams;
-  body?: object;
+  body?: TBody;
   pathParams?: Record<string, string>;
   onResponse?: (res: RequestResult<TData>) => void;
   silent?: boolean;
