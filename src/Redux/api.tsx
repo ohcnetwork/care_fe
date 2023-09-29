@@ -1,18 +1,28 @@
-interface Route {
-  path: string;
-  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  noAuth?: boolean;
+import { IConfig } from "../Common/hooks/useConfig";
+import { AssetData } from "../Components/Assets/AssetTypes";
+import { LocationModel } from "../Components/Facility/models";
+import { UserModel } from "../Components/Users/models";
+import { PaginatedResponse } from "../Utils/request/types";
+
+/**
+ * A fake function that returns an empty object casted to type T
+ * @returns Empty object as type T
+ */
+function Type<T>(): T {
+  return {} as T;
 }
 
-interface Routes {
-  [name: string]: Route;
+interface JwtTokenObtainPair {
+  access: string;
+  refresh: string;
 }
 
-const routes: Routes = {
+const routes = {
   config: {
-    path: import.meta.env.REACT_APP_CONFIG || "/config.json",
+    path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
     method: "GET",
     noAuth: true,
+    TRes: Type<IConfig>(),
   },
 
   // Auth Endpoints
@@ -23,8 +33,10 @@ const routes: Routes = {
   },
 
   token_refresh: {
-    path: "/api/v1/auth/token/refresh",
+    path: "/api/v1/auth/token/refresh/",
     method: "POST",
+    TRes: Type<JwtTokenObtainPair>(),
+    TBody: Type<{ refresh: string }>(),
   },
 
   token_verify: {
@@ -54,6 +66,7 @@ const routes: Routes = {
   // User Endpoints
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
+    TRes: Type<UserModel>(),
   },
 
   userList: {
@@ -187,6 +200,7 @@ const routes: Routes = {
   listFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/",
     method: "GET",
+    TRes: Type<PaginatedResponse<LocationModel>>(),
   },
   createFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/",
@@ -792,6 +806,7 @@ const routes: Routes = {
   getAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "GET",
+    TRes: Type<AssetData>(),
   },
   deleteAsset: {
     path: "/api/v1/asset/{external_id}/",
@@ -1065,6 +1080,6 @@ const routes: Routes = {
     path: "/api/v1/hcx/make_claim/",
     method: "POST",
   },
-};
+} as const;
 
 export default routes;

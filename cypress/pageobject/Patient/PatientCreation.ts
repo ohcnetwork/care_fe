@@ -130,4 +130,8 @@ export class PatientPage {
   verifyStatusCode() {
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
   }
+
+  patientformvisibility() {
+    cy.get("[data-testid='current-address']").scrollIntoView();
+  }
 }

@@ -34,7 +34,7 @@ const FacilitiesSelectDialog = (props: Props) => {
         <Cancel onClick={handleCancel} />
         <Submit
           onClick={handleOk}
-          disabled={!selectedFacility.id}
+          disabled={!selectedFacility?.id}
           label={t("select")}
           data-testid="submit-button"
         />

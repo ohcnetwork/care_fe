@@ -23,7 +23,7 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
+import { parsePhoneNumber } from "../../Utils/utils.js";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
@@ -222,9 +222,10 @@ export const ShiftDetailsUpdate = (props: patientShiftProps) => {
         breathlessness_level: state.form.breathlessness_level,
         patient_category: state.form.patient_category,
         ambulance_driver_name: state.form.ambulance_driver_name,
-        ambulance_phone_number: parsePhoneNumberFromString(
-          state.form.ambulance_phone_number
-        )?.format("E.164"),
+        ambulance_phone_number:
+          state.form.ambulance_phone_number === "+91"
+            ? ""
+            : parsePhoneNumber(state.form.ambulance_phone_number),
         ambulance_number: state.form.ambulance_number,
       };
 

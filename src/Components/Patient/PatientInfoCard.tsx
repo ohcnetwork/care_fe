@@ -20,7 +20,7 @@ import { PatientModel } from "./models";
 import { getDimensionOrDash } from "../../Common/utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { useState } from "react";
-import { formatDate, formatDateTime } from "../../Utils/utils.js";
+import { formatAge, formatDate, formatDateTime } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
 
 export default function PatientInfoCard(props: {
@@ -143,7 +143,7 @@ export default function PatientInfoCard(props: {
                   </div>
                 )}
             </div>
-            <div className="flex flex-col items-center gap-1 sm:flex-row lg:mb-2">
+            <div className="flex flex-col items-center gap-2 sm:flex-row lg:mb-2">
               <Link
                 href={`/facility/${consultation?.facility}`}
                 className="font-semibold text-black hover:text-primary-600"
@@ -171,15 +171,24 @@ export default function PatientInfoCard(props: {
               </p>
             )}
             <p className="text-sm text-gray-900 sm:text-sm">
-              <span>{patient.age} years</span>
+              <span>{formatAge(patient.age, patient.date_of_birth, true)}</span>
               <span className="mx-2">•</span>
               <span>{patient.gender}</span>
               {consultation?.suggestion === "DC" && (
                 <>
                   <span className="mx-2">•</span>
-                  <span className="space-x-2">
-                    Domiciliary Care{" "}
-                    <CareIcon className="care-l-estate text-base text-gray-700" />
+                  <span>
+                    <CareIcon icon="l-estate" className="mr-1 text-gray-700" />
+                    Domiciliary Care
+                  </span>
+                </>
+              )}
+              {consultation?.is_readmission && (
+                <>
+                  <span className="mx-2">•</span>
+                  <span>
+                    <CareIcon icon="l-repeat" className="mr-1 text-gray-600" />
+                    Readmitted
                   </span>
                 </>
               )}

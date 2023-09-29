@@ -9,17 +9,18 @@ interface Props {
   bounds: DateRange;
   perPage: number;
   slots?: number;
-  defaultEnd?: boolean;
+  snapToLatest?: boolean;
+  reverse?: boolean;
 }
 
 const useRangePagination = ({ bounds, perPage, ...props }: Props) => {
   const [currentRange, setCurrentRange] = useState(
-    getInitialBounds(bounds, perPage, props.defaultEnd)
+    getInitialBounds(bounds, perPage, props.snapToLatest)
   );
 
   useEffect(() => {
-    setCurrentRange(getInitialBounds(bounds, perPage, props.defaultEnd));
-  }, [bounds, perPage, props.defaultEnd]);
+    setCurrentRange(getInitialBounds(bounds, perPage, props.snapToLatest));
+  }, [bounds, perPage, props.snapToLatest]);
 
   const next = () => {
     const { end } = currentRange;
@@ -62,17 +63,24 @@ const useRangePagination = ({ bounds, perPage, ...props }: Props) => {
     }
 
     const slots: DateRange[] = [];
-    const { start } = currentRange;
+    const { start, end } = currentRange;
     const delta = perPage / props.slots;
 
     for (let i = 0; i < props.slots; i++) {
-      slots.push({
-        start: new Date(start.valueOf() + delta * i),
-        end: new Date(start.valueOf() + delta * (i + 1)),
-      });
+      if (props.snapToLatest) {
+        slots.push({
+          start: new Date(end.valueOf() - delta * (i - 1)),
+          end: new Date(end.valueOf() - delta * i),
+        });
+      } else {
+        slots.push({
+          start: new Date(start.valueOf() + delta * i),
+          end: new Date(start.valueOf() + delta * (i + 1)),
+        });
+      }
     }
 
-    return slots;
+    return props.reverse ? slots.reverse() : slots;
   }, [currentRange, props.slots, perPage]);
 
   return {
@@ -90,7 +98,7 @@ export default useRangePagination;
 const getInitialBounds = (
   bounds: DateRange,
   perPage: number,
-  defaultEnd?: boolean
+  snapToLatest?: boolean
 ) => {
   const deltaBounds = bounds.end.valueOf() - bounds.start.valueOf();
 
@@ -98,7 +106,7 @@ const getInitialBounds = (
     return bounds;
   }
 
-  if (defaultEnd) {
+  if (snapToLatest) {
     return {
       start: new Date(bounds.end.valueOf() - perPage),
       end: bounds.end,

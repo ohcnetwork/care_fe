@@ -16,12 +16,14 @@ export class PatientConsultationPage {
   }
 
   fillIllnessHistory(history: string) {
+    cy.wait(5000);
     cy.get("#history_of_present_illness").scrollIntoView();
     cy.get("#history_of_present_illness").should("be.visible");
     cy.get("#history_of_present_illness").click().type(history);
   }
 
   enterConsultationDetails(
+    category: string,
     examinationDetails: string,
     weight: string,
     height: string,
@@ -30,6 +32,11 @@ export class PatientConsultationPage {
     verificationBy: string
   ) {
     cy.get("#symptoms").click();
+    cy.get("#category")
+      .click()
+      .then(() => {
+        cy.get("[role='option']").contains(category).click();
+      });
     cy.get("#examination_details").click().type(examinationDetails);
     cy.get("#weight").click().type(height);
     cy.get("#height").click().type(weight);
@@ -38,10 +45,12 @@ export class PatientConsultationPage {
     cy.get(
       "#icd11_diagnoses_object input[placeholder='Select'][role='combobox']"
     )
+      .scrollIntoView()
       .click()
       .type("1A");
     cy.get("#icd11_diagnoses_object [role='option']")
       .contains("1A03 Intestinal infections due to Escherichia coli")
+      .scrollIntoView()
       .click();
     cy.get("label[for='icd11_diagnoses_object']").click();
     cy.wait("@getIcdResults").its("response.statusCode").should("eq", 200);

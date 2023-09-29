@@ -33,6 +33,7 @@ describe("Patient Creation with consultation", () => {
   it("Create a new patient with no consultation", () => {
     patientPage.createPatient();
     patientPage.selectFacility("dummy facility");
+    patientPage.patientformvisibility();
     patientPage.enterPatientDetails(
       phone_number,
       emergency_phone_number,
@@ -69,6 +70,7 @@ describe("Patient Creation with consultation", () => {
     patientPage.interceptFacilities();
     patientPage.visitUpdatePatientUrl();
     patientPage.verifyStatusCode();
+    patientPage.patientformvisibility();
     updatePatientPage.enterPatientDetails(
       "Test E2E User Edited",
       "O+",
@@ -113,6 +115,7 @@ describe("Patient Creation with consultation", () => {
     patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
 
     patientConsultationPage.enterConsultationDetails(
+      "Stable",
       "Examination details and Clinical conditions",
       "70",
       "170",
