@@ -74,15 +74,16 @@ const HL7Monitor = (props: HL7MonitorProps) => {
         });
       } else {
         Notification.Error({
-          msg: "Something went wrong..!",
+          msg: "Something went wrong!",
         });
       }
     } else {
-      setIpAddress_error("Please Enter a Valid IP address !!");
+      setIpAddress_error("IP address is invalid");
     }
   };
 
-  const middleware = middlewareHostname || facilityMiddlewareHostname;
+  const fallbackMiddleware =
+    asset?.location_object?.middleware_address || facilityMiddlewareHostname;
 
   if (isLoading) return <Loading />;
   return (
@@ -93,11 +94,29 @@ const HL7Monitor = (props: HL7MonitorProps) => {
             <Card className="flex w-full flex-col">
               <form onSubmit={handleSubmit}>
                 <h2 className="mb-2 text-lg font-bold">Connection</h2>
-                <div className="flex flex-col">
+                <div className="flex flex-col gap-2">
                   <TextFormField
                     name="middlewareHostname"
-                    label="Middleware Hostname"
-                    placeholder={facilityMiddlewareHostname}
+                    label={
+                      <div className="flex flex-row gap-1">
+                        <p>Middleware Hostname</p>
+                        {!middlewareHostname && (
+                          <div className="tooltip">
+                            <CareIcon
+                              icon="l-info-circle"
+                              className="tooltip text-indigo-500 hover:text-indigo-600"
+                            />
+                            <span className="tooltip-text w-64 whitespace-normal">
+                              Middleware hostname sourced from{" "}
+                              {asset?.location_object?.middleware_address
+                                ? "asset location"
+                                : "asset facility"}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    }
+                    placeholder={fallbackMiddleware}
                     value={middlewareHostname}
                     onChange={(e) => setMiddlewareHostname(e.value)}
                     errorClassName="hidden"
@@ -127,12 +146,16 @@ const HL7Monitor = (props: HL7MonitorProps) => {
 
         {assetType === "HL7MONITOR" && (
           <HL7PatientVitalsMonitor
-            socketUrl={`wss://${middleware}/observations/${localipAddress}`}
+            socketUrl={`wss://${
+              middlewareHostname || fallbackMiddleware
+            }/observations/${localipAddress}`}
           />
         )}
         {assetType === "VENTILATOR" && (
           <VentilatorPatientVitalsMonitor
-            socketUrl={`wss://${middleware}/observations/${localipAddress}`}
+            socketUrl={`wss://${
+              middlewareHostname || fallbackMiddleware
+            }/observations/${localipAddress}`}
           />
         )}
       </div>

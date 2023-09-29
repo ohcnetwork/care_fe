@@ -155,6 +155,7 @@ export const UpdateFacilityMiddleware = (props: any) => {
               <TextFormField
                 name="middleware_address"
                 label="Facility Middleware Address"
+                required
                 value={state.form.middleware_address}
                 onChange={(e) => handleChange(e)}
                 error={state.errors?.middleware_address}
