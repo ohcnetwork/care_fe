@@ -26,7 +26,7 @@ const update_Link = async (
     pathParams: { external_id: assetbedId },
     body: {
       asset: assetId,
-      bed: bed.id,
+      bed: bed.id ?? "",
     },
   });
   Notification.Success({ msg: "AssetBed Link updated successfully" });

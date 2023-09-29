@@ -120,8 +120,11 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
       //   )
       // );
       const { res } = await request(routes.createAssetBed, {
-        pathParams: { external_id: assetId },
-        body: { meta: { ...data, ...presetData.data } },
+        body: {
+          meta: { ...data, ...presetData.data },
+          asset: assetId,
+          bed: bed?.id as string,
+        },
       });
       if (res?.status === 201) {
         Notification.Success({
