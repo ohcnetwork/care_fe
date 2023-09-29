@@ -308,6 +308,7 @@ export const ConsultationDetails = (props: any) => {
                   </ButtonV2>
                 ) : (
                   <ButtonV2
+                    id="create_shift_request"
                     onClick={() =>
                       navigate(
                         `/facility/${patientData.facility}/patient/${patientData.id}/shift/new`
@@ -351,6 +352,7 @@ export const ConsultationDetails = (props: any) => {
                 Patient Details
               </Link>
               <Link
+                id="patient_doctor_notes"
                 href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
                 className="btn btn-primary m-1 w-full hover:text-white"
               >
@@ -449,6 +451,7 @@ export const ConsultationDetails = (props: any) => {
                 </ButtonV2>
 
                 <ButtonV2
+                  id="discharge_patient_from_care"
                   onClick={() => setOpenDischargeDialog(true)}
                   disabled={!!consultationData.discharge_date}
                 >
@@ -495,7 +498,10 @@ export const ConsultationDetails = (props: any) => {
         <div className="mt-4 w-full border-b-2 border-gray-200">
           <div className="overflow-x-auto sm:flex sm:items-baseline">
             <div className="mt-4 sm:mt-0">
-              <nav className="flex space-x-6 overflow-x-auto pb-2 pl-2 ">
+              <nav
+                className="flex space-x-6 overflow-x-auto pb-2 pl-2 "
+                id="consultation_tab_nav"
+              >
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
                     if (
