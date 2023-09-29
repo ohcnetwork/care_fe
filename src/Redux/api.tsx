@@ -1,6 +1,7 @@
 import { IConfig } from "../Common/hooks/useConfig";
 import { AssetData } from "../Components/Assets/AssetTypes";
 import { LocationModel } from "../Components/Facility/models";
+import { Prescription } from "../Components/Medicine/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 
@@ -972,6 +973,8 @@ const routes = {
   createPrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
     method: "POST",
+    TBody: Type<Prescription>(),
+    TRes: Type<Prescription>(),
   },
 
   listAdministrations: {
@@ -997,6 +1000,8 @@ const routes = {
   discontinuePrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
     method: "POST",
+    TBody: Type<{ discontinued_reason: string }>(),
+    TRes: Type<Record<string, never>>(),
   },
 
   // HCX Endpoints

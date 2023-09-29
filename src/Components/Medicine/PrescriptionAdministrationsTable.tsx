@@ -20,6 +20,7 @@ import {
   formatTime,
 } from "../../Utils/utils";
 import useRangePagination from "../../Common/hooks/useRangePagination";
+import EditPrescriptionForm from "./EditPrescriptionForm";
 
 interface DateRange {
   start: Date;
@@ -299,6 +300,7 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
   const { t } = useTranslation();
   // const [showActions, setShowActions] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   const [showAdminister, setShowAdminister] = useState(false);
   const [showDiscontinue, setShowDiscontinue] = useState(false);
   const [administrations, setAdministrations] =
@@ -387,6 +389,21 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
                   prescription.discontinued ||
                   prescription.prescription_type === "DISCHARGE"
                 }
+                variant="secondary"
+                border
+                onClick={() => {
+                  setShowDetails(false);
+                  setShowEdit(true);
+                }}
+              >
+                <CareIcon icon="l-pen" className="text-lg" />
+                {t("edit")}
+              </Submit>
+              <Submit
+                disabled={
+                  prescription.discontinued ||
+                  prescription.prescription_type === "DISCHARGE"
+                }
                 onClick={() => setShowAdminister(true)}
               >
                 <CareIcon className="care-l-syringe text-lg" />
@@ -394,6 +411,34 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
               </Submit>
             </div>
           </div>
+        </DialogModal>
+      )}
+      {showEdit && (
+        <DialogModal
+          onClose={() => setShowEdit(false)}
+          show={showEdit}
+          title={`${t("edit")} ${t(
+            prescription.is_prn ? "prn_prescription" : "prescription_medication"
+          )}: ${
+            prescription.medicine_object?.name ?? prescription.medicine_old
+          }`}
+          description={
+            <div className="mt-2 flex w-full justify-start gap-2 text-warning-500">
+              <CareIcon icon="l-info-circle" className="text-base" />
+              <span>{t("edit_caution_note")}</span>
+            </div>
+          }
+          className="w-full max-w-3xl lg:min-w-[600px]"
+        >
+          <EditPrescriptionForm
+            initial={prescription}
+            onDone={(success) => {
+              setShowEdit(false);
+              if (success) {
+                props.refetch();
+              }
+            }}
+          />
         </DialogModal>
       )}
       <tr
