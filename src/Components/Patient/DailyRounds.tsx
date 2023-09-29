@@ -42,7 +42,7 @@ const initForm: any = {
   other_symptoms: "",
   physical_examination_info: "",
   other_details: "",
-  patient_category: "Comfort",
+  patient_category: "",
   current_health: 0,
   actions: null,
   review_interval: 0,
@@ -141,14 +141,14 @@ export const DailyRounds = (props: any) => {
       );
 
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           const data = {
             ...res.data,
             patient_category: res.data.patient_category
               ? PATIENT_CATEGORIES.find(
                   (i) => i.text === res.data.patient_category
-                )?.id || "Comfort"
-              : "Comfort",
+                )?.id ?? ""
+              : "",
             rhythm:
               (res.data.rhythm &&
                 RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
@@ -185,8 +185,8 @@ export const DailyRounds = (props: any) => {
             patient_category: res.data.patient_category
               ? PATIENT_CATEGORIES.find(
                   (i) => i.text === res.data.patient_category
-                )?.id || "Comfort"
-              : "Comfort",
+                )?.id ?? ""
+              : "",
             rhythm:
               (res.data.rhythm &&
                 RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
@@ -204,6 +204,12 @@ export const DailyRounds = (props: any) => {
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
+        case "patient_category":
+          if (!state.form[field]) {
+            errors[field] = "Please select a category";
+            invalidForm = true;
+          }
+          return;
         case "other_symptoms":
           if (
             state.form.additional_symptoms?.includes(9) &&
