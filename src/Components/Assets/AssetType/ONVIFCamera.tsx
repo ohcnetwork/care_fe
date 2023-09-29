@@ -161,7 +161,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
                         icon="l-info-circle"
                         className="tooltip text-indigo-500 hover:text-indigo-600"
                       />
-                      <span className="tooltip-text w-64 whitespace-normal">
+                      <span className="tooltip-text w-56 whitespace-normal">
                         Middleware hostname sourced from{" "}
                         {asset?.location_object?.middleware_address
                           ? "asset location"
