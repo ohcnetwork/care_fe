@@ -7,13 +7,6 @@ import {
   AssetTransaction,
 } from "./AssetTypes";
 import { statusType, useAbortableEffect } from "../../Common/utils";
-import { useDispatch } from "react-redux";
-import {
-  deleteAsset,
-  getAsset,
-  listAssetService,
-  listAssetTransaction,
-} from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
@@ -35,6 +28,8 @@ import dayjs from "dayjs";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import { AssetServiceEditModal } from "./AssetServiceEditModal";
 import Page from "../Common/components/Page";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface AssetManageProps {
   assetId: string;
@@ -64,7 +59,6 @@ const AssetManage = (props: AssetManageProps) => {
     ReactElement | ReactElement[]
   >();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const dispatch = useDispatch<any>();
   const limit = 14;
   const authUser = useAuthUser();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -75,25 +69,34 @@ const AssetManage = (props: AssetManageProps) => {
   const fetchData = useCallback(
     async (status: statusType) => {
       setIsLoading(true);
-      const assetData = await dispatch(getAsset(assetId));
+      // const assetData = await dispatch(getAsset(assetId));
+      const { data: assetData } = await request(routes.getAsset, {
+        pathParams: {
+          external_id: assetId,
+        },
+      });
       if (!status.aborted) {
         setIsLoading(false);
-        if (assetData?.data) {
-          setAsset(assetData.data);
+        if (assetData) {
+          setAsset(assetData);
 
           const transactionFilter = assetData.qr_code_id
             ? { qr_code_id: assetData.qr_code_id }
             : { external_id: assetId };
 
           const [transactionsData, servicesData] = await Promise.all([
-            dispatch(
-              listAssetTransaction({
-                ...transactionFilter,
+            request(routes.listAssetTransaction, {
+              ...transactionFilter,
+              query: {
                 limit,
                 offset,
-              })
-            ),
-            dispatch(listAssetService({}, assetId)),
+              },
+            }),
+            request(routes.listAssetService, {
+              pathParams: {
+                asset_external_id: assetId,
+              },
+            }),
           ]);
 
           if (transactionsData?.data) {
@@ -116,14 +119,14 @@ const AssetManage = (props: AssetManageProps) => {
         }
       }
     },
-    [dispatch, assetId, offset]
+    [assetId, offset]
   );
 
   useAbortableEffect(
     (status: statusType) => {
       fetchData(status);
     },
-    [dispatch, fetchData]
+    [fetchData]
   );
 
   const handlePagination = (page: number, limit: number) => {
@@ -323,8 +326,12 @@ const AssetManage = (props: AssetManageProps) => {
 
   const handleDelete = async () => {
     if (asset) {
-      const response = await dispatch(deleteAsset(asset.id));
-      if (response && response.status === 204) {
+      const { res } = await request(routes.deleteAsset, {
+        pathParams: {
+          external_id: asset.id,
+        },
+      });
+      if (res && res.status === 204) {
         Notification.Success({
           msg: "Asset deleted successfully",
         });

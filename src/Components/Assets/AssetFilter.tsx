@@ -3,11 +3,6 @@ import { useAbortableEffect, statusType } from "../../Common/utils";
 import { navigate, useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-// import { useDispatch } from "react-redux";
-// import {
-//   getFacilityAssetLocation,
-//   getPermittedFacility,
-// } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { LocationSelect } from "../Common/LocationSelect";
 import { AssetClass, AssetLocationObject } from "./AssetTypes";
@@ -84,11 +79,6 @@ function AssetFilter(props: any) {
   const fetchLocation = useCallback(
     async (status: statusType) => {
       if (locationId && facilityId) {
-        // const [locationData]: any = await Promise.all([
-        //   dispatch(
-        //     getFacilityAssetLocation(String(facilityId), String(locationId))
-        //   ),
-        // ]);
         const { data } = await request(routes.getFacilityAssetLocation, {
           pathParams: {
             facilityId: String(facilityId),

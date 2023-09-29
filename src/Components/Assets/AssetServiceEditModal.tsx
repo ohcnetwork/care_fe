@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { updateAssetService } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
@@ -11,6 +9,8 @@ import DateInputV2 from "../Common/DateInputV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { formatDate, formatDateTime } from "../../Utils/utils";
 import CareIcon from "../../CAREUI/icons/CareIcon";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 export const AssetServiceEditModal = (props: {
   asset?: AssetData;
@@ -24,23 +24,28 @@ export const AssetServiceEditModal = (props: {
     serviced_on: props.service_record?.serviced_on,
     note: props.service_record?.note,
   });
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [editRecord, setEditRecord] = useState<AssetServiceEdit>();
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
-    const data = {
+    const body = {
       serviced_on: form.serviced_on,
       note: form.note,
     };
-
-    const res = await dispatchAction(
-      updateAssetService(props.asset?.id ?? "", props.service_record.id, data)
-    );
+    const { data } = await request(routes.updateAssetService, {
+      pathParams: {
+        asset_external_id: props.asset?.id ?? "",
+        external_id: props.service_record.id,
+      },
+      body: body,
+    });
+    // const res = await dispatchAction(
+    //   updateAssetService(props.asset?.id ?? "", props.service_record.id, data)
+    // );
     setIsLoading(false);
-    if (res?.data) {
+    if (data) {
       Notification.Success({
         msg: "Asset service record updated successfully",
       });

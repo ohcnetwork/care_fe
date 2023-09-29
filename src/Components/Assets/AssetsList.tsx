@@ -1,13 +1,7 @@
-import { useDispatch } from "react-redux";
 import QrReader from "react-qr-reader";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import * as Notification from "../../Utils/Notifications.js";
-import {
-  getAnyFacility,
-  listAssets,
-  getFacilityAssetLocation,
-  getAsset,
-} from "../../Redux/actions";
+import { listAssets } from "../../Redux/actions";
 import { assetClassProps, AssetData } from "./AssetTypes";
 import { useState, useCallback, useEffect, lazy } from "react";
 import { Link, navigate } from "raviger";
@@ -28,6 +22,8 @@ import AssetImportModal from "./AssetImportModal";
 import Page from "../Common/components/Page";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import { useTranslation } from "react-i18next";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -54,7 +50,6 @@ const AssetsList = () => {
   const [asset_class, setAssetClass] = useState<string>();
   const [locationName, setLocationName] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
-  const dispatch: any = useDispatch();
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
   const [showFacilityDialog, setShowFacilityDialog] = useState(false);
   const [selectedFacility, setSelectedFacility] = useState<FacilityModel>({
@@ -75,7 +70,9 @@ const AssetsList = () => {
         location: qParams.facility ? qParams.location || "" : "",
         status: qParams.status || "",
       };
-      const { data } = await dispatch(listAssets(params));
+      const { data } = await request(routes.listAssets, {
+        query: params,
+      });
       if (!status.aborted) {
         setIsLoading(false);
         if (!data)
@@ -86,10 +83,12 @@ const AssetsList = () => {
           setAssets(data.results);
           setTotalCount(data.count);
           if (qParams.facility) {
-            const fetchFacility = await dispatch(
-              getAnyFacility(qParams.facility)
-            );
-            setSelectedFacility(fetchFacility.data as FacilityModel);
+            const { data } = await request(routes.getAnyFacility, {
+              pathParams: { id: qParams.facility },
+            });
+            if (data) {
+              setSelectedFacility(data);
+            }
           }
         }
       }
@@ -103,7 +102,6 @@ const AssetsList = () => {
       qParams.asset_class,
       qParams.location,
       qParams.status,
-      dispatch,
     ]
   );
 
@@ -123,43 +121,50 @@ const AssetsList = () => {
     (status: statusType) => {
       fetchData(status);
     },
-    [dispatch, fetchData]
+    [fetchData]
   );
   useEffect(() => {
     async function fetchFacilityName() {
       if (!qParams.facility) return setFacilityName("");
-      const res = await dispatch(getAnyFacility(qParams.facility, "facility"));
-      setFacilityName(res?.data?.name);
+      const { data } = await request(routes.getAnyFacility, {
+        pathParams: { id: qParams.facility },
+      });
+      setFacilityName(data?.name);
     }
     fetchFacilityName();
-  }, [dispatch, qParams.facility]);
+  }, [qParams.facility]);
 
   const fetchFacility = useCallback(
     async (status: statusType) => {
       if (!qParams.facility) return setFacility(undefined);
       setIsLoading(true);
-      const res = await dispatch(getAnyFacility(qParams.facility));
+      const res = await request(routes.getAnyFacility, {
+        pathParams: { id: qParams.facility },
+      });
       if (!status.aborted) {
         setFacility(res?.data);
         setIsLoading(false);
       }
     },
-    [dispatch, qParams.facility]
+    [qParams.facility]
   );
   const fetchLocationName = useCallback(
     async (status: statusType) => {
       if (!qParams.location || !qParams.facility)
         return setLocationName(undefined);
       setIsLoading(true);
-      const res = await dispatch(
-        getFacilityAssetLocation(qParams.facility, qParams.location)
-      );
+      const { data } = await request(routes.getFacilityAssetLocation, {
+        pathParams: {
+          facility_external_id: String(qParams.facility),
+          external_id: String(qParams.location),
+        },
+      });
       if (!status.aborted) {
-        setLocationName(res?.data?.name);
+        setLocationName(data?.name);
         setIsLoading(false);
       }
     },
-    [dispatch, qParams.facility, qParams.location]
+    [qParams.facility, qParams.location]
   );
 
   useAbortableEffect(
@@ -178,8 +183,10 @@ const AssetsList = () => {
       // QR Maybe searchParams "asset" or "assetQR"
       const assetId = params.asset || params.assetQR;
       if (assetId) {
-        const { data } = await dispatch(listAssets({ qr_code_id: assetId }));
-        return data.results[0].id;
+        const { data } = await request(routes.listAssets, {
+          query: { qr_code_id: assetId },
+        });
+        return data?.results[0].id;
       }
     } catch (err) {
       console.log(err);
@@ -187,11 +194,14 @@ const AssetsList = () => {
   };
 
   const checkValidAssetId = async (assetId: string) => {
-    const assetData = await dispatch(getAsset(assetId));
+    // const assetData = await dispatch(getAsset(assetId));
+    const { data: assetData } = await request(routes.getAsset, {
+      pathParams: { id: assetId },
+    });
     try {
-      if (assetData.data) {
+      if (assetData) {
         navigate(
-          `/facility/${assetData.data.location_object.facility.id}/assets/${assetId}`
+          `/facility/${assetData.location_object.facility.id}/assets/${assetId}`
         );
       }
     } catch (err) {

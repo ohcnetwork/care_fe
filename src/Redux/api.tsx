@@ -1,7 +1,10 @@
 import { IConfig } from "../Common/hooks/useConfig";
 import {
+  AssetBedModel,
   AssetData,
   AssetLocationObject,
+  AssetService,
+  AssetTransaction,
 } from "../Components/Assets/AssetTypes";
 import { FacilityModel, LocationModel } from "../Components/Facility/models";
 import { UserModel } from "../Components/Users/models";
@@ -180,6 +183,8 @@ const routes = {
 
   getAnyFacility: {
     path: "/api/v1/getallfacilities/{id}/",
+    method: "GET",
+    TRes: Res<FacilityModel>(),
   },
 
   updateFacility: {
@@ -228,6 +233,7 @@ const routes = {
   listAssetBeds: {
     path: "/api/v1/assetbed/",
     method: "GET",
+    TRes: Res<PaginatedResponse<AssetBedModel>>(),
   },
   createAssetBed: {
     path: "/api/v1/assetbed/",
@@ -245,6 +251,7 @@ const routes = {
   partialUpdateAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "PATCH",
+    TRes: Res<AssetBedModel>(),
   },
   deleteAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
@@ -796,6 +803,7 @@ const routes = {
   listAssets: {
     path: "/api/v1/asset",
     method: "GET",
+    TRes: Res<PaginatedResponse<AssetData>>(),
   },
   createAsset: {
     path: "/api/v1/asset/",
@@ -817,6 +825,7 @@ const routes = {
   deleteAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "DELETE",
+    TRes: Res<AssetData>(),
   },
   updateAsset: {
     path: "/api/v1/asset/{external_id}/",
@@ -833,6 +842,7 @@ const routes = {
   listAssetTransaction: {
     path: "/api/v1/asset_transaction/",
     method: "GET",
+    TRes: Res<PaginatedResponse<AssetTransaction>>(),
   },
   getAssetTransaction: {
     path: "/api/v1/asset_transaction/{id}",
@@ -844,6 +854,7 @@ const routes = {
   listAssetService: {
     path: "/api/v1/asset/{asset_external_id}/service_records/",
     method: "GET",
+    TRes: Res<PaginatedResponse<AssetService>>(),
   },
   getAssetService: {
     path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
@@ -852,6 +863,7 @@ const routes = {
   updateAssetService: {
     path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
     method: "PUT",
+    TRes: Res<AssetService>(),
   },
 
   // ABDM HealthID endpoints
