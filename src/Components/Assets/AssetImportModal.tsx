@@ -39,21 +39,18 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
     setSelectedFile(undefined);
     onClose && onClose();
   };
-  const {
-    data: facilityAssetLocations,
-    loading,
-    refetch,
-  } = useQuery(routes.listFacilityAssetLocation, {
-    pathParams: { facility_external_id: `${facility.id}` },
-  });
+  const { data: facilityAssetLocations, loading } = useQuery(
+    routes.listFacilityAssetLocation,
+    {
+      pathParams: { facility_external_id: `${facility.id}` },
+    }
+  );
 
   useEffect(() => {
-    if (!facilityAssetLocations) {
-      () => refetch();
-    } else if (facilityAssetLocations?.count) {
+    if (facilityAssetLocations?.count) {
       setLocations(facilityAssetLocations?.results);
     }
-  }, [facilityAssetLocations, refetch]);
+  }, [facilityAssetLocations]);
 
   useEffect(() => {
     const readFile = async () => {
