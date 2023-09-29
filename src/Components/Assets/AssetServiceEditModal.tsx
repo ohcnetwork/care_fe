@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { updateAssetService } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import ButtonV2 from "../Common/components/ButtonV2";
+import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
 import { AssetData, AssetService, AssetServiceEdit } from "./AssetTypes";
 import dayjs from "dayjs";
@@ -97,7 +97,10 @@ export const AssetServiceEditModal = (props: {
                       {edit.edited_by.username}
                     </p>
                   </div>
-                  <div className="flex items-center justify-center">
+                  <div
+                    className="flex items-center justify-center"
+                    id="view-asset-edit-history"
+                  >
                     <CareIcon icon="l-eye" className="text-lg" />
                   </div>
                 </div>
@@ -124,19 +127,25 @@ export const AssetServiceEditModal = (props: {
                   <p className="text-sm font-medium text-gray-500">
                     Serviced On
                   </p>
-                  <p className="text-gray-900">
+                  <p
+                    className="text-gray-900"
+                    id="edit-history-asset-servicedon"
+                  >
                     {formatDate(editRecord.serviced_on)}
                   </p>
                 </div>
                 <div className="mt-4 grow">
                   <p className="text-sm font-medium text-gray-500">Notes</p>
-                  <p className="text-gray-900">{editRecord.note || "-"}</p>
+                  <p className="text-gray-900" id="edit-history-asset-note">
+                    {editRecord.note || "-"}
+                  </p>
                 </div>
               </div>
             </div>
           )}
           <div className="flex justify-end">
             <ButtonV2
+              id="view-history-back-button"
               variant="secondary"
               onClick={() => {
                 editRecord ? setEditRecord(undefined) : props.handleClose();
@@ -199,18 +208,13 @@ export const AssetServiceEditModal = (props: {
             </div>
           </div>
         </div>
-        <div className="flex justify-end">
-          <ButtonV2
-            variant="primary"
+        <div className="flex flex-col justify-end gap-2 md:flex-row">
+          <Submit
+            label={`${isLoading ? "Updating" : "Update"}`}
             onClick={handleSubmit}
-            className="mr-2"
             loading={isLoading}
-          >
-            {isLoading ? "Updating" : "Update"}
-          </ButtonV2>
-          <ButtonV2 variant="secondary" onClick={props.handleClose}>
-            Cancel
-          </ButtonV2>
+          />
+          <Cancel onClick={props.handleClose} />
         </div>
       </div>
     </DialogModal>

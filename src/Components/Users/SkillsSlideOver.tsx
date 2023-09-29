@@ -55,6 +55,10 @@ export default ({ show, setShow, username }: IProps) => {
         Notification.Error({
           msg: "Error while adding skill",
         });
+      } else {
+        Notification.Success({
+          msg: "Skill added successfully",
+        });
       }
       setSelectedSkill(null);
       setIsLoading(false);
@@ -110,36 +114,33 @@ export default ({ show, setShow, username }: IProps) => {
       >
         <div>
           <div className="col-span-full sm:col-span-3 sm:col-start-2">
-            <div className="tooltip flex items-center gap-2">
-              <SkillSelect
-                multiple={false}
-                name="skill"
-                disabled={!authorizeForAddSkill}
-                showAll={true}
-                showNOptions={Infinity}
-                selected={selectedSkill}
-                setSelected={setSelectedSkill}
-                errors=""
-              />
-              <ButtonV2
-                disabled={!authorizeForAddSkill}
-                onClick={() => addSkill(username, selectedSkill)}
-                className="w-6rem"
-              >
-                {/* Replace "Add" in button with CircularProgress */}
-                {isLoading ? (
-                  <CircularProgress className="h-5 w-5" />
-                ) : (
-                  t("add")
+            {!isLoading && (
+              <div className="tooltip flex items-center gap-2">
+                <SkillSelect
+                  multiple={false}
+                  name="skill"
+                  disabled={!authorizeForAddSkill}
+                  showAll={true}
+                  showNOptions={Infinity}
+                  selected={selectedSkill}
+                  setSelected={setSelectedSkill}
+                  errors=""
+                  username={username}
+                />
+                <ButtonV2
+                  disabled={!authorizeForAddSkill}
+                  onClick={() => addSkill(username, selectedSkill)}
+                  className="w-6rem"
+                >
+                  {t("add")}
+                </ButtonV2>
+                {!authorizeForAddSkill && (
+                  <span className="tooltip-text tooltip-bottom -translate-x-24 translate-y-2">
+                    {t("contact_your_admin_to_add_skills")}
+                  </span>
                 )}
-              </ButtonV2>
-              {!authorizeForAddSkill && (
-                <span className="tooltip-text tooltip-bottom -translate-x-24 translate-y-2">
-                  {t("contact_your_admin_to_add_skills")}
-                </span>
-              )}
-            </div>
-            {/* While loading skills, we display an additional circular progress to show we are fetching the information*/}
+              </div>
+            )}
             {isLoading ? (
               <div className="mt-4 flex justify-center">
                 <CircularProgress />

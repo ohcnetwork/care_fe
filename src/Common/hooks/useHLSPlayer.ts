@@ -4,7 +4,7 @@ import { IOptions } from "./useMSEplayer";
 export const useHLSPLayer = (ref: ReactPlayer | null) => {
   const startStream = ({ onSuccess, onError }: IOptions = {}) => {
     try {
-      ref && ref.forceUpdate();
+      ref?.setState({ url: ref?.props.url + "&t=" + Date.now() });
       onSuccess && onSuccess(undefined);
     } catch (err) {
       onError && onError(err);

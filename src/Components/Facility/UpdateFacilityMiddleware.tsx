@@ -11,6 +11,7 @@ import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import Page from "../Common/components/Page";
+import { ConfigureHealthFacility } from "../ABDM/ConfigureHealthFacility";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
@@ -141,7 +142,7 @@ export const UpdateFacilityMiddleware = (props: any) => {
 
   return (
     <Page
-      title="Update Middleware"
+      title="Configure Facility"
       crumbsReplacements={{
         [facilityId]: { name: state.form.name },
       }}
@@ -166,6 +167,8 @@ export const UpdateFacilityMiddleware = (props: any) => {
           </div>
         </form>
       </div>
+
+      <ConfigureHealthFacility facilityId={facilityId} />
     </Page>
   );
 };

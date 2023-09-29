@@ -49,7 +49,7 @@ import ShowPushNotification from "../Components/Notifications/ShowPushNotificati
 import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
 import { AddLocationForm } from "../Components/Facility/AddLocationForm";
 import { AddBedForm } from "../Components/Facility/AddBedForm";
-import { LocationManagement } from "../Components/Facility/LocationManagement";
+import LocationManagement from "../Components/Facility/LocationManagement";
 import { BedManagement } from "../Components/Facility/BedManagement";
 import AssetsList from "../Components/Assets/AssetsList";
 import AssetManage from "../Components/Assets/AssetManage";
@@ -73,10 +73,9 @@ import { handleSignOut } from "../Utils/utils";
 import SessionExpired from "../Components/ErrorPages/SessionExpired";
 import ManagePrescriptions from "../Components/Medicine/ManagePrescriptions";
 import CentralNursingStation from "../Components/Facility/CentralNursingStation";
-import { ConfigureHealthFacility } from "../Components/ABDM/ConfigureHealthFacility";
 
 export default function AppRouter() {
-  const { main_logo, enable_hcx, enable_abdm } = useConfig();
+  const { main_logo, enable_hcx } = useConfig();
 
   const routes = {
     "/": () => <HospitalList />,
@@ -99,15 +98,6 @@ export default function AppRouter() {
     "/facility/:facilityId/update": ({ facilityId }: any) => (
       <FacilityCreate facilityId={facilityId} />
     ),
-    ...(enable_abdm
-      ? {
-          "/facility/:facilityId/health_facility": ({
-            facilityId,
-          }: {
-            facilityId: string;
-          }) => <ConfigureHealthFacility facilityId={facilityId} />,
-        }
-      : {}),
     "/facility/:facilityId/middleware/update": ({ facilityId }: any) => (
       <UpdateFacilityMiddleware facilityId={facilityId} />
     ),

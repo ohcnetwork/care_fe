@@ -411,7 +411,9 @@ export const NeurologicalTable = (props: any) => {
           <div className="my-2 text-xl font-semibold">Scale Description</div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-lg border bg-white px-4 py-2 shadow">
-              <div className="mb-2 text-xl font-semibold">Eye Open</div>
+              <div className="mb-2 text-xl font-semibold">
+                Eye Opening Response
+              </div>
               <div>
                 {EYE_OPEN_SCALE.map((x: any) => (
                   <div

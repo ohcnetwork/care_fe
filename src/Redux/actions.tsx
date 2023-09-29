@@ -1,5 +1,6 @@
 import { HCXClaimModel, HCXPolicyModel } from "../Components/HCX/models";
 import {
+  MedibaseMedicine,
   MedicineAdministrationRecord,
   Prescription,
 } from "../Components/Medicine/models";
@@ -803,8 +804,11 @@ export const listICD11Diagnosis = (params: object, key: string) => {
   return fireRequest("listICD11Diagnosis", [], params, null, key);
 };
 // Medibase
-export const listMedibaseMedicines = (query: string) => {
-  return fireRequest("listMedibaseMedicines", [], { query });
+export const listMedibaseMedicines = (
+  query: string,
+  type?: MedibaseMedicine["type"]
+) => {
+  return fireRequest("listMedibaseMedicines", [], { query, type });
 };
 
 // Resource
@@ -975,6 +979,15 @@ export const healthFacilityActions = {
       facility_id: id,
     });
   },
+
+  registerService: (id: string) => {
+    return fireRequest(
+      "registerHealthFacilityAsService",
+      [],
+      {},
+      { facility_id: id }
+    );
+  },
 };
 
 export const consentActions = {
@@ -1008,7 +1021,7 @@ export const PrescriptionActions = (consultation_external_id: string) => {
   const pathParams = { consultation_external_id };
 
   return {
-    list: (query?: Partial<Prescription>) => {
+    list: (query?: Record<string, string | boolean | number>) => {
       let altKey;
       if (query?.is_prn !== undefined) {
         altKey = query?.is_prn
@@ -1043,6 +1056,18 @@ export const PrescriptionActions = (consultation_external_id: string) => {
             obj,
             pathParams,
             `administer-medicine-${external_id}`
+          ),
+
+        listAdministrations: (query?: {
+          administered_date_after?: string;
+          administered_date_before?: string;
+        }) =>
+          fireRequest(
+            "listAdministrations",
+            [],
+            { prescription: external_id, ...query },
+            pathParams,
+            `list-administrations-${external_id}`
           ),
 
         /** Discontinue a prescription */
