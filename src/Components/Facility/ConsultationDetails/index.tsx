@@ -41,6 +41,7 @@ import { ConsultationVentilatorTab } from "./ConsultationVentilatorTab";
 import { ConsultationPressureSoreTab } from "./ConsultationPressureSoreTab";
 import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
+import ABDMRecordsTab from "../../ABDM/ABDMRecordsTab";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -68,6 +69,7 @@ const TABS = {
   NUTRITION: ConsultationNursingTab,
   PRESSURE_SORE: ConsultationPressureSoreTab,
   DIALYSIS: ConsultationDialysisTab,
+  ABDM: ABDMRecordsTab,
 };
 
 export const ConsultationDetails = (props: any) => {
