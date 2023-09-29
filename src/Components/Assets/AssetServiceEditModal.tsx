@@ -41,9 +41,6 @@ export const AssetServiceEditModal = (props: {
       },
       body: body,
     });
-    // const res = await dispatchAction(
-    //   updateAssetService(props.asset?.id ?? "", props.service_record.id, data)
-    // );
     setIsLoading(false);
     if (data) {
       Notification.Success({

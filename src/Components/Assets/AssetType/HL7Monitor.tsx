@@ -31,21 +31,15 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   const [localipAddress, setLocalIPAddress] = useState("");
   const [ipadrdress_error, setIpAddress_error] = useState("");
   const authUser = useAuthUser();
-  const {
-    data: facility,
-    loading,
-    refetch,
-  } = useQuery(routes.getPermittedFacility, {
+  const { data: facility, loading } = useQuery(routes.getPermittedFacility, {
     pathParams: { id: facilityId },
   });
 
   useEffect(() => {
     if (facility?.middleware_address) {
       setFacilityMiddlewareHostname(facility.middleware_address);
-    } else {
-      () => refetch();
     }
-  }, [facility, facilityId, refetch]);
+  }, [facility, facilityId]);
 
   useEffect(() => {
     setAssetType(asset?.asset_class);

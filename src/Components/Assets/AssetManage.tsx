@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, ReactElement, lazy } from "react";
+import { useState, useEffect, ReactElement, lazy } from "react";
 import {
   AssetClass,
   assetClassProps,
@@ -6,7 +6,6 @@ import {
   AssetService,
   AssetTransaction,
 } from "./AssetTypes";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
 import { navigate } from "raviger";
 import QRCode from "qrcode.react";
@@ -30,6 +29,7 @@ import { AssetServiceEditModal } from "./AssetServiceEditModal";
 import Page from "../Common/components/Page";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 
 interface AssetManageProps {
   assetId: string;
@@ -58,76 +58,65 @@ const AssetManage = (props: AssetManageProps) => {
   const [servicesDetails, setServiceDetails] = useState<
     ReactElement | ReactElement[]
   >();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const limit = 14;
   const authUser = useAuthUser();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [serviceEditData, setServiceEditData] = useState<
     AssetService & { open: boolean; viewOnly?: boolean }
   >();
+  const [transactionFilter, setTransactionFilter] = useState<any>({});
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      // const assetData = await dispatch(getAsset(assetId));
-      const { data: assetData } = await request(routes.getAsset, {
-        pathParams: {
-          external_id: assetId,
-        },
-      });
-      if (!status.aborted) {
-        setIsLoading(false);
-        if (assetData) {
-          setAsset(assetData);
-
-          const transactionFilter = assetData.qr_code_id
-            ? { qr_code_id: assetData.qr_code_id }
-            : { external_id: assetId };
-
-          const [transactionsData, servicesData] = await Promise.all([
-            request(routes.listAssetTransaction, {
-              ...transactionFilter,
-              query: {
-                limit,
-                offset,
-              },
-            }),
-            request(routes.listAssetService, {
-              pathParams: {
-                asset_external_id: assetId,
-              },
-            }),
-          ]);
-
-          if (transactionsData?.data) {
-            setTransactions(transactionsData.data.results);
-            setTotalCount(transactionsData.data.count);
-          } else {
-            Notification.Error({
-              msg: "Error fetching transactions",
-            });
-          }
-          if (servicesData?.data) {
-            setServices(servicesData.data.results);
-          } else {
-            Notification.Error({
-              msg: "Error fetching service logs",
-            });
-          }
-        } else {
-          navigate("/not-found");
-        }
-      }
+  const { data: assetData, loading } = useQuery(routes.getAsset, {
+    pathParams: {
+      external_id: assetId,
     },
-    [assetId, offset]
+  });
+
+  const { data: transactionsData, refetch } = useQuery(
+    routes.listAssetTransaction,
+    {
+      prefetch: false,
+      ...transactionFilter,
+      query: {
+        limit,
+        offset,
+      },
+    }
   );
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
+  const { data: servicesData, refetch: serviceRefetch } = useQuery(
+    routes.listAssetService,
+    {
+      pathParams: {
+        asset_external_id: assetId,
+      },
+    }
   );
+
+  useEffect(() => {
+    if (assetData) setAsset(assetData);
+  }, [assetData]);
+
+  useEffect(() => {
+    if (transactionsData) {
+      setTransactions(transactionsData.results);
+      setTotalCount(transactionsData.count);
+    }
+  }, [transactionsData]);
+
+  useEffect(() => {
+    if (servicesData) setServices(servicesData.results);
+  }, [servicesData]);
+
+  useEffect(() => {
+    if (assetData) {
+      const transactionFilter = assetData.qr_code_id
+        ? { qr_code_id: assetData.qr_code_id }
+        : { external_id: assetId };
+      setTransactionFilter(transactionFilter);
+      refetch();
+    }
+  }, [assetData, assetId, refetch]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -285,7 +274,7 @@ const AssetManage = (props: AssetManageProps) => {
     populateServiceTableRows(services);
   }, [services]);
 
-  if (isLoading) return <Loading />;
+  if (loading) return <Loading />;
   if (isPrintMode) return <PrintPreview />;
 
   const assetClassProp =
@@ -598,7 +587,7 @@ const AssetManage = (props: AssetManageProps) => {
           handleClose={() =>
             setServiceEditData({ ...serviceEditData, open: false })
           }
-          handleUpdate={() => fetchData({ aborted: false })}
+          handleUpdate={() => serviceRefetch()}
           show={serviceEditData.open}
           viewOnly={serviceEditData.viewOnly}
         />

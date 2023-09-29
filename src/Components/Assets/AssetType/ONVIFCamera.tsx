@@ -40,21 +40,15 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
   const [refreshPresetsHash, setRefreshPresetsHash] = useState(
     Number(new Date())
   );
-  const {
-    data: facility,
-    loading,
-    refetch,
-  } = useQuery(routes.getPermittedFacility, {
+  const { data: facility, loading } = useQuery(routes.getPermittedFacility, {
     pathParams: { id: facilityId },
   });
   const authUser = useAuthUser();
   useEffect(() => {
     if (facility?.middleware_address) {
       setFacilityMiddlewareHostname(facility.middleware_address);
-    } else {
-      () => refetch();
     }
-  }, [facility, facilityId, refetch]);
+  }, [facility, facilityId]);
 
   useEffect(() => {
     if (asset) {
@@ -110,15 +104,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
       const presetData = await axios.get(
         `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
       );
-      // const res: any = await Promise.resolve(
-      //   dispatch(
-      //     createAssetBed(
-      //       { meta: { ...data, ...presetData.data } },
-      //       assetId,
-      //       bed?.id as string
-      //     )
-      //   )
-      // );
+
       const { res } = await request(routes.createAssetBed, {
         body: {
           meta: { ...data, ...presetData.data },
