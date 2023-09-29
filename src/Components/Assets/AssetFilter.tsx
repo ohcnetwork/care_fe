@@ -1,16 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
-import { useAbortableEffect, statusType } from "../../Common/utils";
 import { navigate, useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-import * as Notification from "../../Utils/Notifications.js";
 import { LocationSelect } from "../Common/LocationSelect";
 import { AssetClass, AssetLocationObject } from "./AssetTypes";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
-import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 
 const initialLocation = {
   id: "",
@@ -38,6 +36,26 @@ function AssetFilter(props: any) {
   const [locationId, setLocationId] = useState<string | "">(filter.location);
   const [qParams, _] = useQueryParams();
 
+  const { data: facilityData } = useQuery(routes.getPermittedFacility, {
+    pathParams: { id: facilityId },
+  });
+
+  const { data: locationData } = useQuery(routes.getFacilityAssetLocation, {
+    pathParams: {
+      facilityId: String(facilityId),
+      locationId: String(locationId),
+    },
+  });
+
+  useEffect(() => {
+    if (facilityData) {
+      setFacility(facilityData);
+    }
+    if (locationData) {
+      setLocation(locationData);
+    }
+  }, [facilityData, locationData]);
+
   useEffect(() => {
     setFacilityId(facility?.id ? `${facility?.id}` : "");
     setLocationId(
@@ -59,52 +77,6 @@ function AssetFilter(props: any) {
     else navigate("/assets");
   }, [qParams]);
 
-  const fetchFacility = useCallback(
-    async (status: statusType) => {
-      if (facilityId) {
-        const { data: facilityData } = await request(
-          routes.getPermittedFacility,
-          {
-            pathParams: { id: facilityId },
-          }
-        );
-        if (!status.aborted && facilityData) {
-          setFacility(facilityData);
-        }
-      }
-    },
-    [facilityId]
-  );
-
-  const fetchLocation = useCallback(
-    async (status: statusType) => {
-      if (locationId && facilityId) {
-        const { data } = await request(routes.getFacilityAssetLocation, {
-          pathParams: {
-            facilityId: String(facilityId),
-            locationId: String(locationId),
-          },
-        });
-        if (!status.aborted) {
-          if (!data)
-            Notification.Error({
-              msg: "Something went wrong..!",
-            });
-          else {
-            setLocation(data);
-          }
-        }
-      } else {
-        setLocation(initialLocation);
-      }
-    },
-    [facilityId, locationId]
-  );
-
-  useAbortableEffect((status: statusType) => {
-    filter.facility && fetchFacility(status);
-    filter.location && fetchLocation(status);
-  }, []);
   const applyFilter = () => {
     const data = {
       facility: facilityId,
