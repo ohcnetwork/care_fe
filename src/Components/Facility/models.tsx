@@ -1,8 +1,8 @@
-import { AssignedToObjectModel } from "../Patient/models";
+import { AssetData } from "../Assets/AssetTypes";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
-import { AssetData } from "../Assets/AssetTypes";
-import { UserBareMinimum } from "../Users/models";
+import { AssignedToObjectModel } from "../Patient/models";
+import { UserAssignedModel, UserBareMinimum } from "../Users/models";
 
 export interface LocalBodyModel {
   name: string;
@@ -193,6 +193,7 @@ export interface LocationModel {
   facility?: {
     name: string;
   };
+  duty_staff_objects?: UserAssignedModel[];
 }
 
 export interface BedModel {

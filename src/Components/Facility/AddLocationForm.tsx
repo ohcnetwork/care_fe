@@ -1,17 +1,20 @@
-import { useState, useEffect, lazy, SyntheticEvent } from "react";
+import { navigate } from "raviger";
+import { SyntheticEvent, lazy, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   createFacilityAssetLocation,
   getAnyFacility,
   getFacilityAssetLocation,
+  getFacilityUsers,
   updateFacilityAssetLocation,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { navigate } from "raviger";
-import { Submit, Cancel } from "../Common/components/ButtonV2";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
+import { MultiSelectFormField } from "../Form/FormFields/SelectFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { UserAssignedModel } from "../Users/models";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -29,7 +32,15 @@ export const AddLocationForm = (props: LocationFormProps) => {
   const [description, setDescription] = useState("");
   const [facilityName, setFacilityName] = useState("");
   const [locationName, setLocationName] = useState("");
-  const [errors, setErrors] = useState<any>({
+  const [doctorList, setDoctorList] = useState<UserAssignedModel[]>([]);
+  const [staffList, setStaffList] = useState<UserAssignedModel[]>([]);
+  const [doctors, setDoctors] = useState<UserAssignedModel[]>([]);
+  const [staff, setStaff] = useState<UserAssignedModel[]>([]);
+  const [errors, setErrors] = useState<{
+    name: string;
+    description: string;
+    middlewareAddress: string;
+  }>({
     name: "",
     description: "",
     middlewareAddress: "",
@@ -41,9 +52,21 @@ export const AddLocationForm = (props: LocationFormProps) => {
     async function fetchFacilityName() {
       setIsLoading(true);
       if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
+        const facility = await dispatchAction(getAnyFacility(facilityId));
+        const doctor = await dispatchAction(
+          getFacilityUsers(facilityId, {
+            user_type: "Doctor",
+            home_facility: facilityId,
+          })
+        );
+        const staff = await dispatchAction(
+          getFacilityUsers(facilityId, {
+            user_type: "Staff",
+          })
+        );
+        setFacilityName(facility?.data?.name || "");
+        setDoctorList(doctor?.data?.results || []);
+        setStaffList(staff?.data?.results || []);
       }
       if (locationId) {
         const res = await dispatchAction(
@@ -54,6 +77,16 @@ export const AddLocationForm = (props: LocationFormProps) => {
         setLocationName(res?.data?.name || "");
         setDescription(res?.data?.description || "");
         setMiddlewareAddress(res?.data?.middleware_address || "");
+        setDoctors(
+          res?.data?.duty_staff_objects
+            .filter((doc: UserAssignedModel) => doc.user_type === "Doctor")
+            .map((doc: UserAssignedModel) => doc.id) || []
+        );
+        setStaff(
+          res?.data?.duty_staff_objects
+            .filter((s: UserAssignedModel) => s.user_type === "Staff")
+            .map((s: UserAssignedModel) => s.id) || []
+        );
       }
       setIsLoading(false);
     }
@@ -98,6 +131,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
       name,
       description,
       middleware_address: middlewareAddress,
+      duty_staff: [...doctors, ...staff],
     };
 
     const res = await dispatchAction(
@@ -151,6 +185,12 @@ export const AddLocationForm = (props: LocationFormProps) => {
         <div className="cui-card">
           <form onSubmit={handleSubmit}>
             <div className="mt-2 grid grid-cols-1 gap-4">
+              <div className="flex flex-row items-center">
+                <label className="text-lg font-bold text-gray-900">
+                  General Details
+                </label>
+                <hr className="ml-6 flex-1 border border-gray-400" />
+              </div>
               <div>
                 <TextFormField
                   name="name"
@@ -180,6 +220,38 @@ export const AddLocationForm = (props: LocationFormProps) => {
                   value={middlewareAddress}
                   onChange={(e) => setMiddlewareAddress(e.value)}
                   error={errors.middlewareAddress}
+                />
+              </div>
+              <div className="flex flex-row items-center">
+                <label className="text-lg font-bold text-gray-900">
+                  Duty Staff
+                </label>
+                <hr className="ml-6 flex-1 border border-gray-400" />
+              </div>
+              <div>
+                <MultiSelectFormField
+                  name="doctors"
+                  label="Doctors"
+                  onChange={(e) => setDoctors(e.value)}
+                  options={doctorList}
+                  value={doctors}
+                  optionLabel={(option: any) =>
+                    `${option.first_name} ${option.last_name}`
+                  }
+                  optionValue={(option: any) => option.id}
+                />
+              </div>
+              <div>
+                <MultiSelectFormField
+                  name="staff"
+                  label="Staff"
+                  onChange={(e) => setStaff(e.value)}
+                  options={staffList}
+                  value={staff}
+                  optionLabel={(option: any) =>
+                    `${option.first_name} ${option.last_name}`
+                  }
+                  optionValue={(option: any) => option.id}
                 />
               </div>
             </div>
