@@ -1,5 +1,4 @@
 import { MutableRefObject, useEffect, useState } from "react";
-import { getDay, getDaysInMonth, isEqual } from "date-fns";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Popover } from "@headlessui/react";
@@ -89,11 +88,11 @@ const DateInputV2: React.FC<Props> = ({
   };
 
   const isSelectedDate = (date: number) => {
-    if (value)
-      return isEqual(
-        new Date(value.getFullYear(), value.getMonth(), date),
-        value
-      );
+    if (value) {
+      return dayjs(
+        new Date(value.getFullYear(), value.getMonth(), date)
+      ).isSame(dayjs(value));
+    }
   };
 
   type CloseFunction = (
@@ -114,9 +113,11 @@ const DateInputV2: React.FC<Props> = ({
   };
 
   const getDayCount = (date: Date) => {
-    const daysInMonth = getDaysInMonth(date);
+    const daysInMonth = dayjs(date).daysInMonth();
 
-    const dayOfWeek = getDay(new Date(date.getFullYear(), date.getMonth(), 1));
+    const dayOfWeek = dayjs(
+      new Date(date.getFullYear(), date.getMonth(), 1)
+    ).day();
     const blankDaysArray = [];
     for (let i = 1; i <= dayOfWeek; i++) {
       blankDaysArray.push(i);
