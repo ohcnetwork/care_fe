@@ -70,43 +70,38 @@ const AssetManage = (props: AssetManageProps) => {
     pathParams: {
       external_id: assetId,
     },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setAsset(data);
+      }
+    },
   });
 
-  const { data: transactionsData, refetch } = useQuery(
-    routes.listAssetTransaction,
-    {
-      prefetch: false,
-      ...transactionFilter,
-      query: {
-        limit,
-        offset,
-      },
-    }
-  );
+  const { refetch } = useQuery(routes.listAssetTransaction, {
+    prefetch: false,
+    ...transactionFilter,
+    query: {
+      limit,
+      offset,
+    },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setTransactions(data.results);
+        setTotalCount(data.count);
+      }
+    },
+  });
 
-  const { data: servicesData, refetch: serviceRefetch } = useQuery(
-    routes.listAssetService,
-    {
-      pathParams: {
-        asset_external_id: assetId,
-      },
-    }
-  );
-
-  useEffect(() => {
-    if (assetData) setAsset(assetData);
-  }, [assetData]);
-
-  useEffect(() => {
-    if (transactionsData) {
-      setTransactions(transactionsData.results);
-      setTotalCount(transactionsData.count);
-    }
-  }, [transactionsData]);
-
-  useEffect(() => {
-    if (servicesData) setServices(servicesData.results);
-  }, [servicesData]);
+  const { refetch: serviceRefetch } = useQuery(routes.listAssetService, {
+    pathParams: {
+      asset_external_id: assetId,
+    },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setServices(data.results);
+      }
+    },
+  });
 
   useEffect(() => {
     if (assetData) {

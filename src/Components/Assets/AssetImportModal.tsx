@@ -17,7 +17,6 @@ import useConfig from "../../Common/hooks/useConfig";
 import DialogModal from "../Common/Dialog";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
-import Loading from "../Common/Loading";
 
 interface Props {
   open: boolean;
@@ -39,18 +38,14 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
     setSelectedFile(undefined);
     onClose && onClose();
   };
-  const { data: facilityAssetLocations, loading } = useQuery(
-    routes.listFacilityAssetLocation,
-    {
-      pathParams: { facility_external_id: `${facility.id}` },
-    }
-  );
-
-  useEffect(() => {
-    if (facilityAssetLocations?.count) {
-      setLocations(facilityAssetLocations?.results);
-    }
-  }, [facilityAssetLocations]);
+  useQuery(routes.listFacilityAssetLocation, {
+    pathParams: { facility_external_id: `${facility.id}` },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setLocations(data.results);
+      }
+    },
+  });
 
   useEffect(() => {
     const readFile = async () => {
@@ -181,8 +176,6 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
       );
     setSelectedFile(dropedFile);
   };
-
-  if (loading) return <Loading />;
 
   return (
     <DialogModal

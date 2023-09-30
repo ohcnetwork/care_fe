@@ -36,25 +36,27 @@ function AssetFilter(props: any) {
   const [locationId, setLocationId] = useState<string | "">(filter.location);
   const [qParams, _] = useQueryParams();
 
-  const { data: facilityData } = useQuery(routes.getPermittedFacility, {
+  useQuery(routes.getPermittedFacility, {
     pathParams: { id: facilityId },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setFacility(data);
+      }
+    },
   });
 
-  const { data: locationData } = useQuery(routes.getFacilityAssetLocation, {
+  useQuery(routes.getFacilityAssetLocation, {
     pathParams: {
       facilityId: String(facilityId),
       locationId: String(locationId),
     },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setLocation(data);
+      }
+    },
+    prefetch: !!(facilityId && locationId),
   });
-
-  useEffect(() => {
-    if (facilityData) {
-      setFacility(facilityData);
-    }
-    if (locationData) {
-      setLocation(locationData);
-    }
-  }, [facilityData, locationData]);
 
   useEffect(() => {
     setFacilityId(facility?.id ? `${facility?.id}` : "");

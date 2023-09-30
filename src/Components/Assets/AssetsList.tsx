@@ -66,27 +66,26 @@ const AssetsList = () => {
     status: qParams.status || "",
   };
 
-  const { data: assetList } = useQuery(routes.listAssets, {
+  useQuery(routes.listAssets, {
     query: params,
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setAssets(data.results);
+        setTotalCount(data.count);
+      }
+    },
   });
-  const { data: facilityResponse } = useQuery(routes.getAnyFacility, {
+
+  useQuery(routes.getAnyFacility, {
     pathParams: { id: qParams.facility },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setFacility(data);
+        setSelectedFacility(data);
+        setFacilityName(data.name);
+      }
+    },
   });
-
-  useEffect(() => {
-    if (assetList) {
-      setAssets(assetList.results);
-      setTotalCount(assetList.count);
-    }
-  }, [assetList]);
-
-  useEffect(() => {
-    if (facilityResponse) {
-      setFacility(facilityResponse);
-      setSelectedFacility(facilityResponse);
-      setFacilityName(facilityResponse.name);
-    }
-  }, [facilityResponse]);
 
   useEffect(() => {
     setAssetType(qParams.asset_type);
