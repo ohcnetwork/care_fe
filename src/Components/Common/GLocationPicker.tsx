@@ -156,7 +156,9 @@ const Map: React.FC<MapProps> = ({
           places.length > 0 &&
           places[0].geometry?.location
         ) {
-          handleOnChange(places[0].geometry.location);
+          const selectedLocation = places[0].geometry.location;
+          handleOnChange(selectedLocation);
+          map?.setCenter(selectedLocation);
         }
       });
     }
