@@ -364,13 +364,14 @@ const DateInputV2: React.FC<Props> = ({
                             <div
                               onClick={setDateValue(d, close)}
                               className={classNames(
-                                "flex h-full cursor-pointer items-center justify-center rounded text-center text-sm leading-loose text-black transition duration-100 ease-in-out",
+                                "flex h-full items-center justify-center rounded text-center text-sm leading-loose text-black transition duration-100 ease-in-out",
                                 isDateWithinConstraints(d)
                                   ? value &&
                                       (isSelectedDate(d)
                                         ? "bg-primary-500 font-bold text-white"
-                                        : "hover:bg-gray-300")
-                                  : "!cursor-not-allowed bg-gray-200 !text-gray-500"
+                                        : "hover:bg-gray-300") +
+                                        " cursor-pointer"
+                                  : "!cursor-not-allowed bg-gray-200 !text-gray-400"
                               )}
                             >
                               {d}
