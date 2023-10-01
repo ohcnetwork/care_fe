@@ -93,14 +93,6 @@ export interface AssetData {
 
 export type AssetUpdate = Partial<AssetData>;
 
-export interface AssetBody {
-  asset: string;
-  bed: string;
-  meta?: {
-    [key: string]: any;
-  };
-}
-
 export interface AssetsResponse {
   count: number;
   next?: string;
@@ -141,12 +133,14 @@ export interface AssetTransaction {
 }
 
 export interface AssetBedModel {
-  id: string;
-  asset_object: AssetData;
-  bed_object: BedModel;
-  created_date: string;
-  modified_date: string;
-  meta: Record<string, any>;
+  id?: string;
+  asset_object?: AssetData;
+  bed_object?: BedModel;
+  created_date?: string;
+  modified_date?: string;
+  meta?: Record<string, any>;
+  asset?: string;
+  bed?: string;
 }
 
 export interface AssetServiceEdit {
