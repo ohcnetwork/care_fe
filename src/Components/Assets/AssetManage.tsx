@@ -321,12 +321,6 @@ const AssetManage = (props: AssetManageProps) => {
           navigate("/assets");
         },
       });
-      // if (res?.status === 204) {
-      //   Notification.Success({
-      //     msg: "Asset deleted successfully",
-      //   });
-      //   navigate("/assets");
-      // }
     }
   };
 
