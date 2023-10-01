@@ -1,7 +1,6 @@
 import ButtonV2 from "../Common/components/ButtonV2";
 import { navigate } from "raviger";
 import { lazy, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import { externalResultList } from "../../Redux/actions";
 import ListFilter from "./ListFilter";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
@@ -15,12 +14,14 @@ import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import CountBlock from "../../CAREUI/display/Count";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import Page from "../Common/components/Page";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
+import { IExternalResult } from "./types";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultList() {
-  const dispatch: any = useDispatch();
-  const [data, setData] = useState([]);
+  const [resultListData, setResultListData] = useState<IExternalResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const {
@@ -57,7 +58,7 @@ export default function ResultList() {
 
     setPhoneNumberError("Enter a valid number");
   };
-
+  const { res, data, loading } = useQuery(routes.externalResultList);
   let manageResults: any = null;
   useEffect(() => {
     setIsLoading(true);
@@ -81,23 +82,21 @@ export default function ResultList() {
       srf_id: qParams.srf_id || undefined,
     };
 
-    dispatch(externalResultList(params, "externalResultList"))
-      .then((res: any) => {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-          setIsLoading(false);
-        }
-      })
-      .catch(() => {
-        setIsLoading(false);
-      });
+    if (loading) {
+      setIsLoading(true);
+    } else if (res && data) {
+      setResultListData(data.results);
+      setTotalCount(data.count);
+      setIsLoading(false);
+    }
 
     if (!params.mobile_number) {
       setPhoneNum("+91");
     }
   }, [
-    dispatch,
+    res,
+    data,
+    loading,
     qParams.name,
     qParams.page,
     qParams.mobile_number,
@@ -158,8 +157,8 @@ export default function ResultList() {
   };
 
   let resultList: any[] = [];
-  if (data && data.length) {
-    resultList = data.map((result: any) => {
+  if (data && resultListData.length) {
+    resultList = resultListData.map((result: any) => {
       const resultUrl = `/external_results/${result.id}`;
       return (
         <tr key={`usr_${result.id}`} className="bg-white">
@@ -173,7 +172,7 @@ export default function ResultList() {
                 className="group inline-flex space-x-2 text-sm leading-5"
               >
                 <p className="text-gray-800 transition duration-150 ease-in-out group-hover:text-gray-900">
-                  {result.name} - {result.age} {result.age_in}
+                  {`${result.name} hi`} - {result.age} {result.age_in}
                 </p>
               </a>
             </div>
@@ -222,9 +221,9 @@ export default function ResultList() {
         </td>
       </tr>
     );
-  } else if (data && data.length) {
+  } else if (data && resultListData.length) {
     manageResults = <>{resultList}</>;
-  } else if (data && data.length === 0) {
+  } else if (data && resultListData.length === 0) {
     manageResults = (
       <tr className="bg-white">
         <td colSpan={5}>
@@ -302,6 +301,7 @@ export default function ResultList() {
             <div className="w-full max-w-sm">
               <PhoneNumberFormField
                 name="mobile_number"
+                key={`mobile_number_${phone_number}`}
                 labelClassName="hidden"
                 value={phone_number}
                 onChange={(e) => setPhoneNum(e.value)}

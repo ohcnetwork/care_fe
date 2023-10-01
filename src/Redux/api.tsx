@@ -1,5 +1,6 @@
 import { IConfig } from "../Common/hooks/useConfig";
 import { AssetData } from "../Components/Assets/AssetTypes";
+import { IExternalResultList } from "../Components/ExternalResult/types";
 import { LocationModel } from "../Components/Facility/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
@@ -484,6 +485,8 @@ const routes = {
   // External Results
   externalResultList: {
     path: "/api/v1/external_result/",
+    method: "GET",
+    TRes: Type<IExternalResultList>(),
   },
   externalResult: {
     path: "/api/v1/external_result/{id}/",
