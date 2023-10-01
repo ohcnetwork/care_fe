@@ -405,7 +405,7 @@ const AssetCreate = (props: AssetProps) => {
   if (locations.length === 0) {
     return (
       <Page
-        title={assetId ? t("Update Asset") : t("Create New Asset")}
+        title={assetId ? t("update_asset") : t("create_new_asset")}
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
           assets: { style: "text-gray-200 pointer-events-none" },
@@ -420,14 +420,14 @@ const AssetCreate = (props: AssetProps) => {
             </div>
           </h1>
           <p className="text-gray-600">
-            {t("You need at least a location to create an assest.")}
+            {t("you_need_at_least_a_location_to_create_an_assest")}
           </p>
           <button
             className="btn-primary btn mt-5"
             onClick={() => navigate(`/facility/${facilityId}/location/add`)}
           >
             <i className="fas fa-plus mr-2 text-white"></i>
-            {t("Add Location")}
+            {t("add_location")}
           </button>
         </section>
       </Page>
@@ -442,7 +442,7 @@ const AssetCreate = (props: AssetProps) => {
           className="btn btn-default mb-2"
         >
           <i className="fas fa-times mr-2"></i>
-          {t("Close Scanner")}
+          {t("close_scanner")}
         </button>
         <QrReader
           delay={300}
@@ -455,7 +455,7 @@ const AssetCreate = (props: AssetProps) => {
           style={{ width: "100%" }}
         />
         <h2 className="self-center text-center text-lg">
-          {t("Scan Asset QR!")}
+          {t("scan_asset_qr")}
         </h2>
       </div>
     );
@@ -483,7 +483,7 @@ const AssetCreate = (props: AssetProps) => {
   return (
     <div className="relative flex flex-col">
       <Page
-        title={`${assetId ? t("Update") : t("Create")} Asset`}
+        title={`${assetId ? t("update") : t("create")} Asset`}
         className="grow-0 pl-6"
         crumbsReplacements={{
           [facilityId]: { name: facilityName },
@@ -538,7 +538,7 @@ const AssetCreate = (props: AssetProps) => {
                     >
                       <TextFormField
                         name="name"
-                        label={t("Asset Name")}
+                        label={t("asset_name")}
                         required
                         value={name}
                         onChange={({ value }) => setName(value)}
@@ -548,7 +548,7 @@ const AssetCreate = (props: AssetProps) => {
 
                     {/* Location */}
                     <FieldLabel className="w-max text-sm" required>
-                      {t("Asset Location")}
+                      {t("asset_location")}
                     </FieldLabel>
                     <div
                       ref={fieldRef["location"]}
@@ -575,7 +575,7 @@ const AssetCreate = (props: AssetProps) => {
                         data-testid="asset-type-input"
                       >
                         <SelectFormField
-                          label={t("Asset Type")}
+                          label={t("asset_type")}
                           name="asset_type"
                           required
                           options={[
@@ -610,7 +610,7 @@ const AssetCreate = (props: AssetProps) => {
                         <SelectFormField
                           disabled={!!(props.assetId && asset_class)}
                           name="asset_class"
-                          label={t("Asset Class")}
+                          label={t("asset_class")}
                           value={asset_class}
                           options={[
                             { title: "ONVIF Camera", value: AssetClass.ONVIF },
@@ -637,8 +637,8 @@ const AssetCreate = (props: AssetProps) => {
                     >
                       <TextAreaFormField
                         name="asset_description"
-                        label={t("Description")}
-                        placeholder={t("Details about the equipment")}
+                        label={t("description")}
+                        placeholder={t("details_about_the_equipment")}
                         value={description}
                         onChange={({ value }) => setDescription(value)}
                         error={state.errors.description}
@@ -668,7 +668,7 @@ const AssetCreate = (props: AssetProps) => {
                         className="col-span-6"
                         required
                         name="is_working"
-                        label={t("Working Status")}
+                        label={t("working_status")}
                         options={["true", "false"]}
                         optionLabel={(option) => {
                           return (
@@ -696,8 +696,8 @@ const AssetCreate = (props: AssetProps) => {
                     >
                       <TextAreaFormField
                         name="not_working_reason"
-                        label={t("Why the asset is not working?")}
-                        placeholder={t("Describe why the asset is not working")}
+                        label={t("why_the_asset_is_not_working")}
+                        placeholder={t("describe_why_the_asset_is_not_working")}
                         value={not_working_reason}
                         onChange={(e) => setNotWorkingReason(e.value)}
                         error={state.errors.not_working_reason}
@@ -721,7 +721,7 @@ const AssetCreate = (props: AssetProps) => {
                           id="qr_code_id"
                           name="qr_code_id"
                           placeholder=""
-                          label={t("Asset QR ID")}
+                          label={t("asset_qr_id")}
                           value={qrCodeId}
                           onChange={(e) => setQrCodeId(e.value)}
                           error={state.errors.qr_code_id}
@@ -747,9 +747,9 @@ const AssetCreate = (props: AssetProps) => {
                       <TextFormField
                         id="manufacturer"
                         name="manufacturer"
-                        label={t("Manufacturer")}
+                        label={t("manufacturer")}
                         value={manufacturer}
-                        placeholder={t("Eg. XYZ")}
+                        placeholder={t("eg_xyz")}
                         onChange={(e) => setManufacturer(e.value)}
                         error={state.errors.manufacturer}
                       />
@@ -764,7 +764,7 @@ const AssetCreate = (props: AssetProps) => {
                       <TextFormField
                         name="WarrantyAMCExpiry"
                         value={warranty_amc_end_of_validity}
-                        label={t("Warranty / AMC Expiry")}
+                        label={t("warranty_amc_expiry")}
                         error={state.errors.warranty_amc_end_of_validity}
                         onChange={(event) => {
                           const value = dayjs(event.value);
@@ -792,8 +792,8 @@ const AssetCreate = (props: AssetProps) => {
                       <TextFormField
                         id="support-name"
                         name="support_name"
-                        label={t("Customer Support Name")}
-                        placeholder={t("Eg. ABC")}
+                        label={t("customer_support_name")}
+                        placeholder={t("eg_abc")}
                         value={support_name}
                         onChange={(e) => setSupportName(e.value)}
                         error={state.errors.support_name}
@@ -808,7 +808,7 @@ const AssetCreate = (props: AssetProps) => {
                     >
                       <PhoneNumberFormField
                         name="support_phone"
-                        label={t("Customer support number")}
+                        label={t("customer_support_number")}
                         required
                         value={support_phone}
                         onChange={(e) => setSupportPhone(e.value)}
@@ -826,8 +826,8 @@ const AssetCreate = (props: AssetProps) => {
                       <TextFormField
                         id="support-email"
                         name="support_email"
-                        label={t("Customer Support Email")}
-                        placeholder={t("Eg. mail@example.com")}
+                        label={t("customer_support_email")}
+                        placeholder={t("eg_mail_example_com")}
                         value={support_email}
                         onChange={(e) => setSupportEmail(e.value)}
                         error={state.errors.support_email}
@@ -845,9 +845,9 @@ const AssetCreate = (props: AssetProps) => {
                       <TextFormField
                         id="vendor-name"
                         name="vendor_name"
-                        label={t("Vendor Name")}
+                        label={t("vendor_name")}
                         value={vendor_name}
-                        placeholder={t("Eg. XYZ")}
+                        placeholder={t("eg_xyz")}
                         onChange={(e) => setVendorName(e.value)}
                         error={state.errors.vendor_name}
                       />
@@ -862,7 +862,7 @@ const AssetCreate = (props: AssetProps) => {
                       <TextFormField
                         id="serial-number"
                         name="serial_number"
-                        label={t("Serial Number")}
+                        label={t("serial_number")}
                         value={serial_number}
                         onChange={(e) => setSerialNumber(e.value)}
                         error={state.errors.serial_number}
@@ -879,7 +879,7 @@ const AssetCreate = (props: AssetProps) => {
                       data-testid="asset-last-serviced-on-input"
                     >
                       <DateFormField
-                        label={t("Last Serviced On")}
+                        label={t("last_serviced_on")}
                         name="last_serviced_on"
                         className="mt-2"
                         position="RIGHT"
@@ -912,7 +912,7 @@ const AssetCreate = (props: AssetProps) => {
                     >
                       <TextAreaFormField
                         name="notes"
-                        label={t("Notes")}
+                        label={t("notes")}
                         placeholder={t(
                           "Eg. Details on functionality, service, etc."
                         )}
@@ -935,13 +935,13 @@ const AssetCreate = (props: AssetProps) => {
                     />
                     <Submit
                       onClick={(e) => handleSubmit(e, false)}
-                      label={assetId ? t("Update") : t("Create Asset")}
+                      label={assetId ? t("update") : t("create_asset")}
                     />
                     {!assetId && (
                       <Submit
                         data-testid="create-asset-add-more-button"
                         onClick={(e) => handleSubmit(e, true)}
-                        label={t("Create & Add More")}
+                        label={t("create_add_more")}
                       />
                     )}
                   </div>
