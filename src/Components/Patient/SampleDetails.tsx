@@ -8,7 +8,7 @@ import Card from "../../CAREUI/display/Card";
 import { FileUpload } from "./FileUpload";
 import Page from "../Common/components/Page";
 import _ from "lodash";
-import { formatDateTime } from "../../Utils/utils";
+import { formatAge, formatDateTime } from "../../Utils/utils";
 import { getTestSample } from "../../Redux/actions";
 
 import { navigate } from "raviger";
@@ -118,7 +118,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
             ) : (
               <div>
                 <span className="font-semibold leading-relaxed">Age: </span>
-                {patientData?.age}
+                {formatAge(patientData.age, patientData.date_of_birth)}
               </div>
             )}
             <div>

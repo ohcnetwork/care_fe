@@ -223,5 +223,4 @@ export interface CurrentBed {
 export type ICD11DiagnosisModel = {
   id: string;
   label: string;
-  parentId: string | null;
 };

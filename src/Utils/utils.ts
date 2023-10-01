@@ -379,3 +379,30 @@ export const getCountryCode = (phoneNumber: string) => {
   }
   return undefined;
 };
+
+export const formatAge = (
+  age?: number,
+  date_of_birth?: string,
+  abbreviated = false
+) => {
+  if (!age && !date_of_birth) return undefined;
+  if (!age) age = 0;
+
+  const daySuffix = abbreviated ? "d" : "days";
+  const monthSuffix = abbreviated ? "mo" : "months";
+  const yearSuffix = abbreviated ? "yr" : "years";
+
+  if (age < 1 && date_of_birth) {
+    const dob = new Date(date_of_birth);
+    const today = new Date();
+    const diffTime = Math.abs(today.getTime() - dob.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const months = Math.floor(diffDays / 30);
+    const days = diffDays % 30;
+    if (months === 0) {
+      return `${days} ${daySuffix}`;
+    }
+    return `${months} ${monthSuffix} ${days} ${daySuffix}`;
+  }
+  return `${age} ${yearSuffix}`;
+};
