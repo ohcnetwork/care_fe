@@ -133,15 +133,17 @@ export interface AssetTransaction {
 }
 
 export interface AssetBedModel {
-  id?: string;
-  asset_object?: AssetData;
-  bed_object?: BedModel;
-  created_date?: string;
-  modified_date?: string;
-  meta?: Record<string, any>;
+  id: string;
+  asset_object: AssetData;
+  bed_object: BedModel;
+  created_date: string;
+  modified_date: string;
+  meta: Record<string, any>;
   asset?: string;
   bed?: string;
 }
+
+export type AssetBedBody = Partial<AssetBedModel>;
 
 export interface AssetServiceEdit {
   id: string;

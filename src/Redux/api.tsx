@@ -1,5 +1,6 @@
 import { IConfig } from "../Common/hooks/useConfig";
 import {
+  AssetBedBody,
   AssetBedModel,
   AssetData,
   AssetLocationObject,
@@ -242,7 +243,7 @@ const routes = {
     path: "/api/v1/assetbed/",
     method: "POST",
     TRes: Type<AssetData>(),
-    TBody: Type<AssetBedModel>(),
+    TBody: Type<AssetBedBody>(),
   },
   getAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
@@ -256,7 +257,7 @@ const routes = {
     path: "/api/v1/assetbed/{external_id}/",
     method: "PATCH",
     TRes: Type<AssetBedModel>(),
-    TBody: Type<AssetBedModel>(),
+    TBody: Type<AssetBedBody>(),
   },
   deleteAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",

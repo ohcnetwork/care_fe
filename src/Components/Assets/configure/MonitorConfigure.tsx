@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { AssetData } from "../AssetTypes";
@@ -7,6 +7,7 @@ import { Submit } from "../../Common/components/ButtonV2";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
+import useQuery from "../../../Utils/request/useQuery";
 
 const saveLink = async (assetId: string, bedId: string) => {
   await request(routes.createAssetBed, {
@@ -35,27 +36,15 @@ const update_Link = async (
 export default function MonitorConfigure({ asset }: { asset: AssetData }) {
   const [bed, setBed] = useState<BedModel>({});
   const [updateLink, setUpdateLink] = useState<boolean>(false);
-  const [assetBed, setAssetBed] = useState<any>();
-
-  const getAssetBeds = async (id: string) => {
-    // const assetBeds = await dispatch(listAssetBeds({ asset: id }));
-    const { data } = await request(routes.listAssetBeds, {
-      query: { asset: id },
-    });
-    if (data && data.results?.length > 0) {
-      setUpdateLink(true);
-      setAssetBed(data.results[0]);
-      setBed(data.results[0].bed_object);
-    } else {
-      setUpdateLink(false);
-    }
-  };
-
-  useEffect(() => {
-    if (asset.id) {
-      getAssetBeds(asset.id);
-    }
-  }, [asset]);
+  const { data: assetBed } = useQuery(routes.listAssetBeds, {
+    query: { asset: asset.id },
+  });
+  if (assetBed && assetBed.results?.length > 0) {
+    setUpdateLink(true);
+    setBed(assetBed.results[0].bed_object);
+  } else {
+    setUpdateLink(false);
+  }
 
   return (
     <form
@@ -63,7 +52,7 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
         e.preventDefault();
         if (updateLink) {
           update_Link(
-            assetBed?.id as string,
+            assetBed?.results[0].id as string,
             asset.id as string,
             bed as BedModel
           );

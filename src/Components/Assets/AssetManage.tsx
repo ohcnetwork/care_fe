@@ -45,16 +45,13 @@ const checkAuthority = (type: string, cutoff: string) => {
 const AssetManage = (props: AssetManageProps) => {
   const { t } = useTranslation();
   const { assetId, facilityId } = props;
-  const [asset, setAsset] = useState<AssetData>();
   const [isPrintMode, setIsPrintMode] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffset] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
-  const [transactions, setTransactions] = useState<AssetTransaction[]>([]);
   const [transactionDetails, setTransactionDetails] = useState<
     ReactElement | ReactElement[]
   >();
-  const [services, setServices] = useState<AssetService[]>([]);
   const [servicesDetails, setServiceDetails] = useState<
     ReactElement | ReactElement[]
   >();
@@ -66,52 +63,47 @@ const AssetManage = (props: AssetManageProps) => {
   >();
   const [transactionFilter, setTransactionFilter] = useState<any>({});
 
-  const { data: assetData, loading } = useQuery(routes.getAsset, {
+  const { data: asset, loading } = useQuery(routes.getAsset, {
     pathParams: {
       external_id: assetId,
     },
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data) {
-        setAsset(data);
-      }
-    },
   });
 
-  const { refetch } = useQuery(routes.listAssetTransaction, {
-    prefetch: false,
-    ...transactionFilter,
-    query: {
-      limit,
-      offset,
-    },
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data) {
-        setTransactions(data.results);
-        setTotalCount(data.count);
-      }
-    },
-  });
+  const { data: transactions, refetch } = useQuery(
+    routes.listAssetTransaction,
+    {
+      prefetch: false,
+      ...transactionFilter,
+      query: {
+        limit,
+        offset,
+      },
+      onResponse: ({ res, data }) => {
+        if (res?.status === 200 && data) {
+          setTotalCount(data.count);
+        }
+      },
+    }
+  );
 
-  const { refetch: serviceRefetch } = useQuery(routes.listAssetService, {
-    pathParams: {
-      asset_external_id: assetId,
-    },
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data) {
-        setServices(data.results);
-      }
-    },
-  });
+  const { data: services, refetch: serviceRefetch } = useQuery(
+    routes.listAssetService,
+    {
+      pathParams: {
+        asset_external_id: assetId,
+      },
+    }
+  );
 
   useEffect(() => {
-    if (assetData) {
-      const transactionFilter = assetData.qr_code_id
-        ? { qr_code_id: assetData.qr_code_id }
+    if (asset) {
+      const transactionFilter = asset.qr_code_id
+        ? { qr_code_id: asset.qr_code_id }
         : { external_id: assetId };
       setTransactionFilter(transactionFilter);
       refetch();
     }
-  }, [assetData, assetId, refetch]);
+  }, [asset, assetId, refetch]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -144,7 +136,7 @@ const AssetManage = (props: AssetManageProps) => {
   const populateTableRows = (txns: AssetTransaction[]) => {
     if (txns.length > 0) {
       setTransactionDetails(
-        transactions.map((transaction: AssetTransaction) => (
+        transactions?.results.map((transaction: AssetTransaction) => (
           <tr key={`transaction_id_${transaction.id}`}>
             <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
@@ -187,7 +179,7 @@ const AssetManage = (props: AssetManageProps) => {
   const populateServiceTableRows = (txns: AssetService[]) => {
     if (txns.length > 0) {
       setServiceDetails(
-        services.map((service: AssetService) => (
+        services?.results.map((service: AssetService) => (
           <tr key={`service_id_${service.id}`}>
             <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
@@ -262,11 +254,11 @@ const AssetManage = (props: AssetManageProps) => {
   };
 
   useEffect(() => {
-    populateTableRows(transactions);
+    if (transactions) populateTableRows(transactions.results);
   }, [transactions]);
 
   useEffect(() => {
-    populateServiceTableRows(services);
+    if (services) populateServiceTableRows(services?.results);
   }, [services]);
 
   if (loading) return <Loading />;
