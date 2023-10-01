@@ -310,17 +310,23 @@ const AssetManage = (props: AssetManageProps) => {
 
   const handleDelete = async () => {
     if (asset) {
-      const { res } = await request(routes.deleteAsset, {
+      await request(routes.deleteAsset, {
         pathParams: {
           external_id: asset.id,
         },
+        onResponse: () => {
+          Notification.Success({
+            msg: "Asset deleted successfully",
+          });
+          navigate("/assets");
+        },
       });
-      if (res && res.status === 204) {
-        Notification.Success({
-          msg: "Asset deleted successfully",
-        });
-        navigate("/assets");
-      }
+      // if (res?.status === 204) {
+      //   Notification.Success({
+      //     msg: "Asset deleted successfully",
+      //   });
+      //   navigate("/assets");
+      // }
     }
   };
 
