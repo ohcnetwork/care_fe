@@ -75,7 +75,7 @@ const DischargeModal = ({
   const [latestClaim, setLatestClaim] = useState<HCXClaimModel>();
   const [isCreateClaimLoading, setIsCreateClaimLoading] = useState(false);
   const [isSendingDischargeApi, setIsSendingDischargeApi] = useState(false);
-  const [facility, setFacility] = useState<FacilityModel>({ id: 0, name: "" }); // for referred to external
+  const [facility, setFacility] = useState<FacilityModel>();
   const [errors, setErrors] = useState<any>({});
 
   const fetchLatestClaim = useCallback(async () => {
@@ -186,12 +186,13 @@ const DischargeModal = ({
   const prescriptionActions = PrescriptionActions(consultationData.id ?? "");
 
   const handleFacilitySelect = (selected: FacilityModel) => {
-    setFacility(selected ? selected : facility);
-    const { id, name } = selected;
+    setFacility(selected);
+    const { id, name } = selected || {};
     const isExternal = id === -1;
     setPreDischargeForm((prev) => ({
       ...prev,
-      ...(isExternal ? { referred_to_external: name } : { referred_to: id }),
+      referred_to: isExternal ? null : id,
+      referred_to_external: isExternal ? name : null,
     }));
   };
 
@@ -238,8 +239,8 @@ const DischargeModal = ({
                 handleFacilitySelect(selected as FacilityModel)
               }
               selected={facility}
-              showAll={true}
-              freeText={true}
+              showAll
+              freeText
               multiple={false}
               errors={errors?.referred_to}
               className="mb-4"

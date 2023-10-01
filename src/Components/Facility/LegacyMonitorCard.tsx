@@ -4,6 +4,7 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { PatientModel } from "../Patient/models";
 import LegacyPatientVitalsCard from "../Patient/LegacyPatientVitalsCard";
 import { AssetLocationObject } from "../Assets/AssetTypes";
+import { formatAge } from "../../Utils/utils";
 
 interface MonitorCardProps {
   facilityId: string;
@@ -28,7 +29,7 @@ export const LegacyMonitorCard = ({
           {patient.name}
         </Link>
         <span>
-          {patient.age}y |{" "}
+          {formatAge(patient.age, patient.date_of_birth)} |{" "}
           {GENDER_TYPES.find((g) => g.id === patient.gender)?.icon}
         </span>
         <span className="flex flex-1 items-center justify-end gap-2 text-end">
