@@ -54,21 +54,21 @@ const routes = {
   checkResetToken: {
     path: "/api/v1/password_reset/check/",
     method: "POST",
-    TRes: Type<any>(),
+    TRes: Type<Record<string, never>>(),
     TBody: Type<{ token: string }>(),
   },
 
   resetPassword: {
     path: "/api/v1/password_reset/confirm/",
     method: "POST",
-    TRes: Type<any>(),
+    TRes: Type<Record<string, never>>(),
     TBody: Type<{ password: string; confirm: string }>(),
   },
 
   forgotPassword: {
     path: "/api/v1/password_reset/",
     method: "POST",
-    TRes: Type<any>(),
+    TRes: Type<Record<string, never>>(),
     TBody: Type<{ username: string }>(),
   },
 
