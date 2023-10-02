@@ -2,12 +2,12 @@ import handleResponse from "./handleResponse";
 import { RequestOptions, RequestResult, Route } from "./types";
 import { makeHeaders, makeUrl } from "./utils";
 
-interface Options extends RequestOptions {
+interface Options<TData, TBody> extends RequestOptions<TData, TBody> {
   controller?: AbortController;
 }
 
-export default async function request<TData>(
-  { path, method, noAuth }: Route<TData>,
+export default async function request<TData, TBody>(
+  { path, method, noAuth }: Route<TData, TBody>,
   {
     query,
     body,
@@ -16,7 +16,7 @@ export default async function request<TData>(
     onResponse,
     silent,
     reattempts = 3,
-  }: Options = {}
+  }: Options<TData, TBody> = {}
 ): Promise<RequestResult<TData>> {
   const signal = controller?.signal;
   const url = makeUrl(path, query, pathParams);

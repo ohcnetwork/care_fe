@@ -72,8 +72,6 @@ import { FormContextValue } from "../Form/FormContext.js";
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
 
-// const debounce = require("lodash.debounce");
-
 interface PatientRegisterProps extends PatientModel {
   facilityId: string;
 }
@@ -1260,7 +1258,7 @@ export const PatientRegister = (props: PatientRegisterProps) => {
                               required
                               label="Phone Number"
                               onChange={(event) => {
-                                duplicateCheck(event.value);
+                                if (!id) duplicateCheck(event.value);
                                 field("phone_number").onChange(event);
                               }}
                               types={["mobile", "landline"]}

@@ -10,7 +10,7 @@ import { statusType, useAbortableEffect } from "../../Common/utils";
 import { PatientModel } from "../Patient/models";
 
 import { GENDER_TYPES } from "../../Common/constants";
-import { formatDate, formatDateTime } from "../../Utils/utils";
+import { formatAge, formatDate, formatDateTime } from "../../Utils/utils";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const TreatmentSummary = (props: any) => {
@@ -132,7 +132,8 @@ const TreatmentSummary = (props: any) => {
 
               <div className="grid border-b-2 border-gray-800 print:grid-cols-3 sm:grid-cols-2 md:grid-cols-3">
                 <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 sm:border-r-2 md:border-b-0 ">
-                  <b>Age :</b> {patientData.age}
+                  <b>Age :</b>{" "}
+                  {formatAge(patientData.age, patientData.date_of_birth, true)}
                 </div>
                 <div className="col-span-1 border-b-2 border-gray-800 px-3 py-2 print:border-b-0 print:border-r-2 md:border-b-0 md:border-r-2">
                   <b>Date of admission :</b>
