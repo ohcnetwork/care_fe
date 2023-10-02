@@ -861,19 +861,19 @@ const routes = {
     generateAadhaarOtp: {
       path: "/api/v1/abdm/healthid/generate_aadhaar_otp/",
       method: "POST",
-      TRes: Res<IAadhaarOtp>(),
+      TRes: Type<IAadhaarOtp>(),
     },
 
     resendAadhaarOtp: {
       path: "/api/v1/abdm/healthid/resend_aadhaar_otp/",
       method: "POST",
-      TRes: Res<IAadhaarOtp>(),
+      TRes: Type<IAadhaarOtp>(),
     },
 
     verifyAadhaarOtp: {
       path: "/api/v1/abdm/healthid/verify_aadhaar_otp/",
       method: "POST",
-      TRes: Res<IAadhaarOtp>(),
+      TRes: Type<IAadhaarOtp>(),
     },
 
     generateMobileOtp: {
@@ -884,62 +884,62 @@ const routes = {
     checkAndGenerateMobileOtp: {
       path: "/api/v1/abdm/healthid/check_and_generate_mobile_otp/",
       method: "POST",
-      TRes: Res<ICheckAndGenerateMobileOtp>(),
+      TRes: Type<ICheckAndGenerateMobileOtp>(),
     },
 
     // TODO: resend mobile otp
     verifyMobileOtp: {
       path: "/api/v1/abdm/healthid/verify_mobile_otp/",
       method: "POST",
-      TRes: Res<IAadhaarOtp>(),
+      TRes: Type<IAadhaarOtp>(),
     },
 
     createHealthId: {
       path: "/api/v1/abdm/healthid/create_health_id/",
       method: "POST",
-      TRes: Res<ICreateHealthIdResponse>(),
+      TRes: Type<ICreateHealthIdResponse>(),
     },
 
     searchByHealthId: {
       path: "/api/v1/abdm/healthid/search_by_health_id/",
       method: "POST",
-      TRes: Res<IHealthId>(),
+      TRes: Type<IHealthId>(),
     },
 
     initiateAbdmAuthentication: {
       path: "/api/v1/abdm/healthid/auth_init/",
       method: "POST",
-      TRes: Res<IConfirmMobileOtp>(),
+      TRes: Type<IConfirmMobileOtp>(),
     },
 
     confirmWithAadhaarOtp: {
       path: "/api/v1/abdm/healthid/confirm_with_aadhaar_otp/",
       method: "POST",
-      TRes: Res<IConfirmMobileOtp>(),
+      TRes: Type<IConfirmMobileOtp>(),
     },
 
     confirmWithMobileOtp: {
       path: "/api/v1/abdm/healthid/confirm_with_mobile_otp/",
       method: "POST",
-      TRes: Res<IConfirmMobileOtp>(),
+      TRes: Type<IConfirmMobileOtp>(),
     },
 
     linkViaQR: {
       path: "/api/v1/abdm/healthid/link_via_qr/",
       method: "POST",
-      TRes: Res<ILinkABHANumber>(),
+      TRes: Type<ILinkABHANumber>(),
     },
 
     linkCareContext: {
       path: "/api/v1/abdm/healthid/add_care_context/",
       method: "POST",
-      TRes: Res<unknown>(),
+      TRes: Type<unknown>(),
     },
 
     getAbhaCard: {
       path: "/api/v1/abdm/healthid/get_abha_card/",
       method: "POST",
-      TRes: Res<unknown>(),
+      TRes: Type<unknown>(),
     },
 
     // ABDM Health Facility
@@ -952,13 +952,13 @@ const routes = {
     createHealthFacility: {
       path: "/api/v1/abdm/health_facility/",
       method: "POST",
-      TRes: Res<IHealthFacility>(),
+      TRes: Type<IHealthFacility>(),
     },
 
     getHealthFacility: {
       path: "/api/v1/abdm/health_facility/{facility_id}/",
       method: "GET",
-      TRes: Res<IHealthFacility>(),
+      TRes: Type<IHealthFacility>(),
     },
 
     updateHealthFacility: {
@@ -969,13 +969,13 @@ const routes = {
     partialUpdateHealthFacility: {
       path: "/api/v1/abdm/health_facility/{facility_id}/",
       method: "PATCH",
-      TRes: Res<IHealthFacility>(),
+      TRes: Type<IHealthFacility>(),
     },
 
     registerHealthFacilityAsService: {
       path: "/api/v1/abdm/health_facility/{facility_id}/register_service/",
       method: "POST",
-      TRes: Res<IHealthFacility>(),
+      TRes: Type<IHealthFacility>(),
     },
   },
 
