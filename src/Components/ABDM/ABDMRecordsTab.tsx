@@ -19,7 +19,7 @@ function ConsentArtefactCard({ artefact }: IConsentArtefactCardProps) {
   return (
     <Link
       href={`/abdm/health-information/${artefact.id}`}
-      className="cursor-pointer overflow-hidden bg-white shadow sm:rounded-lg"
+      className="w-full cursor-pointer overflow-hidden bg-white shadow sm:rounded-lg"
     >
       <div className="flex flex-col items-center justify-between gap-4 px-4 py-5 sm:flex-row sm:gap-0 sm:px-6">
         <div className="flex flex-col items-center">
@@ -166,6 +166,7 @@ export default function ABDMRecordsTab({ patientId }: IProps) {
       const response = await dispatch(
         consentActions.list({
           patient: patientId,
+          ordering: "-created_date",
         })
       );
 
@@ -184,7 +185,7 @@ export default function ABDMRecordsTab({ patientId }: IProps) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mt-6 flex flex-col gap-6">
       {records.map((record) => {
         return <ConsentRequestCard key={record.id} consent={record} />;
       })}

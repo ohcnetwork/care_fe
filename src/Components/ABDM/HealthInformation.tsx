@@ -29,8 +29,9 @@ export default function HealthInformation({ artefactId }: IProps) {
               This record has been archived and is no longer available for
               viewing.
             </h5>
-            <h4 className="mt-2 text-gray-500">
-              This record was archived on {error?.archived_time as string} as{" "}
+            <h4 className="mt-2 text-center text-gray-500">
+              This record was archived on{" "}
+              {new Date(error?.archived_time as string).toLocaleString()} as{" "}
               {error?.archived_reason as string}
             </h4>
           </>
