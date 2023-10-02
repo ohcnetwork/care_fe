@@ -1,4 +1,5 @@
 import { IConfig } from "../Common/hooks/useConfig";
+import { HealthInformationModel } from "../Components/ABDM/types/health-information";
 import { AssetData } from "../Components/Assets/AssetTypes";
 import { LocationModel } from "../Components/Facility/models";
 import { UserModel } from "../Components/Users/models";
@@ -971,6 +972,12 @@ const routes = {
   checkConsentStatus: {
     path: "/api/v1/abdm/consent/{id}/status/",
     method: "GET",
+  },
+
+  getHealthInformation: {
+    path: "/api/v1/abdm/health_information/{artefactId}",
+    method: "GET",
+    TRes: Type<HealthInformationModel>(),
   },
 
   // Asset Availability endpoints

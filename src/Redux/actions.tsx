@@ -948,6 +948,10 @@ export const getAbhaCard = (patient: string, type: "pdf" | "png") => {
   });
 };
 
+export const getHealthInformation = (artefactId: string) => {
+  return fireRequest("getHealthInformation", [], { artefactId });
+};
+
 export const healthFacilityActions = {
   list: (params: object) => {
     return fireRequest("listHealthFacilities", [], params);
