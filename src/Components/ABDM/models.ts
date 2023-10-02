@@ -40,7 +40,7 @@ export interface ILinkABHANumber {
 export interface IConfirmMobileOtp {
   otp: string;
   txnId: string;
-  patientId: string;
+  patientId?: string;
   message?: string;
 }
 
@@ -55,4 +55,46 @@ export interface IAadhaarOtp {
 export interface ICheckAndGenerateMobileOtp {
   mobileLinked: boolean;
   txnId: string;
+}
+
+export interface IAadhaarOtpTBody {
+  aadhaar?: string;
+  txnId?: string;
+}
+
+export interface IVerifyAadhaarOtpTBody {
+  consultation?: string;
+  name?: string;
+  gender?: "M" | "F" | "O";
+  dob?: string;
+  otp?: string;
+  txnId?: string;
+}
+
+export interface IGenerateMobileOtpTBody {
+  mobile: string;
+  txnId: string;
+}
+
+export interface ISearchByHealthIdTBody {
+  healthId: string;
+}
+
+export interface IinitiateAbdmAuthenticationTBody {
+  authMethod: string;
+  healthid: string;
+}
+
+export interface IgetAbhaCardTBody {
+  patient: string;
+  type: "pdf" | "png";
+}
+
+export interface IcreateHealthFacilityTBody {
+  facility: string;
+  hf_id: string;
+}
+
+export interface IpartialUpdateHealthFacilityTBody {
+  hf_id: string;
 }

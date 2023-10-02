@@ -1,12 +1,21 @@
 import { IConfig } from "../Common/hooks/useConfig";
 import {
   IAadhaarOtp,
+  IAadhaarOtpTBody,
   ICheckAndGenerateMobileOtp,
   IConfirmMobileOtp,
+  ICreateHealthIdRequest,
   ICreateHealthIdResponse,
+  IGenerateMobileOtpTBody,
   IHealthFacility,
   IHealthId,
   ILinkABHANumber,
+  ISearchByHealthIdTBody,
+  IVerifyAadhaarOtpTBody,
+  IcreateHealthFacilityTBody,
+  IgetAbhaCardTBody,
+  IinitiateAbdmAuthenticationTBody,
+  IpartialUpdateHealthFacilityTBody,
 } from "../Components/ABDM/models";
 import { AssetData } from "../Components/Assets/AssetTypes";
 import { LocationModel } from "../Components/Facility/models";
@@ -862,29 +871,35 @@ const routes = {
       path: "/api/v1/abdm/healthid/generate_aadhaar_otp/",
       method: "POST",
       TRes: Type<IAadhaarOtp>(),
+      TBody: Type<IAadhaarOtpTBody>(),
     },
 
     resendAadhaarOtp: {
       path: "/api/v1/abdm/healthid/resend_aadhaar_otp/",
       method: "POST",
       TRes: Type<IAadhaarOtp>(),
+      TBody: Type<IAadhaarOtp>(),
     },
 
     verifyAadhaarOtp: {
       path: "/api/v1/abdm/healthid/verify_aadhaar_otp/",
       method: "POST",
       TRes: Type<IAadhaarOtp>(),
+      TBody: Type<IVerifyAadhaarOtpTBody>(),
     },
 
     generateMobileOtp: {
       path: "/api/v1/abdm/healthid/generate_mobile_otp/",
       method: "POST",
+      TRes: Type<unknown>(),
+      TBody: Type<unknown>(),
     },
 
     checkAndGenerateMobileOtp: {
       path: "/api/v1/abdm/healthid/check_and_generate_mobile_otp/",
       method: "POST",
       TRes: Type<ICheckAndGenerateMobileOtp>(),
+      TBody: Type<IGenerateMobileOtpTBody>(),
     },
 
     // TODO: resend mobile otp
@@ -892,54 +907,63 @@ const routes = {
       path: "/api/v1/abdm/healthid/verify_mobile_otp/",
       method: "POST",
       TRes: Type<IAadhaarOtp>(),
+      TBody: Type<IVerifyAadhaarOtpTBody>(),
     },
 
     createHealthId: {
       path: "/api/v1/abdm/healthid/create_health_id/",
       method: "POST",
       TRes: Type<ICreateHealthIdResponse>(),
+      TBody: Type<ICreateHealthIdRequest>(),
     },
 
     searchByHealthId: {
       path: "/api/v1/abdm/healthid/search_by_health_id/",
       method: "POST",
       TRes: Type<IHealthId>(),
+      TBody: Type<ISearchByHealthIdTBody>(),
     },
 
     initiateAbdmAuthentication: {
       path: "/api/v1/abdm/healthid/auth_init/",
       method: "POST",
       TRes: Type<IConfirmMobileOtp>(),
+      TBody: Type<IinitiateAbdmAuthenticationTBody>(),
     },
 
     confirmWithAadhaarOtp: {
       path: "/api/v1/abdm/healthid/confirm_with_aadhaar_otp/",
       method: "POST",
       TRes: Type<IConfirmMobileOtp>(),
+      TBody: Type<IConfirmMobileOtp>(),
     },
 
     confirmWithMobileOtp: {
       path: "/api/v1/abdm/healthid/confirm_with_mobile_otp/",
       method: "POST",
       TRes: Type<IConfirmMobileOtp>(),
+      TBody: Type<IConfirmMobileOtp>(),
     },
 
     linkViaQR: {
       path: "/api/v1/abdm/healthid/link_via_qr/",
       method: "POST",
       TRes: Type<ILinkABHANumber>(),
+      TBody: Type<ISearchByHealthIdTBody>(),
     },
 
     linkCareContext: {
       path: "/api/v1/abdm/healthid/add_care_context/",
       method: "POST",
       TRes: Type<unknown>(),
+      TBody: Type<unknown>(),
     },
 
     getAbhaCard: {
       path: "/api/v1/abdm/healthid/get_abha_card/",
       method: "POST",
       TRes: Type<unknown>(),
+      TBody: Type<IgetAbhaCardTBody>(),
     },
 
     // ABDM Health Facility
@@ -953,6 +977,7 @@ const routes = {
       path: "/api/v1/abdm/health_facility/",
       method: "POST",
       TRes: Type<IHealthFacility>(),
+      TBody: Type<IcreateHealthFacilityTBody>(),
     },
 
     getHealthFacility: {
@@ -964,18 +989,22 @@ const routes = {
     updateHealthFacility: {
       path: "/api/v1/abdm/health_facility/{facility_id}/",
       method: "PUT",
+      TRes: Type<IHealthFacility>(),
+      TBody: Type<IcreateHealthFacilityTBody>(),
     },
 
     partialUpdateHealthFacility: {
       path: "/api/v1/abdm/health_facility/{facility_id}/",
       method: "PATCH",
       TRes: Type<IHealthFacility>(),
+      TBody: Type<IpartialUpdateHealthFacilityTBody>(),
     },
 
     registerHealthFacilityAsService: {
       path: "/api/v1/abdm/health_facility/{facility_id}/register_service/",
       method: "POST",
       TRes: Type<IHealthFacility>(),
+      TBody: Type<IcreateHealthFacilityTBody>(),
     },
   },
 
