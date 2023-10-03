@@ -273,7 +273,7 @@ export class AssetPage {
 
   clickImportAsset() {
     cy.intercept("POST", "**/api/v1/asset/").as("importAsset");
-    cy.get("#submit").contains("Import").click();
+    cy.get("[data-testid=asset-import-btn]").click();
     cy.wait("@importAsset").its("response.statusCode").should("eq", 201);
   }
 

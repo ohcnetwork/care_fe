@@ -85,6 +85,7 @@ const AssetsList = () => {
         setFacilityName(data.name);
       }
     },
+    prefetch: !!qParams.facility,
   });
 
   useEffect(() => {
@@ -104,6 +105,7 @@ const AssetsList = () => {
       facility_external_id: String(qParams.facility),
       external_id: String(qParams.location),
     },
+    prefetch: !!(qParams.facility && qParams.location),
   });
 
   const getAssetIdFromQR = async (assetUrl: string) => {

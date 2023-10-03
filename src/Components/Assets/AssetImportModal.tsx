@@ -337,6 +337,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
             <Submit
               onClick={handleUpload}
               disabled={isImporting || !selectedFile}
+              data-testid="asset-import-btn"
             >
               {isImporting ? (
                 <i className="fa-solid fa-spinner animate-spin" />

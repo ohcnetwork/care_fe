@@ -16,7 +16,7 @@ describe("Asset Tab", () => {
   const assetFilters = new AssetFilters();
   const assetPage = new AssetPage();
   const loginPage = new LoginPage();
-  const assetName = "Dummy Camera 10";
+  const assetName = "Dummy Camera 30";
   const qrCode = uuidv4();
   const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
 
@@ -69,11 +69,11 @@ describe("Asset Tab", () => {
     );
     assetFilters.clickadvancefilter();
     assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
-    assetFilters.assertFacilityText("Dummy Facility 1");
-    assetFilters.assertAssetTypeText("INTERNAL");
-    assetFilters.assertAssetClassText("ONVIF");
-    assetFilters.assertStatusText("ACTIVE");
-    assetFilters.assertLocationText("Camera Locations");
+    assetFilters.assertFacilityText("Facility: Dummy Facility 1");
+    assetFilters.assertAssetTypeText("Asset Type: INTERNAL");
+    assetFilters.assertAssetClassText("Asset Class: ONVIF");
+    assetFilters.assertStatusText("Status: ACTIVE");
+    assetFilters.assertLocationText("Location: Camera Loc");
     assetFilters.clickadvancefilter();
     assetFilters.clearFilters();
   });
@@ -90,7 +90,7 @@ describe("Asset Tab", () => {
     assetPage.selectImportOption();
     assetPage.selectImportFacility("Dummy Facility 1");
     assetPage.importAssetFile();
-    assetPage.selectImportLocation("Camera Locations");
+    assetPage.selectImportLocation("Camera Loc");
     assetPage.clickImportAsset();
     assetPage.verifySuccessNotification("Assets imported successfully");
   });

@@ -43,6 +43,7 @@ function AssetFilter(props: any) {
         setFacility(data);
       }
     },
+    prefetch: !!facilityId,
   });
 
   useQuery(routes.getFacilityAssetLocation, {

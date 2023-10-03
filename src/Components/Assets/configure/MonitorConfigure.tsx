@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BedSelect } from "../../Common/BedSelect";
 import { BedModel } from "../../Facility/models";
 import { AssetData } from "../AssetTypes";
@@ -39,12 +39,15 @@ export default function MonitorConfigure({ asset }: { asset: AssetData }) {
   const { data: assetBed } = useQuery(routes.listAssetBeds, {
     query: { asset: asset.id },
   });
-  if (assetBed && assetBed.results?.length > 0) {
-    setUpdateLink(true);
-    setBed(assetBed.results[0].bed_object);
-  } else {
-    setUpdateLink(false);
-  }
+
+  useEffect(() => {
+    if (assetBed && assetBed.results?.length > 0) {
+      setUpdateLink(true);
+      setBed(assetBed.results[0].bed_object);
+    } else {
+      setUpdateLink(false);
+    }
+  }, [assetBed]);
 
   return (
     <form
