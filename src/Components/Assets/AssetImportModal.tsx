@@ -129,12 +129,15 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
         qr_code_id: asset.qr_code_id,
         manufacturer: asset.manufacturer,
         meta: { ...asset.meta },
-        warranty_amc_end_of_validity: asset.warranty_amc_end_of_validity,
         note: asset.notes,
       };
 
       if (asset.last_serviced_on)
         asset_data["last_serviced_on"] = asset.last_serviced_on;
+
+      if (asset.warranty_amc_end_of_validity)
+        asset_data["warranty_amc_end_of_validity"] =
+          asset.warranty_amc_end_of_validity;
 
       const response = await fetch("/api/v1/asset/", {
         method: "POST",

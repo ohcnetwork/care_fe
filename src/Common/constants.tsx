@@ -966,7 +966,9 @@ export const XLSXAssetImportSchema = {
     type: String,
     parse: (date: string) => {
       if (!date) return null;
-      const parsed = new Date(date);
+      const parts = date.split("-");
+      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      const parsed = new Date(reformattedDateStr);
 
       if (String(parsed) === "Invalid Date") {
         throw new Error("Invalid Warranty End Date:" + date);
@@ -980,7 +982,9 @@ export const XLSXAssetImportSchema = {
     type: String,
     parse: (date: string) => {
       if (!date) return null;
-      const parsed = new Date(date);
+      const parts = date.split("-");
+      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      const parsed = new Date(reformattedDateStr);
 
       if (String(parsed) === "Invalid Date") {
         throw new Error("Invalid Last Service Date:" + date);
