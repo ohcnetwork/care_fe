@@ -47,6 +47,8 @@ export default function PrescriptionAdministrationsTable({
   const { t } = useTranslation();
 
   const [state, setState] = useState<State>();
+  const [showDiscontinued, setShowDiscontinued] = useState(false);
+  const [discontinuedCount, setDiscontinuedCount] = useState<number>();
   const pagination = useRangePagination({
     bounds: state?.administrationsTimeBounds ?? {
       start: new Date(),
@@ -64,8 +66,13 @@ export default function PrescriptionAdministrationsTable({
   );
 
   const refetch = useCallback(async () => {
+    const filters = {
+      is_prn: prn,
+      prescription_type: "REGULAR",
+    };
+
     const res = await dispatch(
-      list({ is_prn: prn, prescription_type: "REGULAR" })
+      list(showDiscontinued ? filters : { ...filters, discontinued: false })
     );
 
     setState({
@@ -74,7 +81,14 @@ export default function PrescriptionAdministrationsTable({
       ),
       administrationsTimeBounds: getAdministrationBounds(res.data.results),
     });
-  }, [consultation_id, dispatch]);
+
+    if (showDiscontinued === false) {
+      const discontinuedRes = await dispatch(
+        list({ ...filters, discontinued: true, limit: 0 })
+      );
+      setDiscontinuedCount(discontinuedRes.data.count);
+    }
+  }, [consultation_id, showDiscontinued, dispatch]);
 
   useEffect(() => {
     refetch();
@@ -141,17 +155,22 @@ export default function PrescriptionAdministrationsTable({
         }
       />
 
-      <div className="overflow-x-auto rounded border border-white shadow">
-        <table className="w-full overflow-x-scroll whitespace-nowrap rounded">
+      <div className="relative overflow-x-auto rounded border border-white shadow">
+        <table className="w-full  whitespace-nowrap rounded">
           <thead className="bg-white text-xs font-medium text-black">
             <tr>
-              <th className="py-3 pl-4 text-left text-sm">{t("medicine")}</th>
-
-              <th className="px-2 text-center leading-none">
-                <p>Dosage &</p>
-                <p>
-                  {!state?.prescriptions[0]?.is_prn ? "Frequency" : "Indicator"}
-                </p>
+              <th className="sticky left-0 z-10 bg-white py-3 pl-4 text-left">
+                <div className="flex justify-between gap-2">
+                  <span className="text-sm">{t("medicine")}</span>
+                  <span className="hidden px-2 text-center text-xs leading-none lg:block">
+                    <p>Dosage &</p>
+                    <p>
+                      {!state?.prescriptions[0]?.is_prn
+                        ? "Frequency"
+                        : "Indicator"}
+                    </p>
+                  </span>
+                </div>
               </th>
 
               <th>
@@ -164,6 +183,8 @@ export default function PrescriptionAdministrationsTable({
                   variant="secondary"
                   disabled={!pagination.hasPrevious}
                   onClick={pagination.previous}
+                  tooltip="Previous 24 hours"
+                  tooltipClassName="tooltip-bottom -translate-x-1/2 text-xs"
                 >
                   <CareIcon icon="l-angle-left-b" className="text-base" />
                 </ButtonV2>
@@ -205,6 +226,8 @@ export default function PrescriptionAdministrationsTable({
                   variant="secondary"
                   disabled={!pagination.hasNext}
                   onClick={pagination.next}
+                  tooltip="Next 24 hours"
+                  tooltipClassName="tooltip-bottom -translate-x-1/2 text-xs"
                 >
                   <CareIcon icon="l-angle-right-b" className="text-base" />
                 </ButtonV2>
@@ -226,6 +249,23 @@ export default function PrescriptionAdministrationsTable({
             ))}
           </tbody>
         </table>
+
+        {showDiscontinued === false && !!discontinuedCount && (
+          <ButtonV2
+            variant="secondary"
+            className="sticky left-0 z-10 w-full"
+            ghost
+            onClick={() => setShowDiscontinued(true)}
+          >
+            <span className="flex w-full justify-start gap-1 text-sm">
+              <CareIcon icon="l-eye" className="text-lg" />
+              <span>
+                Show <strong>{discontinuedCount}</strong> other discontinued
+                prescription(s)
+              </span>
+            </span>
+          </ButtonV2>
+        )}
 
         {state?.prescriptions.length === 0 && (
           <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-gray-500">
@@ -285,8 +325,7 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
   return (
     <tr
       className={classNames(
-        "border-separate border border-gray-300 bg-gray-100 transition-all duration-200 ease-in-out hover:border-primary-300 hover:bg-primary-100"
-        // prescription.discontinued && "opacity-60"
+        "group border-separate border border-gray-300 bg-gray-100 transition-all duration-200 ease-in-out hover:border-primary-300 hover:bg-primary-100"
       )}
     >
       {showDiscontinue && (
@@ -357,40 +396,42 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
         </DialogModal>
       )}
       <td
-        className="cursor-pointer py-3 pl-4 text-left"
+        className="sticky left-0 z-10 cursor-pointer bg-gray-100 py-3 pl-4 text-left transition-all duration-200 ease-in-out group-hover:bg-primary-100"
         onClick={() => setShowDetails(true)}
       >
-        <div className="flex items-center gap-2">
-          <span
-            className={classNames(
-              "text-sm font-semibold",
-              prescription.discontinued ? "text-gray-700" : "text-gray-900"
+        <div className="flex flex-col gap-1 lg:flex-row lg:justify-between lg:gap-2">
+          <div className="flex items-center gap-2">
+            <span
+              className={classNames(
+                "text-sm font-semibold",
+                prescription.discontinued ? "text-gray-700" : "text-gray-900"
+              )}
+            >
+              {prescription.medicine_object?.name ?? prescription.medicine_old}
+            </span>
+
+            {prescription.discontinued && (
+              <span className="hidden rounded-full border border-gray-500 bg-gray-200 px-1.5 text-xs font-medium text-gray-700 lg:block">
+                {t("discontinued")}
+              </span>
             )}
-          >
-            {prescription.medicine_object?.name ?? prescription.medicine_old}
-          </span>
 
-          {prescription.discontinued && (
-            <span className="rounded-full border border-gray-500 bg-gray-200 px-1.5 text-xs font-medium text-gray-700">
-              {t("discontinued")}
-            </span>
-          )}
+            {prescription.route && (
+              <span className="hidden rounded-full border border-blue-500 bg-blue-100 px-1.5 text-xs font-medium text-blue-700 lg:block">
+                {t(prescription.route)}
+              </span>
+            )}
+          </div>
 
-          {prescription.route && (
-            <span className="rounded-full border border-blue-500 bg-blue-100 px-1.5 text-xs font-medium text-blue-700">
-              {t(prescription.route)}
-            </span>
-          )}
+          <div className="flex gap-1 text-xs font-semibold text-gray-900 lg:flex-col lg:px-2 lg:text-center">
+            <p>{prescription.dosage}</p>
+            <p>
+              {!prescription.is_prn
+                ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
+                : prescription.indicator}
+            </p>
+          </div>
         </div>
-      </td>
-
-      <td className="text-center text-xs font-semibold text-gray-900">
-        <p>{prescription.dosage}</p>
-        <p>
-          {!prescription.is_prn
-            ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
-            : prescription.indicator}
-        </p>
       </td>
 
       <td />
