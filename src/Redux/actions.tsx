@@ -1003,7 +1003,7 @@ export const PrescriptionActions = (consultation_external_id: string) => {
   const pathParams = { consultation_external_id };
 
   return {
-    list: (query?: Record<string, string | boolean | number>) => {
+    list: (query?: Partial<Prescription>) => {
       let altKey;
       if (query?.is_prn !== undefined) {
         altKey = query?.is_prn
