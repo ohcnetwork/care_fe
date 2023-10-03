@@ -82,11 +82,11 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
             }
           }
         }
-      } catch (e) {
+      } catch (e: any) {
         setPreview(undefined);
         console.log(e);
         Notification.Error({
-          msg: "Invalid file",
+          msg: "Invalid file: " + e.message,
         });
         setSelectedFile(undefined);
       }
@@ -110,7 +110,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
     let error = false;
 
     for (const asset of preview || []) {
-      const asset_data = JSON.stringify({
+      const asset_data: any = {
         name: asset.name,
         asset_type: asset.asset_type,
         asset_class: asset.asset_class,
@@ -126,11 +126,15 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
         qr_code_id: asset.qr_code_id,
         manufacturer: asset.manufacturer,
         meta: { ...asset.meta },
-        warranty_amc_end_of_validity: asset.warranty_amc_end_of_validity,
-        last_serviced_on: asset.last_serviced_on,
         note: asset.notes,
-        cancelToken: { promise: {} },
-      });
+      };
+
+      if (asset.last_serviced_on)
+        asset_data["last_serviced_on"] = asset.last_serviced_on;
+
+      if (asset.warranty_amc_end_of_validity)
+        asset_data["warranty_amc_end_of_validity"] =
+          asset.warranty_amc_end_of_validity;
 
       const response = await fetch("/api/v1/asset/", {
         method: "POST",
@@ -139,7 +143,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
           Authorization:
             "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken),
         },
-        body: asset_data,
+        body: JSON.stringify(asset_data),
       });
       const data = await response.json();
       if (response.status !== 201) {
