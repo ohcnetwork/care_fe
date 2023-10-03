@@ -174,7 +174,7 @@ const ScanABHAQRSection = ({
           try {
             const abha = JSON.parse(value);
             const { res, data } = await request(routes.abha.linkViaQR, {
-              body: { ...JSON.parse(value), patientId },
+              body: { ...abha, patientId },
             });
 
             if (res?.status === 200 || res?.status === 202) {
