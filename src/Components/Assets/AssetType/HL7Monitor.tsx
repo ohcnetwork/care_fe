@@ -33,13 +33,12 @@ const HL7Monitor = (props: HL7MonitorProps) => {
   const authUser = useAuthUser();
   const { data: facility, loading } = useQuery(routes.getPermittedFacility, {
     pathParams: { id: facilityId },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data && data.middleware_address) {
+        setFacilityMiddlewareHostname(data.middleware_address);
+      }
+    },
   });
-
-  useEffect(() => {
-    if (facility?.middleware_address) {
-      setFacilityMiddlewareHostname(facility.middleware_address);
-    }
-  }, [facility, facilityId]);
 
   useEffect(() => {
     setAssetType(asset?.asset_class);

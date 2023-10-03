@@ -67,24 +67,30 @@ const AssetManage = (props: AssetManageProps) => {
     pathParams: {
       external_id: assetId,
     },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setTransactionFilter(
+          data.qr_code_id
+            ? { qr_code_id: data.qr_code_id }
+            : { external_id: assetId }
+        );
+      }
+    },
   });
 
-  const { data: transactions, refetch } = useQuery(
-    routes.listAssetTransaction,
-    {
-      prefetch: false,
-      ...transactionFilter,
-      query: {
-        limit,
-        offset,
-      },
-      onResponse: ({ res, data }) => {
-        if (res?.status === 200 && data) {
-          setTotalCount(data.count);
-        }
-      },
-    }
-  );
+  const { data: transactions } = useQuery(routes.listAssetTransaction, {
+    prefetch: !!asset,
+    ...transactionFilter,
+    query: {
+      limit,
+      offset,
+    },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setTotalCount(data.count);
+      }
+    },
+  });
 
   const { data: services, refetch: serviceRefetch } = useQuery(
     routes.listAssetService,
@@ -94,16 +100,6 @@ const AssetManage = (props: AssetManageProps) => {
       },
     }
   );
-
-  useEffect(() => {
-    if (asset) {
-      const transactionFilter = asset.qr_code_id
-        ? { qr_code_id: asset.qr_code_id }
-        : { external_id: assetId };
-      setTransactionFilter(transactionFilter);
-      refetch();
-    }
-  }, [asset, assetId, refetch]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
