@@ -157,6 +157,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
               placeholder={props.placeholder ?? "Select"}
               displayValue={(value: any) => value?.label || ""}
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
+              onBlur={() => value && setQuery("")}
               autoComplete="off"
             />
             <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
@@ -164,7 +165,7 @@ export const Autocomplete = <T, V>(props: AutocompleteProps<T, V>) => {
                 <span>{value?.icon}</span>
 
                 {value && !props.isLoading && !props.required && (
-                  <div className="tooltip">
+                  <div className="tooltip" id="clear-button">
                     <CareIcon
                       className="care-l-times-circle h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
                       onClick={(e) => {

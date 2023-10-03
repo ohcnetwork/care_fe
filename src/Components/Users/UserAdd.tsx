@@ -1,5 +1,4 @@
 import { Link, navigate } from "raviger";
-import { parsePhoneNumberFromString } from "libphonenumber-js/max";
 import { lazy, useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -25,8 +24,11 @@ import {
 import * as Notification from "../../Utils/Notifications.js";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
-
-import { classNames, dateQueryString } from "../../Utils/utils";
+import {
+  classNames,
+  dateQueryString,
+  parsePhoneNumber,
+} from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -42,6 +44,7 @@ import CircularProgress from "../Common/components/CircularProgress";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import dayjs from "../../Utils/dayjs";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import { PhoneNumberValidator } from "../Form/FieldValidators";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -472,14 +475,11 @@ export const UserAdd = (props: UserProps) => {
           return;
         case "phone_number":
           // eslint-disable-next-line no-case-declarations
-          const phoneNumber = parsePhoneNumberFromString(
-            state.form[field],
-            "IN"
-          );
+          const phoneNumber = parsePhoneNumber(state.form[field]);
           // eslint-disable-next-line no-case-declarations
           let is_valid = false;
           if (phoneNumber) {
-            is_valid = phoneNumber.isValid();
+            is_valid = PhoneNumberValidator()(phoneNumber) === undefined;
           }
           if (!state.form[field] || !is_valid) {
             errors[field] = "Please enter valid phone number";
@@ -491,12 +491,10 @@ export const UserAdd = (props: UserProps) => {
           // eslint-disable-next-line no-case-declarations
           let alt_is_valid = false;
           if (state.form[field] && state.form[field] !== "+91") {
-            const altPhoneNumber = parsePhoneNumberFromString(
-              state.form[field],
-              "IN"
-            );
+            const altPhoneNumber = parsePhoneNumber(state.form[field]);
             if (altPhoneNumber) {
-              alt_is_valid = altPhoneNumber.isValid();
+              alt_is_valid =
+                PhoneNumberValidator(["mobile"])(altPhoneNumber) === undefined;
             }
           }
           if (
@@ -572,15 +570,20 @@ export const UserAdd = (props: UserProps) => {
         state: state.form.state,
         district: state.form.district,
         local_body: showLocalbody ? state.form.local_body : null,
-        phone_number: parsePhoneNumberFromString(
-          state.form.phone_number
-        )?.format("E.164"),
+        phone_number:
+          state.form.phone_number === "+91"
+            ? ""
+            : parsePhoneNumber(state.form.phone_number),
         alt_phone_number:
-          parsePhoneNumberFromString(
+          parsePhoneNumber(
             state.form.phone_number_is_whatsapp
-              ? state.form.phone_number
+              ? state.form.phone_number === "+91"
+                ? ""
+                : state.form.phone_number
+              : state.form.alt_phone_number === "+91"
+              ? ""
               : state.form.alt_phone_number
-          )?.format("E.164") ?? "",
+          ) ?? "",
         date_of_birth: dateQueryString(state.form.date_of_birth),
         age: Number(dayjs().diff(state.form.date_of_birth, "years", false)),
         doctor_qualification:

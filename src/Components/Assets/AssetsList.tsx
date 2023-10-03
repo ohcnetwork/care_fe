@@ -324,7 +324,7 @@ const AssetsList = () => {
                     },
                   },
                   {
-                    label: "Export Assets",
+                    label: "Export Assets (JSON)",
                     action: () =>
                       authorizedForImportExport &&
                       listAssets({
@@ -333,10 +333,28 @@ const AssetsList = () => {
                         limit: totalCount,
                       }),
                     type: "json",
-                    filePrefix: `assets_${facility?.name}`,
+                    filePrefix: `assets_${facility?.name ?? "all"}`,
                     options: {
                       icon: <CareIcon className="care-l-export" />,
                       disabled: totalCount === 0 || !authorizedForImportExport,
+                      id: "export-json-option",
+                    },
+                  },
+                  {
+                    label: "Export Assets (CSV)",
+                    action: () =>
+                      authorizedForImportExport &&
+                      listAssets({
+                        ...qParams,
+                        csv: true,
+                        limit: totalCount,
+                      }),
+                    type: "csv",
+                    filePrefix: `assets_${facility?.name ?? "all"}`,
+                    options: {
+                      icon: <CareIcon className="care-l-export" />,
+                      disabled: totalCount === 0 || !authorizedForImportExport,
+                      id: "export-csv-option",
                     },
                   },
                 ]}

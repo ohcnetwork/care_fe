@@ -100,8 +100,9 @@ const InvestigationReports = ({ id }: any) => {
   const [patientDetails, setPatientDetails] = useState<{
     name: string;
     age: number;
+    date_of_birth: string;
     hospitalName: string;
-  }>({ name: "", age: -1, hospitalName: "" });
+  }>({ name: "", age: -1, date_of_birth: "", hospitalName: "" });
   const [state, dispatch] = useReducer(
     investigationReportsReducer,
     initialState
@@ -220,6 +221,7 @@ const InvestigationReports = ({ id }: any) => {
           setPatientDetails({
             name: res.data.name,
             age: res.data.age,
+            date_of_birth: res.data.date_of_birth,
             hospitalName: res.data.facility_object.name,
           });
         }
@@ -227,6 +229,7 @@ const InvestigationReports = ({ id }: any) => {
         setPatientDetails({
           name: "",
           age: -1,
+          date_of_birth: "",
           hospitalName: "",
         });
       }
