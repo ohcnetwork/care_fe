@@ -59,7 +59,7 @@ export default function PrescriptionAdministrationsTable({
       start: new Date(),
       end: new Date(),
     },
-    perPage: daysPerPage * 24 * 60 * 60 * 1000, // 1 day
+    perPage: daysPerPage * 24 * 60 * 60 * 1000,
     slots: (daysPerPage * 24) / 4, // Grouped by 4 hours
     defaultEnd: true,
   });
