@@ -5,6 +5,7 @@ import ReadMore from "../Common/components/Readmore";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { PrescriptionActions } from "../../Redux/actions";
 import { useTranslation } from "react-i18next";
+import RecordMeta from "../../CAREUI/display/RecordMeta";
 
 export default function PrescriptionDetailCard({
   prescription,
@@ -29,7 +30,7 @@ export default function PrescriptionDetailCard({
         prescription.discontinued && "bg-gray-200 opacity-80"
       )}
     >
-      <div className="flex flex-1 flex-col gap-2">
+      <div className="flex flex-1 flex-col">
         <div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -83,7 +84,7 @@ export default function PrescriptionDetailCard({
           </div>
         </div>
 
-        <div className="mt-2 grid grid-cols-9 items-center gap-2">
+        <div className="mt-4 grid grid-cols-9 items-center gap-2">
           <Detail className="col-span-9 md:col-span-5" label={t("medicine")}>
             {prescription.medicine_object?.name ?? prescription.medicine_old}
           </Detail>
@@ -144,6 +145,23 @@ export default function PrescriptionDetailCard({
             >
               {prescription.discontinued_reason}
             </Detail>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1 text-xs text-gray-600 md:mt-3 md:flex-row md:items-center">
+          <span className="flex gap-1">
+            Prescribed
+            <RecordMeta
+              time={prescription.created_date}
+              user={prescription.prescribed_by}
+              inlineUser
+            />
+          </span>
+          {prescription.discontinued && (
+            <span className="flex gap-1">
+              and was discontinued
+              <RecordMeta time={prescription.discontinued_date} />
+            </span>
           )}
         </div>
       </div>
