@@ -150,7 +150,7 @@ export class AssetPage {
 
   configureVitalAsset(hostName: string, localIp: string) {
     cy.get("[data-testid=asset-configure-button]").click();
-    cy.get("#middlewareHostname").type(hostName);
+    cy.get("#middleware_hostname").type(hostName);
     cy.get("#localipAddress").type(localIp);
   }
 
