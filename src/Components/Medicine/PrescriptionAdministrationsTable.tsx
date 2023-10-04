@@ -21,6 +21,7 @@ import {
 } from "../../Utils/utils";
 import useRangePagination from "../../Common/hooks/useRangePagination";
 import EditPrescriptionForm from "./EditPrescriptionForm";
+import useBreakpoints from "../../Common/hooks/useBreakpoints";
 
 interface DateRange {
   start: Date;
@@ -48,13 +49,18 @@ export default function PrescriptionAdministrationsTable({
   const { t } = useTranslation();
 
   const [state, setState] = useState<State>();
+  const daysPerPage = useBreakpoints({
+    default: 1,
+    xl: 2,
+    "2xl": 3,
+  });
   const pagination = useRangePagination({
     bounds: state?.administrationsTimeBounds ?? {
       start: new Date(),
       end: new Date(),
     },
-    perPage: 24 * 60 * 60 * 1000,
-    slots: 24,
+    perPage: daysPerPage * 24 * 60 * 60 * 1000, // 1 day
+    slots: (daysPerPage * 24) / 4, // Grouped by 4 hours
     defaultEnd: true,
   });
   const [showBulkAdminister, setShowBulkAdminister] = useState(false);
@@ -600,12 +606,12 @@ function getAdministrationBounds(prescriptions: Prescription[]) {
       )
   );
 
-  // floor start to previous hour
-  start.setMinutes(0, 0, 0);
+  // floor start to 00:00 of the day
+  start.setHours(0, 0, 0, 0);
 
-  // ceil end to next hour
-  end.setMinutes(0, 0, 0);
-  end.setHours(end.getHours() + 1);
+  // ceil end to 00:00 of the next day
+  end.setHours(0, 0, 0, 0);
+  end.setDate(end.getDate() + 1);
 
   return { start, end };
 }
