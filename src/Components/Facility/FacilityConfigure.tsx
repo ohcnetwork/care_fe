@@ -46,7 +46,7 @@ const FormReducer = (state = initialState, action: any) => {
   }
 };
 
-export const UpdateFacilityMiddleware = (props: any) => {
+export const FacilityConfigure = (props: any) => {
   const [state, dispatch] = useReducer(FormReducer, initialState);
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
