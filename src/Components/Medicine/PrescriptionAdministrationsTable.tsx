@@ -192,7 +192,7 @@ export default function PrescriptionAdministrationsTable({
                       <p>{formatDateTime(start, "DD/MM")}</p>
                       <p>{formatDateTime(start, "HH:mm")}</p>
 
-                      <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs font-normal">
+                      <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs font-normal">
                         Administration(s) between
                         <br />
                         <strong>{formatTime(start)}</strong> and{" "}
