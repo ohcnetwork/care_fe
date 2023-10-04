@@ -151,7 +151,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
         <form className="rounded bg-white p-8 shadow" onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-x-4 lg:grid-cols-2">
             <TextFormField
-              name="middlewareHostname"
+              name="middleware_hostname"
               label={
                 <div className="flex flex-row gap-1">
                   <p>Middleware Hostname</p>

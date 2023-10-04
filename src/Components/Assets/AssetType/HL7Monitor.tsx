@@ -96,7 +96,7 @@ const HL7Monitor = (props: HL7MonitorProps) => {
                 <h2 className="mb-2 text-lg font-bold">Connection</h2>
                 <div className="flex flex-col gap-2">
                   <TextFormField
-                    name="middlewareHostname"
+                    name="middleware_hostname"
                     label={
                       <div className="flex flex-row gap-1">
                         <p>Middleware Hostname</p>
