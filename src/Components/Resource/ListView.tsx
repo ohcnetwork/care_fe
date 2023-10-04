@@ -31,7 +31,7 @@ export default function ListView() {
   const { t } = useTranslation();
 
   const onBoardViewBtnClick = () =>
-    navigate("/resource/board-view", { query: qParams });
+    navigate("/resource/board", { query: qParams });
   const appliedFilters = formatFilter(qParams);
 
   const refreshList = () => {

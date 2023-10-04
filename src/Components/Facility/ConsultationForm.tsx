@@ -123,7 +123,7 @@ const initForm: FormDetails = {
   facility: "",
   admitted: "false",
   admitted_to: "",
-  category: "Comfort",
+  category: "",
   admission_date: new Date(),
   discharge_date: null,
   referred_to: "",
@@ -373,8 +373,8 @@ export const ConsultationForm = (props: any) => {
             admitted_to: res.data.admitted_to ? res.data.admitted_to : "",
             category: res.data.category
               ? PATIENT_CATEGORIES.find((i) => i.text === res.data.category)
-                  ?.id ?? "Comfort"
-              : "Comfort",
+                  ?.id ?? ""
+              : "",
             patient_no: res.data.patient_no ?? "",
             OPconsultation: res.data.consultation_notes,
             is_telemedicine: `${res.data.is_telemedicine}`,

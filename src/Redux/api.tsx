@@ -1,6 +1,7 @@
 import { IConfig } from "../Common/hooks/useConfig";
 import { AssetData } from "../Components/Assets/AssetTypes";
 import { LocationModel } from "../Components/Facility/models";
+import { Prescription } from "../Components/Medicine/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 
@@ -8,7 +9,7 @@ import { PaginatedResponse } from "../Utils/request/types";
  * A fake function that returns an empty object casted to type T
  * @returns Empty object as type T
  */
-function Res<T>(): T {
+function Type<T>(): T {
   return {} as T;
 }
 
@@ -17,12 +18,17 @@ interface JwtTokenObtainPair {
   refresh: string;
 }
 
+interface LoginInput {
+  username: string;
+  password: string;
+}
+
 const routes = {
   config: {
     path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
     method: "GET",
     noAuth: true,
-    TRes: Res<IConfig>(),
+    TRes: Type<IConfig>(),
   },
 
   // Auth Endpoints
@@ -30,12 +36,15 @@ const routes = {
     path: "/api/v1/auth/login/",
     method: "POST",
     noAuth: true,
+    TRes: Type<JwtTokenObtainPair>(),
+    TBody: Type<LoginInput>(),
   },
 
   token_refresh: {
     path: "/api/v1/auth/token/refresh/",
     method: "POST",
-    TRes: Res<JwtTokenObtainPair>(),
+    TRes: Type<JwtTokenObtainPair>(),
+    TBody: Type<{ refresh: string }>(),
   },
 
   token_verify: {
@@ -46,16 +55,22 @@ const routes = {
   checkResetToken: {
     path: "/api/v1/password_reset/check/",
     method: "POST",
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ token: string }>(),
   },
 
   resetPassword: {
     path: "/api/v1/password_reset/confirm/",
     method: "POST",
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ password: string; confirm: string }>(),
   },
 
   forgotPassword: {
     path: "/api/v1/password_reset/",
     method: "POST",
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ username: string }>(),
   },
 
   updatePassword: {
@@ -65,7 +80,7 @@ const routes = {
   // User Endpoints
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
-    TRes: Res<UserModel>(),
+    TRes: Type<UserModel>(),
   },
 
   userList: {
@@ -199,7 +214,7 @@ const routes = {
   listFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/",
     method: "GET",
-    TRes: Res<PaginatedResponse<LocationModel>>(),
+    TRes: Type<PaginatedResponse<LocationModel>>(),
   },
   createFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/",
@@ -805,7 +820,7 @@ const routes = {
   getAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "GET",
-    TRes: Res<AssetData>(),
+    TRes: Type<AssetData>(),
   },
   deleteAsset: {
     path: "/api/v1/asset/{external_id}/",
@@ -971,6 +986,8 @@ const routes = {
   createPrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
     method: "POST",
+    TBody: Type<Prescription>(),
+    TRes: Type<Prescription>(),
   },
 
   listAdministrations: {
@@ -996,6 +1013,8 @@ const routes = {
   discontinuePrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
     method: "POST",
+    TBody: Type<{ discontinued_reason: string }>(),
+    TRes: Type<Record<string, never>>(),
   },
 
   // HCX Endpoints

@@ -231,7 +231,7 @@ export default function ResourceDetails(props: { id: string }) {
     <Page
       title={"Resource details"}
       crumbsReplacements={{ [props.id]: { name: data.title } }}
-      backUrl={"/resource/board-view"}
+      backUrl={"/resource/board"}
     >
       {isPrintMode ? (
         <div className="my-4">

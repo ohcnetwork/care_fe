@@ -115,6 +115,7 @@ describe("Patient Creation with consultation", () => {
     patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
 
     patientConsultationPage.enterConsultationDetails(
+      "Stable",
       "Examination details and Clinical conditions",
       "70",
       "170",
