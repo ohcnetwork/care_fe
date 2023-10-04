@@ -1,7 +1,7 @@
 import { PerformedByModel } from "../HCX/misc";
 
 interface BasePrescription {
-  readonly id?: string;
+  readonly id: string;
   medicine?: string;
   medicine_object?: MedibaseMedicine;
   medicine_old?: string;
