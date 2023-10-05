@@ -306,7 +306,7 @@ const AssetCreate = (props: AssetProps) => {
     setLocation("");
     setAssetType(assetTypeInitial);
     setAssetClass(assetClassInitial);
-    setIsWorking("");
+    setIsWorking(undefined);
     setNotWorkingReason("");
     setSerialNumber("");
     setVendorName("");
