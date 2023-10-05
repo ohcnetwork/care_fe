@@ -592,8 +592,11 @@ export const deleteLastInventoryLog = (params: object) => {
   return fireRequest("deleteLastInventoryLog", [], {}, params);
 };
 
-export const generateDischargeSummary = (pathParams: object) => {
-  return fireRequest("dischargeSummaryGenerate", [], {}, pathParams);
+export const generateDischargeSummary = (
+  params: object,
+  pathParams: object
+) => {
+  return fireRequest("dischargeSummaryGenerate", [], params, pathParams);
 };
 export const previewDischargeSummary = (pathParams: object) => {
   return fireRequest(

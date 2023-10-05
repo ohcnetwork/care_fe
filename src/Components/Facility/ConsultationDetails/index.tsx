@@ -41,6 +41,7 @@ import { ConsultationVentilatorTab } from "./ConsultationVentilatorTab";
 import { ConsultationPressureSoreTab } from "./ConsultationPressureSoreTab";
 import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
+import DischargeAISummaryModal from "../DischargeAISummaryModal";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -85,6 +86,8 @@ export const ConsultationDetails = (props: any) => {
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [activeShiftingData, setActiveShiftingData] = useState<Array<any>>([]);
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
+    useState(false);
+  const [openAIDischargeSummaryDialog, setOpenAIDischargeSummaryDialog] =
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
 
@@ -261,6 +264,12 @@ export const ConsultationDetails = (props: any) => {
         consultation={consultationData}
         show={openDischargeSummaryDialog}
         onClose={() => setOpenDischargeSummaryDialog(false)}
+      />
+
+      <DischargeAISummaryModal
+        consultation={consultationData}
+        show={openAIDischargeSummaryDialog}
+        onClose={() => setOpenAIDischargeSummaryDialog(false)}
       />
 
       <DischargeModal
@@ -443,6 +452,10 @@ export const ConsultationDetails = (props: any) => {
                 )}
               </div>
               <div className="flex h-full w-full flex-col justify-end gap-2 text-right lg:flex-row">
+                <ButtonV2 onClick={() => setOpenAIDischargeSummaryDialog(true)}>
+                  <i className="fas fa-robot"></i>
+                  <span>AI {t("discharge_summary")}</span>
+                </ButtonV2>
                 <ButtonV2 onClick={() => setOpenDischargeSummaryDialog(true)}>
                   <i className="fas fa-clipboard-list"></i>
                   <span>{t("discharge_summary")}</span>

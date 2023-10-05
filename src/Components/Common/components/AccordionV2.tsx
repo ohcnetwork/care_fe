@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { classNames } from "../../../Utils/utils";
 
 export default function AccordionV2(props: {
+  prefix?: JSX.Element | JSX.Element[];
   children: JSX.Element | JSX.Element[];
   expandIcon?: JSX.Element;
   title: JSX.Element | JSX.Element[] | string;
@@ -14,6 +15,7 @@ export default function AccordionV2(props: {
   return (
     <div className={props.className}>
       <div className="flex justify-between">
+        <>{props.prefix}</>
         <button
           type="button"
           className="grid w-full justify-start"
