@@ -1,6 +1,14 @@
 import { IConfig } from "../Common/hooks/useConfig";
 import { AssetData } from "../Components/Assets/AssetTypes";
-import { IExternalResultList } from "../Components/ExternalResult/types";
+import {
+  IDeleteExternalResult,
+  IExternalResult,
+  IExternalResultList,
+  ILocalBodies,
+  ILocalBodyByDistrict,
+  IPartialUpdateExternalResult,
+  IWardByLocalBody,
+} from "../Components/ExternalResult/models";
 import { LocationModel } from "../Components/Facility/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
@@ -490,6 +498,8 @@ const routes = {
   },
   externalResult: {
     path: "/api/v1/external_result/{id}/",
+    method: "GET",
+    TRes: Type<IExternalResult>(),
   },
   externalResultUploadCsv: {
     path: "/api/v1/external_result/bulk_upsert/",
@@ -497,8 +507,9 @@ const routes = {
   },
 
   deleteExternalResult: {
-    path: "/api/v1/external_result",
+    path: "/api/v1/external_result/{id}/",
     method: "DELETE",
+    TRes: Type<IDeleteExternalResult>(),
   },
 
   updateExternalResult: {
@@ -509,6 +520,8 @@ const routes = {
   partialUpdateExternalResult: {
     path: "/api/v1/external_result/{id}/",
     method: "PATCH",
+    TRes: Type<IPartialUpdateExternalResult>(),
+    TBody: Type<IPartialUpdateExternalResult>(),
   },
 
   // States
@@ -533,9 +546,13 @@ const routes = {
   },
   getAllLocalBodyByDistrict: {
     path: "/api/v1/district/{id}/get_all_local_body/",
+    method: "GET",
+    TRes: Type<ILocalBodyByDistrict[]>(),
   },
   getLocalbodyByDistrict: {
     path: "/api/v1/district/{id}/local_bodies/",
+    method: "GET",
+    TRes: Type<ILocalBodies[]>(),
   },
 
   // Local Body
@@ -558,6 +575,8 @@ const routes = {
   },
   getWardByLocalBody: {
     path: "/api/v1/ward/?local_body={id}",
+    method: "GET",
+    TRes: Type<IWardByLocalBody>(),
   },
 
   // Sample Test

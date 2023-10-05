@@ -16,12 +16,14 @@ import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover"
 import Page from "../Common/components/Page";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import { IExternalResult } from "./types";
+import { IExternalResult } from "./models";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultList() {
-  const [resultListData, setResultListData] = useState<IExternalResult[]>([]);
+  const [resultListData, setResultListData] = useState<
+    Partial<IExternalResult>[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const {
@@ -172,7 +174,7 @@ export default function ResultList() {
                 className="group inline-flex space-x-2 text-sm leading-5"
               >
                 <p className="text-gray-800 transition duration-150 ease-in-out group-hover:text-gray-900">
-                  {`${result.name} hi`} - {result.age} {result.age_in}
+                  {`${result.name}`} - {result.age} {result.age_in}
                 </p>
               </a>
             </div>

@@ -472,10 +472,6 @@ export const getWards = (params: object) => {
   return fireRequest("getWards", [], params);
 };
 
-export const getAllLocalBodyByDistrict = (pathParam: object) => {
-  return fireRequest("getAllLocalBodyByDistrict", [], {}, pathParam);
-};
-
 // Local Body
 export const getLocalBody = (pathParam: object) => {
   return fireRequest("getLocalBody", [], {}, pathParam);
@@ -665,15 +661,8 @@ export const externalResultList = (params: object, altKey: string) => {
   return fireRequest("externalResultList", [], params, null, altKey);
 };
 
-export const externalResult = (pathParam: object) => {
-  return fireRequest("externalResult", [], {}, pathParam);
-};
 export const externalResultUploadCsv = (params: object) => {
   return fireRequest("externalResultUploadCsv", [], params);
-};
-
-export const deleteExternalResult = (id: string) => {
-  return fireRequest("deleteExternalResult", [id], {});
 };
 
 export const updateExternalResult = (id: number, params: object) => {
