@@ -3,6 +3,7 @@ import { AssetData } from "../Components/Assets/AssetTypes";
 import {
   IDeleteExternalResult,
   IExternalResult,
+  IExternalResultCsv,
   IExternalResultList,
   ILocalBodies,
   ILocalBodyByDistrict,
@@ -504,6 +505,8 @@ const routes = {
   externalResultUploadCsv: {
     path: "/api/v1/external_result/bulk_upsert/",
     method: "POST",
+    TBody: Type<IExternalResultCsv>(),
+    TRes: Type<IExternalResult[]>(),
   },
 
   deleteExternalResult: {

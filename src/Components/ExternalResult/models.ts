@@ -83,3 +83,7 @@ export interface ILocalBodyByDistrict {
   name: string;
   state: number;
 }
+
+export interface IExternalResultCsv {
+  sample_tests: Partial<IExternalResult>[];
+}

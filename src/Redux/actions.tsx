@@ -661,8 +661,8 @@ export const externalResultList = (params: object, altKey: string) => {
   return fireRequest("externalResultList", [], params, null, altKey);
 };
 
-export const externalResultUploadCsv = (params: object) => {
-  return fireRequest("externalResultUploadCsv", [], params);
+export const externalResult = (pathParam: object) => {
+  return fireRequest("externalResult", [], {}, pathParam);
 };
 
 export const updateExternalResult = (id: number, params: object) => {
