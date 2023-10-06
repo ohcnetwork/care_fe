@@ -40,7 +40,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   }, [props.socketUrl]);
 
   const bpWithinMaxPersistence = !!(
-    data.bp?.["date-time"] && isWithinMinutes(data.bp?.["date-time"], 30)
+    (data.bp?.["date-time"] && isWithinMinutes(data.bp?.["date-time"], 30)) // Max blood pressure persistence is 30 minutes
   );
 
   return (
