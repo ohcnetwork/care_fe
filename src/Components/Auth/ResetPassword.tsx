@@ -72,7 +72,7 @@ export const ResetPassword = (props: any) => {
       const { res, error } = await request(routes.resetPassword, {
         body: { ...valid },
       });
-      if (res && res.statusText === "OK") {
+      if (res?.ok) {
         localStorage.removeItem(LocalStorageKeys.accessToken);
         Notification.Success({
           msg: t("password_reset_success"),
@@ -89,7 +89,7 @@ export const ResetPassword = (props: any) => {
       const { res } = await request(routes.checkResetToken, {
         body: { token: props.token },
       });
-      if (!res || res.statusText !== "OK") {
+      if (!res || res.ok) {
         navigate("/invalid-reset");
       }
     };
