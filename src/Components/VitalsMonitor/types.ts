@@ -8,7 +8,7 @@ export interface VitalsDataBase {
   "patient-name": string;
 }
 
-export interface VitalsValueBase {
+export interface VitalsValueBase extends VitalsDataBase {
   value: number;
   unit: string;
   interpretation: string;

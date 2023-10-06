@@ -1,6 +1,7 @@
 import { IConfig } from "../Common/hooks/useConfig";
 import { AssetData } from "../Components/Assets/AssetTypes";
 import { LocationModel } from "../Components/Facility/models";
+import { Prescription } from "../Components/Medicine/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 
@@ -17,6 +18,11 @@ interface JwtTokenObtainPair {
   refresh: string;
 }
 
+interface LoginInput {
+  username: string;
+  password: string;
+}
+
 const routes = {
   config: {
     path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
@@ -30,6 +36,8 @@ const routes = {
     path: "/api/v1/auth/login/",
     method: "POST",
     noAuth: true,
+    TRes: Type<JwtTokenObtainPair>(),
+    TBody: Type<LoginInput>(),
   },
 
   token_refresh: {
@@ -47,16 +55,25 @@ const routes = {
   checkResetToken: {
     path: "/api/v1/password_reset/check/",
     method: "POST",
+    noAuth: true,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ token: string }>(),
   },
 
   resetPassword: {
     path: "/api/v1/password_reset/confirm/",
     method: "POST",
+    noAuth: true,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ password: string; confirm: string }>(),
   },
 
   forgotPassword: {
     path: "/api/v1/password_reset/",
     method: "POST",
+    noAuth: true,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ username: string }>(),
   },
 
   updatePassword: {
@@ -972,6 +989,8 @@ const routes = {
   createPrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
     method: "POST",
+    TBody: Type<Prescription>(),
+    TRes: Type<Prescription>(),
   },
 
   listAdministrations: {
@@ -997,6 +1016,8 @@ const routes = {
   discontinuePrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
     method: "POST",
+    TBody: Type<{ discontinued_reason: string }>(),
+    TRes: Type<Record<string, never>>(),
   },
 
   // HCX Endpoints

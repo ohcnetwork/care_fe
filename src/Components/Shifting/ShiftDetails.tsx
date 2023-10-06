@@ -557,7 +557,7 @@ export default function ShiftDetails(props: { id: string }) {
       ) : (
         <Page
           title={t("shifting_details")}
-          backUrl="/shifting/board-view"
+          backUrl="/shifting/board"
           options={
             <div className="flex gap-2">
               <ButtonV2
