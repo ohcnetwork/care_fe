@@ -28,7 +28,6 @@ export default function ResultItem(props: any) {
   });
 
   const handleDelete = async () => {
-    console.log("handleDelete");
     if (showDeleteAlert) {
       const { res, data } = await request(routes.deleteExternalResult, {
         pathParams: { id: props.id },

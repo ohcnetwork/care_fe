@@ -161,6 +161,9 @@ export default function ListFilter(props: any) {
     };
     onChange(data);
     dataList(selectedLsgs, wards);
+    console.log("data", data);
+    console.log("selectedLsgs", selectedLsgs);
+    console.log("wards", wards);
   };
 
   const sortByName = (items: any) => {

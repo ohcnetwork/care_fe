@@ -4,13 +4,11 @@ import {
   IDeleteExternalResult,
   IExternalResult,
   IExternalResultCsv,
-  IExternalResultList,
   ILocalBodies,
   ILocalBodyByDistrict,
   IPartialUpdateExternalResult,
-  IWardByLocalBody,
 } from "../Components/ExternalResult/models";
-import { LocationModel } from "../Components/Facility/models";
+import { LocationModel, WardModel } from "../Components/Facility/models";
 import { Prescription } from "../Components/Medicine/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
@@ -509,7 +507,7 @@ const routes = {
   externalResultList: {
     path: "/api/v1/external_result/",
     method: "GET",
-    TRes: Type<IExternalResultList>(),
+    TRes: Type<PaginatedResponse<IExternalResult>>(),
   },
   externalResult: {
     path: "/api/v1/external_result/{id}/",
@@ -593,7 +591,7 @@ const routes = {
   getWardByLocalBody: {
     path: "/api/v1/ward/?local_body={id}",
     method: "GET",
-    TRes: Type<IWardByLocalBody>(),
+    TRes: Type<PaginatedResponse<WardModel>>(),
   },
 
   // Sample Test

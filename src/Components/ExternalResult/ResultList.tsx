@@ -17,6 +17,7 @@ import Page from "../Common/components/Page";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 import { IExternalResult } from "./models";
+import request from "../../Utils/request/request";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -24,7 +25,7 @@ export default function ResultList() {
   const [resultListData, setResultListData] = useState<
     Partial<IExternalResult>[]
   >([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const {
     qParams,
@@ -60,7 +61,17 @@ export default function ResultList() {
 
     setPhoneNumberError("Enter a valid number");
   };
-  const { res, data, loading } = useQuery(routes.externalResultList);
+
+  useQuery(routes.externalResultList, {
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        setResultListData(data.results);
+        setTotalCount(data.count);
+        setIsLoading(false);
+      }
+    },
+  });
+
   let manageResults: any = null;
   useEffect(() => {
     setIsLoading(true);
@@ -80,25 +91,26 @@ export default function ResultList() {
         qParams.sample_collection_date_after || undefined,
       sample_collection_date_before:
         qParams.sample_collection_date_before || undefined,
-      offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+      offset: String((qParams.page ? qParams.page - 1 : 0) * resultsPerPage),
       srf_id: qParams.srf_id || undefined,
     };
 
-    if (loading) {
-      setIsLoading(true);
-    } else if (res && data) {
-      setResultListData(data.results);
-      setTotalCount(data.count);
-      setIsLoading(false);
-    }
+    const fetchData = async () => {
+      const { res, data } = await request(routes.externalResultList, {
+        query: params,
+      });
+      if (res && data) {
+        setResultListData(data.results);
+        setTotalCount(data.count);
+        setIsLoading(false);
+      }
+    };
+    fetchData();
 
     if (!params.mobile_number) {
       setPhoneNum("+91");
     }
   }, [
-    res,
-    data,
-    loading,
     qParams.name,
     qParams.page,
     qParams.mobile_number,
@@ -159,7 +171,7 @@ export default function ResultList() {
   };
 
   let resultList: any[] = [];
-  if (data && resultListData.length) {
+  if (resultListData.length) {
     resultList = resultListData.map((result: any) => {
       const resultUrl = `/external_results/${result.id}`;
       return (
@@ -215,7 +227,7 @@ export default function ResultList() {
     });
   }
 
-  if (isLoading || !data) {
+  if (isLoading) {
     manageResults = (
       <tr className="bg-white">
         <td colSpan={5}>
@@ -223,9 +235,9 @@ export default function ResultList() {
         </td>
       </tr>
     );
-  } else if (data && resultListData.length) {
+  } else if (resultListData.length) {
     manageResults = <>{resultList}</>;
-  } else if (data && resultListData.length === 0) {
+  } else if (resultListData.length === 0) {
     manageResults = (
       <tr className="bg-white">
         <td colSpan={5}>

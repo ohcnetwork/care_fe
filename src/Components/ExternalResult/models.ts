@@ -50,25 +50,8 @@ export interface ILocalBodies {
   district: number;
 }
 
-export interface IExternalResultList {
-  count: number;
-  results: Partial<IExternalResult>[];
-}
-
 export interface IDeleteExternalResult {
   detail: string;
-}
-
-export interface Ward {
-  id: number;
-  name: string;
-  number: number;
-  local_body: number;
-}
-
-export interface IWardByLocalBody {
-  count: number;
-  results: Ward[];
 }
 
 export interface IPartialUpdateExternalResult {

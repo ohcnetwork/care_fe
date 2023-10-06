@@ -38,13 +38,30 @@ export default async function request<TData, TBody>(
 
     try {
       const res = await fetch(url, options);
-      const data: TData = await res.json();
 
-      result = {
-        res,
-        data: res.ok ? data : undefined,
-        error: res.ok ? undefined : (data as Record<string, unknown>),
-      };
+      if (!res.ok) {
+        const data: Record<string, unknown> = await res.json();
+        result = {
+          res,
+          data: undefined,
+          error: data,
+        };
+      } else if (
+        res.headers.get("content-type")?.includes("application/json")
+      ) {
+        const data: TData = await res.json();
+        result = {
+          res,
+          data,
+          error: undefined,
+        };
+      } else {
+        result = {
+          res,
+          data: undefined,
+          error: undefined,
+        };
+      }
 
       onResponse?.(result);
       handleResponse(result, silent);

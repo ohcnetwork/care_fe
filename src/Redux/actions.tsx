@@ -472,6 +472,10 @@ export const getWards = (params: object) => {
   return fireRequest("getWards", [], params);
 };
 
+export const getAllLocalBodyByDistrict = (pathParam: object) => {
+  return fireRequest("getAllLocalBodyByDistrict", [], {}, pathParam);
+};
+
 // Local Body
 export const getLocalBody = (pathParam: object) => {
   return fireRequest("getLocalBody", [], {}, pathParam);
