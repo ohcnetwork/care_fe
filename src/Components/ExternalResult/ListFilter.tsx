@@ -30,7 +30,6 @@ export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter, dataList } = props;
   const [wardList, setWardList] = useState<any[]>([]);
   const [lsgList, setLsgList] = useState<any[]>([]);
-
   const [wards, setWards] = useState<any[]>([]);
   const [selectedLsgs, setSelectedLsgs] = useState<any[]>([]);
   const authUser = useAuthUser();
@@ -161,9 +160,6 @@ export default function ListFilter(props: any) {
     };
     onChange(data);
     dataList(selectedLsgs, wards);
-    console.log("data", data);
-    console.log("selectedLsgs", selectedLsgs);
-    console.log("wards", wards);
   };
 
   const sortByName = (items: any) => {
@@ -176,7 +172,6 @@ export default function ListFilter(props: any) {
     const selectedLsgIds: any = selectedLsgs.map((e) => {
       return e.id;
     });
-
     const selectedwards: any =
       selectedLsgIds.length === 0
         ? wardList
@@ -189,10 +184,8 @@ export default function ListFilter(props: any) {
 
   const handleChange = (event: any) => {
     const { name, value } = event.target;
-
     const filterData: any = { ...filterState };
     filterData[name] = value;
-
     setFilterState(filterData);
   };
 
