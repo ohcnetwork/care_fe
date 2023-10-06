@@ -165,6 +165,7 @@ export default function NotificationsList({
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const [showUnread, setShowUnread] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -351,33 +352,39 @@ export default function NotificationsList({
   } else if (data?.length) {
     manageResults = (
       <>
-        {data.map((result: any) => (
-          <NotificationTile
-            key={result.id}
-            notification={result}
-            onClickCB={onClickCB}
-            setShowNotifications={setOpen}
-          />
-        ))}
+        {data
+          .filter((notification: any) =>
+            showUnread ? notification.read_at === null : true
+          )
+          .map((result: any) => (
+            <NotificationTile
+              key={result.id}
+              notification={result}
+              onClickCB={onClickCB}
+              setShowNotifications={setOpen}
+            />
+          ))}
         {isLoading && (
           <div className="flex items-center justify-center">
             <CircularProgress />
           </div>
         )}
-        {totalCount > RESULT_LIMIT && offset < totalCount - RESULT_LIMIT && (
-          <div className="mt-4 flex w-full justify-center px-4 py-5 lg:px-8">
-            <ButtonV2
-              className="w-full"
-              disabled={isLoading}
-              variant="secondary"
-              shadow
-              border
-              onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
-            >
-              {isLoading ? t("loading") : t("load_more")}
-            </ButtonV2>
-          </div>
-        )}
+        {!showUnread &&
+          totalCount > RESULT_LIMIT &&
+          offset < totalCount - RESULT_LIMIT && (
+            <div className="mt-4 flex w-full justify-center px-4 py-5 lg:px-8">
+              <ButtonV2
+                className="w-full"
+                disabled={isLoading}
+                variant="secondary"
+                shadow
+                border
+                onClick={() => setOffset((prev) => prev + RESULT_LIMIT)}
+              >
+                {isLoading ? t("loading") : t("load_more")}
+              </ButtonV2>
+            </div>
+          )}
       </>
     );
   } else if (data && data.length === 0) {
@@ -447,6 +454,21 @@ export default function NotificationsList({
                 }
               />
               <span className="text-xs">{t("mark_all_as_read")}</span>
+            </ButtonV2>
+            <ButtonV2
+              ghost
+              variant="secondary"
+              onClick={() => setShowUnread(!showUnread)}
+            >
+              <CareIcon
+                className={showUnread ? "care-l-filter-slash" : "care-l-filter"}
+              />
+
+              <span className="text-xs">
+                {showUnread
+                  ? t("show_all_notifications")
+                  : t("show_unread_notifications")}
+              </span>
             </ButtonV2>
           </div>
 
