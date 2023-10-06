@@ -89,7 +89,7 @@ export const ResetPassword = (props: any) => {
       const { res } = await request(routes.checkResetToken, {
         body: { token: props.token },
       });
-      if (!res || res.ok) {
+      if (!res || !res.ok) {
         navigate("/invalid-reset");
       }
     };
