@@ -100,7 +100,7 @@ interface FileUploadProps {
   hideBack: boolean;
   audio?: boolean;
   unspecified: boolean;
-  sampleId?: number;
+  sampleId?: string;
   claimId?: string;
 }
 

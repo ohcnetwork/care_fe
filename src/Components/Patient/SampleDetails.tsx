@@ -13,14 +13,11 @@ import { getTestSample } from "../../Redux/actions";
 
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
+import { DetailRoute } from "../../Routers/types";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
-interface SampleDetailsProps {
-  id: number;
-}
-
-export const SampleDetails = ({ id }: SampleDetailsProps) => {
+export const SampleDetails = ({ id }: DetailRoute) => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [sampleDetails, setSampleDetails] = useState<SampleTestModel>({});
