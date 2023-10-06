@@ -509,6 +509,10 @@ export const warrantyAmcValidityChip = (
   const today = new Date();
   const warrantyAmcEndDate = new Date(warranty_amc_end_of_validity);
 
+  const days = Math.ceil(
+    Math.abs(Number(warrantyAmcEndDate) - Number(today)) / (1000 * 60 * 60 * 24)
+  );
+
   if (warrantyAmcEndDate < today) {
     return (
       <Chip
@@ -517,9 +521,7 @@ export const warrantyAmcValidityChip = (
         text="AMC/Warranty Expired"
       />
     );
-  } else if (
-    warrantyAmcEndDate < new Date(today.setMonth(today.getMonth() + 1))
-  ) {
+  } else if (days <= 30) {
     return (
       <Chip
         variant="custom"
@@ -528,9 +530,7 @@ export const warrantyAmcValidityChip = (
         text="AMC/Warranty Expiring Soon"
       />
     );
-  } else if (
-    warrantyAmcEndDate < new Date(today.setMonth(today.getMonth() + 3))
-  ) {
+  } else if (days <= 90) {
     return (
       <Chip
         variant="warning"
