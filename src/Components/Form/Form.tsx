@@ -7,6 +7,7 @@ import { FormContextValue, createFormContext } from "./FormContext";
 import { FieldChangeEvent } from "./FormFields/Utils";
 import { FormDetails, FormErrors, FormState, formReducer } from "./Utils";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
+import * as Notification from "../../Utils/Notifications";
 
 type Props<T extends FormDetails> = {
   className?: string;
@@ -51,6 +52,10 @@ const Form = <T extends FormDetails>({
 
       if (Object.keys(errors).length) {
         dispatch({ type: "set_errors", errors });
+
+        if (errors.$all) {
+          Notification.Error({ msg: errors.$all });
+        }
         return;
       }
     }
