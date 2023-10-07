@@ -1,11 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import useKeyboardShortcut from "use-keyboard-shortcut";
-import {
-  listAssetBeds,
-  partialUpdateAssetBed,
-  deleteAssetBed,
-} from "../../../Redux/actions";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 import { getCameraPTZ } from "../../../Common/constants";
 import {
   StreamStatus,
@@ -101,28 +98,32 @@ const LiveFeed = (props: any) => {
     });
 
   const getBedPresets = async (id: any) => {
-    const bedAssets = await dispatch(
-      listAssetBeds({
+    const { data } = await request(routes.listAssetBeds, {
+      body: {
         asset: id,
         limit: page.limit,
         offset: page.offset,
-      })
-    );
-    setBedPresets(bedAssets?.data?.results);
+      },
+    });
+    setBedPresets(data?.results);
     setPage({
       ...page,
-      count: bedAssets?.data?.count,
+      count: data?.count ? data?.count : 0,
     });
   };
 
   const deletePreset = async (id: any) => {
-    const res = await dispatch(deleteAssetBed(id));
+    const { res, data } = await request(routes.deleteAssetBed, {
+      pathParams: {
+        id: id,
+      },
+    });
     if (res?.status === 204) {
       Notification.Success({ msg: "Preset deleted successfully" });
       getBedPresets(cameraAsset.id);
     } else {
       Notification.Error({
-        msg: "Error while deleting Preset: " + (res?.data?.detail || ""),
+        msg: "Error while deleting Preset: " + (data?.detail || ""),
       });
     }
     setToDelete(null);
@@ -133,20 +134,21 @@ const LiveFeed = (props: any) => {
       bed_id: bed.id,
       preset_name: preset,
     };
-    const response = await dispatch(
-      partialUpdateAssetBed(
-        {
-          asset: currentPreset.asset_object.id,
-          bed: bed.id,
-          meta: {
-            ...currentPreset.meta,
-            ...data,
-          },
+    const { res } = await request(routes.partialUpdateAssetBed, {
+      body: {
+        asset: currentPreset.asset_object.id,
+        beds: bed.id ? bed.id : "",
+        meta: {
+          ...currentPreset.meta,
+          ...data,
         },
-        currentPreset?.id
-      )
-    );
-    if (response && response.status === 200) {
+      },
+      pathParams: {
+        id: currentPreset.id,
+      },
+    });
+
+    if (res && res.status === 200) {
       Notification.Success({ msg: "Preset Updated" });
     } else {
       Notification.Error({ msg: "Something Went Wrong" });
@@ -239,20 +241,20 @@ const LiveFeed = (props: any) => {
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
             console.log("Updating Preset");
-            const response = await dispatch(
-              partialUpdateAssetBed(
-                {
-                  asset: currentPreset.asset_object.id,
-                  bed: currentPreset.bed_object.id,
-                  meta: {
-                    ...currentPreset.meta,
-                    position: data?.position,
-                  },
+            const { res } = await request(routes.partialUpdateAssetBed, {
+              body: {
+                asset: currentPreset.asset_object.id,
+                beds: currentPreset.bed_object.id,
+                meta: {
+                  ...currentPreset.meta,
+                  position: data?.position,
                 },
-                currentPreset?.id
-              )
-            );
-            if (response && response.status === 200) {
+              },
+              pathParams: {
+                id: currentPreset?.id,
+              },
+            });
+            if (res && res.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
               getBedPresets(cameraAsset?.id);
               fetchCameraPresets();

@@ -1,6 +1,21 @@
 import { IConfig } from "../Common/hooks/useConfig";
 import { AssetData } from "../Components/Assets/AssetTypes";
-import { LocationModel } from "../Components/Facility/models";
+import {
+  DailyRoundsBody,
+  DailyRoundsRes,
+  CreateBedBody,
+  GetBedsRes,
+  GetDailyReportsBody,
+  GetDailyReportsRes,
+  LocationModel,
+  FacilityModel,
+  ConsultationModel,
+  GetFeedRes,
+  GetFeedBody,
+  DeleteAssetBedsRes,
+  PartialUpdateAssetBedsBody,
+  AssetBedsModel,
+} from "../Components/Facility/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 
@@ -172,6 +187,8 @@ const routes = {
 
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
+    method: "GET",
+    TRes: Type<FacilityModel>(),
   },
 
   getAnyFacility: {
@@ -223,6 +240,8 @@ const routes = {
   listAssetBeds: {
     path: "/api/v1/assetbed/",
     method: "GET",
+    TRes: Type<GetFeedRes>(),
+    TBody: Type<GetFeedBody>(),
   },
   createAssetBed: {
     path: "/api/v1/assetbed/",
@@ -239,10 +258,13 @@ const routes = {
   partialUpdateAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "PATCH",
+    TBody: Type<PartialUpdateAssetBedsBody>(),
+    TRes: Type<AssetBedsModel>(),
   },
   deleteAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "DELETE",
+    TRes: Type<DeleteAssetBedsRes>(),
   },
   operateAsset: {
     path: "/api/v1/asset/{external_id}/operate_assets/",
@@ -282,10 +304,13 @@ const routes = {
   listConsultationBeds: {
     path: "/api/v1/consultationbed/",
     method: "GET",
+    TRes: Type<GetBedsRes>(),
   },
   createConsultationBed: {
     path: "/api/v1/consultationbed/",
     method: "POST",
+    TBody: Type<CreateBedBody>(),
+    TRes: Type<GetBedsRes>(),
   },
   getConsultationBed: {
     path: "/api/v1/consultationbed/{external_id}/",
@@ -333,6 +358,8 @@ const routes = {
   },
   getConsultation: {
     path: "/api/v1/consultation/{id}/",
+    method: "GET",
+    TRes: Type<ConsultationModel>(),
   },
   updateConsultation: {
     path: "/api/v1/consultation/{id}/",
@@ -360,6 +387,9 @@ const routes = {
   },
   getDailyReports: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
+    method: "GET",
+    TBody: Type<GetDailyReportsBody>(),
+    TRes: Type<GetDailyReportsRes>(),
   },
 
   getDailyReport: {
@@ -368,6 +398,8 @@ const routes = {
   dailyRoundsAnalyse: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/analyse/",
     method: "POST",
+    TRes: Type<DailyRoundsRes>(),
+    Tbody: Type<DailyRoundsBody>(),
   },
 
   // Hospital Beds
