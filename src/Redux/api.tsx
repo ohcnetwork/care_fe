@@ -7,7 +7,6 @@ import {
   GetBedsRes,
   GetDailyReportsBody,
   GetDailyReportsRes,
-  LocationModel,
   FacilityModel,
   ConsultationModel,
   GetFeedRes,
@@ -34,6 +33,11 @@ interface JwtTokenObtainPair {
   refresh: string;
 }
 
+interface LoginInput {
+  username: string;
+  password: string;
+}
+
 const routes = {
   config: {
     path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
@@ -47,6 +51,8 @@ const routes = {
     path: "/api/v1/auth/login/",
     method: "POST",
     noAuth: true,
+    TRes: Type<JwtTokenObtainPair>(),
+    TBody: Type<LoginInput>(),
   },
 
   token_refresh: {
@@ -64,16 +70,25 @@ const routes = {
   checkResetToken: {
     path: "/api/v1/password_reset/check/",
     method: "POST",
+    noAuth: true,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ token: string }>(),
   },
 
   resetPassword: {
     path: "/api/v1/password_reset/confirm/",
     method: "POST",
+    noAuth: true,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ password: string; confirm: string }>(),
   },
 
   forgotPassword: {
     path: "/api/v1/password_reset/",
     method: "POST",
+    noAuth: true,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ username: string }>(),
   },
 
   updatePassword: {
@@ -189,6 +204,8 @@ const routes = {
 
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
+    method: "GET",
+    TRes: Type<FacilityModel>(),
   },
 
   getAnyFacility: {
@@ -240,6 +257,8 @@ const routes = {
   listAssetBeds: {
     path: "/api/v1/assetbed/",
     method: "GET",
+    TRes: Type<GetFeedRes>(),
+    TBody: Type<GetFeedBody>(),
   },
   createAssetBed: {
     path: "/api/v1/assetbed/",
@@ -256,10 +275,13 @@ const routes = {
   partialUpdateAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "PATCH",
+    TBody: Type<PartialUpdateAssetBedsBody>(),
+    TRes: Type<AssetBedsModel>(),
   },
   deleteAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "DELETE",
+    TRes: Type<DeleteAssetBedsRes>(),
   },
   operateAsset: {
     path: "/api/v1/asset/{external_id}/operate_assets/",
@@ -299,10 +321,13 @@ const routes = {
   listConsultationBeds: {
     path: "/api/v1/consultationbed/",
     method: "GET",
+    TRes: Type<GetBedsRes>(),
   },
   createConsultationBed: {
     path: "/api/v1/consultationbed/",
     method: "POST",
+    TBody: Type<CreateBedBody>(),
+    TRes: Type<GetBedsRes>(),
   },
   getConsultationBed: {
     path: "/api/v1/consultationbed/{external_id}/",
@@ -350,6 +375,8 @@ const routes = {
   },
   getConsultation: {
     path: "/api/v1/consultation/{id}/",
+    method: "GET",
+    TRes: Type<ConsultationModel>(),
   },
   updateConsultation: {
     path: "/api/v1/consultation/{id}/",
@@ -377,6 +404,9 @@ const routes = {
   },
   getDailyReports: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
+    method: "GET",
+    TBody: Type<GetDailyReportsBody>(),
+    TRes: Type<GetDailyReportsRes>(),
   },
 
   getDailyReport: {
@@ -385,6 +415,8 @@ const routes = {
   dailyRoundsAnalyse: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/analyse/",
     method: "POST",
+    TRes: Type<DailyRoundsRes>(),
+    Tbody: Type<DailyRoundsBody>(),
   },
 
   // Hospital Beds
@@ -989,6 +1021,8 @@ const routes = {
   createPrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
     method: "POST",
+    TBody: Type<Prescription>(),
+    TRes: Type<Prescription>(),
   },
 
   listAdministrations: {
@@ -1014,6 +1048,8 @@ const routes = {
   discontinuePrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
     method: "POST",
+    TBody: Type<{ discontinued_reason: string }>(),
+    TRes: Type<Record<string, never>>(),
   },
 
   // HCX Endpoints
