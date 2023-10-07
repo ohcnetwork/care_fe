@@ -287,8 +287,7 @@ export const deleteFacilityBed = (external_id: string) => {
 };
 
 // Consultation Beds
-export const listConsultationBeds = (params: object) =>
-  fireRequest("listConsultationBeds", [], params, {});
+
 export const createConsultationBed = (
   params: object,
   consultation_id: string,
@@ -522,9 +521,6 @@ export const getDailyReport = (params: object, pathParam: object) => {
 };
 export const getConsultationDailyRoundsDetails = (pathParam: object) => {
   return fireRequest("getDailyReport", [], {}, pathParam);
-};
-export const dailyRoundsAnalyse = (params: object, pathParam: object) => {
-  return fireRequest("dailyRoundsAnalyse", [], params, pathParam);
 };
 
 // Consultation
