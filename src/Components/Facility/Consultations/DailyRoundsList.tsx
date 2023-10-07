@@ -1,14 +1,13 @@
 import { navigate } from "raviger";
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { getDailyReport } from "../../../Redux/actions";
+import { useEffect, useState } from "react";
 import Pagination from "../../Common/Pagination";
 import { DailyRoundsModel } from "../../Patient/models";
 import VirtualNursingAssistantLogUpdateCard from "./DailyRounds/VirtualNursingAssistantLogUpdateCard";
 import DefaultLogUpdateCard from "./DailyRounds/DefaultLogUpdateCard";
 import { useTranslation } from "react-i18next";
 import LoadingLogUpdateCard from "./DailyRounds/LoadingCard";
+import routes from "../../../Redux/api";
+import useQuery from "../../../Utils/request/useQuery";
 
 export const DailyRoundsList = (props: any) => {
   const { t } = useTranslation();
@@ -19,7 +18,6 @@ export const DailyRoundsList = (props: any) => {
     consultationData,
     showAutomatedRounds,
   } = props;
-  const dispatch: any = useDispatch();
   const [isDailyRoundLoading, setIsDailyRoundLoading] = useState(false);
   const [dailyRoundsListData, setDailyRoundsListData] = useState<
     Array<DailyRoundsModel>
@@ -29,36 +27,27 @@ export const DailyRoundsList = (props: any) => {
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 14;
 
-  const fetchDailyRounds = useCallback(
-    async (status: statusType) => {
-      setIsDailyRoundLoading(true);
-      const res = await dispatch(
-        getDailyReport(
-          {
-            limit,
-            offset,
-            rounds_type: showAutomatedRounds ? "" : "NORMAL,VENTILATOR,ICU",
-          },
-          { consultationId }
-        )
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setDailyRoundsListData(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsDailyRoundLoading(false);
-      }
+  const { res, data, refetch } = useQuery(routes.getDailyReports, {
+    body: {
+      limit,
+      offset,
+      rounds_type: showAutomatedRounds ? "" : "NORMAL,VENTILATOR,ICU",
     },
-    [consultationId, dispatch, offset, showAutomatedRounds]
-  );
+    pathParams: { consultationId },
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDailyRounds(status);
-    },
-    [currentPage, showAutomatedRounds]
-  );
+  useEffect(() => {
+    setIsDailyRoundLoading(true);
+    if (res?.ok && data) {
+      setDailyRoundsListData(data.results);
+      setTotalCount(data.count);
+    }
+    setIsDailyRoundLoading(false);
+  }, [res, data]);
+
+  useEffect(() => {
+    refetch();
+  }, [currentPage, showAutomatedRounds, refetch]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
