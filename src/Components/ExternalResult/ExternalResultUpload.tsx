@@ -1,4 +1,4 @@
-import _ from "lodash";
+import { startCase, camelCase } from "lodash-es";
 import { navigate } from "raviger";
 import { lazy, useState } from "react";
 import CSVReader from "react-csv-reader";
@@ -122,7 +122,7 @@ export default function ExternalResultUpload() {
                       ? errors.map((error: any) => {
                           return (
                             <div key={error[0][0]}>
-                              {_.startCase(_.camelCase(error[0][0]))} -{" "}
+                              {startCase(camelCase(error[0][0]))} -{" "}
                               {error[0][1]}
                             </div>
                           );

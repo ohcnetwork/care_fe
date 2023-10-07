@@ -7,7 +7,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import Card from "../../CAREUI/display/Card";
 import { FileUpload } from "./FileUpload";
 import Page from "../Common/components/Page";
-import _ from "lodash";
+import { startCase, camelCase } from "lodash-es";
 import { formatAge, formatDateTime } from "../../Utils/utils";
 import { getTestSample } from "../../Redux/actions";
 
@@ -259,11 +259,11 @@ export const SampleDetails = ({ id }: DetailRoute) => {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <span className="font-semibold leading-relaxed">Status: </span>{" "}
-            {_.startCase(_.camelCase(flow.status))}
+            {startCase(camelCase(flow.status))}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Label:</span>{" "}
-            {_.capitalize(flow.notes)}
+            {capitalize(flow.notes)}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Created On :</span>{" "}
@@ -343,7 +343,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <span className="font-semibold leading-relaxed">
                 Doctor&apos;s Name:{" "}
               </span>
-              {_.startCase(_.camelCase(sampleDetails.doctor_name))}
+              {startCase(camelCase(sampleDetails.doctor_name))}
             </div>
           )}
           {sampleDetails.diagnosis && (
@@ -426,7 +426,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <span className="font-semibold leading-relaxed">
                 Sample Type:{" "}
               </span>
-              {_.startCase(_.camelCase(sampleDetails.sample_type))}
+              {startCase(camelCase(sampleDetails.sample_type))}
             </div>
           )}
         </div>
