@@ -29,7 +29,7 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
     setInterval(
       () => updateRefreshToken(),
       jwt_token_refresh_interval ?? 5 * 60 * 3000
-    ); // TODO: move this interval to config.json
+    );
   }, [data, jwt_token_refresh_interval]);
 
   if (loading || !res) {
