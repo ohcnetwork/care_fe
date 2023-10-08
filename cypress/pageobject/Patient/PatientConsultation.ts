@@ -49,7 +49,7 @@ export class PatientConsultationPage {
       .click()
       .type("1A");
     cy.get("#icd11_diagnoses_object [role='option']")
-      .contains("1A03 Intestinal infections due to Escherichia coli")
+      .contains("1A00 Cholera")
       .scrollIntoView()
       .click();
     cy.get("label[for='icd11_diagnoses_object']").click();
@@ -57,7 +57,7 @@ export class PatientConsultationPage {
 
     cy.get("#icd11_principal_diagnosis [role='combobox']").click().type("1A");
     cy.get("#icd11_principal_diagnosis [role='option']")
-      .contains("1A03 Intestinal infections due to Escherichia coli")
+      .contains("1A00 Cholera")
       .click();
 
     cy.get("#consultation_notes").click().type(consulationNotes);
