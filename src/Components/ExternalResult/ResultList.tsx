@@ -315,7 +315,6 @@ export default function ResultList() {
             <div className="w-full max-w-sm">
               <PhoneNumberFormField
                 name="mobile_number"
-                key={`mobile_number_${phone_number}`}
                 labelClassName="hidden"
                 value={phone_number}
                 onChange={(e) => setPhoneNum(e.value)}
