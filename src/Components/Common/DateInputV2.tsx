@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useRef, useState } from "react";
+import { MutableRefObject, useEffect, useState } from "react";
 import {
   addMonths,
   addYears,
@@ -60,7 +60,6 @@ const DateInputV2: React.FC<Props> = ({
   const [displayValue, setDisplayValue] = useState<string>(
     value ? dayjs(value).format("DDMMYYYY") : ""
   );
-  const popover = useRef<HTMLDivElement>(null);
 
   const decrement = () => {
     switch (type) {
@@ -114,6 +113,7 @@ const DateInputV2: React.FC<Props> = ({
         )
       );
     close();
+    setIsOpen?.(false);
   };
 
   const getDayCount = (date: Date) => {
@@ -213,13 +213,7 @@ const DateInputV2: React.FC<Props> = ({
         <Popover className="relative">
           {({ open, close }) => (
             <div>
-              <Popover.Button
-                disabled={disabled}
-                className="w-full"
-                onClick={() => {
-                  setIsOpen?.(!isOpen);
-                }}
-              >
+              <Popover.Button disabled={disabled} className="w-full">
                 <input type="hidden" name="date" />
                 <input
                   id={id}
@@ -238,10 +232,6 @@ const DateInputV2: React.FC<Props> = ({
 
               {(open || isOpen) && (
                 <Popover.Panel
-                  onBlur={() => {
-                    setIsOpen?.(false);
-                  }}
-                  ref={popover}
                   static
                   className={classNames(
                     "cui-dropdown-base absolute mt-0.5 w-72 divide-y-0 p-4",
@@ -252,10 +242,6 @@ const DateInputV2: React.FC<Props> = ({
                     <input
                       id="date-input"
                       autoFocus
-                      onBlur={(e) => {
-                        popover.current?.focus();
-                        e.preventDefault();
-                      }}
                       className="cui-input-base bg-gray-50"
                       value={
                         displayValue.replace(

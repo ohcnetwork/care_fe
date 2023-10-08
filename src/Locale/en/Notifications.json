@@ -3,6 +3,8 @@
   "mark_as_read": "Mark as Read",
   "subscribe": "Subscribe",
   "subscribe_on_this_device": "Subscribe on this device",
+  "show_unread_notifications": "Show Unread",
+  "show_all_notifications": "Show All",
   "filter_by_category": "Filter by category",
   "mark_all_as_read": "Mark all as Read",
   "reload": "Reload",

@@ -501,7 +501,7 @@ export const sampleReport = (id: string, sampleId: string) => {
 export const getTestList = (params: object) => {
   return fireRequest("getTestSampleList", [], params);
 };
-export const getTestSample = (id: number) => {
+export const getTestSample = (id: string) => {
   return fireRequest("getTestSample", [id], {});
 };
 export const patchSample = (params: object, pathParam: object) => {
@@ -971,7 +971,7 @@ export const PrescriptionActions = (consultation_external_id: string) => {
   const pathParams = { consultation_external_id };
 
   return {
-    list: (query?: Partial<Prescription>) => {
+    list: (query?: Record<string, any>) => {
       let altKey;
       if (query?.is_prn !== undefined) {
         altKey = query?.is_prn
