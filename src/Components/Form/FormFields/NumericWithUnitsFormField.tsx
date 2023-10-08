@@ -34,6 +34,7 @@ export default function NumericWithUnitsFormField(props: Props) {
           max={props.max}
           autoComplete={props.autoComplete}
           required={field.required}
+          value={numValue}
           onChange={(e) => field.handleChange(e.target.value + " " + unitValue)}
         />
         <div className="absolute inset-y-0 right-0 flex items-center">

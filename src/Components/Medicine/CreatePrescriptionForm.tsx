@@ -1,4 +1,4 @@
-import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
+import { RequiredFieldValidator } from "../Form/FieldValidators";
 import Form from "../Form/Form";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -11,6 +11,7 @@ import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormFi
 import { useTranslation } from "react-i18next";
 import MedibaseAutocompleteFormField from "./MedibaseAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
+import { PrescriptionFormValidator } from "./validators";
 
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;
@@ -40,16 +41,7 @@ export default function CreatePrescriptionForm(props: {
         }
       }}
       noPadding
-      validate={(form) => {
-        const errors: Partial<Record<keyof Prescription, FieldError>> = {};
-        errors.medicine_object = RequiredFieldValidator()(form.medicine_object);
-        errors.dosage = RequiredFieldValidator()(form.dosage);
-        if (form.is_prn)
-          errors.indicator = RequiredFieldValidator()(form.indicator);
-        if (!form.is_prn)
-          errors.frequency = RequiredFieldValidator()(form.frequency);
-        return errors;
-      }}
+      validate={PrescriptionFormValidator()}
       className="max-w-3xl"
     >
       {(field) => (
