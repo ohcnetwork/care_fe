@@ -113,6 +113,7 @@ const DateInputV2: React.FC<Props> = ({
         )
       );
     close();
+    setIsOpen?.(false);
   };
 
   const getDayCount = (date: Date) => {
@@ -212,13 +213,7 @@ const DateInputV2: React.FC<Props> = ({
         <Popover className="relative">
           {({ open, close }) => (
             <div>
-              <Popover.Button
-                disabled={disabled}
-                className="w-full"
-                onClick={() => {
-                  setIsOpen?.(!isOpen);
-                }}
-              >
+              <Popover.Button disabled={disabled} className="w-full">
                 <input type="hidden" name="date" />
                 <input
                   id={id}
@@ -237,9 +232,6 @@ const DateInputV2: React.FC<Props> = ({
 
               {(open || isOpen) && (
                 <Popover.Panel
-                  onBlur={() => {
-                    setIsOpen?.(false);
-                  }}
                   static
                   className={classNames(
                     "cui-dropdown-base absolute mt-0.5 w-72 divide-y-0 p-4",
