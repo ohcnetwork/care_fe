@@ -5,6 +5,7 @@ import routes from "../Redux/api";
 import useQuery from "../Utils/request/useQuery";
 import { LocalStorageKeys } from "../Common/constants";
 import request from "../Utils/request/request";
+import useConfig from "../Common/hooks/useConfig";
 
 interface Props {
   children: React.ReactNode;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function AuthUserProvider({ children, unauthorized }: Props) {
+  const { jwt_token_refresh_interval } = useConfig();
   const { res, data, loading } = useQuery(routes.currentUser, {
     refetchOnWindowFocus: false,
     prefetch: true,
@@ -24,8 +26,11 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
     }
 
     updateRefreshToken(true);
-    setInterval(() => updateRefreshToken(), 5 * 60 * 1000); // TODO: move this interval to config.json
-  }, [data]);
+    setInterval(
+      () => updateRefreshToken(),
+      jwt_token_refresh_interval ?? 5 * 60 * 3000
+    ); // TODO: move this interval to config.json
+  }, [data, jwt_token_refresh_interval]);
 
   if (loading || !res) {
     return <Loading />;
