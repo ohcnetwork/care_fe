@@ -38,30 +38,13 @@ export default async function request<TData, TBody>(
 
     try {
       const res = await fetch(url, options);
+      const data = await getResponseBody<TData>(res);
 
-      if (!res.ok) {
-        const data: Record<string, unknown> = await res.json();
-        result = {
-          res,
-          data: undefined,
-          error: data,
-        };
-      } else if (
-        res.headers.get("content-type")?.includes("application/json")
-      ) {
-        const data: TData = await res.json();
-        result = {
-          res,
-          data,
-          error: undefined,
-        };
-      } else {
-        result = {
-          res,
-          data: undefined,
-          error: undefined,
-        };
-      }
+      result = {
+        res,
+        data: res.ok ? data : undefined,
+        error: res.ok ? undefined : (data as Record<string, unknown>),
+      };
 
       onResponse?.(result);
       handleResponse(result, silent);
@@ -78,3 +61,21 @@ export default async function request<TData, TBody>(
   );
   return result;
 }
+
+const getResponseBody = async <TData>(res: Response): Promise<TData> => {
+  if (!(res.headers.get("content-length") !== "0")) {
+    return null as TData;
+  }
+
+  const isJson = res.headers.get("content-type")?.includes("application/json");
+
+  if (!isJson) {
+    return (await res.text()) as TData;
+  }
+
+  try {
+    return await res.json();
+  } catch {
+    return (await res.text()) as TData;
+  }
+};
