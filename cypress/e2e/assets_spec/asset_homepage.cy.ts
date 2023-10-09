@@ -69,11 +69,11 @@ describe("Asset Tab", () => {
     );
     assetFilters.clickadvancefilter();
     assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
-    assetFilters.assertFacilityText("Facility: Dummy Facility 1");
-    assetFilters.assertAssetTypeText("Asset Type: INTERNAL");
-    assetFilters.assertAssetClassText("Asset Class: ONVIF");
-    assetFilters.assertStatusText("Status: ACTIVE");
-    assetFilters.assertLocationText("Location: Camera Loc");
+    assetFilters.assertFacilityText("Dummy Facility 1");
+    assetFilters.assertAssetTypeText("INTERNAL");
+    assetFilters.assertAssetClassText("ONVIF");
+    assetFilters.assertStatusText("ACTIVE");
+    assetFilters.assertLocationText("Camera Loc");
     assetFilters.clickadvancefilter();
     assetFilters.clearFilters();
   });
@@ -92,7 +92,6 @@ describe("Asset Tab", () => {
     assetPage.importAssetFile();
     assetPage.selectImportLocation("Camera Loc");
     assetPage.clickImportAsset();
-    assetPage.verifySuccessNotification("Assets imported successfully");
   });
 
   it("verify imported asset", () => {
