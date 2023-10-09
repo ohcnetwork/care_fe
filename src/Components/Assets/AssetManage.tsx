@@ -34,6 +34,7 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import dayjs from "dayjs";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
 import { AssetServiceEditModal } from "./AssetServiceEditModal";
+import { warrantyAmcValidityChip } from "./AssetsList";
 import Page from "../Common/components/Page";
 
 interface AssetManageProps {
@@ -407,6 +408,9 @@ const AssetManage = (props: AssetManageProps) => {
                       text="Not Working"
                       startIcon="l-times"
                     />
+                  )}
+                  {warrantyAmcValidityChip(
+                    asset?.warranty_amc_end_of_validity as string
                   )}
                 </div>
               </div>
