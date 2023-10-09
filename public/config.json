@@ -22,5 +22,6 @@
     "kasp_full_string": "Karunya Arogya Suraksha Padhathi",
     "sample_format_asset_import": "https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key=11JaEhNHdyCHth4YQs_44YaRlP77Rrqe81VSEfg1glko&exportFormat=xlsx",
     "sample_format_external_result_import": "https://docs.google.com/spreadsheets/d/17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE/export?format=csv&id=17VfgryA6OYSYgtQZeXU9mp7kNvLySeEawvnLBO_1nuE",
-    "enable_abdm": true
+    "enable_abdm": true,
+    "jwt_token_refresh_interval": 300000
 }
