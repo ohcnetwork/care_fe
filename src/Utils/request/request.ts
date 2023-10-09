@@ -62,7 +62,7 @@ export default async function request<TData, TBody>(
   return result;
 }
 
-const getResponseBody = async <TData>(res: Response): Promise<TData> => {
+async function getResponseBody<TData>(res: Response): Promise<TData> {
   if (!(res.headers.get("content-length") !== "0")) {
     return null as TData;
   }
@@ -78,4 +78,4 @@ const getResponseBody = async <TData>(res: Response): Promise<TData> => {
   } catch {
     return (await res.text()) as TData;
   }
-};
+}
