@@ -370,7 +370,7 @@ const AssetsList = () => {
               value("Asset Type", "asset_type", asset_type ?? ""),
               value("Asset Class", "asset_class", asset_class ?? ""),
               value("Status", "status", status?.replace(/_/g, " ") ?? ""),
-              value("Location", "location", locationName ?? ""),
+              value("Location", "location", location?.name ?? ""),
               value(
                 "Warranty AMC End Of Validity Before",
                 "warranty_amc_end_of_validity_before",
