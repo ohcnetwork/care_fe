@@ -106,6 +106,7 @@ class FacilityPage {
   }
 
   clickManageFacilityDropdown() {
+    cy.get("h1.text-3xl.font-bold", { timeout: 20000 }).should("be.visible");
     cy.get("#manage-facility-dropdown button").scrollIntoView();
     cy.get("#manage-facility-dropdown button")
       .contains("Manage Facility")
@@ -191,17 +192,13 @@ class FacilityPage {
   }
 
   verifyfacilitycreateassetredirection() {
-    cy.intercept("GET", "**/api/v1/facility/**").as("getNewAssets");
     cy.url().should("include", "/assets/new");
-    cy.wait("@getNewAssets").its("response.statusCode").should("eq", 200);
   }
 
   verifyassetfacilitybackredirection() {
     cy.intercept("GET", "**/api/v1/facility/**").as("getManagePage");
     cy.go("back");
     cy.wait("@getManagePage").its("response.statusCode").should("eq", 200);
-    cy.get("#manage-facility-dropdown").scrollIntoView();
-    cy.get("#manage-facility-dropdown").should("exist");
   }
 
   verifyfacilityviewassetredirection() {

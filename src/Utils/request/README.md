@@ -56,7 +56,8 @@ const FooRoutes = {
     path: "/api/v1/foo/{id}/",  // 👈 The path to the endpoint. Slug parameters can be specified using curly braces.
 
     method: "GET",              // 👈 The HTTP method to use. Optional; defaults to "GET".
-    TRes: Res<Foo()>,           // 👈 The type of the response body (for type inference).
+    TRes: Type<Foo>(),          // 👈 The type of the response body (for type inference).
+    TBody: Type<Foo>(),         // 👈 The type of the request body (for type inference).
     noAuth: true,               // 👈 Whether to skip adding the Authorization header to the request.
   },
 } as const; // 👈 This is important for type inference to work properly.
@@ -78,7 +79,7 @@ const options = {
   // thrown before the request is made.
 
   query: { limit: 10 },         // 👈 The query parameters to be added to the request URL.
-  body: { name: "foo" },        // 👈 The body to be sent with the request.
+  body: { name: "foo" },        // 👈 The body to be sent with the request. Should be compatible with the TBody type of the route.
   headers: { "X-Foo": "bar" },  // 👈 Additional headers to be sent with the request. (Coming soon...)
 
   silent: true,                 // 👈 Whether to suppress notifications for this request.
@@ -103,7 +104,7 @@ The `useQuery` hook returns an object with the following properties:
 
 ```ts
 {
-  res: Res<TRes> | undefined;   // 👈 The response object. `undefined` if the request has not been made yet.
+  res: Type<TRes> | undefined;  // 👈 The response object. `undefined` if the request has not been made yet.
   
   data: TRes | null;            // 👈 The response body. `null` if the request has not been made yet.
 
@@ -129,7 +130,7 @@ import FooRoutes from "@foo/routes";
 export default async function updateFoo(id: string, object: Foo) {
   const { res, data } = await request(FooRoutes.updateFoo, {
     pathParams: { id },
-    body: object,               // 👈 The body is automatically serialized to JSON.
+    body: object,               // 👈 The body is automatically serialized to JSON. Should be compatible with the TBody type of the route.
   });
 
   if (res.status === 403) {

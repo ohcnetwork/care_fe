@@ -95,9 +95,7 @@ export default function BoardView() {
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
             <ButtonV2
               className="py-[11px]"
-              onClick={() =>
-                navigate("/shifting/list-view", { query: qParams })
-              }
+              onClick={() => navigate("/shifting/list", { query: qParams })}
             >
               <CareIcon className="care-l-list-ul" />
               {t("list_view")}
