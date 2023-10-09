@@ -13,12 +13,7 @@ import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import { useTranslation } from "react-i18next";
 import SubHeading from "../../CAREUI/display/SubHeading";
 import dayjs from "../../Utils/dayjs";
-import {
-  classNames,
-  formatDate,
-  formatDateTime,
-  formatTime,
-} from "../../Utils/utils";
+import { classNames, formatDateTime, formatTime } from "../../Utils/utils";
 import useRangePagination from "../../Common/hooks/useRangePagination";
 import EditPrescriptionForm from "./EditPrescriptionForm";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
@@ -51,7 +46,7 @@ export default function PrescriptionAdministrationsTable({
   const [state, setState] = useState<State>();
   const [showDiscontinued, setShowDiscontinued] = useState(false);
   const [discontinuedCount, setDiscontinuedCount] = useState<number>();
-  const daysPerPage = useBreakpoints({ default: 1, xl: 2, "2xl": 3 });
+  const daysPerPage = useBreakpoints({ default: 1, xl: 2 });
   const pagination = useRangePagination({
     bounds: state?.administrationsTimeBounds ?? {
       start: new Date(),
@@ -159,99 +154,130 @@ export default function PrescriptionAdministrationsTable({
       />
 
       <div className="relative overflow-x-auto rounded border border-white shadow">
-        <table className="w-full  whitespace-nowrap rounded">
-          <thead className="bg-white text-xs font-medium text-black">
-            <tr>
-              <th className="sticky left-0 z-10 bg-white py-3 pl-4 text-left">
-                <div className="flex justify-between gap-2">
-                  <span className="text-sm">{t("medicine")}</span>
-                  <span className="hidden px-2 text-center text-xs leading-none lg:block">
-                    <p>Dosage &</p>
-                    <p>
-                      {!state?.prescriptions[0]?.is_prn
-                        ? "Frequency"
-                        : "Indicator"}
-                    </p>
-                  </span>
-                </div>
-              </th>
+        {state?.prescriptions.length === 0 ? (
+          <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-gray-500">
+            <CareIcon icon="l-tablets" className="text-5xl" />
+            <h3 className="text-lg font-medium">
+              {prn
+                ? "No PRN Prescriptions Prescribed"
+                : "No Prescriptions Prescribed"}
+            </h3>
+          </div>
+        ) : (
+          <table className="w-full  whitespace-nowrap rounded">
+            <thead className="bg-white text-xs font-medium text-black">
+              <tr>
+                <th className="sticky left-0 z-10 bg-white py-3 pl-4 text-left">
+                  <div className="flex justify-between gap-2">
+                    <span className="text-sm">{t("medicine")}</span>
+                    <span className="hidden px-2 text-center text-xs leading-none lg:block">
+                      <p>Dosage &</p>
+                      <p>
+                        {!state?.prescriptions[0]?.is_prn
+                          ? "Frequency"
+                          : "Indicator"}
+                      </p>
+                    </span>
+                  </div>
+                </th>
 
-              <th>
-                <ButtonV2
-                  size="small"
-                  circle
-                  ghost
-                  border
-                  className="mx-2 px-1"
-                  variant="secondary"
-                  disabled={!pagination.hasPrevious}
-                  onClick={pagination.previous}
-                  tooltip="Previous 24 hours"
-                  tooltipClassName="tooltip-bottom -translate-x-1/2 text-xs"
-                >
-                  <CareIcon icon="l-angle-left-b" className="text-base" />
-                </ButtonV2>
-              </th>
-              {state === undefined
-                ? Array.from({ length: 24 }, (_, i) => i).map((i) => (
-                    <th
-                      className="tooltip py-2 text-center font-semibold leading-none text-gray-900"
-                      key={i}
-                    >
-                      <p className="h-4 w-6 animate-pulse rounded bg-gray-500" />
-                    </th>
-                  ))
-                : pagination.slots?.map(({ start, end }, index) => (
-                    <th
-                      className="tooltip px-0.5 py-2 text-center font-semibold leading-none text-gray-900"
-                      key={index}
-                    >
-                      <p>{formatDateTime(start, "DD/MM")}</p>
-                      <p>{formatDateTime(start, "HH:mm")}</p>
+                <th>
+                  <ButtonV2
+                    size="small"
+                    circle
+                    ghost
+                    border
+                    className="mx-2 px-1"
+                    variant="secondary"
+                    disabled={!pagination.hasPrevious}
+                    onClick={pagination.previous}
+                    tooltip="Previous 24 hours"
+                    tooltipClassName="tooltip-bottom -translate-x-1/2 text-xs"
+                  >
+                    <CareIcon icon="l-angle-left-b" className="text-base" />
+                  </ButtonV2>
+                </th>
+                {state === undefined
+                  ? Array.from({ length: 12 }, (_, i) => i).map((i) => (
+                      <th
+                        className="tooltip py-2 text-center font-semibold leading-none text-gray-900"
+                        key={i}
+                      >
+                        <p className="h-4 w-6 animate-pulse rounded bg-gray-500" />
+                      </th>
+                    ))
+                  : pagination.slots?.map(({ start, end }, index) => (
+                      <>
+                        {index === 0 && (
+                          <th
+                            key="administration-interval-0"
+                            className={classNames(
+                              "leading-none",
+                              start.getHours() === 0
+                                ? "text-base font-bold text-gray-900"
+                                : "text-sm font-semibold text-gray-700"
+                            )}
+                          >
+                            {formatDateTime(
+                              start,
+                              start.getHours() === 0 ? "DD/MM" : "h A"
+                            )}
+                          </th>
+                        )}
+                        <th
+                          key={`administration-slot-${index}`}
+                          className="flex w-6"
+                        />
+                        <th
+                          key={`administration-interval-${index + 1}`}
+                          className={classNames(
+                            "leading-none",
+                            end.getHours() === 0
+                              ? "text-base font-bold text-gray-900"
+                              : "text-sm font-semibold text-gray-700"
+                          )}
+                        >
+                          {formatDateTime(
+                            end,
+                            end.getHours() === 0 ? "DD/MM" : "h A"
+                          )}
+                        </th>
+                      </>
+                    ))}
+                <th>
+                  <ButtonV2
+                    size="small"
+                    circle
+                    ghost
+                    border
+                    className="mx-2 px-1"
+                    variant="secondary"
+                    disabled={!pagination.hasNext}
+                    onClick={pagination.next}
+                    tooltip="Next 24 hours"
+                    tooltipClassName="tooltip-bottom -translate-x-1/2 text-xs"
+                  >
+                    <CareIcon icon="l-angle-right-b" className="text-base" />
+                  </ButtonV2>
+                </th>
 
-                      <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs font-normal">
-                        Administration(s) between
-                        <br />
-                        <strong>{formatTime(start)}</strong> and{" "}
-                        <strong>{formatTime(end)}</strong>
-                        <br />
-                        on <strong>{formatDate(start)}</strong>
-                      </span>
-                    </th>
-                  ))}
-              <th>
-                <ButtonV2
-                  size="small"
-                  circle
-                  ghost
-                  border
-                  className="mx-2 px-1"
-                  variant="secondary"
-                  disabled={!pagination.hasNext}
-                  onClick={pagination.next}
-                  tooltip="Next 24 hours"
-                  tooltipClassName="tooltip-bottom -translate-x-1/2 text-xs"
-                >
-                  <CareIcon icon="l-angle-right-b" className="text-base" />
-                </ButtonV2>
-              </th>
+                <th className="py-3 pr-2 text-right"></th>
+              </tr>
+            </thead>
 
-              <th className="py-3 pr-2 text-right"></th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-gray-200">
-            {state?.prescriptions?.map((item) => (
-              <PrescriptionRow
-                key={item.id}
-                prescription={item}
-                intervals={pagination.slots!}
-                actions={prescription(item.id ?? "")}
-                refetch={refetch}
-              />
-            ))}
-          </tbody>
-        </table>
+            <tbody className="divide-y divide-gray-200">
+              {state?.prescriptions?.map((item) => (
+                <PrescriptionRow
+                  key={item.id}
+                  prescription={item}
+                  intervals={pagination.slots!}
+                  actions={prescription(item.id ?? "")}
+                  refetch={refetch}
+                />
+              ))}
+            </tbody>
+          </table>
+        )}
 
         {showDiscontinued === false && !!discontinuedCount && (
           <ButtonV2
@@ -268,17 +294,6 @@ export default function PrescriptionAdministrationsTable({
               </span>
             </span>
           </ButtonV2>
-        )}
-
-        {state?.prescriptions.length === 0 && (
-          <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-gray-500">
-            <CareIcon className="care-l-tablets text-5xl" />
-            <h3 className="text-lg font-medium">
-              {prn
-                ? "No PRN Prescriptions Prescribed"
-                : "No Prescriptions Prescribed"}
-            </h3>
-          </div>
         )}
       </div>
     </div>
@@ -329,7 +344,7 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
   return (
     <tr
       className={classNames(
-        "group border-separate border border-gray-300 bg-gray-100 transition-all duration-200 ease-in-out hover:border-primary-300 hover:bg-primary-100"
+        "group border-separate border border-gray-300 bg-gray-100 transition-all duration-200 ease-in-out hover:bg-primary-100"
       )}
     >
       {showDiscontinue && (
@@ -484,20 +499,44 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
       <td />
       {/* Administration Cells */}
       {props.intervals.map(({ start, end }, index) => (
-        <td className="text-center" key={index}>
-          {administrations === undefined ? (
-            <CareIcon
-              icon="l-spinner"
-              className="animate-spin text-lg text-gray-500"
-            />
-          ) : (
-            <AdministrationCell
-              administrations={administrations}
-              interval={{ start, end }}
-              prescription={prescription}
-            />
+        <>
+          {index === 0 && (
+            <td>
+              {start.getHours() === 0 && (
+                <div className="mx-auto flex h-[58px] w-6 flex-col items-center justify-center bg-gray-300 text-center text-xs font-bold text-white transition-all duration-200 ease-in-out group-hover:w-8 group-hover:bg-primary-500">
+                  <span className="uppercase opacity-0 duration-500 ease-in-out group-hover:opacity-100">
+                    <p> {formatDateTime(start, "DD")}</p>
+                    <p> {formatDateTime(start, "MMM")}</p>
+                  </span>
+                </div>
+              )}
+            </td>
           )}
-        </td>
+          <td key={index} className="text-center">
+            {administrations === undefined ? (
+              <CareIcon
+                icon="l-spinner"
+                className="animate-spin text-lg text-gray-500"
+              />
+            ) : (
+              <AdministrationCell
+                administrations={administrations}
+                interval={{ start, end }}
+                prescription={prescription}
+              />
+            )}
+          </td>
+          <td>
+            {end.getHours() === 0 && (
+              <div className="mx-auto flex h-[58px] w-6 flex-col items-center justify-center bg-gray-300 text-center text-xs font-bold text-white transition-all duration-200 ease-in-out group-hover:w-8 group-hover:bg-primary-500">
+                <span className="uppercase opacity-0 duration-500 ease-in-out group-hover:opacity-100">
+                  <p> {formatDateTime(end, "DD")}</p>
+                  <p> {formatDateTime(end, "MMM")}</p>
+                </span>
+              </div>
+            )}
+          </td>
+        </>
       ))}
       <td />
 
