@@ -16,7 +16,7 @@ describe("Asset Tab", () => {
   const assetFilters = new AssetFilters();
   const assetPage = new AssetPage();
   const loginPage = new LoginPage();
-  const assetName = "Dummy Camera 30";
+  const assetName = "Dummy Camera 10";
   const qrCode = uuidv4();
   const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
 
@@ -90,7 +90,7 @@ describe("Asset Tab", () => {
     assetPage.selectImportOption();
     assetPage.selectImportFacility("Dummy Facility 1");
     assetPage.importAssetFile();
-    assetPage.selectImportLocation("Camera Loc");
+    assetPage.selectImportLocation("Camera Locations");
     assetPage.clickImportAsset();
   });
 
