@@ -151,7 +151,7 @@ export const Login = (props: { forgot?: boolean }) => {
         body: { ...valid },
       });
       setLoading(false);
-      if (res && res.statusText === "OK") {
+      if (res?.ok) {
         Notification.Success({
           msg: t("password_sent"),
         });
