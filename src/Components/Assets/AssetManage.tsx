@@ -164,18 +164,18 @@ const AssetManage = (props: AssetManageProps) => {
                 {transaction.from_location.name}
               </span>
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
                 {transaction.to_location.name}
               </span>
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
                 {transaction.performed_by.first_name}{" "}
                 {transaction.performed_by.last_name}
               </span>
             </td>
-            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
+            <td className="whitespace-nowrap px-6 py-4 text-right text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
                 {formatDateTime(transaction.modified_date)}
               </span>
@@ -202,7 +202,7 @@ const AssetManage = (props: AssetManageProps) => {
       setServiceDetails(
         services.map((service: AssetService) => (
           <tr key={`service_id_${service.id}`}>
-            <td className="whitespace-nowrap px-6 py-4 text-center text-sm leading-5 text-gray-500">
+            <td className="whitespace-nowrap px-6 py-4 text-left text-sm leading-5 text-gray-500">
               <span className="font-medium text-gray-900">
                 {dayjs(service.serviced_on).format("DD MMM YYYY")}
               </span>
@@ -229,7 +229,7 @@ const AssetManage = (props: AssetManageProps) => {
                 )}
               </span>
             </td>
-            <td className="gap-4 whitespace-nowrap px-6 py-4 text-left text-sm leading-5">
+            <td className="gap-4 whitespace-nowrap px-6 py-4 text-right text-sm leading-5">
               <ButtonV2
                 id="edit-service-history"
                 authorizeFor={NonReadOnlyUsers}
@@ -525,7 +525,7 @@ const AssetManage = (props: AssetManageProps) => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead>
             <tr>
-              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Serviced on
               </th>
               <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
@@ -537,7 +537,7 @@ const AssetManage = (props: AssetManageProps) => {
               <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Last Updated
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="relative right-10 bg-gray-50 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Edit
               </th>
             </tr>
@@ -558,13 +558,13 @@ const AssetManage = (props: AssetManageProps) => {
               <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Moved from
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Moved to
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="bg-gray-50 px-6 py-3 text-center text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Moved By
               </th>
-              <th className="bg-gray-50 px-6 py-3 text-left text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
+              <th className="relative right-5 bg-gray-50 px-6 py-3 text-right text-xs font-medium uppercase leading-4 tracking-wider text-gray-500">
                 Moved On
               </th>
             </tr>
