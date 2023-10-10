@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { PrescriptionActions } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import { MedicineAdministrationRecord, Prescription } from "./models";
@@ -17,6 +17,7 @@ import { classNames, formatDateTime, formatTime } from "../../Utils/utils";
 import useRangePagination from "../../Common/hooks/useRangePagination";
 import EditPrescriptionForm from "./EditPrescriptionForm";
 import useBreakpoints from "../../Common/hooks/useBreakpoints";
+import { Disclosure, Popover, Transition } from "@headlessui/react";
 
 interface DateRange {
   start: Date;
@@ -46,7 +47,7 @@ export default function PrescriptionAdministrationsTable({
   const [state, setState] = useState<State>();
   const [showDiscontinued, setShowDiscontinued] = useState(false);
   const [discontinuedCount, setDiscontinuedCount] = useState<number>();
-  const daysPerPage = useBreakpoints({ default: 1, xl: 2 });
+  const daysPerPage = useBreakpoints({ default: 1, "2xl": 2 });
   const pagination = useRangePagination({
     bounds: state?.administrationsTimeBounds ?? {
       start: new Date(),
@@ -67,6 +68,7 @@ export default function PrescriptionAdministrationsTable({
     const filters = {
       is_prn: prn,
       prescription_type: "REGULAR",
+      limit: 100,
     };
 
     const res = await dispatch(
@@ -153,7 +155,7 @@ export default function PrescriptionAdministrationsTable({
         }
       />
 
-      <div className="relative overflow-x-auto rounded border border-white shadow">
+      <div className="relative max-h-[70vh] overflow-auto rounded border border-white shadow">
         {state?.prescriptions.length === 0 ? (
           <div className="my-16 flex w-full flex-col items-center justify-center gap-4 text-gray-500">
             <CareIcon icon="l-tablets" className="text-5xl" />
@@ -164,8 +166,8 @@ export default function PrescriptionAdministrationsTable({
             </h3>
           </div>
         ) : (
-          <table className="w-full  whitespace-nowrap rounded">
-            <thead className="bg-white text-xs font-medium text-black">
+          <table className="w-full whitespace-nowrap rounded">
+            <thead className="sticky top-0 z-10 bg-white text-xs font-medium text-black">
               <tr>
                 <th className="sticky left-0 z-10 bg-white py-3 pl-4 text-left">
                   <div className="flex justify-between gap-2">
@@ -206,42 +208,26 @@ export default function PrescriptionAdministrationsTable({
                         <p className="h-4 w-6 animate-pulse rounded bg-gray-500" />
                       </th>
                     ))
-                  : pagination.slots?.map(({ start, end }, index) => (
+                  : pagination.slots?.map(({ start }, index) => (
                       <>
-                        {index === 0 && (
-                          <th
-                            key="administration-interval-0"
-                            className={classNames(
-                              "leading-none",
-                              start.getHours() === 0
-                                ? "text-base font-bold text-gray-900"
-                                : "text-sm font-semibold text-gray-700"
-                            )}
-                          >
-                            {formatDateTime(
-                              start,
-                              start.getHours() === 0 ? "DD/MM" : "h A"
-                            )}
-                          </th>
-                        )}
                         <th
-                          key={`administration-slot-${index}`}
-                          className="flex w-6"
-                        />
-                        <th
-                          key={`administration-interval-${index + 1}`}
+                          key={`administration-interval-${index}`}
                           className={classNames(
                             "leading-none",
-                            end.getHours() === 0
-                              ? "text-base font-bold text-gray-900"
+                            start.getHours() === 0
+                              ? "text-base font-bold text-gray-800"
                               : "text-sm font-semibold text-gray-700"
                           )}
                         >
                           {formatDateTime(
-                            end,
-                            end.getHours() === 0 ? "DD/MM" : "h A"
+                            start,
+                            start.getHours() === 0 ? "DD/MM" : "HH:mm"
                           )}
                         </th>
+                        <th
+                          key={`administration-slot-${index}`}
+                          className="flex w-6"
+                        />
                       </>
                     ))}
                 <th>
@@ -458,7 +444,7 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
         </DialogModal>
       )}
       <td
-        className="sticky left-0 z-10 cursor-pointer bg-gray-100 py-3 pl-4 text-left transition-all duration-200 ease-in-out group-hover:bg-primary-100"
+        className="sticky left-0 cursor-pointer bg-gray-100 py-3 pl-4 text-left transition-all duration-200 ease-in-out group-hover:bg-primary-100"
         onClick={() => setShowDetails(true)}
       >
         <div className="flex flex-col gap-1 lg:flex-row lg:justify-between lg:gap-2">
@@ -500,18 +486,9 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
       {/* Administration Cells */}
       {props.intervals.map(({ start, end }, index) => (
         <>
-          {index === 0 && (
-            <td>
-              {start.getHours() === 0 && (
-                <div className="mx-auto flex h-[58px] w-6 flex-col items-center justify-center bg-gray-300 text-center text-xs font-bold text-white transition-all duration-200 ease-in-out group-hover:w-8 group-hover:bg-primary-500">
-                  <span className="uppercase opacity-0 duration-500 ease-in-out group-hover:opacity-100">
-                    <p> {formatDateTime(start, "DD")}</p>
-                    <p> {formatDateTime(start, "MMM")}</p>
-                  </span>
-                </div>
-              )}
-            </td>
-          )}
+          <td>
+            <AdministrationCellSeperator date={start} />
+          </td>
           <td key={index} className="text-center">
             {administrations === undefined ? (
               <CareIcon
@@ -524,16 +501,6 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
                 interval={{ start, end }}
                 prescription={prescription}
               />
-            )}
-          </td>
-          <td>
-            {end.getHours() === 0 && (
-              <div className="mx-auto flex h-[58px] w-6 flex-col items-center justify-center bg-gray-300 text-center text-xs font-bold text-white transition-all duration-200 ease-in-out group-hover:w-8 group-hover:bg-primary-500">
-                <span className="uppercase opacity-0 duration-500 ease-in-out group-hover:opacity-100">
-                  <p> {formatDateTime(end, "DD")}</p>
-                  <p> {formatDateTime(end, "MMM")}</p>
-                </span>
-              </div>
             )}
           </td>
         </>
@@ -557,6 +524,27 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
   );
 };
 
+const AdministrationCellSeperator = ({ date }: { date: Date }) => {
+  // Show date if it's 00:00
+  if (date.getHours() === 0) {
+    return (
+      <div className="mx-auto flex h-[58px] flex-col items-center justify-center bg-gray-300 text-center text-xs font-bold text-gray-600 transition-all duration-200 ease-in-out group-hover:bg-primary-500 group-hover:text-white">
+        <span className="-rotate-90 uppercase duration-500 ease-in-out">
+          <p> {formatDateTime(date, "DD/MM")}</p>
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto flex h-[58px] flex-col items-center justify-center text-center text-xs font-bold text-gray-500 transition-all duration-200 ease-in-out">
+      <span className="font-bold duration-500 ease-in-out">
+        <p>{formatDateTime(date, "HH")}</p>
+      </span>
+    </div>
+  );
+};
+
 interface AdministrationCellProps {
   administrations: MedicineAdministrationRecord[];
   interval: DateRange;
@@ -569,36 +557,129 @@ const AdministrationCell = ({
   prescription,
 }: AdministrationCellProps) => {
   // Check if cell belongs to an administered prescription
-  const administered = administrations.filter((administration) =>
-    dayjs(administration.administered_date).isBetween(start, end)
-  );
+  const administered = administrations
+    .filter((administration) =>
+      dayjs(administration.administered_date).isBetween(start, end)
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.administered_date).getTime() -
+        new Date(b.administered_date).getTime()
+    );
+
+  const hasComment = administered.some((obj) => !!obj.notes);
 
   if (administered.length) {
     return (
-      <div className="tooltip">
-        <div className="relative mx-auto max-w-min">
-          <CareIcon
-            icon="l-check-circle"
-            className="text-xl text-primary-500"
-          />
-          {administered.length > 1 && (
-            <span className="absolute -bottom-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary-500 text-xs font-semibold text-white">
-              {administered.length}
+      <Popover className="relative">
+        <Popover.Button className="scale-100 transition-transform duration-200 ease-in-out hover:scale-110">
+          <div className="tooltip">
+            <div className="relative mx-auto max-w-min">
+              <CareIcon
+                icon="l-check-circle"
+                className="text-xl text-primary-500"
+              />
+              {administered.length > 1 && (
+                <span className="absolute -bottom-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary-500 text-xs font-semibold text-white">
+                  {administered.length}
+                </span>
+              )}
+            </div>
+            {hasComment && (
+              <CareIcon icon="l-notes" className="text-xl text-primary-500" />
+            )}
+            <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs">
+              {administered.length === 1 ? (
+                <p>
+                  Administered on{" "}
+                  <strong>
+                    {formatTime(administered[0].administered_date)}
+                  </strong>
+                </p>
+              ) : (
+                <p>
+                  <strong>{administered.length}</strong> administrations
+                </p>
+              )}
+              <p>Click to view details</p>
             </span>
-          )}
-        </div>
-        <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs">
-          <p>
-            Administered on{" "}
-            <strong>{formatDateTime(administered[0].administered_date)}</strong>
-          </p>
-          <p>
-            {administered.length > 1
-              ? `Administered ${administered.length} times`
-              : `Administered ${formatTime(administered[0].administered_date)}`}
-          </p>
-        </span>
-      </div>
+          </div>
+        </Popover.Button>
+
+        <Transition
+          as={Fragment}
+          enter="transition ease-out duration-200"
+          enterFrom="opacity-0 translate-y-1"
+          enterTo="opacity-100 translate-y-0"
+          leave="transition ease-in duration-150"
+          leaveFrom="opacity-100 translate-y-0"
+          leaveTo="opacity-0 translate-y-1"
+        >
+          <Popover.Panel className="absolute left-1/2 z-10 mt-3 -translate-x-1/2 px-4 sm:px-0">
+            <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
+              <div className="relative flex flex-col gap-2 bg-white p-4">
+                {administered.map((administration) => (
+                  <div>
+                    <Disclosure defaultOpen={administered.length === 1}>
+                      {({ open }) => (
+                        <>
+                          <Disclosure.Button
+                            className={classNames(
+                              "flex w-full justify-between border-gray-400 px-4 py-2 text-left text-sm focus:outline-none focus-visible:ring focus-visible:ring-primary-500/75",
+                              open
+                                ? "rounded-t-lg border-l border-r border-t bg-gray-200"
+                                : "rounded-lg border hover:bg-gray-200"
+                            )}
+                          >
+                            <span className="text-gray-700">
+                              Administered on{" "}
+                              <strong className="font-semibold text-gray-900">
+                                {formatTime(administration.administered_date)}
+                              </strong>
+                            </span>
+                            {administration.notes && (
+                              <CareIcon
+                                icon="l-notes"
+                                className="ml-2 text-lg"
+                              />
+                            )}
+                            <CareIcon
+                              icon="l-angle-down"
+                              className={classNames(
+                                "ml-8 text-base",
+                                open ? "rotate-180" : "rotate-0"
+                              )}
+                            />
+                          </Disclosure.Button>
+                          <Disclosure.Panel className="flex flex-col items-start rounded-b-lg border border-gray-400 bg-gray-200 p-2 px-4 text-sm text-gray-700 shadow">
+                            <div>
+                              Administered by:{" "}
+                              <span className="font-medium text-gray-900">
+                                {administration.administered_by?.first_name}{" "}
+                                {administration.administered_by?.last_name}
+                              </span>
+                            </div>
+                            <div>
+                              Notes:{" "}
+                              <span className="font-medium text-gray-800">
+                                {administration.notes || (
+                                  <span className="italic text-gray-700">
+                                    No notes
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          </Disclosure.Panel>
+                        </>
+                      )}
+                    </Disclosure>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Popover.Panel>
+        </Transition>
+      </Popover>
     );
   }
 
@@ -639,9 +720,9 @@ const AdministrationCell = ({
   }
 
   // Check if cell belongs to after prescription.created_date
-  if (dayjs(start).isAfter(prescription.created_date)) {
-    return <CareIcon icon="l-minus-circle" className="text-xl text-gray-400" />;
-  }
+  // if (dayjs(start).isAfter(prescription.created_date)) {
+  //   return <CareIcon icon="l-minus-circle" className="text-xl text-gray-400" />;
+  // }
 
   // Check if prescription.created_date is between start and end
   // if (dayjs(prescription.created_date).isBetween(start, end)) {
