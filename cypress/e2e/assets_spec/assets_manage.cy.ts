@@ -5,6 +5,12 @@ import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
 
+function addDaysToDate(numberOfDays: number) {
+  const inputDate = new Date();
+  inputDate.setDate(inputDate.getDate() + numberOfDays);
+  return inputDate.toISOString().split("T")[0];
+}
+
 describe("Asset", () => {
   const assetPage = new AssetPage();
   const loginPage = new LoginPage();
@@ -24,6 +30,33 @@ describe("Asset", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/assets");
+  });
+
+  it("Verify Asset Service History Alert", () => {
+    assetSearchPage.typeSearchKeyword(assetname);
+    assetSearchPage.pressEnter();
+    assetSearchPage.verifyBadgeContent(assetname);
+    assetSearchPage.clickAssetByName(assetname);
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintoWarrantyDetails();
+    assetPage.enterWarrantyExpiryDate(addDaysToDate(100)); // greater than 3 months
+    assetPage.clickassetupdatebutton();
+    assetPage.verifyWarrantyExpiryLabel("");
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintoWarrantyDetails();
+    assetPage.enterWarrantyExpiryDate(addDaysToDate(80)); // less than 3 months
+    assetPage.clickassetupdatebutton();
+    assetPage.verifyWarrantyExpiryLabel("3 months");
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintoWarrantyDetails();
+    assetPage.enterWarrantyExpiryDate(addDaysToDate(20)); // less than 1 month
+    assetPage.clickassetupdatebutton();
+    assetPage.verifyWarrantyExpiryLabel("1 month");
+    // assetPage.clickupdatedetailbutton(); // Can't check for expired warranty as it will fail since we can set only future dates for warranty expiry
+    // assetPage.scrollintoWarrantyDetails();
+    // assetPage.enterWarrantyExpiryDate(addDaysToDate(-10)); // expired
+    // assetPage.clickassetupdatebutton();
+    // assetPage.verifyWarrantyExpiryLabel("expired");
   });
 
   it("Create & Edit a service history and verify reflection", () => {
