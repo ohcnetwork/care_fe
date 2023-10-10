@@ -1,11 +1,10 @@
 import ButtonV2 from "../Common/components/ButtonV2";
 import { navigate } from "raviger";
-import { lazy, useEffect, useState } from "react";
+import { lazy, useState } from "react";
 import { externalResultList } from "../../Redux/actions";
 import ListFilter from "./ListFilter";
 import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
 import { FacilityModel } from "../Facility/models";
-import { parsePhoneNumber } from "../../Utils/utils";
 import SearchInput from "../Form/SearchInput";
 import useFilters from "../../Common/hooks/useFilters";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -16,17 +15,10 @@ import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover"
 import Page from "../Common/components/Page";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-import { IExternalResult } from "./models";
-import request from "../../Utils/request/request";
-
+import { parsePhoneNumber } from "../../Utils/utils";
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultList() {
-  const [resultListData, setResultListData] = useState<
-    Partial<IExternalResult>[]
-  >([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [totalCount, setTotalCount] = useState(0);
   const {
     qParams,
     updateQuery,
@@ -61,70 +53,31 @@ export default function ResultList() {
 
     setPhoneNumberError("Enter a valid number");
   };
+  const params = {
+    page: qParams.page || 1,
+    name: qParams.name || "",
+    mobile_number: qParams.mobile_number
+      ? parsePhoneNumber(qParams.mobile_number) ?? ""
+      : "",
+    wards: qParams.wards || undefined,
+    local_bodies: qParams.local_bodies || undefined,
+    created_date_before: qParams.created_date_before || undefined,
+    created_date_after: qParams.created_date_after || undefined,
+    result_date_before: qParams.result_date_before || undefined,
+    result_date_after: qParams.result_date_after || undefined,
+    sample_collection_date_after:
+      qParams.sample_collection_date_after || undefined,
+    sample_collection_date_before:
+      qParams.sample_collection_date_before || undefined,
+    offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+    srf_id: qParams.srf_id || undefined,
+  };
 
-  useQuery(routes.externalResultList, {
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        setResultListData(data.results);
-        setTotalCount(data.count);
-        setIsLoading(false);
-      }
-    },
+  const { data, loading } = useQuery(routes.externalResultList, {
+    query: params,
   });
 
   let manageResults: any = null;
-  useEffect(() => {
-    setIsLoading(true);
-    const params = {
-      page: qParams.page || 1,
-      name: qParams.name || "",
-      mobile_number: qParams.mobile_number
-        ? parsePhoneNumber(qParams.mobile_number) ?? ""
-        : "",
-      wards: qParams.wards || undefined,
-      local_bodies: qParams.local_bodies || undefined,
-      created_date_before: qParams.created_date_before || undefined,
-      created_date_after: qParams.created_date_after || undefined,
-      result_date_before: qParams.result_date_before || undefined,
-      result_date_after: qParams.result_date_after || undefined,
-      sample_collection_date_after:
-        qParams.sample_collection_date_after || undefined,
-      sample_collection_date_before:
-        qParams.sample_collection_date_before || undefined,
-      offset: String((qParams.page ? qParams.page - 1 : 0) * resultsPerPage),
-      srf_id: qParams.srf_id || undefined,
-    };
-
-    const fetchData = async () => {
-      const { res, data } = await request(routes.externalResultList, {
-        query: params,
-      });
-      if (res && data) {
-        setResultListData(data.results);
-        setTotalCount(data.count);
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-
-    if (!params.mobile_number) {
-      setPhoneNum("+91");
-    }
-  }, [
-    qParams.name,
-    qParams.page,
-    qParams.mobile_number,
-    qParams.wards,
-    qParams.created_date_before,
-    qParams.created_date_after,
-    qParams.result_date_before,
-    qParams.result_date_after,
-    qParams.sample_collection_date_after,
-    qParams.sample_collection_date_before,
-    qParams.local_bodies,
-    qParams.srf_id,
-    dataList,
-  ]);
 
   const removeLSGFilter = (paramKey: any, id: any) => {
     const updatedLsgList = dataList.lsgList.filter((x: any) => x.id !== id);
@@ -171,8 +124,8 @@ export default function ResultList() {
   };
 
   let resultList: any[] = [];
-  if (resultListData.length) {
-    resultList = resultListData.map((result: any) => {
+  if (data?.results.length) {
+    resultList = data.results.map((result: any) => {
       const resultUrl = `/external_results/${result.id}`;
       return (
         <tr key={`usr_${result.id}`} className="bg-white">
@@ -227,7 +180,7 @@ export default function ResultList() {
     });
   }
 
-  if (isLoading) {
+  if (loading) {
     manageResults = (
       <tr className="bg-white">
         <td colSpan={5}>
@@ -235,9 +188,9 @@ export default function ResultList() {
         </td>
       </tr>
     );
-  } else if (resultListData.length) {
+  } else if (data?.results.length) {
     manageResults = <>{resultList}</>;
-  } else if (resultListData.length === 0) {
+  } else if (data?.results.length === 0) {
     manageResults = (
       <tr className="bg-white">
         <td colSpan={5}>
@@ -299,8 +252,8 @@ export default function ResultList() {
         <div className="relative my-4 grid-cols-1 gap-5 px-2 sm:grid-cols-3 md:px-0 lg:grid">
           <CountBlock
             text="Total Results"
-            count={totalCount}
-            loading={isLoading}
+            count={data?.count || 0}
+            loading={loading}
             icon="l-clipboard-notes"
             className="flex-1"
           />
@@ -371,7 +324,7 @@ export default function ResultList() {
             </tbody>
           </table>
         </div>
-        <Pagination totalCount={totalCount} />
+        <Pagination totalCount={data?.count || 0} />
         <ListFilter
           {...advancedFilter}
           dataList={lsgWardData}
