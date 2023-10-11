@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import useSlug from "../../../Common/hooks/useSlug";
 import useQuery from "../../../Utils/request/useQuery";
 import MedicineRoutes from "../routes";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { computeActivityBounds } from "./utils";
 import useBreakpoints from "../../../Common/hooks/useBreakpoints";
 import SubHeading from "../../../CAREUI/display/SubHeading";
@@ -11,6 +11,8 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import BulkAdminister from "./BulkAdminister";
 import useRangePagination from "../../../Common/hooks/useRangePagination";
 import MedicineAdministrationTable from "./AdministrationTable";
+import useIsScrollable from "../../../Common/hooks/useIsScrollable";
+import { classNames } from "../../../Utils/utils";
 
 interface Props {
   readonly?: boolean;
@@ -22,6 +24,8 @@ const DEFAULT_BOUNDS = { start: new Date(), end: new Date() };
 const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
   const { t } = useTranslation();
   const consultation = useSlug("consultation");
+
+  const { isScrollable, ref } = useIsScrollable();
 
   const [showDiscontinued, setShowDiscontinued] = useState(false);
 
@@ -58,8 +62,19 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
     defaultEnd: true,
   });
 
+  const divRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (divRef.current) {
+      const isScrollable =
+        divRef.current.scrollHeight > divRef.current.clientHeight;
+
+      console.log(`Is div scrollable? ${isScrollable ? "Yes" : "No"}`);
+    }
+  }, [prescriptions]);
+
   return (
-    <>
+    <div>
       <SubHeading
         title={is_prn ? "PRN Prescriptions" : "Prescriptions"}
         lastModified={
@@ -91,10 +106,13 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
         }
       />
 
-      <div className="relative max-h-[80vh] overflow-auto rounded border border-white shadow">
+      <div
+        className="relative max-h-[80vh] overflow-auto rounded border border-gray-400/50 md:max-h-[90vh]"
+        ref={ref}
+      >
         {prescriptions?.length === 0 && <NoPrescriptions prn={is_prn} />}
 
-        {prescriptions?.length && (
+        {!!prescriptions?.length && (
           <MedicineAdministrationTable
             prescriptions={prescriptions}
             pagination={pagination}
@@ -118,8 +136,20 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
             </span>
           </ButtonV2>
         )}
+
+        <div
+          className={classNames(
+            "sticky inset-x-0 bottom-0 flex items-end justify-center bg-gradient-to-t from-gray-900/90 to-transparent pb-2 text-white transition-all duration-500 ease-in-out",
+            isScrollable ? "h-16 opacity-75" : "h-0 opacity-0"
+          )}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-sm">Scroll to view more prescriptions</span>
+            <CareIcon icon="l-arrow-down" className="animate-bounce text-2xl" />
+          </div>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
