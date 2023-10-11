@@ -243,11 +243,12 @@ const ScanABHAQRSection = ({
               onClick={async () => {
                 let response = null;
                 let Rdata = null;
+                let Rerror = null;
 
                 switch (selectedAuthMethod) {
                   case "MOBILE_OTP":
                     {
-                      const { res, data } = await request(
+                      const { res, data, error } = await request(
                         routes.abha.confirmWithMobileOtp,
                         {
                           body: {
@@ -259,12 +260,13 @@ const ScanABHAQRSection = ({
                       );
                       response = res;
                       Rdata = data;
+                      Rerror = error;
                     }
                     break;
 
                   case "AADHAAR_OTP":
                     {
-                      const { res, data } = await request(
+                      const { res, data, error } = await request(
                         routes.abha.confirmWithAadhaarOtp,
                         {
                           body: {
@@ -276,6 +278,7 @@ const ScanABHAQRSection = ({
                       );
                       response = res;
                       Rdata = data;
+                      Rerror = error;
                     }
                     break;
                 }
@@ -287,7 +290,7 @@ const ScanABHAQRSection = ({
                   });
                 } else {
                   Notify.Error({
-                    msg: Rdata?.message ?? "Something went wrong!",
+                    msg: Rerror ?? "Something went wrong!",
                   });
                 }
               }}
