@@ -204,12 +204,12 @@ export default function MedicineAdministrationTableRow({
       {/* Administration Cells */}
       {props.intervals.map(({ start, end }, index) => (
         <>
-          <td>
+          <td key={`event-seperator-${index}`}>
             <AdministrationEventSeperator date={start} />
           </td>
 
-          <td key={index} className="text-center">
-            {data?.results === undefined ? (
+          <td key={`event-socket-${index}`} className="text-center">
+            {!data?.results ? (
               <CareIcon
                 icon="l-spinner"
                 className="animate-spin text-lg text-gray-500"

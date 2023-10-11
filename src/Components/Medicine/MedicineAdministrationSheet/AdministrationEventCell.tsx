@@ -79,7 +79,7 @@ export default function AdministrationEventCell({
             <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
               <div className="relative flex flex-col gap-2 bg-white p-4">
                 {administered.map((administration) => (
-                  <div>
+                  <div key={administration.id}>
                     <Disclosure defaultOpen={administered.length === 1}>
                       {({ open }) => (
                         <>
