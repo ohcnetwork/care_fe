@@ -41,11 +41,7 @@ export default function DiscontinuePrescription(props: Props) {
       className="w-full md:max-w-4xl"
     >
       <div className="mt-4 flex flex-col gap-8">
-        <PrescriptionDetailCard
-          prescription={props.prescription}
-          readonly
-          actions={props.actions}
-        />
+        <PrescriptionDetailCard prescription={props.prescription} readonly />
         <TextAreaFormField
           label={t("reason_for_discontinuation")}
           placeholder={t("optional")}

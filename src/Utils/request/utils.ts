@@ -78,7 +78,7 @@ export function mergeRequestOptions<TData>(
     ...overrides,
 
     query: { ...options.query, ...overrides.query },
-    body: { ...options.body, ...overrides.body },
+    body: { ...(options.body ?? {}), ...(overrides.body ?? {}) },
     pathParams: { ...options.pathParams, ...overrides.pathParams },
 
     onResponse: (res) => {

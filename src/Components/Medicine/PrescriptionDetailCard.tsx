@@ -3,7 +3,6 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import ReadMore from "../Common/components/Readmore";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { PrescriptionActions } from "../../Redux/actions";
 import { useTranslation } from "react-i18next";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 
@@ -14,7 +13,6 @@ export default function PrescriptionDetailCard({
   prescription: Prescription;
   readonly?: boolean;
   children?: React.ReactNode;
-  actions: ReturnType<ReturnType<typeof PrescriptionActions>["prescription"]>;
   onDiscontinueClick?: () => void;
   onAdministerClick?: () => void;
   selected?: boolean;

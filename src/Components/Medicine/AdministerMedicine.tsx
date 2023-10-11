@@ -67,11 +67,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
       className="w-full md:max-w-4xl"
     >
       <div className="mt-4 flex flex-col gap-8">
-        <PrescriptionDetailCard
-          prescription={prescription}
-          readonly
-          actions={props.actions}
-        />
+        <PrescriptionDetailCard prescription={prescription} readonly />
 
         <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
           <TextAreaFormField

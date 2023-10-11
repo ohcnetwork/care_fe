@@ -75,7 +75,6 @@ export default function PrescriptionsTable({
         >
           <MedicineAdministration
             prescriptions={prescriptions}
-            action={prescription}
             onDone={() => {
               setShowBulkAdminister(false);
               onChange?.();
@@ -115,7 +114,6 @@ export default function PrescriptionsTable({
           <div className="mt-4 flex flex-col gap-4">
             <PrescriptionDetailCard
               prescription={detailedViewFor}
-              actions={prescription(detailedViewFor.id ?? "")}
               key={detailedViewFor.id}
               readonly
             />

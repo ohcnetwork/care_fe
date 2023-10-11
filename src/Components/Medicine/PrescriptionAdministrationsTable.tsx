@@ -105,7 +105,6 @@ export default function PrescriptionAdministrationsTable({
         >
           <MedicineAdministration
             prescriptions={state.prescriptions}
-            action={prescription}
             onDone={() => {
               setShowBulkAdminister(false);
               refetch();
@@ -365,11 +364,7 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
           show
         >
           <div className="mt-4 flex flex-col gap-4">
-            <PrescriptionDetailCard
-              prescription={prescription}
-              actions={props.actions}
-              readonly
-            />
+            <PrescriptionDetailCard prescription={prescription} readonly />
             <div className="flex w-full flex-col items-center justify-end gap-2 md:flex-row">
               <Cancel
                 onClick={() => setShowDetails(false)}
