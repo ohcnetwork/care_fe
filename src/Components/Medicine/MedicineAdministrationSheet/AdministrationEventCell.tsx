@@ -48,7 +48,7 @@ export default function AdministrationEventCell({
             {hasComment && (
               <CareIcon icon="l-notes" className="text-xl text-primary-500" />
             )}
-            <span className="tooltip-text tooltip-top -translate-x-1/2 text-xs">
+            <span className="tooltip-text tooltip-left translate-y-1/3 text-xs">
               {administered.length === 1 ? (
                 <p>
                   Administered on{" "}
