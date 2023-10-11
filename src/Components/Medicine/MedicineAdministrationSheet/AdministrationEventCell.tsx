@@ -143,6 +143,11 @@ export default function AdministrationEventCell({
     );
   }
 
+  // Check if cell belongs to after prescription.created_date
+  if (dayjs(start).isAfter(prescription.created_date)) {
+    return <CareIcon icon="l-minus-circle" className="text-xl text-gray-400" />;
+  }
+
   // Check if cell belongs to a discontinued prescription
   if (
     prescription.discontinued &&
