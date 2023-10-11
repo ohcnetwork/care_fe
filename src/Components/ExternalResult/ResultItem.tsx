@@ -11,20 +11,11 @@ import request from "../../Utils/request/request";
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultItem(props: any) {
-  const initialData: any = {};
-  const [resultItemData, setResultItemData] = useState(initialData);
-  const [isLoading, setIsLoading] = useState(true);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
   const { t } = useTranslation();
 
-  useQuery(routes.externalResult, {
+  const { data: resultItemData, loading } = useQuery(routes.externalResult, {
     pathParams: { id: props.id },
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data) {
-        setResultItemData(data);
-      }
-      setIsLoading(false);
-    },
   });
 
   const handleDelete = async () => {
@@ -47,7 +38,7 @@ export default function ResultItem(props: any) {
     }
   };
 
-  if (isLoading) {
+  if (loading || !resultItemData) {
     return <Loading />;
   }
 
