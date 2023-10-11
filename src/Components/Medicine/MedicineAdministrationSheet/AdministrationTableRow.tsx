@@ -47,6 +47,7 @@ export default function MedicineAdministrationTableRow({
         "YYYY-MM-DD"
       ),
     },
+    key: `${prescription.last_administered_on}`,
   });
 
   return (
