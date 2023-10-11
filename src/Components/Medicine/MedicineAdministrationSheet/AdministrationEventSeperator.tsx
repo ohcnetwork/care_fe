@@ -7,7 +7,7 @@ export default function AdministrationEventSeperator({ date }: { date: Date }) {
   }
 
   return (
-    <div className="mx-auto flex h-[58px] flex-col items-center justify-center bg-gray-300 text-center text-xs font-bold text-gray-600 transition-all duration-200 ease-in-out group-hover:bg-primary-500 group-hover:text-white">
+    <div className="mx-auto flex h-[58px] w-min flex-col items-center justify-center bg-gray-300 text-center text-xs font-bold text-gray-600 transition-all duration-200 ease-in-out group-hover:bg-primary-500 group-hover:text-white">
       <span className="-rotate-90 uppercase duration-500 ease-in-out">
         <p> {formatDateTime(date, "DD/MM")}</p>
       </span>

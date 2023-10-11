@@ -62,7 +62,7 @@ export default function MedicineAdministrationTable({
               >
                 {formatDateTime(
                   start,
-                  start.getHours() === 0 ? "DD/MM" : "HH:mm"
+                  start.getHours() === 0 ? "DD/MM" : "h a"
                 )}
               </th>
               <th key={`administration-slot-${index}`} className="flex w-6" />
