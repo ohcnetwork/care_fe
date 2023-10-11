@@ -1,6 +1,9 @@
 import { IConfig } from "../Common/hooks/useConfig";
 import { AssetData } from "../Components/Assets/AssetTypes";
-import { LocationModel } from "../Components/Facility/models";
+import {
+  ConsultationModel,
+  LocationModel,
+} from "../Components/Facility/models";
 import { Prescription } from "../Components/Medicine/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
@@ -358,6 +361,8 @@ const routes = {
   partialUpdateConsultation: {
     path: "/api/v1/consultation/{id}/",
     method: "PATCH",
+    TRes: Type<Partial<ConsultationModel>>(),
+    TBody: Type<ConsultationModel>(),
   },
   deleteConsultation: {
     path: "/api/v1/consultation/{id}/",

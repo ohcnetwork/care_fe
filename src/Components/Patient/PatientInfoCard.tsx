@@ -22,6 +22,9 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useState } from "react";
 import { formatAge, formatDate, formatDateTime } from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
+import SwitchTabs from "../Common/components/SwitchTabs.js";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -42,6 +45,10 @@ export default function PatientInfoCard(props: {
   const patient = props.patient;
   const consultation = props.consultation;
 
+  const [medicoLegalCase, setMedicoLegalCase] = useState(
+    consultation?.medico_legal_case ?? false
+  );
+
   const category: PatientCategory | undefined =
     consultation?.last_daily_round?.patient_category ?? consultation?.category;
   const categoryClass = category
@@ -53,6 +60,25 @@ export default function PatientInfoCard(props: {
     : !consultation?.current_bed
     ? "Assign Bed"
     : "Switch Bed";
+
+  const switchMedicoLegalCase = async (value: boolean) => {
+    if (!consultation?.id || value === medicoLegalCase) return;
+    const { res, data } = await request(routes.partialUpdateConsultation, {
+      pathParams: { id: consultation?.id },
+      body: { medico_legal_case: value },
+    });
+
+    if (res?.status !== 200 || !data) {
+      Notification.Error({
+        msg: "Failed to update Medico Legal Case",
+      });
+      setMedicoLegalCase(!value);
+    } else {
+      Notification.Success({
+        msg: "Medico Legal Case updated successfully",
+      });
+    }
+  };
 
   return (
     <>
@@ -433,6 +459,20 @@ export default function PatientInfoCard(props: {
                 />
               </>
             ))}
+          Is this a medico-legal case?
+          <SwitchTabs
+            tab1="Yes"
+            tab2="No"
+            isTab2Active={!medicoLegalCase}
+            onClickTab1={() => {
+              setMedicoLegalCase(true);
+              switchMedicoLegalCase(true);
+            }}
+            onClickTab2={() => {
+              setMedicoLegalCase(false);
+              switchMedicoLegalCase(false);
+            }}
+          />
         </div>
       </section>
     </>
