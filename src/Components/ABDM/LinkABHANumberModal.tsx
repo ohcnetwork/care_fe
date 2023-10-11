@@ -631,7 +631,7 @@ const VerifyMobileSection = ({
     setIsSendingOtp(true);
     const { res, data } = await request(routes.abha.checkAndGenerateMobileOtp, {
       body: {
-        mobile: otp,
+        mobile: mobile,
         txnId: txnId,
       },
     });
