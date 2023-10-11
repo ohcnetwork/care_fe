@@ -563,8 +563,8 @@ const AdministrationCell = ({
     )
     .sort(
       (a, b) =>
-        new Date(a.administered_date).getTime() -
-        new Date(b.administered_date).getTime()
+        new Date(a.administered_date!).getTime() -
+        new Date(b.administered_date!).getTime()
     );
 
   const hasComment = administered.some((obj) => !!obj.notes);
