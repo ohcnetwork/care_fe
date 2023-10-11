@@ -208,6 +208,9 @@ export const useMSEMediaPlayer = ({
                 readPacket(event.data);
               }
             };
+            ws.onerror = function (event) {
+              onError && onError(event);
+            };
           },
           false
         );
