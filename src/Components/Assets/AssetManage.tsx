@@ -69,6 +69,8 @@ const AssetManage = (props: AssetManageProps) => {
       external_id: assetId,
     },
     onResponse: ({ res, data }) => {
+      console.log(res, data);
+      console.log(data?.qr_code_id ? "not null" : "null", assetId);
       if (res?.status === 200 && data) {
         setTransactionFilter(
           data.qr_code_id
@@ -81,8 +83,8 @@ const AssetManage = (props: AssetManageProps) => {
 
   const { data: transactions } = useQuery(routes.listAssetTransaction, {
     prefetch: !!asset,
-    ...transactionFilter,
     query: {
+      ...transactionFilter,
       limit,
       offset,
     },
