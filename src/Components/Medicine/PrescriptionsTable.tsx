@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import ResponsiveMedicineTable from "../Common/components/ResponsiveMedicineTables";
+import ResponsiveMedicineTable from "./ResponsiveMedicineTables";
 import { formatDateTime } from "../../Utils/utils";
 import { PrescriptionActions } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
