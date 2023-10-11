@@ -1,22 +1,22 @@
 import { useState } from "react";
-import { PrescriptionActions } from "../../Redux/actions";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { Prescription } from "./models";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Success } from "../../Utils/Notifications";
-import { useDispatch } from "react-redux";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import { useTranslation } from "react-i18next";
+import request from "../../Utils/request/request";
+import MedicineRoutes from "./routes";
+import useSlug from "../../Common/hooks/useSlug";
 
 interface Props {
   prescription: Prescription;
-  actions: ReturnType<ReturnType<typeof PrescriptionActions>["prescription"]>;
   onClose: (discontinued: boolean) => void;
 }
 
 export default function DiscontinuePrescription(props: Props) {
   const { t } = useTranslation();
-  const dispatch = useDispatch<any>();
+  const consultation = useSlug("consultation");
   const [isDiscontinuing, setIsDiscontinuing] = useState(false);
   const [discontinuedReason, setDiscontinuedReason] = useState<string>("");
 
@@ -29,10 +29,13 @@ export default function DiscontinuePrescription(props: Props) {
       variant="danger"
       onConfirm={async () => {
         setIsDiscontinuing(true);
-        const res = await dispatch(
-          props.actions.discontinue(discontinuedReason)
-        );
-        if (res.status === 201) {
+        const { res } = await request(MedicineRoutes.discontinuePrescription, {
+          pathParams: { consultation },
+          body: {
+            discontinued_reason: discontinuedReason,
+          },
+        });
+        if (res?.ok) {
           Success({ msg: t("prescription_discontinued") });
         }
         setIsDiscontinuing(false);

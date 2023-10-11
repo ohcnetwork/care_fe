@@ -10,7 +10,7 @@ interface BasePrescription {
   notes?: string;
   meta?: object;
   readonly prescription_type?: "DISCHARGE" | "REGULAR";
-  readonly discontinued?: boolean;
+  readonly discontinued: boolean;
   discontinued_reason?: string;
   readonly prescribed_by: PerformedByModel;
   readonly discontinued_date: string;
