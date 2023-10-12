@@ -55,6 +55,7 @@ const routes = {
   checkResetToken: {
     path: "/api/v1/password_reset/check/",
     method: "POST",
+    noAuth: true,
     TRes: Type<Record<string, never>>(),
     TBody: Type<{ token: string }>(),
   },
@@ -62,6 +63,7 @@ const routes = {
   resetPassword: {
     path: "/api/v1/password_reset/confirm/",
     method: "POST",
+    noAuth: true,
     TRes: Type<Record<string, never>>(),
     TBody: Type<{ password: string; confirm: string }>(),
   },
@@ -69,6 +71,7 @@ const routes = {
   forgotPassword: {
     path: "/api/v1/password_reset/",
     method: "POST",
+    noAuth: true,
     TRes: Type<Record<string, never>>(),
     TBody: Type<{ username: string }>(),
   },
