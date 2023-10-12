@@ -1145,17 +1145,24 @@ export const ConsultationForm = (props: any) => {
                         className="col-span-6"
                         ref={fieldRef["admission_date"]}
                       >
-                        <DateFormField
-                          {...field("admission_date")}
-                          required
-                          disableFuture
-                          label={
-                            state.form.suggestion === "A"
-                              ? "Date of Admission"
-                              : "Domiciliary Care Start Date"
-                          }
-                          position="LEFT"
-                        />
+                        {state.form.suggestion === "DC" && (
+                          <DateFormField
+                            {...field("admission_date")}
+                            required
+                            disableFuture
+                            label="Domiciliary Care Start Date"
+                            position="LEFT"
+                          />
+                        )}
+                        {state.form.suggestion === "A" && (
+                          <TextFormField
+                            {...field("admission_date")}
+                            required
+                            label="Date & Time Admission"
+                            type="datetime-local"
+                            max={dayjs().format("YYYY-MM-DDTHH:mm")}
+                          />
+                        )}
                       </div>
 
                       {!isUpdate && (
