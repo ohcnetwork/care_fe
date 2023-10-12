@@ -78,8 +78,20 @@ const DATE_TIME_FORMAT = `${TIME_FORMAT}; ${DATE_FORMAT}`;
 
 type DateLike = Parameters<typeof dayjs>[0];
 
-export const formatDateTime = (date: DateLike, format = DATE_TIME_FORMAT) =>
-  dayjs(date).format(format);
+export const formatDateTime = (date: DateLike, format?: string) => {
+  const obj = dayjs(date);
+
+  if (format) {
+    return obj.format(format);
+  }
+
+  // formatDate if hours, minutes and seconds are 0
+  if (obj.hour() === 0 && obj.minute() === 0 && obj.second() === 0) {
+    return obj.format(DATE_FORMAT);
+  }
+
+  return obj.format(DATE_TIME_FORMAT);
+};
 
 export const formatDate = (date: DateLike, format = DATE_FORMAT) =>
   formatDateTime(date, format);
