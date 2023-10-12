@@ -107,7 +107,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
       />
 
       <div
-        className="relative max-h-[80vh] overflow-auto rounded border border-gray-400/50 md:max-h-[90vh]"
+        className="relative max-h-[80vh] overflow-auto rounded-lg border border-black/10 shadow md:max-h-[90vh]"
         ref={ref}
       >
         {prescriptions?.length === 0 && <NoPrescriptions prn={is_prn} />}
