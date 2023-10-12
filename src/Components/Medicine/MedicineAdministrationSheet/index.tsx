@@ -139,7 +139,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
 
         <div
           className={classNames(
-            "sticky inset-x-0 bottom-0 flex items-end justify-center bg-gradient-to-t from-gray-900/90 to-transparent pb-2 text-white transition-all duration-500 ease-in-out",
+            "sticky inset-x-0 bottom-0 z-10 flex items-end justify-center bg-gradient-to-t from-gray-900/90 to-transparent pb-2 text-white transition-all duration-500 ease-in-out",
             isScrollable ? "h-16 opacity-75" : "h-0 opacity-0"
           )}
         >

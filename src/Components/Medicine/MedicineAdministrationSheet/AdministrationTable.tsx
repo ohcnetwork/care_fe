@@ -21,9 +21,9 @@ export default function MedicineAdministrationTable({
 
   return (
     <table className="w-full whitespace-nowrap rounded">
-      <thead className="sticky top-0 z-10 bg-white text-xs font-medium text-black">
+      <thead className="sticky top-0 z-20 bg-white text-xs font-medium text-black">
         <tr>
-          <th className="sticky left-0 z-10 bg-white py-3 pl-4 text-left">
+          <th className="sticky left-0 z-20 bg-white py-3 pl-4 text-left">
             <div className="flex justify-between gap-2">
               <span className="text-sm">{t("medicine")}</span>
               <span className="hidden px-2 text-center text-xs leading-none lg:block">
