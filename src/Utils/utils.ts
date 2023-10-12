@@ -85,8 +85,9 @@ export const formatDateTime = (date: DateLike, format?: string) => {
     return obj.format(format);
   }
 
-  // formatDate if hours, minutes and seconds are 0
-  if (obj.hour() === 0 && obj.minute() === 0 && obj.second() === 0) {
+  // formatDate if hours, minutes and seconds are 0 (after timezone correction)
+  const utc = obj.subtract(obj.utcOffset(), "minute");
+  if (utc.hour() === 0 && utc.minute() === 0 && utc.second() === 0) {
     return obj.format(DATE_FORMAT);
   }
 
