@@ -6,7 +6,6 @@ import { SAMPLE_TEST_STATUS } from "../../Common/constants";
 import { patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
-import { startCase, camelCase } from "lodash-es";
 import { formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
@@ -91,8 +90,8 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             <div className="text-sm font-semibold leading-5 text-zinc-400">
               Status{" "}
             </div>
-            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-              {startCase(camelCase(itemData.status))}
+            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium capitalize leading-5">
+              {itemData.status?.toLowerCase()}
             </div>
           </div>
         </div>
@@ -101,10 +100,11 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             <div className="text-sm font-semibold leading-5 text-zinc-400">
               Sample Type{" "}
             </div>
-            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-              {itemData.sample_type !== "OTHER TYPE"
+            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium capitalize leading-5">
+              {(itemData.sample_type !== "OTHER TYPE"
                 ? itemData.sample_type
-                : itemData.sample_type_other}
+                : itemData.sample_type_other
+              )?.toLowerCase()}
             </div>
           </div>
         </div>
@@ -125,8 +125,8 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
             <div className="text-sm font-semibold leading-5 text-zinc-400">
               Result{" "}
             </div>
-            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-              {startCase(camelCase(itemData.result))}
+            <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium capitalize leading-5">
+              {itemData.result?.toLowerCase()}
             </div>
           </div>
         </div>
