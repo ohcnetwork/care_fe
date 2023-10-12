@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import useSlug from "../../../Common/hooks/useSlug";
 import useQuery from "../../../Utils/request/useQuery";
 import MedicineRoutes from "../routes";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { computeActivityBounds } from "./utils";
 import useBreakpoints from "../../../Common/hooks/useBreakpoints";
 import SubHeading from "../../../CAREUI/display/SubHeading";
@@ -24,8 +24,6 @@ const DEFAULT_BOUNDS = { start: new Date(), end: new Date() };
 const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
   const { t } = useTranslation();
   const consultation = useSlug("consultation");
-
-  const { isScrollable, ref } = useIsScrollable();
 
   const [showDiscontinued, setShowDiscontinued] = useState(false);
 
@@ -62,16 +60,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
     defaultEnd: true,
   });
 
-  const divRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (divRef.current) {
-      const isScrollable =
-        divRef.current.scrollHeight > divRef.current.clientHeight;
-
-      console.log(`Is div scrollable? ${isScrollable ? "Yes" : "No"}`);
-    }
-  }, [prescriptions]);
+  const { isScrollable, ref } = useIsScrollable([data?.results?.length]);
 
   return (
     <div>

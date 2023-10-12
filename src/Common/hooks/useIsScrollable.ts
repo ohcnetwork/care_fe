@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-const useIsScrollable = () => {
+const useIsScrollable = (deps?: unknown[]) => {
   const [isScrollable, setIsScrollable] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -27,7 +27,7 @@ const useIsScrollable = () => {
     return () => {
       div?.removeEventListener("scroll", handleScroll);
     };
-  }, [ref.current]); // Re-run effect if divRef.current changes
+  }, [ref.current, ...(deps || [])]); // Re-run effect if divRef.current changes
 
   return { isScrollable, ref };
 };
