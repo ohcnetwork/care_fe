@@ -324,15 +324,28 @@ export const ConsultationForm = (props: any) => {
           verified_by: "Declared Dead",
         },
       });
-    } else if (
-      event.name === "icd11_diagnoses_object" ||
-      event.name === "icd11_provisional_diagnoses_object"
-    ) {
+    } else if (event.name === "icd11_diagnoses_object") {
+      const selectedDiagnoses = event.value as ICD11DiagnosisModel[];
+      const provisionalDiagnoses =
+        state.form.icd11_provisional_diagnoses_object.filter(
+          (d) => !selectedDiagnoses.map((d) => d.id).includes(d.id)
+        );
       dispatch({
         type: "set_form",
         form: {
           ...state.form,
-          [event.name]: event.value,
+          icd11_diagnoses_object: selectedDiagnoses,
+          icd11_provisional_diagnoses_object: provisionalDiagnoses,
+          icd11_principal_diagnosis: undefined,
+        },
+      });
+    } else if (event.name === "icd11_provisional_diagnoses_object") {
+      dispatch({
+        type: "set_form",
+        form: {
+          ...state.form,
+          icd11_provisional_diagnoses_object:
+            event.value as ICD11DiagnosisModel[],
           icd11_principal_diagnosis: undefined,
         },
       });
@@ -421,7 +434,7 @@ export const ConsultationForm = (props: any) => {
   const validateForm = () => {
     const errors = { ...initError };
     let invalidForm = false;
-
+    console.log("Errors", errors);
     Object.keys(state.form).forEach((field) => {
       switch (field) {
         case "symptoms":
@@ -1203,6 +1216,7 @@ export const ConsultationForm = (props: any) => {
                       {...field("icd11_provisional_diagnoses_object")}
                       multiple
                       label="Provisional Diagnosis"
+                      excludeOptions={state.form.icd11_diagnoses_object}
                     />
                   </div>
 

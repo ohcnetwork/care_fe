@@ -10,7 +10,10 @@ import {
 
 type Props =
   // | ({ multiple?: false | undefined } & FormFieldBaseProps<ICD11DiagnosisModel>) // uncomment when single select form field is required and implemented.
-  { multiple: true } & FormFieldBaseProps<ICD11DiagnosisModel[]>;
+  {
+    multiple: true;
+    excludeOptions?: ICD11DiagnosisModel[];
+  } & FormFieldBaseProps<ICD11DiagnosisModel[]>;
 
 export function DiagnosisSelectFormField(props: Props) {
   const field = useFormFieldPropsResolver(props);
@@ -32,7 +35,9 @@ export function DiagnosisSelectFormField(props: Props) {
         disabled={field.disabled}
         value={field.value || []}
         onChange={field.handleChange}
-        options={options(props.value)}
+        options={options(props.value).filter(
+          (val) => !props.excludeOptions?.find((ex) => ex.id === val.id)
+        )}
         optionLabel={(option) => option.label}
         optionValue={(option) => option}
         onQuery={(query) =>
