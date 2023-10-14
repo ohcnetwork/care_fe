@@ -14,16 +14,7 @@ import {
   getBedTypes,
 } from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
-import {
-  deleteFacility,
-  getPermittedFacility,
-  getTriageInfo,
-  listCapacity,
-  listDoctor,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy, useEffect, useState } from "react";
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -45,6 +36,9 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
+import useQuery from "../../Utils/request/useQuery.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -61,7 +55,6 @@ export const getFacilityFeatureIcon = (featureId: number) => {
 export const FacilityHome = (props: any) => {
   const { t } = useTranslation();
   const { facilityId } = props;
-  const dispatch: any = useDispatch();
   const [facilityData, setFacilityData] = useState<FacilityModel>({});
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
@@ -80,32 +73,102 @@ export const FacilityHome = (props: any) => {
 
   useMessageListener((data) => console.log(data));
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
+  const {
+    res: permittedFacilityRes,
+    data: permittedFacilityData,
+    refetch: permittedFacilityFetch,
+  } = useQuery(routes.getPermittedFacility, {
+    pathParams: {
+      id: facilityId,
+    },
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
       setIsLoading(true);
-      const facilityRes = await dispatch(getPermittedFacility(facilityId));
-      if (facilityRes) {
-        const [capacityRes, doctorRes, triageRes] = await Promise.all([
-          dispatch(listCapacity({}, { facilityId })),
-          dispatch(listDoctor({}, { facilityId })),
-          dispatch(getTriageInfo({ facilityId })),
-        ]);
-        if (!status.aborted) {
+      if (permittedFacilityRes) {
+        const { res: capacityRes, data: capacityData } = await request(
+          routes.getCapacity,
+          {
+            pathParams: { facilityId: facilityId },
+          }
+        );
+        const { res: doctorRes, data: doctorData } = await request(
+          routes.listDoctor,
+          {
+            pathParams: { facilityId: facilityId },
+          }
+        );
+        const { res: triageRes, data: triageData } = await request(
+          routes.getTriage,
+          {
+            pathParams: {
+              facilityId: String(facilityId),
+            },
+          }
+        );
+
+        if (permittedFacilityRes) {
           setIsLoading(false);
-          if (!facilityRes.data) {
+          if (!permittedFacilityData) {
             Notification.Error({
               msg: "Something went wrong..!",
             });
           } else {
-            setFacilityData(facilityRes.data);
-            if (capacityRes && capacityRes.data) {
-              setCapacityData(capacityRes.data.results);
+            const transformedPermittedFacilityData = {
+              id: Number(permittedFacilityData.id),
+              name: permittedFacilityData.name,
+              district: permittedFacilityData.district,
+              read_cover_image_url: permittedFacilityData.read_cover_image_url,
+              facility_type: String(permittedFacilityData.facility_type),
+              address: permittedFacilityData.address,
+              features: permittedFacilityData.features,
+              location: {
+                latitude: Number(permittedFacilityData.latitude),
+                longitude: Number(permittedFacilityData.longitude),
+              },
+              oxygen_capacity: permittedFacilityData.oxygen_capacity,
+              phone_number: permittedFacilityData.phone_number,
+              type_b_cylinders: permittedFacilityData.type_b_cylinders,
+              type_c_cylinders: permittedFacilityData.type_c_cylinders,
+              type_d_cylinders: permittedFacilityData.type_d_cylinders,
+              middleware_address: permittedFacilityData.middleware_address,
+              expected_type_b_cylinders:
+                permittedFacilityData.expected_type_b_cylinders,
+              expected_type_c_cylinders:
+                permittedFacilityData.expected_type_c_cylinders,
+              expected_type_d_cylinders:
+                permittedFacilityData.expected_type_d_cylinders,
+              expected_oxygen_requirement:
+                permittedFacilityData.expected_oxygen_requirement,
+              local_body_object: permittedFacilityData.local_body_object,
+              district_object: permittedFacilityData.district_object,
+              state_object: permittedFacilityData.state_object,
+              ward_object: permittedFacilityData.ward_object,
+              modified_date: permittedFacilityData.modified_date,
+              created_date: permittedFacilityData.created_date,
+            };
+            setFacilityData(transformedPermittedFacilityData);
+            if (capacityRes && capacityData) {
+              const transformedCapacityData = {
+                id: Number(capacityData.results[0].id),
+                room_type: capacityData.results[0].room_type_text,
+                modified_date: capacityData.results[0].modified_date,
+                total_capacity: capacityData.results[0].total_capacity,
+                current_capacity: capacityData.results[0].current_capacity,
+              };
+              setCapacityData([transformedCapacityData]);
             }
-            if (doctorRes && doctorRes.data) {
-              setDoctorData(doctorRes.data.results);
+            if (doctorRes && doctorData) {
+              const transformedDoctorData = {
+                id: Number(doctorData.results[0].id),
+                area: doctorData.results[0].area,
+                count: doctorData.results[0].count,
+              };
+              setDoctorData([transformedDoctorData]);
               // calculating total doctors count
               let totalCount = 0;
-              doctorRes.data.results.map((doctor: DoctorModal) => {
+              [transformedDoctorData].map((doctor: DoctorModal) => {
                 if (doctor.count) {
                   totalCount += doctor.count;
                 }
@@ -114,11 +177,26 @@ export const FacilityHome = (props: any) => {
             }
             if (
               triageRes &&
-              triageRes.data &&
-              triageRes.data.results &&
-              triageRes.data.results.length
+              triageData &&
+              triageData.results &&
+              triageData.results.length
             ) {
-              setPatientStatsData(triageRes.data.results);
+              const transformedTriageData = {
+                id: Number(triageData.results[0].id),
+                entryDate: triageData.results[0].entry_date,
+                num_patients_visited:
+                  triageData.results[0].num_patients_visited,
+                num_patients_home_quarantine:
+                  triageData.results[0].num_patients_home_quarantine,
+                num_patients_isolation:
+                  triageData.results[0].num_patients_isolation,
+                num_patient_referred:
+                  triageData.results[0].num_patient_referred,
+                entry_date: Number(triageData.results[0].entry_date),
+                num_patient_confirmed_positive:
+                  triageData.results[0].num_patient_confirmed_positive,
+              };
+              setPatientStatsData([transformedTriageData]);
             }
           }
         }
@@ -126,30 +204,29 @@ export const FacilityHome = (props: any) => {
         navigate("/not-found");
         setIsLoading(false);
       }
-    },
-    [dispatch, facilityId]
-  );
+    };
+    fetchData();
+  }, [facilityId, permittedFacilityRes, permittedFacilityData]);
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [dispatch, fetchData]
-  );
+  useEffect(() => {
+    permittedFacilityFetch();
+  }, [permittedFacilityFetch]);
 
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
   };
 
   const handleDeleteSubmit = async () => {
-    const res = await dispatch(deleteFacility(facilityId));
+    const { res, data } = await request(routes.deleteFacility, {
+      pathParams: { id: facilityId },
+    });
     if (res?.status === 204) {
       Notification.Success({
         msg: "Facility deleted successfully",
       });
     } else {
       Notification.Error({
-        msg: "Error while deleting Facility: " + (res?.data?.detail || ""),
+        msg: "Error while deleting Facility: " + (data?.detail || ""),
       });
     }
     navigate("/facility");
@@ -209,11 +286,17 @@ export const FacilityHome = (props: any) => {
                 lastUpdated={res.modified_date}
                 removeBedType={removeCurrentBedType}
                 handleUpdate={async () => {
-                  const capacityRes = await dispatch(
-                    listCapacity({}, { facilityId })
-                  );
-                  if (capacityRes && capacityRes.data) {
-                    setCapacityData(capacityRes.data.results);
+                  const { res, data } = await request(routes.getCapacity, {
+                    pathParams: { facilityId },
+                  });
+                  if (res?.ok && data) {
+                    const convertedResult = data.results.map((result) => {
+                      return {
+                        ...result,
+                        id: Number(result.id),
+                      };
+                    });
+                    setCapacityData(convertedResult);
                   }
                 }}
               />
@@ -263,14 +346,20 @@ export const FacilityHome = (props: any) => {
               facilityId={facilityId}
               key={`bed_${data.id}`}
               handleUpdate={async () => {
-                const doctorRes = await dispatch(
-                  listDoctor({}, { facilityId })
-                );
-                if (doctorRes && doctorRes.data) {
-                  setDoctorData(doctorRes.data.results);
+                const { res, data } = await request(routes.listDoctor, {
+                  pathParams: { facilityId: facilityId },
+                });
+                if (res && data) {
+                  const convertedResult = data.results.map((result) => {
+                    return {
+                      ...result,
+                      id: Number(result.id),
+                    };
+                  });
+                  setDoctorData(convertedResult);
                   // update total doctors count
                   let totalCount = 0;
-                  doctorRes.data.results.map((doctor: DoctorModal) => {
+                  convertedResult.map((doctor: DoctorModal) => {
                     if (doctor.count) {
                       totalCount += doctor.count;
                     }
@@ -752,11 +841,17 @@ export const FacilityHome = (props: any) => {
             facilityId={facilityId}
             handleClose={() => setBedCapacityModalOpen(false)}
             handleUpdate={async () => {
-              const capacityRes = await dispatch(
-                listCapacity({}, { facilityId })
-              );
-              if (capacityRes && capacityRes.data) {
-                setCapacityData(capacityRes.data.results);
+              const { res, data } = await request(routes.getCapacity, {
+                pathParams: { facilityId },
+              });
+              if (res && data) {
+                const convertedResult = data.results.map((result) => {
+                  return {
+                    ...result,
+                    id: Number(result.id),
+                  };
+                });
+                setCapacityData(convertedResult);
               }
             }}
           />
@@ -773,12 +868,20 @@ export const FacilityHome = (props: any) => {
             facilityId={facilityId}
             handleClose={() => setDoctorCapacityModalOpen(false)}
             handleUpdate={async () => {
-              const doctorRes = await dispatch(listDoctor({}, { facilityId }));
-              if (doctorRes && doctorRes.data) {
-                setDoctorData(doctorRes.data.results);
+              const { res, data } = await request(routes.listDoctor, {
+                pathParams: { facilityId: facilityId },
+              });
+              if (res && data) {
+                const convertedResult = data.results.map((result) => {
+                  return {
+                    ...result,
+                    id: Number(result.id),
+                  };
+                });
+                setDoctorData(convertedResult);
                 // update total doctors count
                 setTotalDoctors(
-                  doctorRes.data.results.reduce(
+                  convertedResult.reduce(
                     (acc: number, doctor: DoctorModal) =>
                       acc + (doctor.count || 0),
                     0

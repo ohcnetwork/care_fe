@@ -1,13 +1,4 @@
-import { useCallback, useReducer, useState, useEffect, lazy } from "react";
-import { useDispatch } from "react-redux";
-
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getItems,
-  setMinQuantity,
-  getAnyFacility,
-  getMinQuantity,
-} from "../../Redux/actions";
+import { useReducer, useState, useEffect, lazy } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { InventoryItemsModel } from "./models";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -17,6 +8,9 @@ import Card from "../../CAREUI/display/Card";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
@@ -50,7 +44,6 @@ export const SetInventoryForm = (props: any) => {
   const { goBack } = useAppHistory();
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId } = props;
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState<Array<InventoryItemsModel>>([]);
   const [currentUnit, setCurrentUnit] = useState<any>();
@@ -59,56 +52,78 @@ export const SetInventoryForm = (props: any) => {
   const limit = 14;
   const offset = 0;
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
+  const {
+    res: minQuantityRes,
+    data: minQuantityData,
+    refetch: minQuantityFetch,
+  } = useQuery(routes.getMinQuantity, {
+    body: {},
+    pathParams: {
+      id: facilityId,
+    },
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
       setIsLoading(true);
-
       const existingItemIDs: number[] = [];
-      const resMinQuantity = await dispatchAction(
-        getMinQuantity(facilityId, {})
-      );
-
-      resMinQuantity.data.results.map((item: any) =>
-        existingItemIDs.push(item.item_object.id)
-      );
-
-      const res = await dispatchAction(getItems({ limit, offset }));
-
-      if (!status.aborted) {
-        if (res && res.data) {
-          const filteredData = res.data.results.filter(
-            (item: any) => !existingItemIDs.includes(item.id)
-          );
-          setData(filteredData);
-          dispatch({
-            type: "set_form",
-            form: { ...state.form, id: filteredData[0]?.id },
-          });
-        }
-        setIsLoading(false);
+      if (minQuantityRes && minQuantityData) {
+        minQuantityData.results.map((item: any) =>
+          existingItemIDs.push(item.item_object.id)
+        );
       }
-    },
-    [dispatchAction]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+      const { res, data } = await request(routes.getItems, {
+        body: {
+          limit: limit,
+          offset: offset,
+        },
+      });
+      if (res && data) {
+        const filteredData = data.results.filter(
+          (item: any) => !existingItemIDs.includes(item.id)
+        );
+        const transformedData = filteredData.map((item) => {
+          const allowedUnits = item.allowed_units || [];
+          return {
+            id: item.id,
+            name: item.name,
+            default_unit: item.default_unit,
+            allowedUnits,
+          };
+        });
+
+        setData(transformedData);
+
+        dispatch({
+          type: "set_form",
+          form: { ...state.form, id: filteredData[0]?.id },
+        });
+      }
+      setIsLoading(false);
+    };
+
+    fetchData();
+  }, [minQuantityData, minQuantityRes, state.form]);
+
+  useEffect(() => {
+    minQuantityFetch();
+  }, [minQuantityFetch]);
 
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
+        const { res, data } = await request(routes.getAnyFacility, {
+          pathParams: {
+            id: facilityId,
+          },
+        });
+        if (res && data) setFacilityName(data.name || "");
       } else {
         setFacilityName("");
       }
     }
     fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  }, [facilityId]);
 
   useEffect(() => {
     // set the default units according to the item
@@ -125,14 +140,17 @@ export const SetInventoryForm = (props: any) => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
-    const data: any = {
-      min_quantity: Number(state.form.quantity),
-      item: Number(state.form.id),
-    };
-
-    const res = await dispatchAction(setMinQuantity(data, { facilityId }));
+    const { res, data } = await request(routes.setMinQuantity, {
+      body: {
+        min_quantity: Number(state.form.quantity),
+        item: Number(state.form.id),
+      },
+      pathParams: {
+        facilityId: facilityId,
+      },
+    });
     setIsLoading(false);
-    if (res && res.data && res.data.id) {
+    if (res && data && data.id) {
       Notification.Success({
         msg: "Minimum quantiy updated successfully",
       });

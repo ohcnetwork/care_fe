@@ -1,18 +1,16 @@
-import { useCallback, useState, useEffect, lazy } from "react";
-import { useDispatch } from "react-redux";
-
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getMinQuantity, getAnyFacility } from "../../Redux/actions";
+import { useState, useEffect, lazy } from "react";
 import Pagination from "../Common/Pagination";
 import { MinQuantityRequiredModal } from "./MinQuantityRequiredModal";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import Page from "../Common/components/Page";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function MinQuantityList(props: any) {
   const { facilityId }: any = props;
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const initialInventory: any[] = [];
   let inventoryItem: any = null;
@@ -26,42 +24,44 @@ export default function MinQuantityList(props: any) {
   const [selectedItem, setSelectedItem] = useState({ id: 0, item_id: 0 });
   const limit = 14;
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(
-        getMinQuantity(facilityId, { limit, offset })
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setInventory(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
+  const { res, data, refetch } = useQuery(routes.getMinQuantity, {
+    body: {
+      limit: limit,
+      offset: offset,
     },
-    [dispatchAction, offset, facilityId]
-  );
+    pathParams: {
+      id: facilityId,
+    },
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+  useEffect(() => {
+    setIsLoading(true);
+    if (res && data) {
+      setInventory(data.results);
+      setTotalCount(data.count);
+    }
+    setIsLoading(false);
+  }, [offset, facilityId, res, data]);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
+        const { res, data } = await request(routes.getAnyFacility, {
+          pathParams: {
+            id: facilityId,
+          },
+        });
+        if (res && data) setFacilityName(data.name || "");
       } else {
         setFacilityName("");
       }
     }
     fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  }, [facilityId]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -236,7 +236,7 @@ export default function MinQuantityList(props: any) {
           show={showMinQuantityRequiredModal}
           handleClose={() => setShowMinQuantityRequiredModal(false)}
           handleUpdate={() => {
-            fetchData({ aborted: false });
+            refetch();
             setShowMinQuantityRequiredModal(false);
           }}
         />

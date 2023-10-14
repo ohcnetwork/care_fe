@@ -1,22 +1,16 @@
-import { lazy, useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import {
-  getPatient,
-  getInvestigation,
-  getConsultation,
-} from "../../Redux/actions";
+import { lazy, useEffect, useState } from "react";
 import { ConsultationModel } from "./models";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 import { PatientModel } from "../Patient/models";
 
 import { GENDER_TYPES } from "../../Common/constants";
 import { formatAge, formatDate, formatDateTime } from "../../Utils/utils";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const TreatmentSummary = (props: any) => {
   const { consultationId, patientId } = props;
   const date = new Date();
-  const dispatch: any = useDispatch();
   const [patientData, setPatientData] = useState<PatientModel>({});
   const [consultationData, setConsultationData] = useState<ConsultationModel>(
     {}
@@ -25,70 +19,79 @@ const TreatmentSummary = (props: any) => {
   const [investigations, setInvestigations] = useState<Array<any>>([]);
   const [dailyRounds, setDailyRounds] = useState<any>({});
 
-  const fetchPatientData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(getPatient({ id: patientId }));
-      if (!status.aborted) {
-        if (res?.data) {
-          setPatientData(res.data);
-        } else {
-          setPatientData({});
-        }
-      }
-      setIsLoading(false);
+  const {
+    res: patientRes,
+    data: patientResData,
+    refetch: patientFetch,
+  } = useQuery(routes.getPatient, {
+    pathParams: {
+      id: patientId,
     },
-    [patientId, dispatch]
-  );
+  });
 
-  const fetchInvestigationData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(getInvestigation({}, consultationId));
+  useEffect(() => {
+    setIsLoading(true);
+    if (patientRes && patientResData) {
+      setPatientData(patientResData);
+    } else {
+      setPatientData({});
+    }
+    setIsLoading(false);
+  }, [patientId, patientRes, patientResData]);
 
-      if (!status.aborted) {
-        if (res?.data?.results) {
-          const valueMap = res.data.results.reduce(
-            (acc: any, cur: { id: any }) => ({ ...acc, [cur.id]: cur }),
-            {}
-          );
-          setInvestigations(valueMap);
-        } else {
-          setInvestigations([]);
-        }
-      }
-      setIsLoading(false);
+  const {
+    res: investigationRes,
+    data: investigationData,
+    refetch: investigationFetch,
+  } = useQuery(routes.getInvestigation, {
+    body: {},
+    pathParams: {
+      consultation_external_id: consultationId,
     },
-    [consultationId, dispatch]
-  );
+  });
 
-  const fetchConsultation = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const [res] = await Promise.all([
-        dispatch(getConsultation(consultationId)),
-      ]);
-      if (!status.aborted) {
-        if (res?.data) {
-          setConsultationData(res.data);
-          if (res.data.last_daily_round) {
-            setDailyRounds(res.data.last_daily_round);
-          }
-        } else {
-          setConsultationData({});
-        }
-      }
-      setIsLoading(false);
+  useEffect(() => {
+    setIsLoading(true);
+    if (investigationRes && investigationData?.results) {
+      const valueMap = investigationData.results.reduce(
+        (acc: any, cur: { id: any }) => ({ ...acc, [cur.id]: cur }),
+        {}
+      );
+      setInvestigations(valueMap);
+    } else {
+      setInvestigations([]);
+    }
+    setIsLoading(false);
+  }, [consultationId, investigationRes, investigationData]);
+
+  const {
+    res: consultationRes,
+    data: consultationfetchData,
+    refetch: consultationFetch,
+  } = useQuery(routes.getConsultation, {
+    pathParams: {
+      id: consultationId,
     },
-    [consultationId, dispatch]
-  );
+  });
 
-  useAbortableEffect((status: statusType) => {
-    fetchPatientData(status);
-    fetchInvestigationData(status);
+  useEffect(() => {
+    setIsLoading(true);
+    if (consultationRes && consultationfetchData) {
+      setConsultationData(consultationfetchData);
+      if (consultationfetchData.last_daily_round) {
+        setDailyRounds(consultationfetchData.last_daily_round); // add last_daily_rounds in model(not specified in documentation)
+      }
+    } else {
+      setConsultationData({});
+    }
+    setIsLoading(false);
+  }, [consultationId, consultationRes, consultationfetchData]);
 
-    fetchConsultation(status);
-  }, []);
+  useEffect(() => {
+    patientFetch();
+    investigationFetch();
+    consultationFetch();
+  }, [patientFetch, investigationFetch, consultationFetch]);
 
   return (
     <div>

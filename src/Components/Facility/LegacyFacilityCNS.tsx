@@ -1,12 +1,6 @@
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import {
-  getAllPatient,
-  getPermittedFacility,
-  listAssetBeds,
-} from "../../Redux/actions";
 import { classNames } from "../../Utils/utils";
 import { AssetData, AssetLocationObject } from "../Assets/AssetTypes";
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -19,6 +13,8 @@ import AutocompleteFormField from "../Form/FormFields/Autocomplete";
 import { uniqBy } from "lodash";
 import DialogModal from "../Common/Dialog";
 import { LegacyMonitorCard } from "./LegacyMonitorCard";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 interface Monitor {
   patient: PatientModel;
@@ -34,7 +30,6 @@ export default function LegacyFacilityCNS({
 }: {
   facilityId: string;
 }) {
-  const dispatch = useDispatch<any>();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [monitors, setMonitors] = useState<Monitor[]>();
   const [facility, setFacility] = useState<FacilityModel>();
@@ -61,25 +56,76 @@ export default function LegacyFacilityCNS({
 
   useEffect(() => {
     async function fetchFacility() {
-      const res = await dispatch(getPermittedFacility(facilityId || ""));
-      if (res.status === 200) setFacility(res.data);
+      const { res, data } = await request(routes.getPermittedFacility, {
+        pathParams: { facilityId },
+      });
+      if (res?.status === 200 && data) {
+        const updateData = {
+          id: Number(data.id),
+          name: data.name,
+          district: data.district_object.id,
+          read_cover_image_url: data.read_cover_image_url,
+          facility_type: data.facility_type.toString(),
+          address: data.address,
+          features: data.features,
+          location: {
+            latitude: Number(data.latitude),
+            longitude: Number(data.longitude),
+          },
+          oxygen_capacity: data.oxygen_capacity,
+          phone_number: data.phone_number,
+          type_b_cylinders: data.type_b_cylinders,
+          type_c_cylinders: data.type_c_cylinders,
+          type_d_cylinders: data.type_d_cylinders,
+          middleware_address: data.middleware_address,
+          expected_type_b_cylinders: data.expected_type_b_cylinders,
+          expected_type_c_cylinders: data.expected_type_c_cylinders,
+          expected_type_d_cylinders: data.expected_type_d_cylinders,
+          expected_oxygen_requirement: data.expected_oxygen_requirement,
+          local_body_object: {
+            name: data.local_body_object.name,
+            body_type: data.local_body_object.body_type,
+            localbody_code: data.local_body_object.localbody_code,
+            district: data.local_body_object.district,
+          },
+          district_object: {
+            id: data.district_object.id,
+            name: data.district_object.name,
+            state: data.district_object.state,
+          },
+          state_object: {
+            id: data.state_object.id,
+            name: data.state_object.name,
+          },
+          ward_object: {
+            id: data.ward_object.id,
+            name: data.ward_object.name,
+            number: data.ward_object.number,
+            local_body: data.ward_object.local_body,
+          },
+          modified_date: data.modified_date,
+          created_date: data.created_date,
+        };
+
+        setFacility(updateData);
+      }
     }
     fetchFacility();
-  }, [facilityId, dispatch]);
+  }, [facilityId]);
 
   useEffect(() => {
     if (!facility) return;
     const middlewareHostname = facility.middleware_address;
 
     async function fetchPatients() {
-      const res = await dispatch(
-        getAllPatient(
-          { facility: facilityId, is_active: "True" },
-          "cns-patient-list"
-        )
-      );
-      if (res.status === 200) {
-        const patients = res.data.results as PatientModel[];
+      const { res, data } = await request(routes.patientList, {
+        body: {
+          facility: facilityId,
+          is_active: true,
+        },
+      });
+      if (res && res.status === 200) {
+        const patients = data.results as PatientModel[];
         return patients.filter(
           (patient) => !!patient.last_consultation?.current_bed?.bed_object.id
         );
@@ -87,27 +133,25 @@ export default function LegacyFacilityCNS({
     }
 
     async function fetchPatientMonitorAsset(patient: PatientModel) {
-      const res = await dispatch(
-        listAssetBeds(
-          {
-            bed: patient.last_consultation?.current_bed?.bed_object?.id,
-          },
-          `asset-bed-${patient.id}`
-        )
-      );
+      // Request body in API documentation is not matching with request body of dispatch call
+      const { res, data } = await request(routes.listAssetBeds, {
+        body: `asset-bed-${patient.id}`,
+        pathParams: {
+          bed: patient.last_consultation?.current_bed?.bed_object?.id || "",
+        },
+      });
+      if (res?.status === 200 && data) {
+        const asset = data.results.find(
+          (assetBed: any) =>
+            assetBed.asset_object.meta?.asset_type === "HL7MONITOR"
+        )?.asset_object as AssetData | undefined;
 
-      if (res.status !== 200) return;
+        if (!asset) return;
 
-      const asset = res.data.results.find(
-        (assetBed: any) =>
-          assetBed.asset_object.meta?.asset_type === "HL7MONITOR"
-      )?.asset_object as AssetData | undefined;
+        const socketUrl = `wss://${middlewareHostname}/observations/${asset.meta?.local_ip_address}`;
 
-      if (!asset) return;
-
-      const socketUrl = `wss://${middlewareHostname}/observations/${asset.meta?.local_ip_address}`;
-
-      return { patient, asset, socketUrl } as Monitor;
+        return { patient, asset, socketUrl } as Monitor;
+      }
     }
 
     async function fetchMonitors() {
@@ -130,7 +174,7 @@ export default function LegacyFacilityCNS({
     }, CNS_REFRESH_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [dispatch, facility, facilityId]);
+  }, [facility, facilityId]);
 
   if (!monitors) return <Loading />;
   return (

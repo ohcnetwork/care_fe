@@ -3,14 +3,8 @@ import {
   downloadFacilityCapacity,
   downloadFacilityDoctors,
   downloadFacilityTriage,
-  getDistrict,
-  getLocalBody,
-  getPermittedFacilities,
-  getState,
 } from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy, useEffect, useState } from "react";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CountBlock from "../../CAREUI/display/Count";
 import ExportMenu from "../Common/Export";
@@ -25,6 +19,8 @@ import { navigate } from "raviger";
 import useFilters from "../../Common/hooks/useFilters";
 import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -39,7 +35,6 @@ export const HospitalList = () => {
   } = useFilters({
     limit: 14,
   });
-  const dispatchAction: any = useDispatch();
   const [data, setData] = useState<Array<FacilityModel>>([]);
   let manageFacilities: any = null;
   const [isLoading, setIsLoading] = useState(false);
@@ -50,105 +45,138 @@ export const HospitalList = () => {
   const { user_type } = useAuthUser();
   const { t } = useTranslation();
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const params = {
-        limit: resultsPerPage,
-        page: qParams.page || 1,
-        offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-        search_text: qParams.search || undefined,
-        state: qParams.state,
-        district: qParams.district,
-        local_body: qParams.local_body,
-        facility_type: qParams.facility_type,
-        kasp_empanelled: qParams.kasp_empanelled,
-      };
-
-      const res = await dispatchAction(getPermittedFacilities(params));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
+  const {
+    res: permittedDataRes,
+    data: permittedData,
+    refetch: permittedFacilitiesFetch,
+  } = useQuery(routes.getPermittedFacilities, {
+    body: {
+      district: qParams.district,
+      district_name: districtName,
+      facility_type: qParams.facility_type,
+      kasp_empanelled: qParams.kasp_empanelled,
+      limit: resultsPerPage,
+      local_body: qParams.local_body,
+      local_body_name: localbodyName,
+      offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+      search_text: qParams.search || undefined,
+      state: qParams.state,
+      state_name: stateName,
     },
-    [
-      qParams.page,
-      qParams.search,
-      qParams.state,
-      qParams.district,
-      qParams.local_body,
-      qParams.facility_type,
-      qParams.kasp_empanelled,
-      dispatchAction,
-    ]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+  useEffect(() => {
+    setIsLoading(true);
+    if (permittedDataRes && permittedData) {
+      const transformedData = permittedData.results.map((result) => ({
+        id: Number(result.id),
+        name: result.name,
+        district: result.district,
+        read_cover_image_url: result.read_cover_image_url,
+        facility_type: String(result.facility_type),
+        address: result.address,
+        features: result.features,
+        location: {
+          latitude: Number(result.latitude),
+          longitude: Number(result.longitude),
+        },
+        oxygen_capacity: result.oxygen_capacity,
+        phone_number: result.phone_number,
+        type_b_cylinders: result.type_b_cylinders,
+        type_c_cylinders: result.type_c_cylinders,
+        type_d_cylinders: result.type_d_cylinders,
+        middleware_address: result.middleware_address,
+        expected_type_b_cylinders: result.expected_type_b_cylinders,
+        expected_type_c_cylinders: result.expected_type_c_cylinders,
+        expected_type_d_cylinders: result.expected_type_d_cylinders,
+        expected_oxygen_requirement: result.expected_oxygen_requirement,
+        local_body_object: result.local_body_object,
+        district_object: result.district_object,
+        state_object: result.state_object,
+        ward_object: result.ward_object,
+        modified_date: result.modified_date,
+        created_date: result.created_date,
+      }));
 
-  const fetchStateName = useCallback(
-    async (status: statusType) => {
-      const res =
-        Number(qParams.state) &&
-        (await dispatchAction(getState(qParams.state)));
-      if (!status.aborted) {
-        setStateName(res?.data?.name);
-      }
-    },
-    [dispatchAction, qParams.state]
-  );
+      setData(transformedData);
+      setTotalCount(permittedData.count);
+    }
+    setIsLoading(false);
+  }, [
+    qParams.page,
+    qParams.search,
+    qParams.state,
+    qParams.district,
+    qParams.local_body,
+    qParams.facility_type,
+    qParams.kasp_empanelled,
+    permittedDataRes,
+    permittedData,
+  ]);
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchStateName(status);
-    },
-    [fetchStateName]
-  );
+  useEffect(() => {
+    permittedFacilitiesFetch();
+  }, [permittedFacilitiesFetch]);
 
-  const fetchDistrictName = useCallback(
-    async (status: statusType) => {
-      const res =
-        Number(qParams.district) &&
-        (await dispatchAction(getDistrict(qParams.district)));
-      if (!status.aborted) {
-        setDistrictName(res?.data?.name);
-      }
+  const {
+    res: stateNameRes,
+    data: stateNameData,
+    refetch: stateNameFetch,
+  } = useQuery(routes.getState, {
+    pathParams: {
+      id: qParams.state,
     },
-    [dispatchAction, qParams.district]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchDistrictName(status);
-    },
-    [fetchDistrictName]
-  );
+  useEffect(() => {
+    if (stateNameRes && stateNameData) {
+      setStateName(stateNameData.name);
+    }
+  }, [qParams.state, stateNameRes, stateNameData]);
 
-  const fetchLocalbodyName = useCallback(
-    async (status: statusType) => {
-      const res =
-        Number(qParams.local_body) &&
-        (await dispatchAction(getLocalBody({ id: qParams.local_body })));
-      if (!status.aborted) {
-        setLocalbodyName(res?.data?.name);
-      }
-    },
-    [dispatchAction, qParams.local_body]
-  );
+  useEffect(() => {
+    stateNameFetch();
+  }, [stateNameFetch]);
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchLocalbodyName(status);
+  const {
+    res: DistrictNameRes,
+    data: DistrictNameData,
+    refetch: DistrictNameFetch,
+  } = useQuery(routes.getDistrict, {
+    pathParams: {
+      id: qParams.district,
     },
-    [fetchLocalbodyName]
-  );
+  });
+
+  useEffect(() => {
+    if (DistrictNameRes && DistrictNameData) {
+      setDistrictName(DistrictNameData.name);
+    }
+  }, [qParams.district, DistrictNameRes, DistrictNameData]);
+
+  useEffect(() => {
+    DistrictNameFetch();
+  }, [DistrictNameFetch]);
+
+  const {
+    res: LocalbodyNameRes,
+    data: LocalbodyNameData,
+    refetch: LocalbodyNameFetch,
+  } = useQuery(routes.getLocalBody, {
+    pathParams: {
+      id: qParams.local_body,
+    },
+  });
+
+  useEffect(() => {
+    if (LocalbodyNameRes && LocalbodyNameData) {
+      setLocalbodyName(LocalbodyNameData.name);
+    }
+  }, [qParams.local_body, LocalbodyNameRes, LocalbodyNameData]);
+
+  useEffect(() => {
+    LocalbodyNameFetch();
+  }, [LocalbodyNameFetch]);
 
   const findFacilityTypeById = (id: number) => {
     const facility_type = FACILITY_TYPES.find((type) => type.id == id);

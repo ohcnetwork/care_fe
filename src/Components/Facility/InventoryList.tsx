@@ -1,19 +1,18 @@
-import { useState, useCallback, useEffect, lazy } from "react";
+import { useState, useEffect, lazy } from "react";
 
 import { navigate } from "raviger";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getInventorySummary, getAnyFacility } from "../../Redux/actions";
 import Pagination from "../Common/Pagination";
 import { classNames } from "../../Utils/utils";
 import Page from "../Common/components/Page";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function InventoryList(props: any) {
   const { facilityId }: any = props;
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const initialInventory: any[] = [];
   let inventoryItem: any = null;
@@ -24,42 +23,44 @@ export default function InventoryList(props: any) {
   const [facilityName, setFacilityName] = useState("");
   const limit = 14;
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(
-        getInventorySummary(facilityId, { limit, offset })
-      );
-      if (!status.aborted) {
-        if (res?.data) {
-          setInventory(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
+  const { res, data, refetch } = useQuery(routes.getInventorySummary, {
+    body: {
+      limit,
+      offset,
     },
-    [dispatchAction, offset, facilityId]
-  );
+    pathParams: {
+      id: facilityId,
+    },
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+  useEffect(() => {
+    setIsLoading(true);
+    if (data) {
+      setInventory(data.results);
+      setTotalCount(data.count);
+    }
+    setIsLoading(false);
+  }, [offset, facilityId, res, data]);
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
+        const { res, data } = await request(routes.getAnyFacility, {
+          pathParams: {
+            id: facilityId,
+          },
+        });
+        if (res && data) setFacilityName(data.name || "");
       } else {
         setFacilityName("");
       }
     }
     fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  }, [facilityId]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;

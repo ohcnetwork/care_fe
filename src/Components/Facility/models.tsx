@@ -25,6 +25,10 @@ export interface WardModel {
   number: number;
   local_body: number;
 }
+export interface HomeFacilityModel {
+  id: string;
+  name: string;
+}
 export interface FacilityModel {
   id?: number;
   name?: string;
@@ -81,7 +85,7 @@ export type PatientCategory =
   | "Abnormal"
   | "Critical";
 
-export interface ConsultationModel {
+export type ConsultationModel = {
   admission_date?: string;
   admitted?: boolean;
   test_id?: string;
@@ -143,7 +147,7 @@ export interface ConsultationModel {
   death_datetime?: string;
   death_confirmed_doctor?: string;
   is_readmission?: boolean;
-}
+};
 export interface PatientStatsModel {
   id?: number;
   entryDate?: string;
@@ -167,7 +171,7 @@ export interface DupPatientModel {
 }
 
 export interface InventoryItemsModel {
-  // count?: number;
+  count?: number;
   id?: number;
   name?: string;
   default_unit?: {
@@ -223,4 +227,642 @@ export interface CurrentBed {
 export type ICD11DiagnosisModel = {
   id: string;
   label: string;
+};
+
+export type IFacilityNotificationRequest = {
+  facility?: string;
+  message?: string;
+};
+
+export type IStateListResponse = {
+  count: number;
+  next: string;
+  previous: string;
+  results: {
+    id: number;
+    name: string;
+  }[];
+};
+
+export type IStateDitrictResponse = {
+  id: number;
+  name: string;
+};
+
+export type IDistrictLocalBodyResponse = IStateDitrictResponse & {
+  state: number;
+};
+
+export type IWardLocalBodyResponse = IStateDitrictResponse & {
+  number: number;
+  local_body: number;
+};
+
+export type IFacilityRequest = Omit<
+  FacilityModel,
+  | "id"
+  | "location"
+  | "local_body_object"
+  | "district_object"
+  | "state_object"
+  | "ward_object"
+  | "modified_date"
+  | "created_date"
+  | "facility_type"
+> & {
+  facility_type?: number;
+  district_name?: string;
+  pincode?: string;
+  state?: number;
+  local_body?: number;
+  ward?: number;
+  kasp_empanelled?: any;
+  latitude?: string;
+  longitude?: string;
+  phone_number?: string | undefined;
+};
+
+export type IAllFacilitiesResponse = {
+  id: string;
+  name: string;
+  local_body: number;
+  district: number;
+  state: number;
+  ward_object: WardModel;
+  local_body_object: { id: number } & LocalBodyModel;
+  district_object: DistrictModel;
+  state_object: StateModel;
+  facility_type: string;
+  read_cover_image_url: string;
+  features: number[];
+  patient_count: string;
+  bed_count: string;
+};
+
+export type IFacilityResponse = Omit<
+  IAllFacilitiesResponse,
+  "facility_type"
+> & {
+  ward: number;
+  facility_type: number;
+  address: string;
+  longitude: string;
+  latitude: string;
+  pincode: number;
+  oxygen_capacity: number;
+  phone_number: string;
+  modified_date: string;
+  created_date: string;
+  kasp_empanelled: boolean;
+  middleware_address: string;
+  expected_oxygen_requirement: number;
+  type_b_cylinders: number;
+  type_c_cylinders: number;
+  type_d_cylinders: number;
+  expected_type_b_cylinders: number;
+  expected_type_c_cylinders: number;
+  expected_type_d_cylinders: number;
+};
+
+export type IListDoctorResponse = {
+  count: number;
+  next: string;
+  previous: string;
+  results: {
+    id: string;
+    area_text: number;
+    area: number;
+    count: number;
+  }[];
+};
+
+export type IListCapacityResponse = {
+  count: number;
+  next: string;
+  previous: string;
+  results: {
+    id: string;
+    room_type_text: number;
+    modified_date: string;
+    room_type: number;
+    total_capacity: number;
+    current_capacity: number;
+  }[];
+};
+
+export type IUserListFacilityResponse = {
+  id: number;
+  username: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  user_type: number;
+  doctor_qualification: string;
+  doctor_experience_commenced_on: string;
+  doctor_medical_council_registration: string;
+  created_by: string;
+  home_facility: string;
+  weekly_working_hours: number;
+  local_body: number;
+  district: number;
+  state: number;
+  phone_number: string;
+  alt_phone_number: string;
+  gender: number;
+  age: number;
+  is_superuser: boolean;
+  verified: boolean;
+  home_facility_object: HomeFacilityModel;
+  local_body_object: { id: number } & LocalBodyModel;
+  district_object: DistrictModel;
+  state_object: StateModel;
+  pf_endpoint: string;
+  pf_p256dh: string;
+  pf_auth: string;
+};
+
+export type IDeleteUserResponse = {
+  detail?: string;
+};
+
+export type IDeleteInventoryLog = IDeleteUserResponse;
+
+export type IUserFacilityRequest = {
+  username?: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  doctor_qualification?: string;
+  doctor_experience_commenced_on?: string;
+  doctor_medical_council_registration?: string;
+  home_facility?: string;
+  weekly_working_hours?: number;
+  phone_number?: string;
+  alt_phone_number?: string;
+  gender?: number;
+  age?: number;
+};
+
+export type IUserFacilityResponse = IUserListFacilityResponse;
+
+export type IFacilityUserRequest = {
+  limit?: number;
+  offset?: number;
+};
+
+export type IFacilityUserResponse = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: {
+    id: number;
+    first_name: string;
+    username: string;
+    email: string;
+    last_name: string;
+    alt_phone_number: string;
+    user_type: number;
+    last_login: string;
+    home_facility_object: HomeFacilityModel;
+    doctor_qualification: string;
+    doctor_experience_commenced_on: string;
+    doctor_medical_council_registration: string;
+    skills: {
+      id: string;
+      name: string;
+      description: string;
+    }[];
+  }[];
+};
+
+export type IPermittedFacilityRequest = {
+  district?: number;
+  district_name?: string;
+  facility_type?: number;
+  kasp_empanelled?: boolean;
+  limit?: number;
+  local_body?: number;
+  local_body_name?: string;
+  name?: string;
+  offset?: number;
+  search_text?: string;
+  state?: number;
+  state_name?: string;
+};
+
+export type IPermittedFacilityResponse = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: IFacilityResponse[];
+};
+
+export type IStateResponse = {
+  id: number;
+  name: string;
+};
+
+export type IStateRequest = {
+  id?: number;
+};
+
+export type IDistrictResponse = IStateResponse;
+
+export type IDistrictRequest = IStateRequest;
+
+export type ILocalBodyResponse = IStateResponse & {
+  body_type: number;
+  localbody_code: string;
+  district: number;
+};
+
+export type ILocalBodyRequest = IStateRequest;
+
+interface InventoryItemObjectModel {
+  id: number;
+  default_unit: {
+    id: number;
+    name: string;
+  };
+  allowed_units: {
+    id: number;
+    name: string;
+  }[];
+  tags: {
+    id: number;
+    name: string;
+  }[];
+  name: string;
+  description: string;
+  min_quantity: number;
+}
+
+export type IInventorySummaryRequest = {
+  limit?: number;
+  offset?: number;
+};
+
+export type IInventorySummaryResponse = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: {
+    id: string;
+    item_object: InventoryItemObjectModel;
+    unit_object: {
+      id: number;
+      name: string;
+    };
+    created_date: string;
+    quantity: number;
+    is_low: boolean;
+    item: number;
+  }[];
+};
+
+export type IInventoryLogRequest = {
+  item?: number;
+  limit?: number;
+  name?: string;
+  offset?: number;
+};
+
+export type IInventoryLogResponse = Omit<
+  IInventorySummaryResponse,
+  "results"
+> & {
+  results: {
+    id: string;
+    item_object: InventoryItemObjectModel;
+    unit_object: {
+      id: number;
+      name: string;
+    };
+    external_id: string;
+    current_stock: number;
+    quantity_in_default_unit: number;
+    is_incoming: boolean;
+    probable_accident: boolean;
+    created_by: number;
+  }[];
+};
+
+export type IFaciclityMinimumQuantityRequest = {
+  min_quantity?: number;
+  item?: number;
+};
+
+export type IFaciclityMinimumQuantityResponse = {
+  id: string;
+  item_object: InventoryItemObjectModel;
+  created_date: string;
+  min_quantity: number;
+  item: number;
+};
+
+export type IPatientTransferRequest = {
+  facility?: string;
+  date_of_birth?: string;
+};
+
+interface FacilityObjectModel {
+  id: string;
+  name: string;
+  local_body: number;
+  district: number;
+  state: number;
+  ward_object: WardModel;
+  local_body_object: { id: number } & LocalBodyModel;
+  district_object: DistrictModel;
+  state_object: StateModel;
+  facility_type: string;
+  read_cover_image_url: string;
+  features: number[];
+  patient_count: string;
+  bed_count: string;
+}
+
+export type IPatientTransferResponse = {
+  date_of_birth: string;
+  patient: string;
+  facility_object: FacilityObjectModel;
+};
+
+export type IInvestigationRequest = {
+  created_date_after?: string;
+  created_date_before?: string;
+  investigation?: string;
+  investigations?: string;
+  modified_date_after?: string;
+  modified_date_before?: string;
+  page?: number;
+  session?: string;
+  sessions?: string;
+};
+
+export type IInvestigationResponse = {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: {
+    id: string;
+    group_object: {
+      external_id: string;
+      name: string;
+    };
+    investigation_object: {
+      external_id: string;
+      name: string;
+      unit: string;
+      ideal_value: string;
+      min_value: number;
+      max_value: number;
+      investigation_type: string;
+      choices: string;
+    };
+    session_object: {
+      session_external_id: string;
+      session_created_date: string;
+      created_by: number;
+    };
+    value: number;
+    notes: string;
+    investigation: number;
+    group: number;
+    consultation: number;
+    session: number;
+  }[];
+};
+
+interface BedObjectModel {
+  id: string;
+  bed_type: number;
+  location_object: {
+    id: string;
+    facility: {
+      id: string;
+      name: string;
+    };
+    created_date: string;
+    modified_date: string;
+    name: string;
+    description: string;
+    location_type: number;
+  };
+  is_occupied: boolean;
+  created_date: string;
+  modified_date: string;
+  name: string;
+  description: string;
+  meta: Record<string, string>;
+}
+
+export type IConsultationBedResponse = {
+  id: string;
+  bed_object: BedObjectModel;
+  assets_objects: Asset[];
+  last_daily_round: string;
+  start_date: string;
+  created_date: string;
+  modified_date: string;
+  end_date: string;
+  meta: Record<string, string>;
+};
+
+type Asset = {
+  id: string;
+  status: number;
+  asset_type: number;
+  location_object: {
+    id: string;
+    facility: {
+      id: string;
+      name: string;
+    };
+    created_date: string;
+    modified_date: string;
+    name: string;
+    description: string;
+    location_type: number;
+  };
+  last_service: {
+    id: string;
+    edits: ServiceEdit[];
+    external_id: string;
+    created_date: string;
+    modified_date: string;
+    serviced_on: string;
+    note: string;
+  };
+  created_date: string;
+  modified_date: string;
+  name: string;
+  description: string;
+  asset_class: string;
+  is_working: boolean;
+  not_working_reason: string;
+  serial_number: string;
+  warranty_details: string;
+  meta: Record<string, string>;
+  vendor_name: string;
+  support_name: string;
+  support_phone: string;
+  support_email: string;
+  qr_code_id: string;
+  manufacturer: string;
+  warranty_amc_end_of_validity: string;
+};
+
+type ServiceEdit = {
+  id: string;
+  edited_by: {
+    id: number;
+    first_name: string;
+    username: string;
+    email: string;
+    last_name: string;
+    user_type: number;
+    last_login: string;
+  };
+  edited_on: string;
+  serviced_on: string;
+  note: string;
+};
+
+export type ITriageDetailResponse = {
+  id: string;
+  entry_date: string;
+  facility: string;
+  created_date: string;
+  modified_date: string;
+  num_patients_visited: number;
+  num_patients_home_quarantine: number;
+  num_patients_isolation: number;
+  num_patient_referred: number;
+  num_patient_confirmed_positive: number;
+};
+
+// export interface PatientStatsModel {
+//   id?: number;
+//   entryDate?: string;
+//   num_patients_visited?: number;
+//   num_patients_home_quarantine?: number;
+//   num_patients_isolation?: number;
+//   num_patient_referred?: number;
+//   entry_date?: number;
+//   num_patient_confirmed_positive?: number;
+// }
+
+export type ITriageRequest = {
+  entry_date_after?: string;
+  entry_date_before?: string;
+  limit?: number;
+  offset?: number;
+};
+
+export type ITriageResponse = {
+  count: number;
+  next: string;
+  previous: string;
+  results: ITriageDetailResponse[];
+};
+
+export type IMinQuantityRequest = {
+  limit?: number;
+  offset?: number;
+};
+
+export type IMinQuantityResponse = {
+  count: number;
+  next: string;
+  previous: string;
+  results: IMinQuantityItemResponse[];
+};
+
+export type IMinQuantityItemResponse = {
+  id: string;
+  item_object: InventoryItemObjectModel;
+  created_date: string;
+  min_quantity: number;
+  item: number;
+};
+
+export type IItemRequest = {
+  limit?: number;
+  name?: number;
+  offset?: number;
+};
+
+export type IItemResponse = {
+  count: number;
+  next: string;
+  previous: string;
+  results: InventoryItemObjectModel[];
+};
+
+export type ISetMinQuantityRequest = {
+  min_quantity?: number;
+  item?: number;
+};
+
+export type ISetMinQuantityResponse = IMinQuantityItemResponse;
+
+export type IFlagInventoryItemResponse = {
+  id: string;
+  item_object: InventoryItemObjectModel;
+  unit_object: {
+    id: number;
+    name: string;
+  };
+  external_id: string;
+  created_date: string;
+  current_stock: number;
+  quantity_in_default_unit: number;
+  quantity: number;
+  is_incoming: boolean;
+  probable_accident: boolean;
+  item: number;
+  unit: number;
+  created_by: number;
+};
+
+export type IAssetBedResponse = {
+  count: number;
+  next: string;
+  previous: string;
+  results: {
+    id: string;
+    asset_object: Asset;
+    bed_object: BedObjectModel;
+    created_date: string;
+    modified_date: string;
+    meta: Record<string, string>;
+  }[];
+};
+
+export type IAllPatientRequest = {
+  facility?: string;
+  is_active?: boolean;
+};
+
+export type ICreateTriageRequest = {
+  entry_date?: string;
+  num_patients_visited?: number;
+  num_patients_home_quarantine?: number;
+  num_patients_isolation?: number;
+  num_patient_referred?: number;
+  num_patient_confirmed_positive?: number;
+};
+
+export type ICreateTriageResponse = {
+  id: string;
+  entry_date: string;
+  facility: string;
+  created_date: string;
+  modified_date: string;
+  num_patients_visited: number;
+  num_patients_home_quarantine: number;
+  num_patients_isolation: number;
+  num_patient_referred: number;
+  num_patient_confirmed_positive: number;
 };

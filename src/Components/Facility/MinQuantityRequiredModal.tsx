@@ -1,15 +1,11 @@
-import { useCallback, useReducer, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  updateMinQuantity,
-  getAnyFacility,
-  getMinQuantityOfItem,
-} from "../../Redux/actions";
+import { useEffect, useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import ButtonV2 from "../Common/components/ButtonV2";
 import DialogModal from "../Common/Dialog";
 import TextFormField from "../Form/FormFields/TextFormField";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 
 const initForm = {
   id: "",
@@ -42,56 +38,66 @@ export const MinQuantityRequiredModal = (props: any) => {
   const [state, dispatch] = useReducer(inventoryFormReducer, initialState);
   const { facilityId, inventoryId, itemId, show, handleClose, handleUpdate } =
     props;
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState(" ");
   const [facilityName, setFacilityName] = useState("");
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
+  const {
+    res: minQuantityRes,
+    data: minQuantityData,
+    refetch: minQuantityFetch,
+  } = useQuery(routes.getMinQuantityOfItem, {
+    pathParams: {
+      id: facilityId,
+      external_id: inventoryId,
+    },
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
       setIsLoading(true);
-      const res = await dispatchAction(
-        getMinQuantityOfItem(facilityId, inventoryId)
-      );
-      if (!status.aborted) {
-        if (res && res.data) {
-          setData(res.data.item_object.name);
-          const form = { ...state.form, quantity: res.data.min_quantity };
-          dispatch({ type: "set_form", form });
-        }
-        if (facilityId) {
-          const res = await dispatchAction(getAnyFacility(facilityId));
-
-          setFacilityName(res?.data?.name || "");
-        } else {
-          setFacilityName("");
-        }
-
-        setIsLoading(false);
+      if (minQuantityRes && minQuantityData) {
+        setData(minQuantityData.item_object.name);
+        const form = { ...state.form, quantity: minQuantityData.min_quantity };
+        dispatch({ type: "set_form", form });
       }
-    },
-    [dispatchAction, facilityId, inventoryId]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+      if (facilityId) {
+        const { res, data } = await request(routes.getAnyFacility, {
+          pathParams: {
+            id: facilityId,
+          },
+        });
+        if (res && data) setFacilityName(data.name || "");
+      } else {
+        setFacilityName("");
+      }
+
+      setIsLoading(false);
+    };
+
+    fetchData();
+  }, [facilityId, inventoryId, minQuantityData, minQuantityRes, state.form]);
+
+  useEffect(() => {
+    minQuantityFetch();
+  }, [minQuantityFetch]);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsLoading(true);
-    const data: any = {
-      min_quantity: Number(state.form.quantity),
-      item: Number(itemId),
-    };
 
-    const res = await dispatchAction(
-      updateMinQuantity(data, { facilityId, inventoryId })
-    );
+    const { res, data } = await request(routes.updateMinQuantity, {
+      body: {
+        min_quantity: Number(state.form.quantity),
+        item: Number(itemId),
+      },
+      pathParams: {
+        facilityId: facilityId,
+        inventoryId: inventoryId,
+      },
+    });
     setIsLoading(false);
-    if (res && res.data) {
+    if (res && data) {
       Notification.Success({
         msg: "Minimum quantity updated successfully",
       });

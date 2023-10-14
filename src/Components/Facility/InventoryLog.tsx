@@ -1,25 +1,19 @@
-import { useState, useCallback, useEffect, lazy } from "react";
+import { useState, useEffect, lazy } from "react";
 
 import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
-import {
-  getInventoryLog,
-  flagInventoryItem,
-  deleteLastInventoryLog,
-  getAnyFacility,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 import Pagination from "../Common/Pagination";
 import { formatDateTime } from "../../Utils/utils";
 import Page from "../Common/components/Page.js";
 import CareIcon from "../../CAREUI/icons/CareIcon.js";
 import ButtonV2 from "../Common/components/ButtonV2.js";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import request from "../../Utils/request/request.js";
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function InventoryLog(props: any) {
   const { facilityId, inventoryId }: any = props;
 
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const initialInventory: any[] = [];
@@ -34,81 +28,91 @@ export default function InventoryLog(props: any) {
   const [itemName, setItemName] = useState(" ");
   const [facilityName, setFacilityName] = useState("");
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(
-        getInventoryLog(facilityId, { item, limit, offset })
-      );
-      if (!status.aborted) {
-        if (res?.data) {
-          setInventory(res.data.results);
-          setCurrentStock(res.data.results[0].current_stock);
-          setTotalCount(res.data.count);
-          setItemName(res.data.results[0].item_object.name);
-        }
-        setIsLoading(false);
-      }
+  const { res, data, refetch } = useQuery(routes.getInventoryLog, {
+    body: {
+      item: item,
+      limit: limit,
+      name: facilityName,
+      offset: offset,
     },
-    [dispatchAction, offset, facilityId]
-  );
+    pathParams: {
+      id: facilityId,
+    },
+  });
+
+  useEffect(() => {
+    setIsLoading(true);
+    if (data) {
+      setInventory(data.results);
+      setCurrentStock(data.results[0].current_stock);
+      setTotalCount(data.count);
+      setItemName(data.results[0].item_object.name);
+    }
+    setIsLoading(false);
+  }, [offset, facilityId, res, data]);
 
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
+        const { res, data } = await request(routes.getAnyFacility, {
+          pathParams: {
+            id: facilityId,
+          },
+        });
 
-        setFacilityName(res?.data?.name || "");
+        if (res && data) setFacilityName(data.name || "");
       } else {
         setFacilityName("");
       }
     }
     fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  }, [facilityId]);
 
   const flagFacility = async (id: string) => {
     setSaving(true);
-    const res = await dispatchAction(
-      flagInventoryItem({ facility_external_id: facilityId, external_id: id })
-    );
-
+    // request body is not given in the dispath call
+    const { res } = await request(routes.flagInventoryItem, {
+      body: {},
+      pathParams: {
+        facility_external_id: facilityId,
+        external_id: id,
+      },
+    });
     if (res && res.status === 204) {
       Notification.Success({
         msg: "Updated Successfully",
       });
-      fetchData({ aborted: false });
+      refetch();
     }
     setSaving(false);
   };
 
   const removeLastInventoryLog = async (id: any) => {
     setSaving(true);
-    const res = await dispatchAction(
-      deleteLastInventoryLog({
+    // API call not matching with documentation. Extra pathparam given in this file for dispatch call
+    const { res, data } = await request(routes.deleteLastInventoryLog, {
+      pathParams: {
         facility_external_id: facilityId,
         id: id,
-      })
-    );
+      },
+    });
 
     if (res?.status === 201) {
       Notification.Success({
         msg: "Last entry deleted Successfully",
       });
-      fetchData({ aborted: false });
+      refetch();
     } else {
       Notification.Error({
-        msg: "Error while deleting last entry: " + (res?.data?.detail || ""),
+        msg: "Error while deleting last entry: " + (data?.detail || ""),
       });
     }
     setSaving(false);
   };
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
     setCurrentPage(page);

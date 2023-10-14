@@ -1,7 +1,7 @@
 import * as Notification from "../../Utils/Notifications.js";
 
 import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import { CapacityModal, DoctorModal } from "./models";
+import { CapacityModal, DoctorModal, IFacilityRequest } from "./models";
 import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
 import {
   FACILITY_FEATURE_TYPES,
@@ -13,19 +13,8 @@ import {
   SelectFormField,
 } from "../Form/FormFields/SelectFormField";
 import { Popover, Transition } from "@headlessui/react";
-import { Fragment, lazy, useCallback, useState } from "react";
+import { Fragment, lazy, useEffect, useState } from "react";
 import Steps, { Step } from "../Common/Steps";
-import {
-  createFacility,
-  getDistrictByState,
-  getLocalbodyByDistrict,
-  getPermittedFacility,
-  getStates,
-  getWardByLocalBody,
-  listCapacity,
-  listDoctor,
-  updateFacility,
-} from "../../Redux/actions";
 import {
   getPincodeDetails,
   includesIgnoreCase,
@@ -37,7 +26,6 @@ import {
   validateLongitude,
   validatePincode,
 } from "../../Common/validation";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
@@ -57,9 +45,11 @@ import TextFormField from "../Form/FormFields/TextFormField";
 import { navigate } from "raviger";
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { PhoneNumberValidator } from "../Form/FieldValidators.js";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
+import useQuery from "../../Utils/request/useQuery.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -150,7 +140,6 @@ const facilityCreateReducer = (state = initialState, action: FormAction) => {
 export const FacilityCreate = (props: FacilityProps) => {
   const { t } = useTranslation();
   const { gov_data_api_key, kasp_string, kasp_enabled } = useConfig();
-  const dispatchAction: any = useDispatch();
   const { facilityId } = props;
 
   const [state, dispatch] = useAutoSaveReducer<FacilityForm>(
@@ -176,37 +165,47 @@ export const FacilityCreate = (props: FacilityProps) => {
   const { goBack } = useAppHistory();
   const headerText = !facilityId ? "Create Facility" : "Update Facility";
   const buttonText = !facilityId ? "Save Facility" : "Update Facility";
+  const [newId, setNewId] = useState(0);
 
-  const fetchDistricts = useCallback(
-    async (id: number) => {
-      if (id > 0) {
-        setIsDistrictLoading(true);
-        const districtList = await dispatchAction(getDistrictByState({ id }));
-        if (districtList) {
-          setDistricts([...districtList.data]);
-        }
-        setIsDistrictLoading(false);
-        return districtList ? [...districtList.data] : [];
-      }
+  const {
+    res: districtRes,
+    data: districtData,
+    refetch: districtFetch,
+  } = useQuery(routes.getDistrictByState, {
+    pathParams: {
+      id: String(newId),
     },
-    [dispatchAction]
-  );
+  });
 
-  const fetchLocalBody = useCallback(
-    async (id: number) => {
-      if (id > 0) {
-        setIsLocalbodyLoading(true);
-        const localBodyList = await dispatchAction(
-          getLocalbodyByDistrict({ id })
-        );
-        setIsLocalbodyLoading(false);
-        if (localBodyList) {
-          setLocalBodies([...localBodyList.data]);
-        }
+  useEffect(() => {
+    if (newId > 0) {
+      setIsDistrictLoading(true);
+      if (districtRes && districtData) {
+        setDistricts([districtData]);
       }
+      setIsDistrictLoading(false);
+    }
+  }, [newId, districtData]);
+
+  const {
+    res: localBodyRes,
+    data: localBodyData,
+    refetch: localBodyFetch,
+  } = useQuery(routes.getLocalbodyByDistrict, {
+    pathParams: {
+      id: String(newId),
     },
-    [dispatchAction]
-  );
+  });
+
+  useEffect(() => {
+    if (newId > 0) {
+      setIsLocalbodyLoading(true);
+      if (localBodyData) {
+        setLocalBodies([localBodyData]);
+      }
+      setIsLocalbodyLoading(false);
+    }
+  }, [newId, localBodyRes, localBodyData]);
 
   const getSteps = (): Step[] => {
     return [
@@ -245,90 +244,116 @@ export const FacilityCreate = (props: FacilityProps) => {
     ];
   };
 
-  const fetchWards = useCallback(
-    async (id: number) => {
-      if (id > 0) {
-        setIsWardLoading(true);
-        const wardList = await dispatchAction(getWardByLocalBody({ id }));
-        setIsWardLoading(false);
-        if (wardList) {
-          setWard([...wardList.data.results]);
-        }
-      }
+  const {
+    res: wardsRes,
+    data: wardsData,
+    refetch: wardsFetch,
+  } = useQuery(routes.getWardByLocalBody, {
+    pathParams: {
+      id: String(newId),
     },
-    [dispatchAction]
-  );
+  });
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      if (facilityId) {
-        setIsLoading(true);
-        const res = await dispatchAction(getPermittedFacility(facilityId));
-        if (!status.aborted && res.data) {
-          const formData = {
-            facility_type: res.data.facility_type,
-            name: res.data.name,
-            state: res.data.state ? res.data.state : 0,
-            district: res.data.district ? res.data.district : 0,
-            local_body: res.data.local_body ? res.data.local_body : 0,
-            features: res.data.features || [],
-            ward: res.data.ward_object ? res.data.ward_object.id : 0,
-            kasp_empanelled: res.data.kasp_empanelled
-              ? String(res.data.kasp_empanelled)
-              : "false",
-            address: res.data.address,
-            pincode: res.data.pincode,
-            phone_number:
-              res.data.phone_number.length == 10
-                ? "+91" + res.data.phone_number
-                : res.data.phone_number,
-            latitude: res.data.latitude || "",
-            longitude: res.data.longitude || "",
-            type_b_cylinders: res.data.type_b_cylinders,
-            type_c_cylinders: res.data.type_c_cylinders,
-            type_d_cylinders: res.data.type_d_cylinders,
-            expected_type_b_cylinders: res.data.expected_type_b_cylinders,
-            expected_type_c_cylinders: res.data.expected_type_c_cylinders,
-            expected_type_d_cylinders: res.data.expected_type_d_cylinders,
-            expected_oxygen_requirement: res.data.expected_oxygen_requirement,
-            oxygen_capacity: res.data.oxygen_capacity,
-          };
-          dispatch({ type: "set_form", form: formData });
-          Promise.all([
-            fetchDistricts(res.data.state),
-            fetchLocalBody(res.data.district),
-            fetchWards(res.data.local_body),
-          ]);
-        } else {
-          navigate(`/facility/${facilityId}`);
-        }
-        setIsLoading(false);
+  useEffect(() => {
+    if (newId > 0) {
+      setIsWardLoading(true);
+      if (wardsData) {
+        const updatedWards = {
+          id: wardsData.id,
+          name: wardsData.name,
+          number: wardsData.number,
+        };
+        setWard([updatedWards]);
       }
-    },
-    [dispatchAction, facilityId, fetchDistricts, fetchLocalBody, fetchWards]
-  );
+      setIsWardLoading(false);
+    }
+  }, [newId, wardsRes, wardsData]);
 
-  const fetchStates = useCallback(
-    async (status: statusType) => {
-      setIsStateLoading(true);
-      const statesRes = await dispatchAction(getStates());
-      if (!status.aborted && statesRes.data.results) {
-        setStates([...statesRes.data.results]);
-      }
-      setIsStateLoading(false);
+  const {
+    res: facilityRes,
+    data: facilityData,
+    refetch: facilityFetch,
+  } = useQuery(routes.getPermittedFacility, {
+    pathParams: {
+      id: facilityId || "",
     },
-    [dispatchAction]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      if (facilityId) {
-        fetchData(status);
+  useEffect(() => {
+    if (facilityId) {
+      setIsLoading(true);
+      if (facilityData) {
+        const formData = {
+          facility_type: String(facilityData.facility_type),
+          name: facilityData.name,
+          state: facilityData.state ? facilityData.state : 0,
+          district: facilityData.district ? facilityData.district : 0,
+          local_body: facilityData.local_body ? facilityData.local_body : 0,
+          features: facilityData.features || [],
+          ward: facilityData.ward_object ? facilityData.ward_object.id : 0,
+          kasp_empanelled: facilityData.kasp_empanelled
+            ? String(facilityData.kasp_empanelled)
+            : "false",
+          address: facilityData.address,
+          pincode: String(facilityData.pincode),
+          phone_number:
+            facilityData.phone_number.length == 10
+              ? "+91" + facilityData.phone_number
+              : facilityData.phone_number,
+          latitude: facilityData.latitude || "",
+          longitude: facilityData.longitude || "",
+          type_b_cylinders: facilityData.type_b_cylinders,
+          type_c_cylinders: facilityData.type_c_cylinders,
+          type_d_cylinders: facilityData.type_d_cylinders,
+          expected_type_b_cylinders: facilityData.expected_type_b_cylinders,
+          expected_type_c_cylinders: facilityData.expected_type_c_cylinders,
+          expected_type_d_cylinders: facilityData.expected_type_d_cylinders,
+          expected_oxygen_requirement: facilityData.expected_oxygen_requirement,
+          oxygen_capacity: facilityData.oxygen_capacity,
+        };
+        dispatch({ type: "set_form", form: formData });
+        Promise.all([
+          setNewId(facilityData.state),
+          districtFetch(),
+          setNewId(facilityData.district),
+          localBodyFetch(),
+          setNewId(facilityData.local_body),
+          wardsFetch(),
+        ]);
+      } else {
+        navigate(`/facility/${facilityId}`);
       }
-      fetchStates(status);
-    },
-    [dispatch, fetchData]
-  );
+      setIsLoading(false);
+    }
+  }, [
+    facilityId,
+    facilityRes,
+    facilityData,
+    districtFetch,
+    localBodyFetch,
+    wardsFetch,
+  ]);
+
+  const {
+    res: statesRes,
+    data: statesData,
+    refetch: fetchStates,
+  } = useQuery(routes.statesList, {});
+
+  useEffect(() => {
+    setIsStateLoading(true);
+    if (statesRes && statesData) {
+      setStates([...statesData.results]);
+    }
+    setIsStateLoading(false);
+  }, [statesRes, statesData]);
+
+  useEffect(() => {
+    if (facilityId) {
+      facilityFetch();
+    }
+    fetchStates();
+  }, [dispatch, facilityFetch]);
 
   const handleChange = (e: FieldChangeEvent<unknown>) => {
     dispatch({
@@ -362,13 +387,14 @@ export const FacilityCreate = (props: FacilityProps) => {
       return includesIgnoreCase(state.name, pincodeDetails.statename);
     });
     if (!matchedState) return;
+    setNewId(matchedState.id);
+    if (!districtData) return;
 
-    const fetchedDistricts = await fetchDistricts(matchedState.id);
-    if (!fetchedDistricts) return;
-
-    const matchedDistrict = fetchedDistricts.find((district) => {
-      return includesIgnoreCase(district.name, pincodeDetails.district);
-    });
+    const matchedDistrict = Object.values(districtData).find(
+      (district: any) => {
+        return includesIgnoreCase(district.name, pincodeDetails.district);
+      }
+    );
     if (!matchedDistrict) return;
 
     dispatch({
@@ -376,12 +402,13 @@ export const FacilityCreate = (props: FacilityProps) => {
       form: {
         ...state.form,
         state: matchedState.id,
-        district: matchedDistrict.id,
+        district: districtData.id,
         pincode: e.value,
       },
     });
 
-    fetchLocalBody(matchedDistrict.id);
+    setNewId(districtData.id);
+    localBodyFetch();
     setShowAutoFilledPincode(true);
     setTimeout(() => {
       setShowAutoFilledPincode(false);
@@ -479,8 +506,8 @@ export const FacilityCreate = (props: FacilityProps) => {
     console.log(state.form);
     if (validated) {
       setIsLoading(true);
-      const data = {
-        facility_type: state.form.facility_type,
+      const data: IFacilityRequest = {
+        facility_type: Number(state.form.facility_type) || undefined,
         name: state.form.name,
         district: state.form.district,
         state: state.form.state,
@@ -490,8 +517,8 @@ export const FacilityCreate = (props: FacilityProps) => {
         features: state.form.features,
         ward: state.form.ward,
         kasp_empanelled: JSON.parse(state.form.kasp_empanelled),
-        latitude: state.form.latitude || null,
-        longitude: state.form.longitude || null,
+        latitude: state.form.latitude,
+        longitude: state.form.longitude,
         phone_number: parsePhoneNumber(state.form.phone_number),
         oxygen_capacity: state.form.oxygen_capacity
           ? state.form.oxygen_capacity
@@ -520,12 +547,20 @@ export const FacilityCreate = (props: FacilityProps) => {
           ? state.form.expected_type_d_cylinders
           : 0,
       };
-      const res = await dispatchAction(
-        facilityId ? updateFacility(facilityId, data) : createFacility(data)
-      );
 
-      if (res && (res.status === 200 || res.status === 201) && res.data) {
-        const id = res.data.id;
+      const { res, data: requestData } = facilityId
+        ? await request(routes.updateFacility, {
+            body: data,
+            pathParams: {
+              id: facilityId,
+            },
+          })
+        : await request(routes.createFacility, {
+            body: data,
+          });
+
+      if (res && (res.status === 200 || res.status === 201) && requestData) {
+        const id = requestData.id;
         dispatch({ type: "set_form", form: initForm });
         if (!facilityId) {
           Notification.Success({
@@ -540,9 +575,9 @@ export const FacilityCreate = (props: FacilityProps) => {
           navigate(`/facility/${facilityId}`);
         }
       } else {
-        if (res?.data)
+        if (requestData)
           Notification.Error({
-            msg: "Something went wrong: " + (res.data.detail || ""),
+            msg: "Something went wrong: ",
           });
       }
       setIsLoading(false);
@@ -603,11 +638,17 @@ export const FacilityCreate = (props: FacilityProps) => {
                 lastUpdated={res.modified_date}
                 removeBedType={removeCurrentBedType}
                 handleUpdate={async () => {
-                  const capacityRes = await dispatchAction(
-                    listCapacity({}, { facilityId: createdFacilityId })
-                  );
-                  if (capacityRes && capacityRes.data) {
-                    setCapacityData(capacityRes.data.results);
+                  const { res, data } = await request(routes.getCapacity, {
+                    pathParams: { facilityId: createdFacilityId },
+                  });
+                  if (res?.ok && data) {
+                    const convertedResult = data.results.map((result) => {
+                      return {
+                        ...result,
+                        id: Number(result.id),
+                      };
+                    });
+                    setCapacityData(convertedResult);
                   }
                 }}
               />
@@ -640,11 +681,17 @@ export const FacilityCreate = (props: FacilityProps) => {
               facilityId={createdFacilityId || ""}
               key={`bed_${data.id}`}
               handleUpdate={async () => {
-                const doctorRes = await dispatchAction(
-                  listDoctor({}, { facilityId: createdFacilityId })
-                );
-                if (doctorRes && doctorRes.data) {
-                  setDoctorData(doctorRes.data.results);
+                const { res, data } = await request(routes.listDoctor, {
+                  pathParams: { facilityId: createdFacilityId },
+                });
+                if (res && data) {
+                  const convertedResult = data.results.map((result) => {
+                    return {
+                      ...result,
+                      id: Number(result.id),
+                    };
+                  });
+                  setDoctorData(convertedResult);
                 }
               }}
               {...data}
@@ -686,11 +733,17 @@ export const FacilityCreate = (props: FacilityProps) => {
                 navigate(`/facility/${createdFacilityId}`);
               }}
               handleUpdate={async () => {
-                const doctorRes = await dispatchAction(
-                  listDoctor({}, { facilityId: createdFacilityId })
-                );
-                if (doctorRes && doctorRes.data) {
-                  setDoctorData(doctorRes.data.results);
+                const { res, data } = await request(routes.listDoctor, {
+                  pathParams: { facilityId: createdFacilityId },
+                });
+                if (res && data) {
+                  const convertedResult = data.results.map((result) => {
+                    return {
+                      ...result,
+                      id: Number(result.id),
+                    };
+                  });
+                  setDoctorData(convertedResult);
                 }
               }}
             />
@@ -721,11 +774,17 @@ export const FacilityCreate = (props: FacilityProps) => {
                 setCurrentStep(3);
               }}
               handleUpdate={async () => {
-                const capacityRes = await dispatchAction(
-                  listCapacity({}, { facilityId: createdFacilityId })
-                );
-                if (capacityRes && capacityRes.data) {
-                  setCapacityData(capacityRes.data.results);
+                const { res, data } = await request(routes.getCapacity, {
+                  pathParams: { facilityId: createdFacilityId },
+                });
+                if (res && data) {
+                  const convertedResult = data.results.map((result) => {
+                    return {
+                      ...result,
+                      id: Number(result.id),
+                    };
+                  });
+                  setCapacityData(convertedResult);
                 }
               }}
             />
@@ -757,9 +816,12 @@ export const FacilityCreate = (props: FacilityProps) => {
                   handleDraftSelect={(newState: any) => {
                     dispatch({ type: "set_state", state: newState });
                     Promise.all([
-                      fetchDistricts(newState.form.state),
-                      fetchLocalBody(newState.form.district),
-                      fetchWards(newState.form.local_body),
+                      setNewId(newState.data.state),
+                      districtFetch(),
+                      setNewId(newState.data.district),
+                      localBodyFetch(),
+                      setNewId(newState.data.local_body),
+                      wardsFetch(),
                     ]);
                   }}
                   formData={state.form}
@@ -811,7 +873,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                     onChange={(event) => {
                       handleChange(event);
                       if (!event) return;
-                      fetchDistricts(event.value);
+                      setNewId(event.value);
+                      districtFetch();
                     }}
                   />
                   <SelectFormField
@@ -826,7 +889,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                     onChange={(event) => {
                       handleChange(event);
                       if (!event) return;
-                      fetchLocalBody(event.value);
+                      setNewId(event.value);
+                      localBodyFetch();
                     }}
                   />
                   <SelectFormField
@@ -841,7 +905,8 @@ export const FacilityCreate = (props: FacilityProps) => {
                     onChange={(event) => {
                       handleChange(event);
                       if (!event) return;
-                      fetchWards(event.value);
+                      setNewId(event.value);
+                      wardsFetch();
                     }}
                   />
                   <SelectFormField

@@ -1,17 +1,13 @@
-import { lazy, useCallback, useReducer, useState } from "react";
-import { useDispatch } from "react-redux";
-
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getPermittedFacility,
-  partialUpdateFacility,
-} from "../../Redux/actions";
+import { lazy, useEffect, useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import Page from "../Common/components/Page";
 import { ConfigureHealthFacility } from "../ABDM/ConfigureHealthFacility";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
@@ -49,39 +45,37 @@ const FormReducer = (state = initialState, action: any) => {
 export const UpdateFacilityMiddleware = (props: any) => {
   const [state, dispatch] = useReducer(FormReducer, initialState);
   const { facilityId } = props;
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      if (facilityId) {
-        setIsLoading(true);
-        const res = await dispatchAction(getPermittedFacility(facilityId));
-        if (!status.aborted && res.data) {
-          const formData = {
-            name: res.data.name,
-            state: res.data.state,
-            district: res.data.district,
-            local_body: res.data.local_body,
-            ward: res.data.ward,
-            middleware_address: res.data.middleware_address,
-          };
-          dispatch({ type: "set_form", form: formData });
-        } else {
-          navigate(`/facility/${facilityId}`);
-        }
-        setIsLoading(false);
-      }
+  const { res, data, refetch } = useQuery(routes.getPermittedFacility, {
+    pathParams: {
+      id: facilityId,
     },
-    [dispatchAction, facilityId]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [dispatch, fetchData]
-  );
+  useEffect(() => {
+    if (facilityId) {
+      setIsLoading(true);
+      if (data) {
+        const formData = {
+          name: data.name,
+          state: data.state,
+          district: data.district,
+          local_body: data.local_body,
+          ward: data.ward,
+          middleware_address: data.middleware_address,
+        };
+        dispatch({ type: "set_form", form: formData });
+      } else {
+        navigate(`/facility/${facilityId}`);
+      }
+      setIsLoading(false);
+    }
+  }, [facilityId, res, data]);
+
+  useEffect(() => {
+    refetch();
+  }, [dispatch, refetch]);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -113,17 +107,26 @@ export const UpdateFacilityMiddleware = (props: any) => {
       middleware_address: state.form.middleware_address,
     };
 
-    const res = await dispatchAction(partialUpdateFacility(facilityId, data));
+    // data for request body is not same - keep any
+    const { res, data: updateData } = await request(
+      routes.partialUpdateFacility,
+      {
+        body: data,
+        pathParams: {
+          id: facilityId,
+        },
+      }
+    );
     setIsLoading(false);
-    if (res && res.data) {
+    if (res && updateData) {
       Notification.Success({
         msg: "Facility updated successfully",
       });
       navigate(`/facility/${facilityId}`);
     } else {
-      if (res?.data)
+      if (updateData)
         Notification.Error({
-          msg: "Something went wrong: " + (res.data.detail || ""),
+          msg: "Something went wrong: ", // No detail property in response
         });
     }
     setIsLoading(false);

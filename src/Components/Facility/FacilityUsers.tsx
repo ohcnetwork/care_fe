@@ -1,14 +1,4 @@
-import { lazy, useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  addUserFacility,
-  deleteUserFacility,
-  getUserListFacility,
-  deleteUser,
-  getFacilityUsers,
-  getAnyFacility,
-} from "../../Redux/actions";
+import { lazy, useEffect, useState } from "react";
 import Pagination from "../Common/Pagination";
 import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
 import { FacilityModel } from "../Facility/models";
@@ -23,12 +13,14 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import ButtonV2 from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import useQuery from "../../Utils/request/useQuery";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function FacilityUsers(props: any) {
   const { facilityId } = props;
-  const dispatch: any = useDispatch();
   const initialData: any[] = [];
   let manageUsers: any = null;
   const [users, setUsers] = useState(initialData);
@@ -66,11 +58,17 @@ export default function FacilityUsers(props: any) {
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatch(getAnyFacility(facilityId));
-        setFacilityData({
-          name: res?.data?.name || "",
-          district_object_id: res?.data?.district_object?.id || 0,
+        const { res, data } = await request(routes.getAnyFacility, {
+          pathParams: {
+            id: facilityId,
+          },
         });
+        if (res && data) {
+          setFacilityData({
+            name: data.name || "",
+            district_object_id: data?.district_object?.id || 0,
+          });
+        }
       } else {
         setFacilityData({
           name: "",
@@ -79,32 +77,25 @@ export default function FacilityUsers(props: any) {
       }
     }
     fetchFacilityName();
-  }, [dispatch, facilityId]);
+  }, [facilityId]);
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatch(
-        getFacilityUsers(facilityId, { offset, limit })
-      );
+  const { res, data, refetch } = useQuery(routes.getFacilityUsers, {
+    body: { offset: offset, limit: limit },
+    pathParams: { facility_id: facilityId },
+  });
 
-      if (!status.aborted) {
-        if (res && res.data) {
-          setUsers(res.data.results);
-          setTotalCount(res.data.count);
-        }
-        setIsLoading(false);
-      }
-    },
-    [dispatch, facilityId, offset, limit]
-  );
+  useEffect(() => {
+    setIsLoading(true);
+    if (res && data) {
+      setUsers(data.results);
+      setTotalCount(data.count);
+    }
+    setIsLoading(false);
+  }, [facilityId, offset, limit, res, data]);
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -117,13 +108,15 @@ export default function FacilityUsers(props: any) {
       return;
     }
     setIsFacilityLoading(true);
-    const res = await dispatch(getUserListFacility({ username }));
-    if (res && res.data) {
+    const { res, data } = await request(routes.userListFacility, {
+      pathParams: { username: username },
+    });
+    if (res && data) {
       const updated = users.map((user) => {
         return user.username === username
           ? {
               ...user,
-              facilities: res.data,
+              facilities: data,
             }
           : user;
       });
@@ -156,12 +149,13 @@ export default function FacilityUsers(props: any) {
 
   const handleUnlinkFacilitySubmit = async () => {
     setIsFacilityLoading(true);
-    await dispatch(
-      deleteUserFacility(
-        unlinkFacilityData.userName,
-        String(unlinkFacilityData?.facility?.id)
-      )
-    );
+    await request(routes.deleteUserFacility, {
+      // body given in the dispatch call but there is no body in API documentation
+      body: String(unlinkFacilityData?.facility?.id),
+      pathParams: {
+        username: unlinkFacilityData.userName,
+      },
+    });
     setIsFacilityLoading(false);
     loadFacilities(unlinkFacilityData.userName);
     hideUnlinkFacilityModal();
@@ -173,19 +167,21 @@ export default function FacilityUsers(props: any) {
 
   const handleSubmit = async () => {
     const username = userData.username;
-    const res = await dispatch(deleteUser(username));
+    const { res, data } = await request(routes.deleteUser, {
+      pathParams: { username: username },
+    });
     if (res?.status === 204) {
       Notification.Success({
         msg: "User deleted successfully",
       });
     } else {
       Notification.Error({
-        msg: "Error while deleting User: " + (res?.data?.detail || ""),
+        msg: "Error while deleting User: " + (data?.detail || ""),
       });
     }
 
     setUserData({ show: false, username: "", name: "" });
-    fetchData({ aborted: false });
+    refetch();
   };
 
   const handleDelete = (user: any) => {
@@ -268,7 +264,15 @@ export default function FacilityUsers(props: any) {
   const addFacility = async (username: string, facility: any) => {
     hideLinkFacilityModal();
     setIsFacilityLoading(true);
-    await dispatch(addUserFacility(username, String(facility.id)));
+    // Remaining props of request are not specified in dispatch request
+    await request(routes.addUserFacility, {
+      body: {
+        username: facility.id,
+      },
+      pathParams: {
+        username: username,
+      },
+    });
     setIsFacilityLoading(false);
     loadFacilities(username);
   };

@@ -1,6 +1,59 @@
 import { IConfig } from "../Common/hooks/useConfig";
 import { AssetData } from "../Components/Assets/AssetTypes";
-import { LocationModel } from "../Components/Facility/models";
+import {
+  IUserFacilityRequest,
+  IDeleteUserResponse,
+  IFacilityNotificationRequest,
+  IFacilityRequest,
+  IFacilityResponse,
+  IListCapacityResponse,
+  IListDoctorResponse,
+  IUserListFacilityResponse,
+  LocationModel,
+  IUserFacilityResponse,
+  IAllFacilitiesResponse,
+  IFacilityUserRequest,
+  IFacilityUserResponse,
+  IPermittedFacilityRequest,
+  IPermittedFacilityResponse,
+  IStateResponse,
+  IStateRequest,
+  IDistrictRequest,
+  IDistrictResponse,
+  ILocalBodyRequest,
+  ILocalBodyResponse,
+  IInventorySummaryRequest,
+  IInventorySummaryResponse,
+  IInventoryLogRequest,
+  IInventoryLogResponse,
+  IFaciclityMinimumQuantityResponse,
+  IFaciclityMinimumQuantityRequest,
+  IPatientTransferRequest,
+  IPatientTransferResponse,
+  IInvestigationResponse,
+  IInvestigationRequest,
+  IConsultationBedResponse,
+  ITriageDetailResponse,
+  ITriageRequest,
+  ITriageResponse,
+  IMinQuantityRequest,
+  IMinQuantityResponse,
+  IMinQuantityItemResponse,
+  IItemRequest,
+  IItemResponse,
+  ISetMinQuantityRequest,
+  ISetMinQuantityResponse,
+  IFlagInventoryItemResponse,
+  IAssetBedResponse,
+  IStateListResponse,
+  IStateDitrictResponse,
+  IDistrictLocalBodyResponse,
+  IWardLocalBodyResponse,
+  IAllPatientRequest,
+  IDeleteInventoryLog,
+  ICreateTriageRequest,
+  ICreateTriageResponse,
+} from "../Components/Facility/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 
@@ -79,11 +132,14 @@ const routes = {
 
   userListFacility: {
     path: "/api/v1/users/{username}/get_facilities/",
+    TRes: Type<IUserListFacilityResponse>(),
   },
 
   addUserFacility: {
     path: "/api/v1/users/{username}/add_facility/",
     method: "PUT",
+    TBody: Type<IUserFacilityRequest>(),
+    TRes: Type<IUserFacilityResponse>(),
   },
 
   addUserSkill: {
@@ -94,6 +150,8 @@ const routes = {
   deleteUserFacility: {
     path: "/api/v1/users/{username}/delete_facility/",
     method: "DELETE",
+    TBody: Type<any>(),
+    TRes: Type<IDeleteUserResponse>(),
   },
 
   clearHomeFacility: {
@@ -123,8 +181,9 @@ const routes = {
   },
 
   deleteUser: {
-    path: "/api/v1/users",
+    path: "/api/v1/users/{username}",
     method: "DELETE",
+    TRes: Type<IDeleteUserResponse>(),
   },
 
   addUser: {
@@ -159,6 +218,8 @@ const routes = {
 
   getPermittedFacilities: {
     path: "/api/v1/facility/",
+    TBody: Type<IPermittedFacilityRequest>(),
+    TRes: Type<IPermittedFacilityResponse>(),
   },
 
   getAllFacilities: {
@@ -168,24 +229,32 @@ const routes = {
   createFacility: {
     path: "/api/v1/facility/",
     method: "POST",
+    TRes: Type<IFacilityResponse>(),
+    TBody: Type<IFacilityRequest>(),
   },
 
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
+    TRes: Type<IFacilityResponse>(),
   },
 
   getAnyFacility: {
     path: "/api/v1/getallfacilities/{id}/",
+    TRes: Type<IAllFacilitiesResponse>(),
   },
 
   updateFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{id}/",
     method: "PUT",
+    TRes: Type<IFacilityResponse>(),
+    TBody: Type<IFacilityRequest>(),
   },
 
   partialUpdateFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{id}/",
     method: "PATCH",
+    TBody: Type<any>(),
+    TRes: Type<IFacilityResponse>(),
   },
 
   deleteFacilityCoverImage: {
@@ -195,6 +264,8 @@ const routes = {
 
   getFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/get_users/",
+    TBody: Type<IFacilityUserRequest>(),
+    TRes: Type<IFacilityUserResponse>(),
   },
 
   listFacilityAssetLocation: {
@@ -223,6 +294,8 @@ const routes = {
   listAssetBeds: {
     path: "/api/v1/assetbed/",
     method: "GET",
+    TBody: Type<any>(),
+    TRes: Type<IAssetBedResponse>(),
   },
   createAssetBed: {
     path: "/api/v1/assetbed/",
@@ -298,8 +371,10 @@ const routes = {
 
   // Download Api
   deleteFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{id}",
     method: "DELETE",
+    TRes: Type<any>(),
+    Tbody: Type<any>(),
   },
 
   downloadFacility: {
@@ -333,6 +408,7 @@ const routes = {
   },
   getConsultation: {
     path: "/api/v1/consultation/{id}/",
+    TRes: Type<IConsultationBedResponse>(),
   },
   updateConsultation: {
     path: "/api/v1/consultation/{id}/",
@@ -383,6 +459,7 @@ const routes = {
 
   getCapacity: {
     path: "/api/v1/facility/{facilityId}/capacity/",
+    TRes: Type<IListCapacityResponse>(),
   },
 
   getCapacityBed: {
@@ -396,6 +473,7 @@ const routes = {
 
   listDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/",
+    TRes: Type<IListDoctorResponse>(),
   },
   getDoctor: {
     path: "/api/v1/facility/{facilityId}/hospital_doctor/{id}/",
@@ -420,13 +498,18 @@ const routes = {
   createTriage: {
     path: "/api/v1/facility/{facilityId}/patient_stats/",
     method: "POST",
+    TBody: Type<ICreateTriageRequest>(),
+    TRes: Type<ICreateTriageResponse>(),
   },
   getTriage: {
     path: "/api/v1/facility/{facilityId}/patient_stats/",
+    TBody: Type<ITriageRequest>(),
+    TRes: Type<ITriageResponse>(),
   },
 
   getTriageDetails: {
     path: "/api/v1/facility/{facilityId}/patient_stats/{id}/",
+    TRes: Type<ITriageDetailResponse>(),
   },
 
   // //Care Center
@@ -442,6 +525,8 @@ const routes = {
   },
   patientList: {
     path: "/api/v1/patient/",
+    TBody: Type<IAllPatientRequest>(),
+    TRes: Type<any>(),
   },
   addPatient: {
     path: "/api/v1/patient/",
@@ -449,6 +534,7 @@ const routes = {
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
+    TRes: Type<any>(),
   },
   updatePatient: {
     path: "/api/v1/patient/{id}/",
@@ -461,6 +547,8 @@ const routes = {
   transferPatient: {
     path: "/api/v1/patient/{id}/transfer/",
     method: "POST",
+    TBody: Type<IPatientTransferRequest>(),
+    TRes: Type<IPatientTransferResponse>(),
   },
   getPatientNotes: {
     path: "/api/v1/patient/{patientId}/notes/",
@@ -511,19 +599,25 @@ const routes = {
   // States
   statesList: {
     path: "/api/v1/state/",
+    TRes: Type<IStateListResponse>(),
   },
 
   getState: {
     path: "/api/v1/state/{id}/",
+    TBody: Type<IStateRequest>(),
+    TRes: Type<IStateResponse>(),
   },
 
   // Districts
 
   getDistrict: {
     path: "/api/v1/district/{id}/",
+    TBody: Type<IDistrictRequest>(),
+    TRes: Type<IDistrictResponse>(),
   },
   getDistrictByState: {
     path: "/api/v1/state/{id}/districts/",
+    TRes: Type<IStateDitrictResponse>(),
   },
   getDistrictByName: {
     path: "/api/v1/district/",
@@ -533,11 +627,14 @@ const routes = {
   },
   getLocalbodyByDistrict: {
     path: "/api/v1/district/{id}/local_bodies/",
+    TRes: Type<IDistrictLocalBodyResponse>(),
   },
 
   // Local Body
   getLocalBody: {
     path: "/api/v1/local_body/{id}/",
+    TBody: Type<ILocalBodyRequest>(),
+    TRes: Type<ILocalBodyResponse>(),
   },
   getAllLocalBody: {
     path: "/api/v1/local_body/",
@@ -555,6 +652,7 @@ const routes = {
   },
   getWardByLocalBody: {
     path: "/api/v1/ward/?local_body={id}",
+    TRes: Type<IWardLocalBodyResponse>(),
   },
 
   // Sample Test
@@ -572,29 +670,47 @@ const routes = {
   //inventory
   getItems: {
     path: "/api/v1/items/",
+    TBody: Type<IItemRequest>(),
+    TRes: Type<IItemResponse>(),
   },
   createInventory: {
     path: "/api/v1/facility/{facilityId}/inventory/",
     method: "POST",
   },
   getInventoryLog: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{id}/inventory/",
+    TBody: Type<IInventoryLogRequest>(),
+    TRes: Type<IInventoryLogResponse>(),
   },
   setMinQuantity: {
     path: "/api/v1/facility/{facilityId}/min_quantity/",
     method: "POST",
+    TBody: Type<ISetMinQuantityRequest>(),
+    TRes: Type<ISetMinQuantityResponse>(),
   },
   getMinQuantity: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{id}/min_quantity/",
     method: "GET",
+    TBody: Type<IMinQuantityRequest>(),
+    TRes: Type<IMinQuantityResponse>(),
+  },
+
+  getMinQuantityOfItem: {
+    path: "/api/v1/facility/{id}/min_quantity/{external_id}",
+    method: "GET",
+    TRes: Type<IMinQuantityItemResponse>(),
   },
   updateMinQuantity: {
     path: "/api/v1/facility/{facilityId}/min_quantity/{inventoryId}",
     method: "PATCH",
+    TBody: Type<IFaciclityMinimumQuantityRequest>(),
+    TRes: Type<IFaciclityMinimumQuantityResponse>(),
   },
   getInventorySummary: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{id}/inventorysummary/",
     method: "GET",
+    TBody: Type<IInventorySummaryRequest>(),
+    TRes: Type<IInventorySummaryResponse>(),
   },
   getItemName: {
     path: "/api/v1/items",
@@ -603,10 +719,13 @@ const routes = {
   flagInventoryItem: {
     path: "/api/v1/facility/{facility_external_id}/inventory/{external_id}/flag/",
     method: "PUT",
+    TBody: Type<any>(),
+    TRes: Type<IFlagInventoryItemResponse>(),
   },
   deleteLastInventoryLog: {
     path: "/api/v1/facility/{facility_external_id}/inventory/delete_last/?item={id}",
     method: "DELETE",
+    TRes: Type<IDeleteInventoryLog>(),
   },
   dischargeSummaryGenerate: {
     path: "/api/v1/consultation/{external_id}/generate_discharge_summary/",
@@ -693,6 +812,8 @@ const routes = {
   sendNotificationMessages: {
     path: "/api/v1/notification/notify/",
     method: "POST",
+    TRes: Type<any>(),
+    Tbody: Type<IFacilityNotificationRequest>(),
   },
 
   // FileUpload Create
@@ -733,6 +854,8 @@ const routes = {
   getInvestigation: {
     path: "/api/v1/consultation/{consultation_external_id}/investigation/",
     method: "GET",
+    TBody: Type<IInvestigationRequest>(),
+    TRes: Type<IInvestigationResponse>(),
   },
   getPatientInvestigation: {
     path: "/api/v1/patient/{patient_external_id}/investigation/",

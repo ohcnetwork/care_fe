@@ -1,16 +1,7 @@
 import ConfirmDialog from "../Common/ConfirmDialog";
 import Card from "../../CAREUI/display/Card";
-
 import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useCallback, useReducer, useState, useEffect, lazy } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  createTriageForm,
-  getTriageDetails,
-  getAnyFacility,
-  getTriageInfo,
-} from "../../Redux/actions";
+import { useReducer, useState, useEffect, lazy } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { PatientStatsModel } from "./models";
@@ -22,6 +13,9 @@ const Loading = lazy(() => import("../Common/Loading"));
 import Page from "../Common/components/Page";
 import dayjs from "dayjs";
 import { dateQueryString } from "../../Utils/utils";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 interface triageFormProps extends PatientStatsModel {
   facilityId: number;
@@ -63,8 +57,6 @@ const triageFormReducer = (state = initialState, action: any) => {
 
 export const TriageForm = (props: triageFormProps) => {
   const { goBack } = useAppHistory();
-  const dispatchTriageData: any = useDispatch();
-  const dispatchAction: any = useDispatch();
   const { facilityId, id } = props;
   const [state, dispatch] = useReducer(triageFormReducer, initialState);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,83 +69,100 @@ export const TriageForm = (props: triageFormProps) => {
   const headerText = !id ? "Add Triage" : "Edit Triage";
   const buttonText = !id ? "Save Triage" : "Update Triage";
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      if (id) {
-        // Edit Form functionality
-        const res = await dispatchAction(
-          getTriageDetails({ facilityId: facilityId, id: id })
-        );
-        if (!status.aborted && res && res.data) {
-          dispatch({
-            type: "set_form",
-            form: {
-              entry_date: res.data.entry_date
-                ? dayjs(res.data.entry_date).toDate()
-                : null,
-              num_patients_visited: res.data.num_patients_visited,
-              num_patients_home_quarantine:
-                res.data.num_patients_home_quarantine,
-              num_patients_isolation: res.data.num_patients_isolation,
-              num_patient_referred: res.data.num_patient_referred,
-              num_patient_confirmed_positive:
-                res.data.num_patient_confirmed_positive,
-            },
-          });
-        }
-      }
-      setIsLoading(false);
+  const {
+    res: dataRes,
+    data: dataFetch,
+    refetch: fetchData,
+  } = useQuery(routes.getTriageDetails, {
+    pathParams: {
+      facilityId: String(facilityId),
+      id: String(id),
     },
-    [dispatchAction, facilityId, id]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
+  useEffect(() => {
+    setIsLoading(true);
+    if (id && dataFetch) {
+      // Edit Form functionality
+      dispatch({
+        type: "set_form",
+        form: {
+          entry_date: dataFetch.entry_date
+            ? dayjs(dataFetch.entry_date).toDate()
+            : null,
+          num_patients_visited: dataFetch.num_patients_visited,
+          num_patients_home_quarantine: dataFetch.num_patients_home_quarantine,
+          num_patients_isolation: dataFetch.num_patients_isolation,
+          num_patient_referred: dataFetch.num_patient_referred,
+          num_patient_confirmed_positive:
+            dataFetch.num_patient_confirmed_positive,
+        },
+      });
+    }
+    setIsLoading(false);
+  }, [facilityId, id, dataFetch, dataRes]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData, id]);
+
+  const {
+    res: triageRes,
+    data: triageData,
+    refetch: triageFetch,
+  } = useQuery(routes.getTriage, {
+    pathParams: {
+      facilityId: String(facilityId),
     },
-    [dispatch, fetchData, id]
-  );
+  });
 
   // this will fetch all triage data of the facility
-  const fetchTriageData = useCallback(
-    async (status: statusType) => {
-      const [triageRes] = await Promise.all([
-        dispatchTriageData(getTriageInfo({ facilityId })),
-      ]);
-      if (!status.aborted) {
-        if (
-          triageRes &&
-          triageRes.data &&
-          triageRes.data.results &&
-          triageRes.data.results.length
-        ) {
-          setPatientStatsData(triageRes.data.results);
-        }
-      }
-    },
-    [dispatchTriageData, facilityId]
-  );
+  useEffect(() => {
+    if (
+      triageRes &&
+      triageData &&
+      triageData.results &&
+      triageData.results.length > 0
+    ) {
+      const firstResult = triageData.results[0];
+      const updatedDataArray: PatientStatsModel[] = [
+        {
+          id: Number(firstResult.id),
+          entryDate: firstResult.entry_date.toString(),
+          num_patients_visited: firstResult.num_patients_visited,
+          num_patients_home_quarantine:
+            firstResult.num_patients_home_quarantine,
+          num_patients_isolation: firstResult.num_patients_isolation,
+          num_patient_referred: firstResult.num_patient_referred,
+          entry_date: Number(firstResult.entry_date),
+          num_patient_confirmed_positive:
+            firstResult.num_patient_confirmed_positive,
+        },
+      ];
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchTriageData(status);
-    },
-    [dispatch, fetchTriageData]
-  );
+      setPatientStatsData(updatedDataArray);
+    }
+  }, [facilityId, triageData, triageRes]);
+
+  useEffect(() => {
+    triageFetch();
+  }, [triageFetch]);
 
   useEffect(() => {
     async function fetchFacilityName() {
       if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
+        const { res, data } = await request(routes.getAnyFacility, {
+          pathParams: {
+            id: String(facilityId),
+          },
+        });
+        if (res && data) setFacilityName(data.name || "");
       } else {
         setFacilityName("");
       }
     }
     fetchFacilityName();
-  }, [dispatchAction, facilityId]);
+  }, [facilityId]);
 
   const validateForm = () => {
     const errors = { ...initForm };
@@ -192,7 +201,7 @@ export const TriageForm = (props: triageFormProps) => {
     setOpenModalForExistingTriage(false);
     const validForm = validateForm();
     if (validForm) {
-      const data = {
+      const requestData = {
         entry_date: dateQueryString(state.form.entry_date),
         num_patients_visited: Number(state.form.num_patients_visited),
         num_patients_home_quarantine: Number(
@@ -206,17 +215,20 @@ export const TriageForm = (props: triageFormProps) => {
       };
       //proceed if the triage does not exist or proceed has allowed to proceed after seeing the modal or it's a edit feature of the same date
       if (
-        !isTriageExist(data) ||
+        !isTriageExist(requestData) ||
         openModalForExistingTriage ||
         buttonText === "Update Triage"
       ) {
         setOpenModalForExistingTriage(false);
         setIsLoading(true);
-        const res = await dispatchAction(
-          createTriageForm(data, { facilityId })
-        );
+        const { res, data } = await request(routes.createTriage, {
+          body: requestData,
+          pathParams: {
+            facilityId: String(facilityId),
+          },
+        });
         setIsLoading(false);
-        if (res && res.data) {
+        if (res && data) {
           dispatch({ type: "set_form", form: initForm });
           if (id) {
             Notification.Success({
