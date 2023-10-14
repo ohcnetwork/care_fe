@@ -32,7 +32,7 @@ describe("Asset", () => {
     cy.awaitUrl("/assets");
   });
 
-  it("Verify Asset Service History Alert", () => {
+  it("Verify Asset Warranty Expiry Label", () => {
     assetSearchPage.typeSearchKeyword(assetname);
     assetSearchPage.pressEnter();
     assetSearchPage.verifyBadgeContent(assetname);
@@ -52,11 +52,10 @@ describe("Asset", () => {
     assetPage.enterWarrantyExpiryDate(addDaysToDate(20)); // less than 1 month
     assetPage.clickassetupdatebutton();
     assetPage.verifyWarrantyExpiryLabel("1 month");
-    // assetPage.clickupdatedetailbutton(); // Can't check for expired warranty as it will fail since we can set only future dates for warranty expiry
-    // assetPage.scrollintoWarrantyDetails();
-    // assetPage.enterWarrantyExpiryDate(addDaysToDate(-10)); // expired
-    // assetPage.clickassetupdatebutton();
-    // assetPage.verifyWarrantyExpiryLabel("expired");
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintoWarrantyDetails();
+    assetPage.enterWarrantyExpiryDate(addDaysToDate(100)); // check for greater than 3 months again to verify the label is removed
+    assetPage.clickassetupdatebutton();
   });
 
   it("Create & Edit a service history and verify reflection", () => {
