@@ -4,7 +4,7 @@ import { NutritionPlots } from "../Consultations/NutritionPlots";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
-export const ConsultationNeutritionTab = (props: ConsultationTabProps) => {
+export const ConsultationNutritionTab = (props: ConsultationTabProps) => {
   return (
     <div>
       <PageTitle title="Nutrition" hideBack={true} breadcrumbs={false} />

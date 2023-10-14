@@ -29,6 +29,7 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 import useFullscreen from "../../../Common/hooks/useFullscreen.js";
 import { triggerGoal } from "../../../Integrations/Plausible.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
+import Spinner from "../../Common/Spinner.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -54,6 +55,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
   const [isFullscreen, setFullscreen] = useFullscreen();
   const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
+  const [statusReported, setStatusReported] = useState(false);
   const authUser = useAuthUser();
 
   useEffect(() => {
@@ -241,13 +243,32 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   useEffect(() => {
     let tId: any;
     if (streamStatus !== StreamStatus.Playing) {
-      setStreamStatus(StreamStatus.Loading);
+      if (streamStatus !== StreamStatus.Offline) {
+        setStreamStatus(StreamStatus.Loading);
+      }
       tId = setTimeout(() => {
         startStream({
           onSuccess: () => setStreamStatus(StreamStatus.Playing),
-          onError: () => setStreamStatus(StreamStatus.Offline),
+          onError: () => {
+            setStreamStatus(StreamStatus.Offline);
+            if (!statusReported) {
+              triggerGoal("Camera Feed Viewed", {
+                consultationId,
+                userId: authUser.id,
+                result: "error",
+              });
+              setStatusReported(true);
+            }
+          },
         });
       }, 100);
+    } else if (!statusReported) {
+      triggerGoal("Camera Feed Viewed", {
+        consultationId,
+        userId: authUser.id,
+        result: "success",
+      });
+      setStatusReported(true);
     }
 
     return () => {
@@ -514,8 +535,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                 STATUS: <span className="text-red-600">OFFLINE</span>
               </p>
               <p className="font-semibold ">Feed is currently not live.</p>
-              <p className="font-semibold ">
-                Click refresh button to try again.
+              <p className="font-semibold ">Trying to connect... </p>
+              <p className="mt-2 flex justify-center">
+                <Spinner circle={{ fill: "none" }} />
               </p>
             </div>
           )}
