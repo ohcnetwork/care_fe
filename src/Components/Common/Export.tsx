@@ -44,7 +44,7 @@ export const ExportMenu = ({
       <DropdownMenu
         disabled={isExporting || disabled}
         title={isExporting ? "Exporting..." : label}
-        icon={<CareIcon className="care-l-import" />}
+        icon={<CareIcon className="care-l-export" />}
         className="tooltip border-primary-500 bg-white text-primary-500 hover:bg-primary-100 enabled:border"
       >
         {exportItems.map((item) => (
