@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
-import axios from "axios";
 
 export interface IAsset {
   middlewareHostname: string;
+  accessKey: string;
 }
 
 interface PTZPayload {
@@ -30,8 +30,8 @@ export enum StreamStatus {
 }
 
 interface UseMSEMediaPlayerReturnType {
-  stopStream: (config: { id: string }, options: IOptions) => void;
   startStream: (options?: IOptions) => void;
+  stopStream: () => void;
 }
 
 export interface IOptions {
@@ -47,25 +47,6 @@ enum PTZ {
   ZoomIn = "zoomIn",
   ZoomOut = "zoomOut",
 }
-
-const stopStream =
-  ({
-    middlewareHostname,
-    ws,
-  }: {
-    middlewareHostname: string;
-    ws?: WebSocket;
-  }) =>
-  (payload: { id: string }, options: IOptions) => {
-    const { id } = payload;
-    ws?.close();
-    axios
-      .post(`https://${middlewareHostname}/stop`, {
-        id,
-      })
-      .then((res) => options?.onSuccess && options.onSuccess(res))
-      .catch((err) => options.onError && options.onError(err));
-  };
 
 export const getPTZPayload = (action: PTZ): PTZPayload => {
   let x = 0;
@@ -244,14 +225,19 @@ export const useMSEMediaPlayer = ({
     }
   });
 
+  const stopStream = () => {
+    wsRef.current?.close();
+    fetch(`https://${config.middlewareHostname}/stop`, {
+      method: "POST",
+      body: JSON.stringify({ id: config.accessKey }),
+    });
+  };
+
   useEffect(() => {
     return () => {
       wsRef.current?.close();
     };
   }, []);
 
-  return {
-    startStream: startStream,
-    stopStream: stopStream({ ...config, ws: wsRef.current }),
-  };
+  return { startStream, stopStream };
 };

@@ -12,6 +12,6 @@ export const useHLSPLayer = (ref: ReactPlayer | null) => {
   };
   return {
     startStream,
-    stopStream: undefined,
+    stopStream: () => {},
   };
 };

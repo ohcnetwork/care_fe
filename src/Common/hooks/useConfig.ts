@@ -69,6 +69,10 @@ export interface IConfig {
    */
   wartime_shifting: boolean;
   jwt_token_refresh_interval?: number;
+  /**
+   * Env to use webrtc for media streaming
+   */
+  use_webrtc?: boolean;
 }
 
 const useConfig = () => {

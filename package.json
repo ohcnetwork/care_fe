@@ -97,7 +97,8 @@
     "rehype-raw": "^6.1.1",
     "rescript-webapi": "^0.8.0",
     "use-keyboard-shortcut": "^1.1.6",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "webrtc-adapter": "^8.2.3"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.0.26",
