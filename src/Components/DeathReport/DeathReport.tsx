@@ -1,4 +1,5 @@
-import { useState } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useEffect, useState } from "react";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -71,6 +72,7 @@ export default function PrintDeathReport(props: { id: string }) {
 
   const [patientData, setPatientData] = useState<DeathReport>(initialState);
   const [patientName, setPatientName] = useState("");
+  const [abortState, SetAbortState] = useState(false);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const { id } = props;
   const { t } = useTranslation();
@@ -101,46 +103,53 @@ export default function PrintDeathReport(props: { id: string }) {
     refetch,
   } = useQuery(routes.getPatient, { pathParams: { id } });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      refetch();
-      if (!status.aborted) {
-        if (res && Rpatient) {
-          setPatientName(Rpatient.name);
-          const patientGender = getPatientGender(Rpatient);
-          const patientAddress = getPatientAddress(Rpatient);
-          const patientComorbidities = getPatientComorbidities(Rpatient);
-          const data = {
-            ...Rpatient,
-            gender: patientGender,
-            address: patientAddress,
-            comorbidities: patientComorbidities,
-            is_declared_positive: Rpatient.is_declared_positive ? "Yes" : "No",
-            is_vaccinated: Rpatient.is_vaccinated ? "Yes" : "No",
-            cause_of_death: Rpatient.last_consultation?.discharge_notes || "",
-            hospital_died_in: Rpatient.last_consultation.facility_name,
-            date_declared_positive: Rpatient.date_declared_positive
-              ? dayjs(Rpatient.date_declared_positive).toDate()
-              : "",
-            date_of_admission: Rpatient.last_consultation.admission_date
-              ? dayjs(Rpatient.last_consultation.admission_date).toDate()
-              : "",
-            date_of_test: Rpatient.date_of_test
-              ? dayjs(Rpatient.date_of_test).toDate()
-              : "",
-            date_of_result: Rpatient.date_of_result
-              ? dayjs(Rpatient.date_of_result).toDate()
-              : "",
-            date_of_death: Rpatient.last_consultation.death_datetime
-              ? dayjs(Rpatient.last_consultation.death_datetime).toDate()
-              : "",
-          };
-          setPatientData(data);
-        }
+  useEffect(() => {
+    if (!abortState) {
+      if (res && Rpatient) {
+        setPatientName(Rpatient.name);
+        const patientGender = getPatientGender(Rpatient);
+        const patientAddress = getPatientAddress(Rpatient);
+        const patientComorbidities = getPatientComorbidities(Rpatient);
+        const data = {
+          ...Rpatient,
+          gender: patientGender,
+          address: patientAddress,
+          comorbidities: patientComorbidities,
+          is_declared_positive: Rpatient.is_declared_positive ? "Yes" : "No",
+          is_vaccinated: Rpatient.is_vaccinated ? "Yes" : "No",
+          cause_of_death: Rpatient.last_consultation?.discharge_notes || "",
+          hospital_died_in: Rpatient.last_consultation.facility_name,
+          date_declared_positive: Rpatient.date_declared_positive
+            ? dayjs(Rpatient.date_declared_positive).toDate()
+            : "",
+          date_of_admission: Rpatient.last_consultation.admission_date
+            ? dayjs(Rpatient.last_consultation.admission_date).toDate()
+            : "",
+          date_of_test: Rpatient.date_of_test
+            ? dayjs(Rpatient.date_of_test).toDate()
+            : "",
+          date_of_result: Rpatient.date_of_result
+            ? dayjs(Rpatient.date_of_result).toDate()
+            : "",
+          date_of_death: Rpatient.last_consultation.death_datetime
+            ? dayjs(Rpatient.last_consultation.death_datetime).toDate()
+            : "",
+        };
+        setPatientData(data);
       }
-    },
-    [Rpatient, refetch]
-  );
+    }
+  }, [Rpatient, abortState]);
+  // useAbortableEffect(
+  //   (status: statusType) => {
+  //     refetch();
+  //     SetAbortState(status.aborted!);
+  //   },
+  //   [refetch]
+  // );
+
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   const previewData = () => (
     <div className="my-4">
