@@ -32,6 +32,8 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 import useFullscreen from "../../../Common/hooks/useFullscreen.js";
 import { triggerGoal } from "../../../Integrations/Plausible.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
+import useWebRTCPlayer from "../../../Common/hooks/useWebRTCPlayer.js";
+import useConfig from "../../../Common/hooks/useConfig.js";
 import Spinner from "../../Common/Spinner.js";
 
 interface IFeedProps {
@@ -60,6 +62,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
   const [statusReported, setStatusReported] = useState(false);
   const authUser = useAuthUser();
+  const { use_webrtc } = useConfig();
 
   useEffect(() => {
     const fetchFacility = async () => {
@@ -175,8 +178,14 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
 
   const {
     startStream,
-    // setVideoEl,
-  } = isIOS
+    stopStream
+  } = use_webrtc
+    ? useWebRTCPlayer(
+        liveFeedPlayerRef.current as HTMLVideoElement,
+        cameraMiddlewareHostname,
+        cameraAsset.accessKey
+      )
+    : isIOS
     ? // eslint-disable-next-line react-hooks/rules-of-hooks
       useHLSPLayer(liveFeedPlayerRef.current as ReactPlayer)
     : // eslint-disable-next-line react-hooks/rules-of-hooks

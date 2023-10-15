@@ -23,6 +23,8 @@ import Page from "../../Common/components/Page";
 import ConfirmDialog from "../../Common/ConfirmDialog";
 import { FieldLabel } from "../../Form/FormFields/FormField";
 import useFullscreen from "../../../Common/hooks/useFullscreen";
+import useConfig from "../../../Common/hooks/useConfig";
+import useWebRTCPlayer from "../../../Common/hooks/useWebRTCPlayer";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =
@@ -60,14 +62,21 @@ const LiveFeed = (props: any) => {
 
   const url = `wss://${middlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`;
 
-  const { startStream } = useMSEMediaPlayer({
-    config: {
-      middlewareHostname,
-      ...cameraAsset,
-    },
-    url,
-    videoEl,
-  });
+  const { use_webrtc } = useConfig();
+  const { startStream, stopStream } = use_webrtc
+    ? useWebRTCPlayer(
+        liveFeedPlayerRef.current as HTMLVideoElement,
+        middlewareHostname,
+        cameraAsset.accessKey
+      )
+    : useMSEMediaPlayer({
+        config: {
+          ...cameraAsset,
+          middlewareHostname,
+        },
+        url,
+        videoEl,
+      });
 
   const refreshPresetsHash = props.refreshPresetsHash;
 
@@ -217,7 +226,7 @@ const LiveFeed = (props: any) => {
     return () => {
       clearTimeout(tId);
     };
-  }, [startStream, streamStatus]);
+  }, [streamStatus]);
 
   const handlePagination = (cOffset: number) => {
     setPage({
