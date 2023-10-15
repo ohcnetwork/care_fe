@@ -414,6 +414,9 @@ export const getAllPatient = (params: object, altKey: string) => {
 export const createPatient = (params: object) => {
   return fireRequest("addPatient", [], params);
 };
+export const getPatient = (pathParam: object) => {
+  return fireRequest("getPatient", [], {}, pathParam);
+};
 export const updatePatient = (params: object, pathParam: object) => {
   return fireRequest("updatePatient", [], params, pathParam);
 };
