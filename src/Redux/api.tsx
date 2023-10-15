@@ -2,7 +2,7 @@ import { IConfig } from "../Common/hooks/useConfig";
 import { AssetData } from "../Components/Assets/AssetTypes";
 import { LocationModel } from "../Components/Facility/models";
 import { Prescription } from "../Components/Medicine/models";
-import { UserModel } from "../Components/Users/models";
+import { UserAssignedModel, UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 
 /**
@@ -212,6 +212,8 @@ const routes = {
 
   getFacilityUsers: {
     path: "/api/v1/facility/{facility_id}/get_users/",
+    methood: "GET",
+    TRes: Type<PaginatedResponse<UserAssignedModel>>(),
   },
 
   listFacilityAssetLocation: {

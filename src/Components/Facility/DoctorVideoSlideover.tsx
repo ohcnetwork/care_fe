@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import SlideOver from "../../CAREUI/interactive/SlideOver";
-import { getFacilityUsers } from "../../Redux/actions";
 import { UserAssignedModel } from "../Users/models";
 import { SkillObjectModel } from "../Users/models";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { relativeTime } from "../../Utils/utils";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 export default function DoctorVideoSlideover(props: {
   show: boolean;
@@ -13,32 +12,13 @@ export default function DoctorVideoSlideover(props: {
   setShow: (show: boolean) => void;
 }) {
   const { show, facilityId, setShow } = props;
-  const [doctors, setDoctors] = useState<UserAssignedModel[]>([]);
 
-  const dispatchAction: any = useDispatch();
-  useEffect(() => {
-    const fetchUsers = async () => {
-      if (facilityId) {
-        const res = await dispatchAction(
-          getFacilityUsers(facilityId, { limit: 50 })
-        );
-        if (res && res.data) {
-          setDoctors(
-            res.data.results
-              .filter((user: any) => user.alt_phone_number)
-              .sort((a: any, b: any) => {
-                return Number(a.last_login) - Number(b.last_login);
-              })
-          );
-        }
-      } else {
-        setDoctors([]);
-      }
-    };
-    if (show) {
-      fetchUsers();
-    }
-  }, [show, facilityId]);
+  const { data } = useQuery(routes.getFacilityUsers, {
+    pathParams: { facility_id: facilityId },
+    query: {
+      limit: 50,
+    },
+  });
 
   return (
     <SlideOver
@@ -78,7 +58,11 @@ export default function DoctorVideoSlideover(props: {
             id="options"
             role="listbox"
           >
-            {doctors
+            {data?.results
+              .filter((user) => user.alt_phone_number)
+              .sort((a, b) => {
+                return Number(a.last_login) - Number(b.last_login);
+              })
               .filter((doc) => {
                 const isHomeUser =
                   (doc.home_facility_object?.id || "") === facilityId;
