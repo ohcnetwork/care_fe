@@ -1,6 +1,4 @@
-import { useState, useCallback } from "react";
-import { useDispatch } from "react-redux";
-import { getPatient } from "../../Redux/actions";
+import { useState } from "react";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import { GENDER_TYPES } from "../../Common/constants";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -13,6 +11,8 @@ import Form from "../Form/Form";
 import { useTranslation } from "react-i18next";
 import { navigate } from "raviger";
 import dayjs from "dayjs";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 type DeathReport = {
   name: string;
@@ -71,10 +71,8 @@ export default function PrintDeathReport(props: { id: string }) {
 
   const [patientData, setPatientData] = useState<DeathReport>(initialState);
   const [patientName, setPatientName] = useState("");
-  const [_isLoading, setIsLoading] = useState(true);
   const [isPrintMode, setIsPrintMode] = useState(false);
   const { id } = props;
-  const dispatch: any = useDispatch();
   const { t } = useTranslation();
 
   const getPatientGender = (patientData: any) =>
@@ -96,57 +94,52 @@ export default function PrintDeathReport(props: { id: string }) {
     }
   };
 
-  const fetchpatient = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const patientRes = await dispatch(getPatient({ id }));
+  const {
+    res,
+    data: Rpatient,
+    loading: _isLoading,
+    refetch,
+  } = useQuery(routes.getPatient, { pathParams: { id } });
+
+  useAbortableEffect(
+    (status: statusType) => {
+      refetch();
       if (!status.aborted) {
-        if (patientRes && patientRes.data) {
-          setPatientName(patientRes.data.name);
-          const patientGender = getPatientGender(patientRes.data);
-          const patientAddress = getPatientAddress(patientRes.data);
-          const patientComorbidities = getPatientComorbidities(patientRes.data);
+        if (res && Rpatient) {
+          setPatientName(Rpatient.name);
+          const patientGender = getPatientGender(Rpatient);
+          const patientAddress = getPatientAddress(Rpatient);
+          const patientComorbidities = getPatientComorbidities(Rpatient);
           const data = {
-            ...patientRes.data,
+            ...Rpatient,
             gender: patientGender,
             address: patientAddress,
             comorbidities: patientComorbidities,
-            is_declared_positive: patientRes.data.is_declared_positive
-              ? "Yes"
-              : "No",
-            is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
-            cause_of_death:
-              patientRes.data.last_consultation?.discharge_notes || "",
-            hospital_died_in: patientRes.data.last_consultation.facility_name,
-            date_declared_positive: patientRes.data.date_declared_positive
-              ? dayjs(patientRes.data.date_declared_positive).toDate()
+            is_declared_positive: Rpatient.is_declared_positive ? "Yes" : "No",
+            is_vaccinated: Rpatient.is_vaccinated ? "Yes" : "No",
+            cause_of_death: Rpatient.last_consultation?.discharge_notes || "",
+            hospital_died_in: Rpatient.last_consultation.facility_name,
+            date_declared_positive: Rpatient.date_declared_positive
+              ? dayjs(Rpatient.date_declared_positive).toDate()
               : "",
-            date_of_admission: patientRes.data.last_consultation.admission_date
-              ? dayjs(patientRes.data.last_consultation.admission_date).toDate()
+            date_of_admission: Rpatient.last_consultation.admission_date
+              ? dayjs(Rpatient.last_consultation.admission_date).toDate()
               : "",
-            date_of_test: patientRes.data.date_of_test
-              ? dayjs(patientRes.data.date_of_test).toDate()
+            date_of_test: Rpatient.date_of_test
+              ? dayjs(Rpatient.date_of_test).toDate()
               : "",
-            date_of_result: patientRes.data.date_of_result
-              ? dayjs(patientRes.data.date_of_result).toDate()
+            date_of_result: Rpatient.date_of_result
+              ? dayjs(Rpatient.date_of_result).toDate()
               : "",
-            date_of_death: patientRes.data.last_consultation.death_datetime
-              ? dayjs(patientRes.data.last_consultation.death_datetime).toDate()
+            date_of_death: Rpatient.last_consultation.death_datetime
+              ? dayjs(Rpatient.last_consultation.death_datetime).toDate()
               : "",
           };
           setPatientData(data);
         }
-        setIsLoading(false);
       }
     },
-    [dispatch, id]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchpatient(status);
-    },
-    [dispatch, fetchpatient]
+    [Rpatient, refetch]
   );
 
   const previewData = () => (

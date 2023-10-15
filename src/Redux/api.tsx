@@ -466,6 +466,8 @@ const routes = {
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
+    TRes: Type<any>(),
+    TBody: Type<{ id: string }>(),
   },
   updatePatient: {
     path: "/api/v1/patient/{id}/",
