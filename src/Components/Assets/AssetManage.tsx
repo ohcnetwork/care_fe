@@ -453,20 +453,23 @@ const AssetManage = (props: AssetManageProps) => {
                 <CareIcon className="care-l-pen mr-1 h-4" />
                 {t("update")}
               </ButtonV2>
-              {asset?.asset_class && (
-                <ButtonV2
-                  onClick={() =>
-                    navigate(
-                      `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}/configure`
-                    )
-                  }
-                  id="configure-asset"
-                  data-testid="asset-configure-button"
-                >
-                  <CareIcon className="care-l-setting h-4" />
-                  {t("configure")}
-                </ButtonV2>
-              )}
+              {asset?.asset_class !== "ONVIF" ||
+                (["DistrictAdmin", "StateAdmin", "Doctor"].includes(
+                  authUser.user_type
+                ) && (
+                  <ButtonV2
+                    onClick={() =>
+                      navigate(
+                        `/facility/${asset?.location_object.facility.id}/assets/${asset?.id}/configure`
+                      )
+                    }
+                    id="configure-asset"
+                    data-testid="asset-configure-button"
+                  >
+                    <CareIcon className="care-l-setting h-4" />
+                    {t("configure")}
+                  </ButtonV2>
+                ))}
               {checkAuthority(authUser.user_type, "DistrictAdmin") && (
                 <ButtonV2
                   authorizeFor={NonReadOnlyUsers}
