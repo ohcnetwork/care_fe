@@ -980,6 +980,13 @@ const routes = {
     TRes: Type<HealthInformationModel>(),
   },
 
+  findPatient: {
+    path: "/api/v1/abdm/patients/find/",
+    method: "POST",
+    TRes: Type<unknown>(),
+    TBody: Type<{ id: string }>(),
+  },
+
   // Asset Availability endpoints
 
   listAssetAvailability: {

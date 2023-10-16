@@ -1012,6 +1012,12 @@ export const consentActions = {
   },
 };
 
+export const patientsActions = {
+  find: (params: object) => {
+    return fireRequest("findPatients", [], params);
+  },
+};
+
 export const listAssetAvailability = (params: object) =>
   fireRequest("listAssetAvailability", [], params);
 export const getAssetAvailability = (id: string) =>
