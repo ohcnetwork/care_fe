@@ -73,10 +73,16 @@ const Location = ({
 }: LocationModel) => (
   <div className="w-full items-center justify-between rounded border border-gray-300 bg-white p-6 shadow-sm transition-all duration-200 ease-in-out hover:border-primary-400 lg:flex">
     <div className="lg:w-3/4">
-      <div className="w-full items-baseline lg:flex lg:items-center">
-        <p className="break-words text-xl lg:mr-4 lg:w-2/4">{name}</p>
-        <p className="break-all text-sm lg:w-1/4">{description || "-"}</p>
-        <p className="break-all text-sm lg:w-1/4">{middleware_address}</p>
+      <div className="w-full items-baseline gap-4 lg:flex lg:items-center">
+        <p className="break-words text-xl lg:mr-4 lg:w-3/4">
+          {name}
+          <p className="break-all text-sm text-gray-700">
+            {description || "-"}
+          </p>
+        </p>
+        <p className="break-all text-sm lg:mr-4 lg:w-3/4">
+          {middleware_address}
+        </p>
       </div>
     </div>
 
