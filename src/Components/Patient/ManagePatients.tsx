@@ -16,6 +16,7 @@ import {
   getAllPatient,
   getAnyFacility,
   getDistrict,
+  getFacilityAssetLocation,
   getLocalBody,
 } from "../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../Common/utils";
@@ -104,6 +105,7 @@ export const PatientManager = () => {
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadge] = useState("");
+  const [locationBadgeName, setLocationBadge] = useState("");
   const [phone_number, setPhoneNumber] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
@@ -167,6 +169,7 @@ export const PatientManager = () => {
       : undefined,
     local_body: qParams.lsgBody || undefined,
     facility: qParams.facility,
+    location: qParams.location || undefined,
     facility_type: qParams.facility_type || undefined,
     district: qParams.district || undefined,
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
@@ -342,6 +345,7 @@ export const PatientManager = () => {
     qParams.last_consultation_admitted_bed_type_list,
     qParams.last_consultation_discharge_reason,
     qParams.facility,
+    qParams.location,
     qParams.facility_type,
     qParams.district,
     qParams.category,
@@ -440,12 +444,29 @@ export const PatientManager = () => {
     [dispatch, qParams.facility]
   );
 
+  const fetchLocationBadgeName = useCallback(
+    async (status: statusType) => {
+      const res =
+        qParams.location &&
+        (await dispatch(
+          getFacilityAssetLocation(qParams.facility, qParams.location)
+        ));
+
+      if (!status.aborted) {
+        setLocationBadge(res?.data?.name);
+      }
+    },
+    [dispatch, qParams.location]
+  );
+
   useAbortableEffect(
     (status: statusType) => {
       fetchFacilityBadgeName(status);
+      fetchLocationBadgeName(status);
     },
-    [fetchFacilityBadgeName]
+    [fetchFacilityBadgeName, fetchLocationBadgeName]
   );
+
   const LastAdmittedToTypeBadges = () => {
     const badge = (key: string, value: any, id: string) => {
       return (
@@ -933,6 +954,7 @@ export const PatientManager = () => {
             badge("COWIN ID", "covin_id"),
             badge("Is Antenatal", "is_antenatal"),
             value("Facility", "facility", facilityBadgeName),
+            value("Location", "location", locationBadgeName),
             badge("Facility Type", "facility_type"),
             value("District", "district", districtName),
             ordering(),
