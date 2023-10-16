@@ -56,6 +56,7 @@ describe("Asset", () => {
     assetPage.scrollintoWarrantyDetails();
     assetPage.enterWarrantyExpiryDate(addDaysToDate(100)); // check for greater than 3 months again to verify the label is removed
     assetPage.clickassetupdatebutton();
+    assetPage.verifyWarrantyExpiryLabel("");
   });
 
   it("Create & Edit a service history and verify reflection", () => {
