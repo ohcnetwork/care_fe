@@ -81,15 +81,15 @@ const LinkCareContextModal = ({
         <ButtonV2
           onClick={async () => {
             setIsLinkingCareContext(true);
-            const { res } = await request(routes.abha.verifyAadhaarOtp, {
+            const { res } = await request(routes.abha.linkCareContext, {
               body: {
                 consultation: consultationId,
                 name: patient?.abha_number_object?.name,
                 gender: patient?.abha_number_object?.gender,
                 dob: patient?.abha_number_object?.date_of_birth,
               },
+              reattempts: 0,
             });
-
             if (res?.status === 202) {
               Notification.Success({
                 msg: "Care Context sucessfully linked!",

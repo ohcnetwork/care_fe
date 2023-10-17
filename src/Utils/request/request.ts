@@ -38,7 +38,7 @@ export default async function request<TData, TBody>(
 
     try {
       const res = await fetch(url, options);
-      const data: TData = await res.json();
+      const data: TData = res.status === 202 ? undefined : await res.json();
 
       result = {
         res,
