@@ -87,7 +87,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
           <div className="flex flex-col gap-2 lg:max-w-min">
             <CheckBoxFormField
               label="Administer for a time in the past"
-              labelClassName="whitespace-nowrap"
+              labelClassName="md:whitespace-nowrap"
               name="is_custom_time"
               value={isCustomTime}
               onChange={({ value }) => {

@@ -48,7 +48,7 @@ const RecordMeta = ({ time, user, prefix, className, inlineUser }: Props) => {
         {user && inlineUser && <span>by</span>}
         {user && <CareIcon className="care-l-user" />}
         {user && inlineUser && (
-          <span className="font-medium">
+          <span className="whitespace-nowrap font-medium">
             {user.first_name} {user.last_name}
           </span>
         )}
