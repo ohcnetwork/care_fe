@@ -1,6 +1,6 @@
 export class PatientConsultationPage {
   selectConsultationStatus(status: string) {
-    cy.get("#consultation_status")
+    cy.get("#route_to_facility")
       .click()
       .then(() => {
         cy.get("[role='option']").contains(status).click();
@@ -61,7 +61,7 @@ export class PatientConsultationPage {
       .click();
 
     cy.get("#consultation_notes").click().type(consulationNotes);
-    cy.get("#verified_by")
+    cy.get("#treating_physician")
       .click()
       .type(verificationBy)
       .then(() => {
