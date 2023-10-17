@@ -499,7 +499,7 @@ export const sampleReport = (id: string, sampleId: string) => {
 export const getTestList = (params: object) => {
   return fireRequest("getTestSampleList", [], params);
 };
-export const getTestSample = (id: number) => {
+export const getTestSample = (id: string) => {
   return fireRequest("getTestSample", [id], {});
 };
 export const patchSample = (params: object, pathParam: object) => {
@@ -665,13 +665,6 @@ export const externalResultList = (params: object, altKey: string) => {
 
 export const externalResult = (pathParam: object) => {
   return fireRequest("externalResult", [], {}, pathParam);
-};
-export const externalResultUploadCsv = (params: object) => {
-  return fireRequest("externalResultUploadCsv", [], params);
-};
-
-export const deleteExternalResult = (id: string) => {
-  return fireRequest("deleteExternalResult", [id], {});
 };
 
 export const updateExternalResult = (id: number, params: object) => {
@@ -923,7 +916,7 @@ export const PrescriptionActions = (consultation_external_id: string) => {
   const pathParams = { consultation_external_id };
 
   return {
-    list: (query?: Record<string, string | boolean | number>) => {
+    list: (query?: Record<string, any>) => {
       let altKey;
       if (query?.is_prn !== undefined) {
         altKey = query?.is_prn

@@ -46,7 +46,7 @@ const FormReducer = (state = initialState, action: any) => {
   }
 };
 
-export const UpdateFacilityMiddleware = (props: any) => {
+export const FacilityConfigure = (props: any) => {
   const [state, dispatch] = useReducer(FormReducer, initialState);
   const { facilityId } = props;
   const dispatchAction: any = useDispatch();
@@ -155,6 +155,7 @@ export const UpdateFacilityMiddleware = (props: any) => {
               <TextFormField
                 name="middleware_address"
                 label="Facility Middleware Address"
+                required
                 value={state.form.middleware_address}
                 onChange={(e) => handleChange(e)}
                 error={state.errors?.middleware_address}

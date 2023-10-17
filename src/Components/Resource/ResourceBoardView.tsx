@@ -32,7 +32,7 @@ export default function BoardView() {
   const { t } = useTranslation();
 
   const onListViewBtnClick = () => {
-    navigate("/resource/list-view", { query: qParams });
+    navigate("/resource/list", { query: qParams });
     localStorage.setItem("defaultResourceView", "list");
   };
 

@@ -86,7 +86,7 @@
     "react-google-recaptcha": "^3.1.0",
     "react-i18next": "^13.0.1",
     "react-markdown": "^8.0.7",
-    "react-player": "^2.12.0",
+    "react-player": "^2.13.0",
     "react-qr-reader": "^2.2.1",
     "react-redux": "^8.1.1",
     "react-transition-group": "^4.4.5",
@@ -97,7 +97,7 @@
     "rehype-raw": "^6.1.1",
     "rescript-webapi": "^0.8.0",
     "use-keyboard-shortcut": "^1.1.6",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.0.26",

@@ -38,7 +38,8 @@ export default async function request<TData, TBody>(
 
     try {
       const res = await fetch(url, options);
-      const data: TData = res.status === 202 ? undefined : await res.json();
+
+      const data = await getResponseBody<TData>(res);
 
       result = {
         res,
@@ -60,4 +61,22 @@ export default async function request<TData, TBody>(
     result.error
   );
   return result;
+}
+
+async function getResponseBody<TData>(res: Response): Promise<TData> {
+  if (!(res.headers.get("content-length") !== "0")) {
+    return null as TData;
+  }
+
+  const isJson = res.headers.get("content-type")?.includes("application/json");
+
+  if (!isJson) {
+    return (await res.text()) as TData;
+  }
+
+  try {
+    return await res.json();
+  } catch {
+    return (await res.text()) as TData;
+  }
 }
