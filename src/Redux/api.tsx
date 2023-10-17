@@ -1,4 +1,5 @@
 import { IConfig } from "../Common/hooks/useConfig";
+
 import {
   AssetBedBody,
   AssetBedModel,
@@ -9,7 +10,16 @@ import {
   AssetTransaction,
   AssetUpdate,
 } from "../Components/Assets/AssetTypes";
-import { FacilityModel, LocationModel } from "../Components/Facility/models";
+import { FacilityModel, LocationModel, WardModel } from "../Components/Facility/models";
+
+import {
+  IDeleteExternalResult,
+  IExternalResult,
+  IExternalResultCsv,
+  ILocalBodies,
+  ILocalBodyByDistrict,
+  IPartialUpdateExternalResult,
+} from "../Components/ExternalResult/models";
 import { Prescription } from "../Components/Medicine/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
@@ -520,18 +530,25 @@ const routes = {
   // External Results
   externalResultList: {
     path: "/api/v1/external_result/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<IExternalResult>>(),
   },
   externalResult: {
     path: "/api/v1/external_result/{id}/",
+    method: "GET",
+    TRes: Type<IExternalResult>(),
   },
   externalResultUploadCsv: {
     path: "/api/v1/external_result/bulk_upsert/",
     method: "POST",
+    TBody: Type<IExternalResultCsv>(),
+    TRes: Type<IExternalResult[]>(),
   },
 
   deleteExternalResult: {
-    path: "/api/v1/external_result",
+    path: "/api/v1/external_result/{id}/",
     method: "DELETE",
+    TRes: Type<IDeleteExternalResult>(),
   },
 
   updateExternalResult: {
@@ -542,6 +559,8 @@ const routes = {
   partialUpdateExternalResult: {
     path: "/api/v1/external_result/{id}/",
     method: "PATCH",
+    TRes: Type<IPartialUpdateExternalResult>(),
+    TBody: Type<IPartialUpdateExternalResult>(),
   },
 
   // States
@@ -566,9 +585,13 @@ const routes = {
   },
   getAllLocalBodyByDistrict: {
     path: "/api/v1/district/{id}/get_all_local_body/",
+    method: "GET",
+    TRes: Type<ILocalBodyByDistrict[]>(),
   },
   getLocalbodyByDistrict: {
     path: "/api/v1/district/{id}/local_bodies/",
+    method: "GET",
+    TRes: Type<ILocalBodies[]>(),
   },
 
   // Local Body
@@ -591,6 +614,8 @@ const routes = {
   },
   getWardByLocalBody: {
     path: "/api/v1/ward/?local_body={id}",
+    method: "GET",
+    TRes: Type<PaginatedResponse<WardModel>>(),
   },
 
   // Sample Test

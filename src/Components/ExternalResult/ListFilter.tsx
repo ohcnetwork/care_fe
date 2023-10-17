@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
-import { getAllLocalBodyByDistrict } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
+import { useState } from "react";
 import useMergeState from "../../Common/hooks/useMergeState";
 import { navigate } from "raviger";
 import { useTranslation } from "react-i18next";
@@ -11,6 +9,9 @@ import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
 import dayjs from "dayjs";
 import { dateQueryString } from "../../Utils/utils";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import Loading from "../Common/Loading";
 
 const clearFilterState = {
   created_date_before: "",
@@ -29,10 +30,8 @@ export default function ListFilter(props: any) {
   const { filter, onChange, closeFilter, dataList } = props;
   const [wardList, setWardList] = useState<any[]>([]);
   const [lsgList, setLsgList] = useState<any[]>([]);
-
   const [wards, setWards] = useState<any[]>([]);
   const [selectedLsgs, setSelectedLsgs] = useState<any[]>([]);
-  const dispatch: any = useDispatch();
   const authUser = useAuthUser();
   const [filterState, setFilterState] = useMergeState({
     created_date_before: filter.created_date_before || null,
@@ -44,6 +43,57 @@ export default function ListFilter(props: any) {
     srf_id: filter.srf_id || null,
   });
   const { t } = useTranslation();
+
+  const { loading } = useQuery(routes.getAllLocalBodyByDistrict, {
+    pathParams: { id: String(authUser.district) },
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        let allWards: any[] = [];
+        let allLsgs: any[] = [];
+        if (res && data) {
+          data.forEach((local: any) => {
+            allLsgs = [...allLsgs, { id: local.id, name: local.name }];
+            if (local.wards) {
+              local.wards.forEach((ward: any) => {
+                allWards = [
+                  ...allWards,
+                  {
+                    id: ward.id,
+                    name: ward.number + ": " + ward.name,
+                    panchayath: local.name,
+                    number: ward.number,
+                    local_body_id: local.id,
+                  },
+                ];
+              });
+            }
+          });
+        }
+
+        sortByName(allWards);
+        sortByName(allLsgs);
+        setWardList(allWards || []);
+        setLsgList(allLsgs || []);
+        const filteredWard = filter?.wards?.split(",").map(Number);
+        const selectedWards: any =
+          filteredWard && allWards
+            ? allWards.filter(({ id }: { id: number }) => {
+                return filteredWard.includes(id);
+              })
+            : [];
+        setWards(selectedWards);
+
+        const filteredLsgs = filter?.local_bodies?.split(",").map(Number);
+        const selectedLsgs: any =
+          filteredLsgs && allLsgs
+            ? allLsgs.filter(({ id }: { id: number }) => {
+                return filteredLsgs.includes(id);
+              })
+            : [];
+        setSelectedLsgs(selectedLsgs);
+      }
+    },
+  });
 
   const handleDateRangeChange = (
     startDateId: string,
@@ -118,59 +168,10 @@ export default function ListFilter(props: any) {
     });
   };
 
-  useEffect(() => {
-    async function getWardList() {
-      const id = authUser.district;
-      const res = await dispatch(getAllLocalBodyByDistrict({ id }));
-      let allWards: any[] = [];
-      let allLsgs: any[] = [];
-      res?.data?.forEach((local: any) => {
-        allLsgs = [...allLsgs, { id: local.id, name: local.name }];
-        if (local.wards) {
-          local.wards.forEach((ward: any) => {
-            allWards = [
-              ...allWards,
-              {
-                id: ward.id,
-                name: ward.number + ": " + ward.name,
-                panchayath: local.name,
-                number: ward.number,
-                local_body_id: local.id,
-              },
-            ];
-          });
-        }
-      });
-      sortByName(allWards);
-      sortByName(allLsgs);
-      setWardList(allWards || []);
-      setLsgList(allLsgs || []);
-      const filteredWard = filter?.wards?.split(",").map(Number);
-      const selectedWards: any =
-        filteredWard && allWards
-          ? allWards.filter(({ id }: { id: number }) => {
-              return filteredWard.includes(id);
-            })
-          : [];
-      setWards(selectedWards);
-
-      const filteredLsgs = filter?.local_bodies?.split(",").map(Number);
-      const selectedLsgs: any =
-        filteredLsgs && allLsgs
-          ? allLsgs.filter(({ id }: { id: number }) => {
-              return filteredLsgs.includes(id);
-            })
-          : [];
-      setSelectedLsgs(selectedLsgs);
-    }
-    getWardList();
-  }, []);
-
   const filterWards = () => {
     const selectedLsgIds: any = selectedLsgs.map((e) => {
       return e.id;
     });
-
     const selectedwards: any =
       selectedLsgIds.length === 0
         ? wardList
@@ -183,12 +184,14 @@ export default function ListFilter(props: any) {
 
   const handleChange = (event: any) => {
     const { name, value } = event.target;
-
     const filterData: any = { ...filterState };
     filterData[name] = value;
-
     setFilterState(filterData);
   };
+
+  if (loading) {
+    <Loading />;
+  }
 
   return (
     <FiltersSlideover

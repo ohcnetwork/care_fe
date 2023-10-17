@@ -11,9 +11,13 @@ import TextFormField from "../../Form/FormFields/TextFormField";
 import { Submit } from "../../Common/components/ButtonV2";
 import { SyntheticEvent } from "react";
 import useAuthUser from "../../../Common/hooks/useAuthUser";
+
 import request from "../../../Utils/request/request";
 import routes from "../../../Redux/api";
 import useQuery from "../../../Utils/request/useQuery";
+
+import CareIcon from "../../../CAREUI/icons/CareIcon";
+
 
 interface Props {
   assetId: string;
@@ -84,11 +88,11 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
         Notification.Success({ msg: "Asset Configured Successfully" });
         onUpdated?.();
       } else {
-        Notification.Error({ msg: "Something went wrong..!" });
+        Notification.Error({ msg: "Something went wrong!" });
       }
       setLoadingSetConfiguration(false);
     } else {
-      setIpAddress_error("Please Enter a Valid Camera address !!");
+      setIpAddress_error("IP address is invalid");
     }
   };
 
@@ -131,8 +135,11 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     }
     setLoadingAddPreset(false);
   };
-
+  
   if (isLoading || loading || !facility) return <Loading />;
+
+  const fallbackMiddleware =
+    asset?.location_object?.middleware_address || facilityMiddlewareHostname;
 
   return (
     <div className="space-y-6">
@@ -141,8 +148,26 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
           <div className="grid grid-cols-1 gap-x-4 lg:grid-cols-2">
             <TextFormField
               name="middleware_hostname"
-              label="Hospital Middleware Hostname"
-              autoComplete="off"
+              label={
+                <div className="flex flex-row gap-1">
+                  <p>Middleware Hostname</p>
+                  {!middlewareHostname && (
+                    <div className="tooltip">
+                      <CareIcon
+                        icon="l-info-circle"
+                        className="tooltip text-indigo-500 hover:text-indigo-600"
+                      />
+                      <span className="tooltip-text w-56 whitespace-normal">
+                        Middleware hostname sourced from{" "}
+                        {asset?.location_object?.middleware_address
+                          ? "asset location"
+                          : "asset facility"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              }
+              placeholder={fallbackMiddleware}
               value={middlewareHostname}
               onChange={({ value }) => setMiddlewareHostname(value)}
             />

@@ -41,6 +41,7 @@ import { ConsultationVentilatorTab } from "./ConsultationVentilatorTab";
 import { ConsultationPressureSoreTab } from "./ConsultationPressureSoreTab";
 import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
+import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -65,7 +66,7 @@ const TABS = {
   NURSING: ConsultationNursingTab,
   NEUROLOGICAL_MONITORING: ConsultationNeurologicalMonitoringTab,
   VENTILATOR: ConsultationVentilatorTab,
-  NUTRITION: ConsultationNursingTab,
+  NUTRITION: ConsultationNutritionTab,
   PRESSURE_SORE: ConsultationPressureSoreTab,
   DIALYSIS: ConsultationDialysisTab,
 };
