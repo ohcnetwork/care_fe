@@ -516,6 +516,7 @@ export const warrantyAmcValidityChip = (
   if (warrantyAmcEndDate < today) {
     return (
       <Chip
+        id="warranty-amc-expired-red"
         variant="danger"
         startIcon="l-times-circle"
         text="AMC/Warranty Expired"
@@ -524,6 +525,7 @@ export const warrantyAmcValidityChip = (
   } else if (days <= 30) {
     return (
       <Chip
+        id="warranty-amc-expiring-soon-orange"
         variant="custom"
         className="border-orange-300 bg-orange-100 text-orange-900"
         startIcon="l-exclamation-circle"
@@ -533,6 +535,7 @@ export const warrantyAmcValidityChip = (
   } else if (days <= 90) {
     return (
       <Chip
+        id="warranty-amc-expiring-soon-yellow"
         variant="warning"
         startIcon="l-exclamation-triangle"
         text="AMC/Warranty Expiring Soon"
