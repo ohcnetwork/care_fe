@@ -8,8 +8,13 @@ import {
   ILocalBodyByDistrict,
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
-import { LocationModel, WardModel } from "../Components/Facility/models";
+import {
+  FacilityModel,
+  LocationModel,
+  WardModel,
+} from "../Components/Facility/models";
 import { Prescription } from "../Components/Medicine/models";
+import { IComment, IResource } from "../Components/Resource/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 
@@ -201,6 +206,8 @@ const routes = {
 
   getAnyFacility: {
     path: "/api/v1/getallfacilities/{id}/",
+    method: "GET",
+    TRes: Type<FacilityModel>(),
   },
 
   updateFacility: {
@@ -802,15 +809,21 @@ const routes = {
     method: "PUT",
   },
   deleteResourceRecord: {
-    path: "/api/v1/resource",
+    path: "/api/v1/resource/{id}",
     method: "DELETE",
+    TRes: Type<{
+      detail?: string;
+    }>(),
   },
   listResourceRequests: {
     path: "/api/v1/resource/",
     method: "GET",
+    TRes: Type<PaginatedResponse<IResource>>(),
   },
   getResourceDetails: {
     path: "/api/v1/resource/{id}/",
+    method: "GET",
+    TRes: Type<IResource>(),
   },
   downloadResourceRequests: {
     path: "/api/v1/resource/",
@@ -819,6 +832,7 @@ const routes = {
   getResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
     method: "GET",
+    TRes: Type<PaginatedResponse<IComment>>(),
   },
   addResourceComments: {
     path: "/api/v1/resource/{id}/comment/",

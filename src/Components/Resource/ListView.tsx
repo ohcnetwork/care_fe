@@ -1,11 +1,6 @@
-import { useState, useEffect, lazy } from "react";
-
+import { useEffect, lazy } from "react";
 import { navigate } from "raviger";
-import { useDispatch } from "react-redux";
-import {
-  listResourceRequests,
-  downloadResourceRequests,
-} from "../../Redux/actions";
+import { downloadResourceRequests } from "../../Redux/actions";
 import ListFilter from "./ListFilter";
 import { formatFilter } from "./Commons";
 import BadgesList from "./BadgesList";
@@ -17,17 +12,15 @@ import { useTranslation } from "react-i18next";
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import dayjs from "../../Utils/dayjs";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
 
 export default function ListView() {
-  const dispatch: any = useDispatch();
   const { qParams, Pagination, FilterBadges, advancedFilter, resultsPerPage } =
     useFilters({});
-  const [data, setData] = useState<any[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const { t } = useTranslation();
 
   const onBoardViewBtnClick = () =>
@@ -35,30 +28,18 @@ export default function ListView() {
   const appliedFilters = formatFilter(qParams);
 
   const refreshList = () => {
-    fetchData();
+    refetch();
   };
 
-  const fetchData = () => {
-    setIsLoading(true);
-    dispatch(
-      listResourceRequests(
-        formatFilter({
-          ...qParams,
-          offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
-        }),
-        "resource-list-call"
-      )
-    ).then((res: any) => {
-      if (res && res.data) {
-        setData(res.data.results);
-        setTotalCount(res.data.count);
-      }
-      setIsLoading(false);
-    });
-  };
+  const { loading, data, refetch } = useQuery(routes.listResourceRequests, {
+    query: formatFilter({
+      ...qParams,
+      offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
+    }),
+  });
 
   useEffect(() => {
-    fetchData();
+    refetch();
   }, [
     qParams.status,
     qParams.facility,
@@ -218,7 +199,7 @@ export default function ListView() {
       <BadgesList {...{ appliedFilters, FilterBadges }} />
 
       <div className="px-1">
-        {isLoading ? (
+        {loading ? (
           <Loading />
         ) : (
           <div>
@@ -233,9 +214,9 @@ export default function ListView() {
             </div>
 
             <div className="mb-5 flex flex-wrap md:-mx-4">
-              {showResourceCardList(data)}
+              {data?.results && showResourceCardList(data?.results)}
             </div>
-            <Pagination totalCount={totalCount} />
+            <Pagination totalCount={data?.count || 0} />
           </div>
         )}
       </div>
