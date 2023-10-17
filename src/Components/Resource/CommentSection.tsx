@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { addResourceComments } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 import { formatDateTime } from "../../Utils/utils";
 import CircularProgress from "../Common/components/CircularProgress";
@@ -10,9 +8,9 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
 import { IComment } from "./models";
+import request from "../../Utils/request/request";
 
 const CommentSection = (props: { id: string }) => {
-  const dispatch: any = useDispatch();
   const [commentBox, setCommentBox] = useState("");
   const offset = 0;
   const limit = 8;
@@ -25,7 +23,7 @@ const CommentSection = (props: { id: string }) => {
     }
   );
 
-  const onSubmitComment = () => {
+  const onSubmitComment = async () => {
     const payload = {
       comment: commentBox,
     };
@@ -35,10 +33,15 @@ const CommentSection = (props: { id: string }) => {
       });
       return;
     }
-    dispatch(addResourceComments(props.id, payload)).then((_: any) => {
+
+    const { res, data } = await request(routes.addResourceComments, {
+      pathParams: { id: props.id },
+      body: payload,
+    });
+    if (res && data) {
       Notification.Success({ msg: "Comment added successfully" });
       resourceRefetch();
-    });
+    }
     setCommentBox("");
   };
 

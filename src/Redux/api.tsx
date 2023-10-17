@@ -101,6 +101,8 @@ const routes = {
 
   userList: {
     path: "/api/v1/users/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<UserModel>>(),
   },
 
   userListSkill: {
@@ -803,10 +805,14 @@ const routes = {
   createResource: {
     path: "/api/v1/resource/",
     method: "POST",
+    TRes: Type<IResource>(),
+    TBody: Type<Partial<IResource>>(),
   },
   updateResource: {
-    path: "/api/v1/resource",
+    path: "/api/v1/resource/{id}",
     method: "PUT",
+    TRes: Type<IResource>(),
+    TBody: Type<Partial<IResource>>(),
   },
   deleteResourceRecord: {
     path: "/api/v1/resource/{id}",
@@ -837,6 +843,8 @@ const routes = {
   addResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
     method: "POST",
+    TRes: Type<IComment>(),
+    TBody: Type<Partial<IComment>>(),
   },
 
   // Assets endpoints
