@@ -162,7 +162,7 @@ export default function MedicineAdministrationTableRow({
         </DialogModal>
       )}
       <td
-        className="bg-gray-white sticky left-0 z-10 cursor-pointer py-3 pl-4 text-left transition-all duration-200 ease-in-out group-hover:bg-primary-100"
+        className="bg-gray-white sticky left-0 z-10 cursor-pointer bg-white py-3 pl-4 text-left transition-all duration-200 ease-in-out group-hover:bg-primary-100"
         onClick={() => setShowDetails(true)}
       >
         <div className="flex flex-col gap-1 lg:flex-row lg:justify-between lg:gap-2">

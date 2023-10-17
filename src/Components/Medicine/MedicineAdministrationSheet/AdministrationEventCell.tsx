@@ -33,37 +33,41 @@ export default function AdministrationEventCell({
     return (
       <Popover className="relative">
         <Popover.Button className="scale-100 transition-transform duration-200 ease-in-out hover:scale-110">
-          <div className="tooltip">
-            <div className="relative mx-auto max-w-min">
-              <CareIcon
-                icon="l-check-circle"
-                className="text-xl text-primary-500"
-              />
-              {administered.length > 1 && (
-                <span className="absolute -bottom-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary-500 text-xs font-semibold text-white">
-                  {administered.length}
+          {({ open }) => (
+            <div className="tooltip">
+              <div className="relative mx-auto max-w-min">
+                <CareIcon
+                  icon="l-check-circle"
+                  className="text-xl text-primary-500"
+                />
+                {administered.length > 1 && (
+                  <span className="absolute -bottom-1 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary-500 text-xs font-semibold text-white">
+                    {administered.length}
+                  </span>
+                )}
+              </div>
+              {hasComment && (
+                <CareIcon icon="l-notes" className="text-xl text-primary-500" />
+              )}
+              {!open && (
+                <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs">
+                  {administered.length === 1 ? (
+                    <p>
+                      Administered on{" "}
+                      <strong>
+                        {formatTime(administered[0].administered_date)}
+                      </strong>
+                    </p>
+                  ) : (
+                    <p>
+                      <strong>{administered.length}</strong> administrations
+                    </p>
+                  )}
+                  <p>Click to view details</p>
                 </span>
               )}
             </div>
-            {hasComment && (
-              <CareIcon icon="l-notes" className="text-xl text-primary-500" />
-            )}
-            <span className="tooltip-text tooltip-left translate-y-1/3 text-xs">
-              {administered.length === 1 ? (
-                <p>
-                  Administered on{" "}
-                  <strong>
-                    {formatTime(administered[0].administered_date)}
-                  </strong>
-                </p>
-              ) : (
-                <p>
-                  <strong>{administered.length}</strong> administrations
-                </p>
-              )}
-              <p>Click to view details</p>
-            </span>
-          </div>
+          )}
         </Popover.Button>
 
         <Transition

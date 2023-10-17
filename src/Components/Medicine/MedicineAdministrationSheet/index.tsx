@@ -11,8 +11,8 @@ import CareIcon from "../../../CAREUI/icons/CareIcon";
 import BulkAdminister from "./BulkAdminister";
 import useRangePagination from "../../../Common/hooks/useRangePagination";
 import MedicineAdministrationTable from "./AdministrationTable";
-import useIsScrollable from "../../../Common/hooks/useIsScrollable";
-import { classNames } from "../../../Utils/utils";
+import Loading from "../../Common/Loading";
+import ScrollOverlay from "../../../CAREUI/interactive/ScrollOverlay";
 
 interface Props {
   readonly?: boolean;
@@ -29,10 +29,13 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
 
   const filters = { is_prn, prescription_type: "REGULAR", limit: 100 };
 
-  const { data, refetch } = useQuery(MedicineRoutes.listPrescriptions, {
-    pathParams: { consultation },
-    query: { ...filters, discontinued: showDiscontinued ? undefined : false },
-  });
+  const { data, loading, refetch } = useQuery(
+    MedicineRoutes.listPrescriptions,
+    {
+      pathParams: { consultation },
+      query: { ...filters, discontinued: showDiscontinued ? undefined : false },
+    }
+  );
 
   const discontinuedCount = useQuery(MedicineRoutes.listPrescriptions, {
     pathParams: { consultation },
@@ -59,8 +62,6 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
     slots: (daysPerPage * 24) / 4, // Grouped by 4 hours
     defaultEnd: true,
   });
-
-  const { isScrollable, ref } = useIsScrollable([data?.results?.length]);
 
   return (
     <div>
@@ -95,10 +96,17 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
         }
       />
 
-      <div
-        className="relative max-h-[80vh] overflow-auto rounded-lg border border-black/10 shadow md:max-h-[90vh]"
-        ref={ref}
+      <ScrollOverlay
+        className="rounded-lg border shadow"
+        overlay={
+          <div className="flex items-center gap-2 pb-2">
+            <span className="text-sm">Scroll to view more prescriptions</span>
+            <CareIcon icon="l-arrow-down" className="animate-bounce text-2xl" />
+          </div>
+        }
+        disableOverlay={loading || !prescriptions?.length}
       >
+        {loading && <Loading />}
         {prescriptions?.length === 0 && <NoPrescriptions prn={is_prn} />}
 
         {!!prescriptions?.length && (
@@ -112,11 +120,10 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
         {!showDiscontinued && !!discontinuedCount && (
           <ButtonV2
             variant="secondary"
-            className="sticky left-0 z-10 w-full"
-            ghost
+            className="group sticky left-0 w-full rounded-b-lg rounded-t-none bg-gray-100"
             onClick={() => setShowDiscontinued(true)}
           >
-            <span className="flex w-full justify-start gap-1 text-sm">
+            <span className="flex w-full items-center justify-start gap-1 text-sm transition-all duration-200 ease-in-out group-hover:gap-3">
               <CareIcon icon="l-eye" className="text-lg" />
               <span>
                 Show <strong>{discontinuedCount}</strong> other discontinued
@@ -125,19 +132,7 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
             </span>
           </ButtonV2>
         )}
-
-        <div
-          className={classNames(
-            "sticky inset-x-0 bottom-0 z-10 flex items-end justify-center bg-gradient-to-t from-gray-900/90 to-transparent pb-2 text-white transition-all duration-500 ease-in-out",
-            isScrollable ? "h-16 opacity-75" : "h-0 opacity-0"
-          )}
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-sm">Scroll to view more prescriptions</span>
-            <CareIcon icon="l-arrow-down" className="animate-bounce text-2xl" />
-          </div>
-        </div>
-      </div>
+      </ScrollOverlay>
     </div>
   );
 };
