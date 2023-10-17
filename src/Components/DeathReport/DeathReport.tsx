@@ -16,30 +16,30 @@ import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 
 type DeathReport = {
-  name: string;
-  age: string;
-  gender: string;
-  address: string;
-  phone_number: string;
-  is_declared_positive: string;
-  date_declared_positive: Date | "";
-  test_type: string;
-  date_of_test: Date | "";
-  date_of_result: Date | "";
-  srf_id: string;
-  hospital_tested_in: string;
-  hospital_died_in: string;
-  date_of_admission: Date | "";
-  date_of_death: Date | "";
-  comorbidities: string;
-  history_clinical_course: string;
-  brought_dead: string;
-  home_or_cfltc: string;
-  is_vaccinated: string;
-  kottayam_confirmation_sent: string;
-  kottayam_sample_date: Date | "";
-  cause_of_death: string;
-  facility: string;
+  name?: string;
+  age?: string | number;
+  gender?: string;
+  address?: string;
+  phone_number?: string;
+  is_declared_positive?: string;
+  date_declared_positive: Date | string;
+  test_type?: string;
+  date_of_test?: Date | string;
+  date_of_result?: Date | string;
+  srf_id?: string;
+  hospital_tested_in?: string;
+  hospital_died_in?: string;
+  date_of_admission?: Date | string;
+  date_of_death?: Date | string;
+  comorbidities?: string;
+  history_clinical_course?: string;
+  brought_dead?: string;
+  home_or_cfltc?: string;
+  is_vaccinated?: string;
+  kottayam_confirmation_sent?: string;
+  kottayam_sample_date?: Date | string;
+  cause_of_death?: string;
+  facility?: string;
 };
 
 export default function PrintDeathReport(props: { id: string }) {
@@ -95,56 +95,43 @@ export default function PrintDeathReport(props: { id: string }) {
     }
   };
 
-  const {
-    res,
-    data: Rpatient,
-    loading: _isLoading,
-    refetch,
-  } = useQuery(routes.getPatient, { pathParams: { id } });
-
-  useEffect(() => {
-    if (res?.ok && Rpatient) {
-      setPatientName(Rpatient.name);
-      const patientGender = getPatientGender(Rpatient);
-      const patientAddress = getPatientAddress(Rpatient);
-      const patientComorbidities = getPatientComorbidities(Rpatient);
-      const data = {
-        ...Rpatient,
-        gender: patientGender,
-        address: patientAddress,
-        comorbidities: patientComorbidities,
-        is_declared_positive: Rpatient.is_declared_positive ? "Yes" : "No",
-        is_vaccinated: patientData.is_vaccinated ? "Yes" : "No",
-        cause_of_death: Rpatient.last_consultation?.discharge_notes || "",
-        hospital_died_in: Rpatient.last_consultation?.facility_name,
-        date_declared_positive: Rpatient.date_declared_positive
-          ? dayjs(Rpatient.date_declared_positive).toDate()
-          : "",
-        date_of_admission: Rpatient.last_consultation?.admission_date
-          ? dayjs(Rpatient.last_consultation?.admission_date).toDate()
-          : "",
-        date_of_test: Rpatient.date_of_test
-          ? dayjs(Rpatient.date_of_test).toDate()
-          : "",
-        date_of_result: Rpatient.date_of_result
-          ? dayjs(Rpatient.date_of_result).toDate()
-          : "",
-        date_of_death: Rpatient.last_consultation?.death_datetime
-          ? dayjs(Rpatient.last_consultation?.death_datetime).toDate()
-          : "",
-      };
-      setPatientData(data);
-    }
-  }, [Rpatient]);
-
-  useAbortableEffect(
-    (status: statusType) => {
-      if (!status.aborted) {
-        refetch();
+  const { loading: _isLoading } = useQuery(routes.getPatient, {
+    pathParams: { id },
+    onResponse(res) {
+      if (res.res?.ok && res) {
+        setPatientName(res.data?.name ?? "");
+        const patientGender = getPatientGender(res.data);
+        const patientAddress = getPatientAddress(res.data);
+        const patientComorbidities = getPatientComorbidities(res.data);
+        const data = {
+          ...res.data,
+          gender: patientGender,
+          address: patientAddress,
+          comorbidities: patientComorbidities,
+          is_declared_positive: res.data?.is_declared_positive ? "Yes" : "No",
+          is_vaccinated: res.data?.is_vaccinated ? "Yes" : "No",
+          cause_of_death: res.data?.last_consultation?.discharge_notes || "",
+          hospital_died_in: res.data?.last_consultation?.facility_name,
+          date_declared_positive: res.data?.date_declared_positive
+            ? dayjs(res.data?.date_declared_positive).toDate()
+            : "",
+          date_of_admission: res.data?.last_consultation?.admission_date
+            ? dayjs(res.data?.last_consultation?.admission_date).toDate()
+            : "",
+          date_of_test: res.data?.date_of_test
+            ? dayjs(res.data?.date_of_test).toDate()
+            : "",
+          date_of_result: res.data?.date_of_result
+            ? dayjs(res.data?.date_of_result).toDate()
+            : "",
+          date_of_death: res.data?.last_consultation?.death_datetime
+            ? dayjs(res.data?.last_consultation?.death_datetime).toDate()
+            : "",
+        };
+        setPatientData(data);
       }
     },
-    [refetch]
-  );
+  });
 
   const previewData = () => (
     <div className="my-4">
