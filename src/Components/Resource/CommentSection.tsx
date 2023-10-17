@@ -63,7 +63,6 @@ const CommentSection = (props: { id: string }) => {
           <PaginatedList
             route={routes.getResourceComments}
             pathParams={{ id: props.id }}
-            query={{ limit, offset }}
           >
             {() => (
               <div>

@@ -174,10 +174,12 @@ export default function ResourceBoard({
       if (res && data) {
         setCurrentPage(1);
       }
+      setIsLoading((loading) => reduceLoading("COMPLETE", loading));
     },
   });
 
   useEffect(() => {
+    setIsLoading((loading) => reduceLoading("BOARD", loading));
     refetch();
   }, [
     board,
