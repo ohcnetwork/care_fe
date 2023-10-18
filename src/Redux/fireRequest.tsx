@@ -1,6 +1,6 @@
 import * as Notification from "../Utils/Notifications.js";
 
-import { isEmpty, omitBy } from "lodash";
+import { isEmpty, omitBy } from "lodash-es";
 
 import { LocalStorageKeys } from "../Common/constants";
 import api from "./api";

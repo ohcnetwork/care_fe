@@ -1,7 +1,7 @@
 import { FieldChangeEvent } from "../../Form/FormFields/Utils";
 import { SelectFormField } from "../../Form/FormFields/SelectFormField";
 import TextFormField from "../../Form/FormFields/TextFormField";
-import _ from "lodash";
+import { set } from "lodash-es";
 import { useState } from "react";
 
 const TestRow = ({ data, value, onChange, i }: any) => {
@@ -59,7 +59,7 @@ export const TestTable = ({ title, data, state, dispatch }: any) => {
 
   const handleValueChange = (value: any, name: string) => {
     const form = { ...state };
-    _.set(form, name, value);
+    set(form, name, value);
     dispatch({ type: "set_form", form });
   };
 
