@@ -491,6 +491,7 @@ export const TELEMEDICINE_ACTIONS = [
   { id: 60, text: "COMPLETE", desc: "Complete" },
   { id: 70, text: "REVIEW", desc: "Review" },
   { id: 80, text: "NOT_REACHABLE", desc: "Not Reachable" },
+  { id: 90, text: "DISCHARGE_RECOMMENDED", desc: "Discharge Recommended" },
 ];
 
 export const FRONTLINE_WORKER = [

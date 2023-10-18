@@ -668,13 +668,6 @@ export const externalResultList = (params: object, altKey: string) => {
 export const externalResult = (pathParam: object) => {
   return fireRequest("externalResult", [], {}, pathParam);
 };
-export const externalResultUploadCsv = (params: object) => {
-  return fireRequest("externalResultUploadCsv", [], params);
-};
-
-export const deleteExternalResult = (id: string) => {
-  return fireRequest("deleteExternalResult", [id], {});
-};
 
 export const updateExternalResult = (id: number, params: object) => {
   return fireRequest("updateExternalResult", [], params, { id });
@@ -841,46 +834,14 @@ export const listAssets = (params: object) =>
   fireRequest("listAssets", [], params);
 export const createAsset = (params: object) =>
   fireRequest("createAsset", [], params);
-export const getAssetUserLocation = (params: object) =>
-  fireRequest("getAssetUserLocation", [], params);
-export const createAssetUserLocation = (params: object) =>
-  fireRequest("createAssetUserLocation", [], params);
 export const getAsset = (id: string) =>
   fireRequest("getAsset", [], {}, { external_id: id });
 export const deleteAsset = (id: string) =>
   fireRequest("deleteAsset", [], {}, { external_id: id });
 export const updateAsset = (id: string, params: object) =>
   fireRequest("updateAsset", [], params, { external_id: id });
-export const partialUpdateAsset = (id: string, params: object) =>
-  fireRequest("partialUpdateAsset", [], params, { external_id: id });
 export const operateAsset = (id: string, params: object) =>
   fireRequest("operateAsset", [], params, { external_id: id });
-
-export const listAssetTransaction = (params: object) =>
-  fireRequest("listAssetTransaction", [], params);
-export const getAssetTransaction = (id: string) =>
-  fireRequest("getAssetTransaction", [], {}, { id });
-
-export const listAssetService = (params: object, asset_external_id: string) =>
-  fireRequest("listAssetService", [], params, { asset_external_id });
-export const getAssetService = (
-  params: object,
-  asset_external_id: string,
-  external_id: string
-) =>
-  fireRequest("getAssetService", [], params, {
-    asset_external_id,
-    external_id,
-  });
-export const updateAssetService = (
-  asset_external_id: string,
-  external_id: string,
-  params: object
-) =>
-  fireRequest("updateAssetService", [], params, {
-    asset_external_id,
-    external_id,
-  });
 
 // ABDM related
 export const generateAadhaarOtp = (aadhaar: string) =>
