@@ -186,6 +186,7 @@ export interface LocationModel {
   id?: string;
   name?: string;
   description?: string;
+  middleware_address?: string;
   facility?: {
     name: string;
   };

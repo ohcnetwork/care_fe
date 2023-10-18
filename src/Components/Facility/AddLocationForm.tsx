@@ -25,12 +25,14 @@ export const AddLocationForm = (props: LocationFormProps) => {
   const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [name, setName] = useState("");
+  const [middlewareAddress, setMiddlewareAddress] = useState("");
   const [description, setDescription] = useState("");
   const [facilityName, setFacilityName] = useState("");
   const [locationName, setLocationName] = useState("");
   const [errors, setErrors] = useState<any>({
     name: "",
     description: "",
+    middlewareAddress: "",
   });
   const headerText = !locationId ? "Add Location" : "Update Location";
   const buttonText = !locationId ? "Add Location" : "Update Location";
@@ -51,6 +53,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
         setName(res?.data?.name || "");
         setLocationName(res?.data?.name || "");
         setDescription(res?.data?.description || "");
+        setMiddlewareAddress(res?.data?.middleware_address || "");
       }
       setIsLoading(false);
     }
@@ -62,10 +65,21 @@ export const AddLocationForm = (props: LocationFormProps) => {
     const error = {
       name: "",
       description: "",
+      middlewareAddress: "",
     };
 
     if (name.trim().length === 0) {
       error.name = "Name is required";
+      formValid = false;
+    }
+
+    if (
+      middlewareAddress &&
+      middlewareAddress.match(
+        /^(?!https?:\/\/)[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$/
+      ) === null
+    ) {
+      error.middlewareAddress = "Invalid Middleware Address";
       formValid = false;
     }
 
@@ -83,6 +97,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
     const data = {
       name,
       description,
+      middleware_address: middlewareAddress,
     };
 
     const res = await dispatchAction(
@@ -157,8 +172,18 @@ export const AddLocationForm = (props: LocationFormProps) => {
                   error={errors.description}
                 />
               </div>
+              <div>
+                <TextFormField
+                  name="Location Middleware Address"
+                  type="text"
+                  label="Location Middleware Address"
+                  value={middlewareAddress}
+                  onChange={(e) => setMiddlewareAddress(e.value)}
+                  error={errors.middlewareAddress}
+                />
+              </div>
             </div>
-            <div className="mt-4 cui-form-button-group">
+            <div className="cui-form-button-group mt-4">
               <Cancel
                 onClick={() =>
                   navigate(`/facility/${facilityId}/location`, {

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { Combobox } from "@headlessui/react";
-import { debounce } from "lodash";
+import { debounce } from "lodash-es";
 import { DropdownTransition } from "../Common/components/HelperComponents";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import {
