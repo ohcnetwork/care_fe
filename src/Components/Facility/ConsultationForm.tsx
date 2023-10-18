@@ -1011,7 +1011,7 @@ export const ConsultationForm = (props: any) => {
                     <>
                       <div
                         id="referred_from_facility"
-                        className="col-span-6 mb-5 md:col-span-3"
+                        className="col-span-6 mb-5"
                         ref={fieldRef["referred_from_facility"]}
                       >
                         <FieldLabel required>
@@ -1027,7 +1027,7 @@ export const ConsultationForm = (props: any) => {
                         />
                       </div>
                       <div
-                        className="col-span-6 md:col-span-3"
+                        className="col-span-6"
                         ref={fieldRef["referred_by_external"]}
                       >
                         <TextFormField
@@ -1257,7 +1257,7 @@ export const ConsultationForm = (props: any) => {
                         "col-span-6",
                         state.form.route_to_facility &&
                           [20, 30].includes(state.form.route_to_facility) &&
-                          "md:col-span-3"
+                          "xl:col-span-3"
                       )}
                       ref={fieldRef["admission_date"]}
                     >
@@ -1284,7 +1284,7 @@ export const ConsultationForm = (props: any) => {
                         className={classNames(
                           "col-span-6",
                           ["A", "DC"].includes(state.form.suggestion) &&
-                            "md:col-span-3"
+                            "xl:col-span-3"
                         )}
                         ref={fieldRef["icu_admission_date"]}
                       >
@@ -1298,9 +1298,6 @@ export const ConsultationForm = (props: any) => {
                               "YYYY-MM-DDTHH:mm"
                             )
                           }
-                          max={dayjs(state.form.admission_date).format(
-                            "YYYY-MM-DDTHH:mm"
-                          )}
                         />
                       </div>
                     )}
