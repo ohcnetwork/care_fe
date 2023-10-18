@@ -98,10 +98,11 @@ export const NeurologicalTable = (props: any) => {
   const LOC_OPTIONS = [
     { id: 0, value: "Unknown" },
     { id: 5, value: "Alert" },
-    { id: 10, value: "Drowsy" },
-    { id: 15, value: "Stuporous" },
-    { id: 20, value: "Comatose" },
-    { id: 25, value: "Cannot Be Assessed" },
+    { id: 10, value: "Responds to Voice" },
+    { id: 15, value: "Responds to Pain" },
+    { id: 20, value: "Unresponsive" },
+    { id: 25, value: "Agitated or Confused" },
+    { id: 30, value: "Onset of Agitation and Confusion" },
   ];
 
   const REACTION_OPTIONS = [
