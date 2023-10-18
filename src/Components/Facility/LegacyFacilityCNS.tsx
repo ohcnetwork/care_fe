@@ -16,7 +16,7 @@ import Pagination from "../Common/Pagination";
 import { PatientModel } from "../Patient/models";
 import { FacilityModel } from "./models";
 import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import { uniqBy } from "lodash";
+import { uniqBy } from "lodash-es";
 import DialogModal from "../Common/Dialog";
 import { LegacyMonitorCard } from "./LegacyMonitorCard";
 
