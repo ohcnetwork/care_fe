@@ -24,7 +24,7 @@ function useContextualized<TItem>() {
   const ctx = useContext(context);
 
   if (ctx === null) {
-    throw new Error("PaginatedList must be used within a PaginatedList");
+    throw new Error("Component must be used within a PaginatedList");
   }
 
   return ctx as PaginatedListContext<TItem>;
