@@ -88,11 +88,18 @@ export default function PrescriptionDetailCard({
           <Detail className="col-span-5" label={t("medicine")}>
             {prescription.medicine_object?.name ?? prescription.medicine_old}
           </Detail>
-          <Detail className="col-span-5 md:col-span-2" label={t("route")}>
+          <Detail
+            className="col-span-5 overflow-hidden md:col-span-2"
+            label={t("route")}
+          >
             {prescription.route &&
               t("PRESCRIPTION_ROUTE_" + prescription.route)}
           </Detail>
-          <Detail className="col-span-4 md:col-span-2" label={t("dosage")}>
+
+          <Detail
+            className="col-span-4 overflow-hidden md:col-span-2"
+            label={t("dosage")}
+          >
             {prescription.dosage}
           </Detail>
 
@@ -120,7 +127,7 @@ export default function PrescriptionDetailCard({
           ) : (
             <>
               <Detail
-                className="col-span-4 md:col-span-2"
+                className="col-span-4 overflow-hidden md:col-span-2"
                 label={t("frequency")}
               >
                 {prescription.frequency &&
@@ -129,7 +136,10 @@ export default function PrescriptionDetailCard({
                       prescription.frequency.toUpperCase()
                   )}
               </Detail>
-              <Detail className="col-span-4 md:col-span-2" label={t("days")}>
+              <Detail
+                className="col-span-4 overflow-hidden md:col-span-2"
+                label={t("days")}
+              >
                 {prescription.days}
               </Detail>
             </>
