@@ -1,4 +1,3 @@
-import _ from "lodash";
 import { navigate } from "raviger";
 import { lazy, useState } from "react";
 import CSVReader from "react-csv-reader";
@@ -126,13 +125,13 @@ export default function ExternalResultUpload() {
                   <div className="mr-2 p-2">{index + 1}</div>
                   <div className="mr-2 p-2 md:w-1/3">{data.name}</div>
 
-                  <div className="mr-2 p-2">
+                  <div className="mr-2 p-2 capitalize">
                     {errors && errors.length !== 0
                       ? errors.map((error: any) => {
                           return (
                             <div key={error[0][0]}>
-                              {_.startCase(_.camelCase(error[0][0]))} -{" "}
-                              {error[0][1]}
+                              {error[0][0].toLowerCase()} -{" "}
+                              {error[0][1].toLowerCase()}
                             </div>
                           );
                         })

@@ -1,19 +1,6 @@
 import * as Notify from "../../Utils/Notifications";
 
 import Dropdown, { DropdownItem } from "../Common/components/Menu";
-import {
-  checkAndGenerateMobileOtp,
-  confirmWithAadhaarOtp,
-  confirmWithMobileOtp,
-  createHealthId,
-  generateAadhaarOtp,
-  initiateAbdmAuthentication,
-  linkViaQR,
-  resentAadhaarOtp,
-  searchByHealthId,
-  verifyAadhaarOtp,
-  verifyMobileOtp,
-} from "../../Redux/actions";
 import { useEffect, useState } from "react";
 
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -24,7 +11,8 @@ import OtpFormField from "../Form/FormFields/OtpFormField";
 import QRScanner from "../Common/QRScanner";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { classNames } from "../../Utils/utils";
-import { useDispatch } from "react-redux";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 
 export const validateRule = (
   condition: boolean,
@@ -144,8 +132,6 @@ const ScanABHAQRSection = ({
   onSuccess,
   closeModal,
 }: ScanABHAQRSectionProps) => {
-  const dispatch = useDispatch<any>();
-
   const [qrValue, setQrValue] = useState("");
   const [authMethods, setAuthMethods] = useState<string[]>([]);
   const [selectedAuthMethod, setSelectedAuthMethod] = useState("");
@@ -187,23 +173,23 @@ const ScanABHAQRSection = ({
 
           try {
             const abha = JSON.parse(value);
-            const res = await dispatch(linkViaQR(abha, patientId));
+            const { res, data } = await request(routes.abha.linkViaQR, {
+              body: { ...abha, patientId },
+            });
 
             if (res?.status === 200 || res?.status === 202) {
               Notify.Success({ msg: "Request sent successfully" });
               onSuccess?.({
-                ...res.data,
+                ...data,
                 abha_profile: {
-                  ...res.data?.abha_profile,
-                  healthIdNumber: res.data?.abha_profile?.abha_number,
-                  healthId: res.data?.abha_profile?.health_id,
+                  ...data?.abha_profile,
+                  healthIdNumber: data?.abha_profile?.abha_number,
+                  healthId: data?.abha_profile?.health_id,
                   mobile: abha?.mobile,
                   monthOfBirth:
-                    res.data?.abha_profile?.date_of_birth?.split("-")[1],
-                  dayOfBirth:
-                    res.data?.abha_profile?.date_of_birth?.split("-")[2],
-                  yearOfBirth:
-                    res.data?.abha_profile?.date_of_birth?.split("-")[0],
+                    data?.abha_profile?.date_of_birth?.split("-")[1],
+                  dayOfBirth: data?.abha_profile?.date_of_birth?.split("-")[2],
+                  yearOfBirth: data?.abha_profile?.date_of_birth?.split("-")[0],
                 },
               });
             } else {
@@ -256,29 +242,55 @@ const ScanABHAQRSection = ({
               disabled={otp.length !== 6}
               onClick={async () => {
                 let response = null;
+                let Rdata = null;
+                let Rerror = null;
 
                 switch (selectedAuthMethod) {
                   case "MOBILE_OTP":
-                    response = await dispatch(
-                      confirmWithMobileOtp(txnId, otp, patientId)
-                    );
+                    {
+                      const { res, data, error } = await request(
+                        routes.abha.confirmWithMobileOtp,
+                        {
+                          body: {
+                            otp: otp,
+                            txnId: txnId,
+                            patientId: patientId,
+                          },
+                        }
+                      );
+                      response = res;
+                      Rdata = data;
+                      Rerror = error;
+                    }
                     break;
 
                   case "AADHAAR_OTP":
-                    response = await dispatch(
-                      confirmWithAadhaarOtp(txnId, otp, patientId)
-                    );
+                    {
+                      const { res, data, error } = await request(
+                        routes.abha.confirmWithAadhaarOtp,
+                        {
+                          body: {
+                            otp: otp,
+                            txnId: txnId,
+                            patientId: patientId,
+                          },
+                        }
+                      );
+                      response = res;
+                      Rdata = data;
+                      Rerror = error;
+                    }
                     break;
                 }
 
-                if (response.status === 200) {
-                  onSuccess?.(response.data);
+                if (response?.status === 200) {
+                  onSuccess?.(Rdata);
                   Notify.Success({
                     msg: "ABHA Number linked successfully",
                   });
                 } else {
                   Notify.Error({
-                    msg: response?.message ?? "Something went wrong!",
+                    msg: Rerror ?? "Something went wrong!",
                   });
                 }
               }}
@@ -290,13 +302,14 @@ const ScanABHAQRSection = ({
               {authMethods.map((method) => (
                 <DropdownItem
                   onClick={async () => {
-                    const response = await dispatch(
-                      initiateAbdmAuthentication(method, qrValue)
+                    const { res, data } = await request(
+                      routes.abha.initiateAbdmAuthentication,
+                      { body: { authMethod: method, healthid: qrValue } }
                     );
 
-                    if (response.status === 200 && response?.data?.txnId) {
+                    if (res?.status === 200 && data?.txnId) {
                       setSelectedAuthMethod(method);
-                      setTxnId(response.data.txnId);
+                      setTxnId(data.txnId);
                     }
                   }}
                 >
@@ -308,11 +321,18 @@ const ScanABHAQRSection = ({
             <ButtonV2
               disabled={!qrValue || !acceptedDisclaimer}
               onClick={async () => {
-                const response = await dispatch(searchByHealthId(qrValue));
+                const { res, data } = await request(
+                  routes.abha.searchByHealthId,
+                  {
+                    body: {
+                      healthId: qrValue,
+                    },
+                  }
+                );
 
-                if (response.status === 200 && response?.data?.authMethods) {
+                if (res?.status === 200 && data?.authMethods) {
                   setAuthMethods(
-                    response.data.authMethods?.filter?.((method: string) =>
+                    data.authMethods?.filter?.((method: string) =>
                       supportedAuthMethods.find(
                         (supported) => supported === method
                       )
@@ -339,8 +359,6 @@ const VerifyAadhaarSection = ({
   onVerified,
   onSignin,
 }: VerifyAadhaarSectionProps) => {
-  const dispatch = useDispatch<any>();
-
   const [aadhaarNumber, setAadhaarNumber] = useState("");
   const [aadhaarNumberError, setAadhaarNumberError] = useState<string>();
 
@@ -382,17 +400,22 @@ const VerifyAadhaarSection = ({
     if (!validateAadhaar()) return;
 
     setIsSendingOtp(true);
-    const res = await dispatch(generateAadhaarOtp(aadhaarNumber));
+
+    const { res, data } = await request(routes.abha.generateAadhaarOtp, {
+      body: {
+        aadhaar: aadhaarNumber,
+      },
+    });
     setIsSendingOtp(false);
 
-    if (res.status === 200 && res.data) {
-      const { txnId } = res.data;
+    if (res?.status === 200 && data) {
+      const { txnId } = data;
       setTxnId(txnId);
       Notify.Success({
         msg: "OTP has been sent to the mobile number registered with the Aadhar number.",
       });
     } else {
-      Notify.Error({ msg: JSON.stringify(res.data) });
+      Notify.Error({ msg: JSON.stringify(data) });
     }
   };
 
@@ -400,16 +423,20 @@ const VerifyAadhaarSection = ({
     if (!validateAadhaar() || !txnId) return;
 
     setIsSendingOtp(true);
-    const res = await dispatch(resentAadhaarOtp(txnId));
+    const { res, data } = await request(routes.abha.generateAadhaarOtp, {
+      body: {
+        txnId: txnId,
+      },
+    });
     setIsSendingOtp(false);
 
-    if (res.status === 200 && res.data.txnId) {
-      setTxnId(res.data.txnId);
+    if (res?.status === 200 && data?.txnId) {
+      setTxnId(data.txnId);
       Notify.Success({
         msg: "OTP has been resent to the mobile number registered with the Aadhar number.",
       });
     } else {
-      Notify.Error({ msg: JSON.stringify(res.data) });
+      Notify.Error({ msg: JSON.stringify(data) });
     }
   };
 
@@ -430,11 +457,16 @@ const VerifyAadhaarSection = ({
     if (!validateOtp() || !txnId) return;
 
     setIsVerifyingOtp(true);
-    const res = await dispatch(verifyAadhaarOtp(txnId, otp));
+    const { res, data } = await request(routes.abha.verifyAadhaarOtp, {
+      body: {
+        otp: otp,
+        txnId: txnId,
+      },
+    });
     setIsVerifyingOtp(false);
 
-    if (res.status === 200 && res.data.txnId) {
-      setTxnId(res.data.txnId);
+    if (res?.status === 200 && data?.txnId) {
+      setTxnId(data.txnId);
       Notify.Success({ msg: "OTP verified" });
       setIsVerified(true);
     } else {
@@ -563,8 +595,6 @@ const VerifyMobileSection = ({
   onVerified,
   patientMobile,
 }: VerifyMobileSectionProps) => {
-  const dispatch = useDispatch<any>();
-
   const [mobile, setMobile] = useState(() => patientMobile || "");
   const [mobileError, setMobileError] = useState<string>();
 
@@ -602,11 +632,16 @@ const VerifyMobileSection = ({
 
     setOtpDispatched(false);
     setIsSendingOtp(true);
-    const res = await dispatch(checkAndGenerateMobileOtp(txnId, mobile));
+    const { res, data } = await request(routes.abha.checkAndGenerateMobileOtp, {
+      body: {
+        mobile: mobile,
+        txnId: txnId,
+      },
+    });
     setIsSendingOtp(false);
 
-    if (res.status === 200 && res.data) {
-      const { txnId, mobileLinked } = res.data;
+    if (res?.status === 200 && data) {
+      const { txnId, mobileLinked } = data;
       setTxnId(txnId);
 
       if (mobileLinked) {
@@ -621,7 +656,7 @@ const VerifyMobileSection = ({
         });
       }
     } else {
-      Notify.Error({ msg: JSON.stringify(res.data) });
+      Notify.Error({ msg: JSON.stringify(data) });
     }
   };
 
@@ -642,11 +677,16 @@ const VerifyMobileSection = ({
     if (!validateOtp()) return;
 
     setIsVerifyingOtp(true);
-    const res = await dispatch(verifyMobileOtp(txnId, otp));
+    const { res, data } = await request(routes.abha.verifyMobileOtp, {
+      body: {
+        txnId: txnId,
+        otp: otp,
+      },
+    });
     setIsVerifyingOtp(false);
 
-    if (res.status === 200 && res.data.txnId) {
-      setTxnId(res.data.txnId);
+    if (res?.status === 200 && data?.txnId) {
+      setTxnId(data.txnId);
       Notify.Success({ msg: "OTP verified" });
       setIsVerified(true);
     } else {
@@ -718,21 +758,24 @@ const CreateHealthIDSection = ({
   onCreateSuccess,
   patientId,
 }: CreateHealthIDSectionProps) => {
-  const dispatch = useDispatch<any>();
   const [healthId, setHealthId] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [isHealthIdInputInFocus, setIsHealthIdInputInFocus] = useState(false);
 
   const handleCreateHealthId = async () => {
     setIsCreating(true);
-    const res = await dispatch(
-      createHealthId({ txnId: transactionId, patientId, healthId })
-    );
-    if (res.status === 200) {
+    const { res, data } = await request(routes.abha.createHealthId, {
+      body: {
+        healthId: healthId,
+        txnId: transactionId,
+        patientId: patientId,
+      },
+    });
+    if (res?.status === 200) {
       Notify.Success({ msg: "Abha Address created" });
-      onCreateSuccess(res.data);
+      onCreateSuccess(data);
     } else {
-      Notify.Error({ msg: JSON.stringify(res.data) });
+      Notify.Error({ msg: JSON.stringify(data) });
     }
     setIsCreating(false);
   };
