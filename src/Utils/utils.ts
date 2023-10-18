@@ -85,8 +85,8 @@ export const formatDateTime = (date: DateLike, format?: string) => {
     return obj.format(format);
   }
 
-  // formatDate if hours, minutes and seconds are 0
-  if (obj.hour() === 0 && obj.minute() === 0 && obj.second() === 0) {
+  // If time is 00:00:00 of local timezone, format as date only
+  if (obj.isSame(obj.startOf("day"))) {
     return obj.format(DATE_FORMAT);
   }
 
