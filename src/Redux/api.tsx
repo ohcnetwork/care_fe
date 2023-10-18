@@ -19,6 +19,17 @@ import {
 } from "../Components/ABDM/models";
 import { AssetData } from "../Components/Assets/AssetTypes";
 import {
+  AssetBedBody,
+  AssetBedModel,
+  AssetData,
+  AssetLocationObject,
+  AssetService,
+  AssetServiceUpdate,
+  AssetTransaction,
+  AssetUpdate,
+} from "../Components/Assets/AssetTypes";
+import { FacilityModel, LocationModel, WardModel } from "../Components/Facility/models";
+import {
   IDeleteExternalResult,
   IExternalResult,
   IExternalResultCsv,
@@ -26,7 +37,6 @@ import {
   ILocalBodyByDistrict,
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
-import { LocationModel, WardModel } from "../Components/Facility/models";
 import { Prescription } from "../Components/Medicine/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
@@ -215,10 +225,14 @@ const routes = {
 
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
+    method: "GET",
+    TRes: Type<FacilityModel>(),
   },
 
   getAnyFacility: {
     path: "/api/v1/getallfacilities/{id}/",
+    method: "GET",
+    TRes: Type<FacilityModel>(),
   },
 
   updateFacility: {
@@ -252,6 +266,7 @@ const routes = {
   getFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "GET",
+    TRes: Type<AssetLocationObject>(),
   },
   updateFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
@@ -266,10 +281,13 @@ const routes = {
   listAssetBeds: {
     path: "/api/v1/assetbed/",
     method: "GET",
+    TRes: Type<PaginatedResponse<AssetBedModel>>(),
   },
   createAssetBed: {
     path: "/api/v1/assetbed/",
     method: "POST",
+    TRes: Type<AssetData>(),
+    TBody: Type<AssetBedBody>(),
   },
   getAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
@@ -282,6 +300,8 @@ const routes = {
   partialUpdateAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "PATCH",
+    TRes: Type<AssetBedModel>(),
+    TBody: Type<AssetBedBody>(),
   },
   deleteAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
@@ -848,6 +868,7 @@ const routes = {
   listAssets: {
     path: "/api/v1/asset",
     method: "GET",
+    TRes: Type<PaginatedResponse<AssetData>>(),
   },
   createAsset: {
     path: "/api/v1/asset/",
@@ -869,6 +890,7 @@ const routes = {
   deleteAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "DELETE",
+    TRes: Type<AssetData>(),
   },
   updateAsset: {
     path: "/api/v1/asset/{external_id}/",
@@ -877,6 +899,8 @@ const routes = {
   partialUpdateAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "PATCH",
+    TRes: Type<AssetData>(),
+    TBody: Type<AssetUpdate>(),
   },
 
   // Asset transaction endpoints
@@ -884,6 +908,7 @@ const routes = {
   listAssetTransaction: {
     path: "/api/v1/asset_transaction/",
     method: "GET",
+    TRes: Type<PaginatedResponse<AssetTransaction>>(),
   },
   getAssetTransaction: {
     path: "/api/v1/asset_transaction/{id}",
@@ -895,6 +920,7 @@ const routes = {
   listAssetService: {
     path: "/api/v1/asset/{asset_external_id}/service_records/",
     method: "GET",
+    TRes: Type<PaginatedResponse<AssetService>>(),
   },
   getAssetService: {
     path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
@@ -903,6 +929,8 @@ const routes = {
   updateAssetService: {
     path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
     method: "PUT",
+    TRes: Type<AssetService>(),
+    TBody: Type<AssetServiceUpdate>(),
   },
 
   abha: {
