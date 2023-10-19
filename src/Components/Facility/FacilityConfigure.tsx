@@ -57,7 +57,6 @@ export const FacilityConfigure = (props: IProps) => {
     pathParams: { id: facilityId },
     onResponse: (res) => {
       if (res.data) {
-        console.log(res.data);
         const formData = {
           name: res.data.name,
           state: res.data.state,
