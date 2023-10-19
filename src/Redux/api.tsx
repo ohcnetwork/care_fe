@@ -17,7 +17,6 @@ import {
   IinitiateAbdmAuthenticationTBody,
   IpartialUpdateHealthFacilityTBody,
 } from "../Components/ABDM/models";
-import { AssetData } from "../Components/Assets/AssetTypes";
 import {
   AssetBedBody,
   AssetBedModel,
@@ -28,7 +27,11 @@ import {
   AssetTransaction,
   AssetUpdate,
 } from "../Components/Assets/AssetTypes";
-import { FacilityModel, LocationModel, WardModel } from "../Components/Facility/models";
+import {
+  FacilityModel,
+  LocationModel,
+  WardModel,
+} from "../Components/Facility/models";
 import {
   IDeleteExternalResult,
   IExternalResult,
@@ -242,8 +245,10 @@ const routes = {
   },
 
   partialUpdateFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{id}/",
     method: "PATCH",
+    TRes: Type<FacilityModel>(),
+    TBody: Type<Partial<FacilityModel>>(),
   },
 
   deleteFacilityCoverImage: {
