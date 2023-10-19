@@ -2,7 +2,7 @@
 
 import { cy, describe, before, beforeEach, it, afterEach } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
-import { UserPage } from "../../pageobject/Users/usersearch";
+import { UserPage } from "../../pageobject/Users/UserSearch";
 
 describe("Asset Tab", () => {
   const userPage = new UserPage();
