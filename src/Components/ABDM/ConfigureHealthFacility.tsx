@@ -217,7 +217,7 @@ export const ConfigureHealthFacility = (props: any) => {
             />
           </div>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
           <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
           <Submit
             onClick={handleSubmit}

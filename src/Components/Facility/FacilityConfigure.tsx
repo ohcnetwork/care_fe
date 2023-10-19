@@ -137,7 +137,7 @@ export const FacilityConfigure = (props: IProps) => {
       crumbsReplacements={{
         [facilityId]: { name: state.form.name },
       }}
-      className="max-w-3xl overflow-x-hidden"
+      className="w-full overflow-x-hidden"
     >
       <div className="cui-card mt-4">
         <form onSubmit={handleSubmit}>
@@ -153,7 +153,7 @@ export const FacilityConfigure = (props: IProps) => {
               />
             </div>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
             <Submit onClick={handleSubmit} label="Update" />
           </div>
