@@ -6,6 +6,7 @@ import { mergeRequestOptions } from "./utils";
 export interface QueryOptions<TData> extends RequestOptions<TData> {
   prefetch?: boolean;
   refetchOnWindowFocus?: boolean;
+  refetchOnUpdate?: boolean;
 }
 
 export default function useQuery<TData>(
@@ -41,6 +42,16 @@ export default function useQuery<TData>(
       runQuery();
     }
   }, [runQuery, options?.prefetch]);
+
+  useEffect(() => {
+    if (options?.refetchOnUpdate) {
+      runQuery();
+
+      // window.addEventListener("focus", onFocus);
+
+      // return () => window.removeEventListener("focus", onFocus);
+    }
+  }, [runQuery, options?.refetchOnUpdate]);
 
   useEffect(() => {
     if (options?.refetchOnWindowFocus) {

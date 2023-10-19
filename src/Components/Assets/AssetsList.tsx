@@ -47,6 +47,7 @@ const AssetsList = () => {
   const [asset_type, setAssetType] = useState<string>();
   const [status, setStatus] = useState<string>();
   const [facilityName, setFacilityName] = useState<string>();
+  const [facility_location, setLocation] = useState("");
   const [asset_class, setAssetClass] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
@@ -89,6 +90,10 @@ const AssetsList = () => {
   });
 
   useEffect(() => {
+    setFacilityName(qParams.facility);
+  }, [qParams.facility]);
+
+  useEffect(() => {
     setAssetType(qParams.asset_type);
   }, [qParams.asset_type]);
 
@@ -100,13 +105,18 @@ const AssetsList = () => {
     setAssetClass(qParams.asset_class);
   }, [qParams.asset_class]);
 
-  const { data: location } = useQuery(routes.getFacilityAssetLocation, {
+  const { data: locationData } = useQuery(routes.getFacilityAssetLocation, {
     pathParams: {
       facility_external_id: String(qParams.facility),
       external_id: String(qParams.location),
     },
     prefetch: !!(qParams.facility && qParams.location),
+    refetchOnUpdate: true,
   });
+
+  useEffect(() => {
+    setLocation(locationData?.name ?? "");
+  }, [locationData]);
 
   const getAssetIdFromQR = async (assetUrl: string) => {
     try {
@@ -370,7 +380,7 @@ const AssetsList = () => {
               value("Asset Type", "asset_type", asset_type ?? ""),
               value("Asset Class", "asset_class", asset_class ?? ""),
               value("Status", "status", status?.replace(/_/g, " ") ?? ""),
-              value("Location", "location", location?.name ?? ""),
+              value("Location", "location", facility_location ?? ""),
               value(
                 "Warranty AMC End Of Validity Before",
                 "warranty_amc_end_of_validity_before",
