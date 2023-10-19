@@ -1,4 +1,4 @@
-import { lazy, useEffect, useReducer, useState } from "react";
+import { lazy, useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
@@ -7,6 +7,7 @@ import { classNames } from "../../Utils/utils";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import request from "../../Utils/request/request";
+import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
@@ -42,28 +43,24 @@ export const ConfigureHealthFacility = (props: any) => {
   const { facilityId } = props;
   const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    data: health_facility,
-    loading,
-    refetch,
-  } = useQuery(routes.abha.getHealthFacility, {
-    pathParams: { facility__external_id: facilityId },
+  const { loading } = useQuery(routes.abha.getHealthFacility, {
+    pathParams: { facility_id: facilityId },
+    silent: true,
+    onResponse(res) {
+      if (res.data) {
+        dispatch({
+          type: "set_form",
+          form: {
+            ...state.form,
+            health_facility: res.data,
+            hf_id: res.data.hf_id,
+          },
+        });
+      }
+    },
   });
 
-  useEffect(() => {
-    const formData = {
-      ...state.form,
-      hf_id: health_facility?.hf_id,
-      health_facility: health_facility,
-    };
-    dispatch({ type: "set_form", form: formData });
-  }, [health_facility]);
-
-  useEffect(() => {
-    refetch();
-  }, [dispatch, refetch]);
-
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -83,7 +80,7 @@ export const ConfigureHealthFacility = (props: any) => {
         routes.abha.partialUpdateHealthFacility,
         {
           pathParams: {
-            facility__external_id: facilityId,
+            facility_id: facilityId,
           },
           body: {
             hf_id: state.form.hf_id,
@@ -97,7 +94,7 @@ export const ConfigureHealthFacility = (props: any) => {
         routes.abha.registerHealthFacilityAsService,
         {
           pathParams: {
-            facility__external_id: facilityId,
+            facility_id: facilityId,
           },
         }
       );
@@ -151,7 +148,7 @@ export const ConfigureHealthFacility = (props: any) => {
     setIsLoading(false);
   };
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: FieldChangeEvent<string>) => {
     dispatch({
       type: "set_form",
       form: { ...state.form, [e.name]: e.value },
@@ -164,7 +161,7 @@ export const ConfigureHealthFacility = (props: any) => {
 
   return (
     <div className="cui-card mt-4">
-      <form onSubmit={(e) => handleSubmit(e)}>
+      <form onSubmit={handleSubmit}>
         <div className="mt-2 grid grid-cols-1 gap-4">
           <div>
             <TextFormField
@@ -215,7 +212,7 @@ export const ConfigureHealthFacility = (props: any) => {
               }
               required
               value={state.form.hf_id}
-              onChange={(e) => handleChange(e)}
+              onChange={handleChange}
               error={state.errors?.hf_id}
             />
           </div>
