@@ -93,11 +93,15 @@ export const fireRequest = (
     const config: any = {
       headers: {},
     };
-    if (!request.noAuth && localStorage.getItem(LocalStorageKeys.accessToken)) {
-      config.headers["Authorization"] =
-        "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken);
-    } else {
-      // TODO: get access token
+    if (!request.noAuth) {
+      const access_token = localStorage.getItem(LocalStorageKeys.accessToken);
+      if (access_token) {
+        config.headers["Authorization"] = "Bearer " + access_token;
+      } else {
+        // We do not have access token, so we need to redirect to session expired page
+        window.location.href = "/session-expired";
+        return;
+      }
     }
     const axiosApiCall: any = axios.create(config);
 
