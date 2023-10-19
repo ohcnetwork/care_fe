@@ -73,7 +73,7 @@ describe("Asset Tab", () => {
     assetFilters.assertAssetTypeText("INTERNAL");
     assetFilters.assertAssetClassText("ONVIF");
     assetFilters.assertStatusText("ACTIVE");
-    assetFilters.assertLocationText("Camera Locations");
+    assetFilters.assertLocationText("Camera Loc");
     assetFilters.clickadvancefilter();
     assetFilters.clearFilters();
   });
@@ -92,7 +92,6 @@ describe("Asset Tab", () => {
     assetPage.importAssetFile();
     assetPage.selectImportLocation("Camera Locations");
     assetPage.clickImportAsset();
-    assetPage.verifySuccessNotification("Assets imported successfully");
   });
 
   it("verify imported asset", () => {

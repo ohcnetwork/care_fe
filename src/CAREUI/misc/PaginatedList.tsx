@@ -30,7 +30,7 @@ function useContextualized<TItem>() {
   return ctx as PaginatedListContext<TItem>;
 }
 
-interface Props<TItem> extends QueryOptions {
+interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
   route: QueryRoute<PaginatedResponse<TItem>>;
   perPage?: number;
   children: (ctx: PaginatedListContext<TItem>) => JSX.Element | JSX.Element[];

@@ -7,14 +7,6 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import useConfig from "../../Common/hooks/useConfig";
 import { Popover } from "@headlessui/react";
 
-const render = (status: Status) => {
-  if (status === "LOADING") {
-    return <Spinner />;
-  }
-
-  return <h1>{status}</h1>;
-};
-
 interface GLocationPickerProps {
   lat: number;
   lng: number;
@@ -67,22 +59,37 @@ const GLocationPicker = ({
     setCenter(m?.getCenter()?.toJSON());
   };
 
+  const render = (status: Status) => {
+    switch (status) {
+      case Status.LOADING:
+        return <Spinner />;
+      case Status.SUCCESS:
+        return (
+          <Map
+            center={center}
+            onClick={onClick}
+            onIdle={onIdle}
+            handleOnChange={handleOnChange}
+            handleOnClose={handleOnClose}
+            handleOnSelectCurrentLocation={handleOnSelectCurrentLocation}
+            zoom={zoom}
+            style={{ flexGrow: "1", height: "100%" }}
+          >
+            {location && <Marker position={location} />}
+          </Map>
+        );
+      default:
+        return <h1>{status}</h1>;
+    }
+  };
+
   return (
     <div className="flex h-80 w-80 sm:h-96 sm:w-96">
-      <Wrapper libraries={["places"]} apiKey={gmaps_api_key} render={render}>
-        <Map
-          center={center}
-          onClick={onClick}
-          onIdle={onIdle}
-          handleOnChange={handleOnChange}
-          handleOnClose={handleOnClose}
-          handleOnSelectCurrentLocation={handleOnSelectCurrentLocation}
-          zoom={zoom}
-          style={{ flexGrow: "1", height: "100%" }}
-        >
-          {location && <Marker position={location} />}
-        </Map>
-      </Wrapper>
+      <Wrapper
+        libraries={["places"]}
+        apiKey={gmaps_api_key}
+        render={render}
+      ></Wrapper>
     </div>
   );
 };
@@ -149,7 +156,9 @@ const Map: React.FC<MapProps> = ({
           places.length > 0 &&
           places[0].geometry?.location
         ) {
-          handleOnChange(places[0].geometry.location);
+          const selectedLocation = places[0].geometry.location;
+          handleOnChange(selectedLocation);
+          map?.setCenter(selectedLocation);
         }
       });
     }
