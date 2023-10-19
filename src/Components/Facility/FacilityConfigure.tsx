@@ -137,7 +137,7 @@ export const FacilityConfigure = (props: IProps) => {
       crumbsReplacements={{
         [facilityId]: { name: state.form.name },
       }}
-      className="mx-auto max-w-3xl"
+      className="max-w-3xl overflow-x-hidden"
     >
       <div className="cui-card mt-4">
         <form onSubmit={handleSubmit}>
