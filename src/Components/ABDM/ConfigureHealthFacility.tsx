@@ -1,12 +1,12 @@
-import { lazy, useCallback, useEffect, useReducer, useState } from "react";
-import { useDispatch } from "react-redux";
-
-import { healthFacilityActions } from "../../Redux/actions";
+import { lazy, useEffect, useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import { classNames } from "../../Utils/utils";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
@@ -40,30 +40,28 @@ const FormReducer = (state = initialState, action: any) => {
 export const ConfigureHealthFacility = (props: any) => {
   const [state, dispatch] = useReducer(FormReducer, initialState);
   const { facilityId } = props;
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchData = useCallback(async () => {
-    if (facilityId) {
-      setIsLoading(true);
-      const res = await dispatchAction(healthFacilityActions.read(facilityId));
-
-      if (res?.status === 200 && res?.data) {
-        const formData = {
-          ...state.form,
-          hf_id: res.data.hf_id,
-          health_facility: res.data,
-        };
-        dispatch({ type: "set_form", form: formData });
-      }
-
-      setIsLoading(false);
-    }
-  }, [dispatchAction, facilityId]);
+  const {
+    data: health_facility,
+    loading,
+    refetch,
+  } = useQuery(routes.abha.getHealthFacility, {
+    pathParams: { facility__external_id: facilityId },
+  });
 
   useEffect(() => {
-    fetchData();
-  }, [dispatch, fetchData]);
+    const formData = {
+      ...state.form,
+      hf_id: health_facility?.hf_id,
+      health_facility: health_facility,
+    };
+    dispatch({ type: "set_form", form: formData });
+  }, [health_facility]);
+
+  useEffect(() => {
+    refetch();
+  }, [dispatch, refetch]);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -78,27 +76,43 @@ export const ConfigureHealthFacility = (props: any) => {
       return;
     }
 
-    let res = null;
+    let response = null;
+    let responseData = null;
     if (state.form.health_facility) {
-      res = await dispatchAction(
-        healthFacilityActions.partialUpdate(facilityId, {
-          hf_id: state.form.hf_id,
-        })
+      const { res, data } = await request(
+        routes.abha.partialUpdateHealthFacility,
+        {
+          pathParams: {
+            facility__external_id: facilityId,
+          },
+          body: {
+            hf_id: state.form.hf_id,
+          },
+        }
       );
+      response = res;
+      responseData = data;
     } else if (state.form.hf_id === state.form.health_facility?.hf_id) {
-      res = await dispatchAction(
-        healthFacilityActions.registerService(facilityId)
+      const { res, data } = await request(
+        routes.abha.registerHealthFacilityAsService,
+        {
+          pathParams: {
+            facility__external_id: facilityId,
+          },
+        }
       );
+      response = res;
+      responseData = data;
 
-      if (res?.status === 200 && res?.data) {
-        if (res.data?.registered) {
+      if (response?.status === 200 && responseData) {
+        if (responseData?.registered) {
           dispatch({
             type: "set_form",
             form: {
               ...state.form,
               health_facility: {
                 ...state.form?.health_facility,
-                registered: res.data.registered,
+                registered: responseData.registered,
               },
             },
           });
@@ -112,24 +126,26 @@ export const ConfigureHealthFacility = (props: any) => {
       });
       return;
     } else {
-      res = await dispatchAction(
-        healthFacilityActions.create({
+      const { res, data } = await request(routes.abha.createHealthFacility, {
+        body: {
           facility: facilityId,
           hf_id: state.form.hf_id,
-        })
-      );
+        },
+      });
+      response = res;
+      responseData = data;
     }
 
     setIsLoading(false);
-    if (res && res.data) {
+    if (response && responseData) {
       Notification.Success({
         msg: "Health Facility config updated successfully",
       });
       navigate(`/facility/${facilityId}`);
     } else {
-      if (res?.data)
+      if (responseData)
         Notification.Error({
-          msg: "Something went wrong: " + (res.data.detail || ""),
+          msg: "Something went wrong: " + (responseData.detail || ""),
         });
     }
     setIsLoading(false);
@@ -142,7 +158,7 @@ export const ConfigureHealthFacility = (props: any) => {
     });
   };
 
-  if (isLoading) {
+  if (loading || isLoading) {
     return <Loading />;
   }
 

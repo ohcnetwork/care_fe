@@ -38,6 +38,7 @@ export default async function request<TData, TBody>(
 
     try {
       const res = await fetch(url, options);
+
       const data = await getResponseBody<TData>(res);
 
       result = {

@@ -4,7 +4,7 @@ import { listAssetAvailability } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
 import * as Notification from "../../Utils/Notifications.js";
 import { AssetStatus, AssetUptimeRecord } from "../Assets/AssetTypes";
-import { reverse } from "lodash";
+import { reverse } from "lodash-es";
 import { classNames } from "../../Utils/utils";
 import dayjs from "../../Utils/dayjs";
 
