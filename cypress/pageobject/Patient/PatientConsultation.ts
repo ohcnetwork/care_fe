@@ -1,5 +1,7 @@
 export class PatientConsultationPage {
   selectConsultationStatus(status: string) {
+    cy.get("#consultation_status").scrollIntoView();
+    cy.get("#consultation_status").should("be.visible");
     cy.get("#consultation_status")
       .click()
       .then(() => {

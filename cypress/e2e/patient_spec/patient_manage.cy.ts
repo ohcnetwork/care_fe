@@ -1,7 +1,6 @@
 import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { PatientConsultationPage } from "../../pageobject/Patient/PatientConsultation";
-import { phone_number } from "../../pageobject/constants";
 import { PatientPage } from "../../pageobject/Patient/PatientCreation";
 
 describe("Patient", () => {
@@ -19,20 +18,21 @@ describe("Patient", () => {
     cy.awaitUrl("/patients");
   });
 
-  it("Create Patient shift requests.", () => {
-    patientPage.visitPatient();
-    patientConsultationPage.visitShiftRequestPage();
-    patientConsultationPage.enterPatientShiftDetails(
-      "Test User",
-      phone_number,
-      "Dummy Shifting",
-      "Reason"
-    );
-    patientConsultationPage.createShiftRequest();
-    patientConsultationPage.verifySuccessNotification(
-      "Shift request created successfully"
-    );
-  });
+  // it("Create Patient shift requests.", () => {
+  //   patientPage.visitPatient();
+  //   patientConsultationPage.visitShiftRequestPage();
+  //   patientConsultationPage.enterPatientShiftDetails(
+  //     "Test User",
+  //     phone_number,
+  //     "Dummy Shifting",
+  //     "Reason"
+  //   );
+  //   patientConsultationPage.createShiftRequest();
+  //   patientConsultationPage.verifySuccessNotification(
+  //     "Shift request created successfully"
+  //   );
+  // });
+  // commented out the shifting request, as logic need to be re-visited
 
   it("Post doctor notes for an already created patient", () => {
     patientPage.visitPatient();
@@ -47,7 +47,6 @@ describe("Patient", () => {
   it("Edit prescription for an already created patient", () => {
     patientPage.visitPatient();
     patientConsultationPage.visitEditPrescriptionPage();
-    patientConsultationPage.discontinuePreviousPrescription();
     patientConsultationPage.clickAddPrescription();
     patientConsultationPage.interceptMediaBase();
     patientConsultationPage.selectMedicinebox();

@@ -139,6 +139,7 @@ describe("Patient Creation with consultation", () => {
   it("Edit created consultation to existing patient", () => {
     updatePatientPage.visitUpdatedPatient();
     patientConsultationPage.visitEditConsultationPage();
+    patientConsultationPage.fillIllnessHistory("editted");
     patientConsultationPage.selectConsultationStatus(
       "Referred from other hospital"
     );
