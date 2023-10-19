@@ -12,14 +12,12 @@ import request from "../../Utils/request/request";
 
 const CommentSection = (props: { id: string }) => {
   const [commentBox, setCommentBox] = useState("");
-  const offset = 0;
-  const limit = 8;
 
   const { loading, refetch: resourceRefetch } = useQuery(
     routes.getResourceComments,
     {
       pathParams: { id: props.id },
-      query: { limit, offset },
+      query: { limit: 8, offset: 0 },
     }
   );
 
