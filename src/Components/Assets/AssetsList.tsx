@@ -110,7 +110,7 @@ const AssetsList = () => {
       facility_external_id: String(qParams.facility),
       external_id: String(qParams.location),
     },
-    prefetch: qParams.facility || qParams.location,
+    prefetch: !!(qParams.facility && qParams.location),
   });
 
   useEffect(() => {
