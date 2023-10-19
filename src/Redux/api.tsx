@@ -17,7 +17,6 @@ import {
   IinitiateAbdmAuthenticationTBody,
   IpartialUpdateHealthFacilityTBody,
 } from "../Components/ABDM/models";
-import { AssetData } from "../Components/Assets/AssetTypes";
 import {
   AssetBedBody,
   AssetBedModel,
@@ -28,7 +27,11 @@ import {
   AssetTransaction,
   AssetUpdate,
 } from "../Components/Assets/AssetTypes";
-import { FacilityModel, LocationModel, WardModel } from "../Components/Facility/models";
+import {
+  FacilityModel,
+  LocationModel,
+  WardModel,
+} from "../Components/Facility/models";
 import {
   IDeleteExternalResult,
   IExternalResult,
@@ -37,7 +40,7 @@ import {
   ILocalBodyByDistrict,
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
- 
+
 import { Prescription } from "../Components/Medicine/models";
 import { IComment, IResource } from "../Components/Resource/models";
 import { UserModel } from "../Components/Users/models";
