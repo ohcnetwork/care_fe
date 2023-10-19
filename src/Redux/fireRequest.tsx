@@ -98,8 +98,8 @@ export const fireRequest = (
       if (access_token) {
         config.headers["Authorization"] = "Bearer " + access_token;
       } else {
-        // We do not have access token, so we need to redirect to session expired page
-        window.location.href = "/session-expired";
+        // The access token is missing from the local storage. Redirect to login page.
+        window.location.href = "/";
         return;
       }
     }
