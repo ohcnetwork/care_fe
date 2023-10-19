@@ -244,7 +244,7 @@ const routes = {
   },
 
   partialUpdateFacility: {
-    path: "/api/v1/facility/{id}",
+    path: "/api/v1/facility/{id}/",
     method: "PATCH",
     TRes: Type<FacilityModel>(),
     TBody: Type<Partial<FacilityModel>>(),
