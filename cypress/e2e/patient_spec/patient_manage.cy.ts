@@ -51,7 +51,7 @@ describe("Patient", () => {
     patientConsultationPage.interceptMediaBase();
     patientConsultationPage.selectMedicinebox();
     patientConsultationPage.waitForMediabaseStatusCode();
-    patientConsultationPage.prescribeMedicine();
+    patientConsultationPage.prescribesecondMedicine();
     patientConsultationPage.enterDosage("4");
     patientConsultationPage.selectDosageFrequency("Twice daily");
     patientConsultationPage.submitPrescription();

@@ -85,10 +85,18 @@ export class PatientConsultationPage {
     cy.intercept("GET", "**/api/v1/medibase/**").as("getMediaBase");
   }
 
-  prescribeMedicine() {
+  prescribefirstMedicine() {
     cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
       .click()
-      .type("dolo{enter}");
+      .type("dolo")
+      .type("{downarrow}{enter}");
+  }
+
+  prescribesecondMedicine() {
+    cy.get("div#medicine_object input[placeholder='Select'][role='combobox']")
+      .click()
+      .type("dolo")
+      .type("{downarrow}{downarrow}{enter}");
   }
 
   selectMedicinebox() {

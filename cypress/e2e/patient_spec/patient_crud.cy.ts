@@ -130,7 +130,7 @@ describe("Patient Creation with consultation", () => {
     patientConsultationPage.interceptMediaBase();
     patientConsultationPage.selectMedicinebox();
     patientConsultationPage.waitForMediabaseStatusCode();
-    patientConsultationPage.prescribeMedicine();
+    patientConsultationPage.prescribefirstMedicine();
     patientConsultationPage.enterDosage("3");
     patientConsultationPage.selectDosageFrequency("Twice daily");
     patientConsultationPage.submitPrescriptionAndReturn();
