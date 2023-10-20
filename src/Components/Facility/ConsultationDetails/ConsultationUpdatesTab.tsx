@@ -113,6 +113,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             <div className="mx-auto flex w-full flex-col justify-between gap-1 rounded bg-[#020617] lg:w-auto lg:min-w-[1280px] lg:flex-row">
               <div className="min-h-[400px] flex-1">
                 <HL7PatientVitalsMonitor
+                  consultationId={props.consultationId}
                   patientAssetBed={{
                     asset: monitorBedData?.asset_object as AssetData,
                     bed: monitorBedData?.bed_object as BedModel,

@@ -218,6 +218,27 @@ export interface CurrentBed {
   meta: Record<string, any>;
 }
 
+export interface consultationBedRequest {
+  bed?: string;
+  consultation: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface consultationBedResponse {
+  count: number;
+  next: string;
+  previous: string;
+  results: CurrentBed[];
+  is_occuiped?: boolean;
+  created_date?: string;
+  modified_date?: string;
+  name?: string;
+  description?: string;
+  meta?: Record<string, any>;
+  assets_objects?: AssetData[];
+}
+
 // Voluntarily made as `type` for it to achieve type-safety when used with
 // `useAsyncOptions<ICD11DiagnosisModel>`
 export type ICD11DiagnosisModel = {

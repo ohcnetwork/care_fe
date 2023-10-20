@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useHL7VitalsMonitor from "./useHL7VitalsMonitor";
 import { Link } from "raviger";
 import { GENDER_TYPES } from "../../Common/constants";
@@ -9,6 +9,8 @@ import { IVitalsComponentProps, VitalsValueBase } from "./types";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import dayjs from "dayjs";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const minutesAgo = (timestamp: string) => {
   return `${dayjs().diff(dayjs(timestamp), "minute")}m ago`;
@@ -25,6 +27,32 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   const { patient, bed, asset } = props.patientAssetBed ?? {};
   const authUser = useAuthUser();
 
+  const [bedAssignmentStartDate, setBedAssignmentStartDate] = useState(
+    new Date()
+  );
+
+  const {
+    res: bedsRes,
+    data: bedsData,
+    refetch: bedsFetch,
+  } = useQuery(routes.listConsultationBeds, {
+    query: {
+      consultation: props.consultationId,
+    },
+  });
+
+  useEffect(() => {
+    if (!bedsData) console.log("error");
+    else {
+      const startDate = new Date(bedsData.results[0].created_date);
+      setBedAssignmentStartDate(startDate);
+    }
+  }, [props.consultationId, bedsRes, bedsData]);
+
+  useEffect(() => {
+    bedsFetch();
+  }, [bedsFetch]);
+
   useEffect(() => {
     if (isOnline) {
       triggerGoal("Device Viewed", {
@@ -39,8 +67,14 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
     connect(props.socketUrl);
   }, [props.socketUrl]);
 
+  const currentDate = new Date();
+  const timeDifferenceInMinutes =
+    (currentDate.getTime() - bedAssignmentStartDate.getTime()) / (1000 * 60);
+  console.log("Time difference in minutes: ", timeDifferenceInMinutes);
+  // Check if the time difference is within the specified maximum persistence time
   const bpWithinMaxPersistence = !!(
-    (data.bp?.["date-time"] && isWithinMinutes(data.bp?.["date-time"], 30)) // Max blood pressure persistence is 30 minutes
+    data.bp?.["date-time"] &&
+    isWithinMinutes(data.bp?.["date-time"], timeDifferenceInMinutes)
   );
 
   return (
