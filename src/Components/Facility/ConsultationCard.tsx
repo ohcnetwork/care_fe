@@ -131,6 +131,7 @@ export const ConsultationCard = (props: ConsultationProps) => {
       </div>
       <div className="mt-4 flex w-full flex-col justify-between gap-1 md:flex-row">
         <ButtonV2
+          id="view_consulation_updates"
           className="h-auto whitespace-pre-wrap border border-gray-500 bg-white text-black hover:bg-gray-300"
           onClick={() =>
             navigate(

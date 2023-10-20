@@ -29,7 +29,6 @@ export interface WardModel {
 export interface FacilityModel {
   id?: number;
   name?: string;
-  district?: number;
   read_cover_image_url?: string;
   facility_type?: string;
   address?: string;
@@ -54,6 +53,10 @@ export interface FacilityModel {
   ward_object?: WardModel;
   modified_date?: string;
   created_date?: string;
+  state: number;
+  district: number;
+  local_body: number;
+  ward: number;
 }
 
 export interface CapacityModal {

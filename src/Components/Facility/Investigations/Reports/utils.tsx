@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _ from "lodash-es";
 import { InvestigationResponse } from "./types";
 
 export const transformData = _.memoize((data: InvestigationResponse) => {
