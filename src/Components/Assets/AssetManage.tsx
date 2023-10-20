@@ -432,7 +432,7 @@ const AssetManage = (props: AssetManageProps) => {
                 <CareIcon className="care-l-pen mr-1 h-4" />
                 {t("update")}
               </ButtonV2>
-              {(asset?.asset_class !== "ONVIF" ||
+              {((asset?.asset_class && asset?.asset_class !== "ONVIF") ||
                 ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
                   authUser.user_type
                 )) && (
