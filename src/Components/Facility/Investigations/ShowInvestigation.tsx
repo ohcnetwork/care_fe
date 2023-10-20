@@ -8,8 +8,8 @@ import {
 } from "../../../Redux/actions";
 import PageTitle from "../../Common/PageTitle";
 import InvestigationTable from "./InvestigationTable";
-
-import { set, chain } from "lodash-es";
+import _ from "lodash-es";
+import { set } from "lodash-es";
 import { navigate } from "raviger";
 import * as Notification from "../../../Utils/Notifications.js";
 
@@ -147,7 +147,7 @@ export default function ShowInvestigation(props: any) {
   };
 
   const handleUpdateCancel = useCallback(() => {
-    const changedValues = chain(state.initialValues)
+    const changedValues = _.chain(state.initialValues)
       .map((val: any, _key: string) => ({
         id: val?.id,
         initialValue: val?.notes || val?.value || null,

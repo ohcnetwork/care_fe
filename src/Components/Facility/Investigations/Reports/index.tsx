@@ -1,5 +1,5 @@
 import * as Notification from "../../../../Utils/Notifications";
-
+import _ from "lodash-es";
 import { Group, InvestigationType } from "..";
 import {
   getPatient,
@@ -17,7 +17,6 @@ import { InvestigationResponse } from "./types";
 import Loading from "../../../Common/Loading";
 import Page from "../../../Common/components/Page";
 import ReportTable from "./ReportTable";
-import { chain } from "lodash-es";
 import { useDispatch } from "react-redux";
 import { useRef } from "react";
 
@@ -175,7 +174,7 @@ const InvestigationReports = ({ id }: any) => {
       })
     );
 
-    const investigationList = chain(data)
+    const investigationList = _.chain(data)
       .compact()
       .flatten()
       .map((i) => ({
