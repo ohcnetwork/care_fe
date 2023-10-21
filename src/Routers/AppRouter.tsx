@@ -65,7 +65,12 @@ export default function AppRouter() {
 
   useEffect(() => {
     addEventListener("storage", (event: any) => {
-      if (event.key === LocalStorageKeys.accessToken && !event.newValue) {
+      if (
+        [LocalStorageKeys.accessToken, LocalStorageKeys.refreshToken].includes(
+          event.key
+        ) &&
+        !event.newValue
+      ) {
         handleSignOut(true);
       }
     });
