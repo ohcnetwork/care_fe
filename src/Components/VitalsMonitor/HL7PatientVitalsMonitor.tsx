@@ -31,27 +31,19 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
     new Date()
   );
 
-  const {
-    res: bedsRes,
-    data: bedsData,
-    refetch: bedsFetch,
-  } = useQuery(routes.listConsultationBeds, {
+  useQuery(routes.listConsultationBeds, {
     query: {
       consultation: props.consultationId,
     },
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data) {
+        const startDate = new Date(data.results[0].created_date);
+        setBedAssignmentStartDate(startDate);
+      } else {
+        console.log("No beds found for this consultation");
+      }
+    },
   });
-
-  useEffect(() => {
-    if (!bedsData) console.log("error");
-    else {
-      const startDate = new Date(bedsData.results[0].created_date);
-      setBedAssignmentStartDate(startDate);
-    }
-  }, [props.consultationId, bedsRes, bedsData]);
-
-  useEffect(() => {
-    bedsFetch();
-  }, [bedsFetch]);
 
   useEffect(() => {
     if (isOnline) {
