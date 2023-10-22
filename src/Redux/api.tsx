@@ -29,6 +29,8 @@ import {
   AssetUpdate,
 } from "../Components/Assets/AssetTypes";
 import {
+  ConsultationBedRequest,
+  ConsultationBedResponse,
   FacilityModel,
   LocationModel,
   WardModel,
