@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import useHL7VitalsMonitor from "./useHL7VitalsMonitor";
 import { Link } from "raviger";
 import { GENDER_TYPES } from "../../Common/constants";
@@ -9,8 +9,6 @@ import { IVitalsComponentProps, VitalsValueBase } from "./types";
 import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 import dayjs from "dayjs";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
 
 const minutesAgo = (timestamp: string) => {
   return `${dayjs().diff(dayjs(timestamp), "minute")}m ago`;
@@ -27,24 +25,6 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   const { patient, bed, asset } = props.patientAssetBed ?? {};
   const authUser = useAuthUser();
 
-  const [bedAssignmentStartDate, setBedAssignmentStartDate] = useState(
-    new Date()
-  );
-
-  useQuery(routes.listConsultationBeds, {
-    query: {
-      consultation: props.consultationId,
-    },
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data) {
-        const startDate = new Date(data.results[0].created_date);
-        setBedAssignmentStartDate(startDate);
-      } else {
-        console.log("No beds found for this consultation");
-      }
-    },
-  });
-
   useEffect(() => {
     if (isOnline) {
       triggerGoal("Device Viewed", {
@@ -59,14 +39,12 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
     connect(props.socketUrl);
   }, [props.socketUrl]);
 
-  const currentDate = new Date();
-  const timeDifferenceInMinutes =
-    (currentDate.getTime() - bedAssignmentStartDate.getTime()) / (1000 * 60);
-  console.log("Time difference in minutes: ", timeDifferenceInMinutes);
   // Check if the time difference is within the specified maximum persistence time
+  console.log("Time difference in minutes: ", props.minutesSinceAssignment);
   const bpWithinMaxPersistence = !!(
     data.bp?.["date-time"] &&
-    isWithinMinutes(data.bp?.["date-time"], timeDifferenceInMinutes)
+    props.minutesSinceAssignment &&
+    isWithinMinutes(data.bp?.["date-time"], props.minutesSinceAssignment)
   );
 
   return (

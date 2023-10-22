@@ -13,6 +13,8 @@ import Chip from "../../../CAREUI/display/Chip";
 import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
 import ReadMore from "../../Common/components/Readmore";
 import { DailyRoundsList } from "../Consultations/DailyRoundsList";
+import useQuery from "../../../Utils/request/useQuery";
+import routes from "../../../Redux/api";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
@@ -23,6 +25,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
+  const [bedAssignmentStartDate, setBedAssignmentStartDate] = useState(
+    new Date()
+  );
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
@@ -104,6 +109,24 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
     fetchData();
   }, [props.consultationData]);
 
+  useQuery(routes.listConsultationBeds, {
+    query: {
+      consultation: props.consultationId,
+    },
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data) {
+        const startDate = new Date(data.results[0].created_date);
+        setBedAssignmentStartDate(startDate);
+      } else {
+        console.log("No beds found for this consultation");
+      }
+    },
+  });
+
+  const currentDate = new Date();
+  const timeDifferenceInMinutes =
+    (currentDate.getTime() - bedAssignmentStartDate.getTime()) / (1000 * 60);
+
   return (
     <div className="flex flex-col gap-2">
       {!props.consultationData.discharge_date &&
@@ -113,7 +136,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             <div className="mx-auto flex w-full flex-col justify-between gap-1 rounded bg-[#020617] lg:w-auto lg:min-w-[1280px] lg:flex-row">
               <div className="min-h-[400px] flex-1">
                 <HL7PatientVitalsMonitor
-                  consultationId={props.consultationId}
+                  minutesSinceAssignment={timeDifferenceInMinutes}
                   patientAssetBed={{
                     asset: monitorBedData?.asset_object as AssetData,
                     bed: monitorBedData?.bed_object as BedModel,

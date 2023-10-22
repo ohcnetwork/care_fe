@@ -46,7 +46,7 @@ export interface ChannelOptions {
 }
 
 export interface IVitalsComponentProps {
-  consultationId?: string;
+  minutesSinceAssignment?: number;
   patientAssetBed?: PatientAssetBed;
   socketUrl: string;
   config?: ReturnType<typeof getVitalsCanvasSizeAndDuration>;
