@@ -175,16 +175,8 @@ export interface InventoryItemsModel {
   count?: number;
   id?: number;
   name?: string;
-  default_unit?: {
-    id: number;
-    name: string;
-  };
-  allowed_units?: [
-    {
-      id: number;
-      name: string;
-    }
-  ];
+  default_unit?: UnitModel;
+  allowed_units?: UnitModel[];
 }
 
 export interface LocationModel {
@@ -229,6 +221,17 @@ export type ICD11DiagnosisModel = {
   id: string;
   label: string;
 };
+
+export interface BaseRequest {
+  limit?: number;
+  offset?: number;
+}
+
+export interface BaseResponse {
+  id: string;
+  created_date: string;
+  modified_date: string;
+}
 
 type UnitModel = {
   id: number;
@@ -386,11 +389,7 @@ export type IUserFacilityRequest = {
 
 export type IUserFacilityResponse = IUserListFacilityResponse;
 
-export type IFacilityUserRequest = {
-  limit?: number;
-  offset?: number;
-};
-
+export type IFacilityUserRequest = BaseRequest;
 export type IFacilityUserResponse = {
   count: number;
   next: string | null;
@@ -457,10 +456,7 @@ interface InventoryItemObjectModel {
   min_quantity: number;
 }
 
-export type IInventorySummaryRequest = {
-  limit?: number;
-  offset?: number;
-};
+export type IInventorySummaryRequest = BaseRequest;
 export type IInventorySummaryResponse = PaginatedResponse<{
   id: string;
   item_object: InventoryItemObjectModel;
@@ -576,8 +572,7 @@ export type IInvestigationResponse = PaginatedResponse<{
   session: number;
 }>;
 
-interface BedObjectModel {
-  id: string;
+type BedObjectModel = BaseResponse & {
   bed_type: number;
   location_object: {
     id: string;
@@ -592,27 +587,21 @@ interface BedObjectModel {
     location_type: number;
   };
   is_occupied: boolean;
-  created_date: string;
-  modified_date: string;
   name: string;
   description: string;
   meta: Record<string, string>;
-}
+};
 
-export type IConsultationBedResponse = {
-  id: string;
+export type IConsultationBedResponse = BaseResponse & {
   bed_object: BedObjectModel;
   assets_objects: Asset[];
   last_daily_round: string;
   start_date: string;
-  created_date: string;
-  modified_date: string;
   end_date: string;
   meta: Record<string, string>;
 };
 
-type Asset = {
-  id: string;
+type Asset = BaseResponse & {
   status: number;
   asset_type: number;
   location_object: {
@@ -636,8 +625,6 @@ type Asset = {
     serviced_on: string;
     note: string;
   };
-  created_date: string;
-  modified_date: string;
   name: string;
   description: string;
   asset_class: string;
@@ -671,12 +658,9 @@ type ServiceEdit = {
   note: string;
 };
 
-export type ITriageDetailResponse = {
-  id: string;
+export type ITriageDetailResponse = BaseResponse & {
   entry_date: string;
   facility: string;
-  created_date: string;
-  modified_date: string;
   num_patients_visited: number;
   num_patients_home_quarantine: number;
   num_patients_isolation: number;
@@ -684,18 +668,13 @@ export type ITriageDetailResponse = {
   num_patient_confirmed_positive: number;
 };
 
-export type ITriageRequest = {
+export type ITriageRequest = BaseRequest & {
   entry_date_after?: string;
   entry_date_before?: string;
-  limit?: number;
-  offset?: number;
 };
 export type ITriageResponse = PaginatedResponse<ITriageDetailResponse>;
 
-export type IMinQuantityRequest = {
-  limit?: number;
-  offset?: number;
-};
+export type IMinQuantityRequest = BaseRequest;
 export type IMinQuantityResponse = PaginatedResponse<IMinQuantityItemResponse>;
 
 export type IMinQuantityItemResponse = {
@@ -735,14 +714,13 @@ export type IFlagInventoryItemResponse = {
   created_by: number;
 };
 
-export type IAssetBedResponse = PaginatedResponse<{
-  id: string;
-  asset_object: Asset;
-  bed_object: BedObjectModel;
-  created_date: string;
-  modified_date: string;
-  meta: Record<string, string>;
-}>;
+export type IAssetBedResponse = PaginatedResponse<
+  BaseResponse & {
+    asset_object: Asset;
+    bed_object: BedObjectModel;
+    meta: Record<string, string>;
+  }
+>;
 
 export type IAssetBedRequest = IDeleteUserRequest;
 
@@ -759,12 +737,9 @@ export type ICreateTriageRequest = {
   num_patient_referred?: number;
   num_patient_confirmed_positive?: number;
 };
-export type ICreateTriageResponse = {
-  id: string;
+export type ICreateTriageResponse = BaseResponse & {
   entry_date: string;
   facility: string;
-  created_date: string;
-  modified_date: string;
   num_patients_visited: number;
   num_patients_home_quarantine: number;
   num_patients_isolation: number;
