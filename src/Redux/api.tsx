@@ -2,8 +2,8 @@ import { IConfig } from "../Common/hooks/useConfig";
 import { AssetData } from "../Components/Assets/AssetTypes";
 import {
   LocationModel,
-  consultationBedRequest,
-  consultationBedResponse,
+  ConsultationBedRequest,
+  ConsultationBedResponse,
 } from "../Components/Facility/models";
 import { Prescription } from "../Components/Medicine/models";
 import { UserModel } from "../Components/Users/models";
@@ -303,8 +303,8 @@ const routes = {
   listConsultationBeds: {
     path: "/api/v1/consultationbed/",
     method: "GET",
-    TRes: Type<consultationBedResponse>(),
-    TBody: Type<consultationBedRequest>(),
+    TRes: Type<ConsultationBedResponse>(),
+    TBody: Type<ConsultationBedRequest>(),
   },
   createConsultationBed: {
     path: "/api/v1/consultationbed/",

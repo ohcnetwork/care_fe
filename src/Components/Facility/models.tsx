@@ -3,6 +3,7 @@ import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssetData } from "../Assets/AssetTypes";
 import { UserBareMinimum } from "../Users/models";
+import { PaginatedResponse } from "../../Utils/request/types";
 
 export interface LocalBodyModel {
   name: string;
@@ -218,18 +219,14 @@ export interface CurrentBed {
   meta: Record<string, any>;
 }
 
-export interface consultationBedRequest {
+export interface ConsultationBedRequest {
   bed?: string;
   consultation: string;
   limit?: number;
   offset?: number;
 }
 
-export interface consultationBedResponse {
-  count: number;
-  next: string;
-  previous: string;
-  results: CurrentBed[];
+export interface ConsultationBedResponse extends PaginatedResponse<CurrentBed> {
   is_occuiped?: boolean;
   created_date?: string;
   modified_date?: string;
