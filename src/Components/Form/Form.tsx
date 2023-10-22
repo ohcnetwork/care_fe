@@ -1,4 +1,4 @@
-import { isEmpty, omitBy } from "lodash";
+import { isEmpty, omitBy } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import { classNames } from "../../Utils/utils";
 import { Cancel, Submit } from "../Common/components/ButtonV2";

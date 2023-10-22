@@ -1,4 +1,11 @@
-type consciousnessLevel = Alert | Drowsy | Stuporous | Comatose | CannotBeAssessed | Unknown
+type consciousnessLevel =
+  | Unresponsive
+  | RespondsToPain
+  | RespondsToVoice
+  | Alert
+  | AgitatedOrConfused
+  | OnsetOfAgitationAndConfusion
+  | Unknown
 type lightReaction = Brisk | Sluggish | Fixed | CannotBeAssessed | Unknown
 type limpResponse = Strong | Moderate | Weak | Flexion | Extension | NONE_ | Unknown
 
@@ -68,11 +75,12 @@ let make = (
 
 let makeConsciousnessLevel = consciousnessLevel => {
   switch consciousnessLevel {
+  | "UNRESPONSIVE" => Unresponsive
+  | "RESPONDS_TO_PAIN" => RespondsToPain
+  | "RESPONDS_TO_VOICE" => RespondsToVoice
   | "ALERT" => Alert
-  | "DROWSY" => Drowsy
-  | "STUPOROUS" => Stuporous
-  | "COMATOSE" => Comatose
-  | "CANNOT_BE_ASSESSED" => CannotBeAssessed
+  | "AGITATED_OR_CONFUSED" => AgitatedOrConfused
+  | "ONSET_OF_AGITATION_AND_CONFUSION" => OnsetOfAgitationAndConfusion
   | "UNKNOWN"
   | _ =>
     Unknown
@@ -81,11 +89,12 @@ let makeConsciousnessLevel = consciousnessLevel => {
 
 let encodeConConsciousnessLevel = consciousnessLevel => {
   switch consciousnessLevel {
+  | Unresponsive => "UNRESPONSIVE"
+  | RespondsToPain => "RESPONDS_TO_PAIN"
+  | RespondsToVoice => "RESPONDS_TO_VOICE"
   | Alert => "ALERT"
-  | Drowsy => "DROWSY"
-  | Stuporous => "STUPOROUS"
-  | Comatose => "COMATOSE"
-  | CannotBeAssessed => "CANNOT_BE_ASSESSED"
+  | AgitatedOrConfused => "AGITATED_OR_CONFUSED"
+  | OnsetOfAgitationAndConfusion => "ONSET_OF_AGITATION_AND_CONFUSION"
   | Unknown => "UNKNOWN"
   }
 }
@@ -150,11 +159,12 @@ let lightReactionToString = lightReaction => {
 
 let consciousnessLevelToString = consciousnessLevel => {
   switch consciousnessLevel {
+  | Unresponsive => "Unresponsive"
+  | RespondsToPain => "Responds to Pain"
+  | RespondsToVoice => "Responds to Voice"
   | Alert => "Alert"
-  | Drowsy => "Drowsy"
-  | Stuporous => "Stuporous"
-  | Comatose => "Comatose"
-  | CannotBeAssessed => "Cannot be assessed"
+  | AgitatedOrConfused => "Agitated or Confused"
+  | OnsetOfAgitationAndConfusion => "Onset of Agitation and Confusion"
   | Unknown => "Unknown"
   }
 }

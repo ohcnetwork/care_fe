@@ -353,15 +353,17 @@ export default function NotificationsList({
     manageResults = (
       <>
         {data
-              .filter((notification: any) => showUnread ? notification.read_at === null : true)
-              .map((result: any) => (
-                <NotificationTile
-                  key={result.id}
-                  notification={result}
-                  onClickCB={onClickCB}
-                  setShowNotifications={setOpen}
-                />
-              ))}
+          .filter((notification: any) =>
+            showUnread ? notification.read_at === null : true
+          )
+          .map((result: any) => (
+            <NotificationTile
+              key={result.id}
+              notification={result}
+              onClickCB={onClickCB}
+              setShowNotifications={setOpen}
+            />
+          ))}
         {isLoading && (
           <div className="flex items-center justify-center">
             <CircularProgress />
