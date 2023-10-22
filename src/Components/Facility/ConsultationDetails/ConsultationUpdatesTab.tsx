@@ -15,6 +15,7 @@ import ReadMore from "../../Common/components/Readmore";
 import { DailyRoundsList } from "../Consultations/DailyRoundsList";
 import useQuery from "../../../Utils/request/useQuery";
 import routes from "../../../Redux/api";
+import * as Notification from "../../../Utils/Notifications.js";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
@@ -118,7 +119,9 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
         const startDate = new Date(data.results[0].created_date);
         setBedAssignmentStartDate(startDate);
       } else {
-        console.log("No beds found for this consultation");
+        Notification.Error({
+          msg: "Something went wrong: ",
+        });
       }
     },
   });
