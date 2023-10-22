@@ -3,6 +3,7 @@ import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssetData } from "../Assets/AssetTypes";
 import { UserBareMinimum } from "../Users/models";
+import { PaginatedResponse } from "../../Utils/request/types";
 
 export interface LocalBodyModel {
   name: string;
@@ -229,30 +230,22 @@ export type ICD11DiagnosisModel = {
   label: string;
 };
 
+type UnitModel = {
+  id: number;
+  name: string;
+};
+
 export type IFacilityNotificationRequest = {
   facility?: string;
   message?: string;
 };
 
-export type IStateListResponse = {
-  count: number;
-  next: string;
-  previous: string;
-  results: {
-    id: number;
-    name: string;
-  }[];
-};
-
-export type IStateDitrictResponse = {
-  id: number;
-  name: string;
-};
+export type IStateListResponse = PaginatedResponse<UnitModel>;
+export type IStateDitrictResponse = StateModel;
 
 export type IDistrictLocalBodyResponse = IStateDitrictResponse & {
   state: number;
 };
-
 export type IWardLocalBodyResponse = IStateDitrictResponse & {
   number: number;
   local_body: number;
@@ -281,24 +274,6 @@ export type IFacilityRequest = Omit<
   longitude?: string;
   phone_number?: string | undefined;
 };
-
-export type IAllFacilitiesResponse = {
-  id: string;
-  name: string;
-  local_body: number;
-  district: number;
-  state: number;
-  ward_object: WardModel;
-  local_body_object: { id: number } & LocalBodyModel;
-  district_object: DistrictModel;
-  state_object: StateModel;
-  facility_type: string;
-  read_cover_image_url: string;
-  features: number[];
-  patient_count: string;
-  bed_count: string;
-};
-
 export type IFacilityResponse = Omit<
   IAllFacilitiesResponse,
   "facility_type"
@@ -323,32 +298,31 @@ export type IFacilityResponse = Omit<
   expected_type_c_cylinders: number;
   expected_type_d_cylinders: number;
 };
-
-export type IListDoctorResponse = {
-  count: number;
-  next: string;
-  previous: string;
-  results: {
-    id: string;
-    area_text: number;
-    area: number;
-    count: number;
-  }[];
+export type IAllFacilitiesResponse = {
+  id: string;
+  name: string;
+  local_body: number;
+  district: number;
+  state: number;
+  ward_object: WardModel;
+  local_body_object: { id: number } & LocalBodyModel;
+  district_object: DistrictModel;
+  state_object: StateModel;
+  facility_type: string;
+  read_cover_image_url: string;
+  features: number[];
+  patient_count: string;
+  bed_count: string;
 };
 
-export type IListCapacityResponse = {
+export type IListDoctorResponse = PaginatedResponse<{
+  id: string;
+  area_text: number;
+  area: number;
   count: number;
-  next: string;
-  previous: string;
-  results: {
-    id: string;
-    room_type_text: number;
-    modified_date: string;
-    room_type: number;
-    total_capacity: number;
-    current_capacity: number;
-  }[];
-};
+}>;
+
+export type IListCapacityResponse = PaginatedResponse<CapacityModal>;
 
 export type IUserListFacilityResponse = {
   id: number;
@@ -449,25 +423,14 @@ export type IPermittedFacilityRequest = {
   state?: number;
   state_name?: string;
 };
+export type IPermittedFacilityResponse = PaginatedResponse<IFacilityResponse>;
 
-export type IPermittedFacilityResponse = {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: IFacilityResponse[];
-};
-
-export type IStateResponse = {
-  id: number;
-  name: string;
-};
-
+export type IStateResponse = StateModel;
 export type IStateRequest = {
   id?: number;
 };
 
 export type IDistrictResponse = IStateResponse;
-
 export type IDistrictRequest = IStateRequest;
 
 export type ILocalBodyResponse = IStateResponse & {
@@ -475,23 +438,13 @@ export type ILocalBodyResponse = IStateResponse & {
   localbody_code: string;
   district: number;
 };
-
 export type ILocalBodyRequest = IStateRequest;
 
 interface InventoryItemObjectModel {
   id: number;
-  default_unit: {
-    id: number;
-    name: string;
-  };
-  allowed_units: {
-    id: number;
-    name: string;
-  }[];
-  tags: {
-    id: number;
-    name: string;
-  }[];
+  default_unit: UnitModel;
+  allowed_units: UnitModel[];
+  tags: UnitModel[];
   name: string;
   description: string;
   min_quantity: number;
@@ -501,24 +454,15 @@ export type IInventorySummaryRequest = {
   limit?: number;
   offset?: number;
 };
-
-export type IInventorySummaryResponse = {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: {
-    id: string;
-    item_object: InventoryItemObjectModel;
-    unit_object: {
-      id: number;
-      name: string;
-    };
-    created_date: string;
-    quantity: number;
-    is_low: boolean;
-    item: number;
-  }[];
-};
+export type IInventorySummaryResponse = PaginatedResponse<{
+  id: string;
+  item_object: InventoryItemObjectModel;
+  unit_object: UnitModel;
+  created_date: string;
+  quantity: number;
+  is_low: boolean;
+  item: number;
+}>;
 
 export type IInventoryLogRequest = {
   item?: number;
@@ -526,7 +470,6 @@ export type IInventoryLogRequest = {
   name?: string;
   offset?: number;
 };
-
 export type IInventoryLogResponse = Omit<
   IInventorySummaryResponse,
   "results"
@@ -551,18 +494,12 @@ export type IFaciclityMinimumQuantityRequest = {
   min_quantity?: number;
   item?: number;
 };
-
 export type IFaciclityMinimumQuantityResponse = {
   id: string;
   item_object: InventoryItemObjectModel;
   created_date: string;
   min_quantity: number;
   item: number;
-};
-
-export type IPatientTransferRequest = {
-  facility?: string;
-  date_of_birth?: string;
 };
 
 interface FacilityObjectModel {
@@ -582,6 +519,10 @@ interface FacilityObjectModel {
   bed_count: string;
 }
 
+export type IPatientTransferRequest = {
+  facility?: string;
+  date_of_birth?: string;
+};
 export type IPatientTransferResponse = {
   date_of_birth: string;
   patient: string;
@@ -599,40 +540,34 @@ export type IInvestigationRequest = {
   session?: string;
   sessions?: string;
 };
-
-export type IInvestigationResponse = {
-  count: number;
-  next: string | null;
-  previous: string | null;
-  results: {
-    id: string;
-    group_object: {
-      external_id: string;
-      name: string;
-    };
-    investigation_object: {
-      external_id: string;
-      name: string;
-      unit: string;
-      ideal_value: string;
-      min_value: number;
-      max_value: number;
-      investigation_type: string;
-      choices: string;
-    };
-    session_object: {
-      session_external_id: string;
-      session_created_date: string;
-      created_by: number;
-    };
-    value: number;
-    notes: string;
-    investigation: number;
-    group: number;
-    consultation: number;
-    session: number;
-  }[];
-};
+export type IInvestigationResponse = PaginatedResponse<{
+  id: string;
+  group_object: {
+    external_id: string;
+    name: string;
+  };
+  investigation_object: {
+    external_id: string;
+    name: string;
+    unit: string;
+    ideal_value: string;
+    min_value: number;
+    max_value: number;
+    investigation_type: string;
+    choices: string;
+  };
+  session_object: {
+    session_external_id: string;
+    session_created_date: string;
+    created_by: number;
+  };
+  value: number;
+  notes: string;
+  investigation: number;
+  group: number;
+  consultation: number;
+  session: number;
+}>;
 
 interface BedObjectModel {
   id: string;
@@ -742,42 +677,19 @@ export type ITriageDetailResponse = {
   num_patient_confirmed_positive: number;
 };
 
-// export interface PatientStatsModel {
-//   id?: number;
-//   entryDate?: string;
-//   num_patients_visited?: number;
-//   num_patients_home_quarantine?: number;
-//   num_patients_isolation?: number;
-//   num_patient_referred?: number;
-//   entry_date?: number;
-//   num_patient_confirmed_positive?: number;
-// }
-
 export type ITriageRequest = {
   entry_date_after?: string;
   entry_date_before?: string;
   limit?: number;
   offset?: number;
 };
-
-export type ITriageResponse = {
-  count: number;
-  next: string;
-  previous: string;
-  results: ITriageDetailResponse[];
-};
+export type ITriageResponse = PaginatedResponse<ITriageDetailResponse>;
 
 export type IMinQuantityRequest = {
   limit?: number;
   offset?: number;
 };
-
-export type IMinQuantityResponse = {
-  count: number;
-  next: string;
-  previous: string;
-  results: IMinQuantityItemResponse[];
-};
+export type IMinQuantityResponse = PaginatedResponse<IMinQuantityItemResponse>;
 
 export type IMinQuantityItemResponse = {
   id: string;
@@ -792,28 +704,18 @@ export type IItemRequest = {
   name?: number;
   offset?: number;
 };
-
-export type IItemResponse = {
-  count: number;
-  next: string;
-  previous: string;
-  results: InventoryItemObjectModel[];
-};
+export type IItemResponse = PaginatedResponse<InventoryItemObjectModel>;
 
 export type ISetMinQuantityRequest = {
   min_quantity?: number;
   item?: number;
 };
-
 export type ISetMinQuantityResponse = IMinQuantityItemResponse;
 
 export type IFlagInventoryItemResponse = {
   id: string;
   item_object: InventoryItemObjectModel;
-  unit_object: {
-    id: number;
-    name: string;
-  };
+  unit_object: UnitModel;
   external_id: string;
   created_date: string;
   current_stock: number;
@@ -826,19 +728,14 @@ export type IFlagInventoryItemResponse = {
   created_by: number;
 };
 
-export type IAssetBedResponse = {
-  count: number;
-  next: string;
-  previous: string;
-  results: {
-    id: string;
-    asset_object: Asset;
-    bed_object: BedObjectModel;
-    created_date: string;
-    modified_date: string;
-    meta: Record<string, string>;
-  }[];
-};
+export type IAssetBedResponse = PaginatedResponse<{
+  id: string;
+  asset_object: Asset;
+  bed_object: BedObjectModel;
+  created_date: string;
+  modified_date: string;
+  meta: Record<string, string>;
+}>;
 
 export type IAllPatientRequest = {
   facility?: string;
@@ -853,7 +750,6 @@ export type ICreateTriageRequest = {
   num_patient_referred?: number;
   num_patient_confirmed_positive?: number;
 };
-
 export type ICreateTriageResponse = {
   id: string;
   entry_date: string;

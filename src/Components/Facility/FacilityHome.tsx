@@ -152,7 +152,7 @@ export const FacilityHome = (props: any) => {
             if (capacityRes && capacityData) {
               const transformedCapacityData = {
                 id: Number(capacityData.results[0].id),
-                room_type: capacityData.results[0].room_type_text,
+                room_type: capacityData.results[0].room_type,
                 modified_date: capacityData.results[0].modified_date,
                 total_capacity: capacityData.results[0].total_capacity,
                 current_capacity: capacityData.results[0].current_capacity,
