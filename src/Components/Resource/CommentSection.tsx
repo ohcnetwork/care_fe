@@ -32,11 +32,11 @@ const CommentSection = (props: { id: string }) => {
       return;
     }
 
-    const { res, data } = await request(routes.addResourceComments, {
+    const { res } = await request(routes.addResourceComments, {
       pathParams: { id: props.id },
       body: payload,
     });
-    if (res && data) {
+    if (res?.ok) {
       Notification.Success({ msg: "Comment added successfully" });
       resourceRefetch();
     }

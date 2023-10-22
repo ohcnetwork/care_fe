@@ -1,4 +1,4 @@
-import { useEffect, lazy } from "react";
+import { lazy } from "react";
 import { navigate } from "raviger";
 import { downloadResourceRequests } from "../../Redux/actions";
 import ListFilter from "./ListFilter";
@@ -27,33 +27,12 @@ export default function ListView() {
     navigate("/resource/board", { query: qParams });
   const appliedFilters = formatFilter(qParams);
 
-  const refreshList = () => {
-    refetch();
-  };
-
   const { loading, data, refetch } = useQuery(routes.listResourceRequests, {
     query: formatFilter({
       ...qParams,
       offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
     }),
   });
-
-  useEffect(() => {
-    refetch();
-  }, [
-    qParams.status,
-    qParams.facility,
-    qParams.origin_facility,
-    qParams.approving_facility,
-    qParams.assigned_facility,
-    qParams.emergency,
-    qParams.created_date_before,
-    qParams.created_date_after,
-    qParams.modified_date_before,
-    qParams.modified_date_after,
-    qParams.ordering,
-    qParams.page,
-  ]);
 
   const showResourceCardList = (data: any) => {
     if (data && !data.length) {
@@ -206,7 +185,7 @@ export default function ListView() {
             <div className="-mb-4 mr-2 mt-4 flex justify-end">
               <button
                 className="text-xs hover:text-blue-800"
-                onClick={refreshList}
+                onClick={() => refetch()}
               >
                 <i className="fa fa-refresh mr-1" aria-hidden="true"></i>
                 Refresh List

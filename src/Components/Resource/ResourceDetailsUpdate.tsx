@@ -90,7 +90,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
   const { loading: assignedUserLoading } = useQuery(routes.userList, {
     onResponse: ({ res, data }) => {
-      if (res && data && data.count) {
+      if (res?.ok && data && data.count) {
         SetAssignedUser(data.results[0]);
       }
     },

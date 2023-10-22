@@ -169,7 +169,11 @@ export default function ResourceBoard({
   const [offset, setOffSet] = useState(0);
 
   const { data, refetch } = useQuery(routes.listResourceRequests, {
-    query: formatFilter({ ...filterProp, status: board, offset: offset }),
+    query: formatFilter({
+      ...filterProp,
+      status: board,
+      offset: offset,
+    }),
     onResponse: ({ res, data }) => {
       if (res && data) {
         setCurrentPage(1);

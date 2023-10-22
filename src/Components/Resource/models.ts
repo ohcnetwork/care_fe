@@ -1,21 +1,13 @@
+import { PerformedByModel } from "../HCX/misc";
+
 export interface IComment {
   id: string;
-  created_by_object: CreatedByObject;
+  created_by_object: PerformedByModel;
   external_id: string;
   created_date: string;
   modified_date: string;
   comment: string;
   created_by: number;
-}
-
-export interface CreatedByObject {
-  id: number;
-  first_name: string;
-  username: string;
-  email: string;
-  last_name: string;
-  user_type: number;
-  last_login: string;
 }
 
 export interface IResource {
@@ -45,26 +37,8 @@ export interface IResource {
   refering_facility_contact_name: string;
   refering_facility_contact_number: string;
   requested_quantity: number;
-  assigned_to_object: {
-    id: number;
-    first_name: string;
-    username: string;
-    last_name: string;
-    user_type: number;
-  };
-  created_by_object: {
-    id: number;
-    first_name: string;
-    username: string;
-    last_name: string;
-    user_type: number;
-  };
+  assigned_to_object: PerformedByModel;
+  created_by_object: PerformedByModel;
   created_date: string;
-  last_edited_by_object: {
-    id: number;
-    first_name: string;
-    username: string;
-    last_name: string;
-    user_type: number;
-  };
+  last_edited_by_object: PerformedByModel;
 }

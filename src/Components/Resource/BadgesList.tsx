@@ -1,36 +1,26 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 
+function useQueryHook(facilityId: string | undefined) {
+  return useQuery(routes.getAnyFacility, {
+    pathParams: { id: String(facilityId) },
+    prefetch: facilityId !== undefined,
+  });
+}
+
 export default function BadgesList(props: any) {
   const { appliedFilters, FilterBadges } = props;
 
-  const originFacilityData =
-    appliedFilters.origin_facility &&
-    useQueryHook(appliedFilters.origin_facility);
-  const approvingFacilityData =
-    appliedFilters.approving_facility &&
-    useQueryHook(appliedFilters.approving_facility);
-  const assignedFacilityData =
-    appliedFilters.assigned_facility &&
-    useQueryHook(appliedFilters.assigned_facility);
-
-  function useQueryHook(facilityId: any) {
-    const { data } = useQuery(routes.getAnyFacility, {
-      pathParams: { id: facilityId },
-    });
-    return { data };
-  }
+  const originFacilityData = useQueryHook(appliedFilters.origin_facility);
+  const approvingFacilityData = useQueryHook(appliedFilters.approving_facility);
+  const assignedFacilityData = useQueryHook(appliedFilters.assigned_facility);
 
   const getDescShiftingFilterOrder = (ordering: any) => {
-    let desc = "";
-    SHIFTING_FILTER_ORDER.forEach((item) => {
-      if (item.text === ordering) {
-        desc = item.desc!;
-      }
-    });
-    return desc;
+    const foundItem = SHIFTING_FILTER_ORDER.find(
+      (item) => item.text === ordering
+    );
+    return foundItem ? foundItem.desc : "";
   };
 
   return (

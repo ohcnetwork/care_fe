@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { RESOURCE_FILTER_ORDER } from "../../Common/constants";
 import { RESOURCE_CHOICES } from "../../Common/constants";
@@ -53,38 +52,35 @@ export default function ListFilter(props: any) {
     status: filter.status || null,
   });
 
-  const { loading: orginFacilityLoading } = filter.origin_facility
-    ? useQuery(routes.getAnyFacility, {
-        pathParams: { id: filter.origin_facility },
-        onResponse: ({ res, data }) => {
-          if (res && data) {
-            setFilterState({ origin_facility_ref: data });
-          }
-        },
-      })
-    : { loading: false };
+  const { loading: orginFacilityLoading } = useQuery(routes.getAnyFacility, {
+    prefetch: filter.origin_facility !== undefined,
+    pathParams: { id: filter.origin_facility },
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        setFilterState({ origin_facility_ref: data });
+      }
+    },
+  });
 
-  const { loading: resourceFacilityLoading } = filter.approving_facility
-    ? useQuery(routes.getAnyFacility, {
-        pathParams: { id: filter.approving_facility },
-        onResponse: ({ res, data }) => {
-          if (res && data) {
-            setFilterState({ approving_facility_ref: data });
-          }
-        },
-      })
-    : { loading: false };
+  const { loading: resourceFacilityLoading } = useQuery(routes.getAnyFacility, {
+    prefetch: filter.approving_facility !== undefined,
+    pathParams: { id: filter.approving_facility },
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        setFilterState({ approving_facility_ref: data });
+      }
+    },
+  });
 
-  const { loading: assignedFacilityLoading } = filter.assigned_facility
-    ? useQuery(routes.getAnyFacility, {
-        pathParams: { id: filter.assigned_facility },
-        onResponse: ({ res, data }) => {
-          if (res && data) {
-            setFilterState({ assigned_facility_ref: data });
-          }
-        },
-      })
-    : { loading: false };
+  const { loading: assignedFacilityLoading } = useQuery(routes.getAnyFacility, {
+    pathParams: { id: filter.assigned_facility },
+    prefetch: filter.assigned_facility !== undefined,
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        setFilterState({ assigned_facility_ref: data });
+      }
+    },
+  });
 
   const setFacility = (selected: any, name: string) => {
     setFilterState({

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import { useReducer, useState, lazy } from "react";
 
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -111,11 +110,10 @@ export default function ResourceCreate(props: resourceProps) {
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
-  const { data: facilityData } = facilityId
-    ? useQuery(routes.getAnyFacility, {
-        pathParams: { id: String(facilityId) },
-      })
-    : { data: null };
+  const { data: facilityData } = useQuery(routes.getAnyFacility, {
+    prefetch: facilityId !== undefined,
+    pathParams: { id: String(facilityId) },
+  });
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -198,7 +196,7 @@ export default function ResourceCreate(props: resourceProps) {
       });
       setIsLoading(false);
 
-      if (res && data && (res.status == 201 || res.status == 200)) {
+      if (res?.ok && data) {
         await dispatch({ type: "set_form", form: initForm });
         Notification.Success({
           msg: "Resource request created successfully",
