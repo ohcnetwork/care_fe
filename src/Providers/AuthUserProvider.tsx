@@ -28,7 +28,7 @@ export default function AuthUserProvider({ children, unauthorized }: Props) {
     updateRefreshToken(true);
     setInterval(
       () => updateRefreshToken(),
-      jwt_token_refresh_interval ?? 5 * 60 * 3000
+      jwt_token_refresh_interval ?? 5 * 60 * 1000
     );
   }, [data, jwt_token_refresh_interval]);
 

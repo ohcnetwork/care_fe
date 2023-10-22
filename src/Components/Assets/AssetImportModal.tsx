@@ -5,8 +5,6 @@ import { FacilityModel } from "../Facility/models";
 import { AssetData } from "./AssetTypes";
 import * as Notification from "../../Utils/Notifications.js";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { listFacilityAssetLocation } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
 import { Link } from "raviger";
 import readXlsxFile from "read-excel-file";
 import {
@@ -16,6 +14,8 @@ import {
 import { parseCsvFile } from "../../Utils/utils";
 import useConfig from "../../Common/hooks/useConfig";
 import DialogModal from "../Common/Dialog";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 
 interface Props {
@@ -34,7 +34,6 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
     location: "",
   });
   const [locations, setLocations] = useState<any>([]);
-  const dispatchAction: any = useDispatch();
   const { sample_format_asset_import } = useConfig();
   const [locationsLoading, setLocationsLoading] = useState(false);
 
@@ -43,18 +42,14 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
     setSelectedFile(undefined);
     onClose && onClose();
   };
-
-  useEffect(() => {
-    setLocationsLoading(true);
-    dispatchAction(
-      listFacilityAssetLocation({}, { facility_external_id: facility.id })
-    ).then(({ data }: any) => {
-      setLocationsLoading(false);
-      if (data.count > 0) {
+  useQuery(routes.listFacilityAssetLocation, {
+    pathParams: { facility_external_id: `${facility.id}` },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
         setLocations(data.results);
       }
-    });
-  }, []);
+    },
+  });
 
   useEffect(() => {
     const readFile = async () => {
@@ -362,6 +357,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
             <Submit
               onClick={handleUpload}
               disabled={isImporting || !selectedFile}
+              data-testid="asset-import-btn"
             >
               {isImporting ? (
                 <i className="fa-solid fa-spinner animate-spin" />
