@@ -240,6 +240,10 @@ export type IFacilityNotificationRequest = {
   message?: string;
 };
 
+export type IFacilityNotificationResponse = {
+  [key: string]: string;
+};
+
 export type IStateListResponse = PaginatedResponse<UnitModel>;
 export type IStateDitrictResponse = StateModel;
 
@@ -355,6 +359,9 @@ export type IUserListFacilityResponse = {
   pf_auth: string;
 };
 
+export type IDeleteUserRequest = {
+  id?: string;
+};
 export type IDeleteUserResponse = {
   detail?: string;
 };
@@ -736,6 +743,8 @@ export type IAssetBedResponse = PaginatedResponse<{
   modified_date: string;
   meta: Record<string, string>;
 }>;
+
+export type IAssetBedRequest = IDeleteUserRequest;
 
 export type IAllPatientRequest = {
   facility?: string;

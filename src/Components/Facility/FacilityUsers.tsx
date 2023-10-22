@@ -151,7 +151,7 @@ export default function FacilityUsers(props: any) {
     setIsFacilityLoading(true);
     await request(routes.deleteUserFacility, {
       // body given in the dispatch call but there is no body in API documentation
-      body: String(unlinkFacilityData?.facility?.id),
+      body: { id: String(unlinkFacilityData?.facility?.id) },
       pathParams: {
         username: unlinkFacilityData.userName,
       },

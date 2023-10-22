@@ -53,7 +53,11 @@ import {
   IDeleteInventoryLog,
   ICreateTriageRequest,
   ICreateTriageResponse,
+  IDeleteUserRequest,
+  IAssetBedRequest,
+  IFacilityNotificationResponse,
 } from "../Components/Facility/models";
+import { PatientModel } from "../Components/Patient/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 
@@ -150,7 +154,7 @@ const routes = {
   deleteUserFacility: {
     path: "/api/v1/users/{username}/delete_facility/",
     method: "DELETE",
-    TBody: Type<any>(),
+    TBody: Type<IDeleteUserRequest>(),
     TRes: Type<IDeleteUserResponse>(),
   },
 
@@ -253,7 +257,7 @@ const routes = {
   partialUpdateFacility: {
     path: "/api/v1/facility/{id}/",
     method: "PATCH",
-    TBody: Type<any>(),
+    TBody: Type<IFacilityRequest>(),
     TRes: Type<IFacilityResponse>(),
   },
 
@@ -294,7 +298,7 @@ const routes = {
   listAssetBeds: {
     path: "/api/v1/assetbed/",
     method: "GET",
-    TBody: Type<any>(),
+    TBody: Type<IAssetBedRequest>(),
     TRes: Type<IAssetBedResponse>(),
   },
   createAssetBed: {
@@ -373,8 +377,7 @@ const routes = {
   deleteFacility: {
     path: "/api/v1/facility/{id}",
     method: "DELETE",
-    TRes: Type<any>(),
-    Tbody: Type<any>(),
+    TRes: Type<IDeleteUserResponse>(),
   },
 
   downloadFacility: {
@@ -526,7 +529,7 @@ const routes = {
   patientList: {
     path: "/api/v1/patient/",
     TBody: Type<IAllPatientRequest>(),
-    TRes: Type<any>(),
+    TRes: Type<PatientModel>(),
   },
   addPatient: {
     path: "/api/v1/patient/",
@@ -534,7 +537,7 @@ const routes = {
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
-    TRes: Type<any>(),
+    TRes: Type<PatientModel>(),
   },
   updatePatient: {
     path: "/api/v1/patient/{id}/",
@@ -719,7 +722,6 @@ const routes = {
   flagInventoryItem: {
     path: "/api/v1/facility/{facility_external_id}/inventory/{external_id}/flag/",
     method: "PUT",
-    TBody: Type<any>(),
     TRes: Type<IFlagInventoryItemResponse>(),
   },
   deleteLastInventoryLog: {
@@ -812,7 +814,7 @@ const routes = {
   sendNotificationMessages: {
     path: "/api/v1/notification/notify/",
     method: "POST",
-    TRes: Type<any>(),
+    TRes: Type<IFacilityNotificationResponse>(),
     Tbody: Type<IFacilityNotificationRequest>(),
   },
 

@@ -72,7 +72,6 @@ export default function InventoryLog(props: any) {
     setSaving(true);
     // request body is not given in the dispath call
     const { res } = await request(routes.flagInventoryItem, {
-      body: {},
       pathParams: {
         facility_external_id: facilityId,
         external_id: id,

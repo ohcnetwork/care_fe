@@ -124,8 +124,8 @@ export default function LegacyFacilityCNS({
           is_active: true,
         },
       });
-      if (res && res.status === 200) {
-        const patients = data.results as PatientModel[];
+      if (res && res.status === 200 && data) {
+        const patients = data as PatientModel[];
         return patients.filter(
           (patient) => !!patient.last_consultation?.current_bed?.bed_object.id
         );
@@ -135,7 +135,7 @@ export default function LegacyFacilityCNS({
     async function fetchPatientMonitorAsset(patient: PatientModel) {
       // Request body in API documentation is not matching with request body of dispatch call
       const { res, data } = await request(routes.listAssetBeds, {
-        body: `asset-bed-${patient.id}`,
+        body: { id: `asset-bed-${patient.id}` },
         pathParams: {
           bed: patient.last_consultation?.current_bed?.bed_object?.id || "",
         },
