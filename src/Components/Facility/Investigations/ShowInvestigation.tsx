@@ -9,7 +9,7 @@ import {
 import PageTitle from "../../Common/PageTitle";
 import InvestigationTable from "./InvestigationTable";
 
-import _ from "lodash";
+import { set, chain } from "lodash-es";
 import { navigate } from "raviger";
 import * as Notification from "../../../Utils/Notifications.js";
 
@@ -110,7 +110,7 @@ export default function ShowInvestigation(props: any) {
 
   const handleValueChange = (value: any, name: string) => {
     const changedFields = { ...state.changedFields };
-    _.set(changedFields, name, value);
+    set(changedFields, name, value);
     dispatch({ type: "set_changed_fields", changedFields });
   };
 
@@ -147,7 +147,7 @@ export default function ShowInvestigation(props: any) {
   };
 
   const handleUpdateCancel = useCallback(() => {
-    const changedValues = _.chain(state.initialValues)
+    const changedValues = chain(state.initialValues)
       .map((val: any, _key: string) => ({
         id: val?.id,
         initialValue: val?.notes || val?.value || null,
