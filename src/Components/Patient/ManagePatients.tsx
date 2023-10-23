@@ -19,7 +19,11 @@ import {
   getFacilityAssetLocation,
   getLocalBody,
 } from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import {
+  statusType,
+  useAbortableEffect,
+  parseOptionId,
+} from "../../Common/utils";
 
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -37,7 +41,6 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import { parseOptionId } from "../../Common/utils";
 import { formatAge, parsePhoneNumber } from "../../Utils/utils.js";
 import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
@@ -169,7 +172,6 @@ export const PatientManager = () => {
       : undefined,
     local_body: qParams.lsgBody || undefined,
     facility: qParams.facility,
-    location: qParams.location || undefined,
     facility_type: qParams.facility_type || undefined,
     district: qParams.district || undefined,
     offset: (qParams.page ? qParams.page - 1 : 0) * resultsPerPage,
@@ -200,6 +202,8 @@ export const PatientManager = () => {
       qParams.last_consultation_admitted_bed_type_list || undefined,
     last_consultation_discharge_reason:
       qParams.last_consultation_discharge_reason || undefined,
+    last_consultation_current_bed__location:
+      qParams.last_consultation_current_bed__location || undefined,
     srf_id: qParams.srf_id || undefined,
     number_of_doses: qParams.number_of_doses || undefined,
     covin_id: qParams.covin_id || undefined,
@@ -344,8 +348,8 @@ export const PatientManager = () => {
     qParams.age_min,
     qParams.last_consultation_admitted_bed_type_list,
     qParams.last_consultation_discharge_reason,
+    qParams.last_consultation_current_bed__location,
     qParams.facility,
-    qParams.location,
     qParams.facility_type,
     qParams.district,
     qParams.category,
@@ -447,16 +451,19 @@ export const PatientManager = () => {
   const fetchLocationBadgeName = useCallback(
     async (status: statusType) => {
       const res =
-        qParams.location &&
+        qParams.last_consultation_current_bed__location &&
         (await dispatch(
-          getFacilityAssetLocation(qParams.facility, qParams.location)
+          getFacilityAssetLocation(
+            qParams.facility,
+            qParams.last_consultation_current_bed__location
+          )
         ));
 
       if (!status.aborted) {
         setLocationBadge(res?.data?.name);
       }
     },
-    [dispatch, qParams.location]
+    [dispatch, qParams.last_consultation_current_bed__location]
   );
 
   useAbortableEffect(
@@ -954,7 +961,11 @@ export const PatientManager = () => {
             badge("COWIN ID", "covin_id"),
             badge("Is Antenatal", "is_antenatal"),
             value("Facility", "facility", facilityBadgeName),
-            value("Location", "location", locationBadgeName),
+            value(
+              "Location",
+              "last_consultation_current_bed__location",
+              locationBadgeName
+            ),
             badge("Facility Type", "facility_type"),
             value("District", "district", districtName),
             ordering(),

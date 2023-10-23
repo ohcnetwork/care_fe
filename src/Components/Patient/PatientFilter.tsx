@@ -46,7 +46,6 @@ export default function PatientFilter(props: any) {
   const [filterState, setFilterState] = useMergeState({
     district: filter.district || "",
     facility: filter.facility || "",
-    location: filter.location || "",
     facility_type: filter.facility_type || "",
     lsgBody: filter.lsgBody || "",
     facility_ref: null,
@@ -79,6 +78,8 @@ export default function PatientFilter(props: any) {
       filter.last_consultation_admitted_bed_type_list
         ? filter.last_consultation_admitted_bed_type_list.split(",")
         : [],
+    last_consultation_current_bed__location:
+      filter.last_consultation_current_bed__location || "",
     last_consultation_discharge_reason:
       filter.last_consultation_discharge_reason || null,
     srf_id: filter.srf_id || null,
@@ -102,7 +103,6 @@ export default function PatientFilter(props: any) {
   const clearFilterState = {
     district: "",
     facility: "",
-    location: "",
     facility_type: "",
     lsgBody: "",
     facility_ref: null,
@@ -128,6 +128,7 @@ export default function PatientFilter(props: any) {
     last_consultation_discharge_date_before: "",
     last_consultation_discharge_date_after: "",
     last_consultation_admitted_to_list: [],
+    last_consultation_current_bed__location: "",
     srf_id: "",
     number_of_doses: null,
     covin_id: "",
@@ -216,7 +217,6 @@ export default function PatientFilter(props: any) {
     const {
       district,
       facility,
-      location,
       facility_type,
       lsgBody,
       date_declared_positive_before,
@@ -239,6 +239,7 @@ export default function PatientFilter(props: any) {
       last_consultation_discharge_date_after,
       last_consultation_admitted_bed_type_list,
       last_consultation_discharge_reason,
+      last_consultation_current_bed__location,
       number_of_doses,
       covin_id,
       srf_id,
@@ -256,7 +257,8 @@ export default function PatientFilter(props: any) {
       district: district || "",
       lsgBody: lsgBody || "",
       facility: facility || "",
-      location: location || "",
+      last_consultation_current_bed__location:
+        last_consultation_current_bed__location || "",
       facility_type: facility_type || "",
       date_declared_positive_before: dateQueryString(
         date_declared_positive_before
@@ -580,14 +582,14 @@ export default function PatientFilter(props: any) {
             <LocationSelect
               disabled={!filterState.facility}
               name="facility"
-              selected={filterState.location}
+              selected={filterState.last_consultation_current_bed__location}
               multiple={false}
               errors=""
               facilityId={filterState.facility}
               setSelected={(selected) =>
                 setFilterState({
                   ...filterState,
-                  location: selected,
+                  last_consultation_current_bed__location: selected,
                 })
               }
             />
