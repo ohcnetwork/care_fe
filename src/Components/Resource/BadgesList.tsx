@@ -11,7 +11,6 @@ function useQueryHook(facilityId: string | undefined) {
 
 export default function BadgesList(props: any) {
   const { appliedFilters, FilterBadges } = props;
-
   const originFacilityData = useQueryHook(appliedFilters.origin_facility);
   const approvingFacilityData = useQueryHook(appliedFilters.approving_facility);
   const assignedFacilityData = useQueryHook(appliedFilters.assigned_facility);

@@ -116,7 +116,6 @@ const ResourceCard = ({ resource }: any) => {
                   </dd>
                 </dt>
               </div>
-
               {resource.assigned_to_object && (
                 <div className="sm:col-span-1">
                   <dt
@@ -134,7 +133,6 @@ const ResourceCard = ({ resource }: any) => {
               )}
             </dl>
           </div>
-
           <div className="mt-2 flex">
             <button
               data-testid="resource-details"

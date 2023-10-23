@@ -1,9 +1,7 @@
 import * as Notification from "../../Utils/Notifications.js";
-
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { lazy, useReducer, useState } from "react";
 import { navigate, useQueryParams } from "raviger";
-
 import Card from "../../CAREUI/display/Card";
 import CircularProgress from "../Common/components/CircularProgress";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -16,7 +14,6 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
-
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useQuery from "../../Utils/request/useQuery.js";
 import routes from "../../Redux/api.js";

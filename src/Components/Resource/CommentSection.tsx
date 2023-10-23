@@ -12,7 +12,6 @@ import request from "../../Utils/request/request";
 
 const CommentSection = (props: { id: string }) => {
   const [commentBox, setCommentBox] = useState("");
-
   const { loading, refetch: resourceRefetch } = useQuery(
     routes.getResourceComments,
     {
@@ -31,7 +30,6 @@ const CommentSection = (props: { id: string }) => {
       });
       return;
     }
-
     const { res } = await request(routes.addResourceComments, {
       pathParams: { id: props.id },
       body: payload,
@@ -42,7 +40,6 @@ const CommentSection = (props: { id: string }) => {
     }
     setCommentBox("");
   };
-
   return (
     <div className="flex w-full flex-col">
       <TextAreaFormField
