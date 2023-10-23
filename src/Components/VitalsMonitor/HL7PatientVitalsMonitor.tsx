@@ -40,11 +40,22 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   }, [props.socketUrl]);
 
   // Check if the time difference is within the specified maximum persistence time
-  console.log("Time difference in minutes: ", props.minutesSinceAssignment);
+  const currentDate = new Date();
+  const bedAssignmentStartDate = props.patientCurrentBedAssignmentDate
+    ? new Date(props.patientCurrentBedAssignmentDate)
+    : undefined;
+
+  const minutesSinceCurrentBedAssignment =
+    bedAssignmentStartDate &&
+    (currentDate.getTime() - bedAssignmentStartDate.getTime()) / (1000 * 60);
+  console.log(
+    "minutesSinceCurrentBedAssignment",
+    minutesSinceCurrentBedAssignment
+  );
   const bpWithinMaxPersistence = !!(
     data.bp?.["date-time"] &&
-    props.minutesSinceAssignment &&
-    isWithinMinutes(data.bp?.["date-time"], props.minutesSinceAssignment)
+    minutesSinceCurrentBedAssignment !== undefined && // Check if minutesSinceCurrentBedAssignment is defined
+    isWithinMinutes(data.bp?.["date-time"], minutesSinceCurrentBedAssignment)
   );
 
   return (

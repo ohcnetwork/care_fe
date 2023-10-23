@@ -230,15 +230,7 @@ export interface ConsultationBedRequest {
   offset?: number;
 }
 
-export interface ConsultationBedResponse extends PaginatedResponse<CurrentBed> {
-  is_occuiped?: boolean;
-  created_date?: string;
-  modified_date?: string;
-  name?: string;
-  description?: string;
-  meta?: Record<string, any>;
-  assets_objects?: AssetData[];
-}
+export type ConsultationBedResponse = PaginatedResponse<CurrentBed>;
 
 // Voluntarily made as `type` for it to achieve type-safety when used with
 // `useAsyncOptions<ICD11DiagnosisModel>`

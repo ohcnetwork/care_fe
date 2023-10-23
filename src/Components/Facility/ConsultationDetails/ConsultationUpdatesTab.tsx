@@ -26,9 +26,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
-  const [bedAssignmentStartDate, setBedAssignmentStartDate] = useState(
-    new Date()
-  );
+  const [bedAssignmentStartDate, setBedAssignmentStartDate] = useState("");
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
@@ -116,8 +114,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
     },
     onResponse: ({ res, data }) => {
       if (res?.ok && data) {
-        const startDate = new Date(data.results[0].created_date);
-        setBedAssignmentStartDate(startDate);
+        setBedAssignmentStartDate(data.results[0].created_date);
       } else {
         Notification.Error({
           msg: "Something went wrong: ",
@@ -125,10 +122,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
       }
     },
   });
-
-  const currentDate = new Date();
-  const timeDifferenceInMinutes =
-    (currentDate.getTime() - bedAssignmentStartDate.getTime()) / (1000 * 60);
 
   return (
     <div className="flex flex-col gap-2">
@@ -139,7 +132,7 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
             <div className="mx-auto flex w-full flex-col justify-between gap-1 rounded bg-[#020617] lg:w-auto lg:min-w-[1280px] lg:flex-row">
               <div className="min-h-[400px] flex-1">
                 <HL7PatientVitalsMonitor
-                  minutesSinceAssignment={timeDifferenceInMinutes}
+                  patientCurrentBedAssignmentDate={bedAssignmentStartDate}
                   patientAssetBed={{
                     asset: monitorBedData?.asset_object as AssetData,
                     bed: monitorBedData?.bed_object as BedModel,
