@@ -6,7 +6,10 @@ export const PrescriptionFormValidator = () => {
   return (form: Prescription): FormErrors<Prescription> => {
     const errors: Partial<Record<keyof Prescription, FieldError>> = {};
     errors.medicine_object = RequiredFieldValidator()(form.medicine_object);
-    errors.dosage = RequiredFieldValidator()(form.dosage);
+    if (form.is_titrated) {
+      errors.start_dosage = RequiredFieldValidator()(form.start_dosage);
+      errors.target_dosage = RequiredFieldValidator()(form.target_dosage);
+    } else errors.dosage = RequiredFieldValidator()(form.dosage);
     if (form.is_prn)
       errors.indicator = RequiredFieldValidator()(form.indicator);
     if (!form.is_prn)

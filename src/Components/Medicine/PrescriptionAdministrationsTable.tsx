@@ -118,7 +118,7 @@ export default function PrescriptionAdministrationsTable({
       <SubHeading
         title={prn ? "PRN Prescriptions" : "Prescriptions"}
         lastModified={
-          state?.prescriptions?.[0]?.last_administered_on ??
+          state?.prescriptions?.[0]?.last_administration?.administered_date ??
           state?.prescriptions?.[0]?.modified_date
         }
         options={
@@ -628,14 +628,17 @@ function getAdministrationBounds(prescriptions: Prescription[]) {
     )
   );
 
-  // get end by finding latest of all presciption's last_administered_on
+  // get end by finding latest of all presciption's last_administration?.administered_date
   const end = new Date(
     prescriptions
-      .filter((prescription) => prescription.last_administered_on)
+      .filter(
+        (prescription) => prescription.last_administration?.administered_date
+      )
       .reduce(
         (latest, curr) =>
-          curr.last_administered_on && curr.last_administered_on > latest
-            ? curr.last_administered_on
+          curr.last_administration?.administered_date &&
+          curr.last_administration?.administered_date > latest
+            ? curr.last_administration?.administered_date
             : latest,
         prescriptions[0]?.created_date ?? new Date()
       )

@@ -103,8 +103,8 @@ export default function MedicineAdministration(props: Props) {
               <CareIcon className="care-l-history-alt pr-1" />{" "}
               {t("last_administered")}
               <span className="pl-1">
-                {obj.last_administered_on
-                  ? formatDateTime(obj.last_administered_on)
+                {obj.last_administration?.administered_date
+                  ? formatDateTime(obj.last_administration?.administered_date)
                   : t("never")}
               </span>
             </div>

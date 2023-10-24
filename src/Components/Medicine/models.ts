@@ -6,7 +6,11 @@ interface BasePrescription {
   medicine_object?: MedibaseMedicine;
   medicine_old?: string;
   route?: "ORAL" | "IV" | "IM" | "SC";
-  dosage: string;
+  dosage?: string;
+  is_titrated?: boolean;
+  start_dosage?: string;
+  target_dosage?: string;
+  instruction_on_titration?: string;
   notes?: string;
   meta?: object;
   readonly prescription_type?: "DISCHARGE" | "REGULAR";
@@ -14,7 +18,7 @@ interface BasePrescription {
   discontinued_reason?: string;
   readonly prescribed_by: PerformedByModel;
   readonly discontinued_date: string;
-  readonly last_administered_on?: string;
+  readonly last_administration?: MedicineAdministrationRecord;
   readonly is_migrated: boolean;
   readonly created_date: string;
   readonly modified_date: string;
@@ -53,6 +57,7 @@ export type MedicineAdministrationRecord = {
   readonly id?: string;
   readonly prescription?: Prescription;
   notes: string;
+  dosage?: string;
   administered_date?: string;
   readonly administered_by?: PerformedByModel;
   readonly created_date?: string;

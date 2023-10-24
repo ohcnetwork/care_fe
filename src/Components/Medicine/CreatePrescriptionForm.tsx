@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import MedibaseAutocompleteFormField from "./MedibaseAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
 import { PrescriptionFormValidator } from "./validators";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;
@@ -51,7 +52,8 @@ export default function CreatePrescriptionForm(props: {
             {...field("medicine_object", RequiredFieldValidator())}
             required
           />
-          <div className="flex items-center gap-4">
+          <CheckBoxFormField label="Titrate Dosage" {...field("is_titrated")} />
+          <div className="flex flex-wrap items-center gap-x-4">
             <SelectFormField
               className="flex-1"
               label={t("route")}
@@ -60,14 +62,35 @@ export default function CreatePrescriptionForm(props: {
               optionLabel={(key) => t("PRESCRIPTION_ROUTE_" + key)}
               optionValue={(key) => key}
             />
-            <NumericWithUnitsFormField
-              className="flex-1"
-              label={t("dosage")}
-              {...field("dosage", RequiredFieldValidator())}
-              required
-              units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
-              min={0}
-            />
+            {field("is_titrated").value ? (
+              <div className="flex w-full gap-4">
+                <NumericWithUnitsFormField
+                  className="flex-1"
+                  label="Start Dosage"
+                  {...field("start_dosage", RequiredFieldValidator())}
+                  required
+                  units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
+                  min={0}
+                />
+                <NumericWithUnitsFormField
+                  className="flex-1"
+                  label="Target Dosage"
+                  {...field("target_dosage", RequiredFieldValidator())}
+                  required
+                  units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
+                  min={0}
+                />
+              </div>
+            ) : (
+              <NumericWithUnitsFormField
+                className="flex-1"
+                label={t("dosage")}
+                {...field("dosage", RequiredFieldValidator())}
+                required={!field("is_titrated").value}
+                units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
+                min={0}
+              />
+            )}
           </div>
 
           {props.prescription.is_prn ? (
@@ -114,6 +137,13 @@ export default function CreatePrescriptionForm(props: {
                 {...field("days")}
               />
             </div>
+          )}
+
+          {field("is_titrated").value && (
+            <TextAreaFormField
+              label="Instructions on titration"
+              {...field("instruction_on_titration")}
+            />
           )}
 
           <TextAreaFormField label={t("notes")} {...field("notes")} />
