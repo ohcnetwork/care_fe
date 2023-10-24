@@ -1,7 +1,7 @@
-import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
+import { AssignedToObjectModel } from "../Patient/models";
 import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
-import { AssetData } from "../Assets/AssetTypes";
+import { AssetBedModel, AssetData } from "../Assets/AssetTypes";
 import { UserBareMinimum } from "../Users/models";
 
 export interface LocalBodyModel {
@@ -303,9 +303,7 @@ export type NeurologicalTablesRes = {
 export type NursingPlotFields = "nursing";
 
 export type NursingPlotRes = {
-  nursing: {
-    [key: string]: any;
-  };
+  nursing: [any];
 };
 
 export type NutritionPlotsFields =
@@ -317,36 +315,24 @@ export type NutritionPlotsFields =
   | "output";
 
 export type NutritionPlotsRes = {
-  infusions: {
-    [key: string]: any;
-  };
-  iv_fluids: {
-    [key: string]: any;
-  };
-  feeds: {
-    [key: string]: any;
-  };
+  infusions: [any];
+  iv_fluids: [any];
+  feeds: [any];
   total_intake_calculated: string;
   total_output_calculated: string;
-  output: {
-    [key: string]: any;
-  };
+  output: [any];
 };
 
 export type PainDiagramsFields = "pain_scale_enhanced";
 
 export type PainDiagramsRes = {
-  pain_scale_enhanced: {
-    [key: string]: any;
-  };
+  pain_scale_enhanced: [any];
 };
 
 export type PressureSoreDiagramsFields = "pressure_sore";
 
 export type PressureSoreDiagramsRes = {
-  pressure_sore: {
-    [key: string]: any;
-  };
+  pressure_sore: [any];
 };
 
 export type PrimaryParametersPlotFields =
@@ -364,7 +350,9 @@ export type PrimaryParametersPlotFields =
 
 export type PrimaryParametersPlotRes = {
   bp: {
-    [key: string]: any;
+    mean?: number;
+    systolic?: number;
+    diastolic?: number;
   };
   pulse: number;
   temperature: string;
@@ -408,7 +396,7 @@ export type VentilatorPlotRes = {
 };
 
 export interface DailyRoundsBody {
-  current_page: number;
+  page?: number;
   fields:
     | ABGPlotsFields[]
     | DialysisPlotsFields[]
@@ -423,6 +411,7 @@ export interface DailyRoundsBody {
 
 export interface DailyRoundsRes {
   count: number;
+  page_size: number;
   results:
     | ABGPlotsRes
     | DialysisPlotsRes
@@ -453,44 +442,14 @@ export interface GetDailyReportsBody {
   rounds_type: "" | "NORMAL,VENTILATOR,ICU";
 }
 
-export interface GetDailyReportsRes {
+export interface GetAssetBedsData {
   count: number;
-  results: DailyRoundsModel[];
+  results: AssetBedModel[];
 }
 
-export interface AssetBedsModel {
-  id: number;
-  bed_object: BedModel;
-  asset_object: AssetData;
-  created_date: string;
-  modified_date: string;
-  meta?: {
-    [key: string]: any;
-  };
-}
-
-export interface GetFeedRes {
-  count: number;
-  results: AssetBedsModel[];
-}
-
-export interface GetFeedBody {
-  limit?: number;
-  offset?: number;
-  asset?: number;
-}
-
-export interface DeleteAssetBedsRes {
-  detail?: string;
-}
-
-export interface PartialUpdateAssetBedsBody {
-  asset: string;
-  beds: string;
-  meta?: {
-    [key: string]: any;
-  };
-}
+export type DeleteAssetBedData = null | {
+  detail: string;
+};
 
 // Voluntarily made as `type` for it to achieve type-safety when used with
 // `useAsyncOptions<ICD11DiagnosisModel>`

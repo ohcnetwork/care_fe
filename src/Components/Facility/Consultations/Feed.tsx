@@ -1,5 +1,6 @@
 import * as Notification from "../../../Utils/Notifications.js";
-
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
 import {
   CAMERA_STATES,
   CameraPTZ,
@@ -12,24 +13,21 @@ import {
 } from "../../../Common/hooks/useMSEplayer";
 import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import { useEffect, useRef, useState } from "react";
-import { partialUpdateAssetBed } from "../../../Redux/actions";
 
-import routes from "../../../Redux/api";
-import request from "../../../Utils/request/request";
-import useQuery from "../../../Utils/request/useQuery";
 import CareIcon from "../../../CAREUI/icons/CareIcon.js";
 import { ConsultationModel } from "../models";
 import FeedButton from "./FeedButton";
-import { useDispatch } from "react-redux";
 import Loading from "../../Common/Loading";
 import ReactPlayer from "react-player";
 import { classNames } from "../../../Utils/utils";
+import { useDispatch } from "react-redux";
 import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import useFullscreen from "../../../Common/hooks/useFullscreen.js";
 import { triggerGoal } from "../../../Integrations/Plausible.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
 import Spinner from "../../Common/Spinner.js";
+import useQuery from "../../../Utils/request/useQuery";
 
 interface IFeedProps {
   facilityId: string;
@@ -39,8 +37,9 @@ interface IFeedProps {
 const PATIENT_DEFAULT_PRESET = "Patient View".trim().toLowerCase();
 
 export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
-  const videoWrapper = useRef<HTMLDivElement>(null);
   const dispatch: any = useDispatch();
+
+  const videoWrapper = useRef<HTMLDivElement>(null);
 
   const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
     id: "",
@@ -48,7 +47,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   });
   const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState("");
   const [cameraConfig, setCameraConfig] = useState<any>({});
-  const [isLoading, setIsLoading] = useState(true);
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [bed, setBed] = useState<any>();
   const [precision, setPrecision] = useState(1);
@@ -58,19 +56,14 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [statusReported, setStatusReported] = useState(false);
   const authUser = useAuthUser();
 
-  useEffect(() => {
-    const fetchFacility = async () => {
-      const { res, data } = await request(routes.getPermittedFacility, {
-        pathParams: { facilityId },
-      });
-
-      if (res?.status === 200 && data && data.middleware_address) {
+  useQuery(routes.getPermittedFacility, {
+    pathParams: { id: facilityId || "" },
+    onResponse: ({ res, data }) => {
+      if (res && res.status === 200 && data && data.middleware_address) {
         setCameraMiddlewareHostname(data.middleware_address);
       }
-    };
-
-    if (facilityId) fetchFacility();
-  }, [facilityId]);
+    },
+  });
 
   useEffect(() => {
     if (cameraState) {
@@ -96,37 +89,32 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
 
   const liveFeedPlayerRef = useRef<HTMLVideoElement | ReactPlayer | null>(null);
 
-  const { res, data, refetch } = useQuery(routes.getConsultation, {
-    pathParams: { consultationId },
-  });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      if (res?.ok && data) {
+  const { loading: getConsultationLoading } = useQuery(routes.getConsultation, {
+    pathParams: { id: consultationId },
+    onResponse: ({ res, data }) => {
+      if (res && res.status === 200 && data) {
         const consultation = data as ConsultationModel;
         const consultationBedId = consultation.current_bed?.bed_object?.id;
         if (consultationBedId) {
-          const { res, data: assetBeds } = await request(routes.listAssetBeds, {
-            pathParams: { bed: consultationBedId },
-          });
-          setBed(consultationBedId);
-          const bedAssets = {
-            ...res,
-            data: {
-              ...assetBeds,
-              results: assetBeds?.results.filter((asset) => {
-                return (
-                  (asset?.asset_object?.meta?.asset_type as string) === "CAMERA"
-                );
-              }),
-            },
-          };
+          (async () => {
+            const { res: listAssetBedsRes, data: listAssetBedsData } =
+              await request(routes.getAssetBed, {
+                pathParams: { external_id: consultationBedId },
+              });
+            setBed(consultationBedId);
+            const bedAssets: any = {
+              ...listAssetBedsRes,
+              data: {
+                ...listAssetBedsData,
+                results: listAssetBedsData?.results.filter((asset) => {
+                  return asset?.asset_object?.meta?.asset_type === "CAMERA";
+                }),
+              },
+            };
 
-          if (bedAssets?.data?.results?.length) {
-            if (bedAssets?.data.results?.length) {
+            if (bedAssets?.data?.results?.length) {
               const { camera_access_key } =
-                bedAssets.data.results[0].asset_object.meta || {};
+                bedAssets.data.results[0].asset_object.meta;
               const config = camera_access_key.split(":");
               setCameraAsset({
                 id: bedAssets.data.results[0].asset_object.id,
@@ -134,22 +122,15 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
               });
               setCameraConfig(bedAssets.data.results[0].meta);
               setCameraState({
-                ...bedAssets?.data.results[0]?.meta?.position,
+                ...bedAssets.data.results[0].meta.position,
                 precision: 1,
               });
             }
-          }
-
-          setIsLoading(false);
+          })();
         }
       }
-    };
-    fetchData();
-  }, [consultationId, res, data]);
-
-  useEffect(() => {
-    refetch();
-  }, [refetch, consultationId]);
+    },
+  });
 
   // const [position, setPosition] = useState<any>();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -218,9 +199,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
 
   const getBedPresets = async (asset: any) => {
     if (asset.id && bed) {
-      // const bedAssets = await dispatch(listAssetBeds({ asset: asset.id, bed }));
-      const { data: bedAssets } = await request(routes.listAssetBeds, {
-        pathParams: { asset: asset.id, bed },
+      const { data: bedAssets } = await request(routes.getAssetBed, {
+        pathParams: { external_id: asset.id, bed },
       });
       setBedPresets(bedAssets?.results);
     }
@@ -275,10 +255,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       clearTimeout(tId);
     };
   }, [startStream, streamStatus]);
-
-  // useAbortableEffect((status: statusType) => {
-  //   fetchData(status);
-  // }, []);
 
   useEffect(() => {
     if (!currentPreset && streamStatus === StreamStatus.Playing) {
@@ -363,9 +339,10 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         onSuccess: async (data) => {
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
-            const response = await dispatch(
-              partialUpdateAssetBed(
-                {
+            const { res, data: ResponseData } = await request(
+              routes.partialUpdateAssetBed,
+              {
+                body: {
                   asset: currentPreset.asset_object.id,
                   bed: currentPreset.bed_object.id,
                   meta: {
@@ -373,12 +350,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                     position: data?.position,
                   },
                 },
-                currentPreset?.id
-              )
+                pathParams: { id: currentPreset?.id },
+              }
             );
-            if (response && response.status === 200) {
+            if (res && ResponseData && res.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
-              getBedPresets(cameraAsset?.id);
+              await getBedPresets(cameraAsset?.id);
               getPresets({});
             }
             setLoading(CAMERA_STATES.IDLE);
@@ -410,7 +387,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     useKeyboardShortcut(option.shortcutKey, option.callback);
   }
 
-  if (isLoading) return <Loading />;
+  if (getConsultationLoading) return <Loading />;
 
   return (
     <div className="flex h-[calc(100vh-1.5rem)] flex-col px-2">

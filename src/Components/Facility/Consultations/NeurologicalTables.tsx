@@ -29,7 +29,10 @@ const DataTable = (props: any) => {
             Right
           </div>
         </div>
-        <div className="flex flex-row overflow-x-auto">
+        <div
+          style={{ direction: "rtl" }}
+          className="flex flex-row overflow-x-auto"
+        >
           {data.map((x: any, i: any) => {
             return (
               <div
@@ -96,11 +99,10 @@ export const NeurologicalTable = (props: any) => {
   const LOC_OPTIONS = [
     { id: 0, value: "Unknown" },
     { id: 5, value: "Alert" },
-    { id: 10, value: "Responds to Voice" },
-    { id: 15, value: "Responds to Pain" },
-    { id: 20, value: "Unresponsive" },
-    { id: 25, value: "Agitated or Confused" },
-    { id: 30, value: "Onset of Agitation and Confusion" },
+    { id: 10, value: "Drowsy" },
+    { id: 15, value: "Stuporous" },
+    { id: 20, value: "Comatose" },
+    { id: 25, value: "Cannot Be Assessed" },
   ];
 
   const REACTION_OPTIONS = [
@@ -291,13 +293,16 @@ export const NeurologicalTable = (props: any) => {
       <div className="mb-6">
         <div className="text-xl font-semibold">Level Of Consciousness</div>
         <div className="w-max-content my-4 flex max-w-full flex-row divide-y divide-gray-200 overflow-hidden shadow sm:rounded-lg">
-          <div className="flex flex-row overflow-x-auto">
+          <div
+            style={{ direction: "rtl" }}
+            className="flex flex-row overflow-x-auto"
+          >
             {locData.map((x: any, i: any) => (
               <div
                 key={`loc_${i}`}
-                className="min-w-max-content flex  flex-col divide-x divide-gray-200"
+                className="min-w-max-content flex  flex-col  divide-x divide-gray-200"
               >
-                <div className="whitespace-nowrap border-r bg-gray-50 px-2 py-3 text-center text-xs font-medium leading-4 text-gray-700">
+                <div className="border-r bg-gray-50 px-2 py-3 text-center text-xs font-medium leading-4 text-gray-700">
                   {x.date}
                 </div>
                 <div className="whitespace-nowrap bg-white px-6 py-4 text-center text-sm leading-5 text-gray-700">
@@ -367,7 +372,10 @@ export const NeurologicalTable = (props: any) => {
                 Total
               </div>
             </div>
-            <div className="flex flex-row overflow-x-auto">
+            <div
+              style={{ direction: "rtl" }}
+              className="flex flex-row overflow-x-auto"
+            >
               {glasgowData.map((x: any, i: any) => {
                 return (
                   <div

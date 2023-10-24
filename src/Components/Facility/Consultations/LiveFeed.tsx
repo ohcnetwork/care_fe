@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
-import useKeyboardShortcut from "use-keyboard-shortcut";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 import { getCameraPTZ } from "../../../Common/constants";
 import {
   StreamStatus,
@@ -109,9 +109,9 @@ const LiveFeed = (props: any) => {
   };
 
   const getBedPresets = async (id: any) => {
-    const { data } = await request(routes.listAssetBeds, {
+    const { data } = await request(routes.getAssetBed, {
+      pathParams: { asset: id },
       body: {
-        asset: id,
         limit: page.limit,
         offset: page.offset,
       },
@@ -119,15 +119,13 @@ const LiveFeed = (props: any) => {
     setBedPresets(data?.results);
     setPage({
       ...page,
-      count: data?.count ? data?.count : 0,
+      count: data?.count || 0,
     });
   };
 
   const deletePreset = async (id: any) => {
     const { res, data } = await request(routes.deleteAssetBed, {
-      pathParams: {
-        id: id,
-      },
+      pathParams: { id },
     });
     if (res?.status === 204) {
       Notification.Success({ msg: "Preset deleted successfully" });
@@ -145,21 +143,18 @@ const LiveFeed = (props: any) => {
       bed_id: bed.id,
       preset_name: preset,
     };
-    const { res } = await request(routes.partialUpdateAssetBed, {
+    const { res: responseRes } = await request(routes.partialUpdateAssetBed, {
+      pathParams: { id: currentPreset.id },
       body: {
         asset: currentPreset.asset_object.id,
-        beds: bed.id ? bed.id : "",
+        bed: bed.id,
         meta: {
           ...currentPreset.meta,
           ...data,
         },
       },
-      pathParams: {
-        id: currentPreset.id,
-      },
     });
-
-    if (res && res.status === 200) {
+    if (responseRes && responseRes.status === 200) {
       Notification.Success({ msg: "Preset Updated" });
     } else {
       Notification.Error({ msg: "Something Went Wrong" });
@@ -253,20 +248,22 @@ const LiveFeed = (props: any) => {
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
             console.log("Updating Preset");
-            const { res } = await request(routes.partialUpdateAssetBed, {
-              body: {
-                asset: currentPreset.asset_object.id,
-                beds: currentPreset.bed_object.id,
-                meta: {
-                  ...currentPreset.meta,
-                  position: data?.position,
+            const { res: responseRes } = await request(
+              routes.partialUpdateAssetBed,
+              {
+                pathParams: { id: currentPreset.id },
+                body: {
+                  asset: currentPreset.asset_object.id,
+                  bed: currentPreset.bed_object.id,
+                  meta: {
+                    ...currentPreset.meta,
+                    position: data?.position,
+                  },
                 },
-              },
-              pathParams: {
-                id: currentPreset?.id,
-              },
-            });
-            if (res && res.status === 200) {
+              }
+            );
+
+            if (responseRes && responseRes.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
               getBedPresets(cameraAsset?.id);
               fetchCameraPresets();
@@ -623,5 +620,4 @@ const LiveFeed = (props: any) => {
     </Page>
   );
 };
-
 export default LiveFeed;
