@@ -1,12 +1,10 @@
 import * as Notification from "../../../Utils/Notifications.js";
 
 import { BedModel, CurrentBed } from "../models";
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
-import {
-  createConsultationBed,
-  listConsultationBeds,
-} from "../../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import routes from "../../../Redux/api";
+import request from "../../../Utils/request/request";
+import useQuery from "../../../Utils/request/useQuery";
 
 import { BedSelect } from "../../Common/BedSelect";
 import ButtonV2 from "../../Common/components/ButtonV2";
@@ -16,15 +14,14 @@ import { FieldLabel } from "../../Form/FormFields/FormField";
 import Loading from "../../Common/Loading";
 import TextFormField from "../../Form/FormFields/TextFormField";
 import { formatDateTime } from "../../../Utils/utils";
-import { useDispatch } from "react-redux";
 import dayjs from "../../../Utils/dayjs";
 import { AssetSelect } from "../../Common/AssetSelect.js";
 import DialogModal from "../../Common/Dialog.js";
 import { Link } from "raviger";
 import {
   AssetClass,
-  AssetData,
   assetClassProps,
+  AssetData,
 } from "../../Assets/AssetTypes.js";
 import Chip from "../../../CAREUI/display/Chip.js";
 
@@ -40,7 +37,6 @@ interface BedsProps {
 }
 
 const Beds = (props: BedsProps) => {
-  const dispatch = useDispatch<any>();
   const { facilityId, consultationId, discharged } = props;
   const [bed, setBed] = useState<BedModel>({});
   const [startDate, setStartDate] = useState<string>(
@@ -52,33 +48,30 @@ const Beds = (props: BedsProps) => {
   const [key, setKey] = useState(0);
   const [showBedDetails, setShowBedDetails] = useState<CurrentBed | null>(null);
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const [bedsData]: any = await Promise.all([
-        dispatch(listConsultationBeds({ consultation: consultationId })),
-      ]);
-      if (!status.aborted) {
-        setIsLoading(false);
-        if (!bedsData?.data)
-          Notification.Error({
-            msg: "Something went wrong..!",
-          });
-        else {
-          setConsultationBeds(bedsData.data.results);
-          setBed(bedsData.data.results[0]?.bed_object || {});
-          setAssets(bedsData.data.results[0]?.assets_objects || []);
-        }
-      }
-    },
-    [consultationId, dispatch]
-  );
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [dispatch, fetchData, key]
-  );
+  const {
+    res,
+    data: bedData,
+    refetch,
+  } = useQuery(routes.listConsultationBeds, {
+    pathParams: { consultation: consultationId },
+  });
+
+  useEffect(() => {
+    setIsLoading(true);
+    if (!bedData || !res?.ok) {
+      Notification.Error({
+        msg: "Something went wrong..!",
+      });
+    } else {
+      setConsultationBeds(bedData.results);
+      setBed(bedData.results[0]?.bed_object || {});
+      setAssets(bedData.results[0]?.assets_objects || []);
+    }
+  }, [bedData, res]);
+
+  useEffect(() => {
+    refetch();
+  }, [key, refetch]);
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -88,13 +81,14 @@ const Beds = (props: BedsProps) => {
         msg: "Please select a bed first..!",
       });
 
-    const res: any = await dispatch(
-      createConsultationBed(
-        { start_date: startDate, assets: assets.map((asset) => asset.id) },
-        consultationId,
-        bed?.id
-      )
-    );
+    const { res } = await request(routes.createConsultationBed, {
+      body: {
+        start_date: startDate,
+        assets: assets.map((asset) => asset.id),
+        consultation: consultationId,
+        bed: bed?.id,
+      },
+    });
 
     if (res && res.status === 201) {
       Notification.Success({

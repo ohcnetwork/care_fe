@@ -28,7 +28,15 @@ import {
   AssetUpdate,
 } from "../Components/Assets/AssetTypes";
 import {
+  ConsultationModel,
+  CreateBedBody,
+  DailyRoundsBody,
+  DailyRoundsRes,
+  DeleteAssetBedData,
   FacilityModel,
+  GetAssetBedsData,
+  GetBedsRes,
+  GetDailyReportsBody,
   LocationModel,
   WardModel,
 } from "../Components/Facility/models";
@@ -43,6 +51,7 @@ import {
 import { Prescription } from "../Components/Medicine/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
+import { DailyRoundsModel } from "../Components/Patient/models";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -297,6 +306,7 @@ const routes = {
   getAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "GET",
+    TRes: Type<GetAssetBedsData>(),
   },
   updateAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
@@ -311,6 +321,7 @@ const routes = {
   deleteAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "DELETE",
+    TRes: Type<DeleteAssetBedData>(),
   },
   operateAsset: {
     path: "/api/v1/asset/{external_id}/operate_assets/",
@@ -350,10 +361,13 @@ const routes = {
   listConsultationBeds: {
     path: "/api/v1/consultationbed/",
     method: "GET",
+    TRes: Type<GetBedsRes>(),
   },
   createConsultationBed: {
     path: "/api/v1/consultationbed/",
     method: "POST",
+    TBody: Type<CreateBedBody>(),
+    TRes: Type<GetBedsRes>(),
   },
   getConsultationBed: {
     path: "/api/v1/consultationbed/{external_id}/",
@@ -401,6 +415,8 @@ const routes = {
   },
   getConsultation: {
     path: "/api/v1/consultation/{id}/",
+    method: "GET",
+    TRes: Type<ConsultationModel>(),
   },
   updateConsultation: {
     path: "/api/v1/consultation/{id}/",
@@ -428,6 +444,9 @@ const routes = {
   },
   getDailyReports: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
+    method: "GET",
+    TBody: Type<GetDailyReportsBody>(),
+    TRes: Type<PaginatedResponse<DailyRoundsModel[]>>(),
   },
 
   getDailyReport: {
@@ -436,6 +455,8 @@ const routes = {
   dailyRoundsAnalyse: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/analyse/",
     method: "POST",
+    TBody: Type<DailyRoundsBody>(),
+    TRes: Type<PaginatedResponse<DailyRoundsRes>>(),
   },
 
   // Hospital Beds
