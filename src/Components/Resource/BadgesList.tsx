@@ -2,7 +2,7 @@ import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
 
-function useQueryHook(facilityId: string | undefined) {
+function useFacilityQuery(facilityId: string | undefined) {
   return useQuery(routes.getAnyFacility, {
     pathParams: { id: String(facilityId) },
     prefetch: facilityId !== undefined,
@@ -11,9 +11,13 @@ function useQueryHook(facilityId: string | undefined) {
 
 export default function BadgesList(props: any) {
   const { appliedFilters, FilterBadges } = props;
-  const originFacilityData = useQueryHook(appliedFilters.origin_facility);
-  const approvingFacilityData = useQueryHook(appliedFilters.approving_facility);
-  const assignedFacilityData = useQueryHook(appliedFilters.assigned_facility);
+  const originFacilityData = useFacilityQuery(appliedFilters.origin_facility);
+  const approvingFacilityData = useFacilityQuery(
+    appliedFilters.approving_facility
+  );
+  const assignedFacilityData = useFacilityQuery(
+    appliedFilters.assigned_facility
+  );
 
   const getDescShiftingFilterOrder = (ordering: any) => {
     const foundItem = SHIFTING_FILTER_ORDER.find(
