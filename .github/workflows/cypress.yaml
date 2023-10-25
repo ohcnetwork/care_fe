@@ -14,6 +14,10 @@ jobs:
     permissions: write-all
     if: github.repository == 'coronasafe/care_fe'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1,2,3,4,5,6,7,8]
     steps:
       - name: Checkout 📥
         uses: actions/checkout@v3
@@ -24,14 +28,22 @@ jobs:
           repository: coronasafe/care
           path: care
 
-      - name: Run docker compose up on care 🐳
+      - name: Start care docker containers 🐳
         run: |
-          cd care  
+          cd care
           make docker_config_file=docker-compose.pre-built.yaml up 
-          sleep 60s
+          while docker compose exec backend bash -c "python manage.py showmigrations 2>/dev/null | cat | grep -q '\[ \]'"; do
+            >&2 echo "Migrations are not yet applied - sleeping"
+            sleep 5
+          done
+          echo "Migrations are applied"
+          cd ..
+
+      - name: Load dummy data into care backend 📂
+        run: |
+          cd care
           docker compose exec backend bash -c "python manage.py load_dummy_data"
           cd ..
-        # Voluntarily kept 60 seconds delay to wait for migrations to complete.
 
       - name: Check care is up ♻
         run: curl -o /dev/null -s -w "%{http_code}\n" http://localhost:9000
@@ -52,39 +64,14 @@ jobs:
           wait-on-timeout: 300
           browser: chrome
           record: true
+          parallel: true
         env:
           CARE_API: http://localhost:9000
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_OPTIONS: --max_old_space_size=4096
-
-      - name: Remove cypress passed label on failure 🏷️
-        uses: actions-ecosystem/action-remove-labels@v1
-        if: failure()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: cypress passed
-
-      - name: Add cypress passed label on success 🏷️
-        uses: actions-ecosystem/action-add-labels@v1
-        if: success()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: cypress passed
-
-      - name: Remove cypress failed label on success 🏷️
-        uses: actions-ecosystem/action-remove-labels@v1
-        if: success()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: cypress failed
-
-      - name: Add cypress failed label on failure 🏷️
-        uses: actions-ecosystem/action-add-labels@v1
-        if: failure()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          labels: cypress failed
+          COMMIT_INFO_MESSAGE: ${{github.event.pull_request.title}}
+          COMMIT_INFO_SHA: ${{github.event.pull_request.head.sha}}
 
       - name: Upload cypress screenshots on failure 📸
         uses: actions/upload-artifact@v3
@@ -93,10 +80,3 @@ jobs:
           name: cypress-screenshots
           path: cypress/screenshots
 
-      # Test run video was always captured, so this action uses "always()" condition
-      - name: Upload cypress videos 📹
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: cypress-videos
-          path: cypress/videos

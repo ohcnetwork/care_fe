@@ -1,16 +1,26 @@
-/// <reference types="cypress" />
 import { afterEach, before, beforeEach, cy, describe, it } from "local-cypress";
 import { AssetPage } from "../../pageobject/Asset/AssetCreation";
-import { v4 as uuidv4 } from "uuid";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
+import FacilityPage from "../../pageobject/Facility/FacilityCreation";
+import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
+
+function addDaysToDate(numberOfDays: number) {
+  const inputDate = new Date();
+  inputDate.setDate(inputDate.getDate() + numberOfDays);
+  return inputDate.toISOString().split("T")[0];
+}
 
 describe("Asset", () => {
   const assetPage = new AssetPage();
-  const assetSearchPage = new AssetSearchPage();
   const loginPage = new LoginPage();
-  const phone_number = "9999999999";
-  const serialNumber = Math.floor(Math.random() * 10 ** 10).toString();
+  const facilityPage = new FacilityPage();
+  const assetSearchPage = new AssetSearchPage();
+  const assetFilters = new AssetFilters();
+  const fillFacilityName = "Dummy Facility 1";
+  const assetname = "Dummy Camera";
+  const locationName = "Dummy Location 1";
+  const initiallocationName = "Camera Location";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -22,148 +32,82 @@ describe("Asset", () => {
     cy.awaitUrl("/assets");
   });
 
-  it("Verify asset creation fields throws error if empty", () => {
-    assetPage.createAsset();
-    assetPage.selectFacility("Dummy Facility 1");
-    assetPage.clickCreateAsset();
-
-    assetPage.verifyEmptyAssetNameError();
-    assetPage.verifyEmptyAssetTypeError();
-    assetPage.verifyEmptyLocationError();
-    assetPage.verifyEmptyStatusError();
-    assetPage.verifyEmptyPhoneError();
-  });
-
-  //Create an asset
-
-  it("Create an Asset", () => {
-    assetPage.createAsset();
-    assetPage.selectFacility("Dummy Facility 1");
-    assetPage.selectLocation("Camera Loc");
-    assetPage.selectAssetType("Internal");
-    assetPage.selectAssetClass("ONVIF Camera");
-
-    const qr_id_1 = uuidv4();
-
-    assetPage.enterAssetDetails(
-      "New Test Asset 1",
-      "Test Description",
-      "Working",
-      qr_id_1,
-      "Manufacturer's Name",
-      "2025-12-25",
-      "Customer Support's Name",
-      phone_number,
-      "email@support.com",
-      "Vendor's Name",
-      serialNumber,
-      "25122021",
-      "Test note for asset creation!"
-    );
-
-    assetPage.clickCreateAddMore();
-    assetPage.verifySuccessNotification("Asset created successfully");
-
-    const qr_id_2 = uuidv4();
-
-    assetPage.selectLocation("Camera Loc");
-    assetPage.selectAssetType("Internal");
-    assetPage.selectAssetClass("ONVIF Camera");
-    assetPage.enterAssetDetails(
-      "New Test Asset 2",
-      "Test Description",
-      "Working",
-      qr_id_2,
-      "Manufacturer's Name",
-      "2025-12-25",
-      "Customer Support's Name",
-      phone_number,
-      "email@support.com",
-      "Vendor's Name",
-      serialNumber,
-      "25122021",
-      "Test note for asset creation!"
-    );
-
-    assetPage.interceptAssetCreation();
-    assetPage.clickCreateAsset();
-    assetPage.verifyAssetCreation();
-    assetPage.verifySuccessNotification("Asset created successfully");
-
-    assetSearchPage.typeSearchKeyword("New Test Asset 2");
+  it("Verify Asset Warranty Expiry Label", () => {
+    assetSearchPage.typeSearchKeyword(assetname);
     assetSearchPage.pressEnter();
-    assetSearchPage.verifyAssetIsPresent("New Test Asset 2");
+    assetSearchPage.verifyBadgeContent(assetname);
+    assetSearchPage.clickAssetByName(assetname);
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintoWarrantyDetails();
+    assetPage.enterWarrantyExpiryDate(addDaysToDate(100)); // greater than 3 months
+    assetPage.clickassetupdatebutton();
+    assetPage.verifyWarrantyExpiryLabel("");
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintoWarrantyDetails();
+    assetPage.enterWarrantyExpiryDate(addDaysToDate(80)); // less than 3 months
+    assetPage.clickassetupdatebutton();
+    assetPage.verifyWarrantyExpiryLabel("3 months");
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintoWarrantyDetails();
+    assetPage.enterWarrantyExpiryDate(addDaysToDate(20)); // less than 1 month
+    assetPage.clickassetupdatebutton();
+    assetPage.verifyWarrantyExpiryLabel("1 month");
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintoWarrantyDetails();
+    assetPage.enterWarrantyExpiryDate(addDaysToDate(100)); // check for greater than 3 months again to verify the label is removed
+    assetPage.clickassetupdatebutton();
+    assetPage.verifyWarrantyExpiryLabel("");
   });
 
-  it("Edit an Asset", () => {
-    assetPage.openCreatedAsset();
+  it("Create & Edit a service history and verify reflection", () => {
+    assetSearchPage.typeSearchKeyword(assetname);
+    assetSearchPage.pressEnter();
+    assetSearchPage.verifyBadgeContent(assetname);
+    assetSearchPage.clickAssetByName(assetname);
+    assetPage.clickupdatedetailbutton();
+    assetPage.scrollintonotes();
+    assetPage.enterAssetNotes("Dummy Notes");
+    assetPage.enterAssetservicedate("01092023");
+    assetPage.clickassetupdatebutton();
+    assetPage.scrollintoservicehistory();
+    assetPage.clickedithistorybutton();
+    assetPage.scrollintonotes();
+    assetPage.enterAssetNotes("Dummy Notes Editted");
+    assetPage.clickassetupdatebutton();
+    assetPage.scrollintoservicehistory();
+    assetPage.viewassetservicehistorybutton();
+    assetPage.openassetservicehistory();
+    assetPage.verifyassetupdateservicehistory();
+    assetPage.viewassetservicehistorybutton();
+  });
 
-    const qr_id = uuidv4();
-
-    assetPage.editAssetDetails(
-      "New Test Asset Edited",
-      "Test Description Edited",
-      qr_id,
-      "Manufacturer's Name Edited",
-      "Customer Support's Name Edited",
-      "Vendor's Name Edited",
-      "Test note for asset creation edited!",
-      "25122021"
-    );
-
+  it("Create a asset transaction and verify history", () => {
+    assetSearchPage.typeSearchKeyword(assetname);
+    assetSearchPage.pressEnter();
+    assetSearchPage.verifyBadgeContent(assetname);
+    assetSearchPage.clickAssetByName(assetname);
+    assetPage.clickupdatedetailbutton();
+    assetPage.clickassetlocation(locationName);
     assetPage.clickUpdateAsset();
-
-    assetPage.verifySuccessNotification("Asset updated successfully");
+    assetPage.verifyassetlocation(locationName);
+    assetPage.verifytransactionStatus(initiallocationName, locationName);
   });
 
-  it("Configure an asset", () => {
-    assetPage.openCreatedAsset();
-    assetPage.spyAssetConfigureApi();
-    assetPage.configureAsset(
-      "Host name",
-      "192.168.1.64",
-      "remote_user",
-      "2jCkrCRSeahzKEU",
-      "d5694af2-21e2-4a39-9bad-2fb98d9818bd"
-    );
-    assetPage.clickConfigureAsset();
-    assetPage.verifyAssetConfiguration(200);
-  });
-
-  it("Add an vital monitor asset and configure it", () => {
-    assetPage.createAsset();
-    assetPage.selectFacility("Dummy Facility 1");
-    assetPage.selectLocation("Camera Loc");
-    assetPage.selectAssetType("Internal");
-    assetPage.selectAssetClass("HL7 Vitals Monitor");
-
-    const qr_id_1 = uuidv4();
-
-    assetPage.enterAssetDetails(
-      "New Test Asset Vital",
-      "Test Description",
-      "Working",
-      qr_id_1,
-      "Manufacturer's Name",
-      "2025-12-25",
-      "Customer Support's Name",
-      phone_number,
-      "email@support.com",
-      "Vendor's Name",
-      serialNumber,
-      "25122021",
-      "Test note for asset creation!"
-    );
-    assetPage.interceptAssetCreation();
-    assetPage.clickCreateAsset();
-    assetPage.verifyAssetCreation();
-
-    assetSearchPage.typeSearchKeyword("New Test Asset Vital");
+  it("Verify Facility Asset Page Redirection", () => {
+    cy.visit("/facility");
+    assetSearchPage.typeSearchKeyword(fillFacilityName);
     assetSearchPage.pressEnter();
-
-    assetPage.openCreatedAsset();
-    assetPage.configureVitalAsset("Host name", "192.168.1.64");
-    assetPage.clickConfigureVital();
+    facilityPage.verifyFacilityBadgeContent(fillFacilityName);
+    facilityPage.visitAlreadyCreatedFacility();
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickCreateAssetFacilityOption();
+    facilityPage.verifyfacilitycreateassetredirection();
+    facilityPage.verifyassetfacilitybackredirection();
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickviewAssetFacilityOption();
+    facilityPage.verifyfacilityviewassetredirection();
+    assetFilters.assertFacilityText(fillFacilityName);
+    facilityPage.verifyassetfacilitybackredirection();
   });
 
   it("Delete an Asset", () => {
@@ -173,14 +117,21 @@ describe("Asset", () => {
     assetPage.verifyDeleteStatus();
   });
 
-  it("Import new asset", () => {
-    assetPage.selectImportOption();
-    assetPage.selectImportFacility("Dummy Facility 1");
-    assetPage.importAssetFile();
-    assetPage.selectImportLocation("Camera Locations");
-    assetPage.clickImportAsset();
-
-    assetPage.verifySuccessNotification("Assets imported successfully");
+  it("Verify Facility Asset Page Redirection", () => {
+    cy.visit("/facility");
+    assetSearchPage.typeSearchKeyword(fillFacilityName);
+    assetSearchPage.pressEnter();
+    facilityPage.verifyFacilityBadgeContent(fillFacilityName);
+    facilityPage.visitAlreadyCreatedFacility();
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickCreateAssetFacilityOption();
+    facilityPage.verifyfacilitycreateassetredirection();
+    facilityPage.verifyassetfacilitybackredirection();
+    facilityPage.clickManageFacilityDropdown();
+    facilityPage.clickviewAssetFacilityOption();
+    facilityPage.verifyfacilityviewassetredirection();
+    assetFilters.assertFacilityText(fillFacilityName);
+    facilityPage.verifyassetfacilitybackredirection();
   });
 
   afterEach(() => {

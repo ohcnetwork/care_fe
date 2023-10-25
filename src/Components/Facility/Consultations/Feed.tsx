@@ -30,8 +30,9 @@ import { useDispatch } from "react-redux";
 import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
 import useKeyboardShortcut from "use-keyboard-shortcut";
 import useFullscreen from "../../../Common/hooks/useFullscreen.js";
-import { triggerGoal } from "../../Common/Plausible.js";
+import { triggerGoal } from "../../../Integrations/Plausible.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
+import Spinner from "../../Common/Spinner.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -56,6 +57,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [precision, setPrecision] = useState(1);
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
   const [isFullscreen, setFullscreen] = useFullscreen();
+  const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
+  const [statusReported, setStatusReported] = useState(false);
   const authUser = useAuthUser();
 
   useEffect(() => {
@@ -197,6 +200,16 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     dispatch,
   });
 
+  const calculateVideoLiveDelay = () => {
+    const video = liveFeedPlayerRef.current as HTMLVideoElement;
+    if (!video || !videoStartTime) return 0;
+
+    const timeDifference =
+      (new Date().getTime() - videoStartTime.getTime()) / 1000;
+
+    return timeDifference - video.currentTime;
+  };
+
   const getBedPresets = async (asset: any) => {
     if (asset.id && bed) {
       const bedAssets = await dispatch(listAssetBeds({ asset: asset.id, bed }));
@@ -221,13 +234,32 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   useEffect(() => {
     let tId: any;
     if (streamStatus !== StreamStatus.Playing) {
-      setStreamStatus(StreamStatus.Loading);
+      if (streamStatus !== StreamStatus.Offline) {
+        setStreamStatus(StreamStatus.Loading);
+      }
       tId = setTimeout(() => {
         startStream({
           onSuccess: () => setStreamStatus(StreamStatus.Playing),
-          onError: () => setStreamStatus(StreamStatus.Offline),
+          onError: () => {
+            setStreamStatus(StreamStatus.Offline);
+            if (!statusReported) {
+              triggerGoal("Camera Feed Viewed", {
+                consultationId,
+                userId: authUser.id,
+                result: "error",
+              });
+              setStatusReported(true);
+            }
+          },
         });
       }, 100);
+    } else if (!statusReported) {
+      triggerGoal("Camera Feed Viewed", {
+        consultationId,
+        userId: authUser.id,
+        result: "success",
+      });
+      setStatusReported(true);
     }
 
     return () => {
@@ -240,7 +272,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   }, []);
 
   useEffect(() => {
-    if (streamStatus === StreamStatus.Playing) {
+    if (!currentPreset && streamStatus === StreamStatus.Playing) {
       setLoading(CAMERA_STATES.MOVING.GENERIC);
       const preset =
         bedPresets?.find(
@@ -296,6 +328,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     },
     reset: () => {
       setStreamStatus(StreamStatus.Loading);
+      setVideoStartTime(null);
       startStream({
         onSuccess: () => setStreamStatus(StreamStatus.Playing),
         onError: () => setStreamStatus(StreamStatus.Offline),
@@ -437,10 +470,16 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             playsinline={true}
             playing={true}
             muted={true}
+            onPlay={() => {
+              setVideoStartTime(() => new Date());
+            }}
             width="100%"
             height="100%"
             onBuffer={() => {
-              setStreamStatus(StreamStatus.Loading);
+              const delay = calculateVideoLiveDelay();
+              if (delay > 5) {
+                setStreamStatus(StreamStatus.Loading);
+              }
             }}
             onError={(e: any, _: any, hlsInstance: any) => {
               if (e === "hlsError") {
@@ -459,6 +498,15 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             muted
             playsInline
             className="max-h-full max-w-full"
+            onPlay={() => {
+              setVideoStartTime(() => new Date());
+            }}
+            onWaiting={() => {
+              const delay = calculateVideoLiveDelay();
+              if (delay > 5) {
+                setStreamStatus(StreamStatus.Loading);
+              }
+            }}
             ref={liveFeedPlayerRef as any}
           />
         )}
@@ -478,8 +526,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                 STATUS: <span className="text-red-600">OFFLINE</span>
               </p>
               <p className="font-semibold ">Feed is currently not live.</p>
-              <p className="font-semibold ">
-                Click refresh button to try again.
+              <p className="font-semibold ">Trying to connect... </p>
+              <p className="mt-2 flex justify-center">
+                <Spinner circle={{ fill: "none" }} />
               </p>
             </div>
           )}
@@ -506,7 +555,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         <div className="absolute right-8 top-8 z-10 flex flex-col gap-4">
           {["fullScreen", "reset", "updatePreset", "zoomIn", "zoomOut"].map(
             (button, index) => {
-              if (isIOS && button === "reset") return null;
               const option = cameraPTZ.find(
                 (option) => option.action === button
               );
@@ -531,6 +579,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             clickAction={() => cameraPTZ[4].callback()}
           />
         </div>
+        {streamStatus === StreamStatus.Playing &&
+          calculateVideoLiveDelay() > 3 && (
+            <div className="absolute left-8 top-8 z-10 flex items-center gap-2 rounded-3xl bg-red-400 px-3 py-1.5 text-xs font-semibold text-gray-100">
+              <CareIcon className="care-l-wifi-slash h-4 w-4" />
+              <span>Slow Network Detected</span>
+            </div>
+          )}
         <div className="absolute bottom-8 left-8 z-10 grid grid-flow-col grid-rows-3 gap-1">
           {[
             false,

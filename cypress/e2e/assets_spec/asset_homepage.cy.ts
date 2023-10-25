@@ -5,6 +5,7 @@ import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
 import { AssetQRScanPage } from "../../pageobject/Asset/AssetQRScan";
 import { AssetPagination } from "../../pageobject/Asset/AssetPagination";
 import { AssetFilters } from "../../pageobject/Asset/AssetFilters";
+import { AssetPage } from "../../pageobject/Asset/AssetCreation";
 import LoginPage from "../../pageobject/Login/LoginPage";
 import { v4 as uuidv4 } from "uuid";
 
@@ -13,6 +14,7 @@ describe("Asset Tab", () => {
   const assetQRScanPage = new AssetQRScanPage();
   const assetPagination = new AssetPagination();
   const assetFilters = new AssetFilters();
+  const assetPage = new AssetPage();
   const loginPage = new LoginPage();
   const assetName = "Dummy Camera 10";
   const qrCode = uuidv4();
@@ -62,8 +64,18 @@ describe("Asset Tab", () => {
       "Dummy Facility 1",
       "INTERNAL",
       "ACTIVE",
-      "ONVIF Camera"
+      "ONVIF Camera",
+      "Camera Loc"
     );
+    assetFilters.clickadvancefilter();
+    assetFilters.clickslideoverbackbutton(); // to verify the back button doesn't clear applied filters
+    assetFilters.assertFacilityText("Dummy Facility 1");
+    assetFilters.assertAssetTypeText("INTERNAL");
+    assetFilters.assertAssetClassText("ONVIF");
+    assetFilters.assertStatusText("ACTIVE");
+    assetFilters.assertLocationText("Camera Loc");
+    assetFilters.clickadvancefilter();
+    assetFilters.clearFilters();
   });
 
   // Verify the pagination in the page
@@ -71,6 +83,28 @@ describe("Asset Tab", () => {
   it("Next/Previous Page", () => {
     assetPagination.navigateToNextPage();
     assetPagination.navigateToPreviousPage();
+  });
+
+  it("Import new asset", () => {
+    assetPage.selectassetimportbutton();
+    assetPage.selectImportOption();
+    assetPage.selectImportFacility("Dummy Facility 1");
+    assetPage.importAssetFile();
+    assetPage.selectImportLocation("Camera Locations");
+    assetPage.clickImportAsset();
+  });
+
+  it("verify imported asset", () => {
+    assetSearchPage.typeSearchKeyword("New Test Asset");
+    assetSearchPage.pressEnter();
+    assetSearchPage.verifyAssetIsPresent("New Test Asset");
+  });
+
+  it("Export asset", () => {
+    assetPage.selectassetimportbutton();
+    assetPage.selectjsonexportbutton();
+    assetPage.selectassetimportbutton();
+    assetPage.selectcsvexportbutton();
   });
 
   afterEach(() => {

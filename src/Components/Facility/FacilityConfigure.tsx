@@ -1,17 +1,14 @@
-import { lazy, useCallback, useReducer, useState } from "react";
-import { useDispatch } from "react-redux";
-
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getPermittedFacility,
-  partialUpdateFacility,
-} from "../../Redux/actions";
+import { lazy, useReducer, useState } from "react";
 import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import TextFormField from "../Form/FormFields/TextFormField";
 import Page from "../Common/components/Page";
 import { ConfigureHealthFacility } from "../ABDM/ConfigureHealthFacility";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
+import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {
@@ -22,6 +19,7 @@ const initForm = {
   ward: 0,
   middleware_address: "",
 };
+
 const initialState = {
   form: { ...initForm },
   errors: {},
@@ -46,44 +44,33 @@ const FormReducer = (state = initialState, action: any) => {
   }
 };
 
-export const UpdateFacilityMiddleware = (props: any) => {
+interface IProps {
+  facilityId: string;
+}
+
+export const FacilityConfigure = (props: IProps) => {
   const [state, dispatch] = useReducer(FormReducer, initialState);
   const { facilityId } = props;
-  const dispatchAction: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      if (facilityId) {
-        setIsLoading(true);
-        const res = await dispatchAction(getPermittedFacility(facilityId));
-        if (!status.aborted && res.data) {
-          const formData = {
-            name: res.data.name,
-            state: res.data.state,
-            district: res.data.district,
-            local_body: res.data.local_body,
-            ward: res.data.ward,
-            middleware_address: res.data.middleware_address,
-          };
-          dispatch({ type: "set_form", form: formData });
-        } else {
-          navigate(`/facility/${facilityId}`);
-        }
-        setIsLoading(false);
+  const { loading } = useQuery(routes.getPermittedFacility, {
+    pathParams: { id: facilityId },
+    onResponse: (res) => {
+      if (res.data) {
+        const formData = {
+          name: res.data.name,
+          state: res.data.state,
+          district: res.data.district,
+          local_body: res.data.local_body,
+          ward: res.data.ward,
+          middleware_address: res.data.middleware_address,
+        };
+        dispatch({ type: "set_form", form: formData });
       }
     },
-    [dispatchAction, facilityId]
-  );
+  });
 
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [dispatch, fetchData]
-  );
-
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     if (!state.form.middleware_address) {
@@ -108,35 +95,39 @@ export const UpdateFacilityMiddleware = (props: any) => {
       setIsLoading(false);
       return;
     }
-    const data: any = {
+
+    const data = {
       ...state.form,
       middleware_address: state.form.middleware_address,
     };
 
-    const res = await dispatchAction(partialUpdateFacility(facilityId, data));
+    const { res, error } = await request(routes.partialUpdateFacility, {
+      pathParams: { id: facilityId },
+      body: data,
+    });
+
     setIsLoading(false);
-    if (res && res.data) {
+    if (res?.ok) {
       Notification.Success({
         msg: "Facility updated successfully",
       });
       navigate(`/facility/${facilityId}`);
     } else {
-      if (res?.data)
-        Notification.Error({
-          msg: "Something went wrong: " + (res.data.detail || ""),
-        });
+      Notification.Error({
+        msg: error?.detail ?? "Something went wrong",
+      });
     }
     setIsLoading(false);
   };
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: FieldChangeEvent<string>) => {
     dispatch({
       type: "set_form",
       form: { ...state.form, [e.name]: e.value },
     });
   };
 
-  if (isLoading) {
+  if (isLoading || loading) {
     return <Loading />;
   }
 
@@ -146,22 +137,23 @@ export const UpdateFacilityMiddleware = (props: any) => {
       crumbsReplacements={{
         [facilityId]: { name: state.form.name },
       }}
-      className="mx-auto max-w-3xl"
+      className="w-full overflow-x-hidden"
     >
       <div className="cui-card mt-4">
-        <form onSubmit={(e) => handleSubmit(e)}>
+        <form onSubmit={handleSubmit}>
           <div className="mt-2 grid grid-cols-1 gap-4">
             <div>
               <TextFormField
                 name="middleware_address"
                 label="Facility Middleware Address"
+                required
                 value={state.form.middleware_address}
-                onChange={(e) => handleChange(e)}
+                onChange={handleChange}
                 error={state.errors?.middleware_address}
               />
             </div>
           </div>
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
             <Cancel onClick={() => navigate(`/facility/${facilityId}`)} />
             <Submit onClick={handleSubmit} label="Update" />
           </div>

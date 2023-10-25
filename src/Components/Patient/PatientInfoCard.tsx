@@ -5,23 +5,24 @@ import {
   DISCHARGE_REASONS,
   PATIENT_CATEGORIES,
   RESPIRATORY_SUPPORT,
+  TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
 import { ConsultationModel, PatientCategory } from "../Facility/models";
 
-import ABHAProfileModal from "../ABDM/ABHAProfileModal";
-import Beds from "../Facility/Consultations/Beds";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import DialogModal from "../Common/Dialog";
 import { Link } from "raviger";
+import { useState } from "react";
+import CareIcon from "../../CAREUI/icons/CareIcon";
+import useConfig from "../../Common/hooks/useConfig";
+import { getDimensionOrDash } from "../../Common/utils";
+import dayjs from "../../Utils/dayjs";
+import { formatDate, formatDateTime } from "../../Utils/utils.js";
+import ABHAProfileModal from "../ABDM/ABHAProfileModal";
 import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
 import LinkCareContextModal from "../ABDM/LinkCareContextModal";
+import DialogModal from "../Common/Dialog";
+import ButtonV2 from "../Common/components/ButtonV2";
+import Beds from "../Facility/Consultations/Beds";
 import { PatientModel } from "./models";
-import { getDimensionOrDash } from "../../Common/utils";
-import useConfig from "../../Common/hooks/useConfig";
-import { useState } from "react";
-import { formatDate, formatDateTime } from "../../Utils/utils.js";
-import dayjs from "../../Utils/dayjs";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -143,7 +144,7 @@ export default function PatientInfoCard(props: {
                   </div>
                 )}
             </div>
-            <div className="flex flex-col items-center gap-1 sm:flex-row lg:mb-2">
+            <div className="flex flex-col items-center gap-2 sm:flex-row lg:mb-2">
               <Link
                 href={`/facility/${consultation?.facility}`}
                 className="font-semibold text-black hover:text-primary-600"
@@ -170,20 +171,44 @@ export default function PatientInfoCard(props: {
                 Discharged from CARE
               </p>
             )}
-            <p className="text-sm text-gray-900 sm:text-sm">
-              <span>{patient.age} years</span>
-              <span className="mx-2">•</span>
-              <span>{patient.gender}</span>
-              {consultation?.suggestion === "DC" && (
-                <>
-                  <span className="mx-2">•</span>
-                  <span className="space-x-2">
-                    Domiciliary Care{" "}
-                    <CareIcon className="care-l-estate text-base text-gray-700" />
-                  </span>
-                </>
-              )}
-            </p>
+            <div className="flex flex-col items-center gap-2 text-sm sm:flex-row lg:mt-4">
+              <div className="flex flex-col items-center gap-2 text-sm text-gray-900 sm:flex-row sm:text-sm">
+                {patient.action && patient.action != 10 && (
+                  <div>
+                    <div className="inline-flex w-full items-center justify-start rounded-lg border border-gray-500 bg-blue-700 p-1 px-3 text-xs font-semibold leading-4">
+                      <span className="font-semibold text-white">
+                        {" "}
+                        {
+                          TELEMEDICINE_ACTIONS.find(
+                            (i) => i.id === patient.action
+                          )?.desc
+                        }
+                      </span>
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <div className="inline-flex w-full items-center justify-start rounded-lg border border-gray-500 bg-gray-200 p-1 px-3 text-xs font-semibold leading-4">
+                    <b>Age</b>: {patient.age} years
+                  </div>
+                </div>
+                <div>
+                  <div className="inline-flex w-full items-center justify-start rounded-lg border border-gray-500 bg-gray-200 p-1 px-3 text-xs font-semibold leading-4">
+                    <b>Gender</b>: {patient.gender}
+                  </div>
+                </div>
+                {consultation?.suggestion === "DC" && (
+                  <div>
+                    <div>
+                      <div className="inline-flex w-full items-center justify-start rounded-lg border border-gray-500 bg-gray-200 p-1 px-3 text-xs font-semibold leading-4">
+                        <span>Domiciliary Care</span>
+                        <CareIcon className="care-l-estate text-base text-gray-700" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
             <div className="flex flex-col items-center gap-2 text-sm sm:flex-row lg:mt-4">
               {[
                 ["Blood Group", patient.blood_group, patient.blood_group],

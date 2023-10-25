@@ -33,6 +33,7 @@ describe("Patient Creation with consultation", () => {
   it("Create a new patient with no consultation", () => {
     patientPage.createPatient();
     patientPage.selectFacility("dummy facility");
+    patientPage.patientformvisibility();
     patientPage.enterPatientDetails(
       phone_number,
       emergency_phone_number,
@@ -69,6 +70,7 @@ describe("Patient Creation with consultation", () => {
     patientPage.interceptFacilities();
     patientPage.visitUpdatePatientUrl();
     patientPage.verifyStatusCode();
+    patientPage.patientformvisibility();
     updatePatientPage.enterPatientDetails(
       "Test E2E User Edited",
       "O+",
@@ -113,6 +115,7 @@ describe("Patient Creation with consultation", () => {
     patientConsultationPage.selectSymptoms("ASYMPTOMATIC");
 
     patientConsultationPage.enterConsultationDetails(
+      "Stable",
       "Examination details and Clinical conditions",
       "70",
       "170",
@@ -127,10 +130,25 @@ describe("Patient Creation with consultation", () => {
     patientConsultationPage.interceptMediaBase();
     patientConsultationPage.selectMedicinebox();
     patientConsultationPage.waitForMediabaseStatusCode();
-    patientConsultationPage.prescribeMedicine();
+    patientConsultationPage.prescribefirstMedicine();
     patientConsultationPage.enterDosage("3");
     patientConsultationPage.selectDosageFrequency("Twice daily");
     patientConsultationPage.submitPrescriptionAndReturn();
+  });
+
+  it("Edit created consultation to existing patient", () => {
+    updatePatientPage.visitUpdatedPatient();
+    patientConsultationPage.visitEditConsultationPage();
+    patientConsultationPage.fillIllnessHistory("editted");
+    patientConsultationPage.selectConsultationStatus(
+      "Referred from other hospital"
+    );
+    patientConsultationPage.updateSymptoms("FEVER");
+    patientConsultationPage.setSymptomsDate("01082023");
+    patientConsultationPage.updateConsultation();
+    patientConsultationPage.verifySuccessNotification(
+      "Consultation updated successfully"
+    );
   });
 
   afterEach(() => {

@@ -1,6 +1,6 @@
 export class AssetSearchPage {
   typeSearchKeyword(keyword: string) {
-    cy.get("#search").clear();
+    cy.get("#search").click().clear();
     cy.get("#search").click().type(keyword);
   }
 
@@ -9,7 +9,9 @@ export class AssetSearchPage {
   }
 
   clickAssetByName(assetName: string) {
+    cy.intercept("GET", "**/api/v1/asset/**").as("clearAssets");
     cy.get("[data-testid='created-asset-list']").contains(assetName).click();
+    cy.wait("@clearAssets").its("response.statusCode").should("eq", 200);
   }
 
   verifyBadgeContent(expectedText: string) {

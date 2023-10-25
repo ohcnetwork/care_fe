@@ -6,8 +6,17 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import WaveformLabels from "./WaveformLabels";
 import { classNames } from "../../Utils/utils";
 import { IVitalsComponentProps, VitalsValueBase } from "./types";
-import { triggerGoal } from "../Common/Plausible";
+import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import dayjs from "dayjs";
+
+const minutesAgo = (timestamp: string) => {
+  return `${dayjs().diff(dayjs(timestamp), "minute")}m ago`;
+};
+
+const isWithinMinutes = (timestamp: string, minutes: number) => {
+  return dayjs().diff(dayjs(timestamp), "minute") < minutes;
+};
 
 export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   const { connect, waveformCanvas, data, isOnline } = useHL7VitalsMonitor(
@@ -29,6 +38,10 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   useEffect(() => {
     connect(props.socketUrl);
   }, [props.socketUrl]);
+
+  const bpWithinMaxPersistence = !!(
+    (data.bp?.["date-time"] && isWithinMinutes(data.bp?.["date-time"], 30)) // Max blood pressure persistence is 30 minutes
+  );
 
   return (
     <div className="flex flex-col gap-1 rounded bg-[#020617] p-2">
@@ -88,7 +101,7 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
           {/* Pulse Rate */}
           <NonWaveformData
             label="ECG"
-            attr={data.pulseRate ?? data.heartRate}
+            attr={data.pulseRate?.value ? data.pulseRate : data.heartRate}
             className="text-green-400"
             suffix={
               <span className="animate-pulse font-sans text-red-500">❤️</span>
@@ -97,24 +110,37 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
 
           {/* Blood Pressure */}
           <div className="flex flex-col p-1">
-            <div className="flex w-full gap-2 font-bold text-orange-500">
+            <div className="flex w-full justify-between gap-2 font-bold text-orange-500">
               <span className="text-sm">NIBP</span>
-              <span className="text-xs">{data.bp?.systolic.unit ?? "--"}</span>
+              <span className="text-xs">
+                {bpWithinMaxPersistence ? data.bp?.systolic.unit ?? "--" : "--"}
+              </span>
+              <span className="text-xs">
+                {data.bp?.["date-time"] && minutesAgo(data.bp?.["date-time"])}
+              </span>
             </div>
             <div className="flex w-full justify-center text-sm font-medium text-orange-500">
               Sys / Dia
             </div>
             <div className="flex w-full justify-center text-2xl font-black text-orange-300 md:text-4xl">
-              <span>{data.bp?.systolic.value ?? "--"}</span>
+              <span>
+                {bpWithinMaxPersistence
+                  ? data.bp?.systolic.value ?? "--"
+                  : "--"}
+              </span>
               <span>/</span>
-              <span>{data.bp?.diastolic.value ?? "--"}</span>
+              <span>
+                {bpWithinMaxPersistence
+                  ? data.bp?.diastolic.value ?? "--"
+                  : "--"}
+              </span>
             </div>
             <div className="flex items-end">
               <span className="flex-1 text-sm font-bold text-orange-500">
                 Mean
               </span>
               <span className="flex-1 text-xl font-bold text-gray-300">
-                {data.bp?.map.value ?? "--"}
+                {bpWithinMaxPersistence ? data.bp?.map.value ?? "--" : "--"}
               </span>
             </div>
           </div>

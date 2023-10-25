@@ -1,9 +1,9 @@
 import { IConfig } from "./hooks/useConfig";
 import { PatientCategory } from "../Components/Facility/models";
 import { SortOption } from "../Components/Common/SortDropdown";
-import { parsePhoneNumberFromString } from "libphonenumber-js";
 import { dateQueryString } from "../Utils/utils";
 import { IconName } from "../CAREUI/icons/CareIcon";
+import { PhoneNumberValidator } from "../Components/Form/FieldValidators";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;
@@ -345,6 +345,7 @@ export const ADMITTED_TO = [
   { id: "2", text: "ICU" },
   { id: "6", text: "Bed with oxygen support" },
   { id: "7", text: "Regular" },
+  { id: "None", text: "No bed assigned" },
 ];
 
 export const RESPIRATORY_SUPPORT = [
@@ -498,6 +499,7 @@ export const TELEMEDICINE_ACTIONS = [
   { id: 60, text: "COMPLETE", desc: "Complete" },
   { id: 70, text: "REVIEW", desc: "Review" },
   { id: 80, text: "NOT_REACHABLE", desc: "Not Reachable" },
+  { id: 90, text: "DISCHARGE_RECOMMENDED", desc: "Discharge Recommended" },
 ];
 
 export const FRONTLINE_WORKER = [
@@ -662,22 +664,22 @@ export const NURSING_CARE_FIELDS: Array<OptionsType> = [
 export const EYE_OPEN_SCALE = [
   { value: 4, text: "Spontaneous" },
   { value: 3, text: "To Speech" },
-  { value: 2, text: "Pain" },
-  { value: 1, text: "None" },
+  { value: 2, text: "To Pain" },
+  { value: 1, text: "No Response" },
 ];
 
 export const VERBAL_RESPONSE_SCALE = [
-  { value: 5, text: "Oriented/Coos/Babbles" },
+  { value: 5, text: "Oriented to Time, Place and Person" },
   { value: 4, text: "Confused/Irritable" },
   { value: 3, text: "Inappropriate words/Cry to Pain" },
   { value: 2, text: "Incomprehensible words/Moans to pain" },
-  { value: 1, text: "None" },
+  { value: 1, text: "No Response" },
 ];
 
 export const MOTOR_RESPONSE_SCALE = [
-  { value: 6, text: "Obeying commands" },
-  { value: 5, text: "Moves to localised pain" },
-  { value: 4, text: "Flexion withdrawal from pain" },
+  { value: 6, text: "Obeying commands/Normal acrivity" },
+  { value: 5, text: "Moves to localized pain" },
+  { value: 4, text: "Flexion/Withdrawal from pain" },
   { value: 3, text: "Abnormal Flexion(decorticate)" },
   { value: 2, text: "Abnormal Extension(decerebrate)" },
   { value: 1, text: "No Response" },
@@ -895,7 +897,7 @@ export const XLSXAssetImportSchema = {
   Class: {
     prop: "asset_class",
     type: String,
-    oneOf: ["HL7MONITOR", "ONVIF"],
+    oneOf: ["HL7MONITOR", "ONVIF", "VENTILATOR", ""],
   },
   Description: { prop: "description", type: String },
   "Working Status": {
@@ -907,7 +909,7 @@ export const XLSXAssetImportSchema = {
       } else if (status === "NOT WORKING") {
         return false;
       } else {
-        throw new Error("Invalid Working Status");
+        throw new Error("Invalid Working Status: " + status);
       }
     },
     required: true,
@@ -916,6 +918,7 @@ export const XLSXAssetImportSchema = {
     prop: "not_working_reason",
     type: String,
   },
+  "Serial Number": { prop: "serial_number", type: String },
   "QR Code ID": { prop: "qr_code_id", type: String },
   Manufacturer: { prop: "manufacturer", type: String },
   "Vendor Name": { prop: "vendor_name", type: String },
@@ -924,10 +927,11 @@ export const XLSXAssetImportSchema = {
     prop: "support_email",
     type: String,
     parse: (email: string) => {
+      if (!email) return null;
       const isValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
 
       if (!isValid) {
-        throw new Error("Invalid Support Email");
+        throw new Error("Invalid Support Email: " + email);
       }
 
       return email;
@@ -937,24 +941,38 @@ export const XLSXAssetImportSchema = {
     prop: "support_phone",
     type: String,
     parse: (phone: number | string) => {
-      const parsed = parsePhoneNumberFromString(String(phone), "IN");
-
-      if (!parsed?.isValid()) {
-        throw new Error("Invalid Support Phone Number");
+      phone = String(phone);
+      if (phone.length === 10 && !phone.startsWith("1800")) {
+        phone = "+91" + phone;
+      }
+      if (phone.startsWith("91") && phone.length === 12) {
+        phone = "+" + phone;
+      }
+      if (phone.startsWith("+911800")) {
+        phone = "1800" + phone.slice(6);
+      }
+      if (
+        PhoneNumberValidator(["mobile", "landline", "support"])(phone) !==
+        undefined
+      ) {
+        throw new Error("Invalid Support Phone Number: " + phone);
       }
 
-      return parsed?.format("E.164");
+      return phone ? phone : undefined;
     },
     required: true,
   },
-  "Warrenty End Date": {
+  "Warranty End Date": {
     prop: "warranty_amc_end_of_validity",
     type: String,
     parse: (date: string) => {
-      const parsed = new Date(date);
+      if (!date) return null;
+      const parts = date.split("-");
+      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      const parsed = new Date(reformattedDateStr);
 
       if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Warrenty End Date");
+        throw new Error("Invalid Warranty End Date:" + date);
       }
 
       return dateQueryString(parsed);
@@ -964,10 +982,13 @@ export const XLSXAssetImportSchema = {
     prop: "last_serviced_on",
     type: String,
     parse: (date: string) => {
-      const parsed = new Date(date);
+      if (!date) return null;
+      const parts = date.split("-");
+      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      const parsed = new Date(reformattedDateStr);
 
       if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Last Service Date");
+        throw new Error("Invalid Last Service Date:" + date);
       }
 
       return dateQueryString(parsed);
@@ -981,22 +1002,146 @@ export const XLSXAssetImportSchema = {
         prop: "local_ip_address",
         type: String,
         parse: (ip: string) => {
+          if (!ip) return null;
           const isValid =
             /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
               ip
             );
 
           if (!isValid) {
-            throw new Error("Invalid Config IP Address");
+            throw new Error("Invalid Config IP Address: " + ip);
           }
 
           return ip;
         },
       },
-      "Config: Camera Access Key": {
+      "Config - Camera Access Key": {
         prop: "camera_access_key",
         type: String,
       },
     },
   },
 };
+
+export const AREACODES: Record<string, string[]> = {
+  CA: [
+    "403",
+    "587",
+    "250",
+    "604",
+    "778",
+    "204",
+    "431",
+    "506",
+    "709",
+    "867",
+    "902",
+    "226",
+    "249",
+    "289",
+    "343",
+    "365",
+    "416",
+    "437",
+    "519",
+    "613",
+    "647",
+    "705",
+    "807",
+    "902",
+    "418",
+    "438",
+    "450",
+    "514",
+    "579",
+    "581",
+    "819",
+    "306",
+    "639",
+    "867",
+  ],
+  JM: ["658", "876"],
+  PR: ["787", "939"],
+  DO: ["809", "829"],
+  RE: ["262", "263", "692", "693"],
+  YT: ["269", "639"],
+  CC: ["89162"],
+  CX: ["89164"],
+  BQ: ["9"],
+  KZ: ["6", "7"],
+  SJ: ["79"],
+};
+
+export const IN_LANDLINE_AREA_CODES = [
+  "11",
+  "22",
+  "33",
+  "44",
+  "20",
+  "40",
+  "79",
+  "80",
+  "120",
+  "124",
+  "129",
+  "135",
+  "141",
+  "160",
+  "161",
+  "172",
+  "175",
+  "181",
+  "183",
+  "233",
+  "240",
+  "241",
+  "250",
+  "251",
+  "253",
+  "257",
+  "260",
+  "261",
+  "265",
+  "343",
+  "413",
+  "422",
+  "431",
+  "435",
+  "452",
+  "462",
+  "471",
+  "474",
+  "477",
+  "478",
+  "481",
+  "484",
+  "485",
+  "487",
+  "490",
+  "497",
+  "512",
+  "522",
+  "532",
+  "542",
+  "551",
+  "562",
+  "581",
+  "591",
+  "621",
+  "612",
+  "641",
+  "657",
+  "712",
+  "721",
+  "724",
+  "751",
+  "761",
+  "821",
+  "824",
+  "831",
+  "836",
+  "866",
+  "870",
+  "891",
+  "4822",
+];

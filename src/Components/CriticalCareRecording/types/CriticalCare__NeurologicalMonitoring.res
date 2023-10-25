@@ -1,4 +1,11 @@
-type consciousnessLevel = Alert | Drowsy | Stuporous | Comatose | CannotBeAssessed | Unknown
+type consciousnessLevel =
+  | Unresponsive
+  | RespondsToPain
+  | RespondsToVoice
+  | Alert
+  | AgitatedOrConfused
+  | OnsetOfAgitationAndConfusion
+  | Unknown
 type lightReaction = Brisk | Sluggish | Fixed | CannotBeAssessed | Unknown
 type limpResponse = Strong | Moderate | Weak | Flexion | Extension | NONE_ | Unknown
 
@@ -45,34 +52,35 @@ let make = (
   ~limbResponseLowerExtremityRight,
   ~limbResponseLowerExtremityLeft,
 ) => {
-  inPronePosition: inPronePosition,
-  consciousnessLevel: consciousnessLevel,
-  consciousnessLevelDetails: consciousnessLevelDetails,
-  leftPupilSize: leftPupilSize,
-  leftPupilSizeDetails: leftPupilSizeDetails,
-  leftPupilLightReaction: leftPupilLightReaction,
-  leftPupilLightReactionDetails: leftPupilLightReactionDetails,
-  rightPupilSize: rightPupilSize,
-  rightPupilSizeDetails: rightPupilSizeDetails,
-  rightPupilLightReaction: rightPupilLightReaction,
-  rightPupilLightReactionDetails: rightPupilLightReactionDetails,
-  glasgowEyeOpen: glasgowEyeOpen,
-  glasgowVerbalResponse: glasgowVerbalResponse,
-  glasgowMotorResponse: glasgowMotorResponse,
-  glasgowTotalCalculated: glasgowTotalCalculated,
-  limbResponseUpperExtremityRight: limbResponseUpperExtremityRight,
-  limbResponseUpperExtremityLeft: limbResponseUpperExtremityLeft,
-  limbResponseLowerExtremityRight: limbResponseLowerExtremityRight,
-  limbResponseLowerExtremityLeft: limbResponseLowerExtremityLeft,
+  inPronePosition,
+  consciousnessLevel,
+  consciousnessLevelDetails,
+  leftPupilSize,
+  leftPupilSizeDetails,
+  leftPupilLightReaction,
+  leftPupilLightReactionDetails,
+  rightPupilSize,
+  rightPupilSizeDetails,
+  rightPupilLightReaction,
+  rightPupilLightReactionDetails,
+  glasgowEyeOpen,
+  glasgowVerbalResponse,
+  glasgowMotorResponse,
+  glasgowTotalCalculated,
+  limbResponseUpperExtremityRight,
+  limbResponseUpperExtremityLeft,
+  limbResponseLowerExtremityRight,
+  limbResponseLowerExtremityLeft,
 }
 
 let makeConsciousnessLevel = consciousnessLevel => {
   switch consciousnessLevel {
+  | "UNRESPONSIVE" => Unresponsive
+  | "RESPONDS_TO_PAIN" => RespondsToPain
+  | "RESPONDS_TO_VOICE" => RespondsToVoice
   | "ALERT" => Alert
-  | "DROWSY" => Drowsy
-  | "STUPOROUS" => Stuporous
-  | "COMATOSE" => Comatose
-  | "CANNOT_BE_ASSESSED" => CannotBeAssessed
+  | "AGITATED_OR_CONFUSED" => AgitatedOrConfused
+  | "ONSET_OF_AGITATION_AND_CONFUSION" => OnsetOfAgitationAndConfusion
   | "UNKNOWN"
   | _ =>
     Unknown
@@ -81,11 +89,12 @@ let makeConsciousnessLevel = consciousnessLevel => {
 
 let encodeConConsciousnessLevel = consciousnessLevel => {
   switch consciousnessLevel {
+  | Unresponsive => "UNRESPONSIVE"
+  | RespondsToPain => "RESPONDS_TO_PAIN"
+  | RespondsToVoice => "RESPONDS_TO_VOICE"
   | Alert => "ALERT"
-  | Drowsy => "DROWSY"
-  | Stuporous => "STUPOROUS"
-  | Comatose => "COMATOSE"
-  | CannotBeAssessed => "CANNOT_BE_ASSESSED"
+  | AgitatedOrConfused => "AGITATED_OR_CONFUSED"
+  | OnsetOfAgitationAndConfusion => "ONSET_OF_AGITATION_AND_CONFUSION"
   | Unknown => "UNKNOWN"
   }
 }
@@ -150,11 +159,12 @@ let lightReactionToString = lightReaction => {
 
 let consciousnessLevelToString = consciousnessLevel => {
   switch consciousnessLevel {
+  | Unresponsive => "Unresponsive"
+  | RespondsToPain => "Responds to Pain"
+  | RespondsToVoice => "Responds to Voice"
   | Alert => "Alert"
-  | Drowsy => "Drowsy"
-  | Stuporous => "Stuporous"
-  | Comatose => "Comatose"
-  | CannotBeAssessed => "Cannot be assessed"
+  | AgitatedOrConfused => "Agitated or Confused"
+  | OnsetOfAgitationAndConfusion => "Onset of Agitation and Confusion"
   | Unknown => "Unknown"
   }
 }
@@ -173,8 +183,8 @@ let limpResponseToString = limpResponse => {
 
 let eyeOpenToString = eyeOpen => {
   switch eyeOpen {
-  | 1 => "1 - None"
-  | 2 => "2 - Pain"
+  | 1 => "1 - No Response"
+  | 2 => "2 - To Pain"
   | 3 => "3 - To Speech"
   | 4 => "4 - Spontaneous"
   | _ => "Unknown"
@@ -183,23 +193,23 @@ let eyeOpenToString = eyeOpen => {
 
 let motorResposneToString = eyeOpen => {
   switch eyeOpen {
-  | 1 => "1 - None"
-  | 2 => "2 - Incomprehensible words/Moans to pain"
+  | 1 => "1 - No Response"
+  | 2 => "2 - Abnormal Extension"
   | 3 => "3 - Abnormal Flexion"
-  | 4 => "4 - Withdrawing"
-  | 5 => "5 - Localizing/Withdrawl to touch"
-  | 6 => "6 - Obeying/Normal Activity"
+  | 4 => "4 - Flexion/Withdrawal to pain"
+  | 5 => "5 - Moves to localized pain"
+  | 6 => "6 - Obeys commands/Normal Activity"
   | _ => "Unknown"
   }
 }
 
 let verbalResposneToString = eyeOpen => {
   switch eyeOpen {
-  | 1 => "1 - None"
+  | 1 => "1 - No Response"
   | 2 => "2 - Incomprehensible words/Moans to pain"
   | 3 => "3 - Inappropriate words/Cry to pain"
   | 4 => "4 - Confused/Irritable"
-  | 5 => "5 - Oriented/Coos/Babbies"
+  | 5 => "5 - Oriented to Time, Place and Person"
   | _ => "Unknown"
   }
 }

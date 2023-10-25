@@ -1,40 +1,40 @@
 import { navigate } from "raviger";
 
-import { useCallback, useState, useEffect, lazy } from "react";
+import dayjs from "dayjs";
+import { lazy, useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
-  TELEMEDICINE_ACTIONS,
+  PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
   RHYTHM_CHOICES,
-  PATIENT_CATEGORIES,
+  TELEMEDICINE_ACTIONS,
 } from "../../Common/constants";
+import useAppHistory from "../../Common/hooks/useAppHistory";
 import { statusType, useAbortableEffect } from "../../Common/utils";
 import {
   createDailyReport,
   getConsultationDailyRoundsDetails,
   getDailyReport,
-  updateDailyReport,
   getPatient,
+  updateDailyReport,
 } from "../../Redux/actions";
+import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
 import * as Notification from "../../Utils/Notifications";
 import { formatDateTime } from "../../Utils/utils";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-import Page from "../Common/components/Page";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import PatientCategorySelect from "./PatientCategorySelect";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { SymptomsSelect } from "../Common/SymptomsSelect";
-import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
 import BloodPressureFormField, {
   meanArterialPressure,
 } from "../Common/BloodPressureFormField";
+import { SymptomsSelect } from "../Common/SymptomsSelect";
 import TemperatureFormField from "../Common/TemperatureFormField";
-import dayjs from "dayjs";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
+import Page from "../Common/components/Page";
+import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
+import { SelectFormField } from "../Form/FormFields/SelectFormField";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "../Form/FormFields/Utils";
+import PatientCategorySelect from "./PatientCategorySelect";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {
@@ -42,10 +42,9 @@ const initForm: any = {
   other_symptoms: "",
   physical_examination_info: "",
   other_details: "",
-  patient_category: "Comfort",
+  patient_category: "",
   current_health: 0,
-  recommend_discharge: false,
-  action: null,
+  actions: null,
   review_interval: 0,
   admitted_to: "",
   taken_at: null,
@@ -142,14 +141,14 @@ export const DailyRounds = (props: any) => {
       );
 
       if (!status.aborted) {
-        if (res && res.data) {
+        if (res?.data) {
           const data = {
             ...res.data,
             patient_category: res.data.patient_category
               ? PATIENT_CATEGORIES.find(
                   (i) => i.text === res.data.patient_category
-                )?.id || "Comfort"
-              : "Comfort",
+                )?.id ?? ""
+              : "",
             rhythm:
               (res.data.rhythm &&
                 RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
@@ -186,8 +185,8 @@ export const DailyRounds = (props: any) => {
             patient_category: res.data.patient_category
               ? PATIENT_CATEGORIES.find(
                   (i) => i.text === res.data.patient_category
-                )?.id || "Comfort"
-              : "Comfort",
+                )?.id ?? ""
+              : "",
             rhythm:
               (res.data.rhythm &&
                 RHYTHM_CHOICES.find((i) => i.text === res.data.rhythm)?.id) ||
@@ -205,6 +204,12 @@ export const DailyRounds = (props: any) => {
     let invalidForm = false;
     Object.keys(state.form).forEach((field) => {
       switch (field) {
+        case "patient_category":
+          if (!state.form[field]) {
+            errors[field] = "Please select a category";
+            invalidForm = true;
+          }
+          return;
         case "other_symptoms":
           if (
             state.form.additional_symptoms?.includes(9) &&
@@ -268,7 +273,6 @@ export const DailyRounds = (props: any) => {
           physical_examination_info: state.form.physical_examination_info,
           other_details: state.form.other_details,
           consultation: consultationId,
-          recommend_discharge: JSON.parse(state.form.recommend_discharge),
           action: prevAction,
           review_interval: Number(prevReviewInterval),
         };
@@ -508,12 +512,6 @@ export const DailyRounds = (props: any) => {
                 handleFormFieldChange(event);
                 setPreviousReviewInterval(Number(event.value));
               }}
-            />
-
-            <CheckBoxFormField
-              {...field("recommend_discharge")}
-              className="md:col-span-2"
-              label="Discharge Recommended"
             />
 
             {state.form.rounds_type === "NORMAL" && (

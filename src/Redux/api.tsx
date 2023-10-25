@@ -1,18 +1,73 @@
-interface Route {
-  path: string;
-  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  noAuth?: boolean;
+import { IConfig } from "../Common/hooks/useConfig";
+import {
+  IAadhaarOtp,
+  IAadhaarOtpTBody,
+  ICheckAndGenerateMobileOtp,
+  IConfirmMobileOtp,
+  ICreateHealthIdRequest,
+  ICreateHealthIdResponse,
+  IGenerateMobileOtpTBody,
+  IHealthFacility,
+  IHealthId,
+  ILinkABHANumber,
+  ISearchByHealthIdTBody,
+  IVerifyAadhaarOtpTBody,
+  IcreateHealthFacilityTBody,
+  IgetAbhaCardTBody,
+  IinitiateAbdmAuthenticationTBody,
+  IpartialUpdateHealthFacilityTBody,
+} from "../Components/ABDM/models";
+import {
+  AssetBedBody,
+  AssetBedModel,
+  AssetData,
+  AssetLocationObject,
+  AssetService,
+  AssetServiceUpdate,
+  AssetTransaction,
+  AssetUpdate,
+} from "../Components/Assets/AssetTypes";
+import {
+  FacilityModel,
+  LocationModel,
+  WardModel,
+} from "../Components/Facility/models";
+import {
+  IDeleteExternalResult,
+  IExternalResult,
+  IExternalResultCsv,
+  ILocalBodies,
+  ILocalBodyByDistrict,
+  IPartialUpdateExternalResult,
+} from "../Components/ExternalResult/models";
+import { Prescription } from "../Components/Medicine/models";
+import { UserModel } from "../Components/Users/models";
+import { PaginatedResponse } from "../Utils/request/types";
+
+/**
+ * A fake function that returns an empty object casted to type T
+ * @returns Empty object as type T
+ */
+function Type<T>(): T {
+  return {} as T;
 }
 
-interface Routes {
-  [name: string]: Route;
+interface JwtTokenObtainPair {
+  access: string;
+  refresh: string;
 }
 
-const routes: Routes = {
+interface LoginInput {
+  username: string;
+  password: string;
+}
+
+const routes = {
   config: {
     path: import.meta.env.REACT_APP_CONFIG ?? "/config.json",
     method: "GET",
     noAuth: true,
+    TRes: Type<IConfig>(),
   },
 
   // Auth Endpoints
@@ -20,11 +75,15 @@ const routes: Routes = {
     path: "/api/v1/auth/login/",
     method: "POST",
     noAuth: true,
+    TRes: Type<JwtTokenObtainPair>(),
+    TBody: Type<LoginInput>(),
   },
 
   token_refresh: {
-    path: "/api/v1/auth/token/refresh",
+    path: "/api/v1/auth/token/refresh/",
     method: "POST",
+    TRes: Type<JwtTokenObtainPair>(),
+    TBody: Type<{ refresh: string }>(),
   },
 
   token_verify: {
@@ -35,16 +94,25 @@ const routes: Routes = {
   checkResetToken: {
     path: "/api/v1/password_reset/check/",
     method: "POST",
+    noAuth: true,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ token: string }>(),
   },
 
   resetPassword: {
     path: "/api/v1/password_reset/confirm/",
     method: "POST",
+    noAuth: true,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ password: string; confirm: string }>(),
   },
 
   forgotPassword: {
     path: "/api/v1/password_reset/",
     method: "POST",
+    noAuth: true,
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{ username: string }>(),
   },
 
   updatePassword: {
@@ -54,6 +122,7 @@ const routes: Routes = {
   // User Endpoints
   currentUser: {
     path: "/api/v1/users/getcurrentuser/",
+    TRes: Type<UserModel>(),
   },
 
   userList: {
@@ -159,10 +228,14 @@ const routes: Routes = {
 
   getPermittedFacility: {
     path: "/api/v1/facility/{id}/",
+    method: "GET",
+    TRes: Type<FacilityModel>(),
   },
 
   getAnyFacility: {
     path: "/api/v1/getallfacilities/{id}/",
+    method: "GET",
+    TRes: Type<FacilityModel>(),
   },
 
   updateFacility: {
@@ -171,8 +244,10 @@ const routes: Routes = {
   },
 
   partialUpdateFacility: {
-    path: "/api/v1/facility",
+    path: "/api/v1/facility/{id}/",
     method: "PATCH",
+    TRes: Type<FacilityModel>(),
+    TBody: Type<Partial<FacilityModel>>(),
   },
 
   deleteFacilityCoverImage: {
@@ -187,6 +262,7 @@ const routes: Routes = {
   listFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/",
     method: "GET",
+    TRes: Type<PaginatedResponse<LocationModel>>(),
   },
   createFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/",
@@ -195,6 +271,7 @@ const routes: Routes = {
   getFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "GET",
+    TRes: Type<AssetLocationObject>(),
   },
   updateFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
@@ -209,10 +286,13 @@ const routes: Routes = {
   listAssetBeds: {
     path: "/api/v1/assetbed/",
     method: "GET",
+    TRes: Type<PaginatedResponse<AssetBedModel>>(),
   },
   createAssetBed: {
     path: "/api/v1/assetbed/",
     method: "POST",
+    TRes: Type<AssetData>(),
+    TBody: Type<AssetBedBody>(),
   },
   getAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
@@ -225,6 +305,8 @@ const routes: Routes = {
   partialUpdateAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "PATCH",
+    TRes: Type<AssetBedModel>(),
+    TBody: Type<AssetBedBody>(),
   },
   deleteAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
@@ -470,18 +552,25 @@ const routes: Routes = {
   // External Results
   externalResultList: {
     path: "/api/v1/external_result/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<IExternalResult>>(),
   },
   externalResult: {
     path: "/api/v1/external_result/{id}/",
+    method: "GET",
+    TRes: Type<IExternalResult>(),
   },
   externalResultUploadCsv: {
     path: "/api/v1/external_result/bulk_upsert/",
     method: "POST",
+    TBody: Type<IExternalResultCsv>(),
+    TRes: Type<IExternalResult[]>(),
   },
 
   deleteExternalResult: {
-    path: "/api/v1/external_result",
+    path: "/api/v1/external_result/{id}/",
     method: "DELETE",
+    TRes: Type<IDeleteExternalResult>(),
   },
 
   updateExternalResult: {
@@ -492,6 +581,8 @@ const routes: Routes = {
   partialUpdateExternalResult: {
     path: "/api/v1/external_result/{id}/",
     method: "PATCH",
+    TRes: Type<IPartialUpdateExternalResult>(),
+    TBody: Type<IPartialUpdateExternalResult>(),
   },
 
   // States
@@ -516,9 +607,13 @@ const routes: Routes = {
   },
   getAllLocalBodyByDistrict: {
     path: "/api/v1/district/{id}/get_all_local_body/",
+    method: "GET",
+    TRes: Type<ILocalBodyByDistrict[]>(),
   },
   getLocalbodyByDistrict: {
     path: "/api/v1/district/{id}/local_bodies/",
+    method: "GET",
+    TRes: Type<ILocalBodies[]>(),
   },
 
   // Local Body
@@ -541,6 +636,8 @@ const routes: Routes = {
   },
   getWardByLocalBody: {
     path: "/api/v1/ward/?local_body={id}",
+    method: "GET",
+    TRes: Type<PaginatedResponse<WardModel>>(),
   },
 
   // Sample Test
@@ -776,6 +873,7 @@ const routes: Routes = {
   listAssets: {
     path: "/api/v1/asset",
     method: "GET",
+    TRes: Type<PaginatedResponse<AssetData>>(),
   },
   createAsset: {
     path: "/api/v1/asset/",
@@ -792,10 +890,12 @@ const routes: Routes = {
   getAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "GET",
+    TRes: Type<AssetData>(),
   },
   deleteAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "DELETE",
+    TRes: Type<AssetData>(),
   },
   updateAsset: {
     path: "/api/v1/asset/{external_id}/",
@@ -804,6 +904,8 @@ const routes: Routes = {
   partialUpdateAsset: {
     path: "/api/v1/asset/{external_id}/",
     method: "PATCH",
+    TRes: Type<AssetData>(),
+    TBody: Type<AssetUpdate>(),
   },
 
   // Asset transaction endpoints
@@ -811,6 +913,7 @@ const routes: Routes = {
   listAssetTransaction: {
     path: "/api/v1/asset_transaction/",
     method: "GET",
+    TRes: Type<PaginatedResponse<AssetTransaction>>(),
   },
   getAssetTransaction: {
     path: "/api/v1/asset_transaction/{id}",
@@ -822,6 +925,7 @@ const routes: Routes = {
   listAssetService: {
     path: "/api/v1/asset/{asset_external_id}/service_records/",
     method: "GET",
+    TRes: Type<PaginatedResponse<AssetService>>(),
   },
   getAssetService: {
     path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
@@ -830,110 +934,151 @@ const routes: Routes = {
   updateAssetService: {
     path: "/api/v1/asset/{asset_external_id}/service_records/{external_id}",
     method: "PUT",
+    TRes: Type<AssetService>(),
+    TBody: Type<AssetServiceUpdate>(),
   },
 
-  // ABDM HealthID endpoints
-  generateAadhaarOtp: {
-    path: "/api/v1/abdm/healthid/generate_aadhaar_otp/",
-    method: "POST",
-  },
+  abha: {
+    // ABDM HealthID endpoints
+    generateAadhaarOtp: {
+      path: "/api/v1/abdm/healthid/generate_aadhaar_otp/",
+      method: "POST",
+      TRes: Type<IAadhaarOtp>(),
+      TBody: Type<IAadhaarOtpTBody>(),
+    },
 
-  resendAadhaarOtp: {
-    path: "/api/v1/abdm/healthid/resend_aadhaar_otp/",
-    method: "POST",
-  },
+    resendAadhaarOtp: {
+      path: "/api/v1/abdm/healthid/resend_aadhaar_otp/",
+      method: "POST",
+      TRes: Type<IAadhaarOtp>(),
+      TBody: Type<IAadhaarOtp>(),
+    },
 
-  verifyAadhaarOtp: {
-    path: "/api/v1/abdm/healthid/verify_aadhaar_otp/",
-    method: "POST",
-  },
+    verifyAadhaarOtp: {
+      path: "/api/v1/abdm/healthid/verify_aadhaar_otp/",
+      method: "POST",
+      TRes: Type<IAadhaarOtp>(),
+      TBody: Type<IVerifyAadhaarOtpTBody>(),
+    },
 
-  generateMobileOtp: {
-    path: "/api/v1/abdm/healthid/generate_mobile_otp/",
-    method: "POST",
-  },
+    generateMobileOtp: {
+      path: "/api/v1/abdm/healthid/generate_mobile_otp/",
+      method: "POST",
+      TRes: Type<unknown>(),
+      TBody: Type<unknown>(),
+    },
 
-  checkAndGenerateMobileOtp: {
-    path: "/api/v1/abdm/healthid/check_and_generate_mobile_otp/",
-    method: "POST",
-  },
+    checkAndGenerateMobileOtp: {
+      path: "/api/v1/abdm/healthid/check_and_generate_mobile_otp/",
+      method: "POST",
+      TRes: Type<ICheckAndGenerateMobileOtp>(),
+      TBody: Type<IGenerateMobileOtpTBody>(),
+    },
 
-  // TODO: resend mobile otp
-  verifyMobileOtp: {
-    path: "/api/v1/abdm/healthid/verify_mobile_otp/",
-    method: "POST",
-  },
+    // TODO: resend mobile otp
+    verifyMobileOtp: {
+      path: "/api/v1/abdm/healthid/verify_mobile_otp/",
+      method: "POST",
+      TRes: Type<IAadhaarOtp>(),
+      TBody: Type<IVerifyAadhaarOtpTBody>(),
+    },
 
-  createHealthId: {
-    path: "/api/v1/abdm/healthid/create_health_id/",
-    method: "POST",
-  },
+    createHealthId: {
+      path: "/api/v1/abdm/healthid/create_health_id/",
+      method: "POST",
+      TRes: Type<ICreateHealthIdResponse>(),
+      TBody: Type<ICreateHealthIdRequest>(),
+    },
 
-  searchByHealthId: {
-    path: "/api/v1/abdm/healthid/search_by_health_id/",
-    method: "POST",
-  },
+    searchByHealthId: {
+      path: "/api/v1/abdm/healthid/search_by_health_id/",
+      method: "POST",
+      TRes: Type<IHealthId>(),
+      TBody: Type<ISearchByHealthIdTBody>(),
+    },
 
-  initiateAbdmAuthentication: {
-    path: "/api/v1/abdm/healthid/auth_init/",
-    method: "POST",
-  },
+    initiateAbdmAuthentication: {
+      path: "/api/v1/abdm/healthid/auth_init/",
+      method: "POST",
+      TRes: Type<IConfirmMobileOtp>(),
+      TBody: Type<IinitiateAbdmAuthenticationTBody>(),
+    },
 
-  confirmWithAadhaarOtp: {
-    path: "/api/v1/abdm/healthid/confirm_with_aadhaar_otp/",
-    method: "POST",
-  },
+    confirmWithAadhaarOtp: {
+      path: "/api/v1/abdm/healthid/confirm_with_aadhaar_otp/",
+      method: "POST",
+      TRes: Type<IConfirmMobileOtp>(),
+      TBody: Type<IConfirmMobileOtp>(),
+    },
 
-  confirmWithMobileOtp: {
-    path: "/api/v1/abdm/healthid/confirm_with_mobile_otp/",
-    method: "POST",
-  },
+    confirmWithMobileOtp: {
+      path: "/api/v1/abdm/healthid/confirm_with_mobile_otp/",
+      method: "POST",
+      TRes: Type<IConfirmMobileOtp>(),
+      TBody: Type<IConfirmMobileOtp>(),
+    },
 
-  linkViaQR: {
-    path: "/api/v1/abdm/healthid/link_via_qr/",
-    method: "POST",
-  },
+    linkViaQR: {
+      path: "/api/v1/abdm/healthid/link_via_qr/",
+      method: "POST",
+      TRes: Type<ILinkABHANumber>(),
+      TBody: Type<ISearchByHealthIdTBody>(),
+    },
 
-  linkCareContext: {
-    path: "/api/v1/abdm/healthid/add_care_context/",
-    method: "POST",
-  },
+    linkCareContext: {
+      path: "/api/v1/abdm/healthid/add_care_context/",
+      method: "POST",
+      TRes: Type<unknown>(),
+      TBody: Type<unknown>(),
+    },
 
-  getAbhaCard: {
-    path: "/api/v1/abdm/healthid/get_abha_card/",
-    method: "POST",
-  },
+    getAbhaCard: {
+      path: "/api/v1/abdm/healthid/get_abha_card/",
+      method: "POST",
+      TRes: Type<unknown>(),
+      TBody: Type<IgetAbhaCardTBody>(),
+    },
 
-  // ABDM Health Facility
+    // ABDM Health Facility
 
-  listHealthFacility: {
-    path: "/api/v1/abdm/health_facility/",
-    method: "GET",
-  },
+    listHealthFacility: {
+      path: "/api/v1/abdm/health_facility/",
+      method: "GET",
+    },
 
-  createHealthFacility: {
-    path: "/api/v1/abdm/health_facility/",
-    method: "POST",
-  },
+    createHealthFacility: {
+      path: "/api/v1/abdm/health_facility/",
+      method: "POST",
+      TRes: Type<IHealthFacility>(),
+      TBody: Type<IcreateHealthFacilityTBody>(),
+    },
 
-  getHealthFacility: {
-    path: "/api/v1/abdm/health_facility/{facility_id}/",
-    method: "GET",
-  },
+    getHealthFacility: {
+      path: "/api/v1/abdm/health_facility/{facility_id}/",
+      method: "GET",
+      TRes: Type<IHealthFacility>(),
+    },
 
-  updateHealthFacility: {
-    path: "/api/v1/abdm/health_facility/{facility_id}/",
-    method: "PUT",
-  },
+    updateHealthFacility: {
+      path: "/api/v1/abdm/health_facility/{facility_id}/",
+      method: "PUT",
+      TRes: Type<IHealthFacility>(),
+      TBody: Type<IcreateHealthFacilityTBody>(),
+    },
 
-  partialUpdateHealthFacility: {
-    path: "/api/v1/abdm/health_facility/{facility_id}/",
-    method: "PATCH",
-  },
+    partialUpdateHealthFacility: {
+      path: "/api/v1/abdm/health_facility/{facility_id}/",
+      method: "PATCH",
+      TRes: Type<IHealthFacility>(),
+      TBody: Type<IpartialUpdateHealthFacilityTBody>(),
+    },
 
-  registerHealthFacilityAsService: {
-    path: "/api/v1/abdm/health_facility/{facility_id}/register_service/",
-    method: "POST",
+    registerHealthFacilityAsService: {
+      path: "/api/v1/abdm/health_facility/{facility_id}/register_service/",
+      method: "POST",
+      TRes: Type<IHealthFacility>(),
+      TBody: Type<IcreateHealthFacilityTBody>(),
+    },
   },
 
   // Asset Availability endpoints
@@ -957,6 +1102,8 @@ const routes: Routes = {
   createPrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
     method: "POST",
+    TBody: Type<Prescription>(),
+    TRes: Type<Prescription>(),
   },
 
   listAdministrations: {
@@ -982,6 +1129,8 @@ const routes: Routes = {
   discontinuePrescription: {
     path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
     method: "POST",
+    TBody: Type<{ discontinued_reason: string }>(),
+    TRes: Type<Record<string, never>>(),
   },
 
   // HCX Endpoints
@@ -1065,6 +1214,6 @@ const routes: Routes = {
     path: "/api/v1/hcx/make_claim/",
     method: "POST",
   },
-};
+} as const;
 
 export default routes;

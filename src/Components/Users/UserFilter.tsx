@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { getDistrict } from "../../Redux/actions";
 import { navigate } from "raviger";
 import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
-import parsePhoneNumberFromString from "libphonenumber-js";
+import { parsePhoneNumber } from "../../Utils/utils";
 import TextFormField from "../Form/FormFields/TextFormField";
 import SelectMenuV2 from "../Form/SelectMenuV2";
 import { FieldLabel } from "../Form/FormFields/FormField";
@@ -14,8 +14,8 @@ import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";
-  if (phoneNumber.startsWith("+"))
-    return parsePhoneNumberFromString(phoneNumber)?.format("E.164") || "";
+  if (phoneNumber === "+91") return "";
+  if (phoneNumber.startsWith("+")) return parsePhoneNumber(phoneNumber) ?? "";
   return phoneNumber;
 };
 
@@ -25,8 +25,8 @@ export default function UserFilter(props: any) {
   const [filterState, setFilterState] = useMergeState({
     first_name: filter.first_name || "",
     last_name: filter.last_name || "",
-    phone_number: filter.phone_number || undefined,
-    alt_phone_number: filter.alt_phone_number || undefined,
+    phone_number: filter.phone_number || "+91",
+    alt_phone_number: filter.alt_phone_number || "+91",
     user_type: filter.user_type || "",
     district_id: filter.district_id || "",
     district_ref: null,

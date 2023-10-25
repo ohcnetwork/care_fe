@@ -323,7 +323,7 @@ export const FacilityHome = (props: any) => {
       StaffUserTypeIndex;
 
   const editCoverImageTooltip = hasPermissionToEditCoverImage && (
-    <div className="absolute right-0 top-0 z-10 flex h-48 w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]">
+    <div className="absolute right-0 top-0 z-10 flex h-full w-full flex-col items-center justify-center bg-black text-sm text-gray-300 opacity-0 transition-[opacity] hover:opacity-60 md:h-[88px]">
       <i className="fa-solid fa-pen" />
       <span className="mt-2">{`${hasCoverImage ? "Edit" : "Upload"}`}</span>
     </div>
@@ -541,9 +541,7 @@ export const FacilityHome = (props: any) => {
                 </DropdownItem>
                 <DropdownItem
                   id="configure-facility"
-                  onClick={() =>
-                    navigate(`/facility/${facilityId}/middleware/update`)
-                  }
+                  onClick={() => navigate(`/facility/${facilityId}/configure`)}
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon className="care-l-setting text-lg" />}
                 >
@@ -575,6 +573,7 @@ export const FacilityHome = (props: any) => {
                   Resource Request
                 </DropdownItem>
                 <DropdownItem
+                  id="create-assets"
                   onClick={() => navigate(`/facility/${facilityId}/assets/new`)}
                   authorizeFor={NonReadOnlyUsers}
                   icon={<CareIcon className="care-l-plus-circle text-lg" />}
@@ -582,12 +581,14 @@ export const FacilityHome = (props: any) => {
                   Create Asset
                 </DropdownItem>
                 <DropdownItem
+                  id="view-assets"
                   onClick={() => navigate(`/assets?facility=${facilityId}`)}
                   icon={<CareIcon className="care-l-medkit text-lg" />}
                 >
                   View Assets
                 </DropdownItem>
                 <DropdownItem
+                  id="view-users"
                   onClick={() => navigate(`/facility/${facilityId}/users`)}
                   icon={<CareIcon className="care-l-users-alt text-lg" />}
                 >

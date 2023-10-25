@@ -7,20 +7,17 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import Card from "../../CAREUI/display/Card";
 import { FileUpload } from "./FileUpload";
 import Page from "../Common/components/Page";
-import _ from "lodash";
-import { formatDateTime } from "../../Utils/utils";
+import _ from "lodash-es";
+import { formatAge, formatDateTime } from "../../Utils/utils";
 import { getTestSample } from "../../Redux/actions";
 
 import { navigate } from "raviger";
 import { useDispatch } from "react-redux";
+import { DetailRoute } from "../../Routers/types";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
-interface SampleDetailsProps {
-  id: number;
-}
-
-export const SampleDetails = ({ id }: SampleDetailsProps) => {
+export const SampleDetails = ({ id }: DetailRoute) => {
   const dispatch: any = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [sampleDetails, setSampleDetails] = useState<SampleTestModel>({});
@@ -118,7 +115,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
             ) : (
               <div>
                 <span className="font-semibold leading-relaxed">Age: </span>
-                {patientData?.age}
+                {formatAge(patientData?.age, patientData?.date_of_birth)}
               </div>
             )}
             <div>
@@ -304,12 +301,16 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
       <Card>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <span className="font-semibold leading-relaxed">Status: </span>
-            {_.startCase(_.camelCase(sampleDetails.status))}
+            <span className="font-semibold capitalize leading-relaxed">
+              Status:{" "}
+            </span>
+            {sampleDetails.status}
           </div>
           <div>
-            <span className="font-semibold leading-relaxed">Result: </span>
-            {_.startCase(_.camelCase(sampleDetails.result))}
+            <span className="font-semibold capitalize leading-relaxed">
+              Result:{" "}
+            </span>
+            {sampleDetails.result}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Patient: </span>
@@ -342,7 +343,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
             </div>
           )}
           {sampleDetails.doctor_name && (
-            <div className="md:col-span-2">
+            <div className="capitalize md:col-span-2">
               <span className="font-semibold leading-relaxed">
                 Doctor&apos;s Name:{" "}
               </span>
@@ -426,7 +427,7 @@ export const SampleDetails = ({ id }: SampleDetailsProps) => {
             )}
           {sampleDetails.sample_type && (
             <div className="md:col-span-2">
-              <span className="font-semibold leading-relaxed">
+              <span className="font-semibold capitalize leading-relaxed">
                 Sample Type:{" "}
               </span>
               {_.startCase(_.camelCase(sampleDetails.sample_type))}
