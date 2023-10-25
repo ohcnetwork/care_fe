@@ -33,23 +33,18 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
   const [errors, setErrors] = useState<any>({
     location: "",
   });
-  const [locations, setLocations] = useState<any>([]);
   const { sample_format_asset_import } = useConfig();
-  const [locationsLoading, setLocationsLoading] = useState(false);
 
   const closeModal = () => {
     setPreview(undefined);
     setSelectedFile(undefined);
     onClose && onClose();
   };
-  useQuery(routes.listFacilityAssetLocation, {
+  const { data, loading } = useQuery(routes.listFacilityAssetLocation, {
     pathParams: { facility_external_id: `${facility.id}` },
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data) {
-        setLocations(data.results);
-      }
-    },
   });
+
+  const locations = data?.results || [];
 
   useEffect(() => {
     const readFile = async () => {
@@ -209,7 +204,7 @@ const AssetImportModal = ({ open, onClose, facility }: Props) => {
       fixedWidth={false}
     >
       <span className="mt-1 text-gray-700">{facility.name}</span>
-      {!locationsLoading && locations.length === 0 ? (
+      {!loading && locations.length === 0 ? (
         <>
           <div className="flex h-full flex-col items-center justify-center">
             <h1 className="m-7 text-2xl font-medium text-gray-700">
