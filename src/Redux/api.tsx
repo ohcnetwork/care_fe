@@ -41,6 +41,7 @@ import {
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
 import { Prescription } from "../Components/Medicine/models";
+import { PatientModel } from "../Components/Patient/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 
@@ -519,6 +520,7 @@ const routes = {
   },
   getPatient: {
     path: "/api/v1/patient/{id}/",
+    TRes: Type<PatientModel>(),
   },
   updatePatient: {
     path: "/api/v1/patient/{id}/",
