@@ -504,17 +504,22 @@ export default function PatientInfoCard(props: {
                     </Menu.Item>
                   </>
                 ) : (
-                  <>
-                    <div
-                      className="dropdown-item-primary pointer-events-auto mx-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 px-2 py-1 text-sm font-normal transition-all duration-200 ease-in-out"
-                      onClick={() => setShowLinkABHANumber(true)}
-                    >
-                      <span className="flex w-full items-center justify-start gap-2">
-                        <CareIcon className="care-l-link" />
-                        <p>Link ABHA Number</p>
-                      </span>
-                    </div>
-                  </>
+                  <Menu.Item>
+                    {({ close }) => (
+                      <div
+                        className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                        onClick={() => {
+                          close();
+                          setShowLinkABHANumber(true);
+                        }}
+                      >
+                        <span className="flex w-full items-center justify-start gap-2">
+                          <CareIcon className="care-l-link text-lg text-primary-500" />
+                          <p>Link ABHA Number</p>
+                        </span>
+                      </div>
+                    )}
+                  </Menu.Item>
                 ))}
             </div>
             <div className="px-4 py-2">
