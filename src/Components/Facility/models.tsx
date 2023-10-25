@@ -150,6 +150,7 @@ export interface ConsultationModel {
   death_datetime?: string;
   death_confirmed_doctor?: string;
   is_readmission?: boolean;
+  medico_legal_case?: boolean;
 }
 
 export interface PatientStatsModel {

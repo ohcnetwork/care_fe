@@ -85,11 +85,11 @@ export default function BoardView() {
           />
 
           <SwitchTabs
-            Tab1={t("active")}
-            Tab2={t("completed")}
+            tab1={t("active")}
+            tab2={t("completed")}
             onClickTab1={() => setBoardFilter(activeBoards)}
             onClickTab2={() => setBoardFilter(completedBoards)}
-            activeTab={boardFilter[0].text !== activeBoards[0].text}
+            isTab2Active={boardFilter[0].text !== activeBoards[0].text}
           />
 
           <div className="flex w-full flex-col gap-2 lg:mr-4 lg:w-fit lg:flex-row lg:gap-4">
