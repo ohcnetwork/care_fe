@@ -7,6 +7,7 @@ import {
   RESPIRATORY_SUPPORT,
 } from "../../Common/constants";
 import { ConsultationModel, PatientCategory } from "../Facility/models";
+import { Switch } from "@headlessui/react";
 
 import ABHAProfileModal from "../ABDM/ABHAProfileModal";
 import Beds from "../Facility/Consultations/Beds";
@@ -19,12 +20,17 @@ import LinkCareContextModal from "../ABDM/LinkCareContextModal";
 import { PatientModel } from "./models";
 import { getDimensionOrDash } from "../../Common/utils";
 import useConfig from "../../Common/hooks/useConfig";
-import { useState } from "react";
-import { formatAge, formatDate, formatDateTime } from "../../Utils/utils.js";
+import { Fragment, useState } from "react";
+import {
+  classNames,
+  formatAge,
+  formatDate,
+  formatDateTime,
+} from "../../Utils/utils.js";
 import dayjs from "../../Utils/dayjs";
-import SwitchTabs from "../Common/components/SwitchTabs.js";
 import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
+import { Menu, Transition } from "@headlessui/react";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -155,7 +161,7 @@ export default function PatientInfoCard(props: {
                 Number(consultation?.review_interval) > 0 && (
                   <div
                     className={
-                      "mb-2 inline-flex w-full items-center justify-center rounded-lg border border-gray-500 p-1 px-3 py-1 text-xs font-semibold leading-4 " +
+                      "mb-2 inline-flex w-full items-center justify-center rounded-lg border border-gray-500 text-xs font-semibold leading-4 " +
                       (dayjs().isBefore(patient.review_time)
                         ? " bg-gray-100"
                         : " bg-red-400 p-1 text-white")
@@ -336,145 +342,268 @@ export default function PatientInfoCard(props: {
                 </div>,
               ],
             ],
-            [
-              `/patient/${patient.id}/investigation_reports`,
-              "Investigation Summary",
-              "align-alt",
-              true,
-            ],
-            [
-              `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/treatment-summary`,
-              "Treatment Summary",
-              "file-medical",
-              consultation?.id,
-            ],
-          ]
-            .concat(
-              enable_hcx
-                ? [
-                    [
-                      `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
-                      "Claims",
-                      "copy-landscape",
-                      consultation?.id,
-                    ],
-                  ]
-                : []
-            )
-            .map(
-              (action: any, i) =>
-                action[3] && (
-                  <div className="relative" key={i}>
-                    <ButtonV2
-                      key={i}
-                      variant={action?.[4]?.[0] ? "danger" : "primary"}
-                      href={
+          ].map(
+            (action: any, i) =>
+              action[3] && (
+                <div className="relative" key={i}>
+                  <ButtonV2
+                    key={i}
+                    variant={action?.[4]?.[0] ? "danger" : "primary"}
+                    href={
+                      consultation?.admitted &&
+                      !consultation?.current_bed &&
+                      i === 1
+                        ? undefined
+                        : `${action[0]}`
+                    }
+                    onClick={() => {
+                      if (
                         consultation?.admitted &&
                         !consultation?.current_bed &&
                         i === 1
-                          ? undefined
-                          : `${action[0]}`
+                      ) {
+                        Notification.Error({
+                          msg: "Please assign a bed to the patient",
+                        });
+                        setOpen(true);
                       }
-                      onClick={() => {
-                        if (
-                          consultation?.admitted &&
-                          !consultation?.current_bed &&
-                          i === 1
-                        ) {
-                          Notification.Error({
-                            msg: "Please assign a bed to the patient",
-                          });
-                          setOpen(true);
-                        }
-                      }}
-                      className="w-full"
-                    >
-                      <span className="flex w-full items-center justify-start gap-2">
-                        <CareIcon className={`care-l-${action[2]} text-lg`} />
-                        <p className="font-semibold">{action[1]}</p>
-                      </span>
-                    </ButtonV2>
-                    {action[4] && action[4][0] && (
-                      <>
-                        <p className="mt-1 text-xs text-red-500">
-                          {action[4][1]}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                )
+                    }}
+                    className="w-full"
+                  >
+                    <span className="flex w-full items-center justify-center gap-2 lg:justify-start">
+                      <CareIcon className={`care-l-${action[2]} text-lg`} />
+                      <p className="font-semibold">{action[1]}</p>
+                    </span>
+                  </ButtonV2>
+                  {action?.[4]?.[0] && (
+                    <>
+                      <p className="mt-1 text-xs text-red-500">
+                        {action[4][1]}
+                      </p>
+                    </>
+                  )}
+                </div>
+              )
+          )}
+
+          <Menu as="div" className="relative inline-block text-left">
+            {({ open }) => (
+              <>
+                <Menu.Button className="w-full">
+                  <ButtonV2
+                    variant="primary"
+                    className={`w-full ${open && "bg-primary-400"}`}
+                  >
+                    <span className="flex w-full items-center justify-center gap-2 lg:justify-start">
+                      {open ? (
+                        <CareIcon icon="l-angle-up" className="text-lg" />
+                      ) : (
+                        <CareIcon icon="l-angle-down" className="text-lg" />
+                      )}
+                      <p className="font-semibold">
+                        {open ? "Hide More" : "Show More"}
+                      </p>
+                    </span>
+                  </ButtonV2>
+                </Menu.Button>
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <Menu.Items
+                    static
+                    className="absolute right-0 mt-2 w-full origin-top-right scale-100 divide-y divide-gray-400	divide-opacity-50 rounded-md bg-white opacity-100 ring-1 ring-primary-500 focus:outline-none lg:w-56"
+                  >
+                    <div>
+                      {[
+                        [
+                          `/patient/${patient.id}/investigation_reports`,
+                          "Investigation Summary",
+                          "align-alt",
+                          true,
+                        ],
+                        [
+                          `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/treatment-summary`,
+                          "Treatment Summary",
+                          "file-medical",
+                          consultation?.id,
+                        ],
+                      ]
+                        .concat(
+                          enable_hcx
+                            ? [
+                                [
+                                  `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
+                                  "Claims",
+                                  "copy-landscape",
+                                  consultation?.id,
+                                ],
+                              ]
+                            : []
+                        )
+                        .map(
+                          (action: any, i) =>
+                            action[3] && (
+                              <div className="relative" key={i}>
+                                <ButtonV2
+                                  ghost
+                                  key={i}
+                                  variant={
+                                    action?.[4]?.[0] ? "danger" : "primary"
+                                  }
+                                  href={
+                                    consultation?.admitted &&
+                                    !consultation?.current_bed &&
+                                    i === 1
+                                      ? undefined
+                                      : `${action[0]}`
+                                  }
+                                  onClick={() => {
+                                    if (
+                                      consultation?.admitted &&
+                                      !consultation?.current_bed &&
+                                      i === 1
+                                    ) {
+                                      Notification.Error({
+                                        msg: "Please assign a bed to the patient",
+                                      });
+                                      setOpen(true);
+                                    }
+                                  }}
+                                  className="w-full"
+                                >
+                                  <span className="flex w-full items-center justify-start gap-2">
+                                    <CareIcon
+                                      className={`care-l-${action[2]} text-lg`}
+                                    />
+                                    <p className="font-semibold">{action[1]}</p>
+                                  </span>
+                                </ButtonV2>
+                                {action?.[4]?.[0] && (
+                                  <>
+                                    <p className="mt-1 text-xs text-red-500">
+                                      {action[4][1]}
+                                    </p>
+                                  </>
+                                )}
+                              </div>
+                            )
+                        )}
+                    </div>
+                    <div>
+                      {enable_abdm &&
+                        (patient.abha_number ? (
+                          <>
+                            <Menu.Item>
+                              {({ close }) => (
+                                <>
+                                  <ButtonV2
+                                    ghost
+                                    className="flex w-full justify-start gap-3 rounded-none font-semibold"
+                                    onClick={() => {
+                                      close();
+                                      setShowABHAProfile(true);
+                                    }}
+                                  >
+                                    <span className="flex w-full items-center justify-start gap-2">
+                                      <CareIcon className="care-l-user-square" />
+                                      <p>Show ABHA Profile</p>
+                                    </span>
+                                  </ButtonV2>
+                                  <ButtonV2
+                                    ghost
+                                    className="flex w-full justify-start gap-3 rounded-none font-semibold"
+                                    onClick={() => {
+                                      close();
+                                      setShowLinkCareContext(true);
+                                    }}
+                                  >
+                                    <span className="flex w-full items-center justify-start gap-2">
+                                      <CareIcon className="care-l-link" />
+                                      <p>Link Care Context</p>
+                                    </span>
+                                  </ButtonV2>
+                                </>
+                              )}
+                            </Menu.Item>
+                          </>
+                        ) : (
+                          <>
+                            <ButtonV2
+                              ghost
+                              className="mb-2 flex justify-start gap-3 font-semibold hover:text-white"
+                              onClick={() => setShowLinkABHANumber(true)}
+                            >
+                              <span className="flex w-full items-center justify-start gap-2">
+                                <CareIcon className="care-l-link" />
+                                <p>Link ABHA Number</p>
+                              </span>
+                            </ButtonV2>
+                          </>
+                        ))}
+                    </div>
+                    <div className="px-4 py-2">
+                      <Switch.Group as="div" className="flex items-center">
+                        <Switch
+                          checked={medicoLegalCase}
+                          onChange={(checked) => {
+                            setMedicoLegalCase(checked);
+                            switchMedicoLegalCase(checked);
+                          }}
+                          className={classNames(
+                            medicoLegalCase ? "bg-primary" : "bg-gray-200",
+                            "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none "
+                          )}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={classNames(
+                              medicoLegalCase
+                                ? "translate-x-4"
+                                : "translate-x-0",
+                              "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                            )}
+                          />
+                        </Switch>
+                        <Switch.Label as="span" className="ml-3 text-sm">
+                          <span className="font-medium text-gray-900">
+                            Medico-Legal Case
+                          </span>{" "}
+                        </Switch.Label>
+                      </Switch.Group>
+                    </div>
+                  </Menu.Items>
+                </Transition>
+              </>
             )}
-          {enable_abdm &&
-            (patient.abha_number ? (
-              <>
-                <ButtonV2
-                  className="flex justify-start gap-3 font-semibold hover:text-white"
-                  onClick={() => setShowABHAProfile(true)}
-                >
-                  <span className="flex w-full items-center justify-start gap-2">
-                    <CareIcon className="care-l-user-square" />
-                    <p>Show ABHA Profile</p>
-                  </span>
-                </ButtonV2>
-                <ButtonV2
-                  className="mt-0 flex justify-start gap-3 font-semibold hover:text-white"
-                  onClick={() => setShowLinkCareContext(true)}
-                >
-                  <span className="flex w-full items-center justify-start gap-2">
-                    <CareIcon className="care-l-link" />
-                    <p>Link Care Context</p>
-                  </span>
-                </ButtonV2>
-                <ABHAProfileModal
-                  patientId={patient.id}
-                  abha={patient.abha_number_object}
-                  show={showABHAProfile}
-                  onClose={() => setShowABHAProfile(false)}
-                />
-                <LinkCareContextModal
-                  consultationId={props.consultationId}
-                  patient={patient}
-                  show={showLinkCareContext}
-                  onClose={() => setShowLinkCareContext(false)}
-                />
-              </>
-            ) : (
-              <>
-                <ButtonV2
-                  className="flex justify-start gap-3 font-semibold hover:text-white"
-                  onClick={() => setShowLinkABHANumber(true)}
-                >
-                  <span className="flex w-full items-center justify-start gap-2">
-                    <CareIcon className="care-l-link" />
-                    <p>Link ABHA Number</p>
-                  </span>
-                </ButtonV2>
-                <LinkABHANumberModal
-                  show={showLinkABHANumber}
-                  onClose={() => setShowLinkABHANumber(false)}
-                  patientId={patient.id as any}
-                  onSuccess={(_) => {
-                    window.location.href += "?show-abha-profile=true";
-                  }}
-                />
-              </>
-            ))}
-          Is this a medico-legal case?
-          <SwitchTabs
-            tab1="Yes"
-            tab2="No"
-            isTab2Active={!medicoLegalCase}
-            onClickTab1={() => {
-              setMedicoLegalCase(true);
-              switchMedicoLegalCase(true);
-            }}
-            onClickTab2={() => {
-              setMedicoLegalCase(false);
-              switchMedicoLegalCase(false);
-            }}
-          />
+          </Menu>
         </div>
       </section>
+      <LinkABHANumberModal
+        show={showLinkABHANumber}
+        onClose={() => setShowLinkABHANumber(false)}
+        patientId={patient.id as any}
+        onSuccess={(_) => {
+          window.location.href += "?show-abha-profile=true";
+        }}
+      />
+      <ABHAProfileModal
+        patientId={patient.id}
+        abha={patient.abha_number_object}
+        show={showABHAProfile}
+        onClose={() => setShowABHAProfile(false)}
+      />
+      <LinkCareContextModal
+        consultationId={props.consultationId}
+        patient={patient}
+        show={showLinkCareContext}
+        onClose={() => setShowLinkCareContext(false)}
+      />
     </>
   );
 }
