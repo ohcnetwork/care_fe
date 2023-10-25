@@ -3,7 +3,6 @@ import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssetData } from "../Assets/AssetTypes";
 import { UserBareMinimum } from "../Users/models";
-import { PaginatedResponse } from "../../Utils/request/types";
 
 export interface LocalBodyModel {
   name: string;
@@ -222,15 +221,6 @@ export interface CurrentBed {
   end_date: string;
   meta: Record<string, any>;
 }
-
-export interface ConsultationBedRequest {
-  bed?: string;
-  consultation: string;
-  limit?: number;
-  offset?: number;
-}
-
-export type ConsultationBedResponse = PaginatedResponse<CurrentBed>;
 
 // Voluntarily made as `type` for it to achieve type-safety when used with
 // `useAsyncOptions<ICD11DiagnosisModel>`

@@ -48,10 +48,6 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   const minutesSinceCurrentBedAssignment =
     bedAssignmentStartDate &&
     (currentDate.getTime() - bedAssignmentStartDate.getTime()) / (1000 * 60);
-  console.log(
-    "minutesSinceCurrentBedAssignment",
-    minutesSinceCurrentBedAssignment
-  );
   const bpWithinMaxPersistence = !!(
     data.bp?.["date-time"] &&
     minutesSinceCurrentBedAssignment !== undefined && // Check if minutesSinceCurrentBedAssignment is defined

@@ -15,7 +15,6 @@ import ReadMore from "../../Common/components/Readmore";
 import { DailyRoundsList } from "../Consultations/DailyRoundsList";
 import useQuery from "../../../Utils/request/useQuery";
 import routes from "../../../Redux/api";
-import * as Notification from "../../../Utils/Notifications.js";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 
@@ -26,7 +25,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
   const [ventilatorSocketUrl, setVentilatorSocketUrl] = useState<string>();
   const [monitorBedData, setMonitorBedData] = useState<AssetBedModel>();
   const [ventilatorBedData, setVentilatorBedData] = useState<AssetBedModel>();
-  const [bedAssignmentStartDate, setBedAssignmentStartDate] = useState("");
 
   const vitals = useVitalsAspectRatioConfig({
     default: undefined,
@@ -108,20 +106,10 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
     fetchData();
   }, [props.consultationData]);
 
-  useQuery(routes.listConsultationBeds, {
-    query: {
-      consultation: props.consultationId,
-    },
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data) {
-        setBedAssignmentStartDate(data.results[0].created_date);
-      } else {
-        Notification.Error({
-          msg: "Something went wrong: ",
-        });
-      }
-    },
+  const { data } = useQuery(routes.listConsultationBeds, {
+    query: { consultation: props.consultationId },
   });
+  const bedAssignmentStartDate = data?.results[0].created_date ?? "";
 
   return (
     <div className="flex flex-col gap-2">

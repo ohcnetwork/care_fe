@@ -29,8 +29,7 @@ import {
   AssetUpdate,
 } from "../Components/Assets/AssetTypes";
 import {
-  ConsultationBedRequest,
-  ConsultationBedResponse,
+  CurrentBed,
   FacilityModel,
   LocationModel,
   WardModel,
@@ -353,8 +352,7 @@ const routes = {
   listConsultationBeds: {
     path: "/api/v1/consultationbed/",
     method: "GET",
-    TRes: Type<ConsultationBedResponse>(),
-    TBody: Type<ConsultationBedRequest>(),
+    TRes: Type<PaginatedResponse<CurrentBed>>(),
   },
   createConsultationBed: {
     path: "/api/v1/consultationbed/",
