@@ -105,17 +105,22 @@ const AssetsList = () => {
     setAssetClass(qParams.asset_class);
   }, [qParams.asset_class]);
 
-  const { data: location } = useQuery(routes.getFacilityAssetLocation, {
+  useQuery(routes.getFacilityAssetLocation, {
     pathParams: {
       facility_external_id: String(qParams.facility),
       external_id: String(qParams.location),
+    },
+    onResponse: ({ res, data }) => {
+      if (res?.status === 200 && data) {
+        setLocation(data?.name);
+      }
     },
     prefetch: !!(qParams.facility && qParams.location),
   });
 
   useEffect(() => {
-    setLocation(location?.name ?? "");
-  }, [location]);
+    setLocation(qParams?.location ?? "");
+  }, [qParams.location]);
 
   const getAssetIdFromQR = async (assetUrl: string) => {
     try {
