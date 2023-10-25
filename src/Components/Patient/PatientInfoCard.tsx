@@ -193,6 +193,11 @@ export default function PatientInfoCard(props: {
                   </span>
                 </span>
               )}
+              {medicoLegalCase && (
+                <span className="pl-2 capitalize md:col-span-2">
+                  <span className="badge badge-pill badge-danger">MLC</span>
+                </span>
+              )}
             </div>
             {!!consultation?.discharge_date && (
               <p className="my-1 inline-block rounded-lg bg-red-100 px-2 py-1 text-sm text-red-600">
