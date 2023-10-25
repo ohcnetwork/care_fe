@@ -109,7 +109,13 @@ export const Login = (props: { forgot?: boolean }) => {
           window.location.pathname === "/" ||
           window.location.pathname === "/login"
         ) {
-          window.location.href = "/facility";
+          const lastPath = localStorage.getItem("lastPath");
+          if (lastPath) {
+            localStorage.removeItem("lastPath");
+            window.location.href = lastPath;
+          } else {
+            window.location.href = "/facility";
+          }
         } else {
           window.location.href = window.location.pathname.toString();
         }

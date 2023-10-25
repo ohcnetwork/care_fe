@@ -152,6 +152,8 @@ export const fireRequest = (
           if (error.response.status > 400 && error.response.status < 500) {
             if (error.response.data && error.response.data.detail) {
               if (error.response.data.code === "token_not_valid") {
+                //store the path before session expiry in local storage
+                localStorage.setItem("lastPath", window.location.href);
                 window.location.href = "/session-expired";
               }
               Notification.Error({
