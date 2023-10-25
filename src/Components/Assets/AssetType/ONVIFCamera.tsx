@@ -134,7 +134,6 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     }
     setLoadingAddPreset(false);
   };
-
   if (isLoading || loading || !facility) return <Loading />;
 
   const fallbackMiddleware =
