@@ -20,7 +20,7 @@ import LinkCareContextModal from "../ABDM/LinkCareContextModal";
 import { PatientModel } from "./models";
 import { getDimensionOrDash } from "../../Common/utils";
 import useConfig from "../../Common/hooks/useConfig";
-import { Fragment, useState } from "react";
+import { useState } from "react";
 import {
   classNames,
   formatAge,
@@ -30,7 +30,8 @@ import {
 import dayjs from "../../Utils/dayjs";
 import request from "../../Utils/request/request.js";
 import routes from "../../Redux/api.js";
-import { Menu, Transition } from "@headlessui/react";
+import { Menu } from "@headlessui/react";
+import DropdownMenu from "../Common/components/Menu.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;
@@ -385,203 +386,155 @@ export default function PatientInfoCard(props: {
                 </div>
               )
           )}
-
-          <Menu as="div" className="relative inline-block text-left">
-            {({ open }) => (
-              <>
-                <Menu.Button className="w-full">
-                  <ButtonV2
-                    variant="primary"
-                    className={`w-full ${open && "bg-primary-400"}`}
-                  >
-                    <span className="flex w-full items-center justify-center gap-2 lg:justify-start">
-                      {open ? (
-                        <CareIcon icon="l-angle-up" className="text-lg" />
-                      ) : (
-                        <CareIcon icon="l-angle-down" className="text-lg" />
-                      )}
-                      <p className="font-semibold">
-                        {open ? "Hide More" : "Show More"}
-                      </p>
-                    </span>
-                  </ButtonV2>
-                </Menu.Button>
-                <Transition
-                  as={Fragment}
-                  enter="transition ease-out duration-100"
-                  enterFrom="transform opacity-0 scale-95"
-                  enterTo="transform opacity-100 scale-100"
-                  leave="transition ease-in duration-75"
-                  leaveFrom="transform opacity-100 scale-100"
-                  leaveTo="transform opacity-0 scale-95"
-                >
-                  <Menu.Items
-                    static
-                    className="absolute right-0 mt-2 w-full origin-top-right scale-100 divide-y divide-gray-400	divide-opacity-50 rounded-md bg-white opacity-100 ring-1 ring-primary-500 focus:outline-none lg:w-56"
-                  >
-                    <div>
-                      {[
+          <DropdownMenu
+            itemClassName="min-w-0 sm:min-w-[225px]"
+            title={"Show More"}
+            icon={<CareIcon icon="l-sliders-v-alt" />}
+          >
+            <div>
+              {[
+                [
+                  `/patient/${patient.id}/investigation_reports`,
+                  "Investigation Summary",
+                  "align-alt",
+                  true,
+                ],
+                [
+                  `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/treatment-summary`,
+                  "Treatment Summary",
+                  "file-medical",
+                  consultation?.id,
+                ],
+              ]
+                .concat(
+                  enable_hcx
+                    ? [
                         [
-                          `/patient/${patient.id}/investigation_reports`,
-                          "Investigation Summary",
-                          "align-alt",
-                          true,
-                        ],
-                        [
-                          `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/treatment-summary`,
-                          "Treatment Summary",
-                          "file-medical",
+                          `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
+                          "Claims",
+                          "copy-landscape",
                           consultation?.id,
                         ],
                       ]
-                        .concat(
-                          enable_hcx
-                            ? [
-                                [
-                                  `/facility/${patient.facility}/patient/${patient.id}/consultation/${consultation?.id}/claims`,
-                                  "Claims",
-                                  "copy-landscape",
-                                  consultation?.id,
-                                ],
-                              ]
-                            : []
-                        )
-                        .map(
-                          (action: any, i) =>
-                            action[3] && (
-                              <div className="relative" key={i}>
-                                <ButtonV2
-                                  ghost
-                                  key={i}
-                                  variant={
-                                    action?.[4]?.[0] ? "danger" : "primary"
-                                  }
-                                  href={
-                                    consultation?.admitted &&
-                                    !consultation?.current_bed &&
-                                    i === 1
-                                      ? undefined
-                                      : `${action[0]}`
-                                  }
-                                  onClick={() => {
-                                    if (
-                                      consultation?.admitted &&
-                                      !consultation?.current_bed &&
-                                      i === 1
-                                    ) {
-                                      Notification.Error({
-                                        msg: "Please assign a bed to the patient",
-                                      });
-                                      setOpen(true);
-                                    }
-                                  }}
-                                  className="w-full"
-                                >
-                                  <span className="flex w-full items-center justify-start gap-2">
-                                    <CareIcon
-                                      className={`care-l-${action[2]} text-lg`}
-                                    />
-                                    <p className="font-semibold">{action[1]}</p>
-                                  </span>
-                                </ButtonV2>
-                                {action?.[4]?.[0] && (
-                                  <>
-                                    <p className="mt-1 text-xs text-red-500">
-                                      {action[4][1]}
-                                    </p>
-                                  </>
-                                )}
-                              </div>
-                            )
-                        )}
-                    </div>
-                    <div>
-                      {enable_abdm &&
-                        (patient.abha_number ? (
-                          <>
-                            <Menu.Item>
-                              {({ close }) => (
-                                <>
-                                  <ButtonV2
-                                    ghost
-                                    className="flex w-full justify-start gap-3 rounded-none font-semibold"
-                                    onClick={() => {
-                                      close();
-                                      setShowABHAProfile(true);
-                                    }}
-                                  >
-                                    <span className="flex w-full items-center justify-start gap-2">
-                                      <CareIcon className="care-l-user-square" />
-                                      <p>Show ABHA Profile</p>
-                                    </span>
-                                  </ButtonV2>
-                                  <ButtonV2
-                                    ghost
-                                    className="flex w-full justify-start gap-3 rounded-none font-semibold"
-                                    onClick={() => {
-                                      close();
-                                      setShowLinkCareContext(true);
-                                    }}
-                                  >
-                                    <span className="flex w-full items-center justify-start gap-2">
-                                      <CareIcon className="care-l-link" />
-                                      <p>Link Care Context</p>
-                                    </span>
-                                  </ButtonV2>
-                                </>
-                              )}
-                            </Menu.Item>
-                          </>
-                        ) : (
-                          <>
-                            <ButtonV2
-                              ghost
-                              className="mb-2 flex justify-start gap-3 font-semibold hover:text-white"
-                              onClick={() => setShowLinkABHANumber(true)}
-                            >
-                              <span className="flex w-full items-center justify-start gap-2">
-                                <CareIcon className="care-l-link" />
-                                <p>Link ABHA Number</p>
-                              </span>
-                            </ButtonV2>
-                          </>
-                        ))}
-                    </div>
-                    <div className="px-4 py-2">
-                      <Switch.Group as="div" className="flex items-center">
-                        <Switch
-                          checked={medicoLegalCase}
-                          onChange={(checked) => {
-                            setMedicoLegalCase(checked);
-                            switchMedicoLegalCase(checked);
+                    : []
+                )
+                .map(
+                  (action: any, i) =>
+                    action[3] && (
+                      <div key={i}>
+                        <a
+                          key={i}
+                          className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                          href={
+                            consultation?.admitted &&
+                            !consultation?.current_bed &&
+                            i === 1
+                              ? undefined
+                              : `${action[0]}`
+                          }
+                          onClick={() => {
+                            if (
+                              consultation?.admitted &&
+                              !consultation?.current_bed &&
+                              i === 1
+                            ) {
+                              Notification.Error({
+                                msg: "Please assign a bed to the patient",
+                              });
+                              setOpen(true);
+                            }
                           }}
-                          className={classNames(
-                            medicoLegalCase ? "bg-primary" : "bg-gray-200",
-                            "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none "
-                          )}
                         >
-                          <span
-                            aria-hidden="true"
-                            className={classNames(
-                              medicoLegalCase
-                                ? "translate-x-4"
-                                : "translate-x-0",
-                              "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                            )}
+                          <CareIcon
+                            className={`care-l-${action[2]} text-lg text-primary-500`}
                           />
-                        </Switch>
-                        <Switch.Label as="span" className="ml-3 text-sm">
-                          <span className="font-medium text-gray-900">
-                            Medico-Legal Case
-                          </span>{" "}
-                        </Switch.Label>
-                      </Switch.Group>
+                          <span>{action[1]}</span>
+                        </a>
+                        {action?.[4]?.[0] && (
+                          <>
+                            <p className="mt-1 text-xs text-red-500">
+                              {action[4][1]}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    )
+                )}
+            </div>
+            <div>
+              {enable_abdm &&
+                (patient.abha_number ? (
+                  <>
+                    <Menu.Item>
+                      {({ close }) => (
+                        <>
+                          <div
+                            className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                            onClick={() => {
+                              close();
+                              setShowABHAProfile(true);
+                            }}
+                          >
+                            <CareIcon className="care-l-user-square text-lg text-primary-500" />
+                            <span>Show ABHA Profile</span>
+                          </div>
+                          <div
+                            className="dropdown-item-primary pointer-events-auto m-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 p-2 text-sm font-normal transition-all duration-200 ease-in-out"
+                            onClick={() => {
+                              close();
+                              setShowLinkCareContext(true);
+                            }}
+                          >
+                            <CareIcon className="care-l-link text-lg text-primary-500" />
+                            <span>Link Care Context</span>
+                          </div>
+                        </>
+                      )}
+                    </Menu.Item>
+                  </>
+                ) : (
+                  <>
+                    <div
+                      className="dropdown-item-primary pointer-events-auto mx-2 flex cursor-pointer items-center justify-start gap-2 rounded border-0 px-2 py-1 text-sm font-normal transition-all duration-200 ease-in-out"
+                      onClick={() => setShowLinkABHANumber(true)}
+                    >
+                      <span className="flex w-full items-center justify-start gap-2">
+                        <CareIcon className="care-l-link" />
+                        <p>Link ABHA Number</p>
+                      </span>
                     </div>
-                  </Menu.Items>
-                </Transition>
-              </>
-            )}
-          </Menu>
+                  </>
+                ))}
+            </div>
+            <div className="px-4 py-2">
+              <Switch.Group as="div" className="flex items-center">
+                <Switch
+                  checked={medicoLegalCase}
+                  onChange={(checked) => {
+                    setMedicoLegalCase(checked);
+                    switchMedicoLegalCase(checked);
+                  }}
+                  className={classNames(
+                    medicoLegalCase ? "bg-primary" : "bg-gray-200",
+                    "relative inline-flex h-4 w-8 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none "
+                  )}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={classNames(
+                      medicoLegalCase ? "translate-x-4" : "translate-x-0",
+                      "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                    )}
+                  />
+                </Switch>
+                <Switch.Label as="span" className="ml-3 text-sm">
+                  <span className="font-medium text-gray-900">
+                    Medico-Legal Case
+                  </span>{" "}
+                </Switch.Label>
+              </Switch.Group>
+            </div>
+          </DropdownMenu>
         </div>
       </section>
       <LinkABHANumberModal
