@@ -410,6 +410,8 @@ const routes = {
   partialUpdateConsultation: {
     path: "/api/v1/consultation/{id}/",
     method: "PATCH",
+    TRes: Type<Partial<ConsultationModel>>(),
+    TBody: Type<ConsultationModel>(),
   },
   deleteConsultation: {
     path: "/api/v1/consultation/{id}/",

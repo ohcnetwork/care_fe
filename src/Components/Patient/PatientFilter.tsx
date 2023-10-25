@@ -65,6 +65,8 @@ export default function PatientFilter(props: any) {
     age_max: filter.age_max || null,
     date_of_result: filter.date_of_result || null,
     date_declared_positive: filter.date_declared_positive || null,
+    last_consultation_medico_legal_case:
+      filter.last_consultation_medico_legal_case || null,
     last_consultation_admission_date_before:
       filter.last_consultation_admission_date_before || null,
     last_consultation_admission_date_after:
@@ -120,6 +122,7 @@ export default function PatientFilter(props: any) {
     age_max: "",
     date_of_result: null,
     date_declared_positive: null,
+    last_consultation_medico_legal_case: null,
     last_consultation_admission_date_before: "",
     last_consultation_admission_date_after: "",
     last_consultation_discharge_date_before: "",
@@ -229,6 +232,7 @@ export default function PatientFilter(props: any) {
       age_min,
       age_max,
       date_of_result,
+      last_consultation_medico_legal_case,
       last_consultation_admission_date_before,
       last_consultation_admission_date_after,
       last_consultation_discharge_date_before,
@@ -266,6 +270,8 @@ export default function PatientFilter(props: any) {
       modified_date_before: dateQueryString(modified_date_before),
       modified_date_after: dateQueryString(modified_date_after),
       date_of_result: dateQueryString(date_of_result),
+      last_consultation_medico_legal_case:
+        last_consultation_medico_legal_case || "",
       last_consultation_admission_date_before: dateQueryString(
         last_consultation_admission_date_before
       ),
@@ -470,6 +476,23 @@ export default function PatientFilter(props: any) {
               value={filterState.is_antenatal}
               onChange={(v) =>
                 setFilterState({ ...filterState, is_antenatal: v })
+              }
+            />
+          </div>
+          <div className="w-full flex-none">
+            <FieldLabel className="text-sm">Is Medico-Legal Case</FieldLabel>
+            <SelectMenuV2
+              placeholder="Show all"
+              options={["true", "false"]}
+              optionLabel={(o) =>
+                o === "true" ? "Medico-Legal" : "Non-Medico-Legal"
+              }
+              value={filterState.last_consultation_medico_legal_case}
+              onChange={(v) =>
+                setFilterState({
+                  ...filterState,
+                  last_consultation_medico_legal_case: v,
+                })
               }
             />
           </div>
