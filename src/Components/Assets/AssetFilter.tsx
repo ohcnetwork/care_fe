@@ -46,14 +46,6 @@ function AssetFilter(props: any) {
     prefetch: !!facilityId,
   });
 
-  useQuery(routes.getFacilityAssetLocation, {
-    pathParams: {
-      facility_external_id: String(facilityId),
-      external_id: String(locationId),
-    },
-    prefetch: !!(facilityId && locationId),
-  });
-
   useEffect(() => {
     setFacilityId(facility?.id ? `${facility?.id}` : "");
     setLocationId(
