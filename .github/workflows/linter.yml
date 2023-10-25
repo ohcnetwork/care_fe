@@ -2,12 +2,19 @@ name: Lint Code Base
 
 on:
   pull_request:
-    branches: [master]
+    branches:
+      - develop
+      - master
   merge_group:
 
 jobs:
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      statuses: write
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
