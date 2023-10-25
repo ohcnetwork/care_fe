@@ -142,9 +142,6 @@ describe("Patient Creation with consultation", () => {
     updatePatientPage.visitUpdatedPatient();
     patientConsultationPage.visitEditConsultationPage();
     patientConsultationPage.fillIllnessHistory("editted");
-    patientConsultationPage.selectConsultationStatus(
-      "Referred from other hospital"
-    );
     patientConsultationPage.updateSymptoms("FEVER");
     patientConsultationPage.setSymptomsDate("01082023");
     patientConsultationPage.updateConsultation();
