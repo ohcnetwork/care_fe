@@ -61,7 +61,7 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import countryList from "../../Common/static/countries.json";
-import { debounce } from "lodash";
+import { debounce } from "lodash-es";
 
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
