@@ -1,22 +1,22 @@
-import _ from "lodash";
+import _ from "lodash-es";
 import { navigate } from "raviger";
 import { lazy, useState } from "react";
 import CSVReader from "react-csv-reader";
-import { useDispatch } from "react-redux";
 import useConfig from "../../Common/hooks/useConfig";
-import { externalResultUploadCsv } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
 const PageTitle = lazy(() => import("../Common/PageTitle"));
 import { useTranslation } from "react-i18next";
 import { Cancel, Submit } from "../Common/components/ButtonV2";
 import useAppHistory from "../../Common/hooks/useAppHistory";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
+import { IExternalResult } from "./models";
 
 export default function ExternalResultUpload() {
   const { sample_format_external_result_import } = useConfig();
-  const dispatch: any = useDispatch();
   // for disabling save button once clicked
   const [loading, setLoading] = useState(false);
-  const [csvData, setCsvData] = useState(new Array<any>());
+  const [csvData, setCsvData] = useState(new Array<IExternalResult>());
   const [errors, setErrors] = useState<any>([]);
   const handleForce = (data: any) => {
     setCsvData(data);
@@ -32,26 +32,35 @@ export default function ExternalResultUpload() {
       header.toLowerCase().replace(/\W/g, "_"),
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
     const valid = true;
-    if (csvData.length !== 0) {
-      const data = {
-        sample_tests: csvData,
-      };
 
+    if (csvData.length !== 0) {
       if (valid) {
         setErrors([]);
-        dispatch(externalResultUploadCsv(data)).then((resp: any) => {
-          if (resp && resp.status === 202) {
+
+        try {
+          const { res, data } = await request(routes.externalResultUploadCsv, {
+            body: {
+              sample_tests: csvData,
+            },
+          });
+
+          if (res && res.status === 202) {
             setLoading(false);
             navigate("/external_results");
           } else {
-            setErrors(resp.data.map((err: any) => Object.entries(err)));
+            if (data) {
+              setErrors(data.map((err: any) => Object.entries(err)));
+            }
             setLoading(false);
           }
-        });
+        } catch (error) {
+          console.error("An error occurred:", error);
+          setLoading(false);
+        }
       } else {
         setLoading(false);
       }
@@ -117,7 +126,7 @@ export default function ExternalResultUpload() {
                   <div className="mr-2 p-2">{index + 1}</div>
                   <div className="mr-2 p-2 md:w-1/3">{data.name}</div>
 
-                  <div className="mr-2 p-2">
+                  <div className="mr-2 p-2 capitalize">
                     {errors && errors.length !== 0
                       ? errors.map((error: any) => {
                           return (

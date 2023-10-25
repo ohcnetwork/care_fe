@@ -130,10 +130,25 @@ describe("Patient Creation with consultation", () => {
     patientConsultationPage.interceptMediaBase();
     patientConsultationPage.selectMedicinebox();
     patientConsultationPage.waitForMediabaseStatusCode();
-    patientConsultationPage.prescribeMedicine();
+    patientConsultationPage.prescribefirstMedicine();
     patientConsultationPage.enterDosage("3");
     patientConsultationPage.selectDosageFrequency("Twice daily");
     patientConsultationPage.submitPrescriptionAndReturn();
+  });
+
+  it("Edit created consultation to existing patient", () => {
+    updatePatientPage.visitUpdatedPatient();
+    patientConsultationPage.visitEditConsultationPage();
+    patientConsultationPage.fillIllnessHistory("editted");
+    patientConsultationPage.selectConsultationStatus(
+      "Referred from other hospital"
+    );
+    patientConsultationPage.updateSymptoms("FEVER");
+    patientConsultationPage.setSymptomsDate("01082023");
+    patientConsultationPage.updateConsultation();
+    patientConsultationPage.verifySuccessNotification(
+      "Consultation updated successfully"
+    );
   });
 
   afterEach(() => {
