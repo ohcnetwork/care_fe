@@ -109,13 +109,12 @@ export const Login = (props: { forgot?: boolean }) => {
           window.location.pathname === "/" ||
           window.location.pathname === "/login"
         ) {
-          const lastPath = localStorage.getItem("lastPath");
-          if (lastPath) {
-            localStorage.removeItem("lastPath");
-            window.location.href = lastPath;
-          } else {
-            window.location.href = "/facility";
-          }
+          const redirectParam = new URLSearchParams(window.location.search).get(
+            "redirect"
+          );
+          redirectParam
+            ? (window.location.href = redirectParam.toString())
+            : (window.location.href = "/facility");
         } else {
           window.location.href = window.location.pathname.toString();
         }

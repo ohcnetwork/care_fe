@@ -107,7 +107,10 @@ export const handleSignOut = (forceReload: boolean) => {
   Object.values(LocalStorageKeys).forEach((key) =>
     localStorage.removeItem(key)
   );
-  navigate("/");
+  const redirectURL = new URLSearchParams(window.location.search).get(
+    "redirect"
+  );
+  redirectURL ? navigate(`/?redirect=${redirectURL}`) : navigate("/");
   if (forceReload) window.location.reload();
 };
 
