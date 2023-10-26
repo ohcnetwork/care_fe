@@ -127,7 +127,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     dispatch({ type: "set_form", form });
   };
 
-  const { data: resourceDetailsData } = useQuery(routes.getResourceDetails, {
+  const { data: resourceDetails } = useQuery(routes.getResourceDetails, {
     pathParams: { id: props.id },
     onResponse: ({ res, data }) => {
       if (res && data) {
@@ -159,7 +159,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         assigned_quantity:
           state.form.status === "PENDING"
             ? state.form.assigned_quantity
-            : resourceDetailsData?.assigned_quantity || 0,
+            : resourceDetails?.assigned_quantity || 0,
       };
 
       const { res, data } = await request(routes.updateResource, {
@@ -189,7 +189,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     <Page
       title="Update Resource Request"
       backUrl={`/resource/${props.id}`}
-      crumbsReplacements={{ [props.id]: { name: resourceDetailsData?.title } }}
+      crumbsReplacements={{ [props.id]: { name: resourceDetails?.title } }}
     >
       <div className="mt-4">
         <Card className="flex w-full flex-col">

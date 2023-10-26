@@ -11,13 +11,9 @@ function useFacilityQuery(facilityId: string | undefined) {
 
 export default function BadgesList(props: any) {
   const { appliedFilters, FilterBadges } = props;
-  const originFacilityData = useFacilityQuery(appliedFilters.origin_facility);
-  const approvingFacilityData = useFacilityQuery(
-    appliedFilters.approving_facility
-  );
-  const assignedFacilityData = useFacilityQuery(
-    appliedFilters.assigned_facility
-  );
+  const originFacility = useFacilityQuery(appliedFilters.origin_facility);
+  const approvingFacility = useFacilityQuery(appliedFilters.approving_facility);
+  const assignedFacility = useFacilityQuery(appliedFilters.assigned_facility);
 
   const getDescShiftingFilterOrder = (ordering: any) => {
     const foundItem = SHIFTING_FILTER_ORDER.find(
@@ -41,20 +37,16 @@ export default function BadgesList(props: any) {
         }),
         ...dateRange("Modified", "modified_date"),
         ...dateRange("Created", "created_date"),
-        value(
-          "Origin facility",
-          "origin_facility",
-          originFacilityData?.data?.name
-        ),
+        value("Origin facility", "origin_facility", originFacility?.data?.name),
         value(
           "Approving facility",
           "approving_facility",
-          approvingFacilityData?.data?.name
+          approvingFacility?.data?.name
         ),
         value(
           "Assigned facility",
           "assigned_facility",
-          assignedFacilityData?.data?.name
+          assignedFacility?.data?.name
         ),
       ]}
     />

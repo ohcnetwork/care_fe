@@ -28,6 +28,7 @@ import {
   AssetUpdate,
 } from "../Components/Assets/AssetTypes";
 import {
+  ConsultationModel,
   FacilityModel,
   LocationModel,
   WardModel,
@@ -42,9 +43,11 @@ import {
 } from "../Components/ExternalResult/models";
 
 import { Prescription } from "../Components/Medicine/models";
- 
+
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
+import { PatientModel } from "../Components/Patient/models";
+import { IComment, IResource } from "../Components/Resource/models";
 
 /**
  * A fake function that returns an empty object casted to type T
