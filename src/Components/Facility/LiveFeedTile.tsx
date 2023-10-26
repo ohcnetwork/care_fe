@@ -40,7 +40,6 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
   const { t } = useTranslation();
   const [_isFullscreen, setFullscreen] = useFullscreen();
   // const [toggle, setToggle] = useState(false);
-  console.log("re-rendered");
 
   useEffect(() => {
     let loadingTimeout: any;
@@ -58,7 +57,6 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
       setLoading(true);
       console.log("fetching asset");
       const assetData: any = await dispatch(getAsset(assetId));
-      console.log("assetData", assetData);
       if (!status.aborted) {
         // setLoading(false);
         if (!assetData.data)
@@ -122,14 +120,11 @@ export default function LiveFeedTile(props: LiveFeedTileProps) {
       });
   };
   const getPresets = (asset: any) => {
-    console.log(asset);
     const url = `https://${asset.meta.middleware_hostname}/presets?hostname=${asset.hostname}&port=${asset.port}&username=${asset.username}&password=${asset.password}`;
-    console.log(url);
     axios
       .get(url)
       .then((resp: any) => {
         setPresets(resp.data);
-        console.log("PRESETS", resp.data);
       })
       .catch((_ex: any) => {
         // console.error("Error while refreshing", ex);

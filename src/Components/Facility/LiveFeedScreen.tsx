@@ -130,7 +130,6 @@ export default function LiveFeedScreen({ facilityId }: Props) {
 
       setTotalCount(entries.length);
       setAssetList(entries);
-      console.log("assetList", entries);
     }
     fetchData();
   }, [
@@ -286,12 +285,9 @@ export default function LiveFeedScreen({ facilityId }: Props) {
         </div>
       ) : (
         <div className="mt-1 grid grid-cols-1 gap-2 xl:grid-cols-2 3xl:grid-cols-3">
-          {assetList.map((asset: any) => (
-            <div className="text-clip">
-              <LiveFeedTile
-                assetId={asset.asset.id}
-                key={asset.patientAssetBed?.bed.id}
-              />
+          {assetList.map((asset, idx) => (
+            <div className="text-clip" key={idx}>
+              <LiveFeedTile assetId={asset.asset.id} key={asset?.bed.id} />
             </div>
           ))}
         </div>
