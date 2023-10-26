@@ -918,12 +918,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (mobile) {
       field("phone_number").onChange({
         name: "phone_number",
-        value: parsePhoneNumber(mobile),
+        value: parsePhoneNumber(mobile, "IN"),
       });
 
       field("emergency_phone_number").onChange({
         name: "emergency_phone_number",
-        value: parsePhoneNumber(mobile),
+        value: parsePhoneNumber(mobile, "IN"),
       });
     }
 
