@@ -2,7 +2,6 @@ import { useState } from "react";
 import Form from "../Form/Form";
 import { Prescription } from "./models";
 import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
 import * as Notification from "../../Utils/Notifications";
 import useSlug from "../../Common/hooks/useSlug";
 import { RequiredFieldValidator } from "../Form/FieldValidators";
@@ -16,6 +15,7 @@ import {
 import TextFormField from "../Form/FormFields/TextFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { EditPrescriptionFormValidator } from "./validators";
+import MedicineRoutes from "./routes";
 
 interface Props {
   initial: Prescription;
@@ -27,7 +27,7 @@ const handleSubmit = async (
   oldObj: Prescription,
   { discontinued_reason, ...newObj }: Prescription
 ) => {
-  const discontinue = await request(routes.discontinuePrescription, {
+  const discontinue = await request(MedicineRoutes.discontinuePrescription, {
     pathParams: { consultation_external_id, external_id: oldObj.id },
     body: {
       discontinued_reason: discontinued_reason
@@ -43,7 +43,7 @@ const handleSubmit = async (
     return;
   }
 
-  const { res } = await request(routes.createPrescription, {
+  const { res } = await request(MedicineRoutes.createPrescription, {
     pathParams: { consultation_external_id },
     body: {
       ...newObj,
