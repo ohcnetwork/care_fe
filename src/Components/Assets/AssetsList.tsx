@@ -375,7 +375,7 @@ const AssetsList = () => {
               value(
                 "Location",
                 "location",
-                qParams.facility && locationObject?.name
+                qParams.location && locationObject?.name
               ),
               value(
                 "Warranty AMC End Of Validity Before",
