@@ -3,7 +3,7 @@ import { navigate, useQueryParams } from "raviger";
 import { FacilitySelect } from "../Common/FacilitySelect";
 import { FacilityModel } from "../Facility/models";
 import { LocationSelect } from "../Common/LocationSelect";
-import { AssetClass, AssetLocationObject } from "./AssetTypes";
+import { AssetClass } from "./AssetTypes";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
@@ -15,24 +15,12 @@ import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { DateRange } from "../Common/DateRangeInputV2";
 import { dateQueryString } from "../../Utils/utils";
 
-const initialLocation = {
-  id: "",
-  name: "",
-  description: "",
-  facility: {
-    id: "",
-    name: "",
-  },
-};
-
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
 
 function AssetFilter(props: any) {
   const { filter, onChange, closeFilter } = props;
   const [facility, setFacility] = useState<FacilityModel>({ name: "" });
-  const [location, setLocation] =
-    useState<AssetLocationObject>(initialLocation);
   const [asset_type, setAssetType] = useState<string>(
     filter.asset_type ? filter.asset_type : ""
   );
@@ -58,28 +46,14 @@ function AssetFilter(props: any) {
     prefetch: !!facilityId,
   });
 
-  useQuery(routes.getFacilityAssetLocation, {
-    pathParams: {
-      facilityId: String(facilityId),
-      locationId: String(locationId),
-    },
-    onResponse: ({ res, data }) => {
-      if (res?.status === 200 && data) {
-        setLocation(data);
-      }
-    },
-    prefetch: !!(facilityId && locationId),
-  });
-
   useEffect(() => {
     setFacilityId(facility?.id ? `${facility?.id}` : "");
     setLocationId(
       facility?.id === qParams.facility ? qParams.location ?? "" : ""
     );
-  }, [facility, location]);
+  }, [facility.id, qParams.facility, qParams.location]);
 
   const clearFilter = useCallback(() => {
-    setLocation(initialLocation);
     setFacility({ name: "" });
     setAssetType("");
     setAssetStatus("");
@@ -98,7 +72,7 @@ function AssetFilter(props: any) {
       asset_type: asset_type ?? "",
       asset_class: asset_class ?? "",
       status: asset_status ?? "",
-      location: locationId,
+      location: locationId ?? "",
       warranty_amc_end_of_validity_before: dateQueryString(
         warrantyExpiry.before
       ),
