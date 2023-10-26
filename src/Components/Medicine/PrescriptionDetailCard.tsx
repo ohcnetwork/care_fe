@@ -147,7 +147,7 @@ export default function PrescriptionDetailCard({
         </div>
 
         <div className="flex flex-col gap-1 text-xs text-gray-600 md:mt-3 md:flex-row md:items-center">
-          <span className="flex gap-1">
+          <span className="flex gap-1 font-medium">
             Prescribed
             <RecordMeta
               time={prescription.created_date}
@@ -182,7 +182,9 @@ const Detail = (props: {
         {props.children ? (
           <span className="font-medium">{props.children}</span>
         ) : (
-          <span className="italic text-gray-500">{t("not_specified")}</span>
+          <span className="whitespace-nowrap text-xs font-medium text-gray-500">
+            {t("not_specified")}
+          </span>
         )}
       </div>
     </div>
