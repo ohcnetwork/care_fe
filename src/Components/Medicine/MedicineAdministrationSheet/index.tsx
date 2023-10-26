@@ -123,10 +123,10 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
             className="group sticky left-0 w-full rounded-b-lg rounded-t-none bg-gray-100"
             onClick={() => setShowDiscontinued(true)}
           >
-            <span className="flex w-full items-center justify-start gap-1 text-sm transition-all duration-200 ease-in-out group-hover:gap-3">
+            <span className="flex w-full items-center justify-start gap-1 text-xs transition-all duration-200 ease-in-out group-hover:gap-3 md:text-sm">
               <CareIcon icon="l-eye" className="text-lg" />
               <span>
-                Show <strong>{discontinuedCount}</strong> other discontinued
+                Show <strong>{discontinuedCount}</strong> discontinued
                 prescription(s)
               </span>
             </span>

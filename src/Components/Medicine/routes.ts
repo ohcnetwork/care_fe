@@ -37,7 +37,7 @@ const MedicineRoutes = {
   administerPrescription: {
     path: "/api/v1/consultation/{consultation}/prescriptions/{external_id}/administer/",
     method: "POST",
-    TBody: Type<MedicineAdministrationRecord>(),
+    TBody: Type<Partial<MedicineAdministrationRecord>>(),
     TRes: Type<MedicineAdministrationRecord>(),
   },
 
@@ -45,6 +45,13 @@ const MedicineRoutes = {
     path: "/api/v1/consultation/{consultation}/prescriptions/{external_id}/discontinue/",
     method: "POST",
     TBody: Type<{ discontinued_reason: string }>(),
+    TRes: Type<Record<string, never>>(),
+  },
+
+  archiveAdministration: {
+    path: "/api/v1/consultation/{consultation}/prescription_administration/{external_id}/archive/",
+    method: "POST",
+    TBody: Type<Record<string, never>>(),
     TRes: Type<Record<string, never>>(),
   },
 } as const;

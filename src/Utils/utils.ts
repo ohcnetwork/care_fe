@@ -92,6 +92,10 @@ export const relativeDate = (date: DateLike) => {
   return `${obj.fromNow()} at ${obj.format(TIME_FORMAT)}`;
 };
 
+export const formatName = (user: { first_name: string; last_name: string }) => {
+  return `${user.first_name} ${user.last_name}`;
+};
+
 export const relativeTime = (time?: DateLike) => {
   return `${dayjs(time).fromNow()}`;
 };

@@ -37,7 +37,6 @@ export default function MedicineAdministrationTableRow({
     pathParams: { consultation },
     query: {
       prescription: prescription.id,
-
       administered_date_after: formatDateTime(
         props.intervals[0].start,
         "YYYY-MM-DD"
@@ -46,6 +45,7 @@ export default function MedicineAdministrationTableRow({
         props.intervals[props.intervals.length - 1].end,
         "YYYY-MM-DD"
       ),
+      archived: false,
     },
     key: `${prescription.last_administered_on}`,
   });
