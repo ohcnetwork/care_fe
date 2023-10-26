@@ -2,12 +2,19 @@ import { useDispatch } from "react-redux";
 import { getNotificationData } from "../../Redux/actions";
 import { useEffect } from "react";
 import { DetailRoute } from "../../Routers/types";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 export default function ShowPushNotification({ id }: DetailRoute) {
   const dispatch: any = useDispatch();
 
   const resultUrl = async () => {
     const res = await dispatch(getNotificationData({ id }));
+    // const {data : res} = await request(routes.getNotificationData,
+    //     {
+    //       pathParams: {id}
+    //     });
     const data = res.data.caused_objects;
     switch (res.data.event) {
       case "PATIENT_CREATED":
