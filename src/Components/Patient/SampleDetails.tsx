@@ -7,6 +7,7 @@ import ButtonV2 from "../Common/components/ButtonV2";
 import Card from "../../CAREUI/display/Card";
 import { FileUpload } from "./FileUpload";
 import Page from "../Common/components/Page";
+import _ from "lodash-es";
 import { formatAge, formatDateTime } from "../../Utils/utils";
 import { getTestSample } from "../../Redux/actions";
 
@@ -114,7 +115,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
             ) : (
               <div>
                 <span className="font-semibold leading-relaxed">Age: </span>
-                {formatAge(patientData.age, patientData.date_of_birth)}
+                {formatAge(patientData?.age, patientData?.date_of_birth)}
               </div>
             )}
             <div>
@@ -257,16 +258,12 @@ export const SampleDetails = ({ id }: DetailRoute) => {
       <Card key={flow.id}>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
-            <span className="font-semibold capitalize leading-relaxed">
-              Status:{" "}
-            </span>{" "}
-            {flow.status}
+            <span className="font-semibold leading-relaxed">Status: </span>{" "}
+            {_.startCase(_.camelCase(flow.status))}
           </div>
           <div>
-            <span className="font-semibold capitalize leading-relaxed">
-              Label:
-            </span>{" "}
-            {flow.notes?.toLowerCase()}
+            <span className="font-semibold leading-relaxed">Label:</span>{" "}
+            {_.capitalize(flow.notes)}
           </div>
           <div>
             <span className="font-semibold leading-relaxed">Created On :</span>{" "}
@@ -350,7 +347,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <span className="font-semibold leading-relaxed">
                 Doctor&apos;s Name:{" "}
               </span>
-              {sampleDetails.doctor_name}
+              {_.startCase(_.camelCase(sampleDetails.doctor_name))}
             </div>
           )}
           {sampleDetails.diagnosis && (
@@ -433,7 +430,7 @@ export const SampleDetails = ({ id }: DetailRoute) => {
               <span className="font-semibold capitalize leading-relaxed">
                 Sample Type:{" "}
               </span>
-              {sampleDetails.sample_type}
+              {_.startCase(_.camelCase(sampleDetails.sample_type))}
             </div>
           )}
         </div>

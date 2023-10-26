@@ -18,7 +18,6 @@ import useQuery from "../../../Utils/request/useQuery";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 
-
 interface Props {
   assetId: string;
   facilityId: string;
@@ -135,7 +134,6 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     }
     setLoadingAddPreset(false);
   };
-  
   if (isLoading || loading || !facility) return <Loading />;
 
   const fallbackMiddleware =
