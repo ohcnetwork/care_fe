@@ -46,7 +46,6 @@ const AssetsList = () => {
   const [facility, setFacility] = useState<FacilityModel>();
   const [asset_type, setAssetType] = useState<string>();
   const [status, setStatus] = useState<string>();
-  const [facilityName, setFacilityName] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
@@ -76,13 +75,12 @@ const AssetsList = () => {
     },
   });
 
-  useQuery(routes.getAnyFacility, {
+  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
     pathParams: { id: qParams.facility },
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data) {
         setFacility(data);
         setSelectedFacility(data);
-        setFacilityName(data.name);
       }
     },
     prefetch: !!qParams.facility,
@@ -100,7 +98,7 @@ const AssetsList = () => {
     setAssetClass(qParams.asset_class);
   }, [qParams.asset_class]);
 
-  const { data: location } = useQuery(routes.getFacilityAssetLocation, {
+  const { data: locationObject } = useQuery(routes.getFacilityAssetLocation, {
     pathParams: {
       facility_external_id: String(qParams.facility),
       external_id: String(qParams.location),
@@ -365,12 +363,20 @@ const AssetsList = () => {
         <>
           <FilterBadges
             badges={({ badge, value }) => [
-              value("Facility", "facility", facilityName ?? ""),
+              value(
+                "Facility",
+                "facility",
+                qParams.facility && facilityObject?.name
+              ),
               badge("Name/Serial No./QR ID", "search"),
               value("Asset Type", "asset_type", asset_type ?? ""),
               value("Asset Class", "asset_class", asset_class ?? ""),
               value("Status", "status", status?.replace(/_/g, " ") ?? ""),
-              value("Location", "location", location?.name ?? ""),
+              value(
+                "Location",
+                "location",
+                qParams.location && locationObject?.name
+              ),
               value(
                 "Warranty AMC End Of Validity Before",
                 "warranty_amc_end_of_validity_before",

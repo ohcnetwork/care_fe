@@ -506,10 +506,13 @@ export const ConsultationDetails = (props: any) => {
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
                     if (
-                      !consultationData?.current_bed?.bed_object?.id ??
-                      consultationData?.discharge_date !== null
+                      consultationData?.discharge_date || // Discharged
+                      !consultationData?.current_bed?.bed_object?.id || // Not admitted to bed
+                      !["DistrictAdmin", "StateAdmin", "Doctor"].includes(
+                        authUser.user_type
+                      ) // Not admin or doctor
                     )
-                      return null;
+                      return null; // Hide feed tab
                   }
                   return (
                     <Link
