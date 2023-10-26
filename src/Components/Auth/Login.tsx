@@ -113,7 +113,10 @@ export const Login = (props: { forgot?: boolean }) => {
             "redirect"
           );
           redirectParam
-            ? (window.location.href = window.location.origin + redirectParam)
+            ? (window.location.href = new URL(
+                redirectParam,
+                window.location.origin
+              ).toString())
             : (window.location.href = "/facility");
         } else {
           window.location.href = window.location.pathname.toString();
