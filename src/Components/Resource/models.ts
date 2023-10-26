@@ -3,7 +3,6 @@ import { PerformedByModel } from "../HCX/misc";
 export interface IComment {
   id: string;
   created_by_object: PerformedByModel;
-  external_id: string;
   created_date: string;
   modified_date: string;
   comment: string;
@@ -18,8 +17,6 @@ export interface IResource {
   origin_facility_object: {
     name: string;
   };
-  external_id: string;
-
   approving_facility_object: {
     name: string;
   };
