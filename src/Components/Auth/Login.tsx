@@ -112,12 +112,16 @@ export const Login = (props: { forgot?: boolean }) => {
           const redirectParam = new URLSearchParams(window.location.search).get(
             "redirect"
           );
-          redirectParam
-            ? (window.location.href = new URL(
-                redirectParam,
-                window.location.origin
-              ).toString())
-            : (window.location.href = "/facility");
+          try {
+            if (
+              redirectParam &&
+              new URL(redirectParam).origin === window.location.origin
+            )
+              window.location.href = redirectParam;
+            else window.location.href = "/facility";
+          } catch {
+            window.location.href = "/facility";
+          }
         } else {
           window.location.href = window.location.pathname.toString();
         }
