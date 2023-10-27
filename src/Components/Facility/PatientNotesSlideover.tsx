@@ -45,10 +45,12 @@ export default function PatientNotesSlideover(props: PatientNotesProps) {
   };
 
   useMessageListener((data) => {
+    const message = data?.message;
     if (
-      data?.status == "updated" &&
-      data?.facility_id == facilityId &&
-      data?.patient_id == patientId
+      (message?.from == "patient/doctor_notes/create" ||
+        message?.from == "patient/doctor_notes/edit") &&
+      message?.facility_id == facilityId &&
+      message?.patient_id == patientId
     ) {
       setReload(true);
     }

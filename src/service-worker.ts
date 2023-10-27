@@ -111,8 +111,8 @@ self.addEventListener("push", async function (event) {
       });
     } else {
       event.waitUntil(
-        self.registration.showNotification("Care - CoronaSafe Network", {
-          body: data.title,
+        self.registration.showNotification("Care - Open Health Care Network", {
+          body: data.message,
           tag: data.external_id,
         })
       );
