@@ -28,4 +28,4 @@ jobs:
         run: npm ci
 
       - name: Run lint
-        run: npm run lint --quiet
+        run: npm run lint -- --quiet
