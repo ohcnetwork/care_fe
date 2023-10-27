@@ -1,13 +1,13 @@
 import { useDispatch } from "react-redux";
 import { getNotificationData } from "../../Redux/actions";
 import { useEffect } from "react";
+import { DetailRoute } from "../../Routers/types";
 
-export default function ShowPushNotification({ external_id }: any) {
+export default function ShowPushNotification({ id }: DetailRoute) {
   const dispatch: any = useDispatch();
 
   const resultUrl = async () => {
-    console.log("ID:", external_id.id);
-    const res = await dispatch(getNotificationData({ id: external_id.id }));
+    const res = await dispatch(getNotificationData({ id }));
     const data = res.data.caused_objects;
     switch (res.data.event) {
       case "PATIENT_CREATED":

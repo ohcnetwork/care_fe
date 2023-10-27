@@ -196,7 +196,7 @@ export default function useFilters({ limit = 14 }: { limit?: number }) {
     FilterBadge,
     FilterBadges,
     Pagination,
-    // TODO: update this props to be compliant with new FiltersSlideOver when #3996 is merged.
+
     advancedFilter: {
       show: showFilters,
       setShow: setShowFilters,

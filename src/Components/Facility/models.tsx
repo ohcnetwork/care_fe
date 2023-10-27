@@ -28,7 +28,6 @@ export interface WardModel {
 export interface FacilityModel {
   id?: number;
   name?: string;
-  district?: number;
   read_cover_image_url?: string;
   facility_type?: string;
   address?: string;
@@ -53,6 +52,10 @@ export interface FacilityModel {
   ward_object?: WardModel;
   modified_date?: string;
   created_date?: string;
+  state: number;
+  district: number;
+  local_body: number;
+  ward: number;
 }
 
 export interface CapacityModal {
@@ -142,6 +145,8 @@ export interface ConsultationModel {
   cause_of_death?: string;
   death_datetime?: string;
   death_confirmed_doctor?: string;
+  is_readmission?: boolean;
+  medico_legal_case?: boolean;
 }
 export interface PatientStatsModel {
   id?: number;
@@ -185,6 +190,7 @@ export interface LocationModel {
   id?: string;
   name?: string;
   description?: string;
+  middleware_address?: string;
   facility?: {
     name: string;
   };
@@ -222,7 +228,6 @@ export interface CurrentBed {
 export type ICD11DiagnosisModel = {
   id: string;
   label: string;
-  parentId: string | null;
 };
 
 // Patient Notes Model

@@ -150,7 +150,7 @@ export class AssetPage {
 
   configureVitalAsset(hostName: string, localIp: string) {
     cy.get("[data-testid=asset-configure-button]").click();
-    cy.get("#middlewareHostname").type(hostName);
+    cy.get("#middleware_hostname").type(hostName);
     cy.get("#localipAddress").type(localIp);
   }
 
@@ -234,8 +234,29 @@ export class AssetPage {
       });
   }
 
-  selectImportOption() {
+  selectassetimportbutton() {
     cy.get("[data-testid=import-asset-button]").click();
+  }
+
+  selectjsonexportbutton() {
+    cy.intercept("GET", "**/api/v1/asset/?json=true**").as("getJsonexport");
+    cy.get("#export-json-option").click();
+    cy.wait("@getJsonexport").then(({ request, response }) => {
+      expect(response.statusCode).to.eq(200);
+      expect(request.url).to.include("json=true");
+    });
+  }
+
+  selectcsvexportbutton() {
+    cy.intercept("GET", "**/api/v1/asset/?csv=true**").as("getCsvexport");
+    cy.get("#export-csv-option").click();
+    cy.wait("@getCsvexport").then(({ request, response }) => {
+      expect(response.statusCode).to.eq(200);
+      expect(request.url).to.include("csv=true");
+    });
+  }
+
+  selectImportOption() {
     cy.get(".import-assets-button").click();
   }
 
@@ -254,5 +275,102 @@ export class AssetPage {
     cy.intercept("POST", "**/api/v1/asset/").as("importAsset");
     cy.get("#submit").contains("Import").click();
     cy.wait("@importAsset").its("response.statusCode").should("eq", 201);
+  }
+
+  clickupdatedetailbutton() {
+    cy.get("[data-testid=asset-update-button]").click();
+  }
+
+  scrollintonotes() {
+    cy.get("#notes").scrollIntoView();
+  }
+
+  enterAssetNotes(text: string) {
+    cy.get("#notes").click().clear();
+    cy.get("#notes").click().type(text);
+  }
+
+  enterAssetservicedate(text: string) {
+    cy.get("input[name='last_serviced_on']").click();
+    cy.get("#date-input").click().type(text);
+  }
+
+  scrollintoWarrantyDetails() {
+    cy.get("#warranty-details").scrollIntoView();
+  }
+
+  enterWarrantyExpiryDate(text: string) {
+    cy.get("#WarrantyAMCExpiry").click();
+    cy.get("#WarrantyAMCExpiry").click().type(text);
+  }
+
+  verifyWarrantyExpiryLabel(duration: string) {
+    if (duration === "") {
+      cy.get("#warranty-amc-expired-red").should("not.exist");
+      cy.get("#warranty-amc-expiring-soon-orange").should("not.exist");
+      cy.get("#warranty-amc-expiring-soon-yellow").should("not.exist");
+    } else if (duration === "expired") {
+      cy.get("#warranty-amc-expired-red").should("be.visible");
+    } else if (duration === "1 month") {
+      cy.get("#warranty-amc-expiring-soon-orange").should("be.visible");
+    } else if (duration === "3 months") {
+      cy.get("#warranty-amc-expiring-soon-yellow").should("be.visible");
+    }
+  }
+
+  clickassetupdatebutton() {
+    cy.get("#submit").click();
+  }
+
+  viewassetservicehistorybutton() {
+    cy.get("#view-service-history").should("be.visible");
+  }
+
+  openassetservicehistory() {
+    cy.get("#view-service-history").click();
+    cy.get("#view-asset-edit-history").first().click();
+  }
+
+  verifyassetupdateservicehistory() {
+    cy.get("#edit-history-asset-servicedon").should("have.text", "01/09/2023");
+    cy.get("#edit-history-asset-note").should(
+      "have.text",
+      "Dummy Notes Editted"
+    );
+    cy.get("#view-history-back-button").contains("Back").click();
+    cy.get("#view-history-back-button").contains("Close").click();
+  }
+
+  scrollintoservicehistory() {
+    cy.get("#service-history").scrollIntoView();
+  }
+
+  clickedithistorybutton() {
+    cy.get("#edit-service-history").click();
+  }
+
+  verifytransactionStatus(initiallocationName: string, locationName: string) {
+    cy.get("#transaction-history").scrollIntoView();
+    cy.get("#transaction-history table tbody tr:first-child td:eq(0)").should(
+      "contain",
+      initiallocationName
+    );
+    cy.get("#transaction-history table tbody tr:first-child td:eq(1)").should(
+      "contain",
+      locationName
+    );
+  }
+
+  verifyassetlocation(locationName: string) {
+    cy.get("#asset-current-location").should("contain", locationName);
+  }
+
+  clickassetlocation(locationName: string) {
+    cy.get("#clear-button").click();
+    cy.get("[data-testid=asset-location-input] button").click();
+    cy.get("[data-testid=asset-location-input] button")
+      .click()
+      .type(locationName);
+    cy.get("[role='option']").contains(locationName).click();
   }
 }

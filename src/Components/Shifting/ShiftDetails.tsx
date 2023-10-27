@@ -18,7 +18,7 @@ import { CopyToClipboard } from "react-copy-to-clipboard";
 import Page from "../Common/components/Page";
 import QRCode from "qrcode.react";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { formatDateTime } from "../../Utils/utils";
+import { formatAge, formatDateTime } from "../../Utils/utils";
 import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -110,7 +110,13 @@ export default function ShiftDetails(props: { id: string }) {
       "\n" +
       t("age") +
       ":" +
-      data?.patient_object?.age +
+      +(
+        formatAge(
+          data?.patient_object?.age,
+          data?.patient_object?.date_of_birth,
+          true
+        ) ?? "-"
+      ) +
       "\n" +
       t("origin_facility") +
       ":" +
@@ -195,7 +201,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("age")}:{" "}
               </span>
-              {patientData?.age}
+              {formatAge(patientData?.age, patientData?.date_of_birth, true)}
             </div>
           )}
           {patientData?.gender === 2 && patientData?.is_antenatal && (
@@ -380,7 +386,7 @@ export default function ShiftDetails(props: { id: string }) {
               <span className="font-semibold leading-relaxed">
                 {t("age")}:{" "}
               </span>
-              {patientData?.age}
+              {formatAge(patientData.age, patientData.date_of_birth, true)}
             </div>
             <div>
               <span className="font-semibold leading-relaxed">
@@ -551,7 +557,7 @@ export default function ShiftDetails(props: { id: string }) {
       ) : (
         <Page
           title={t("shifting_details")}
-          backUrl="/shifting/board-view"
+          backUrl="/shifting/board"
           options={
             <div className="flex gap-2">
               <ButtonV2

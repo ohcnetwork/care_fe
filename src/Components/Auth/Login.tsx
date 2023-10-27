@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { postForgotPassword, postLogin } from "../../Redux/actions";
+import request from "../../Utils/request/request";
+import routes from "../../Redux/api";
 import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
 import * as Notification from "../../Utils/Notifications.js";
-import { get } from "lodash";
 import LegendInput from "../../CAREUI/interactive/LegendInput";
 import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
 import CareIcon from "../../CAREUI/icons/CareIcon";
@@ -25,7 +24,6 @@ export const Login = (props: { forgot?: boolean }) => {
     custom_logo_alt,
     custom_description,
   } = useConfig();
-  const dispatch: any = useDispatch();
   const initForm: any = {
     username: "",
     password: "",
@@ -90,37 +88,35 @@ export const Login = (props: { forgot?: boolean }) => {
     };
   }, []);
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     const valid = validateData();
     if (valid) {
       // replaces button with spinner
       setLoading(true);
 
-      dispatch(postLogin(valid)).then((resp: any) => {
-        const res = get(resp, "data", null);
-        const statusCode = get(resp, "status", "");
-        if (res && statusCode === 429) {
-          setCaptcha(true);
-          // captcha displayed set back to login button
-          setLoading(false);
-        } else if (res && statusCode === 200) {
-          localStorage.setItem(LocalStorageKeys.accessToken, res.access);
-          localStorage.setItem(LocalStorageKeys.refreshToken, res.refresh);
-
-          if (
-            window.location.pathname === "/" ||
-            window.location.pathname === "/login"
-          ) {
-            window.location.href = "/facility";
-          } else {
-            window.location.href = window.location.pathname.toString();
-          }
-        } else {
-          // error from server set back to login button
-          setLoading(false);
-        }
+      const { res, data } = await request(routes.login, {
+        body: { ...valid },
       });
+      if (res && res.status === 429) {
+        setCaptcha(true);
+        // captcha displayed set back to login button
+        setLoading(false);
+      } else if (res && res.status === 200 && data) {
+        localStorage.setItem(LocalStorageKeys.accessToken, data.access);
+        localStorage.setItem(LocalStorageKeys.refreshToken, data.refresh);
+        if (
+          window.location.pathname === "/" ||
+          window.location.pathname === "/login"
+        ) {
+          window.location.href = "/facility";
+        } else {
+          window.location.href = window.location.pathname.toString();
+        }
+      } else {
+        // error from server set back to login button
+        setLoading(false);
+      }
     }
   };
 
@@ -146,26 +142,22 @@ export const Login = (props: { forgot?: boolean }) => {
     return form;
   };
 
-  const handleForgetSubmit = (e: any) => {
+  const handleForgetSubmit = async (e: any) => {
     e.preventDefault();
     const valid = validateForgetData();
     if (valid) {
       setLoading(true);
-      dispatch(postForgotPassword(valid)).then((resp: any) => {
-        setLoading(false);
-        const res = resp && resp.data;
-        if (res && res.status === "OK") {
-          Notification.Success({
-            msg: t("password_sent"),
-          });
-        } else if (res && res.data) {
-          setErrors(res.data);
-        } else {
-          Notification.Error({
-            msg: t("something_wrong"),
-          });
-        }
+      const { res, error } = await request(routes.forgotPassword, {
+        body: { ...valid },
       });
+      setLoading(false);
+      if (res?.ok) {
+        Notification.Success({
+          msg: t("password_sent"),
+        });
+      } else if (res && error) {
+        setErrors(error);
+      }
     }
   };
 

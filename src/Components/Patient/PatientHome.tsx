@@ -19,7 +19,7 @@ import { ConsultationModel } from "../Facility/models";
 import { PatientModel, SampleTestModel } from "./models";
 import { SampleTestCard } from "./SampleTestCard";
 import Chip from "../../CAREUI/display/Chip";
-import { classNames, formatDateTime } from "../../Utils/utils";
+import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
 import RelativeDateUserMention from "../Common/RelativeDateUserMention";
@@ -30,7 +30,7 @@ import Page from "../Common/components/Page";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
 import dayjs from "../../Utils/dayjs";
-import { triggerGoal } from "../Common/Plausible";
+import { triggerGoal } from "../../Integrations/Plausible";
 import useAuthUser from "../../Common/hooks/useAuthUser";
 
 const Loading = lazy(() => import("../Common/Loading"));
@@ -374,6 +374,13 @@ export const PatientHome = (props: any) => {
     );
   };
 
+  const isPatientEligibleForNewConsultation = (patientData: PatientModel) => {
+    return !patientData.last_consultation ||
+      patientData.last_consultation?.discharge_date
+      ? true
+      : false;
+  };
+
   return (
     <Page
       title={"Patient Details"}
@@ -469,7 +476,12 @@ export const PatientHome = (props: any) => {
               <div>
                 <div className="flex flex-row gap-4">
                   <h1 className="flex flex-row pb-3 text-2xl font-bold">
-                    {patientData.name} - {patientData.age}
+                    {patientData.name} -{" "}
+                    {formatAge(
+                      patientData.age,
+                      patientData.date_of_birth,
+                      true
+                    )}
                   </h1>
                   <div className="ml-auto mr-9 flex flex-wrap gap-3">
                     {patientData.is_vaccinated ? (
@@ -1105,23 +1117,31 @@ export const PatientHome = (props: any) => {
               <div
                 className={classNames(
                   "w-full rounded-lg border",
-                  patientData.is_active &&
-                    (!patientData?.last_consultation ||
-                      patientData?.last_consultation?.discharge_date)
+                  isPatientEligibleForNewConsultation(patientData)
                     ? "cursor-pointer border-green-700 hover:bg-primary-400"
                     : "border-gray-700 text-gray-700 hover:cursor-not-allowed"
                 )}
                 onClick={() =>
-                  patientData.is_active &&
-                  (!patientData?.last_consultation ||
-                    patientData?.last_consultation?.discharge_date) &&
+                  isPatientEligibleForNewConsultation(patientData) &&
                   navigate(
                     `/facility/${patientData?.facility}/patient/${id}/consultation`
                   )
                 }
               >
-                <div className="h-full space-y-2 rounded-lg bg-white p-4 shadow">
-                  <div className="text-center">
+                <div
+                  className={classNames(
+                    "h-full space-y-2 rounded-lg bg-white p-4 shadow",
+                    isPatientEligibleForNewConsultation(patientData) &&
+                      "hover:bg-gray-200"
+                  )}
+                >
+                  <div
+                    className={classNames(
+                      "text-center",
+                      isPatientEligibleForNewConsultation(patientData) &&
+                        "text-green-700"
+                    )}
+                  >
                     <span>
                       <CareIcon className="care-l-chat-bubble-user text-5xl" />
                     </span>

@@ -73,6 +73,8 @@ export default function ManageUsers() {
     name: string;
   }>({ show: false, username: "", name: "" });
 
+  const [weeklyHoursError, setWeeklyHoursError] = useState<string>("");
+
   const extremeSmallScreenBreakpoint = 320;
   const isExtremeSmallScreen =
     width <= extremeSmallScreenBreakpoint ? true : false;
@@ -144,7 +146,10 @@ export default function ManageUsers() {
 
   const handleWorkingHourSubmit = async () => {
     const username = selectedUser;
-    if (!username || weeklyHours < 0 || weeklyHours > 168) return;
+    if (!username || !weeklyHours || weeklyHours < 0 || weeklyHours > 168) {
+      setWeeklyHoursError("Value should be between 0 and 168");
+      return;
+    }
     const res = await dispatch(
       partialUpdateUser(username, {
         weekly_working_hours: weeklyHours,
@@ -163,6 +168,7 @@ export default function ManageUsers() {
       });
     }
     setWeeklyHours(0);
+    setWeeklyHoursError("");
     fetchData({ aborted: false });
   };
 
@@ -493,13 +499,14 @@ export default function ManageUsers() {
       </SlideOverCustom>
       <SlideOverCustom
         open={expandWorkingHours}
-        setOpen={setExpandWorkingHours}
+        setOpen={(state) => {
+          setExpandWorkingHours(state);
+          setWeeklyHours(0);
+          setWeeklyHoursError("");
+        }}
         slideFrom="right"
         title="Average weekly working hours"
         dialogClass="md:w-[400px]"
-        onCloseClick={() => {
-          setWeeklyHours(0);
-        }}
       >
         <div className="px-2">
           <dt className="mb-3 text-sm font-medium leading-5 text-black">
@@ -512,11 +519,7 @@ export default function ManageUsers() {
             onChange={(e) => {
               setWeeklyHours(e.value);
             }}
-            error={
-              weeklyHours < 0 || weeklyHours > 168
-                ? "Average weekly working hours should be between 0 and 168"
-                : ""
-            }
+            error={weeklyHoursError}
             required
             label=""
             type="number"
@@ -540,6 +543,7 @@ export default function ManageUsers() {
         <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">
           <div className="w-full">
             <SearchInput
+              id="search-by-username"
               name="username"
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               value={qParams.username}

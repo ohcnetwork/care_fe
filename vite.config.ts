@@ -54,6 +54,7 @@ export default defineConfig({
   ],
   build: {
     outDir: "build",
+    assetsDir: "bundle",
     rollupOptions: {
       output: {
         manualChunks(id) {

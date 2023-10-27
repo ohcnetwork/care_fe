@@ -91,6 +91,8 @@ export interface AssetData {
   };
 }
 
+export type AssetUpdate = Partial<AssetData>;
+
 export interface AssetsResponse {
   count: number;
   next?: string;
@@ -137,7 +139,11 @@ export interface AssetBedModel {
   created_date: string;
   modified_date: string;
   meta: Record<string, any>;
+  asset?: string;
+  bed?: string;
 }
+
+export type AssetBedBody = Partial<AssetBedModel>;
 
 export interface AssetServiceEdit {
   id: string;
@@ -165,4 +171,10 @@ export interface PatientAssetBed {
   bed: BedModel;
   patient?: PatientModel;
   meta?: Record<string, any>;
+}
+
+export interface AssetServiceUpdate {
+  external_id: string;
+  serviced_on: string;
+  note: string;
 }

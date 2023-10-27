@@ -10,6 +10,12 @@ export class PatientPage {
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
   }
 
+  visitPatient() {
+    cy.intercept("GET", "**/api/v1/consultation/**").as("getPatient");
+    cy.get("[data-cy='patient']").first().click();
+    cy.wait("@getPatient").its("response.statusCode").should("eq", 200);
+  }
+
   selectFacility(facilityName: string) {
     cy.get("input[name='facilities']")
       .type(facilityName)
@@ -123,5 +129,9 @@ export class PatientPage {
 
   verifyStatusCode() {
     cy.wait("@getFacilities").its("response.statusCode").should("eq", 200);
+  }
+
+  patientformvisibility() {
+    cy.get("[data-testid='current-address']").scrollIntoView();
   }
 }

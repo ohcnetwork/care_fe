@@ -12,7 +12,7 @@ import { ExportButton } from "../Common/Export";
 import ListFilter from "./ListFilter";
 import Page from "../Common/components/Page";
 import SearchInput from "../Form/SearchInput";
-import { formatDateTime } from "../../Utils/utils";
+import { formatAge, formatDateTime } from "../../Utils/utils";
 import { formatFilter } from "./Commons";
 import { navigate } from "raviger";
 import useConfig from "../../Common/hooks/useConfig";
@@ -127,7 +127,12 @@ export default function ListView() {
             <div>
               <div className="flex justify-between">
                 <div className="mb-2 text-xl font-bold capitalize">
-                  {shift.patient_object.name} - {shift.patient_object.age}
+                  {shift.patient_object.name} -{" "}
+                  {formatAge(
+                    shift.patient_object.age,
+                    shift.patient_object.date_of_birth,
+                    true
+                  )}
                 </div>
                 <div>
                   {shift.emergency && (
@@ -307,9 +312,7 @@ export default function ListView() {
           <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
             <ButtonV2
               className="py-[11px]"
-              onClick={() =>
-                navigate("/shifting/board-view", { query: qParams })
-              }
+              onClick={() => navigate("/shifting/board", { query: qParams })}
             >
               <CareIcon className="care-l-list-ul rotate-90" />
               {t("board_view")}

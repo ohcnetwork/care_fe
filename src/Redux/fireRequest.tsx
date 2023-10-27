@@ -1,6 +1,6 @@
 import * as Notification from "../Utils/Notifications.js";
 
-import { isEmpty, omitBy } from "lodash";
+import { isEmpty, omitBy } from "lodash-es";
 
 import { LocalStorageKeys } from "../Common/constants";
 import api from "./api";
@@ -93,11 +93,15 @@ export const fireRequest = (
     const config: any = {
       headers: {},
     };
-    if (!request.noAuth && localStorage.getItem(LocalStorageKeys.accessToken)) {
-      config.headers["Authorization"] =
-        "Bearer " + localStorage.getItem(LocalStorageKeys.accessToken);
-    } else {
-      // TODO: get access token
+    if (!request.noAuth) {
+      const access_token = localStorage.getItem(LocalStorageKeys.accessToken);
+      if (access_token) {
+        config.headers["Authorization"] = "Bearer " + access_token;
+      } else {
+        // The access token is missing from the local storage. Redirect to login page.
+        window.location.href = "/";
+        return;
+      }
     }
     const axiosApiCall: any = axios.create(config);
 
