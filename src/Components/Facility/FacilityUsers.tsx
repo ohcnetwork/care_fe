@@ -80,7 +80,7 @@ export default function FacilityUsers(props: any) {
   }, [facilityId]);
 
   const { res, data, refetch } = useQuery(routes.getFacilityUsers, {
-    body: { offset: offset, limit: limit },
+    query: { offset: offset, limit: limit },
     pathParams: { facility_id: facilityId },
   });
 
@@ -151,7 +151,7 @@ export default function FacilityUsers(props: any) {
     setIsFacilityLoading(true);
     await request(routes.deleteUserFacility, {
       // body given in the dispatch call but there is no body in API documentation
-      body: { id: String(unlinkFacilityData?.facility?.id) },
+      // body: { id: String(unlinkFacilityData?.facility?.id) },
       pathParams: {
         username: unlinkFacilityData.userName,
       },

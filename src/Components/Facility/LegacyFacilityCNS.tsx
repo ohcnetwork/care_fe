@@ -119,7 +119,7 @@ export default function LegacyFacilityCNS({
 
     async function fetchPatients() {
       const { res, data } = await request(routes.patientList, {
-        body: {
+        query: {
           facility: facilityId,
           is_active: true,
         },
@@ -135,7 +135,7 @@ export default function LegacyFacilityCNS({
     async function fetchPatientMonitorAsset(patient: PatientModel) {
       // Request body in API documentation is not matching with request body of dispatch call
       const { res, data } = await request(routes.listAssetBeds, {
-        body: { id: `asset-bed-${patient.id}` },
+        query: { id: `asset-bed-${patient.id}` },
         pathParams: {
           bed: patient.last_consultation?.current_bed?.bed_object?.id || "",
         },

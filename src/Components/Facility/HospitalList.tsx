@@ -50,7 +50,7 @@ export const HospitalList = () => {
     data: permittedData,
     refetch: permittedFacilitiesFetch,
   } = useQuery(routes.getPermittedFacilities, {
-    body: {
+    query: {
       district: qParams.district,
       district_name: districtName,
       facility_type: qParams.facility_type,

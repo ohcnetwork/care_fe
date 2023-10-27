@@ -44,7 +44,6 @@ const TreatmentSummary = (props: any) => {
     data: investigationData,
     refetch: investigationFetch,
   } = useQuery(routes.getInvestigation, {
-    body: {},
     pathParams: {
       consultation_external_id: consultationId,
     },

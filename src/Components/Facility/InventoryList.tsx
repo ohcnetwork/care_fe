@@ -24,7 +24,7 @@ export default function InventoryList(props: any) {
   const limit = 14;
 
   const { res, data, refetch } = useQuery(routes.getInventorySummary, {
-    body: {
+    query: {
       limit,
       offset,
     },

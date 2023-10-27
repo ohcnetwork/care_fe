@@ -57,7 +57,6 @@ export const SetInventoryForm = (props: any) => {
     data: minQuantityData,
     refetch: minQuantityFetch,
   } = useQuery(routes.getMinQuantity, {
-    body: {},
     pathParams: {
       id: facilityId,
     },
@@ -73,7 +72,7 @@ export const SetInventoryForm = (props: any) => {
         );
       }
       const { res, data } = await request(routes.getItems, {
-        body: {
+        query: {
           limit: limit,
           offset: offset,
         },

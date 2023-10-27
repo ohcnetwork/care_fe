@@ -25,7 +25,7 @@ export default function MinQuantityList(props: any) {
   const limit = 14;
 
   const { res, data, refetch } = useQuery(routes.getMinQuantity, {
-    body: {
+    query: {
       limit: limit,
       offset: offset,
     },

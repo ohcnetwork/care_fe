@@ -29,7 +29,7 @@ export default function InventoryLog(props: any) {
   const [facilityName, setFacilityName] = useState("");
 
   const { res, data, refetch } = useQuery(routes.getInventoryLog, {
-    body: {
+    query: {
       item: item,
       limit: limit,
       name: facilityName,

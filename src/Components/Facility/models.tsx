@@ -222,11 +222,6 @@ export type ICD11DiagnosisModel = {
   label: string;
 };
 
-export interface BaseRequest {
-  limit?: number;
-  offset?: number;
-}
-
 export interface BaseResponse {
   id: string;
   created_date: string;
@@ -248,12 +243,11 @@ export type IFacilityNotificationResponse = {
 };
 
 export type IStateListResponse = PaginatedResponse<UnitModel>;
-export type IStateDitrictResponse = StateModel;
 
-export type IDistrictLocalBodyResponse = IStateDitrictResponse & {
+export type IDistrictLocalBodyResponse = StateModel & {
   state: number;
 };
-export type IWardLocalBodyResponse = IStateDitrictResponse & {
+export type IWardLocalBodyResponse = StateModel & {
   number: number;
   local_body: number;
 };
@@ -329,8 +323,6 @@ export type IListDoctorResponse = PaginatedResponse<{
   count: number;
 }>;
 
-export type IListCapacityResponse = PaginatedResponse<CapacityModal>;
-
 export type IUserListFacilityResponse = {
   id: number;
   username: string;
@@ -362,14 +354,9 @@ export type IUserListFacilityResponse = {
   pf_auth: string;
 };
 
-export type IDeleteUserRequest = {
-  id?: string;
-};
-export type IDeleteUserResponse = {
+export type DeleteModel = {
   detail?: string;
 };
-
-export type IDeleteInventoryLog = IDeleteUserResponse;
 
 export type IUserFacilityRequest = {
   username?: string;
@@ -389,7 +376,6 @@ export type IUserFacilityRequest = {
 
 export type IUserFacilityResponse = IUserListFacilityResponse;
 
-export type IFacilityUserRequest = BaseRequest;
 export type IFacilityUserResponse = {
   count: number;
   next: string | null;
@@ -415,38 +401,13 @@ export type IFacilityUserResponse = {
   }[];
 };
 
-export type IPermittedFacilityRequest = {
-  district?: number;
-  district_name?: string;
-  facility_type?: number;
-  kasp_empanelled?: boolean;
-  limit?: number;
-  local_body?: number;
-  local_body_name?: string;
-  name?: string;
-  offset?: number;
-  search_text?: string;
-  state?: number;
-  state_name?: string;
-};
-export type IPermittedFacilityResponse = PaginatedResponse<IFacilityResponse>;
-
-export type IStateResponse = StateModel;
-export type IStateRequest = {
-  id?: number;
-};
-
-export type IDistrictResponse = IStateResponse;
-export type IDistrictRequest = IStateRequest;
-
-export type ILocalBodyResponse = IStateResponse & {
+export type ILocalBodyResponse = StateModel & {
   body_type: number;
   localbody_code: string;
   district: number;
 };
-export type ILocalBodyRequest = IStateRequest;
 
-interface InventoryItemObjectModel {
+export interface InventoryItemObjectModel {
   id: number;
   default_unit: UnitModel;
   allowed_units: UnitModel[];
@@ -456,7 +417,6 @@ interface InventoryItemObjectModel {
   min_quantity: number;
 }
 
-export type IInventorySummaryRequest = BaseRequest;
 export type IInventorySummaryResponse = PaginatedResponse<{
   id: string;
   item_object: InventoryItemObjectModel;
@@ -467,12 +427,6 @@ export type IInventorySummaryResponse = PaginatedResponse<{
   item: number;
 }>;
 
-export type IInventoryLogRequest = {
-  item?: number;
-  limit?: number;
-  name?: string;
-  offset?: number;
-};
 export type IInventoryLogResponse = Omit<
   IInventorySummaryResponse,
   "results"
@@ -532,17 +486,6 @@ export type IPatientTransferResponse = {
   facility_object: FacilityObjectModel;
 };
 
-export type IInvestigationRequest = {
-  created_date_after?: string;
-  created_date_before?: string;
-  investigation?: string;
-  investigations?: string;
-  modified_date_after?: string;
-  modified_date_before?: string;
-  page?: number;
-  session?: string;
-  sessions?: string;
-};
 export type IInvestigationResponse = PaginatedResponse<{
   id: string;
   group_object: {
@@ -668,15 +611,6 @@ export type ITriageDetailResponse = BaseResponse & {
   num_patient_confirmed_positive: number;
 };
 
-export type ITriageRequest = BaseRequest & {
-  entry_date_after?: string;
-  entry_date_before?: string;
-};
-export type ITriageResponse = PaginatedResponse<ITriageDetailResponse>;
-
-export type IMinQuantityRequest = BaseRequest;
-export type IMinQuantityResponse = PaginatedResponse<IMinQuantityItemResponse>;
-
 export type IMinQuantityItemResponse = {
   id: string;
   item_object: InventoryItemObjectModel;
@@ -684,13 +618,6 @@ export type IMinQuantityItemResponse = {
   min_quantity: number;
   item: number;
 };
-
-export type IItemRequest = {
-  limit?: number;
-  name?: number;
-  offset?: number;
-};
-export type IItemResponse = PaginatedResponse<InventoryItemObjectModel>;
 
 export type ISetMinQuantityRequest = {
   min_quantity?: number;
@@ -721,13 +648,6 @@ export type IAssetBedResponse = PaginatedResponse<
     meta: Record<string, string>;
   }
 >;
-
-export type IAssetBedRequest = IDeleteUserRequest;
-
-export type IAllPatientRequest = {
-  facility?: string;
-  is_active?: boolean;
-};
 
 export type ICreateTriageRequest = {
   entry_date?: string;
