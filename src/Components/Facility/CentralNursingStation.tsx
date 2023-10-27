@@ -24,6 +24,8 @@ import { useTranslation } from "react-i18next";
 import { SortOption } from "../Common/SortDropdown";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
+import routes from "../../Redux/api";
+import request from "../../Utils/request/request";
 
 const PER_PAGE_LIMIT = 6;
 
@@ -51,6 +53,9 @@ export default function CentralNursingStation({ facilityId }: Props) {
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
+  const [bedAssignmentStartDate, setBedAssignmentStartDate] = useState<
+    string[]
+  >([]);
 
   // To automatically collapse sidebar.
   useEffect(() => {
@@ -117,6 +122,32 @@ export default function CentralNursingStation({ facilityId }: Props) {
     qParams.ordering,
     qParams.bed_is_occupied,
   ]);
+
+  useEffect(() => {
+    const fetchDataAndBedAssignmentStartDate = async () => {
+      if (data && data.length > 0) {
+        const updatedBedAssignmentStartDate = await Promise.all(
+          data.map(async (item) => {
+            const { data: consultationData } = await request(
+              routes.getConsultationList,
+              {
+                query: { patient: item.patientAssetBed?.patient?.id },
+              }
+            );
+            const { data: bedData } = await request(
+              routes.listConsultationBeds,
+              {
+                query: { consultation: consultationData?.results[0].id },
+              }
+            );
+            return bedData?.results[0].created_date ?? "";
+          })
+        );
+        setBedAssignmentStartDate(updatedBedAssignmentStartDate);
+      }
+    };
+    fetchDataAndBedAssignmentStartDate();
+  }, [data]);
 
   const { config, hash } = useVitalsAspectRatioConfig({
     default: 6 / 11,
@@ -270,9 +301,10 @@ export default function CentralNursingStation({ facilityId }: Props) {
         </div>
       ) : (
         <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 3xl:grid-cols-3">
-          {data.map((props) => (
+          {data.map((props, idx) => (
             <div className="overflow-hidden text-clip">
               <HL7PatientVitalsMonitor
+                patientCurrentBedAssignmentDate={bedAssignmentStartDate[idx]}
                 key={`${props.patientAssetBed?.bed.id}-${hash}`}
                 {...props}
                 config={config}
