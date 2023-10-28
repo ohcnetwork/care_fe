@@ -29,7 +29,6 @@ import {
   AssetUpdate,
 } from "../Components/Assets/AssetTypes";
 import {
-  ConsultationModel,
   CurrentBed,
   FacilityModel,
   LocationModel,
@@ -398,7 +397,6 @@ const routes = {
   },
   getConsultationList: {
     path: "/api/v1/consultation/",
-    TRes: Type<PaginatedResponse<ConsultationModel>>(),
   },
   createConsultation: {
     path: "/api/v1/consultation/",
