@@ -11,8 +11,8 @@ const makeid = (length: number) => {
 };
 
 const username = makeid(25);
-const phone_number = 9999999999;
-const alt_phone_number = 9999999999;
+const phone_number = "9999999999";
+const alt_phone_number = "9999999999";
 
 describe("User management", () => {
   before(() => {
