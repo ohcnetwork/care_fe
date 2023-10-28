@@ -103,4 +103,10 @@ export class UserPage {
   verifyCurrentPageNumber(pageNumber: number) {
     cy.url().should("include", `page=${pageNumber}`);
   }
+
+  verifyMultipleBadgesWithSameId(expectedContents: string[]) {
+    cy.get("#user-view-name").each((el, index) => {
+      expect(el.text().trim()).to.equal(expectedContents[index]);
+    });
+  }
 }
