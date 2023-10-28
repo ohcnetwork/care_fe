@@ -1,11 +1,11 @@
-import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
-import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
-import { NormalPrescription, PRNPrescription } from "../Medicine/models";
-import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
-import { UserBareMinimum } from "../Users/models";
-import { RouteToFacility } from "../Common/RouteToFacilitySelect";
-import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 import { ConsultationSuggestionValue } from "../../Common/constants";
+import { AssetData, AssetLocationType } from "../Assets/AssetTypes";
+import { RouteToFacility } from "../Common/RouteToFacilitySelect";
+import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
+import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
+import { NormalPrescription, PRNPrescription } from "../Medicine/models";
+import { AssignedToObjectModel, DailyRoundsModel } from "../Patient/models";
+import { UserAssignedModel, UserBareMinimum } from "../Users/models";
 
 export interface LocalBodyModel {
   id: number;
@@ -213,6 +213,8 @@ export interface LocationModel {
   };
   created_date?: string;
   modified_date?: string;
+
+  users?: UserAssignedModel[];
 }
 
 export interface BedModel {

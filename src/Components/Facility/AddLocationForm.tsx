@@ -1,4 +1,5 @@
-import { useState, useEffect, lazy, SyntheticEvent } from "react";
+import { navigate } from "raviger";
+import { SyntheticEvent, lazy, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   createFacilityAssetLocation,
@@ -7,13 +8,12 @@ import {
   updateFacilityAssetLocation,
 } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications.js";
-import { navigate } from "raviger";
-import { Submit, Cancel } from "../Common/components/ButtonV2";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import { AssetLocationType } from "../Assets/AssetTypes";
+import { Cancel, Submit } from "../Common/components/ButtonV2";
 import Page from "../Common/components/Page";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { AssetLocationType } from "../Assets/AssetTypes";
+import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
+import TextFormField from "../Form/FormFields/TextFormField";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -32,10 +32,17 @@ export const AddLocationForm = (props: LocationFormProps) => {
   const [facilityName, setFacilityName] = useState("");
   const [locationName, setLocationName] = useState("");
   const [locationType, setLocationType] = useState("");
-  const [errors, setErrors] = useState<any>({
+  const [errors, setErrors] = useState<{
+    name: string;
+    description: string;
+    middlewareAddress: string;
+    duty_staff: string;
+    locationType: string;
+  }>({
     name: "",
     description: "",
     middlewareAddress: "",
+    duty_staff: "",
     locationType: "",
   });
   const headerText = !locationId ? "Add Location" : "Update Location";
@@ -45,9 +52,8 @@ export const AddLocationForm = (props: LocationFormProps) => {
     async function fetchFacilityName() {
       setIsLoading(true);
       if (facilityId) {
-        const res = await dispatchAction(getAnyFacility(facilityId));
-
-        setFacilityName(res?.data?.name || "");
+        const facility = await dispatchAction(getAnyFacility(facilityId));
+        setFacilityName(facility?.data?.name || "");
       }
       if (locationId) {
         const res = await dispatchAction(
@@ -72,6 +78,7 @@ export const AddLocationForm = (props: LocationFormProps) => {
       description: "",
       middlewareAddress: "",
       locationType: "",
+      duty_staff: "",
     };
 
     if (name.trim().length === 0) {
@@ -124,15 +131,16 @@ export const AddLocationForm = (props: LocationFormProps) => {
           ? "Location updated successfully"
           : "Location created successfully";
 
-        navigate(`/facility/${facilityId}/location`, {
-          replace: true,
-        });
         Notification.Success({
           msg: notificationMessage,
         });
+
+        navigate(`/facility/${facilityId}/location`, {
+          replace: true,
+        });
       } else if (res.status === 400) {
         Object.keys(res.data).forEach((key) => {
-          setErrors((prevState: any) => ({
+          setErrors((prevState) => ({
             ...prevState,
             [key]: res.data[key],
           }));
@@ -163,6 +171,12 @@ export const AddLocationForm = (props: LocationFormProps) => {
         <div className="cui-card">
           <form onSubmit={handleSubmit}>
             <div className="mt-2 grid grid-cols-1 gap-4">
+              <div className="flex flex-row items-center">
+                <label className="text-lg font-bold text-gray-900">
+                  General Details
+                </label>
+                <hr className="ml-6 flex-1 border border-gray-400" />
+              </div>
               <div>
                 <TextFormField
                   name="name"

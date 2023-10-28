@@ -11,5 +11,8 @@
   "update_asset_service_record": "Update Asset Service Record",
   "eg_details_on_functionality_service_etc": "Eg. Details on functionality, service, etc.",
   "updating": "Updating",
-  "update": "Update"
+  "update": "Update",
+  "search_user_placeholder": "Search User",
+  "assign_duty_staff": "Assign Duty Staff",
+  "assign": "Assign"
 }

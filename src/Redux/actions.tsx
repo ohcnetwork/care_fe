@@ -74,6 +74,35 @@ export const updateFacilityAssetLocation = (
     external_id,
   });
 
+export const createFacilityAssetLocationDutyStaff = (
+  params: object,
+  facility_external_id: string,
+  external_id: string
+) =>
+  fireRequest("createFacilityAssetLocationDutyStaff", [], params, {
+    facility_external_id,
+    external_id,
+  });
+
+export const removeFacilityAssetLocationDutyStaff = (
+  duty_staff: number[],
+  facility_external_id: string,
+  external_id: string
+) =>
+  fireRequest(
+    "removeFacilityAssetLocationDutyStaff",
+    [],
+    {
+      data: {
+        duty_staff: duty_staff,
+      },
+    },
+    {
+      facility_external_id,
+      external_id,
+    }
+  );
+
 // asset bed
 export const listAssetBeds = (params: object, altKey?: string) =>
   fireRequest("listAssetBeds", [], params, {}, altKey);

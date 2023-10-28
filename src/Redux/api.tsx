@@ -29,28 +29,6 @@ import {
   AssetUpdate,
 } from "../Components/Assets/AssetTypes";
 import {
-  CapacityModal,
-  ConsultationModel,
-  CreateBedBody,
-  CurrentBed,
-  DistrictModel,
-  DailyRoundsBody,
-  DailyRoundsRes,
-  DoctorModal,
-  FacilityModel,
-  IFacilityNotificationRequest,
-  IFacilityNotificationResponse,
-  IUserFacilityRequest,
-  LocalBodyModel,
-  PatientStatsModel,
-  FacilityRequest,
-  StateModel,
-  WardModel,
-  LocationModel,
-  PatientNotesModel,
-  BedModel,
-} from "../Components/Facility/models";
-import {
   IDeleteExternalResult,
   IExternalResult,
   IExternalResultCsv,
@@ -59,22 +37,45 @@ import {
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
 import {
-  SkillModel,
-  SkillObjectModel,
-  UpdatePasswordForm,
-  UserModel,
-} from "../Components/Users/models";
+  BedModel,
+  CapacityModal,
+  ConsultationModel,
+  CreateBedBody,
+  CurrentBed,
+  DailyRoundsBody,
+  DailyRoundsRes,
+  DistrictModel,
+  DoctorModal,
+  FacilityModel,
+  FacilityRequest,
+  IFacilityNotificationRequest,
+  IFacilityNotificationResponse,
+  IUserFacilityRequest,
+  LocalBodyModel,
+  LocationModel,
+  PatientNotesModel,
+  PatientStatsModel,
+  StateModel,
+  WardModel,
+} from "../Components/Facility/models";
+
+import { HCXPolicyModel } from "../Components/HCX/models";
 import { Prescription } from "../Components/Medicine/models";
-import { DailyRoundsModel, PatientModel } from "../Components/Patient/models";
-import { PaginatedResponse } from "../Utils/request/types";
 import {
   NotificationData,
   PNconfigData,
 } from "../Components/Notifications/models";
-
+import { DailyRoundsModel, PatientModel } from "../Components/Patient/models";
 import { IComment, IResource } from "../Components/Resource/models";
 import { IShift } from "../Components/Shifting/models";
-import { HCXPolicyModel } from "../Components/HCX/models";
+import {
+  SkillModel,
+  SkillObjectModel,
+  UpdatePasswordForm,
+  UserBareMinimum,
+  UserModel,
+} from "../Components/Users/models";
+import { PaginatedResponse } from "../Utils/request/types";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -350,6 +351,27 @@ const routes = {
   partialUpdateFacilityAssetLocation: {
     path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/",
     method: "PATCH",
+  },
+  getFacilityAssetLocationDutyStaff: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/duty_staff/",
+    method: "GET",
+    TRes: Type<UserBareMinimum[]>(),
+  },
+  createFacilityAssetLocationDutyStaff: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/duty_staff/",
+    method: "POST",
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{
+      duty_staff: number;
+    }>(),
+  },
+  removeFacilityAssetLocationDutyStaff: {
+    path: "/api/v1/facility/{facility_external_id}/asset_location/{external_id}/duty_staff/",
+    method: "DELETE",
+    TRes: Type<Record<string, never>>(),
+    TBody: Type<{
+      duty_staff: number;
+    }>(),
   },
 
   // Asset bed

@@ -1,6 +1,7 @@
 import { BedModel } from "../Facility/models";
 import { PerformedByModel } from "../HCX/misc";
 import { PatientModel } from "../Patient/models";
+import { UserAssignedModel } from "../Users/models";
 
 export enum AssetLocationType {
   OTHER = "OTHER",
@@ -20,6 +21,11 @@ export interface AssetLocationObject {
     id: string;
     name: string;
   };
+}
+
+export interface AssetLocationDutyStaffObject {
+  duty_staff_objects: UserAssignedModel[];
+  duty_staff: number;
 }
 
 export enum AssetType {

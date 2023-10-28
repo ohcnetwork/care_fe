@@ -1,20 +1,21 @@
-import Auth from "./Auth.json";
 import Asset from "./Asset.json";
+import Auth from "./Auth.json";
+import Bed from "./Bed.json";
 import Common from "./Common.json";
 import Consultation from "./Consultation.json";
+import CoverImageEdit from "./CoverImageEdit.json";
+import Diagnosis from "./Diagnosis.json";
 import Entities from "./Entities.json";
+import ErrorPages from "./ErrorPages.json";
+import ExternalResult from "./ExternalResult.json";
 import Facility from "./Facility.json";
 import Hub from "./Hub.json";
-import ErrorPages from "./ErrorPages.json";
-import Shifting from "./Shifting.json";
-import Notifications from "./Notifications.json";
-import ExternalResult from "./ExternalResult.json";
-import CoverImageEdit from "./CoverImageEdit.json";
-import Resource from "./Resource.json";
-import SortOptions from "./SortOptions.json";
-import Bed from "./Bed.json";
+import Location from "./Location.json";
 import Medicine from "./Medicine.json";
-import Diagnosis from "./Diagnosis.json";
+import Notifications from "./Notifications.json";
+import Resource from "./Resource.json";
+import Shifting from "./Shifting.json";
+import SortOptions from "./SortOptions.json";
 
 export default {
   ...Auth,
@@ -33,5 +34,6 @@ export default {
   ...Resource,
   ...Shifting,
   ...Bed,
+  ...Location,
   SortOptions,
 };
