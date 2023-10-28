@@ -91,4 +91,16 @@ export class UserPage {
   verifyDataTestIdNotVisible(testId: string) {
     cy.get(`[data-testid="${testId}"]`).should("not.be.visible");
   }
+
+  navigateToNextPage() {
+    cy.get("button#next-pages").click();
+  }
+
+  navigateToPreviousPage() {
+    cy.get("button#prev-pages").click();
+  }
+
+  verifyCurrentPageNumber(pageNumber: number) {
+    cy.url().should("include", `page=${pageNumber}`);
+  }
 }

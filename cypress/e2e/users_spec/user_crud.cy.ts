@@ -114,14 +114,6 @@ describe("User management", () => {
       .contains("Facility - User Already has permission to this facility");
   });
 
-  it("Next/Previous Page", () => {
-    // only works for desktop mode
-    cy.get("button#next-pages").click();
-    cy.url().should("include", "page=2");
-    cy.get("button#prev-pages").click();
-    cy.url().should("include", "page=1");
-  });
-
   afterEach(() => {
     cy.saveLocalStorage();
   });
