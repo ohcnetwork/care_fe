@@ -11,9 +11,9 @@ describe("User Creation", () => {
   const assetSearchPage = new AssetSearchPage();
   const fillFacilityName = "Dummy Facility 1";
   const alreadylinkedusersviews = [
+    "devdoctor",
     "devstaff2",
     "devdistrictadmin",
-    "devdoctor",
   ];
 
   before(() => {
