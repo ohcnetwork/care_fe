@@ -12,6 +12,7 @@ import CircularProgress from "../Common/components/CircularProgress";
 import { LocalStorageKeys } from "../../Common/constants";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
+import { handleRedirection } from "../../Utils/utils";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {
@@ -109,20 +110,7 @@ export const Login = (props: { forgot?: boolean }) => {
           window.location.pathname === "/" ||
           window.location.pathname === "/login"
         ) {
-          const redirectParam = new URLSearchParams(window.location.search).get(
-            "redirect"
-          );
-          try {
-            if (
-              redirectParam &&
-              new URL(redirectParam).origin === window.location.origin
-            )
-              window.location.href =
-                window.location.origin + new URL(redirectParam).pathname;
-            else window.location.href = "/facility";
-          } catch {
-            window.location.href = "/facility";
-          }
+          handleRedirection();
         } else {
           window.location.href = window.location.pathname.toString();
         }
