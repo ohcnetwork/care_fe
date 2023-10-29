@@ -111,6 +111,86 @@ describe("User Creation", () => {
     userPage.verifyMultipleBadgesWithSameId(alreadylinkedusersviews);
   });
 
+  // the below commented out codes, will be used in the upcoming refactoring of this module, since it is a inter-dependent of partially converted code, currently taking it down
+
+  //   it("link facility for user", () => {
+  //     cy.contains("Linked Facilities").click();
+  //     cy.intercept(/\/api\/v1\/facility/).as("getFacilities");
+  //     cy.get("[name='facility']")
+  //       .click()
+  //       .type("Dummy Facility 1")
+  //       .wait("@getFacilities");
+  //     cy.get("li[role='option']").first().click();
+  //     cy.intercept(/\/api\/v1\/users\/\w+\/add_facility\//).as("addFacility");
+  //     cy.get("button[id='link-facility']").click();
+  //     cy.wait("@addFacility")
+  //       // .its("response.statusCode")
+  //       // .should("eq", 201)
+  //       .get("span")
+  //       .contains("Facility - User Already has permission to this facility");
+  //   });
+
+  // describe("Edit User Profile & Error Validation", () => {
+  //   before(() => {
+  //     cy.loginByApi(username, "#@Cypress_test123");
+  //     cy.saveLocalStorage();
+  //   });
+
+  //   beforeEach(() => {
+  //     cy.restoreLocalStorage();
+  //     cy.awaitUrl("/user/profile");
+  //     cy.contains("button", "Edit User Profile").click();
+  //   });
+
+  //   it("First name Field Updation " + username, () => {
+  //     cy.get("input[name=firstName]").clear();
+  //     cy.contains("button[type='submit']", "Update").click();
+  //     cy.get("span.error-text").should("contain", "Field is required");
+  //     cy.get("input[name=firstName]").type("firstName updated");
+  //     cy.contains("button[type='submit']", "Update").click();
+  //   });
+
+  //   it("Last name Field Updation " + username, () => {
+  //     cy.get("input[name=lastName]").clear();
+  //     cy.contains("button[type='submit']", "Update").click();
+  //     cy.get("span.error-text").should("contain", "Field is required");
+  //     cy.get("input[name=lastName]").type("lastName updated");
+  //     cy.contains("button[type='submit']", "Update").click();
+  //   });
+
+  //   it("Age Field Updation " + username, () => {
+  //     cy.get("input[name=age]").clear();
+  //     cy.contains("button[type='submit']", "Update").click();
+  //     cy.get("span.error-text").should("contain", "This field is required");
+  //     cy.get("input[name=age]").type("11");
+  //     cy.contains("button[type='submit']", "Update").click();
+  //   });
+
+  //   it("Phone number Field Updation " + username, () => {
+  //     cy.get("input[name=phoneNumber]").clear();
+  //     cy.contains("button[type='submit']", "Update").click();
+  //     cy.get("span.error-text").should(
+  //       "contain",
+  //       "Please enter valid phone number"
+  //     );
+  //     cy.get("input[name=phoneNumber]").type("+919999999999");
+  //     cy.contains("button[type='submit']", "Update").click();
+  //   });
+
+  //   it("Whatsapp number Field Updation " + username, () => {
+  //     cy.get("input[name=altPhoneNumber]").clear();
+  //     cy.get("input[name=altPhoneNumber]").type("+919999999999");
+  //     cy.contains("button[type='submit']", "Update").click();
+  //   });
+
+  //   it("Email Field Updation " + username, () => {
+  //     cy.get("input[name=email]").clear();
+  //     cy.contains("button[type='submit']", "Update").click();
+  //     cy.get("span.error-text").should("contain", "This field is required");
+  //     cy.get("input[name=email]").type("test@test.com");
+  //     cy.contains("button[type='submit']", "Update").click();
+  //   });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });
