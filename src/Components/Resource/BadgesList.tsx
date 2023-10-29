@@ -40,17 +40,21 @@ export default function BadgesList(props: any) {
         value(
           "Origin facility",
           "origin_facility",
-          originFacility?.data?.name || ""
+          appliedFilters.origin_facility ? originFacility?.data?.name || "" : ""
         ),
         value(
           "Approving facility",
           "approving_facility",
-          approvingFacility?.data?.name || ""
+          appliedFilters.approving_facility
+            ? approvingFacility?.data?.name || ""
+            : ""
         ),
         value(
           "Assigned facility",
           "assigned_facility",
-          assignedFacility?.data?.name || ""
+          appliedFilters.assigned_facility
+            ? assignedFacility?.data?.name || ""
+            : ""
         ),
       ]}
     />
