@@ -57,7 +57,9 @@ export default function ListFilter(props: any) {
     pathParams: { id: filter.origin_facility },
     onResponse: ({ res, data }) => {
       if (res && data) {
-        setFilterState({ origin_facility_ref: data });
+        setFilterState({
+          origin_facility_ref: filter.origin_facility === "" ? "" : data,
+        });
       }
     },
   });
@@ -67,7 +69,9 @@ export default function ListFilter(props: any) {
     pathParams: { id: filter.approving_facility },
     onResponse: ({ res, data }) => {
       if (res && data) {
-        setFilterState({ approving_facility_ref: data });
+        setFilterState({
+          approving_facility_ref: filter.approving_facility === "" ? "" : data,
+        });
       }
     },
   });
@@ -77,7 +81,9 @@ export default function ListFilter(props: any) {
     prefetch: filter.assigned_facility !== undefined,
     onResponse: ({ res, data }) => {
       if (res && data) {
-        setFilterState({ assigned_facility_ref: data });
+        setFilterState({
+          assigned_facility_ref: filter.assigned_facility === "" ? "" : data,
+        });
       }
     },
   });

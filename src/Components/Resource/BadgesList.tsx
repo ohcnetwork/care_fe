@@ -37,16 +37,20 @@ export default function BadgesList(props: any) {
         }),
         ...dateRange("Modified", "modified_date"),
         ...dateRange("Created", "created_date"),
-        value("Origin facility", "origin_facility", originFacility?.data?.name),
+        value(
+          "Origin facility",
+          "origin_facility",
+          originFacility?.data?.name || ""
+        ),
         value(
           "Approving facility",
           "approving_facility",
-          approvingFacility?.data?.name
+          approvingFacility?.data?.name || ""
         ),
         value(
           "Assigned facility",
           "assigned_facility",
-          assignedFacility?.data?.name
+          assignedFacility?.data?.name || ""
         ),
       ]}
     />
