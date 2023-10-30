@@ -465,7 +465,7 @@ export default function PatientInfoCard(props: {
                             triggerGoal("Patient Card Button Clicked", {
                               buttonName: action[1],
                               consultationId: consultation?.id,
-                              userId: authUser.id,
+                              userId: authUser?.id,
                             });
                           }}
                         >
@@ -500,7 +500,7 @@ export default function PatientInfoCard(props: {
                               triggerGoal("Patient Card Button Clicked", {
                                 buttonName: "Show ABHA Profile",
                                 consultationId: consultation?.id,
-                                userId: authUser.id,
+                                userId: authUser?.id,
                               });
                             }}
                           >
@@ -513,7 +513,7 @@ export default function PatientInfoCard(props: {
                               triggerGoal("Patient Card Button Clicked", {
                                 buttonName: "Link Care Context",
                                 consultationId: consultation?.id,
-                                userId: authUser.id,
+                                userId: authUser?.id,
                               });
                               close();
                               setShowLinkCareContext(true);
@@ -553,7 +553,7 @@ export default function PatientInfoCard(props: {
                     triggerGoal("Patient Card Button Clicked", {
                       buttonName: "Medico Legal Case",
                       consultationId: consultation?.id,
-                      userId: authUser.id,
+                      userId: authUser?.id,
                     });
                     setMedicoLegalCase(checked);
                     switchMedicoLegalCase(checked);
