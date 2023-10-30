@@ -1,5 +1,5 @@
 import { IConfig } from "../Common/hooks/useConfig";
-import { AssetData } from "../Components/Assets/AssetTypes";
+import { AssetBedModel, AssetData } from "../Components/Assets/AssetTypes";
 import {
   IUserFacilityRequest,
   IFacilityNotificationRequest,
@@ -9,7 +9,6 @@ import {
   IUserListFacilityResponse,
   LocationModel,
   IUserFacilityResponse,
-  IAllFacilitiesResponse,
   IFacilityUserResponse,
   ILocalBodyResponse,
   IInventorySummaryResponse,
@@ -25,10 +24,8 @@ import {
   ISetMinQuantityRequest,
   ISetMinQuantityResponse,
   IFlagInventoryItemResponse,
-  IAssetBedResponse,
   IStateListResponse,
   IDistrictLocalBodyResponse,
-  IWardLocalBodyResponse,
   ICreateTriageRequest,
   ICreateTriageResponse,
   IFacilityNotificationResponse,
@@ -36,6 +33,8 @@ import {
   StateModel,
   InventoryItemObjectModel,
   DeleteModel,
+  FacilityModel,
+  WardModel,
 } from "../Components/Facility/models";
 import { PatientModel } from "../Components/Patient/models";
 import { UserModel } from "../Components/Users/models";
@@ -222,7 +221,7 @@ const routes = {
 
   getAnyFacility: {
     path: "/api/v1/getallfacilities/{id}/",
-    TRes: Type<IAllFacilitiesResponse>(),
+    TRes: Type<FacilityModel>(),
   },
 
   updateFacility: {
@@ -235,8 +234,8 @@ const routes = {
   partialUpdateFacility: {
     path: "/api/v1/facility/{id}/",
     method: "PATCH",
-    TBody: Type<IFacilityRequest>(),
-    TRes: Type<IFacilityResponse>(),
+    TBody: Type<FacilityModel>(),
+    TRes: Type<FacilityModel>(),
   },
 
   deleteFacilityCoverImage: {
@@ -275,7 +274,7 @@ const routes = {
   listAssetBeds: {
     path: "/api/v1/assetbed/",
     method: "GET",
-    TRes: Type<IAssetBedResponse>(),
+    TRes: Type<PaginatedResponse<AssetBedModel>>(),
   },
   createAssetBed: {
     path: "/api/v1/assetbed/",
@@ -626,7 +625,7 @@ const routes = {
   },
   getWardByLocalBody: {
     path: "/api/v1/ward/?local_body={id}",
-    TRes: Type<IWardLocalBodyResponse>(),
+    TRes: Type<PaginatedResponse<WardModel>>(),
   },
 
   // Sample Test

@@ -247,10 +247,6 @@ export type IStateListResponse = PaginatedResponse<UnitModel>;
 export type IDistrictLocalBodyResponse = StateModel & {
   state: number;
 };
-export type IWardLocalBodyResponse = StateModel & {
-  number: number;
-  local_body: number;
-};
 
 export type IFacilityRequest = Omit<
   FacilityModel,
@@ -275,10 +271,20 @@ export type IFacilityRequest = Omit<
   longitude?: string;
   phone_number?: string | undefined;
 };
-export type IFacilityResponse = Omit<
-  IAllFacilitiesResponse,
-  "facility_type"
-> & {
+export type IFacilityResponse = {
+  id: string;
+  name: string;
+  local_body: number;
+  district: number;
+  state: number;
+  ward_object: WardModel;
+  local_body_object: { id: number } & LocalBodyModel;
+  district_object: DistrictModel;
+  state_object: StateModel;
+  read_cover_image_url: string;
+  features: number[];
+  patient_count: string;
+  bed_count: string;
   ward: number;
   facility_type: number;
   address: string;
@@ -298,22 +304,6 @@ export type IFacilityResponse = Omit<
   expected_type_b_cylinders: number;
   expected_type_c_cylinders: number;
   expected_type_d_cylinders: number;
-};
-export type IAllFacilitiesResponse = {
-  id: string;
-  name: string;
-  local_body: number;
-  district: number;
-  state: number;
-  ward_object: WardModel;
-  local_body_object: { id: number } & LocalBodyModel;
-  district_object: DistrictModel;
-  state_object: StateModel;
-  facility_type: string;
-  read_cover_image_url: string;
-  features: number[];
-  patient_count: string;
-  bed_count: string;
 };
 
 export type IListDoctorResponse = PaginatedResponse<{
@@ -640,14 +630,6 @@ export type IFlagInventoryItemResponse = {
   unit: number;
   created_by: number;
 };
-
-export type IAssetBedResponse = PaginatedResponse<
-  BaseResponse & {
-    asset_object: Asset;
-    bed_object: BedObjectModel;
-    meta: Record<string, string>;
-  }
->;
 
 export type ICreateTriageRequest = {
   entry_date?: string;

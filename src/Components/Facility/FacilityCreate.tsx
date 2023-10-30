@@ -259,9 +259,9 @@ export const FacilityCreate = (props: FacilityProps) => {
       setIsWardLoading(true);
       if (wardsData) {
         const updatedWards = {
-          id: wardsData.id,
-          name: wardsData.name,
-          number: wardsData.number,
+          id: wardsData.results[0].id,
+          name: wardsData.results[0].name,
+          number: wardsData.results[0].number,
         };
         setWard([updatedWards]);
       }
