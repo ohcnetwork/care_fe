@@ -69,6 +69,13 @@ describe("User Homepage", () => {
     userPage.checkUsernameText(currentuser);
   });
 
+  it("Next/Previous Page Navigation", () => {
+    userPage.navigateToNextPage();
+    userPage.verifyCurrentPageNumber(2);
+    userPage.navigateToPreviousPage();
+    userPage.verifyCurrentPageNumber(1);
+  });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });
