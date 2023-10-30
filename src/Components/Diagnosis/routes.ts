@@ -27,14 +27,8 @@ const DiagnosesRoutes = {
   updateConsultationDiagnosis: {
     path: "/api/v1/consultation/{consultation}/diagnoses/{id}/",
     method: "PATCH",
-    TBody: Type<Pick<CreateDiagnosis, "verification_status">>(),
+    TBody: Type<Partial<CreateDiagnosis>>(),
     TRes: Type<ConsultationDiagnosis>(),
-  },
-
-  toggleIsPrincipalConsultationDiagnosis: {
-    path: "/api/v1/consultation/{consultation}/diagnoses/{id}/toggle_is_principal/",
-    method: "POST",
-    TRes: Type<Pick<ConsultationDiagnosis, "is_principal">>(),
   },
 };
 

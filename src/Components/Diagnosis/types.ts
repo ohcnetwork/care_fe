@@ -40,8 +40,5 @@ export interface CreateDiagnosis {
   diagnosis: ICD11DiagnosisModel["id"];
   diagnosis_object?: ICD11DiagnosisModel;
   verification_status: (typeof ActiveConditionVerificationStatuses)[number];
-}
-
-export interface ConsultationCreateDignosis extends CreateDiagnosis {
   is_principal: boolean;
 }

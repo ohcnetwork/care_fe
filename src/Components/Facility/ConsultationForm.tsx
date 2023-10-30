@@ -59,10 +59,7 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import dayjs from "../../Utils/dayjs";
-import {
-  ConsultationCreateDignosis,
-  ConsultationDiagnosis,
-} from "../Diagnosis/types.js";
+import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -84,7 +81,7 @@ type FormDetails = {
   discharge_date: null;
   referred_to?: string;
   referred_to_external?: string;
-  create_diagnoses: ConsultationCreateDignosis[];
+  create_diagnoses: CreateDiagnosis[];
   readonly diagnoses: ConsultationDiagnosis[];
   verified_by: string;
   verified_by_object: UserModel | null;

@@ -3,10 +3,7 @@ import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
 import { NormalPrescription, PRNPrescription } from "../Medicine/models";
 import { AssetData } from "../Assets/AssetTypes";
 import { UserBareMinimum } from "../Users/models";
-import {
-  ConsultationCreateDignosis,
-  ConsultationDiagnosis,
-} from "../Diagnosis/types";
+import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types";
 
 export interface LocalBodyModel {
   name: string;
@@ -118,7 +115,7 @@ export interface ConsultationModel {
   is_kasp?: boolean;
   kasp_enabled_date?: string;
   readonly diagnoses?: ConsultationDiagnosis[];
-  create_diagnoses?: ConsultationCreateDignosis[]; // Used for bulk creating diagnoses upon consultation creation
+  create_diagnoses?: CreateDiagnosis[]; // Used for bulk creating diagnoses upon consultation creation
   deprecated_verified_by?: string;
   verified_by?: string;
   verified_by_object?: UserBareMinimum;
