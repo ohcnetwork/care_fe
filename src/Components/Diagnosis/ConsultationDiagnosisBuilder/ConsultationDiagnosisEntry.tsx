@@ -77,7 +77,7 @@ export default function ConsultationDiagnosisEntry(props: Props) {
     >
       <div
         className={classNames(
-          "cui-input-base relative w-full",
+          "cui-input-base relative flex w-full flex-col gap-2 md:flex-row",
           object.is_principal && "border-primary-500"
         )}
       >
@@ -92,7 +92,7 @@ export default function ConsultationDiagnosisEntry(props: Props) {
           {object.diagnosis_object?.label}
         </span>
 
-        <div className="absolute inset-y-0 right-2 flex items-center gap-2">
+        <div className="flex items-center justify-end gap-2 md:absolute md:inset-y-0 md:right-2 md:justify-normal">
           {isActive && (
             <ButtonV2
               type="button"

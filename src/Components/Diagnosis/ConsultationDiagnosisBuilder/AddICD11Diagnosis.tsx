@@ -46,10 +46,7 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
 
   return (
     <div
-      className={classNames(
-        props.className,
-        "flex w-full flex-col items-start gap-2 md:flex-row"
-      )}
+      className={classNames(props.className, "flex w-full items-start gap-2")}
     >
       <AutocompleteFormField
         id="icd11-search"
