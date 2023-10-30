@@ -28,6 +28,7 @@ import {
   AssetUpdate,
 } from "../Components/Assets/AssetTypes";
 import {
+  ConsultationModel,
   FacilityModel,
   LocationModel,
   WardModel,
@@ -49,7 +50,7 @@ import { PaginatedResponse } from "../Utils/request/types";
  * A fake function that returns an empty object casted to type T
  * @returns Empty object as type T
  */
-function Type<T>(): T {
+export function Type<T>(): T {
   return {} as T;
 }
 
