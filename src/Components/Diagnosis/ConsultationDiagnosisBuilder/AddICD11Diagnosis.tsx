@@ -67,9 +67,11 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
         error={hasError ? t("diagnosis_already_added") : undefined}
       />
       <ConditionVerificationStatusMenu
+        className="mt-0.5"
         disabled={props.disabled || !selected || hasError || adding}
         options={ActiveConditionVerificationStatuses}
         onSelect={(status) => handleAdd(status)}
+        size="default"
       />
     </div>
   );

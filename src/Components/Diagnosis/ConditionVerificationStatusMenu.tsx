@@ -1,7 +1,12 @@
 import { useTranslation } from "react-i18next";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
-import { ConditionVerificationStatus } from "./types";
+import {
+  ConditionVerificationStatus,
+  InactiveConditionVerificationStatuses,
+} from "./types";
+import { classNames } from "../../Utils/utils";
+import { ButtonSize } from "../Common/components/ButtonV2";
 
 interface Props<T extends ConditionVerificationStatus> {
   disabled?: boolean;
@@ -11,6 +16,7 @@ interface Props<T extends ConditionVerificationStatus> {
   onSelect: (option: T) => void;
   onRemove?: () => void;
   className?: string;
+  size?: ButtonSize;
 }
 
 export default function ConditionVerificationStatusMenu<
@@ -20,16 +26,14 @@ export default function ConditionVerificationStatusMenu<
 
   return (
     <DropdownMenu
-      className={props.className}
+      size={props.size ?? "small"}
+      className={classNames(
+        props.className,
+        props.value && StatusStyle[props.value].colors,
+        props.value && "border !border-gray-400 bg-white hover:bg-gray-300"
+      )}
       id="condition-verification-status-menu"
-      title={props.value ? t(props.value) : props.placeholder ?? t("add")}
-      icon={
-        props.value ? (
-          <CareIcon icon={StatusStyle[props.value].icon} className="text-lg" />
-        ) : (
-          <CareIcon icon="l-plus-circle" className="text-lg" />
-        )
-      }
+      title={props.value ? t(props.value) : props.placeholder ?? t("add_as")}
       disabled={props.disabled}
       variant={props.value ? StatusStyle[props.value].variant : "primary"}
     >
@@ -40,12 +44,17 @@ export default function ConditionVerificationStatusMenu<
             id={`add-icd11-diagnosis-as-${status}`}
             variant={StatusStyle[status].variant}
             onClick={() => props.onSelect(status)}
-            icon={
-              <CareIcon icon={StatusStyle[status].icon} className="text-lg" />
-            }
+            // icon={
+            //   <CareIcon icon={StatusStyle[status].icon} className="text-lg" />
+            // }
             disabled={props.value === status}
           >
             <span className={props.value === status ? "font-medium" : ""}>
+              {InactiveConditionVerificationStatuses.includes(
+                status as (typeof InactiveConditionVerificationStatuses)[number]
+              )
+                ? "Remove as "
+                : ""}
               {t(status)}
             </span>
           </DropdownItem>
@@ -66,11 +75,35 @@ export default function ConditionVerificationStatusMenu<
   );
 }
 
-const StatusStyle = {
-  unconfirmed: { variant: "warning", icon: "l-question" },
-  provisional: { variant: "warning", icon: "l-question" },
-  differential: { variant: "warning", icon: "l-question" },
-  confirmed: { variant: "primary", icon: "l-check" },
-  refuted: { variant: "danger", icon: "l-times" },
-  "entered-in-error": { variant: "danger", icon: "l-ban" },
+export const StatusStyle = {
+  unconfirmed: {
+    variant: "warning",
+    // icon: "l-question",
+    colors: "text-yellow-500 border-yellow-500",
+  },
+  provisional: {
+    variant: "warning",
+    // icon: "l-question",
+    colors: "text-secondary-800 border-secondary-800",
+  },
+  differential: {
+    variant: "warning",
+    // icon: "l-question",
+    colors: "text-secondary-800 border-secondary-800",
+  },
+  confirmed: {
+    variant: "primary",
+    // icon: "l-check",
+    colors: "text-primary-500 border-primary-500",
+  },
+  refuted: {
+    variant: "danger",
+    icon: "l-times",
+    colors: "text-danger-500 border-danger-500",
+  },
+  "entered-in-error": {
+    variant: "danger",
+    // icon: "l-ban",
+    colors: "text-danger-500 border-danger-500",
+  },
 } as const;

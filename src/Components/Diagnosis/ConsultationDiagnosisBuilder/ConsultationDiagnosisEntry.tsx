@@ -67,6 +67,10 @@ export default function ConsultationDiagnosisEntry(props: Props) {
 
   const object = data ?? props.value;
 
+  const isActive = ActiveConditionVerificationStatuses.includes(
+    object.verification_status as (typeof ActiveConditionVerificationStatuses)[number]
+  );
+
   return (
     <div
       className={classNames(props.className, "flex w-full items-center gap-2")}
@@ -74,69 +78,83 @@ export default function ConsultationDiagnosisEntry(props: Props) {
       <div
         className={classNames(
           "cui-input-base relative w-full",
-          object.is_principal && "border-primary-500 ring-1 ring-primary-500"
+          object.is_principal && "border-primary-500"
         )}
       >
-        {object.diagnosis_object?.label}
-
-        <ButtonV2
-          className="absolute right-2 top-2 h-full"
-          type="button"
-          size="small"
-          variant={object.is_principal ? "primary" : "secondary"}
-          disabled={disabled}
-          ghost
-          border
-          onClick={() => {
-            const value = { ...object, is_principal: !object.is_principal };
-
-            if (props.consultationId === undefined) {
-              props.onChange({ type: "edit", value });
-              return;
-            }
-
-            handleUpdate(value as ConsultationDiagnosis);
-          }}
+        <span
+          className={classNames(
+            object.is_principal
+              ? "font-semibold text-primary-500"
+              : "font-normal",
+            !isActive && "text-gray-500 line-through"
+          )}
         >
-          <CareIcon
-            icon={object.is_principal ? "l-check" : "l-times"}
-            className="text-lg"
-          />
+          {object.diagnosis_object?.label}
+        </span>
 
-          <span>
-            {object.is_principal
-              ? t("principal_diagnosis")
-              : t("mark_as_principal")}
-          </span>
-        </ButtonV2>
-      </div>
+        <div className="absolute inset-y-0 right-2 flex items-center gap-2">
+          {isActive && (
+            <ButtonV2
+              type="button"
+              size="small"
+              variant={object.is_principal ? "primary" : "secondary"}
+              disabled={disabled}
+              ghost
+              border
+              onClick={() => {
+                const value = { ...object, is_principal: !object.is_principal };
 
-      <div className="w-72">
-        <ConditionVerificationStatusMenu
-          className="w-full"
-          value={object.verification_status}
-          disabled={disabled}
-          options={
-            props.consultationId === undefined
-              ? ActiveConditionVerificationStatuses
-              : ConditionVerificationStatuses
-          }
-          onSelect={(verification_status) => {
-            const value = { ...object, verification_status };
+                if (props.consultationId === undefined) {
+                  props.onChange({ type: "edit", value });
+                  return;
+                }
 
-            if (props.consultationId === undefined) {
-              props.onChange({ type: "edit", value: value as CreateDiagnosis });
-              return;
-            }
+                handleUpdate(value as ConsultationDiagnosis);
+              }}
+              tooltip={object.is_principal ? t("unmark_as_principal") : ""}
+              tooltipClassName="tooltip-bottom -translate-x-1/2 translate-y-1 text-xs"
+            >
+              {object.is_principal && (
+                <CareIcon icon="l-check" className="text-lg" />
+              )}
+              <span className="py-0.5">
+                {object.is_principal
+                  ? t("principal_diagnosis")
+                  : t("mark_as_principal")}
+              </span>
+            </ButtonV2>
+          )}
+          <div className="w-32">
+            <ConditionVerificationStatusMenu
+              className="w-full"
+              value={object.verification_status}
+              disabled={disabled}
+              options={
+                props.consultationId === undefined
+                  ? ActiveConditionVerificationStatuses
+                  : ConditionVerificationStatuses
+              }
+              onSelect={(verification_status) => {
+                const value = { ...object, verification_status };
 
-            handleUpdate(value as ConsultationDiagnosis);
-          }}
-          onRemove={
-            props.consultationId === undefined
-              ? () => props.onChange({ type: "remove" })
-              : undefined
-          }
-        />
+                if (props.consultationId === undefined) {
+                  props.onChange({
+                    type: "edit",
+                    value: value as CreateDiagnosis,
+                  });
+                  return;
+                }
+
+                handleUpdate(value as ConsultationDiagnosis);
+              }}
+              onRemove={
+                props.consultationId === undefined
+                  ? () => props.onChange({ type: "remove" })
+                  : undefined
+              }
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

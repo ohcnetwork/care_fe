@@ -1,6 +1,6 @@
 import { Anyone, AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
 
-import { ButtonVariant } from "./ButtonV2";
+import { ButtonSize, ButtonVariant } from "./ButtonV2";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { DropdownTransition } from "./HelperComponents";
 import { Menu } from "@headlessui/react";
@@ -12,6 +12,7 @@ interface DropdownMenuProps {
   id?: string;
   title: string;
   variant?: ButtonVariant;
+  size?: ButtonSize;
   icon?: JSX.Element | undefined;
   children: JSX.Element | JSX.Element[];
   disabled?: boolean | undefined;
@@ -21,6 +22,7 @@ interface DropdownMenuProps {
 
 export default function DropdownMenu({
   variant = "primary",
+  size = "default",
   ...props
 }: DropdownMenuProps) {
   return (
@@ -28,13 +30,16 @@ export default function DropdownMenu({
       <Menu as="div" className="relative inline-block w-full text-left">
         <Menu.Button
           disabled={props.disabled}
-          className={`button-size-default button-${variant}-default  button-shape-square flex w-full cursor-pointer items-center justify-center gap-2 font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 lg:justify-between ${props.className}`}
+          className={`button-size-${size} button-${variant}-default  button-shape-square flex w-full cursor-pointer items-center justify-center gap-2 font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 lg:justify-between ${props.className}`}
         >
           <div className="flex h-6 items-center gap-2 whitespace-nowrap">
             {props.icon}
             {props.title || "Dropdown"}
           </div>
-          <CareIcon className="care-l-angle-down -mr-1 ml-2 text-lg" />
+          <CareIcon
+            icon="l-angle-down"
+            className={size === "small" ? "text-base" : "text-lg"}
+          />
         </Menu.Button>
         <DropdownTransition>
           <Menu.Items
