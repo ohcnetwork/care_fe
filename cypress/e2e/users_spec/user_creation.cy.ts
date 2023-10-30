@@ -121,6 +121,7 @@ describe("User Creation", () => {
   //       .type("Dummy Facility 1")
   //       .wait("@getFacilities");
   //     cy.get("li[role='option']").should("not.exist");
+  //   });
 
   // describe("Edit User Profile & Error Validation", () => {
   //   before(() => {
