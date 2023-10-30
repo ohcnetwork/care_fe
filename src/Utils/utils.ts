@@ -111,7 +111,8 @@ export const handleSignOut = (forceReload: boolean) => {
     "redirect"
   );
   redirectURL ? navigate(`/?redirect=${redirectURL}`) : navigate("/");
-  if (forceReload) window.location.reload();
+  if (forceReload) window.location.href = "/";
+  else navigate("/");
 };
 
 export const handleRedirection = () => {
