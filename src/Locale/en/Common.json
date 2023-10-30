@@ -112,6 +112,7 @@
   "select": "Select",
   "lsg": "Lsg",
   "delete": "Delete",
+  "remove": "Remove",
   "max_size_for_image_uploaded_should_be": "Max size for image uploaded should be",
   "allowed_formats_are": "Allowed formats are",
   "recommended_aspect_ratio_for": "Recommended aspect ratio for",
@@ -154,4 +155,3 @@
   "edit": "Edit",
   "clear_selection": "Clear selection"
 }
-
