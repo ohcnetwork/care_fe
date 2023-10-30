@@ -24,7 +24,7 @@ function useContextualized<TItem>() {
   const ctx = useContext(context);
 
   if (ctx === null) {
-    throw new Error("PaginatedList must be used within a PaginatedList");
+    throw new Error("Component must be used within a PaginatedList");
   }
 
   return ctx as PaginatedListContext<TItem>;
@@ -42,11 +42,15 @@ export default function PaginatedList<TItem extends object>({
   perPage = DEFAULT_PER_PAGE_LIMIT,
   ...queryOptions
 }: Props<TItem>) {
+  const [currentPage, setPage] = useState(1);
   const query = useQuery(route, {
     ...queryOptions,
-    query: { ...queryOptions.query, limit: perPage },
+    query: {
+      ...queryOptions.query,
+      limit: perPage,
+      offset: (currentPage - 1) * perPage,
+    },
   });
-  const [currentPage, setPage] = useState(1);
 
   const items = query.data?.results ?? [];
 
