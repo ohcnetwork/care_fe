@@ -355,29 +355,41 @@ const DateInputV2: React.FC<Props> = ({
                             className="aspect-square w-[14.26%] border border-transparent p-1 text-center text-sm"
                           />
                         ))}
-                        {dayCount.map((d, i) => (
-                          <div
-                            key={i}
-                            id={`date-${d}`}
-                            className="aspect-square w-[14.26%]"
-                          >
+                        {dayCount.map((d, i) => {
+                          const withinConstraints = isDateWithinConstraints(d);
+                          const selected = value && isSelectedDate(d);
+
+                          const baseClasses =
+                            "flex h-full items-center justify-center rounded text-center text-sm leading-loose transition duration-100 ease-in-out";
+                          let conditionalClasses = "";
+
+                          if (withinConstraints) {
+                            if (selected) {
+                              conditionalClasses =
+                                "bg-primary-500 font-bold text-white";
+                            } else {
+                              conditionalClasses =
+                                "hover:bg-gray-300 cursor-pointer";
+                            }
+                          } else {
+                            conditionalClasses =
+                              "!cursor-not-allowed bg-gray-200 !text-gray-400";
+                          }
+                          return (
                             <div
-                              onClick={setDateValue(d, close)}
-                              className={classNames(
-                                "flex h-full items-center justify-center rounded text-center text-sm leading-loose text-black transition duration-100 ease-in-out",
-                                isDateWithinConstraints(d)
-                                  ? value &&
-                                      (isSelectedDate(d)
-                                        ? "bg-primary-500 font-bold text-white"
-                                        : "hover:bg-gray-300") +
-                                        " cursor-pointer"
-                                  : "!cursor-not-allowed bg-gray-200 !text-gray-400"
-                              )}
+                              key={i}
+                              id={`date-${d}`}
+                              className="aspect-square w-[14.26%]"
                             >
-                              {d}
+                              <div
+                                onClick={setDateValue(d, close)}
+                                className={`${baseClasses} ${conditionalClasses}`}
+                              >
+                                {d}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </>
                   )}
