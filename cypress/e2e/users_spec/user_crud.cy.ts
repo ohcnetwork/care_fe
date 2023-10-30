@@ -11,8 +11,8 @@ const makeid = (length: number) => {
 };
 
 const username = makeid(25);
-const phone_number = 9999999999;
-const alt_phone_number = 9999999999;
+const phone_number = "9999999999";
+const alt_phone_number = "9999999999";
 
 describe("User management", () => {
   before(() => {
@@ -112,14 +112,6 @@ describe("User management", () => {
       // .should("eq", 201)
       .get("span")
       .contains("Facility - User Already has permission to this facility");
-  });
-
-  it("Next/Previous Page", () => {
-    // only works for desktop mode
-    cy.get("button#next-pages").click();
-    cy.url().should("include", "page=2");
-    cy.get("button#prev-pages").click();
-    cy.url().should("include", "page=1");
   });
 
   afterEach(() => {

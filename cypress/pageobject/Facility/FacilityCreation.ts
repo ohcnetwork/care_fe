@@ -129,6 +129,10 @@ class FacilityPage {
     cy.get("#view-assets").contains("View Assets").click();
   }
 
+  clickViewUsersOption() {
+    cy.get("#view-users").click();
+  }
+
   clickInventoryManagementOption() {
     cy.get("#inventory-management", { timeout: 10000 }).should("be.visible");
     cy.get("#inventory-management").click();
