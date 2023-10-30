@@ -44,6 +44,7 @@ import { Prescription } from "../Components/Medicine/models";
 import { PatientModel } from "../Components/Patient/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
+import { NotificationResponse } from "../Components/Notifications/models";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -766,9 +767,13 @@ const routes = {
   // Notifications
   getNotifications: {
     path: "/api/v1/notification/",
+    method: "GET",
+    TRes: Type<NotificationResponse>(),
   },
   getNotificationData: {
     path: "/api/v1/notification/{id}/",
+    method: "GET",
+    TRes: Type<NotificationResponse>(),
   },
   markNotificationAsRead: {
     path: "/api/v1/notification/{id}/",
