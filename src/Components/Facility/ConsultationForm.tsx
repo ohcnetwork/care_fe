@@ -59,7 +59,11 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import dayjs from "../../Utils/dayjs";
-import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types.js";
+import {
+  ConditionVerificationStatuses,
+  ConsultationDiagnosis,
+  CreateDiagnosis,
+} from "../Diagnosis/types.js";
 import {
   CreateDiagnosesBuilder,
   EditDiagnosesBuilder,
@@ -382,6 +386,11 @@ export const ConsultationForm = (props: any) => {
             death_datetime: res.data?.death_datetime || "",
             death_confirmed_doctor: res.data?.death_confirmed_doctor || "",
             InvestigationAdvice: res.data.investigation,
+            diagnoses: res.data.diagnoses.sort(
+              (a: ConsultationDiagnosis, b: ConsultationDiagnosis) =>
+                ConditionVerificationStatuses.indexOf(a.verification_status) -
+                ConditionVerificationStatuses.indexOf(b.verification_status)
+            ),
           };
           dispatch({ type: "set_form", form: { ...state.form, ...formData } });
           setBed(formData.bed);
@@ -1179,7 +1188,7 @@ export const ConsultationForm = (props: any) => {
                 <div className="flex flex-col gap-4 pb-4">
                   <div className="flex flex-col">
                     {sectionTitle("Diagnosis", true)}
-                    <p className="-mt-4 mb-4 space-x-1 text-sm text-gray-700">
+                    <p className="-mt-4 space-x-1 text-sm text-gray-700">
                       <span>Diagnoses as per ICD-11 recommended by WHO</span>
                     </p>
                   </div>
