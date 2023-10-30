@@ -533,7 +533,6 @@ export const PatientManager = () => {
                     </span>
                   </span>
                   <span className="w-full truncate px-1 text-center text-base font-bold">
-                    {patient?.last_consultation?.current_bed?.bed_object.name}
                     <span className="tooltip-text tooltip-bottom">
                       {
                         patient?.last_consultation?.current_bed?.bed_object
