@@ -22,6 +22,16 @@ export class UserPage {
     cy.url().should("include", `username=${username}`);
   }
 
+  verifyUrlafteradvancefilter() {
+    cy.url()
+      .should("include", "first_name=Dev")
+      .and("include", "last_name=Doctor")
+      .and("include", "phone_number=%2B919876543219")
+      .and("include", "alt_phone_number=%2B919876543219")
+      .and("include", "user_type=Doctor")
+      .and("include", "district_id=7");
+  }
+
   checkUsernameText(username: string) {
     cy.get(this.usernameText).should("have.text", username);
   }
@@ -33,5 +43,70 @@ export class UserPage {
 
   clickRemoveIcon() {
     cy.get(this.removeIcon).click();
+  }
+
+  clickAdvancedFilters() {
+    cy.get("#advanced-filter").contains("Advanced Filters").click();
+  }
+
+  typeInFirstName(firstName: string) {
+    cy.get("#first_name").click().type(firstName);
+  }
+
+  typeInLastName(lastName: string) {
+    cy.get("#last_name").click().type(lastName);
+  }
+
+  selectRole(role: string) {
+    cy.get("#role button").click();
+    cy.get("[role='option']").contains(role).click();
+  }
+
+  selectDistrict(district: string) {
+    cy.get("input[name='district']").click().type(district);
+    cy.get("[role='option']").contains(district).click();
+  }
+
+  typeInPhoneNumber(phone: string) {
+    cy.get("#phone_number").click().type(phone);
+  }
+
+  typeInAltPhoneNumber(altPhone: string) {
+    cy.get("#alt_phone_number").click().type(altPhone);
+  }
+
+  applyFilter() {
+    cy.get("#apply-filter").click();
+  }
+
+  verifyDataTestIdText(testId: string, text: string) {
+    cy.get(`[data-testid="${testId}"]`).contains(text).should("be.visible");
+  }
+
+  clearFilters() {
+    this.clickAdvancedFilters();
+    cy.get("#clear-filter").contains("Clear").click();
+  }
+
+  verifyDataTestIdNotVisible(testId: string) {
+    cy.get(`[data-testid="${testId}"]`).should("not.be.visible");
+  }
+
+  navigateToNextPage() {
+    cy.get("button#next-pages").click();
+  }
+
+  navigateToPreviousPage() {
+    cy.get("button#prev-pages").click();
+  }
+
+  verifyCurrentPageNumber(pageNumber: number) {
+    cy.url().should("include", `page=${pageNumber}`);
+  }
+
+  verifyMultipleBadgesWithSameId(expectedContents: string[]) {
+    cy.get("#user-view-name").each((el, index) => {
+      expect(el.text().trim()).to.equal(expectedContents[index]);
+    });
   }
 }
