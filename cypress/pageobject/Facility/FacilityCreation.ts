@@ -106,6 +106,7 @@ class FacilityPage {
   }
 
   clickManageFacilityDropdown() {
+    cy.get("h1.text-3xl.font-bold", { timeout: 20000 }).should("be.visible");
     cy.get("#manage-facility-dropdown button").scrollIntoView();
     cy.get("#manage-facility-dropdown button")
       .contains("Manage Facility")
@@ -126,6 +127,10 @@ class FacilityPage {
 
   clickviewAssetFacilityOption() {
     cy.get("#view-assets").contains("View Assets").click();
+  }
+
+  clickViewUsersOption() {
+    cy.get("#view-users").click();
   }
 
   clickInventoryManagementOption() {
@@ -198,8 +203,6 @@ class FacilityPage {
     cy.intercept("GET", "**/api/v1/facility/**").as("getManagePage");
     cy.go("back");
     cy.wait("@getManagePage").its("response.statusCode").should("eq", 200);
-    cy.get("#manage-facility-dropdown").scrollIntoView();
-    cy.get("#manage-facility-dropdown").should("exist");
   }
 
   verifyfacilityviewassetredirection() {

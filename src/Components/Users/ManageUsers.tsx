@@ -134,7 +134,11 @@ export default function ManageUsers() {
   );
 
   const addUser = (
-    <ButtonV2 className="w-full" onClick={() => navigate("/users/add")}>
+    <ButtonV2
+      id="addUserButton"
+      className="w-full"
+      onClick={() => navigate("/users/add")}
+    >
       <CareIcon className="care-l-plus w-full text-lg" />
       <p>Add New User</p>
     </ButtonV2>
@@ -543,6 +547,7 @@ export default function ManageUsers() {
         <div className="col-span-2 my-2 flex flex-col justify-between space-y-3 lg:flex-row lg:space-x-4 lg:space-y-0 lg:px-3">
           <div className="w-full">
             <SearchInput
+              id="search-by-username"
               name="username"
               onChange={(e) => updateQuery({ [e.name]: e.value })}
               value={qParams.username}

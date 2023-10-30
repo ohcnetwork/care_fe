@@ -18,6 +18,7 @@ const FilterBadge = ({ name, value, onRemove }: FilterBadgeProps) => {
     >
       {`${name}: ${value}`}
       <i
+        id="removeicon"
         className="fas fa-times ml-2 cursor-pointer rounded-full px-1 py-0.5 hover:bg-gray-500"
         onClick={onRemove}
       ></i>

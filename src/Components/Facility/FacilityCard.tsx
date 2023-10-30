@@ -47,11 +47,11 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
 
   return (
     <div key={`usr_${facility.id}`} className="w-full">
-      <div className="block h-full rounded-lg bg-white shadow hover:border-primary-500">
+      <div className="block h-full overflow-hidden rounded-lg bg-white shadow hover:border-primary-500">
         <div className="flex h-full">
           <Link
             href={`/facility/${facility.id}`}
-            className="group relative z-0 hidden w-1/4 items-center justify-center self-stretch bg-gray-300 md:flex"
+            className="group relative z-0 hidden w-1/4 min-w-[15%] items-center justify-center self-stretch bg-gray-300 md:flex"
           >
             {(facility.read_cover_image_url && (
               <img
@@ -66,7 +66,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
           <div className="h-full w-full grow">
             <Link
               href={`/facility/${facility.id}`}
-              className="group relative z-0 flex w-full items-center justify-center self-stretch bg-gray-300 md:hidden"
+              className="group relative z-0 flex w-full min-w-[15%] items-center justify-center self-stretch bg-gray-300 md:hidden"
             >
               {(facility.read_cover_image_url && (
                 <img
@@ -79,7 +79,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
               )}
             </Link>
 
-            <div className="flex h-fit w-full flex-col justify-between md:h-full">
+            <div className="flex h-fit w-full flex-col flex-wrap justify-between md:h-full">
               <div className="w-full p-4">
                 <div className="flow-root">
                   {facility.kasp_empanelled && (
@@ -87,7 +87,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                       {kasp_string}
                     </div>
                   )}
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between">
                     <Link
                       href={`/facility/${facility.id}`}
                       className="float-left text-xl font-bold capitalize text-inherit hover:text-inherit"
@@ -152,10 +152,10 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                   </a>
                 </div>
               </div>
-              <div className="flex-none border-t bg-gray-50 px-2 py-1 md:px-3">
+              <div className="flex flex-wrap border-t bg-gray-50 px-2 py-1 md:px-3">
                 <div className="flex justify-between py-2">
                   <div className="flex w-full flex-wrap justify-between gap-2">
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <div
                         className={`tooltip ml-auto flex h-[38px] w-fit items-center justify-center rounded-md px-2 text-xl ${
                           facility.patient_count / facility.bed_count > 0.85
@@ -219,7 +219,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
                         </form>
                       </DialogModal>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {userType !== "Staff" ? (
                         <ButtonV2
                           id="facility-notify"
