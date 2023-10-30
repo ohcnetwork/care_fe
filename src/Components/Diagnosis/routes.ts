@@ -30,6 +30,6 @@ const DiagnosesRoutes = {
     TBody: Type<Partial<CreateDiagnosis>>(),
     TRes: Type<ConsultationDiagnosis>(),
   },
-};
+} as const;
 
 export default DiagnosesRoutes;

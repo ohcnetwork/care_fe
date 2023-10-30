@@ -34,8 +34,10 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
 
     setAdding(true);
     const added = await props.onAdd({
+      diagnosis_object: selected,
       diagnosis: selected.id,
       verification_status: status,
+      is_principal: false,
     });
     setAdding(false);
 
