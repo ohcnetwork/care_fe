@@ -4,26 +4,34 @@ import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
 import { ConditionVerificationStatus } from "./types";
 
 interface Props<T extends ConditionVerificationStatus> {
-  className?: string;
   disabled?: boolean;
   value?: T;
   placeholder?: string;
   options: readonly T[];
   onSelect: (option: T) => void;
   onRemove?: () => void;
+  className?: string;
 }
 
 export default function ConditionVerificationStatusMenu<
   T extends ConditionVerificationStatus
->({ placeholder = "Add diagnosis", ...props }: Props<T>) {
+>(props: Props<T>) {
   const { t } = useTranslation();
 
   return (
     <DropdownMenu
+      className={props.className}
       id="condition-verification-status-menu"
-      title={props.value ? t(props.value) : placeholder}
-      icon={<CareIcon icon="l-plus-circle" className="text-lg" />}
+      title={props.value ? t(props.value) : props.placeholder ?? t("add")}
+      icon={
+        props.value ? (
+          <CareIcon icon={StatusStyle[props.value].icon} className="text-lg" />
+        ) : (
+          <CareIcon icon="l-plus-circle" className="text-lg" />
+        )
+      }
       disabled={props.disabled}
+      variant={props.value ? StatusStyle[props.value].variant : "primary"}
     >
       <>
         {props.options.map((status) => (

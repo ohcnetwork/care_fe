@@ -16,6 +16,7 @@ const DiagnosesRoutes = {
 
   createConsultationDiagnosis: {
     path: "/api/v1/consultation/{consultation}/diagnoses/",
+    method: "POST",
     TBody: Type<CreateDiagnosis>(),
     TRes: Type<ConsultationDiagnosis>(),
   },
@@ -28,7 +29,7 @@ const DiagnosesRoutes = {
   updateConsultationDiagnosis: {
     path: "/api/v1/consultation/{consultation}/diagnoses/{id}/",
     method: "PATCH",
-    TBody: Type<Partial<CreateDiagnosis>>(),
+    TBody: Type<Partial<ConsultationDiagnosis>>(),
     TRes: Type<ConsultationDiagnosis>(),
   },
 } as const;

@@ -8,9 +8,8 @@ import {
 } from "../types";
 import { useAsyncOptions } from "../../../Common/hooks/useAsyncOptions";
 import { listICD11Diagnosis } from "../../../Redux/actions";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import DropdownMenu, { DropdownItem } from "../../Common/components/Menu";
 import ConditionVerificationStatusMenu from "../ConditionVerificationStatusMenu";
+import { classNames } from "../../../Utils/utils";
 
 interface AddICD11DiagnosisProps {
   className?: string;
@@ -46,43 +45,32 @@ export default function AddICD11Diagnosis(props: AddICD11DiagnosisProps) {
   };
 
   return (
-    <div className={props.className}>
-      <div className="flex w-full flex-col items-start gap-2 md:flex-row">
-        <AutocompleteFormField
-          id="icd11-search"
-          name="icd11_search"
-          disabled={props.disabled || adding}
-          value={selected}
-          onChange={(e) => setSelected(e.value)}
-          options={options(selected ? [selected] : undefined)}
-          optionLabel={(option) => option.label}
-          optionValue={(option) => option}
-          onQuery={(query) => fetchOptions(listICD11Diagnosis({ query }))}
-          isLoading={isLoading}
-          error={hasError ? t("diagnosis_already_added") : undefined}
-        />
-        <ConditionVerificationStatusMenu
-          disabled={props.disabled || !selected || hasError || adding}
-          options={ActiveConditionVerificationStatuses}
-          onSelect={(status) => handleAdd(status)}
-        />
-        <DropdownMenu
-          id="add-icd11-diagnosis-menu"
-          title={t("add_diagnosis")}
-          icon={<CareIcon icon="l-plus-circle" className="text-lg" />}
-        >
-          {ActiveConditionVerificationStatuses.map((status) => (
-            <DropdownItem
-              key={status}
-              id={`add-icd11-diagnosis-as-${status}`}
-              onClick={() => handleAdd(status)}
-              icon={<CareIcon icon="l-plus-circle" className="text-lg" />}
-            >
-              Add as {t(status)}
-            </DropdownItem>
-          ))}
-        </DropdownMenu>
-      </div>
+    <div
+      className={classNames(
+        props.className,
+        "flex w-full flex-col items-start gap-2 md:flex-row"
+      )}
+    >
+      <AutocompleteFormField
+        id="icd11-search"
+        name="icd11_search"
+        className="w-full"
+        disabled={props.disabled || adding}
+        placeholder={t("search_icd11_placeholder")}
+        value={selected}
+        onChange={(e) => setSelected(e.value)}
+        options={options(selected ? [selected] : undefined)}
+        optionLabel={(option) => option.label}
+        optionValue={(option) => option}
+        onQuery={(query) => fetchOptions(listICD11Diagnosis({ query }))}
+        isLoading={isLoading}
+        error={hasError ? t("diagnosis_already_added") : undefined}
+      />
+      <ConditionVerificationStatusMenu
+        disabled={props.disabled || !selected || hasError || adding}
+        options={ActiveConditionVerificationStatuses}
+        onSelect={(status) => handleAdd(status)}
+      />
     </div>
   );
 }

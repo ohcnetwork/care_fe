@@ -1,6 +1,13 @@
 {
     "diagnosis_already_added": "This diagnosis was already added",
-    "add_diagnosis": "Add diagnosis",
+    "principal_diagnosis": "Principal diagnosis",
     "mark_as_principal": "Mark as principal",
-    "unmark_as_principal": "Unmark as principal"
+    "unmark_as_principal": "Unmark as principal",
+    "unconfirmed": "Unconfirmed",
+    "provisional": "Provisional",
+    "differential": "Differential",
+    "confirmed": "Confirmed",
+    "refuted": "Refuted",
+    "entered-in-error": "Entered in error",
+    "search_icd11_placeholder": "Search for ICD-11 Diagnoses"
 }

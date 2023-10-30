@@ -11,7 +11,7 @@ import {
 import DiagnosesRoutes from "../routes";
 import { useState } from "react";
 import request from "../../../Utils/request/request";
-import * as Notification from "../../../Utils/Notifications";
+import { classNames } from "../../../Utils/utils";
 
 interface RemoveAction {
   type: "remove";
@@ -48,20 +48,17 @@ export default function ConsultationDiagnosisEntry(props: Props) {
 
   const handleUpdate = async (value: ConsultationDiagnosis) => {
     setDisabled(true);
-    const { res, data, error } = await request(
+    const { res, data } = await request(
       DiagnosesRoutes.updateConsultationDiagnosis,
       {
         pathParams: {
           consultation: props.consultationId as string,
           id: value.id,
         },
+        body: value,
       }
     );
     setDisabled(false);
-
-    if (error) {
-      Notification.Error({ msg: error });
-    }
 
     if (res?.ok && data) {
       setData(data);
@@ -71,12 +68,21 @@ export default function ConsultationDiagnosisEntry(props: Props) {
   const object = data ?? props.value;
 
   return (
-    <div className={props.className}>
-      <div className="flex items-start gap-2">
-        <div className="cui-input-base">{object.diagnosis_object?.label}</div>
+    <div
+      className={classNames(props.className, "flex w-full items-center gap-2")}
+    >
+      <div
+        className={classNames(
+          "cui-input-base relative w-full",
+          object.is_principal && "border-primary-500 ring-1 ring-primary-500"
+        )}
+      >
+        {object.diagnosis_object?.label}
 
         <ButtonV2
-          className="shrink-0"
+          className="absolute right-2 top-2 h-full"
+          type="button"
+          size="small"
           variant={object.is_principal ? "primary" : "secondary"}
           disabled={disabled}
           ghost
@@ -97,15 +103,17 @@ export default function ConsultationDiagnosisEntry(props: Props) {
             className="text-lg"
           />
 
-          <span className="sr-only">
+          <span>
             {object.is_principal
-              ? t("mark_as_principal")
-              : t("unmark_as_principal")}
+              ? t("principal_diagnosis")
+              : t("mark_as_principal")}
           </span>
         </ButtonV2>
+      </div>
 
+      <div className="w-72">
         <ConditionVerificationStatusMenu
-          className="shrink-0"
+          className="w-full"
           value={object.verification_status}
           disabled={disabled}
           options={

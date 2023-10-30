@@ -30,7 +30,7 @@ export default function DropdownMenu({
           disabled={props.disabled}
           className={`button-size-default button-${variant}-default  button-shape-square flex w-full cursor-pointer items-center justify-center gap-2 font-medium outline-offset-1 transition-all duration-200 ease-in-out disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500 lg:justify-between ${props.className}`}
         >
-          <div className="flex h-6 items-center gap-2">
+          <div className="flex h-6 items-center gap-2 whitespace-nowrap">
             {props.icon}
             {props.title || "Dropdown"}
           </div>
