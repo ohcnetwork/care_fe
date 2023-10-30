@@ -454,19 +454,12 @@ export default function ShiftDetails(props: { id: string }) {
             </div>
           </div>
 
-          <div className="mt-2 flex justify-between">
+          {/* <div className="mt-2 flex justify-between">
             <div>
               <span className="font-semibold leading-relaxed">
                 {t("diagnosis")}:{" "}
               </span>
               {consultation.diagnosis || "-"}
-            </div>
-          </div>
-
-          {/* <div className="mt-2 flex justify-between">
-            <div>
-              <span className="font-semibold leading-relaxed">Comorbidities (if any): </span>
-              {consultation.diagnosis || '-'}
             </div>
           </div> */}
 

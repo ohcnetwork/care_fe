@@ -791,8 +791,8 @@ export const editInvestigation = (
 };
 
 // ICD11
-export const listICD11Diagnosis = (params: object, key: string) => {
-  return fireRequest("listICD11Diagnosis", [], params, null, key);
+export const listICD11Diagnosis = (params: object) => {
+  return fireRequest("listICD11Diagnosis", [], params, null);
 };
 // Medibase
 export const listMedibaseMedicines = (
