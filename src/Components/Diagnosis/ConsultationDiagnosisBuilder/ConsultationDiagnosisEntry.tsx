@@ -41,7 +41,7 @@ interface ConsultationEditProps extends BaseProps {
 
 type Props = ConsultationCreateProps | ConsultationEditProps;
 
-export default function ConsultationCreateDignosisEntry(props: Props) {
+export default function ConsultationDiagnosisEntry(props: Props) {
   const { t } = useTranslation();
   const [data, setData] = useState<ConsultationDiagnosis>();
   const [disabled, setDisabled] = useState(false);
@@ -70,64 +70,66 @@ export default function ConsultationCreateDignosisEntry(props: Props) {
 
   const object = data ?? props.value;
 
-  <div className={props.className}>
-    <div className="flex items-start gap-2">
-      <div className="cui-input-base">{object.diagnosis_object?.label}</div>
+  return (
+    <div className={props.className}>
+      <div className="flex items-start gap-2">
+        <div className="cui-input-base">{object.diagnosis_object?.label}</div>
 
-      <ButtonV2
-        className="shrink-0"
-        variant={object.is_principal ? "primary" : "secondary"}
-        disabled={disabled}
-        ghost
-        border
-        onClick={() => {
-          const value = { ...object, is_principal: !object.is_principal };
+        <ButtonV2
+          className="shrink-0"
+          variant={object.is_principal ? "primary" : "secondary"}
+          disabled={disabled}
+          ghost
+          border
+          onClick={() => {
+            const value = { ...object, is_principal: !object.is_principal };
 
-          if (props.consultationId === undefined) {
-            props.onChange({ type: "edit", value });
-            return;
+            if (props.consultationId === undefined) {
+              props.onChange({ type: "edit", value });
+              return;
+            }
+
+            handleUpdate(value as ConsultationDiagnosis);
+          }}
+        >
+          <CareIcon
+            icon={object.is_principal ? "l-check" : "l-times"}
+            className="text-lg"
+          />
+
+          <span className="sr-only">
+            {object.is_principal
+              ? t("mark_as_principal")
+              : t("unmark_as_principal")}
+          </span>
+        </ButtonV2>
+
+        <ConditionVerificationStatusMenu
+          className="shrink-0"
+          value={object.verification_status}
+          disabled={disabled}
+          options={
+            props.consultationId === undefined
+              ? ActiveConditionVerificationStatuses
+              : ConditionVerificationStatuses
           }
+          onSelect={(verification_status) => {
+            const value = { ...object, verification_status };
 
-          handleUpdate(value as ConsultationDiagnosis);
-        }}
-      >
-        <CareIcon
-          icon={object.is_principal ? "l-check" : "l-times"}
-          className="text-lg"
+            if (props.consultationId === undefined) {
+              props.onChange({ type: "edit", value: value as CreateDiagnosis });
+              return;
+            }
+
+            handleUpdate(value as ConsultationDiagnosis);
+          }}
+          onRemove={
+            props.consultationId === undefined
+              ? () => props.onChange({ type: "remove" })
+              : undefined
+          }
         />
-
-        <span className="sr-only">
-          {object.is_principal
-            ? t("mark_as_principal")
-            : t("unmark_as_principal")}
-        </span>
-      </ButtonV2>
-
-      <ConditionVerificationStatusMenu
-        className="shrink-0"
-        value={object.verification_status}
-        disabled={disabled}
-        options={
-          props.consultationId === undefined
-            ? ActiveConditionVerificationStatuses
-            : ConditionVerificationStatuses
-        }
-        onSelect={(verification_status) => {
-          const value = { ...object, verification_status };
-
-          if (props.consultationId === undefined) {
-            props.onChange({ type: "edit", value: value as CreateDiagnosis });
-            return;
-          }
-
-          handleUpdate(value as ConsultationDiagnosis);
-        }}
-        onRemove={
-          props.consultationId === undefined
-            ? () => props.onChange({ type: "remove" })
-            : undefined
-        }
-      />
+      </div>
     </div>
-  </div>;
+  );
 }

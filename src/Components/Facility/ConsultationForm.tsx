@@ -60,6 +60,10 @@ import { useDispatch } from "react-redux";
 import useVisibility from "../../Utils/useVisibility";
 import dayjs from "../../Utils/dayjs";
 import { ConsultationDiagnosis, CreateDiagnosis } from "../Diagnosis/types.js";
+import {
+  CreateDiagnosesBuilder,
+  EditDiagnosesBuilder,
+} from "../Diagnosis/ConsultationDiagnosisBuilder/ConsultationDiagnosisBuilder.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));
@@ -82,7 +86,7 @@ type FormDetails = {
   referred_to?: string;
   referred_to_external?: string;
   create_diagnoses: CreateDiagnosis[];
-  readonly diagnoses: ConsultationDiagnosis[];
+  diagnoses: ConsultationDiagnosis[];
   verified_by: string;
   verified_by_object: UserModel | null;
   is_kasp: BooleanStrings;
@@ -321,18 +325,6 @@ export const ConsultationForm = (props: any) => {
           verified_by: "Declared Dead",
         },
       });
-    } else if (
-      event.name === "icd11_diagnoses_object" ||
-      event.name === "icd11_provisional_diagnoses_object"
-    ) {
-      // dispatch({
-      //   type: "set_form",
-      //   form: {
-      //     ...state.form,
-      //     [event.name]: event.value,
-      //     icd11_principal_diagnosis: undefined,
-      //   },
-      // });
     } else {
       dispatch({
         type: "set_form",
@@ -1188,20 +1180,25 @@ export const ConsultationForm = (props: any) => {
                   <div className="flex flex-col">
                     {sectionTitle("Diagnosis", true)}
                     <p className="-mt-4 mb-4 space-x-1 text-sm text-gray-700">
-                      <span className="font-medium">
-                        Either Provisional or Final Diagnosis is mandatory
-                      </span>
-                      <span>| Diagnoses as per ICD-11 recommended by WHO</span>
+                      <span>Diagnoses as per ICD-11 recommended by WHO</span>
                     </p>
                   </div>
 
-                  {/* <div ref={fieldRef["icd11_provisional_diagnoses_object"]}>
-                    <DiagnosisSelectFormField
-                      {...field("icd11_provisional_diagnoses_object")}
-                      multiple
-                      label="Provisional Diagnosis"
-                    />
-                  </div> */}
+                  <div ref={fieldRef["diagnoses"]}>
+                    {isUpdate ? (
+                      <EditDiagnosesBuilder value={state.form.diagnoses} />
+                    ) : (
+                      <CreateDiagnosesBuilder
+                        value={state.form.create_diagnoses}
+                        onChange={(diagnoses) => {
+                          handleFormFieldChange({
+                            name: "create_diagnoses",
+                            value: diagnoses,
+                          });
+                        }}
+                      />
+                    )}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 gap-x-6">

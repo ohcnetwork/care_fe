@@ -17,6 +17,7 @@ const DiagnosesRoutes = {
   createConsultationDiagnosis: {
     path: "/api/v1/consultation/{consultation}/diagnoses/",
     TBody: Type<CreateDiagnosis>(),
+    TRes: Type<ConsultationDiagnosis>(),
   },
 
   getConsultationDiagnosis: {

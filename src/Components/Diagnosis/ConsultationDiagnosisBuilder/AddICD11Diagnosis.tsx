@@ -6,7 +6,6 @@ import {
   CreateDiagnosis,
   ICD11DiagnosisModel,
 } from "../types";
-import { FieldError } from "../../Form/FieldValidators";
 import { useAsyncOptions } from "../../../Common/hooks/useAsyncOptions";
 import { listICD11Diagnosis } from "../../../Redux/actions";
 import CareIcon from "../../../CAREUI/icons/CareIcon";
@@ -15,7 +14,7 @@ import ConditionVerificationStatusMenu from "../ConditionVerificationStatusMenu"
 
 interface AddICD11DiagnosisProps {
   className?: string;
-  onAdd: (object: CreateDiagnosis) => Promise<FieldError>;
+  onAdd: (object: CreateDiagnosis) => Promise<boolean>;
   disallowed: ICD11DiagnosisModel[];
   disabled?: boolean;
 }
