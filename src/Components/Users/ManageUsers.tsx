@@ -706,6 +706,7 @@ function UserFacilities(props: { user: any }) {
         <FacilitySelect
           multiple={false}
           name="facility"
+          exclude_user={username}
           showAll={false} // Show only facilities that user has access to link (not all facilities)
           showNOptions={8}
           selected={facility}
