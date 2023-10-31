@@ -712,14 +712,7 @@ export const ConsultationForm = (props: any) => {
         treatment_plan: state.form.treatment_plan,
         discharge_date: state.form.discharge_date,
         patient_no: state.form.patient_no,
-        // icd11_diagnoses: state.form.icd11_diagnoses_object.map(
-        //   (o: ICD11DiagnosisModel) => o.id
-        // ),
-        // icd11_provisional_diagnoses:
-        //   state.form.icd11_provisional_diagnoses_object.map(
-        //     (o: ICD11DiagnosisModel) => o.id
-        //   ),
-        // icd11_principal_diagnosis: state.form.icd11_principal_diagnosis,
+        create_diagnoses: isUpdate ? undefined : state.form.create_diagnoses,
         verified_by: state.form.verified_by,
         investigation: state.form.InvestigationAdvice,
         procedure: state.form.procedures,
