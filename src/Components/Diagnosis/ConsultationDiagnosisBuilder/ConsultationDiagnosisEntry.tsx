@@ -92,7 +92,7 @@ export default function ConsultationDiagnosisEntry(props: Props) {
           {object.diagnosis_object?.label}
         </span>
 
-        <div className="flex items-center justify-end gap-2 md:absolute md:inset-y-0 md:right-2 md:justify-normal">
+        <div className="flex items-center justify-end gap-2 sm:flex-row md:absolute md:inset-y-0 md:right-2 md:justify-normal">
           {isActive && (
             <ButtonV2
               type="button"
@@ -118,9 +118,16 @@ export default function ConsultationDiagnosisEntry(props: Props) {
                 <CareIcon icon="l-check" className="text-lg" />
               )}
               <span className="py-0.5">
-                {object.is_principal
-                  ? t("principal_diagnosis")
-                  : t("mark_as_principal")}
+                {object.is_principal ? (
+                  <>
+                    <span className="hidden md:block">
+                      {t("principal_diagnosis")}
+                    </span>
+                    <span className="block md:hidden">{t("principal")}</span>
+                  </>
+                ) : (
+                  t("mark_as_principal")
+                )}
               </span>
             </ButtonV2>
           )}

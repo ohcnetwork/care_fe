@@ -48,7 +48,7 @@ export default function ConditionVerificationStatusMenu<
               <CareIcon
                 icon="l-coronavirus"
                 className={classNames(
-                  "text-lg transition-all duration-200 ease-in-out group-hover:rotate-90 group-hover:text-inherit",
+                  "hidden text-lg transition-all duration-200 ease-in-out group-hover:rotate-90 group-hover:text-inherit md:block",
                   props.value === status ? "text-inherit-500" : "text-gray-500"
                 )}
               />
@@ -56,7 +56,7 @@ export default function ConditionVerificationStatusMenu<
             className="group"
             disabled={props.value === status}
           >
-            <div className="flex w-full max-w-xs flex-col items-start gap-1">
+            <div className="flex w-full max-w-xs flex-col items-start gap-1 whitespace-nowrap">
               <span className={props.value === status ? "font-medium" : ""}>
                 {InactiveConditionVerificationStatuses.includes(
                   status as (typeof InactiveConditionVerificationStatuses)[number]
@@ -65,7 +65,7 @@ export default function ConditionVerificationStatusMenu<
                   : ""}
                 {t(status)}
               </span>
-              <span className="text-xs text-gray-600">
+              <span className="hidden text-xs text-gray-600 md:block">
                 {t(`help_${status}`)}
               </span>
             </div>
