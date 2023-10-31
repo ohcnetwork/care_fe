@@ -1,4 +1,6 @@
 {
+    "diagnosis": "Diagnosis",
+    "diagnoses": "Diagnoses",
     "diagnosis_already_added": "This diagnosis was already added",
     "principal": "Principal",
     "principal_diagnosis": "Principal diagnosis",
@@ -16,5 +18,6 @@
     "help_confirmed": "There is sufficient diagnostic and/or clinical evidence to treat this as a confirmed condition.",
     "help_refuted": "This condition has been ruled out by subsequent diagnostic and clinical evidence.",
     "help_entered-in-error": "The statement was entered in error and is not valid.",
-    "search_icd11_placeholder": "Search for ICD-11 Diagnoses"
+    "search_icd11_placeholder": "Search for ICD-11 Diagnoses",
+    "icd11_as_recommended": "As per ICD-11 recommended by WHO"
 }

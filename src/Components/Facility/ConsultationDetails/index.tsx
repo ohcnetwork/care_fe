@@ -41,6 +41,7 @@ import { ConsultationPressureSoreTab } from "./ConsultationPressureSoreTab";
 import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
 import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
 import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
+import LegacyDiagnosesList from "../../Diagnosis/LegacyDiagnosesList";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
@@ -414,12 +415,9 @@ export const ConsultationDetails = (props: any) => {
                   </div>
                 )*/}
 
-                {/* <ShowDiagnosis
-                  diagnoses={
-                    consultationData?.icd11_provisional_diagnoses_object
-                  }
-                  label="Provisional Diagnosis (as per ICD-11 recommended by WHO)"
-                /> */}
+                <LegacyDiagnosesList
+                  diagnoses={consultationData.diagnoses || []}
+                />
 
                 {(consultationData.verified_by_object ||
                   consultationData.deprecated_verified_by) && (
