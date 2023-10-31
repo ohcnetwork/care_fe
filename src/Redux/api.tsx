@@ -28,6 +28,7 @@ import {
   AssetUpdate,
 } from "../Components/Assets/AssetTypes";
 import {
+  ConsultationModel,
   FacilityModel,
   LocationModel,
   WardModel,
@@ -40,10 +41,13 @@ import {
   ILocalBodyByDistrict,
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
+
 import { Prescription } from "../Components/Medicine/models";
-import { PatientModel } from "../Components/Patient/models";
+
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
+import { PatientModel } from "../Components/Patient/models";
+import { IComment, IResource } from "../Components/Resource/models";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -128,6 +132,8 @@ const routes = {
 
   userList: {
     path: "/api/v1/users/",
+    method: "GET",
+    TRes: Type<PaginatedResponse<UserModel>>(),
   },
 
   userListSkill: {
@@ -843,21 +849,31 @@ const routes = {
   createResource: {
     path: "/api/v1/resource/",
     method: "POST",
+    TRes: Type<IResource>(),
+    TBody: Type<Partial<IResource>>(),
   },
   updateResource: {
-    path: "/api/v1/resource",
+    path: "/api/v1/resource/{id}",
     method: "PUT",
+    TRes: Type<IResource>(),
+    TBody: Type<Partial<IResource>>(),
   },
   deleteResourceRecord: {
-    path: "/api/v1/resource",
+    path: "/api/v1/resource/{id}",
     method: "DELETE",
+    TRes: Type<{
+      detail?: string;
+    }>(),
   },
   listResourceRequests: {
     path: "/api/v1/resource/",
     method: "GET",
+    TRes: Type<PaginatedResponse<IResource>>(),
   },
   getResourceDetails: {
     path: "/api/v1/resource/{id}/",
+    method: "GET",
+    TRes: Type<IResource>(),
   },
   downloadResourceRequests: {
     path: "/api/v1/resource/",
@@ -866,10 +882,13 @@ const routes = {
   getResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
     method: "GET",
+    TRes: Type<PaginatedResponse<IComment>>(),
   },
   addResourceComments: {
     path: "/api/v1/resource/{id}/comment/",
     method: "POST",
+    TRes: Type<IComment>(),
+    TBody: Type<Partial<IComment>>(),
   },
 
   // Assets endpoints

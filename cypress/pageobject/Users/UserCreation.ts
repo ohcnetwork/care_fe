@@ -10,6 +10,20 @@ export class UserCreationPage {
       .type(value);
   }
 
+  typeIntoElementByIdPostClear(elementId: string, value: string) {
+    cy.get("#" + elementId)
+      .click()
+      .clear()
+      .click()
+      .type(value);
+  }
+
+  clearIntoElementById(elementId: string) {
+    cy.get("#" + elementId)
+      .click()
+      .clear();
+  }
+
   typeIntoInputByName(inputName: string, value: string) {
     cy.get("input[name='" + inputName + "']")
       .click()
