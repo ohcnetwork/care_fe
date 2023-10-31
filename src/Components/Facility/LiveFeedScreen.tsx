@@ -143,7 +143,7 @@ export default function LiveFeedScreen({ facilityId }: Props) {
 
   return (
     <Page
-      title="Live Camera Feed"
+      title="Live Monitoring"
       backUrl={`/facility/${facilityId}/`}
       noImplicitPadding
       breadcrumbs={false}

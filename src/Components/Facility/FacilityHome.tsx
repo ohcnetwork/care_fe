@@ -625,7 +625,7 @@ export const FacilityHome = (props: any) => {
                 onClick={() => navigate(`/facility/${facilityId}/livefeed`)}
               >
                 <CareIcon className="care-l-video text-lg" />
-                <span>Live Feeds</span>
+                <span>Live Monitoring</span>
               </ButtonV2>
               <ButtonV2
                 variant="primary"
