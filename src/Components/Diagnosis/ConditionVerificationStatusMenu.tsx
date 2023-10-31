@@ -56,7 +56,7 @@ export default function ConditionVerificationStatusMenu<
             className="group"
             disabled={props.value === status}
           >
-            <div className="flex w-full max-w-xs flex-col items-start gap-1 whitespace-nowrap">
+            <div className="flex w-full max-w-xs flex-col items-start gap-1 whitespace-nowrap md:whitespace-normal">
               <span className={props.value === status ? "font-medium" : ""}>
                 {InactiveConditionVerificationStatuses.includes(
                   status as (typeof InactiveConditionVerificationStatuses)[number]
