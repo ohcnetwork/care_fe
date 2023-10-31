@@ -105,7 +105,7 @@ self.addEventListener("push", async function (event) {
   if (event.data) {
     const data = JSON.parse(event.data.text());
 
-    if (data?.type === "MESSAGE") {
+    if (["MESSAGE","PUSH_MESSAGE"].includes(data?.type)) {
       self.clients.matchAll().then((clients) => {
         clients[0].postMessage(data);
       });
