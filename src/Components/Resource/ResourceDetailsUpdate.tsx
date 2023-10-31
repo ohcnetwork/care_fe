@@ -1,15 +1,7 @@
 import * as Notification from "../../Utils/Notifications.js";
-
 import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { lazy, useCallback, useEffect, useReducer, useState } from "react";
-import {
-  getResourceDetails,
-  getUserList,
-  updateResource,
-} from "../../Redux/actions";
+import { lazy, useReducer, useState } from "react";
 import { navigate, useQueryParams } from "raviger";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-
 import Card from "../../CAREUI/display/Card";
 import CircularProgress from "../Common/components/CircularProgress";
 import { FacilitySelect } from "../Common/FacilitySelect";
@@ -22,9 +14,11 @@ import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
-
 import useAppHistory from "../../Common/hooks/useAppHistory";
-import { useDispatch } from "react-redux";
+import useQuery from "../../Utils/request/useQuery.js";
+import routes from "../../Redux/api.js";
+import { UserModel } from "../Users/models.js";
+import request from "../../Utils/request/request.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -67,13 +61,9 @@ const initialState = {
 
 export const ResourceDetailsUpdate = (props: resourceProps) => {
   const { goBack } = useAppHistory();
-  const dispatchAction: any = useDispatch();
   const [qParams, _] = useQueryParams();
   const [isLoading, setIsLoading] = useState(true);
-  const [assignedQuantity, setAssignedQuantity] = useState(0);
-  const [requestTitle, setRequestTitle] = useState("");
-  const [assignedUser, SetAssignedUser] = useState(null);
-  const [assignedUserLoading, setAssignedUserLoading] = useState(false);
+  const [assignedUser, SetAssignedUser] = useState<UserModel>();
   const resourceFormReducer = (state = initialState, action: any) => {
     switch (action.type) {
       case "set_form": {
@@ -95,23 +85,13 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
 
   const [state, dispatch] = useReducer(resourceFormReducer, initialState);
 
-  useEffect(() => {
-    async function fetchData() {
-      if (state.form.assigned_to) {
-        setAssignedUserLoading(true);
-
-        const res = await dispatchAction(
-          getUserList({ id: state.form.assigned_to })
-        );
-
-        if (res && res.data && res.data.count)
-          SetAssignedUser(res.data.results[0]);
-
-        setAssignedUserLoading(false);
+  const { loading: assignedUserLoading } = useQuery(routes.userList, {
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data && data.count) {
+        SetAssignedUser(data.results[0]);
       }
-    }
-    fetchData();
-  }, [dispatchAction, state.form.assigned_to]);
+    },
+  });
 
   const validateForm = () => {
     const errors = { ...initError };
@@ -147,13 +127,25 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     dispatch({ type: "set_form", form });
   };
 
+  const { data: resourceDetails } = useQuery(routes.getResourceDetails, {
+    pathParams: { id: props.id },
+    onResponse: ({ res, data }) => {
+      if (res && data) {
+        const d = data;
+        d["status"] = qParams.status || data.status;
+        dispatch({ type: "set_form", form: d });
+      }
+      setIsLoading(false);
+    },
+  });
+
   const handleSubmit = async () => {
     const validForm = validateForm();
 
     if (validForm) {
       setIsLoading(true);
 
-      const data = {
+      const resourceData = {
         category: "OXYGEN",
         status: state.form.status,
         origin_facility: state.form.origin_facility_object?.id,
@@ -167,14 +159,17 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
         assigned_quantity:
           state.form.status === "PENDING"
             ? state.form.assigned_quantity
-            : assignedQuantity,
+            : resourceDetails?.assigned_quantity || 0,
       };
 
-      const res = await dispatchAction(updateResource(props.id, data));
+      const { res, data } = await request(routes.updateResource, {
+        pathParams: { id: props.id },
+        body: resourceData,
+      });
       setIsLoading(false);
 
-      if (res && res.status == 200 && res.data) {
-        dispatch({ type: "set_form", form: res.data });
+      if (res && res.status == 200 && data) {
+        dispatch({ type: "set_form", form: data });
         Notification.Success({
           msg: "Resource request updated successfully",
         });
@@ -186,31 +181,6 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     }
   };
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
-      setIsLoading(true);
-      const res = await dispatchAction(getResourceDetails({ id: props.id }));
-      if (!status.aborted) {
-        if (res && res.data) {
-          setRequestTitle(res.data.title);
-          setAssignedQuantity(res.data.assigned_quantity);
-          const d = res.data;
-          d["status"] = qParams.status || res.data.status;
-          dispatch({ type: "set_form", form: d });
-        }
-        setIsLoading(false);
-      }
-    },
-    [props.id, dispatchAction, qParams.status]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [fetchData]
-  );
-
   if (isLoading) {
     return <Loading />;
   }
@@ -219,7 +189,7 @@ export const ResourceDetailsUpdate = (props: resourceProps) => {
     <Page
       title="Update Resource Request"
       backUrl={`/resource/${props.id}`}
-      crumbsReplacements={{ [props.id]: { name: requestTitle } }}
+      crumbsReplacements={{ [props.id]: { name: resourceDetails?.title } }}
     >
       <div className="mt-4">
         <Card className="flex w-full flex-col">
