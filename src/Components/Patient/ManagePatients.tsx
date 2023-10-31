@@ -16,9 +16,14 @@ import {
   getAllPatient,
   getAnyFacility,
   getDistrict,
+  getFacilityAssetLocation,
   getLocalBody,
 } from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import {
+  statusType,
+  useAbortableEffect,
+  parseOptionId,
+} from "../../Common/utils";
 
 import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -36,7 +41,6 @@ import RecordMeta from "../../CAREUI/display/RecordMeta";
 import SearchInput from "../Form/SearchInput";
 import SortDropdownMenu from "../Common/SortDropdown";
 import SwitchTabs from "../Common/components/SwitchTabs";
-import { parseOptionId } from "../../Common/utils";
 import { formatAge, parsePhoneNumber } from "../../Utils/utils.js";
 import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
@@ -104,6 +108,7 @@ export const PatientManager = () => {
   const [districtName, setDistrictName] = useState("");
   const [localbodyName, setLocalbodyName] = useState("");
   const [facilityBadgeName, setFacilityBadge] = useState("");
+  const [locationBadgeName, setLocationBadge] = useState("");
   const [phone_number, setPhoneNumber] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
   const [emergency_phone_number, setEmergencyPhoneNumber] = useState("");
@@ -199,6 +204,8 @@ export const PatientManager = () => {
       qParams.last_consultation_admitted_bed_type_list || undefined,
     last_consultation_discharge_reason:
       qParams.last_consultation_discharge_reason || undefined,
+    last_consultation_current_bed__location:
+      qParams.last_consultation_current_bed__location || undefined,
     srf_id: qParams.srf_id || undefined,
     number_of_doses: qParams.number_of_doses || undefined,
     covin_id: qParams.covin_id || undefined,
@@ -344,6 +351,7 @@ export const PatientManager = () => {
     qParams.age_min,
     qParams.last_consultation_admitted_bed_type_list,
     qParams.last_consultation_discharge_reason,
+    qParams.last_consultation_current_bed__location,
     qParams.facility,
     qParams.facility_type,
     qParams.district,
@@ -443,12 +451,32 @@ export const PatientManager = () => {
     [dispatch, qParams.facility]
   );
 
+  const fetchLocationBadgeName = useCallback(
+    async (status: statusType) => {
+      const res =
+        qParams.last_consultation_current_bed__location &&
+        (await dispatch(
+          getFacilityAssetLocation(
+            qParams.facility,
+            qParams.last_consultation_current_bed__location
+          )
+        ));
+
+      if (!status.aborted) {
+        setLocationBadge(res?.data?.name);
+      }
+    },
+    [dispatch, qParams.last_consultation_current_bed__location]
+  );
+
   useAbortableEffect(
     (status: statusType) => {
       fetchFacilityBadgeName(status);
+      fetchLocationBadgeName(status);
     },
-    [fetchFacilityBadgeName]
+    [fetchFacilityBadgeName, fetchLocationBadgeName]
   );
+
   const LastAdmittedToTypeBadges = () => {
     const badge = (key: string, value: any, id: string) => {
       return (
@@ -936,6 +964,11 @@ export const PatientManager = () => {
               "last_consultation_medico_legal_case"
             ),
             value("Facility", "facility", facilityBadgeName),
+            value(
+              "Location",
+              "last_consultation_current_bed__location",
+              locationBadgeName
+            ),
             badge("Facility Type", "facility_type"),
             value("District", "district", districtName),
             ordering(),
