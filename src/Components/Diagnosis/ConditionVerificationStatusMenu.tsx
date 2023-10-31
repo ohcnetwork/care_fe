@@ -44,19 +44,31 @@ export default function ConditionVerificationStatusMenu<
             id={`add-icd11-diagnosis-as-${status}`}
             variant={StatusStyle[status].variant}
             onClick={() => props.onSelect(status)}
-            // icon={
-            //   <CareIcon icon={StatusStyle[status].icon} className="text-lg" />
-            // }
+            icon={
+              <CareIcon
+                icon="l-coronavirus"
+                className={classNames(
+                  "text-lg transition-all duration-200 ease-in-out group-hover:rotate-90 group-hover:text-inherit",
+                  props.value === status ? "text-inherit-500" : "text-gray-500"
+                )}
+              />
+            }
+            className="group"
             disabled={props.value === status}
           >
-            <span className={props.value === status ? "font-medium" : ""}>
-              {InactiveConditionVerificationStatuses.includes(
-                status as (typeof InactiveConditionVerificationStatuses)[number]
-              )
-                ? "Remove as "
-                : ""}
-              {t(status)}
-            </span>
+            <div className="flex w-full max-w-xs flex-col items-start gap-1">
+              <span className={props.value === status ? "font-medium" : ""}>
+                {InactiveConditionVerificationStatuses.includes(
+                  status as (typeof InactiveConditionVerificationStatuses)[number]
+                )
+                  ? "Remove as "
+                  : ""}
+                {t(status)}
+              </span>
+              <span className="text-xs text-gray-600">
+                {t(`help_${status}`)}
+              </span>
+            </div>
           </DropdownItem>
         ))}
 
