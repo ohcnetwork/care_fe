@@ -93,9 +93,12 @@ export const HospitalList = () => {
         local_body_object: result.local_body_object,
         district_object: result.district_object,
         state_object: result.state_object,
+        state: result.state,
         ward_object: result.ward_object,
         modified_date: result.modified_date,
         created_date: result.created_date,
+        local_body: result.local_body,
+        ward: result.ward,
       }));
 
       setData(transformedData);
