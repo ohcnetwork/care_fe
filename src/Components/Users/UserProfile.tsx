@@ -417,7 +417,11 @@ export default function UserProfile() {
                 Local Body, District and State are Non Editable Settings.
               </p>
               <div className="flex flex-col gap-2">
-                <ButtonV2 onClick={(_) => setShowEdit(!showEdit)} type="button">
+                <ButtonV2
+                  onClick={(_) => setShowEdit(!showEdit)}
+                  type="button"
+                  id="edit-cancel-profile-button"
+                >
                   {showEdit ? "Cancel" : "Edit User Profile"}
                 </ButtonV2>
                 <ButtonV2 variant="danger" onClick={(_) => handleSignOut(true)}>
@@ -431,7 +435,10 @@ export default function UserProfile() {
             {!showEdit && (
               <div className="m-2 overflow-hidden rounded-lg bg-white px-4 py-5  shadow sm:rounded-lg sm:px-6">
                 <dl className="col-gap-4 row-gap-8 grid grid-cols-1 sm:grid-cols-2">
-                  <div className="my-2 sm:col-span-1">
+                  <div
+                    className="my-2 sm:col-span-1"
+                    id="username-profile-details"
+                  >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Username
                     </dt>
@@ -439,7 +446,10 @@ export default function UserProfile() {
                       {details.username || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="contactno-profile-details"
+                  >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Contact No
                     </dt>
@@ -448,7 +458,10 @@ export default function UserProfile() {
                     </dd>
                   </div>
 
-                  <div className="my-2  sm:col-span-1">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="whatsapp-profile-details"
+                  >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Whatsapp No
                     </dt>
@@ -456,7 +469,10 @@ export default function UserProfile() {
                       {details.alt_phone_number || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="emailid-profile-details"
+                  >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Email address
                     </dt>
@@ -464,7 +480,10 @@ export default function UserProfile() {
                       {details.email || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="firstname-profile-details"
+                  >
                     <dt className="text-sm font-medium leading-5 text-black">
                       First Name
                     </dt>
@@ -472,7 +491,10 @@ export default function UserProfile() {
                       {details.first_name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="lastname-profile-details"
+                  >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Last Name
                     </dt>
@@ -480,7 +502,7 @@ export default function UserProfile() {
                       {details.last_name || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div className="my-2  sm:col-span-1" id="age-profile-details">
                     <dt className="text-sm font-medium leading-5 text-black">
                       Age
                     </dt>
@@ -497,7 +519,10 @@ export default function UserProfile() {
                       {details.user_type || "-"}
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="gender-profile-details"
+                  >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Gender
                     </dt>
@@ -547,7 +572,10 @@ export default function UserProfile() {
                       </div>
                     </dd>
                   </div>
-                  <div className="my-2  sm:col-span-1">
+                  <div
+                    className="my-2  sm:col-span-1"
+                    id="averageworkinghour-profile-details"
+                  >
                     <dt className="text-sm font-medium leading-5 text-black">
                       Average weekly working hours
                     </dt>
