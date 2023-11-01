@@ -202,14 +202,7 @@ describe("User Creation", () => {
   //       .click()
   //       .type("Dummy Facility 1")
   //       .wait("@getFacilities");
-  //     cy.get("li[role='option']").first().click();
-  //     cy.intercept(/\/api\/v1\/users\/\w+\/add_facility\//).as("addFacility");
-  //     cy.get("button[id='link-facility']").click();
-  //     cy.wait("@addFacility")
-  //       // .its("response.statusCode")
-  //       // .should("eq", 201)
-  //       .get("span")
-  //       .contains("Facility - User Already has permission to this facility");
+  //     cy.get("li[role='option']").should("not.exist");
   //   });
 
   afterEach(() => {

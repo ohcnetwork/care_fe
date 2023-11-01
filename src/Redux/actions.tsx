@@ -749,29 +749,8 @@ export const listMedibaseMedicines = (
 };
 
 // Resource
-export const createResource = (params: object) => {
-  return fireRequest("createResource", [], params);
-};
-export const updateResource = (id: string, params: object) => {
-  return fireRequest("updateResource", [id], params);
-};
-export const deleteResourceRecord = (id: string) => {
-  return fireRequest("deleteResourceRecord", [id], {});
-};
-export const listResourceRequests = (params: object, key: string) => {
-  return fireRequest("listResourceRequests", [], params, null, key);
-};
-export const getResourceDetails = (pathParam: object) => {
-  return fireRequest("getResourceDetails", [], {}, pathParam);
-};
 export const downloadResourceRequests = (params: object) => {
   return fireRequest("downloadResourceRequests", [], params);
-};
-export const getResourceComments = (id: string, params: object) => {
-  return fireRequest("getResourceComments", [], params, { id });
-};
-export const addResourceComments = (id: string, params: object) => {
-  return fireRequest("addResourceComments", [], params, { id });
 };
 
 export const listAssets = (params: object) =>

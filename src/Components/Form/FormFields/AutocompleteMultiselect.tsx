@@ -119,15 +119,17 @@ export const AutocompleteMutliSelect = <T, V>(
               onChange={(event) => setQuery(event.target.value.toLowerCase())}
               autoComplete="off"
             />
-            <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-gray-900">
-                {props.isLoading ? (
-                  <CareIcon className="care-l-spinner animate-spin" />
-                ) : (
-                  <CareIcon className="care-l-angle-down -mb-1.5" />
-                )}
-              </div>
-            </Combobox.Button>
+            {!props.disabled && (
+              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-gray-900">
+                  {props.isLoading ? (
+                    <CareIcon className="care-l-spinner animate-spin" />
+                  ) : (
+                    <CareIcon className="care-l-angle-down -mb-1.5" />
+                  )}
+                </div>
+              </Combobox.Button>
+            )}
           </div>
           {value.length !== 0 && (
             <div className="flex flex-wrap gap-2 p-2">

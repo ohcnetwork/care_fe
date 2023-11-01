@@ -34,6 +34,7 @@ import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import AccordionV2 from "../Common/components/AccordionV2";
 import { dateQueryString } from "../../Utils/utils";
 import dayjs from "dayjs";
+import { LocationSelect } from "../Common/LocationSelect";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -79,6 +80,8 @@ export default function PatientFilter(props: any) {
       filter.last_consultation_admitted_bed_type_list
         ? filter.last_consultation_admitted_bed_type_list.split(",")
         : [],
+    last_consultation_current_bed__location:
+      filter.last_consultation_current_bed__location || "",
     last_consultation_discharge_reason:
       filter.last_consultation_discharge_reason || null,
     srf_id: filter.srf_id || null,
@@ -128,6 +131,7 @@ export default function PatientFilter(props: any) {
     last_consultation_discharge_date_before: "",
     last_consultation_discharge_date_after: "",
     last_consultation_admitted_to_list: [],
+    last_consultation_current_bed__location: "",
     srf_id: "",
     number_of_doses: null,
     covin_id: "",
@@ -239,6 +243,7 @@ export default function PatientFilter(props: any) {
       last_consultation_discharge_date_after,
       last_consultation_admitted_bed_type_list,
       last_consultation_discharge_reason,
+      last_consultation_current_bed__location,
       number_of_doses,
       covin_id,
       srf_id,
@@ -256,6 +261,8 @@ export default function PatientFilter(props: any) {
       district: district || "",
       lsgBody: lsgBody || "",
       facility: facility || "",
+      last_consultation_current_bed__location:
+        last_consultation_current_bed__location || "",
       facility_type: facility_type || "",
       date_declared_positive_before: dateQueryString(
         date_declared_positive_before
@@ -588,13 +595,29 @@ export default function PatientFilter(props: any) {
             <FacilitySelect
               multiple={false}
               name="facility"
+              showAll={false}
               selected={filterState.facility_ref}
-              showAll
               setSelected={(obj) => setFacility(obj, "facility")}
             />
           </div>
-
           <div className="w-full flex-none">
+            <FieldLabel className="text-sm">Location</FieldLabel>
+            <LocationSelect
+              disabled={!filterState.facility}
+              name="facility"
+              selected={filterState.last_consultation_current_bed__location}
+              multiple={false}
+              errors=""
+              facilityId={filterState.facility}
+              setSelected={(selected) =>
+                setFilterState({
+                  ...filterState,
+                  last_consultation_current_bed__location: selected,
+                })
+              }
+            />
+          </div>
+          <div className="-mt-6 w-full flex-none">
             <FieldLabel className="text-sm">Facility type</FieldLabel>
             <SelectMenuV2
               placeholder="Show all"
