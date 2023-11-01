@@ -1,12 +1,6 @@
 import { Fragment, useContext, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import useFilters from "../../Common/hooks/useFilters";
 import useFullscreen from "../../Common/hooks/useFullscreen";
-import {
-  getPermittedFacility,
-  listPatientAssetBeds,
-} from "../../Redux/actions";
-// import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import { FacilityModel } from "./models";
 import Loading from "../Common/Loading";
 import Page from "../Common/components/Page";
@@ -16,7 +10,7 @@ import { classNames } from "../../Utils/utils";
 import { LocationSelect } from "../Common/LocationSelect";
 import Pagination from "../Common/Pagination";
 import { SidebarShrinkContext } from "../Common/Sidebar/Sidebar";
-import { PatientAssetBed } from "../Assets/AssetTypes";
+import { AssetData } from "../Assets/AssetTypes";
 import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
@@ -24,6 +18,9 @@ import { useTranslation } from "react-i18next";
 import { SortOption } from "../Common/SortDropdown";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import LiveFeedTile from "./LiveFeedTile";
+import { getCameraConfig } from "../../Utils/transformUtils";
+import { getPermittedFacility, listAssets } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
 
 const PER_PAGE_LIMIT = 6;
 
@@ -70,13 +67,17 @@ export default function LiveFeedScreen({ facilityId }: Props) {
   const [isFullscreen, setFullscreen] = useFullscreen();
   const sidebar = useContext(SidebarShrinkContext);
 
-  const [facilityObject, setFacilityObject] = useState<FacilityModel>();
-  const [assetList, setAssetList] = useState<PatientAssetBed[]>();
+  const [facility, setFacility] = useState<FacilityModel>();
+  const [assets, setAssets] = useState<AssetData[]>();
   const [totalCount, setTotalCount] = useState(0);
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
   const [ordering, setOrdering] = useState<string>("bed__name");
+
+  const [refresh_presets_hash, setRefreshPresetsHash] = useState<number>(
+    Number(new Date())
+  );
 
   // To automatically collapse sidebar.
   useEffect(() => {
@@ -93,15 +94,15 @@ export default function LiveFeedScreen({ facilityId }: Props) {
 
   useEffect(() => {
     async function fetchFacilityOrObject() {
-      if (facilityObject) return facilityObject;
+      if (facility) return facility;
       const res = await dispatch(getPermittedFacility(facilityId));
       if (res.status !== 200) return;
-      setFacilityObject(res.data);
+      setFacility(res.data);
       return res.data as FacilityModel;
     }
 
     async function fetchData() {
-      setAssetList(undefined);
+      setAssets(undefined);
 
       const filters = {
         ...qParams,
@@ -109,29 +110,28 @@ export default function LiveFeedScreen({ facilityId }: Props) {
         limit: PER_PAGE_LIMIT,
         offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
         asset_class: "ONVIF",
+        facility: facilityId || "",
+        location: qParams.location,
         ordering: qParams.ordering || ordering,
-        bed_is_occupied: qParams.bed_is_occupied ?? true,
+        bed_is_occupied: qParams.bed_is_occupied,
       };
 
       const [facilityObj, res] = await Promise.all([
         fetchFacilityOrObject(),
-        dispatch(listPatientAssetBeds(facilityId, filters)),
+        dispatch(listAssets(filters)),
       ]);
 
       if (!facilityObj || res.status !== 200) {
         return;
       }
       console.log(facilityObj, res.data);
-      const entries = res.data.results as PatientAssetBed[];
-      // const uniqueAssets = assets.filter(
-      //   (asset: any, index: number, self: any) =>
-      //     index === self.findIndex((t: any) => t.id === asset.id)
-      // );
+      const entries = res.data.results;
 
       setTotalCount(entries.length);
-      setAssetList(entries);
+      setAssets(entries);
     }
     fetchData();
+    setRefreshPresetsHash(Number(new Date()));
   }, [
     dispatch,
     facilityId,
@@ -277,17 +277,23 @@ export default function LiveFeedScreen({ facilityId }: Props) {
         </div>
       }
     >
-      {assetList === undefined ? (
+      {assets === undefined ? (
         <Loading />
-      ) : assetList.length === 0 ? (
+      ) : assets.length === 0 ? (
         <div className="flex h-[80vh] w-full items-center justify-center text-center text-black">
           No Camera present in this location or facility.
         </div>
       ) : (
-        <div className="mt-1 grid grid-cols-1 gap-2 xl:grid-cols-2 3xl:grid-cols-3">
-          {assetList.map((asset, idx) => (
+        <div className="mt-1 grid grid-cols-1 gap-2 pl-4 xl:grid-cols-1 3xl:grid-cols-2">
+          {assets.map((asset, idx) => (
             <div className="text-clip" key={idx}>
-              <LiveFeedTile assetId={asset.asset.id} key={asset?.bed.id} />
+              {/* <LiveFeedTile assetId={asset.asset.id} key={asset?.bed.id} /> */}
+              <LiveFeedTile
+                middlewareHostname={facility?.middleware_address}
+                asset={getCameraConfig(asset)}
+                showRefreshButton={true}
+                refreshPresetsHash={refresh_presets_hash}
+              />
             </div>
           ))}
         </div>
