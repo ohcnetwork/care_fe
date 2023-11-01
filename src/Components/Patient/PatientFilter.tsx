@@ -34,6 +34,7 @@ import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
 import AccordionV2 from "../Common/components/AccordionV2";
 import { dateQueryString } from "../../Utils/utils";
 import dayjs from "dayjs";
+import { LocationSelect } from "../Common/LocationSelect";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();
@@ -65,6 +66,8 @@ export default function PatientFilter(props: any) {
     age_max: filter.age_max || null,
     date_of_result: filter.date_of_result || null,
     date_declared_positive: filter.date_declared_positive || null,
+    last_consultation_medico_legal_case:
+      filter.last_consultation_medico_legal_case || null,
     last_consultation_admission_date_before:
       filter.last_consultation_admission_date_before || null,
     last_consultation_admission_date_after:
@@ -77,6 +80,8 @@ export default function PatientFilter(props: any) {
       filter.last_consultation_admitted_bed_type_list
         ? filter.last_consultation_admitted_bed_type_list.split(",")
         : [],
+    last_consultation_current_bed__location:
+      filter.last_consultation_current_bed__location || "",
     last_consultation_discharge_reason:
       filter.last_consultation_discharge_reason || null,
     srf_id: filter.srf_id || null,
@@ -120,11 +125,13 @@ export default function PatientFilter(props: any) {
     age_max: "",
     date_of_result: null,
     date_declared_positive: null,
+    last_consultation_medico_legal_case: null,
     last_consultation_admission_date_before: "",
     last_consultation_admission_date_after: "",
     last_consultation_discharge_date_before: "",
     last_consultation_discharge_date_after: "",
     last_consultation_admitted_to_list: [],
+    last_consultation_current_bed__location: "",
     srf_id: "",
     number_of_doses: null,
     covin_id: "",
@@ -229,12 +236,14 @@ export default function PatientFilter(props: any) {
       age_min,
       age_max,
       date_of_result,
+      last_consultation_medico_legal_case,
       last_consultation_admission_date_before,
       last_consultation_admission_date_after,
       last_consultation_discharge_date_before,
       last_consultation_discharge_date_after,
       last_consultation_admitted_bed_type_list,
       last_consultation_discharge_reason,
+      last_consultation_current_bed__location,
       number_of_doses,
       covin_id,
       srf_id,
@@ -252,6 +261,8 @@ export default function PatientFilter(props: any) {
       district: district || "",
       lsgBody: lsgBody || "",
       facility: facility || "",
+      last_consultation_current_bed__location:
+        last_consultation_current_bed__location || "",
       facility_type: facility_type || "",
       date_declared_positive_before: dateQueryString(
         date_declared_positive_before
@@ -266,6 +277,8 @@ export default function PatientFilter(props: any) {
       modified_date_before: dateQueryString(modified_date_before),
       modified_date_after: dateQueryString(modified_date_after),
       date_of_result: dateQueryString(date_of_result),
+      last_consultation_medico_legal_case:
+        last_consultation_medico_legal_case || "",
       last_consultation_admission_date_before: dateQueryString(
         last_consultation_admission_date_before
       ),
@@ -473,6 +486,23 @@ export default function PatientFilter(props: any) {
               }
             />
           </div>
+          <div className="w-full flex-none">
+            <FieldLabel className="text-sm">Is Medico-Legal Case</FieldLabel>
+            <SelectMenuV2
+              placeholder="Show all"
+              options={["true", "false"]}
+              optionLabel={(o) =>
+                o === "true" ? "Medico-Legal" : "Non-Medico-Legal"
+              }
+              value={filterState.last_consultation_medico_legal_case}
+              onChange={(v) =>
+                setFilterState({
+                  ...filterState,
+                  last_consultation_medico_legal_case: v,
+                })
+              }
+            />
+          </div>
         </div>
       </AccordionV2>
       <AccordionV2
@@ -565,13 +595,29 @@ export default function PatientFilter(props: any) {
             <FacilitySelect
               multiple={false}
               name="facility"
+              showAll={false}
               selected={filterState.facility_ref}
-              showAll
               setSelected={(obj) => setFacility(obj, "facility")}
             />
           </div>
-
           <div className="w-full flex-none">
+            <FieldLabel className="text-sm">Location</FieldLabel>
+            <LocationSelect
+              disabled={!filterState.facility}
+              name="facility"
+              selected={filterState.last_consultation_current_bed__location}
+              multiple={false}
+              errors=""
+              facilityId={filterState.facility}
+              setSelected={(selected) =>
+                setFilterState({
+                  ...filterState,
+                  last_consultation_current_bed__location: selected,
+                })
+              }
+            />
+          </div>
+          <div className="-mt-6 w-full flex-none">
             <FieldLabel className="text-sm">Facility type</FieldLabel>
             <SelectMenuV2
               placeholder="Show all"
