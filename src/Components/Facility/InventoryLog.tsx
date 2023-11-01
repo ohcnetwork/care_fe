@@ -28,7 +28,7 @@ export default function InventoryLog(props: any) {
   const [itemName, setItemName] = useState(" ");
   const [facilityName, setFacilityName] = useState("");
 
-  const { res, data, refetch } = useQuery(routes.getInventoryLog, {
+  const { refetch } = useQuery(routes.getInventoryLog, {
     query: {
       item: item,
       limit: limit,
@@ -38,18 +38,18 @@ export default function InventoryLog(props: any) {
     pathParams: {
       id: facilityId,
     },
+    prefetch: facilityId !== undefined,
+    onResponse: ({ res, data }) => {
+      setIsLoading(true);
+      if (res?.ok && data) {
+        setInventory(data.results);
+        setCurrentStock(data.results[0].current_stock);
+        setTotalCount(data.count);
+        setItemName(data.results[0].item_object.name);
+      }
+      setIsLoading(false);
+    },
   });
-
-  useEffect(() => {
-    setIsLoading(true);
-    if (data) {
-      setInventory(data.results);
-      setCurrentStock(data.results[0].current_stock);
-      setTotalCount(data.count);
-      setItemName(data.results[0].item_object.name);
-    }
-    setIsLoading(false);
-  }, [offset, facilityId, res, data]);
 
   useEffect(() => {
     async function fetchFacilityName() {
@@ -60,7 +60,7 @@ export default function InventoryLog(props: any) {
           },
         });
 
-        if (res && data) setFacilityName(data.name || "");
+        if (res?.ok && data) setFacilityName(data.name || "");
       } else {
         setFacilityName("");
       }
@@ -77,7 +77,7 @@ export default function InventoryLog(props: any) {
         external_id: id,
       },
     });
-    if (res && res.status === 204) {
+    if (res?.ok && res.status === 204) {
       Notification.Success({
         msg: "Updated Successfully",
       });
@@ -96,7 +96,7 @@ export default function InventoryLog(props: any) {
       },
     });
 
-    if (res?.status === 201) {
+    if (res?.ok && res?.status === 201) {
       Notification.Success({
         msg: "Last entry deleted Successfully",
       });
@@ -109,9 +109,6 @@ export default function InventoryLog(props: any) {
     setSaving(false);
   };
 
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
     setCurrentPage(page);

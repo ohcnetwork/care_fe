@@ -59,7 +59,7 @@ export default function LegacyFacilityCNS({
       const { res, data } = await request(routes.getPermittedFacility, {
         pathParams: { facilityId },
       });
-      if (res?.status === 200 && data) {
+      if (res?.ok && res?.status === 200 && data) {
         const updateData = {
           id: Number(data.id),
           name: data.name,
@@ -110,7 +110,7 @@ export default function LegacyFacilityCNS({
           is_active: true,
         },
       });
-      if (res && res.status === 200 && data) {
+      if (res?.ok && res.status === 200 && data) {
         const patients = data as PatientModel[];
         return patients.filter(
           (patient) => !!patient.last_consultation?.current_bed?.bed_object.id

@@ -67,15 +67,14 @@ export const MinQuantityRequiredModal = (props: any) => {
             id: facilityId,
           },
         });
-        if (res && data) setFacilityName(data.name || "");
+        if (res?.ok && data) setFacilityName(data.name || "");
       } else {
         setFacilityName("");
       }
 
       setIsLoading(false);
     };
-
-    fetchData();
+    if (minQuantityRes?.ok && minQuantityData) fetchData();
   }, [facilityId, inventoryId, minQuantityData, minQuantityRes, state.form]);
 
   useEffect(() => {
@@ -97,7 +96,7 @@ export const MinQuantityRequiredModal = (props: any) => {
       },
     });
     setIsLoading(false);
-    if (res && data) {
+    if (res?.ok && data) {
       Notification.Success({
         msg: "Minimum quantity updated successfully",
       });

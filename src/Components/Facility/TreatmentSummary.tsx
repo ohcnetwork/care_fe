@@ -19,72 +19,54 @@ const TreatmentSummary = (props: any) => {
   const [investigations, setInvestigations] = useState<Array<any>>([]);
   const [dailyRounds, setDailyRounds] = useState<any>({});
 
-  const {
-    res: patientRes,
-    data: patientResData,
-    refetch: patientFetch,
-  } = useQuery(routes.getPatient, {
+  const { refetch: patientFetch } = useQuery(routes.getPatient, {
     pathParams: {
       id: patientId,
     },
+    prefetch: patientId !== undefined,
+    onResponse: ({ res, data }) => {
+      setIsLoading(true);
+      if (res?.ok && data) {
+        setPatientData(data);
+      }
+      setIsLoading(false);
+    },
   });
 
-  useEffect(() => {
-    setIsLoading(true);
-    if (patientRes && patientResData) {
-      setPatientData(patientResData);
-    } else {
-      setPatientData({});
-    }
-    setIsLoading(false);
-  }, [patientId, patientRes, patientResData]);
-
-  const {
-    res: investigationRes,
-    data: investigationData,
-    refetch: investigationFetch,
-  } = useQuery(routes.getInvestigation, {
+  const { refetch: investigationFetch } = useQuery(routes.getInvestigation, {
     pathParams: {
       consultation_external_id: consultationId,
     },
-  });
-
-  useEffect(() => {
-    setIsLoading(true);
-    if (investigationRes && investigationData?.results) {
-      const valueMap = investigationData.results.reduce(
-        (acc: any, cur: { id: any }) => ({ ...acc, [cur.id]: cur }),
-        {}
-      );
-      setInvestigations(valueMap);
-    } else {
-      setInvestigations([]);
-    }
-    setIsLoading(false);
-  }, [consultationId, investigationRes, investigationData]);
-
-  const {
-    res: consultationRes,
-    data: consultationfetchData,
-    refetch: consultationFetch,
-  } = useQuery(routes.getConsultation, {
-    pathParams: {
-      id: consultationId,
+    prefetch: consultationId !== undefined,
+    onResponse: ({ res, data }) => {
+      setIsLoading(true);
+      if (res?.ok && data) {
+        const valueMap = data.results.reduce(
+          (acc: any, cur: { id: any }) => ({ ...acc, [cur.id]: cur }),
+          {}
+        );
+        setInvestigations(valueMap);
+      }
+      setIsLoading(false);
     },
   });
 
-  useEffect(() => {
-    setIsLoading(true);
-    if (consultationRes && consultationfetchData) {
-      setConsultationData(consultationfetchData);
-      if (consultationfetchData.last_daily_round) {
-        setDailyRounds(consultationfetchData.last_daily_round); // add last_daily_rounds in model(not specified in documentation)
+  const { refetch: consultationFetch } = useQuery(routes.getConsultation, {
+    pathParams: {
+      id: consultationId,
+    },
+    prefetch: consultationId !== undefined,
+    onResponse: ({ res, data }) => {
+      setIsLoading(true);
+      if (res?.ok && data) {
+        setConsultationData(data);
+        if (data.last_daily_round) {
+          setDailyRounds(data.last_daily_round); // added last_daily_rounds in model(not present in documentation)
+        }
       }
-    } else {
-      setConsultationData({});
-    }
-    setIsLoading(false);
-  }, [consultationId, consultationRes, consultationfetchData]);
+      setIsLoading(false);
+    },
+  });
 
   useEffect(() => {
     patientFetch();

@@ -24,7 +24,7 @@ export default function MinQuantityList(props: any) {
   const [selectedItem, setSelectedItem] = useState({ id: 0, item_id: 0 });
   const limit = 14;
 
-  const { res, data, refetch } = useQuery(routes.getMinQuantity, {
+  const { refetch } = useQuery(routes.getMinQuantity, {
     query: {
       limit: limit,
       offset: offset,
@@ -32,20 +32,15 @@ export default function MinQuantityList(props: any) {
     pathParams: {
       id: facilityId,
     },
+    onResponse: ({ res, data }) => {
+      setIsLoading(true);
+      if (res?.ok && data) {
+        setInventory(data.results);
+        setTotalCount(data.count);
+      }
+      setIsLoading(false);
+    },
   });
-
-  useEffect(() => {
-    setIsLoading(true);
-    if (res && data) {
-      setInventory(data.results);
-      setTotalCount(data.count);
-    }
-    setIsLoading(false);
-  }, [offset, facilityId, res, data]);
-
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
 
   useEffect(() => {
     async function fetchFacilityName() {
@@ -55,7 +50,7 @@ export default function MinQuantityList(props: any) {
             id: facilityId,
           },
         });
-        if (res && data) setFacilityName(data.name || "");
+        if (res?.ok && data) setFacilityName(data.name || "");
       } else {
         setFacilityName("");
       }

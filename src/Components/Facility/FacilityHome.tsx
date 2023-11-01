@@ -52,10 +52,44 @@ export const getFacilityFeatureIcon = (featureId: number) => {
   );
 };
 
+const initialFacilityState: FacilityModel = {
+  id: undefined,
+  name: "",
+  read_cover_image_url: "",
+  facility_type: "",
+  address: "",
+  features: [],
+  location: {
+    latitude: 0,
+    longitude: 0,
+  },
+  oxygen_capacity: 0,
+  phone_number: "",
+  type_b_cylinders: 0,
+  type_c_cylinders: 0,
+  type_d_cylinders: 0,
+  middleware_address: "",
+  expected_type_b_cylinders: 0,
+  expected_type_c_cylinders: 0,
+  expected_type_d_cylinders: 0,
+  expected_oxygen_requirement: 0,
+  local_body_object: undefined,
+  district_object: undefined,
+  state_object: undefined,
+  ward_object: undefined,
+  modified_date: "",
+  created_date: "",
+  state: 0,
+  district: 0,
+  local_body: 0,
+  ward: 0,
+};
+
 export const FacilityHome = (props: any) => {
   const { t } = useTranslation();
   const { facilityId } = props;
-  const [facilityData, setFacilityData] = useState<FacilityModel>({});
+  const [facilityData, setFacilityData] =
+    useState<FacilityModel>(initialFacilityState);
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,20 +107,19 @@ export const FacilityHome = (props: any) => {
 
   useMessageListener((data) => console.log(data));
 
-  const {
-    res: permittedFacilityRes,
-    data: permittedFacilityData,
-    refetch: permittedFacilityFetch,
-  } = useQuery(routes.getPermittedFacility, {
-    pathParams: {
-      id: facilityId,
-    },
-  });
+  const { res: permittedFacilityRes, data: permittedFacilityData } = useQuery(
+    routes.getPermittedFacility,
+    {
+      pathParams: {
+        id: facilityId,
+      },
+    }
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      if (permittedFacilityRes) {
+      if (permittedFacilityRes?.ok) {
         const { res: capacityRes, data: capacityData } = await request(
           routes.getCapacity,
           {
@@ -147,9 +180,12 @@ export const FacilityHome = (props: any) => {
               ward_object: permittedFacilityData.ward_object,
               modified_date: permittedFacilityData.modified_date,
               created_date: permittedFacilityData.created_date,
+              state: permittedFacilityData.state,
+              local_body: permittedFacilityData.local_body,
+              ward: permittedFacilityData.ward,
             };
             setFacilityData(transformedPermittedFacilityData);
-            if (capacityRes && capacityData) {
+            if (capacityRes?.ok && capacityData) {
               const transformedCapacityData = {
                 id: Number(capacityData.results[0].id),
                 room_type: capacityData.results[0].room_type,
@@ -159,7 +195,7 @@ export const FacilityHome = (props: any) => {
               };
               setCapacityData([transformedCapacityData]);
             }
-            if (doctorRes && doctorData) {
+            if (doctorRes?.ok && doctorData) {
               const transformedDoctorData = {
                 id: Number(doctorData.results[0].id),
                 area: doctorData.results[0].area,
@@ -176,7 +212,7 @@ export const FacilityHome = (props: any) => {
               setTotalDoctors(totalCount);
             }
             if (
-              triageRes &&
+              triageRes?.ok &&
               triageData &&
               triageData.results &&
               triageData.results.length
@@ -205,12 +241,8 @@ export const FacilityHome = (props: any) => {
         setIsLoading(false);
       }
     };
-    fetchData();
+    if (permittedFacilityRes?.ok) fetchData();
   }, [facilityId, permittedFacilityRes, permittedFacilityData]);
-
-  useEffect(() => {
-    permittedFacilityFetch();
-  }, [permittedFacilityFetch]);
 
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
@@ -220,7 +252,7 @@ export const FacilityHome = (props: any) => {
     const { res, data } = await request(routes.deleteFacility, {
       pathParams: { id: facilityId },
     });
-    if (res?.status === 204) {
+    if (res?.ok && res?.status === 204) {
       Notification.Success({
         msg: "Facility deleted successfully",
       });
@@ -349,7 +381,7 @@ export const FacilityHome = (props: any) => {
                 const { res, data } = await request(routes.listDoctor, {
                   pathParams: { facilityId: facilityId },
                 });
-                if (res && data) {
+                if (res?.ok && data) {
                   const convertedResult = data.results.map((result) => {
                     return {
                       ...result,

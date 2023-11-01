@@ -23,7 +23,7 @@ export default function InventoryList(props: any) {
   const [facilityName, setFacilityName] = useState("");
   const limit = 14;
 
-  const { res, data, refetch } = useQuery(routes.getInventorySummary, {
+  useQuery(routes.getInventorySummary, {
     query: {
       limit,
       offset,
@@ -31,20 +31,15 @@ export default function InventoryList(props: any) {
     pathParams: {
       id: facilityId,
     },
+    onResponse: ({ res, data }) => {
+      setIsLoading(true);
+      if (res?.ok && data) {
+        setInventory(data.results);
+        setTotalCount(data.count);
+      }
+      setIsLoading(false);
+    },
   });
-
-  useEffect(() => {
-    setIsLoading(true);
-    if (data) {
-      setInventory(data.results);
-      setTotalCount(data.count);
-    }
-    setIsLoading(false);
-  }, [offset, facilityId, res, data]);
-
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
 
   useEffect(() => {
     async function fetchFacilityName() {
@@ -54,7 +49,7 @@ export default function InventoryList(props: any) {
             id: facilityId,
           },
         });
-        if (res && data) setFacilityName(data.name || "");
+        if (res?.ok && data) setFacilityName(data.name || "");
       } else {
         setFacilityName("");
       }

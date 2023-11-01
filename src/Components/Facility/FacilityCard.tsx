@@ -32,7 +32,7 @@ export const FacilityCard = (props: { facility: any; userType: any }) => {
           message: notifyMessage,
         },
       });
-      if (res && res.status == 204) {
+      if (res?.ok && res.status == 204) {
         Notification.Success({
           msg: "Facility Notified",
         });

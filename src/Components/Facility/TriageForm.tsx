@@ -69,84 +69,60 @@ export const TriageForm = (props: triageFormProps) => {
   const headerText = !id ? "Add Triage" : "Edit Triage";
   const buttonText = !id ? "Save Triage" : "Update Triage";
 
-  const {
-    res: dataRes,
-    data: dataFetch,
-    refetch: fetchData,
-  } = useQuery(routes.getTriageDetails, {
+  useQuery(routes.getTriageDetails, {
     pathParams: {
       facilityId: String(facilityId),
       id: String(id),
     },
-  });
-
-  useEffect(() => {
-    setIsLoading(true);
-    if (id && dataFetch) {
-      // Edit Form functionality
-      dispatch({
-        type: "set_form",
-        form: {
-          entry_date: dataFetch.entry_date
-            ? dayjs(dataFetch.entry_date).toDate()
-            : null,
-          num_patients_visited: dataFetch.num_patients_visited,
-          num_patients_home_quarantine: dataFetch.num_patients_home_quarantine,
-          num_patients_isolation: dataFetch.num_patients_isolation,
-          num_patient_referred: dataFetch.num_patient_referred,
-          num_patient_confirmed_positive:
-            dataFetch.num_patient_confirmed_positive,
-        },
-      });
-    }
-    setIsLoading(false);
-  }, [facilityId, id, dataFetch, dataRes]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData, id]);
-
-  const {
-    res: triageRes,
-    data: triageData,
-    refetch: triageFetch,
-  } = useQuery(routes.getTriage, {
-    pathParams: {
-      facilityId: String(facilityId),
+    prefetch: id !== undefined && facilityId !== undefined,
+    onResponse: ({ res, data }) => {
+      setIsLoading(true);
+      if (res?.ok && data) {
+        // Edit Form functionality
+        dispatch({
+          type: "set_form",
+          form: {
+            entry_date: data.entry_date
+              ? dayjs(data.entry_date).toDate()
+              : null,
+            num_patients_visited: data.num_patients_visited,
+            num_patients_home_quarantine: data.num_patients_home_quarantine,
+            num_patients_isolation: data.num_patients_isolation,
+            num_patient_referred: data.num_patient_referred,
+            num_patient_confirmed_positive: data.num_patient_confirmed_positive,
+          },
+        });
+      }
+      setIsLoading(false);
     },
   });
 
-  // this will fetch all triage data of the facility
-  useEffect(() => {
-    if (
-      triageRes &&
-      triageData &&
-      triageData.results &&
-      triageData.results.length > 0
-    ) {
-      const firstResult = triageData.results[0];
-      const updatedDataArray: PatientStatsModel[] = [
-        {
-          id: Number(firstResult.id),
-          entryDate: firstResult.entry_date.toString(),
-          num_patients_visited: firstResult.num_patients_visited,
-          num_patients_home_quarantine:
-            firstResult.num_patients_home_quarantine,
-          num_patients_isolation: firstResult.num_patients_isolation,
-          num_patient_referred: firstResult.num_patient_referred,
-          entry_date: Number(firstResult.entry_date),
-          num_patient_confirmed_positive:
-            firstResult.num_patient_confirmed_positive,
-        },
-      ];
-
-      setPatientStatsData(updatedDataArray);
-    }
-  }, [facilityId, triageData, triageRes]);
-
-  useEffect(() => {
-    triageFetch();
-  }, [triageFetch]);
+  useQuery(routes.getTriage, {
+    pathParams: {
+      facilityId: String(facilityId),
+    },
+    prefetch: facilityId !== undefined,
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data && data.results && data.results.length > 0) {
+        const firstResult = data.results[0];
+        const updatedDataArray: PatientStatsModel[] = [
+          {
+            id: Number(firstResult.id),
+            entryDate: firstResult.entry_date.toString(),
+            num_patients_visited: firstResult.num_patients_visited,
+            num_patients_home_quarantine:
+              firstResult.num_patients_home_quarantine,
+            num_patients_isolation: firstResult.num_patients_isolation,
+            num_patient_referred: firstResult.num_patient_referred,
+            entry_date: Number(firstResult.entry_date),
+            num_patient_confirmed_positive:
+              firstResult.num_patient_confirmed_positive,
+          },
+        ];
+        setPatientStatsData(updatedDataArray);
+      }
+    },
+  });
 
   useEffect(() => {
     async function fetchFacilityName() {
@@ -156,7 +132,7 @@ export const TriageForm = (props: triageFormProps) => {
             id: String(facilityId),
           },
         });
-        if (res && data) setFacilityName(data.name || "");
+        if (res?.ok && data) setFacilityName(data.name || "");
       } else {
         setFacilityName("");
       }
@@ -228,7 +204,7 @@ export const TriageForm = (props: triageFormProps) => {
           },
         });
         setIsLoading(false);
-        if (res && data) {
+        if (res?.ok && data) {
           dispatch({ type: "set_form", form: initForm });
           if (id) {
             Notification.Success({

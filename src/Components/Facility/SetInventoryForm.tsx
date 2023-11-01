@@ -66,7 +66,7 @@ export const SetInventoryForm = (props: any) => {
     const fetchData = async () => {
       setIsLoading(true);
       const existingItemIDs: number[] = [];
-      if (minQuantityRes && minQuantityData) {
+      if (minQuantityRes?.ok && minQuantityData) {
         minQuantityData.results.map((item: any) =>
           existingItemIDs.push(item.item_object.id)
         );
@@ -77,7 +77,7 @@ export const SetInventoryForm = (props: any) => {
           offset: offset,
         },
       });
-      if (res && data) {
+      if (res?.ok && data) {
         const filteredData = data.results.filter(
           (item: any) => !existingItemIDs.includes(item.id)
         );
@@ -100,8 +100,7 @@ export const SetInventoryForm = (props: any) => {
       }
       setIsLoading(false);
     };
-
-    fetchData();
+    if (minQuantityRes && minQuantityData) fetchData();
   }, [minQuantityData, minQuantityRes, state.form]);
 
   useEffect(() => {

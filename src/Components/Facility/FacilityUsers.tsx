@@ -79,23 +79,19 @@ export default function FacilityUsers(props: any) {
     fetchFacilityName();
   }, [facilityId]);
 
-  const { res, data, refetch } = useQuery(routes.getFacilityUsers, {
+  const { refetch } = useQuery(routes.getFacilityUsers, {
     query: { offset: offset, limit: limit },
     pathParams: { facility_id: facilityId },
+    prefetch: facilityId !== undefined,
+    onResponse: ({ res, data }) => {
+      setIsLoading(true);
+      if (res?.ok && data) {
+        setUsers(data.results);
+        setTotalCount(data.count);
+      }
+      setIsLoading(false);
+    },
   });
-
-  useEffect(() => {
-    setIsLoading(true);
-    if (res && data) {
-      setUsers(data.results);
-      setTotalCount(data.count);
-    }
-    setIsLoading(false);
-  }, [facilityId, offset, limit, res, data]);
-
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
 
   const handlePagination = (page: number, limit: number) => {
     const offset = (page - 1) * limit;
@@ -111,7 +107,7 @@ export default function FacilityUsers(props: any) {
     const { res, data } = await request(routes.userListFacility, {
       pathParams: { username: username },
     });
-    if (res && data) {
+    if (res?.ok && data) {
       const updated = users.map((user) => {
         return user.username === username
           ? {

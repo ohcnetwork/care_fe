@@ -67,7 +67,7 @@ export const HospitalList = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    if (permittedDataRes && permittedData) {
+    if (permittedDataRes?.ok && permittedData) {
       const transformedData = permittedData.results.map((result) => ({
         id: Number(result.id),
         name: result.name,
@@ -121,65 +121,41 @@ export const HospitalList = () => {
     permittedFacilitiesFetch();
   }, [permittedFacilitiesFetch]);
 
-  const {
-    res: stateNameRes,
-    data: stateNameData,
-    refetch: stateNameFetch,
-  } = useQuery(routes.getState, {
+  useQuery(routes.getState, {
     pathParams: {
       id: qParams.state,
     },
+    prefetch: qParams.state !== undefined,
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data) {
+        setStateName(data.name);
+      }
+    },
   });
 
-  useEffect(() => {
-    if (stateNameRes && stateNameData) {
-      setStateName(stateNameData.name);
-    }
-  }, [qParams.state, stateNameRes, stateNameData]);
-
-  useEffect(() => {
-    stateNameFetch();
-  }, [stateNameFetch]);
-
-  const {
-    res: DistrictNameRes,
-    data: DistrictNameData,
-    refetch: DistrictNameFetch,
-  } = useQuery(routes.getDistrict, {
+  useQuery(routes.getDistrict, {
     pathParams: {
       id: qParams.district,
     },
-  });
-
-  useEffect(() => {
-    if (DistrictNameRes && DistrictNameData) {
-      setDistrictName(DistrictNameData.name);
-    }
-  }, [qParams.district, DistrictNameRes, DistrictNameData]);
-
-  useEffect(() => {
-    DistrictNameFetch();
-  }, [DistrictNameFetch]);
-
-  const {
-    res: LocalbodyNameRes,
-    data: LocalbodyNameData,
-    refetch: LocalbodyNameFetch,
-  } = useQuery(routes.getLocalBody, {
-    pathParams: {
-      id: qParams.local_body,
+    prefetch: qParams.district !== undefined,
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data) {
+        setDistrictName(data.name);
+      }
     },
   });
 
-  useEffect(() => {
-    if (LocalbodyNameRes && LocalbodyNameData) {
-      setLocalbodyName(LocalbodyNameData.name);
-    }
-  }, [qParams.local_body, LocalbodyNameRes, LocalbodyNameData]);
-
-  useEffect(() => {
-    LocalbodyNameFetch();
-  }, [LocalbodyNameFetch]);
+  useQuery(routes.getLocalBody, {
+    pathParams: {
+      id: qParams.local_body,
+    },
+    prefetch: qParams.local_body !== undefined,
+    onResponse: ({ res, data }) => {
+      if (res?.ok && data) {
+        setLocalbodyName(data.name);
+      }
+    },
+  });
 
   const findFacilityTypeById = (id: number) => {
     const facility_type = FACILITY_TYPES.find((type) => type.id == id);

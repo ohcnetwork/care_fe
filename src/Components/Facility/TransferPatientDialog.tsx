@@ -123,7 +123,7 @@ const TransferPatientDialog = (props: Props) => {
         },
       });
       setIsLoading(false);
-      if (res && data && res.status === 200) {
+      if (res?.ok && data && res.status === 200) {
         dispatch({ type: "set_form", form: initForm });
         handleOk();
         Notification.Success({
