@@ -154,6 +154,10 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <div className="min-h-[400px] flex-1">
                           <HL7PatientVitalsMonitor
                             key={`hl7-${hl7SocketUrl}-${vitals.hash}`}
+                            patientCurrentBedAssignmentDate={
+                              props.patientData?.last_consultation?.current_bed
+                                ?.start_date
+                            }
                             patientAssetBed={{
                               asset: monitorBedData?.asset_object as AssetData,
                               bed: monitorBedData?.bed_object as BedModel,

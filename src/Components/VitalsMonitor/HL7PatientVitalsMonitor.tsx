@@ -14,8 +14,11 @@ const minutesAgo = (timestamp: string) => {
   return `${dayjs().diff(dayjs(timestamp), "minute")}m ago`;
 };
 
-const isWithinMinutes = (timestamp: string, minutes: number) => {
-  return dayjs().diff(dayjs(timestamp), "minute") < minutes;
+const isWithinMinutes = (timestamp: string, bedAssignmentStartDate: string) => {
+  return (
+    dayjs().diff(dayjs(timestamp), "minute") <
+    dayjs().diff(dayjs(bedAssignmentStartDate), "minute")
+  );
 };
 
 export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
@@ -39,19 +42,13 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
     connect(props.socketUrl);
   }, [props.socketUrl]);
 
-  // Check if the time difference is within the specified maximum persistence time
-  const currentDate = new Date();
-  const bedAssignmentStartDate = props.patientCurrentBedAssignmentDate
-    ? new Date(props.patientCurrentBedAssignmentDate)
-    : undefined;
-
-  const minutesSinceCurrentBedAssignment =
-    bedAssignmentStartDate &&
-    (currentDate.getTime() - bedAssignmentStartDate.getTime()) / (1000 * 60);
   const bpWithinMaxPersistence = !!(
     data.bp?.["date-time"] &&
-    minutesSinceCurrentBedAssignment !== undefined && // Check if minutesSinceCurrentBedAssignment is defined
-    isWithinMinutes(data.bp?.["date-time"], minutesSinceCurrentBedAssignment)
+    props.patientCurrentBedAssignmentDate &&
+    isWithinMinutes(
+      data.bp?.["date-time"],
+      props.patientCurrentBedAssignmentDate
+    )
   );
 
   return (
