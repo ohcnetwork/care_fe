@@ -4,6 +4,10 @@ import { AssetSearchPage } from "../../pageobject/Asset/AssetSearch";
 import FacilityPage from "../../pageobject/Facility/FacilityCreation";
 import { UserPage } from "../../pageobject/Users/UserSearch";
 import { UserCreationPage } from "../../pageobject/Users/UserCreation";
+import {
+  emergency_phone_number,
+  phone_number,
+} from "../../pageobject/constants";
 
 describe("User Creation", () => {
   const userPage = new UserPage();
@@ -43,6 +47,15 @@ describe("User Creation", () => {
     "Please select the local body",
   ];
 
+  const EXPECTED_PROFILE_ERROR_MESSAGES = [
+    "Field is required",
+    "Field is required",
+    "This field is required",
+    "Please enter valid phone number",
+    "This field is required",
+    "This field is required",
+  ];
+
   before(() => {
     loginPage.loginAsDisctrictAdmin();
     cy.saveLocalStorage();
@@ -53,13 +66,82 @@ describe("User Creation", () => {
     cy.awaitUrl("/users");
   });
 
+  it("Update the existing user profile and verify its reflection", () => {
+    userCreationPage.clickElementById("profilenamelink");
+    userCreationPage.verifyElementContainsText(
+      "username-profile-details",
+      "devdistrictadmin"
+    );
+    userCreationPage.clickElementById("edit-cancel-profile-button");
+    userCreationPage.typeIntoElementByIdPostClear(
+      "firstName",
+      "District Editted"
+    );
+    userCreationPage.typeIntoElementByIdPostClear("lastName", "Cypress");
+    userCreationPage.typeIntoElementByIdPostClear("age", "22");
+    userCreationPage.selectDropdownOption("gender", "Male");
+    userCreationPage.typeIntoElementByIdPostClear(
+      "phoneNumber",
+      "+91" + phone_number
+    );
+    userCreationPage.typeIntoElementByIdPostClear(
+      "altPhoneNumber",
+      "+91" + emergency_phone_number
+    );
+    userCreationPage.typeIntoElementByIdPostClear("email", "test@test.com");
+    userCreationPage.typeIntoElementByIdPostClear("weekly_working_hours", "14");
+    userCreationPage.clickElementById("submit");
+    userCreationPage.verifyElementContainsText(
+      "contactno-profile-details",
+      "+91" + phone_number
+    );
+    userCreationPage.verifyElementContainsText(
+      "whatsapp-profile-details",
+      "+91" + emergency_phone_number
+    );
+    userCreationPage.verifyElementContainsText(
+      "firstname-profile-details",
+      "District Editted"
+    );
+    userCreationPage.verifyElementContainsText(
+      "lastname-profile-details",
+      "Cypress"
+    );
+    userCreationPage.verifyElementContainsText("age-profile-details", "22");
+    userCreationPage.verifyElementContainsText(
+      "emailid-profile-details",
+      "test@test.com"
+    );
+    userCreationPage.verifyElementContainsText(
+      "gender-profile-details",
+      "Male"
+    );
+    userCreationPage.verifyElementContainsText(
+      "averageworkinghour-profile-details",
+      "14"
+    );
+  });
+
+  it("Update the existing user profile Form Mandatory File Error", () => {
+    userCreationPage.clickElementById("profilenamelink");
+    userCreationPage.clickElementById("edit-cancel-profile-button");
+    userCreationPage.clearIntoElementById("firstName");
+    userCreationPage.clearIntoElementById("lastName");
+    userCreationPage.clearIntoElementById("age");
+    userCreationPage.clearIntoElementById("phoneNumber");
+    userCreationPage.clearIntoElementById("altPhoneNumber");
+    userCreationPage.clearIntoElementById("weekly_working_hours");
+    userCreationPage.clickElementById("submit");
+    userCreationPage.verifyErrorMessages(EXPECTED_PROFILE_ERROR_MESSAGES);
+  });
+
   it("create new user and verify reflection", () => {
     userCreationPage.clickElementById("addUserButton");
     userCreationPage.selectFacility("Dummy Shifting Center");
     userCreationPage.typeIntoElementById("username", username);
     userCreationPage.typeIntoElementById("password", "Test@123");
     userCreationPage.selectHomeFacility("Dummy Shifting Center");
-    userCreationPage.typeIntoElementById("phone_number", "9999999999");
+    userCreationPage.typeIntoElementById("phone_number", phone_number);
     userCreationPage.setInputDate("date_of_birth", "date-input", "25081999");
     userCreationPage.selectDropdownOption("user_type", "Doctor");
     userCreationPage.typeIntoElementById("c_password", "Test@123");
@@ -120,75 +202,7 @@ describe("User Creation", () => {
   //       .click()
   //       .type("Dummy Facility 1")
   //       .wait("@getFacilities");
-  //     cy.get("li[role='option']").first().click();
-  //     cy.intercept(/\/api\/v1\/users\/\w+\/add_facility\//).as("addFacility");
-  //     cy.get("button[id='link-facility']").click();
-  //     cy.wait("@addFacility")
-  //       // .its("response.statusCode")
-  //       // .should("eq", 201)
-  //       .get("span")
-  //       .contains("Facility - User Already has permission to this facility");
-  //   });
-
-  // describe("Edit User Profile & Error Validation", () => {
-  //   before(() => {
-  //     cy.loginByApi(username, "#@Cypress_test123");
-  //     cy.saveLocalStorage();
-  //   });
-
-  //   beforeEach(() => {
-  //     cy.restoreLocalStorage();
-  //     cy.awaitUrl("/user/profile");
-  //     cy.contains("button", "Edit User Profile").click();
-  //   });
-
-  //   it("First name Field Updation " + username, () => {
-  //     cy.get("input[name=firstName]").clear();
-  //     cy.contains("button[type='submit']", "Update").click();
-  //     cy.get("span.error-text").should("contain", "Field is required");
-  //     cy.get("input[name=firstName]").type("firstName updated");
-  //     cy.contains("button[type='submit']", "Update").click();
-  //   });
-
-  //   it("Last name Field Updation " + username, () => {
-  //     cy.get("input[name=lastName]").clear();
-  //     cy.contains("button[type='submit']", "Update").click();
-  //     cy.get("span.error-text").should("contain", "Field is required");
-  //     cy.get("input[name=lastName]").type("lastName updated");
-  //     cy.contains("button[type='submit']", "Update").click();
-  //   });
-
-  //   it("Age Field Updation " + username, () => {
-  //     cy.get("input[name=age]").clear();
-  //     cy.contains("button[type='submit']", "Update").click();
-  //     cy.get("span.error-text").should("contain", "This field is required");
-  //     cy.get("input[name=age]").type("11");
-  //     cy.contains("button[type='submit']", "Update").click();
-  //   });
-
-  //   it("Phone number Field Updation " + username, () => {
-  //     cy.get("input[name=phoneNumber]").clear();
-  //     cy.contains("button[type='submit']", "Update").click();
-  //     cy.get("span.error-text").should(
-  //       "contain",
-  //       "Please enter valid phone number"
-  //     );
-  //     cy.get("input[name=phoneNumber]").type("+919999999999");
-  //     cy.contains("button[type='submit']", "Update").click();
-  //   });
-
-  //   it("Whatsapp number Field Updation " + username, () => {
-  //     cy.get("input[name=altPhoneNumber]").clear();
-  //     cy.get("input[name=altPhoneNumber]").type("+919999999999");
-  //     cy.contains("button[type='submit']", "Update").click();
-  //   });
-
-  //   it("Email Field Updation " + username, () => {
-  //     cy.get("input[name=email]").clear();
-  //     cy.contains("button[type='submit']", "Update").click();
-  //     cy.get("span.error-text").should("contain", "This field is required");
-  //     cy.get("input[name=email]").type("test@test.com");
-  //     cy.contains("button[type='submit']", "Update").click();
+  //     cy.get("li[role='option']").should("not.exist");
   //   });
 
   afterEach(() => {
