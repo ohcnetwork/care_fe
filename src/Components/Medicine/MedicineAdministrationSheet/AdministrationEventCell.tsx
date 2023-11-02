@@ -40,7 +40,7 @@ export default function AdministrationEventCell({
           title={
             <PrescriptionDetailCard prescription={prescription} readonly />
           }
-          className="w-full md:max-w-2xl"
+          className="w-full md:max-w-4xl"
           show={showTimeline}
         >
           <div className="mt-6 text-sm font-medium text-gray-700">
