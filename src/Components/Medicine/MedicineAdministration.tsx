@@ -115,8 +115,8 @@ export default function MedicineAdministration(props: Props) {
             </div>
             <div
               className={classNames(
-                "flex gap-4 lg:flex-row lg:gap-6",
-                is_prn ? "flex-wrap" : "flex-col"
+                "flex gap-4",
+                is_prn ? "flex-wrap" : "flex-col lg:flex-row lg:gap-6"
               )}
             >
               <TextAreaFormField
