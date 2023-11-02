@@ -111,8 +111,8 @@ export const handleSignOut = (forceReload: boolean) => {
   Object.values(LocalStorageKeys).forEach((key) =>
     localStorage.removeItem(key)
   );
-  navigate("/");
-  if (forceReload) window.location.reload();
+  if (forceReload) window.location.href = "/";
+  else navigate("/");
 };
 
 /**

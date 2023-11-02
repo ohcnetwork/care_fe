@@ -100,29 +100,31 @@ const AutoCompleteAsync = (props: Props) => {
               }}
               autoComplete="off"
             />
-            <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-              <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-secondary-900">
-                {hasSelection && !loading && !required && (
-                  <div className="tooltip">
-                    <CareIcon
-                      className="care-l-times-circle mb-[-5px] h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onChange(null);
-                      }}
-                    />
-                    <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs">
-                      {t("clear_selection")}
-                    </span>
-                  </div>
-                )}
-                {loading ? (
-                  <CareIcon className="care-l-spinner -mb-1.5 animate-spin" />
-                ) : (
-                  <CareIcon className="care-l-angle-down -mb-1.5" />
-                )}
-              </div>
-            </Combobox.Button>
+            {!disabled && (
+              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
+                <div className="absolute right-0 top-1 mr-2 flex items-center text-lg text-secondary-900">
+                  {hasSelection && !loading && !required && (
+                    <div className="tooltip">
+                      <CareIcon
+                        className="care-l-times-circle mb-[-5px] h-4 w-4 text-gray-800 transition-colors duration-200 ease-in-out hover:text-gray-500"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onChange(null);
+                        }}
+                      />
+                      <span className="tooltip-text tooltip-bottom -translate-x-1/2 text-xs">
+                        {t("clear_selection")}
+                      </span>
+                    </div>
+                  )}
+                  {loading ? (
+                    <CareIcon className="care-l-spinner -mb-1.5 animate-spin" />
+                  ) : (
+                    <CareIcon className="care-l-angle-down -mb-1.5" />
+                  )}
+                </div>
+              </Combobox.Button>
+            )}
           </div>
           <DropdownTransition>
             <Combobox.Options className="cui-dropdown-base absolute top-12 z-10 text-sm">
