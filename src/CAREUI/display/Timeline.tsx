@@ -64,7 +64,7 @@ export const TimelineNode = (props: TimelineNodeProps) => {
       <div
         className={classNames(
           props.className,
-          "flex w-full flex-col items-start gap-y-1"
+          "group flex w-full flex-col items-start gap-y-1"
         )}
       >
         <div className="relative flex w-full justify-between gap-x-4">
@@ -86,10 +86,6 @@ export const TimelineNode = (props: TimelineNodeProps) => {
                     ? props.titleSuffix
                     : `${props.event.type} the ${props.name || name}.`}
                 </p>
-                <RecordMeta
-                  className="flex-none py-0.5 text-xs leading-5 text-gray-500"
-                  time={props.event.timestamp}
-                />
               </TimelineNodeTitle>
             )}
           </div>
@@ -97,6 +93,10 @@ export const TimelineNode = (props: TimelineNodeProps) => {
           {props.actions && (
             <TimelineNodeActions>{props.actions}</TimelineNodeActions>
           )}
+          <RecordMeta
+            className="flex-none py-0.5 text-xs leading-5 text-gray-500"
+            time={props.event.timestamp}
+          />
         </div>
 
         <div className="flex w-full flex-col items-start gap-y-2 pl-10">
@@ -116,9 +116,9 @@ interface TimelineNodeTitleProps {
 export const TimelineNodeTitle = (props: TimelineNodeTitleProps) => {
   return (
     <>
-      <div className="relative flex h-6 w-6 flex-none items-center justify-center bg-gray-200 transition-all duration-200 ease-in-out group-hover:bg-primary-500">
+      <div className="relative flex h-6 w-6 flex-none items-center justify-center rounded-full bg-gray-200 transition-all duration-200 ease-in-out group-hover:bg-primary-500">
         <CareIcon
-          className="text-lg text-gray-700 transition-all duration-200 ease-in-out group-hover:text-white"
+          className="text-base text-gray-700 transition-all duration-200 ease-in-out group-hover:text-white"
           aria-hidden="true"
           icon={props.event.icon}
         />
