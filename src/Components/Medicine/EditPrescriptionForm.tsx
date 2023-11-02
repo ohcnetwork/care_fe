@@ -28,7 +28,10 @@ const handleSubmit = async (
   { discontinued_reason, ...newObj }: Prescription
 ) => {
   const discontinue = await request(MedicineRoutes.discontinuePrescription, {
-    pathParams: { consultation_external_id, external_id: oldObj.id },
+    pathParams: {
+      consultation: consultation_external_id,
+      external_id: oldObj.id,
+    },
     body: {
       discontinued_reason: discontinued_reason
         ? `Edit: ${discontinued_reason}`
@@ -44,7 +47,7 @@ const handleSubmit = async (
   }
 
   const { res } = await request(MedicineRoutes.createPrescription, {
-    pathParams: { consultation_external_id },
+    pathParams: { consultation: consultation_external_id },
     body: {
       ...newObj,
       // Forcing the medicine to be the same as the old one

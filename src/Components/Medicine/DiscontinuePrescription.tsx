@@ -30,7 +30,7 @@ export default function DiscontinuePrescription(props: Props) {
       onConfirm={async () => {
         setIsDiscontinuing(true);
         const { res } = await request(MedicineRoutes.discontinuePrescription, {
-          pathParams: { consultation },
+          pathParams: { consultation, external_id: props.prescription.id },
           body: {
             discontinued_reason: discontinuedReason,
           },
