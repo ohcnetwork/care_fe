@@ -60,7 +60,7 @@ export default function PrescrpitionTimeline({
   return (
     <Timeline
       className={classNames(
-        "md:px-3",
+        "py-4 md:px-3",
         loading && data && "animate-pulse opacity-70"
       )}
       name="prescription"
@@ -107,28 +107,6 @@ const MedicineAdministeredNode = ({
 
   return (
     <>
-      <ConfirmDialog
-        show={showArchiveConfirmation}
-        disabled={isArchiving}
-        variant="warning"
-        title="Archive Administration"
-        description="Are you sure you want to archive this administration?"
-        action="Archive"
-        onConfirm={async () => {
-          setIsArchiving(true);
-
-          const { res } = await request(MedicineRoutes.archiveAdministration, {
-            pathParams: { consultation, external_id: event.administration.id },
-          });
-
-          if (res?.status === 200) {
-            setIsArchiving(false);
-            setShowArchiveConfirmation(false);
-            onArchived();
-          }
-        }}
-        onClose={() => setShowArchiveConfirmation(false)}
-      />
       <TimelineNode
         name="medicine"
         event={event}
@@ -163,6 +141,28 @@ const MedicineAdministeredNode = ({
           </TimelineNodeNotes>
         )}
       </TimelineNode>
+      <ConfirmDialog
+        show={showArchiveConfirmation}
+        disabled={isArchiving}
+        variant="warning"
+        title="Archive Administration"
+        description="Are you sure you want to archive this administration?"
+        action="Archive"
+        onConfirm={async () => {
+          setIsArchiving(true);
+
+          const { res } = await request(MedicineRoutes.archiveAdministration, {
+            pathParams: { consultation, external_id: event.administration.id },
+          });
+
+          if (res?.status === 200) {
+            setIsArchiving(false);
+            setShowArchiveConfirmation(false);
+            onArchived();
+          }
+        }}
+        onClose={() => setShowArchiveConfirmation(false)}
+      />
     </>
   );
 };
