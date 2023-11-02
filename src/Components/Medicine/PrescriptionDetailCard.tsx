@@ -103,16 +103,17 @@ export default function PrescriptionDetailCard({
                 {prescription.indicator}
               </Detail>
               <Detail
-                className="col-span-4 md:col-span-2"
+                className="col-span-9 md:col-span-2"
                 label={t("max_dosage_24_hrs")}
               >
                 {prescription.max_dosage}
               </Detail>
               <Detail
-                className="col-span-5 md:col-span-2"
+                className="col-span-9 md:col-span-2"
                 label={t("min_time_bw_doses")}
               >
-                {prescription.max_dosage}
+                {prescription.min_hours_between_doses &&
+                  prescription.min_hours_between_doses + " hrs."}
               </Detail>
             </>
           ) : (

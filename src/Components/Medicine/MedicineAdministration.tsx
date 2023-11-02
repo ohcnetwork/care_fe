@@ -6,7 +6,7 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import ButtonV2 from "../Common/components/ButtonV2";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Error, Success } from "../../Utils/Notifications";
-import { formatDateTime } from "../../Utils/utils";
+import { classNames, formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import dayjs from "../../Utils/dayjs";
 import TextFormField from "../Form/FormFields/TextFormField";
@@ -74,6 +74,7 @@ export default function MedicineAdministration(props: Props) {
   };
 
   const selectedCount = shouldAdminister.filter(Boolean).length;
+  const is_prn = prescriptions.some((obj) => obj.is_prn);
 
   return (
     <div className="flex flex-col gap-3">
@@ -84,7 +85,12 @@ export default function MedicineAdministration(props: Props) {
           readonly
           selected={shouldAdminister[index]}
         >
-          <div className="mt-4 flex w-full max-w-[600px] flex-col gap-2 border-t-2 border-dashed border-gray-500 py-2 pt-4 md:ml-4 md:mt-0 md:border-l-2 md:border-t-0 md:pl-4 md:pt-0">
+          <div
+            className={classNames(
+              "mt-4 flex w-full flex-col gap-2 border-t-2 border-dashed border-gray-500 py-2 pt-4 md:ml-4 md:mt-0 md:border-l-2 md:border-t-0 md:pl-4 md:pt-0",
+              is_prn ? "max-w-sm" : "max-w-[600px]"
+            )}
+          >
             <CheckBoxFormField
               name="should_administer"
               label={t("select_for_administration")}
@@ -107,7 +113,12 @@ export default function MedicineAdministration(props: Props) {
                   : t("never")}
               </span>
             </div>
-            <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+            <div
+              className={classNames(
+                "flex gap-4 lg:flex-row lg:gap-6",
+                is_prn ? "flex-wrap" : "flex-col"
+              )}
+            >
               <TextAreaFormField
                 label={t("administration_notes")}
                 className="w-full"
