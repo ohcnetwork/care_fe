@@ -479,7 +479,10 @@ export const PatientManager = () => {
     [fetchFacilityBadgeName, fetchLocationBadgeName]
   );
 
-  const { data: permittedData } = useQuery(routes.getPermittedFacilities, {});
+  const { data: permittedFacilities } = useQuery(
+    routes.getPermittedFacilities,
+    {}
+  );
 
   const LastAdmittedToTypeBadges = () => {
     const badge = (key: string, value: any, id: string) => {
@@ -787,8 +790,10 @@ export const PatientManager = () => {
               onClick={() => {
                 if (qParams.facility)
                   navigate(`/facility/${qParams.facility}/patient`);
-                else if (permittedData?.results.length === 1)
-                  navigate(`/facility/${permittedData?.results[0].id}/patient`);
+                else if (permittedFacilities?.results.length === 1)
+                  navigate(
+                    `/facility/${permittedFacilities?.results[0].id}/patient`
+                  );
                 else setShowDialog(true);
               }}
               className="w-full lg:w-fit"
