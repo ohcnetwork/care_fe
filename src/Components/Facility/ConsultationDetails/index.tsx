@@ -335,14 +335,17 @@ export const ConsultationDetails = (props: any) => {
                 >
                   Doctor Connect
                 </button>
-                {patientData.last_consultation?.id && (
-                  <Link
-                    href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
-                    className="btn btn-primary m-1 w-full hover:text-white"
-                  >
-                    Camera Feed
-                  </Link>
-                )}
+                {patientData.last_consultation?.id &&
+                  ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
+                    authUser.user_type
+                  ) && (
+                    <Link
+                      href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+                      className="btn btn-primary m-1 w-full hover:text-white"
+                    >
+                      Camera Feed
+                    </Link>
+                  )}
               </>
             )}
             <Link
