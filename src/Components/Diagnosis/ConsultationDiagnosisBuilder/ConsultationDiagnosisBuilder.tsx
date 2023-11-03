@@ -10,6 +10,7 @@ import ConsultationDiagnosisEntry from "./ConsultationDiagnosisEntry";
 import request from "../../../Utils/request/request";
 import DiagnosesRoutes from "../routes";
 import * as Notification from "../../../Utils/Notifications";
+import PrincipalDiagnosisCard from "./PrincipalDiagnosisCard";
 
 interface CreateDiagnosesProps {
   className?: string;
@@ -18,6 +19,7 @@ interface CreateDiagnosesProps {
 }
 
 export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
+  const principalDiagnosis = props.value.find((d) => d.is_principal);
   return (
     <div className={props.className}>
       <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
@@ -62,6 +64,13 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
           />
         </div>
       </div>
+
+      {principalDiagnosis?.diagnosis_object && (
+        <PrincipalDiagnosisCard
+          className="my-2"
+          diagnosis={principalDiagnosis.diagnosis_object}
+        />
+      )}
     </div>
   );
 };
@@ -75,6 +84,8 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
   const consultation = useSlug("consultation");
   const [diagnoses, setDiagnoses] = useState(props.value);
 
+  const principalDiagnosis = diagnoses.find((d) => d.is_principal);
+
   return (
     <div className={props.className}>
       <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
@@ -84,6 +95,15 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
               key={index}
               value={diagnosis}
               consultationId={consultation}
+              onChange={(action) => {
+                setDiagnoses(
+                  diagnoses.map((diagnose, i) =>
+                    i === index
+                      ? (action.value as ConsultationDiagnosis)
+                      : diagnose
+                  )
+                );
+              }}
             />
           ))}
         </div>
@@ -118,6 +138,13 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
           />
         </div>
       </div>
+
+      {principalDiagnosis?.diagnosis_object && (
+        <PrincipalDiagnosisCard
+          className="my-2"
+          diagnosis={principalDiagnosis?.diagnosis_object}
+        />
+      )}
     </div>
   );
 };

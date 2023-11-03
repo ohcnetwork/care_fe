@@ -22,8 +22,6 @@ interface EditAction {
   value: CreateDiagnosis | ConsultationDiagnosis;
 }
 
-type Action = RemoveAction | EditAction;
-
 interface BaseProps {
   className?: string;
 }
@@ -31,12 +29,13 @@ interface BaseProps {
 interface ConsultationCreateProps extends BaseProps {
   consultationId?: undefined;
   value: CreateDiagnosis;
-  onChange: (action: Action) => void;
+  onChange: (action: EditAction | RemoveAction) => void;
 }
 
 interface ConsultationEditProps extends BaseProps {
   consultationId: string;
   value: ConsultationDiagnosis;
+  onChange: (action: EditAction) => void;
 }
 
 type Props = ConsultationCreateProps | ConsultationEditProps;
@@ -101,15 +100,12 @@ export default function ConsultationDiagnosisEntry(props: Props) {
               disabled={disabled}
               ghost
               border
-              onClick={() => {
+              onClick={async () => {
                 const value = { ...object, is_principal: !object.is_principal };
-
-                if (props.consultationId === undefined) {
-                  props.onChange({ type: "edit", value });
-                  return;
+                if (props.consultationId) {
+                  await handleUpdate(value as ConsultationDiagnosis);
                 }
-
-                handleUpdate(value as ConsultationDiagnosis);
+                props.onChange({ type: "edit", value });
               }}
               tooltip={object.is_principal ? t("unmark_as_principal") : ""}
               tooltipClassName="tooltip-bottom -translate-x-1/2 translate-y-1 text-xs"
@@ -141,18 +137,15 @@ export default function ConsultationDiagnosisEntry(props: Props) {
                   ? ActiveConditionVerificationStatuses
                   : ConditionVerificationStatuses
               }
-              onSelect={(verification_status) => {
+              onSelect={async (verification_status) => {
                 const value = { ...object, verification_status };
-
-                if (props.consultationId === undefined) {
-                  props.onChange({
-                    type: "edit",
-                    value: value as CreateDiagnosis,
-                  });
-                  return;
+                if (props.consultationId) {
+                  await handleUpdate(value as ConsultationDiagnosis);
                 }
-
-                handleUpdate(value as ConsultationDiagnosis);
+                props.onChange({
+                  type: "edit",
+                  value: value as CreateDiagnosis | ConsultationDiagnosis,
+                });
               }}
               onRemove={
                 props.consultationId === undefined
