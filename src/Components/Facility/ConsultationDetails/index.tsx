@@ -133,14 +133,11 @@ export const ConsultationDetails = (props: any) => {
               bed: data?.current_bed?.bed_object?.id,
             })
           );
-          const isCameraAttachedRes =
-            assetRes.data.results.filter(
-              (asset: { asset_object: { meta: { asset_type: string } } }) => {
-                return asset?.asset_object?.meta?.asset_type === "CAMERA"
-                  ? true
-                  : false;
-              }
-            ).length >= 1;
+          const isCameraAttachedRes = assetRes.data.results.some(
+            (asset: { asset_object: { asset_class: string } }) => {
+              return asset?.asset_object?.asset_class === "ONVIF";
+            }
+          );
           setIsCameraAttached(isCameraAttachedRes);
           const id = res.data.patient;
           const patientRes = await dispatch(getPatient({ id }));
