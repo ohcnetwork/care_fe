@@ -44,7 +44,10 @@ import { Prescription } from "../Components/Medicine/models";
 import { PatientModel } from "../Components/Patient/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
-import { NotificationResponse } from "../Components/Notifications/models";
+import {
+  NotificationData,
+  NotificationResponse,
+} from "../Components/Notifications/models";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -764,6 +767,7 @@ const routes = {
     path: "/api/v1/shift/{id}/comment/",
     method: "POST",
   },
+
   // Notifications
   getNotifications: {
     path: "/api/v1/notification/",
@@ -773,11 +777,12 @@ const routes = {
   getNotificationData: {
     path: "/api/v1/notification/{id}/",
     method: "GET",
-    TRes: Type<NotificationResponse>(),
+    TRes: Type<NotificationData>(),
   },
   markNotificationAsRead: {
     path: "/api/v1/notification/{id}/",
     method: "PATCH",
+    TRes: Type<NotificationResponse>(),
   },
   getPublicKey: {
     path: "/api/v1/notification/public_key/",
@@ -785,6 +790,7 @@ const routes = {
   sendNotificationMessages: {
     path: "/api/v1/notification/notify/",
     method: "POST",
+    TRes: Type<NotificationResponse>(),
   },
 
   // FileUpload Create

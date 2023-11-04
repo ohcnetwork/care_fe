@@ -24,6 +24,9 @@ import SelectMenuV2 from "../Form/SelectMenuV2";
 import { useTranslation } from "react-i18next";
 import CircularProgress from "../Common/components/CircularProgress";
 import useAuthUser from "../../Common/hooks/useAuthUser";
+import request from "../../Utils/request/request";
+import useQuery from "../../Utils/request/useQuery";
+import routes from "../../Redux/api";
 
 const RESULT_LIMIT = 14;
 
@@ -181,6 +184,11 @@ export default function NotificationsList({
   const intialSubscriptionState = async () => {
     try {
       const res = await dispatch(getUserPnconfig({ username: username }));
+      // console.log(res);
+      // const {data: result} = useQuery(routes.getNotificationData, {
+      //   pathParams: {username: username}
+      // });
+      // console.log(result);
       const reg = await navigator.serviceWorker.ready;
       const subscription = await reg.pushManager.getSubscription();
       if (!subscription && !res?.data?.pf_endpoint) {
