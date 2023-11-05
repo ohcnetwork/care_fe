@@ -1,5 +1,4 @@
 export interface NotificationData {
-  // Define the properties you expect in the notification data
   id: string;
   title: string;
   caused_objects: cause_object;
@@ -13,11 +12,9 @@ export interface NotificationData {
   read_at: string;
   message: string;
   public_key: string;
-  // Add other properties as needed
 }
 
 export interface NotificationResponse {
-  // Define the structure of the response from the API
   results: NotificationData[];
   count: number;
 }
@@ -35,8 +32,3 @@ export interface PNconfigData {
   pf_endpoint: string;
   pf_p256dh: string;
 }
-
-// export interface MarkNotificationAsReadRequest {
-//   // Define the request body for marking a notification as read
-//   id: string;
-// }
