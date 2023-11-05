@@ -45,8 +45,10 @@ import { PatientModel } from "../Components/Patient/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 import {
+  MarkNotificationAsReadRequest,
   NotificationData,
   NotificationResponse,
+  PNconfigData,
 } from "../Components/Notifications/models";
 
 /**
@@ -203,11 +205,14 @@ const routes = {
 
   getUserPnconfig: {
     path: "/api/v1/users/{username}/pnconfig/",
+    method: "GET",
+    TRes: Type<PNconfigData>(),
   },
 
   updateUserPnconfig: {
     path: "/api/v1/users/{username}/pnconfig/",
     method: "PATCH",
+    TRes: Type<PNconfigData>(),
   },
 
   // Skill Endpoints
@@ -782,6 +787,8 @@ const routes = {
   markNotificationAsRead: {
     path: "/api/v1/notification/{id}/",
     method: "PATCH",
+    TRes: Type<NotificationData>(),
+    // TBody: Type<unknown>(),
   },
   getPublicKey: {
     path: "/api/v1/notification/public_key/",
@@ -791,7 +798,6 @@ const routes = {
   sendNotificationMessages: {
     path: "/api/v1/notification/notify/",
     method: "POST",
-    TRes: Type<NotificationResponse>(),
   },
 
   // FileUpload Create

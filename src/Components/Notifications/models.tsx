@@ -1,6 +1,6 @@
 export interface NotificationData {
   // Define the properties you expect in the notification data
-  id: number;
+  id: string;
   title: string;
   caused_objects: cause_object;
   caused_by: any;
@@ -12,9 +12,7 @@ export interface NotificationData {
   created_date: string;
   read_at: string;
   message: string;
-  pf_auth: string;
-  pf_endpoint: string;
-  pf_p256dh: string;
+  public_key: string;
   // Add other properties as needed
 }
 
@@ -32,7 +30,13 @@ export interface cause_object {
   session: string;
 }
 
-export interface MarkNotificationAsReadRequest {
-  // Define the request body for marking a notification as read
-  id: number;
+export interface PNconfigData {
+  pf_auth: string;
+  pf_endpoint: string;
+  pf_p256dh: string;
 }
+
+// export interface MarkNotificationAsReadRequest {
+//   // Define the request body for marking a notification as read
+//   id: string;
+// }
