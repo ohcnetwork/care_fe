@@ -39,10 +39,6 @@ export interface IShift {
   is_assigned_to_user: boolean;
   created_by: number;
   last_edited_by: number;
-  patient: string;
+  patient: string | PatientModel;
   initial_status?: string;
-}
-
-export interface IShiftDetails extends Omit<IShift, "patient"> {
-  patient: PatientModel;
 }

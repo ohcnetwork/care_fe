@@ -48,7 +48,7 @@ import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 import { PatientModel } from "../Components/Patient/models";
 import { IComment, IResource } from "../Components/Resource/models";
-import { IShift, IShiftDetails } from "../Components/Shifting/models";
+import { IShift } from "../Components/Shifting/models";
 
 /**
  * A fake function that returns an empty object casted to type T
@@ -758,7 +758,7 @@ const routes = {
   getShiftDetails: {
     path: "/api/v1/shift/{id}/",
     method: "GET",
-    TRes: Type<IShiftDetails>(),
+    TRes: Type<IShift>(),
   },
   completeTransfer: {
     path: "/api/v1/shift/{externalId}/transfer/",
