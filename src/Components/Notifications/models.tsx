@@ -21,6 +21,7 @@ export interface NotificationData {
 export interface NotificationResponse {
   // Define the structure of the response from the API
   results: NotificationData[];
+  count: number;
 }
 
 export interface cause_object {

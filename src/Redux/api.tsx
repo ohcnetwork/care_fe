@@ -782,10 +782,11 @@ const routes = {
   markNotificationAsRead: {
     path: "/api/v1/notification/{id}/",
     method: "PATCH",
-    TRes: Type<NotificationResponse>(),
   },
   getPublicKey: {
     path: "/api/v1/notification/public_key/",
+    method: "GET",
+    TRes: Type<NotificationData>(),
   },
   sendNotificationMessages: {
     path: "/api/v1/notification/notify/",
