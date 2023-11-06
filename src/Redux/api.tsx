@@ -30,10 +30,10 @@ import {
 import {
   ConsultationModel,
   CreateBedBody,
+  CurrentBed,
   DailyRoundsBody,
   DailyRoundsRes,
   FacilityModel,
-  GetBedsRes,
   LocationModel,
   WardModel,
 } from "../Components/Facility/models";
@@ -372,13 +372,13 @@ const routes = {
   listConsultationBeds: {
     path: "/api/v1/consultationbed/",
     method: "GET",
-    TRes: Type<GetBedsRes>(),
+    TRes: Type<PaginatedResponse<CurrentBed>>(),
   },
   createConsultationBed: {
     path: "/api/v1/consultationbed/",
     method: "POST",
     TBody: Type<CreateBedBody>(),
-    TRes: Type<GetBedsRes>(),
+    TRes: Type<PaginatedResponse<CurrentBed>>(),
   },
   getConsultationBed: {
     path: "/api/v1/consultationbed/{external_id}/",

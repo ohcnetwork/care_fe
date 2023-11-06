@@ -427,11 +427,6 @@ export interface DailyRoundsRes {
   };
 }
 
-export interface GetBedsRes {
-  count: number;
-  results: CurrentBed[];
-}
-
 export interface CreateBedBody {
   start_date: string;
   assets: string[];
