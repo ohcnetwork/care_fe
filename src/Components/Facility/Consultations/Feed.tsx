@@ -48,8 +48,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
     id: "",
     accessKey: "",
+    middleware_address: "",
+    location_middleware: "",
   });
-  const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState("");
+  const [facilityMiddlewareHostname, setFacilityMiddlewareHostname] =
+    useState("");
   const [cameraConfig, setCameraConfig] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [bedPresets, setBedPresets] = useState<any>([]);
@@ -66,12 +69,18 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       const res = await dispatch(getPermittedFacility(facilityId));
 
       if (res.status === 200 && res.data) {
-        setCameraMiddlewareHostname(res.data.middleware_address);
+        setFacilityMiddlewareHostname(res.data.middleware_address);
       }
     };
 
     if (facilityId) fetchFacility();
   }, [dispatch, facilityId]);
+
+  const fallbackMiddleware =
+    cameraAsset.location_middleware || facilityMiddlewareHostname;
+
+  const currentMiddleware =
+    cameraAsset.middleware_address || fallbackMiddleware;
 
   useEffect(() => {
     if (cameraState) {
@@ -130,6 +139,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
               accessKey: config[2] || "",
+              middleware_address:
+                bedAssets.data.results[0].asset_object?.meta
+                  ?.middleware_hostname,
+              location_middleware:
+                bedAssets.data.results[0].asset_object.location_object
+                  ?.middleware_address,
             });
             setCameraConfig(bedAssets.data.results[0].meta);
             setCameraState({
@@ -170,8 +185,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   );
 
   const url = !isIOS
-    ? `wss://${cameraMiddlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
-    : `https://${cameraMiddlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
+    ? `wss://${currentMiddleware}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
+    : `https://${currentMiddleware}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
 
   const {
     startStream,
@@ -182,7 +197,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     : // eslint-disable-next-line react-hooks/rules-of-hooks
       useMSEMediaPlayer({
         config: {
-          middlewareHostname: cameraMiddlewareHostname,
+          middlewareHostname: currentMiddleware,
           ...cameraAsset,
         },
         url,
@@ -229,7 +244,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       });
       getBedPresets(cameraAsset);
     }
-  }, [cameraAsset, cameraMiddlewareHostname]);
+  }, [cameraAsset, currentMiddleware]);
 
   useEffect(() => {
     let tId: any;

@@ -37,6 +37,7 @@ const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
           <Link
             href="/user/profile"
             className="flex-nowrap overflow-hidden break-words font-semibold text-white"
+            id="profilenamelink"
           >
             {profileName}
           </Link>

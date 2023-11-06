@@ -134,7 +134,11 @@ export default function ManageUsers() {
   );
 
   const addUser = (
-    <ButtonV2 className="w-full" onClick={() => navigate("/users/add")}>
+    <ButtonV2
+      id="addUserButton"
+      className="w-full"
+      onClick={() => navigate("/users/add")}
+    >
       <CareIcon className="care-l-plus w-full text-lg" />
       <p>Add New User</p>
     </ButtonV2>
@@ -702,6 +706,7 @@ function UserFacilities(props: { user: any }) {
         <FacilitySelect
           multiple={false}
           name="facility"
+          exclude_user={username}
           showAll={false} // Show only facilities that user has access to link (not all facilities)
           showNOptions={8}
           selected={facility}
