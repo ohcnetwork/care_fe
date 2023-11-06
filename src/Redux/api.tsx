@@ -41,9 +41,6 @@ import {
   ILocalBodyByDistrict,
   IPartialUpdateExternalResult,
 } from "../Components/ExternalResult/models";
-
-import { Prescription } from "../Components/Medicine/models";
-
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 import { PatientModel } from "../Components/Patient/models";
@@ -53,7 +50,7 @@ import { IComment, IResource } from "../Components/Resource/models";
  * A fake function that returns an empty object casted to type T
  * @returns Empty object as type T
  */
-function Type<T>(): T {
+export function Type<T>(): T {
   return {} as T;
 }
 
@@ -1113,47 +1110,6 @@ const routes = {
   getAssetAvailability: {
     path: "/api/v1/asset_availability/{id}",
     method: "GET",
-  },
-
-  // Prescription endpoints
-
-  listPrescriptions: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
-    method: "GET",
-  },
-
-  createPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/",
-    method: "POST",
-    TBody: Type<Prescription>(),
-    TRes: Type<Prescription>(),
-  },
-
-  listAdministrations: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/",
-    method: "GET",
-  },
-
-  getAdministration: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescription_administration/{external_id}/",
-    method: "GET",
-  },
-
-  getPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/",
-    method: "GET",
-  },
-
-  administerPrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/administer/",
-    method: "POST",
-  },
-
-  discontinuePrescription: {
-    path: "/api/v1/consultation/{consultation_external_id}/prescriptions/{external_id}/discontinue/",
-    method: "POST",
-    TBody: Type<{ discontinued_reason: string }>(),
-    TRes: Type<Record<string, never>>(),
   },
 
   // HCX Endpoints

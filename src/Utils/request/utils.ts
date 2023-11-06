@@ -1,4 +1,5 @@
 import { LocalStorageKeys } from "../../Common/constants";
+import * as Notification from "../Notifications";
 import { QueryParams, RequestOptions } from "./types";
 
 export function makeUrl(
@@ -38,6 +39,9 @@ const ensurePathNotMissingReplacements = (path: string) => {
   const missingParams = path.match(/\{.*\}/g);
 
   if (missingParams) {
+    Notification.Error({
+      msg: `Missing path params: ${missingParams.join(", ")}`,
+    });
     throw new Error(`Missing path params: ${missingParams.join(", ")}`);
   }
 };
@@ -78,7 +82,7 @@ export function mergeRequestOptions<TData>(
     ...overrides,
 
     query: { ...options.query, ...overrides.query },
-    body: { ...options.body, ...overrides.body },
+    body: { ...(options.body ?? {}), ...(overrides.body ?? {}) },
     pathParams: { ...options.pathParams, ...overrides.pathParams },
 
     onResponse: (res) => {
