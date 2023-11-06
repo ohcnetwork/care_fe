@@ -766,7 +766,7 @@ const LiveFeed = (props: any) => {
       )}
       <div className="mt-4 flex flex-col">
         <div className="relative mt-4 flex flex-col gap-4 lg:flex-row">
-          <div className="flex-1">
+          <div className="flex flex-1 flex-col items-center">
             {/* ADD VIDEO PLAYER HERE */}
             <div className="relative mb-4 aspect-video w-full rounded bg-primary-100 lg:mb-0">
               <video
