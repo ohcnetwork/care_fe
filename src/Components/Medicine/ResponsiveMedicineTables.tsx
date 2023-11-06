@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import AccordionV2 from "./AccordionV2";
-import { classNames } from "../../../Utils/utils";
+import AccordionV2 from "../Common/components/AccordionV2";
+import { classNames } from "../../Utils/utils";
 
 function getWindowSize() {
   const { innerWidth, innerHeight } = window;
