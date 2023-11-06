@@ -52,7 +52,7 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
                 )
               : t("never")}
           </span>
-          {prescription.is_titrated && (
+          {prescription.dosage_type === "TITRATED" && (
             <span className="whitespace-nowrap pl-2">
               <CareIcon className="care-l-syringe" /> {t("dosage")}
               {":"} {prescription.last_administration?.dosage ?? "NA"}
@@ -68,14 +68,14 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
       show
       onClose={() => props.onClose(false)}
       onConfirm={async () => {
-        if (!dosage && prescription.is_titrated) {
+        if (!dosage && prescription.dosage_type === "TITRATED") {
           setError("This field is required");
           return;
         }
         if (
-          (prescription.is_titrated &&
+          (prescription.dosage_type === "TITRATED" &&
             Number(dosage?.split(" ")[0]) <
-              Number(prescription.start_dosage?.split(" ")[0])) ||
+              Number(prescription.base_dosage?.split(" ")[0])) ||
           Number(dosage?.split(" ")[0]) >
             Number(prescription.target_dosage?.split(" ")[0])
         ) {
@@ -107,18 +107,18 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
             actions={props.actions}
           />
         </div>
-        {prescription.is_titrated && (
+        {prescription.dosage_type === "TITRATED" && (
           <NumericWithUnitsFormField
             name="dosage"
             label={
               t("dosage") +
-              ` (${prescription.start_dosage} - ${prescription.target_dosage})`
+              ` (${prescription.base_dosage} - ${prescription.target_dosage})`
             }
             value={dosage}
             onChange={({ value }) => setDosage(value)}
             required
             units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
-            min={prescription.start_dosage}
+            min={prescription.base_dosage}
             max={prescription.target_dosage}
             disabled={isLoading}
             error={error}

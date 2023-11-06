@@ -42,7 +42,11 @@ export default function PrescriptionDetailCard({
               >
                 {prescription.prescription_type === "DISCHARGE" &&
                   `${t("discharge")} `}
-                {t(prescription.is_prn ? "prn_prescription" : "prescription")}
+                {t(
+                  prescription.dosage_type === "PRN"
+                    ? "prn_prescription"
+                    : "prescription"
+                )}
                 {` #${prescription.id?.slice(-5)}`}
               </h3>
               {prescription.discontinued && (
@@ -87,7 +91,7 @@ export default function PrescriptionDetailCard({
         <div className="mt-4 grid grid-cols-10 items-center gap-2">
           <Detail
             className={
-              prescription.is_titrated
+              prescription.dosage_type === "TITRATED"
                 ? "col-span-10"
                 : "col-span-10 md:col-span-4"
             }
@@ -99,13 +103,13 @@ export default function PrescriptionDetailCard({
             {prescription.route &&
               t("PRESCRIPTION_ROUTE_" + prescription.route)}
           </Detail>
-          {prescription.is_titrated ? (
+          {prescription.dosage_type === "TITRATED" ? (
             <>
               <Detail
                 className="col-span-5 sm:col-span-3"
                 label={t("start_dosage")}
               >
-                {prescription.start_dosage}
+                {prescription.base_dosage}
               </Detail>
               <Detail
                 className="col-span-5 sm:col-span-3"
@@ -119,11 +123,11 @@ export default function PrescriptionDetailCard({
               className="col-span-10 sm:col-span-6 md:col-span-2"
               label={t("dosage")}
             >
-              {prescription.dosage}
+              {prescription.base_dosage}
             </Detail>
           )}
 
-          {prescription.is_prn ? (
+          {prescription.dosage_type === "PRN" ? (
             <>
               <Detail
                 className="col-span-10 md:col-span-5"

@@ -33,9 +33,12 @@ export default function PrescriptionBuilder({
   const [showAdministerFor, setShowAdministerFor] = useState<Prescription>();
 
   const fetchPrescriptions = useCallback(() => {
-    dispatch(actions.list({ is_prn, prescription_type })).then((res: any) =>
-      setPrescriptions(res.data.results)
-    );
+    dispatch(
+      actions.list({
+        dosage_type: is_prn ? "PRN" : "REGULAR,TITRATED",
+        prescription_type,
+      })
+    ).then((res: any) => setPrescriptions(res.data.results));
   }, [dispatch, is_prn]);
 
   useEffect(() => {
@@ -126,5 +129,7 @@ export default function PrescriptionBuilder({
   );
 }
 
-const DefaultPrescription: Partial<NormalPrescription> = { is_prn: false };
-const DefaultPRNPrescription: Partial<PRNPrescription> = { is_prn: true };
+const DefaultPrescription: Partial<NormalPrescription> = {
+  dosage_type: "REGULAR",
+};
+const DefaultPRNPrescription: Partial<PRNPrescription> = { dosage_type: "PRN" };

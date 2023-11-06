@@ -6,13 +6,13 @@ export const PrescriptionFormValidator = () => {
   return (form: Prescription): FormErrors<Prescription> => {
     const errors: Partial<Record<keyof Prescription, FieldError>> = {};
     errors.medicine_object = RequiredFieldValidator()(form.medicine_object);
-    if (form.is_titrated) {
-      errors.start_dosage = RequiredFieldValidator()(form.start_dosage);
+    if (form.dosage_type === "TITRATED") {
+      errors.base_dosage = RequiredFieldValidator()(form.base_dosage);
       errors.target_dosage = RequiredFieldValidator()(form.target_dosage);
-    } else errors.dosage = RequiredFieldValidator()(form.dosage);
-    if (form.is_prn)
+    } else errors.base_dosage = RequiredFieldValidator()(form.base_dosage);
+    if (form.dosage_type === "PRN")
       errors.indicator = RequiredFieldValidator()(form.indicator);
-    if (!form.is_prn)
+    if (form.dosage_type !== "PRN")
       errors.frequency = RequiredFieldValidator()(form.frequency);
     return errors;
   };
@@ -34,10 +34,10 @@ const PRESCRIPTION_COMPARE_FIELDS: (keyof Prescription)[] = [
   "medicine",
   "days",
   "discontinued",
-  "dosage",
+  "base_dosage",
   "frequency",
   "indicator",
-  "is_prn",
+  "dosage_type",
   "max_dosage",
   "min_hours_between_doses",
   "prescription_type",

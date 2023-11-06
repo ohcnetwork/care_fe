@@ -6,9 +6,8 @@ interface BasePrescription {
   medicine_object?: MedibaseMedicine;
   medicine_old?: string;
   route?: "ORAL" | "IV" | "IM" | "SC";
-  dosage?: string;
-  is_titrated?: boolean;
-  start_dosage?: string;
+  dosage_type?: "REGULAR" | "TITRATED" | "PRN";
+  base_dosage?: string;
   target_dosage?: string;
   instruction_on_titration?: string;
   notes?: string;
@@ -36,7 +35,7 @@ export interface NormalPrescription extends BasePrescription {
     | "QOD"
     | "QWK";
   days?: number;
-  is_prn: false;
+  dosage_type: "REGULAR" | "TITRATED";
   indicator?: undefined;
   max_dosage?: undefined;
   min_hours_between_doses?: undefined;
@@ -46,7 +45,7 @@ export interface PRNPrescription extends BasePrescription {
   indicator: string;
   max_dosage?: string;
   min_hours_between_doses?: number;
-  is_prn: true;
+  dosage_type: "PRN";
   frequency?: undefined;
   days?: undefined;
 }

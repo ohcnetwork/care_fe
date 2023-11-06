@@ -886,10 +886,11 @@ export const PrescriptionActions = (consultation_external_id: string) => {
   return {
     list: (query?: Record<string, any>) => {
       let altKey;
-      if (query?.is_prn !== undefined) {
-        altKey = query?.is_prn
-          ? "listPRNPrescriptions"
-          : "listNormalPrescriptions";
+      if (query?.dosage_type !== undefined) {
+        altKey =
+          query?.dosage_type === "PRN"
+            ? "listPRNPrescriptions"
+            : "listNormalPrescriptions";
       }
       return fireRequest("listPrescriptions", [], query, pathParams, altKey);
     },

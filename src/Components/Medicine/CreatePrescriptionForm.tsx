@@ -52,7 +52,26 @@ export default function CreatePrescriptionForm(props: {
             {...field("medicine_object", RequiredFieldValidator())}
             required
           />
-          <CheckBoxFormField label="Titrate Dosage" {...field("is_titrated")} />
+          {props.prescription.dosage_type !== "PRN" && (
+            <CheckBoxFormField
+              label="Titrate Dosage"
+              name="Titrate Dosage"
+              value={field("dosage_type").value === "TITRATED"}
+              onChange={(e) => {
+                if (e.value) {
+                  field("dosage_type").onChange({
+                    name: "dosage_type",
+                    value: "TITRATED",
+                  });
+                } else {
+                  field("dosage_type").onChange({
+                    name: "dosage_type",
+                    value: "REGULAR",
+                  });
+                }
+              }}
+            />
+          )}
           <div className="flex flex-wrap items-center gap-x-4">
             <SelectFormField
               className="flex-1"
@@ -62,12 +81,12 @@ export default function CreatePrescriptionForm(props: {
               optionLabel={(key) => t("PRESCRIPTION_ROUTE_" + key)}
               optionValue={(key) => key}
             />
-            {field("is_titrated").value ? (
+            {field("dosage_type").value === "TITRATED" ? (
               <div className="flex w-full gap-4">
                 <NumericWithUnitsFormField
                   className="flex-1"
                   label="Start Dosage"
-                  {...field("start_dosage", RequiredFieldValidator())}
+                  {...field("base_dosage", RequiredFieldValidator())}
                   required
                   units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
                   min={0}
@@ -85,15 +104,15 @@ export default function CreatePrescriptionForm(props: {
               <NumericWithUnitsFormField
                 className="flex-1"
                 label={t("dosage")}
-                {...field("dosage", RequiredFieldValidator())}
-                required={!field("is_titrated").value}
+                {...field("base_dosage", RequiredFieldValidator())}
+                required={field("dosage_type").value !== "TITRATED"}
                 units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
                 min={0}
               />
             )}
           </div>
 
-          {props.prescription.is_prn ? (
+          {props.prescription.dosage_type === "PRN" ? (
             <>
               <TextFormField
                 label={t("indicator")}
@@ -139,7 +158,7 @@ export default function CreatePrescriptionForm(props: {
             </div>
           )}
 
-          {field("is_titrated").value && (
+          {field("dosage_type").value === "TITRATED" && (
             <TextAreaFormField
               label="Instructions on titration"
               {...field("instruction_on_titration")}

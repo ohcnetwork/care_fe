@@ -68,7 +68,7 @@ export default function PrescriptionAdministrationsTable({
 
   const refetch = useCallback(async () => {
     const filters = {
-      is_prn: prn,
+      dosage_type: prn ? "PRN" : "REGULAR,TITRATED",
       prescription_type: "REGULAR",
     };
 
@@ -166,7 +166,7 @@ export default function PrescriptionAdministrationsTable({
                   <span className="hidden px-2 text-center text-xs leading-none lg:block">
                     <p>Dosage &</p>
                     <p>
-                      {!state?.prescriptions[0]?.is_prn
+                      {state?.prescriptions[0]?.dosage_type !== "PRN"
                         ? "Frequency"
                         : "Indicator"}
                     </p>
@@ -417,7 +417,9 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
           onClose={() => setShowEdit(false)}
           show={showEdit}
           title={`${t("edit")} ${t(
-            prescription.is_prn ? "prn_prescription" : "prescription_medication"
+            prescription.dosage_type === "PRN"
+              ? "prn_prescription"
+              : "prescription_medication"
           )}: ${
             prescription.medicine_object?.name ?? prescription.medicine_old
           }`}
@@ -469,9 +471,9 @@ const PrescriptionRow = ({ prescription, ...props }: PrescriptionRowProps) => {
           </div>
 
           <div className="flex gap-1 text-xs font-semibold text-gray-900 lg:flex-col lg:px-2 lg:text-center">
-            <p>{prescription.dosage}</p>
+            <p>{prescription.base_dosage}</p>
             <p>
-              {!prescription.is_prn
+              {prescription.dosage_type !== "PRN"
                 ? t("PRESCRIPTION_FREQUENCY_" + prescription.frequency)
                 : prescription.indicator}
             </p>

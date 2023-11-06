@@ -97,14 +97,14 @@ export default function EditPrescriptionForm(props: Props) {
             <NumericWithUnitsFormField
               className="flex-1"
               label={t("dosage")}
-              {...field("dosage", RequiredFieldValidator())}
+              {...field("base_dosage", RequiredFieldValidator())}
               required
               units={["mg", "g", "ml", "drop(s)", "ampule(s)", "tsp"]}
               min={0}
             />
           </div>
 
-          {props.initial.is_prn ? (
+          {props.initial.dosage_type === "PRN" ? (
             <>
               <TextFormField
                 label={t("indicator")}

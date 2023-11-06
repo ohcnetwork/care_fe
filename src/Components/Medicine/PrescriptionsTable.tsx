@@ -295,7 +295,7 @@ export default function PrescriptionsTable({
 const COMMON_TKEYS = {
   medicine: "medicine",
   route: "route__pretty",
-  dosage: "dosage",
+  base_dosage: "base_dosage",
 };
 
 const REGULAR_NORMAL_TKEYS = {
