@@ -61,7 +61,7 @@ import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import TransferPatientDialog from "../Facility/TransferPatientDialog";
 import countryList from "../../Common/static/countries.json";
-import { debounce } from "lodash";
+import { debounce } from "lodash-es";
 
 import useAppHistory from "../../Common/hooks/useAppHistory";
 import useConfig from "../../Common/hooks/useConfig";
@@ -918,12 +918,12 @@ export const PatientRegister = (props: PatientRegisterProps) => {
     if (mobile) {
       field("phone_number").onChange({
         name: "phone_number",
-        value: parsePhoneNumber(mobile),
+        value: parsePhoneNumber(mobile, "IN"),
       });
 
       field("emergency_phone_number").onChange({
         name: "emergency_phone_number",
-        value: parsePhoneNumber(mobile),
+        value: parsePhoneNumber(mobile, "IN"),
       });
     }
 

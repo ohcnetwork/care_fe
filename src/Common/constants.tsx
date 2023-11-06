@@ -499,6 +499,7 @@ export const TELEMEDICINE_ACTIONS = [
   { id: 60, text: "COMPLETE", desc: "Complete" },
   { id: 70, text: "REVIEW", desc: "Review" },
   { id: 80, text: "NOT_REACHABLE", desc: "Not Reachable" },
+  { id: 90, text: "DISCHARGE_RECOMMENDED", desc: "Discharge Recommended" },
 ];
 
 export const FRONTLINE_WORKER = [
@@ -896,7 +897,7 @@ export const XLSXAssetImportSchema = {
   Class: {
     prop: "asset_class",
     type: String,
-    oneOf: ["HL7MONITOR", "ONVIF"],
+    oneOf: ["HL7MONITOR", "ONVIF", "VENTILATOR", ""],
   },
   Description: { prop: "description", type: String },
   "Working Status": {
@@ -908,7 +909,7 @@ export const XLSXAssetImportSchema = {
       } else if (status === "NOT WORKING") {
         return false;
       } else {
-        throw new Error("Invalid Working Status");
+        throw new Error("Invalid Working Status: " + status);
       }
     },
     required: true,
@@ -917,6 +918,7 @@ export const XLSXAssetImportSchema = {
     prop: "not_working_reason",
     type: String,
   },
+  "Serial Number": { prop: "serial_number", type: String },
   "QR Code ID": { prop: "qr_code_id", type: String },
   Manufacturer: { prop: "manufacturer", type: String },
   "Vendor Name": { prop: "vendor_name", type: String },
@@ -925,10 +927,11 @@ export const XLSXAssetImportSchema = {
     prop: "support_email",
     type: String,
     parse: (email: string) => {
+      if (!email) return null;
       const isValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
 
       if (!isValid) {
-        throw new Error("Invalid Support Email");
+        throw new Error("Invalid Support Email: " + email);
       }
 
       return email;
@@ -938,23 +941,38 @@ export const XLSXAssetImportSchema = {
     prop: "support_phone",
     type: String,
     parse: (phone: number | string) => {
-      phone = "+91" + String(phone);
-      if (!PhoneNumberValidator(["support"])(phone) === undefined) {
-        throw new Error("Invalid Support Phone Number");
+      phone = String(phone);
+      if (phone.length === 10 && !phone.startsWith("1800")) {
+        phone = "+91" + phone;
+      }
+      if (phone.startsWith("91") && phone.length === 12) {
+        phone = "+" + phone;
+      }
+      if (phone.startsWith("+911800")) {
+        phone = "1800" + phone.slice(6);
+      }
+      if (
+        PhoneNumberValidator(["mobile", "landline", "support"])(phone) !==
+        undefined
+      ) {
+        throw new Error("Invalid Support Phone Number: " + phone);
       }
 
       return phone ? phone : undefined;
     },
     required: true,
   },
-  "Warrenty End Date": {
+  "Warranty End Date": {
     prop: "warranty_amc_end_of_validity",
     type: String,
     parse: (date: string) => {
-      const parsed = new Date(date);
+      if (!date) return null;
+      const parts = date.split("-");
+      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      const parsed = new Date(reformattedDateStr);
 
       if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Warrenty End Date");
+        throw new Error("Invalid Warranty End Date:" + date);
       }
 
       return dateQueryString(parsed);
@@ -964,10 +982,13 @@ export const XLSXAssetImportSchema = {
     prop: "last_serviced_on",
     type: String,
     parse: (date: string) => {
-      const parsed = new Date(date);
+      if (!date) return null;
+      const parts = date.split("-");
+      const reformattedDateStr = `${parts[2]}-${parts[1]}-${parts[0]}`;
+      const parsed = new Date(reformattedDateStr);
 
       if (String(parsed) === "Invalid Date") {
-        throw new Error("Invalid Last Service Date");
+        throw new Error("Invalid Last Service Date:" + date);
       }
 
       return dateQueryString(parsed);
@@ -981,13 +1002,14 @@ export const XLSXAssetImportSchema = {
         prop: "local_ip_address",
         type: String,
         parse: (ip: string) => {
+          if (!ip) return null;
           const isValid =
             /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
               ip
             );
 
           if (!isValid) {
-            throw new Error("Invalid Config IP Address");
+            throw new Error("Invalid Config IP Address: " + ip);
           }
 
           return ip;

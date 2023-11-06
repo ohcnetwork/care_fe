@@ -32,6 +32,7 @@ import useKeyboardShortcut from "use-keyboard-shortcut";
 import useFullscreen from "../../../Common/hooks/useFullscreen.js";
 import { triggerGoal } from "../../../Integrations/Plausible.js";
 import useAuthUser from "../../../Common/hooks/useAuthUser.js";
+import Spinner from "../../Common/Spinner.js";
 
 interface IFeedProps {
   facilityId: string;
@@ -47,8 +48,11 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [cameraAsset, setCameraAsset] = useState<ICameraAssetState>({
     id: "",
     accessKey: "",
+    middleware_address: "",
+    location_middleware: "",
   });
-  const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState("");
+  const [facilityMiddlewareHostname, setFacilityMiddlewareHostname] =
+    useState("");
   const [cameraConfig, setCameraConfig] = useState<any>({});
   const [isLoading, setIsLoading] = useState(true);
   const [bedPresets, setBedPresets] = useState<any>([]);
@@ -57,6 +61,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [cameraState, setCameraState] = useState<PTZState | null>(null);
   const [isFullscreen, setFullscreen] = useFullscreen();
   const [videoStartTime, setVideoStartTime] = useState<Date | null>(null);
+  const [statusReported, setStatusReported] = useState(false);
   const authUser = useAuthUser();
 
   useEffect(() => {
@@ -64,12 +69,18 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       const res = await dispatch(getPermittedFacility(facilityId));
 
       if (res.status === 200 && res.data) {
-        setCameraMiddlewareHostname(res.data.middleware_address);
+        setFacilityMiddlewareHostname(res.data.middleware_address);
       }
     };
 
     if (facilityId) fetchFacility();
   }, [dispatch, facilityId]);
+
+  const fallbackMiddleware =
+    cameraAsset.location_middleware || facilityMiddlewareHostname;
+
+  const currentMiddleware =
+    cameraAsset.middleware_address || fallbackMiddleware;
 
   useEffect(() => {
     if (cameraState) {
@@ -128,6 +139,12 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
             setCameraAsset({
               id: bedAssets.data.results[0].asset_object.id,
               accessKey: config[2] || "",
+              middleware_address:
+                bedAssets.data.results[0].asset_object?.meta
+                  ?.middleware_hostname,
+              location_middleware:
+                bedAssets.data.results[0].asset_object.location_object
+                  ?.middleware_address,
             });
             setCameraConfig(bedAssets.data.results[0].meta);
             setCameraState({
@@ -168,8 +185,8 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   );
 
   const url = !isIOS
-    ? `wss://${cameraMiddlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
-    : `https://${cameraMiddlewareHostname}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
+    ? `wss://${currentMiddleware}/stream/${cameraAsset?.accessKey}/channel/0/mse?uuid=${cameraAsset?.accessKey}&channel=0`
+    : `https://${currentMiddleware}/stream/${cameraAsset?.accessKey}/channel/0/hls/live/index.m3u8?uuid=${cameraAsset?.accessKey}&channel=0`;
 
   const {
     startStream,
@@ -180,7 +197,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     : // eslint-disable-next-line react-hooks/rules-of-hooks
       useMSEMediaPlayer({
         config: {
-          middlewareHostname: cameraMiddlewareHostname,
+          middlewareHostname: currentMiddleware,
           ...cameraAsset,
         },
         url,
@@ -227,18 +244,37 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
       });
       getBedPresets(cameraAsset);
     }
-  }, [cameraAsset, cameraMiddlewareHostname]);
+  }, [cameraAsset, currentMiddleware]);
 
   useEffect(() => {
     let tId: any;
     if (streamStatus !== StreamStatus.Playing) {
-      setStreamStatus(StreamStatus.Loading);
+      if (streamStatus !== StreamStatus.Offline) {
+        setStreamStatus(StreamStatus.Loading);
+      }
       tId = setTimeout(() => {
         startStream({
           onSuccess: () => setStreamStatus(StreamStatus.Playing),
-          onError: () => setStreamStatus(StreamStatus.Offline),
+          onError: () => {
+            setStreamStatus(StreamStatus.Offline);
+            if (!statusReported) {
+              triggerGoal("Camera Feed Viewed", {
+                consultationId,
+                userId: authUser.id,
+                result: "error",
+              });
+              setStatusReported(true);
+            }
+          },
         });
       }, 100);
+    } else if (!statusReported) {
+      triggerGoal("Camera Feed Viewed", {
+        consultationId,
+        userId: authUser.id,
+        result: "success",
+      });
+      setStatusReported(true);
     }
 
     return () => {
@@ -505,8 +541,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                 STATUS: <span className="text-red-600">OFFLINE</span>
               </p>
               <p className="font-semibold ">Feed is currently not live.</p>
-              <p className="font-semibold ">
-                Click refresh button to try again.
+              <p className="font-semibold ">Trying to connect... </p>
+              <p className="mt-2 flex justify-center">
+                <Spinner circle={{ fill: "none" }} />
               </p>
             </div>
           )}

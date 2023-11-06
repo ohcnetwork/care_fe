@@ -312,9 +312,7 @@ export default function ListView() {
           <div className="flex w-full flex-col gap-2 lg:w-fit lg:flex-row lg:gap-4">
             <ButtonV2
               className="py-[11px]"
-              onClick={() =>
-                navigate("/shifting/board-view", { query: qParams })
-              }
+              onClick={() => navigate("/shifting/board", { query: qParams })}
             >
               <CareIcon className="care-l-list-ul rotate-90" />
               {t("board_view")}

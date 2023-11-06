@@ -6,8 +6,6 @@ import {
 } from "../Components/Medicine/models";
 import { fireRequest, fireRequestForFiles } from "./fireRequest";
 
-import { ICreateHealthIdRequest } from "../Components/ABDM/models";
-
 export const getConfig = () => {
   return fireRequestForFiles("config");
 };
@@ -501,7 +499,7 @@ export const sampleReport = (id: string, sampleId: string) => {
 export const getTestList = (params: object) => {
   return fireRequest("getTestSampleList", [], params);
 };
-export const getTestSample = (id: number) => {
+export const getTestSample = (id: string) => {
   return fireRequest("getTestSample", [id], {});
 };
 export const patchSample = (params: object, pathParam: object) => {
@@ -668,13 +666,6 @@ export const externalResultList = (params: object, altKey: string) => {
 export const externalResult = (pathParam: object) => {
   return fireRequest("externalResult", [], {}, pathParam);
 };
-export const externalResultUploadCsv = (params: object) => {
-  return fireRequest("externalResultUploadCsv", [], params);
-};
-
-export const deleteExternalResult = (id: string) => {
-  return fireRequest("deleteExternalResult", [id], {});
-};
 
 export const updateExternalResult = (id: number, params: object) => {
   return fireRequest("updateExternalResult", [], params, { id });
@@ -812,124 +803,30 @@ export const listMedibaseMedicines = (
 };
 
 // Resource
-export const createResource = (params: object) => {
-  return fireRequest("createResource", [], params);
-};
-export const updateResource = (id: string, params: object) => {
-  return fireRequest("updateResource", [id], params);
-};
-export const deleteResourceRecord = (id: string) => {
-  return fireRequest("deleteResourceRecord", [id], {});
-};
-export const listResourceRequests = (params: object, key: string) => {
-  return fireRequest("listResourceRequests", [], params, null, key);
-};
-export const getResourceDetails = (pathParam: object) => {
-  return fireRequest("getResourceDetails", [], {}, pathParam);
-};
 export const downloadResourceRequests = (params: object) => {
   return fireRequest("downloadResourceRequests", [], params);
-};
-export const getResourceComments = (id: string, params: object) => {
-  return fireRequest("getResourceComments", [], params, { id });
-};
-export const addResourceComments = (id: string, params: object) => {
-  return fireRequest("addResourceComments", [], params, { id });
 };
 
 export const listAssets = (params: object) =>
   fireRequest("listAssets", [], params);
 export const createAsset = (params: object) =>
   fireRequest("createAsset", [], params);
-export const getAssetUserLocation = (params: object) =>
-  fireRequest("getAssetUserLocation", [], params);
-export const createAssetUserLocation = (params: object) =>
-  fireRequest("createAssetUserLocation", [], params);
 export const getAsset = (id: string) =>
   fireRequest("getAsset", [], {}, { external_id: id });
 export const deleteAsset = (id: string) =>
   fireRequest("deleteAsset", [], {}, { external_id: id });
 export const updateAsset = (id: string, params: object) =>
   fireRequest("updateAsset", [], params, { external_id: id });
-export const partialUpdateAsset = (id: string, params: object) =>
-  fireRequest("partialUpdateAsset", [], params, { external_id: id });
 export const operateAsset = (id: string, params: object) =>
   fireRequest("operateAsset", [], params, { external_id: id });
 
-export const listAssetTransaction = (params: object) =>
-  fireRequest("listAssetTransaction", [], params);
-export const getAssetTransaction = (id: string) =>
-  fireRequest("getAssetTransaction", [], {}, { id });
-
-export const listAssetService = (params: object, asset_external_id: string) =>
-  fireRequest("listAssetService", [], params, { asset_external_id });
-export const getAssetService = (
-  params: object,
-  asset_external_id: string,
-  external_id: string
-) =>
-  fireRequest("getAssetService", [], params, {
-    asset_external_id,
-    external_id,
-  });
-export const updateAssetService = (
-  asset_external_id: string,
-  external_id: string,
-  params: object
-) =>
-  fireRequest("updateAssetService", [], params, {
-    asset_external_id,
-    external_id,
-  });
-
 // ABDM related
-export const generateAadhaarOtp = (aadhaar: string) =>
-  fireRequest("generateAadhaarOtp", [], { aadhaar });
 
 export const resentAadhaarOtp = (txnId: string) =>
   fireRequest("resendAadhaarOtp", [], { txnId });
 
-export const verifyAadhaarOtp = (txnId: string, otp: string) =>
-  fireRequest("verifyAadhaarOtp", [], { txnId, otp });
-
 export const generateMobileOtp = (txnId: string, mobile: string) =>
   fireRequest("generateMobileOtp", [], { txnId, mobile });
-
-export const checkAndGenerateMobileOtp = (txnId: string, mobile: string) =>
-  fireRequest("checkAndGenerateMobileOtp", [], { txnId, mobile });
-
-export const verifyMobileOtp = (txnId: string, otp: string) =>
-  fireRequest("verifyMobileOtp", [], { txnId, otp });
-
-export const createHealthId = (data: ICreateHealthIdRequest) =>
-  fireRequest("createHealthId", [], data);
-
-export const searchByHealthId = (healthId: string) =>
-  fireRequest("searchByHealthId", [], { healthId });
-
-export const initiateAbdmAuthentication = (
-  authMethod: string,
-  healthid: string
-) => fireRequest("initiateAbdmAuthentication", [], { authMethod, healthid });
-
-export const confirmWithAadhaarOtp = (
-  txnId: string,
-  otp: string,
-  patientId?: string
-) => fireRequest("confirmWithAadhaarOtp", [], { txnId, otp, patientId });
-
-export const confirmWithMobileOtp = (
-  txnId: string,
-  otp: string,
-  patientId?: string
-) => fireRequest("confirmWithMobileOtp", [], { txnId, otp, patientId });
-
-export const linkViaQR = (abha_details: any, patientId?: string) => {
-  return fireRequest("linkViaQR", [], {
-    ...abha_details,
-    patientId,
-  });
-};
 
 export const linkCareContext = (
   consultationId: string,
@@ -941,52 +838,15 @@ export const linkCareContext = (
   });
 };
 
-export const getAbhaCard = (patient: string, type: "pdf" | "png") => {
-  return fireRequest("getAbhaCard", [], {
-    patient,
-    type,
-  });
-};
-
 export const healthFacilityActions = {
   list: (params: object) => {
     return fireRequest("listHealthFacilities", [], params);
-  },
-
-  create: (data: object) => {
-    return fireRequest("createHealthFacility", [], data);
-  },
-
-  read: (id: string) => {
-    return fireRequest(
-      "getHealthFacility",
-      [],
-      {},
-      { facility_id: id },
-      undefined,
-      true
-    );
   },
 
   update: (id: string, data: object) => {
     return fireRequest("updateHealthFacility", [], data, {
       facility_id: id,
     });
-  },
-
-  partialUpdate: (id: string, data: object) => {
-    return fireRequest("partialUpdateHealthFacility", [], data, {
-      facility_id: id,
-    });
-  },
-
-  registerService: (id: string) => {
-    return fireRequest(
-      "registerHealthFacilityAsService",
-      [],
-      {},
-      { facility_id: id }
-    );
   },
 };
 
@@ -1003,7 +863,7 @@ export const PrescriptionActions = (consultation_external_id: string) => {
   const pathParams = { consultation_external_id };
 
   return {
-    list: (query?: Record<string, string | boolean | number>) => {
+    list: (query?: Record<string, any>) => {
       let altKey;
       if (query?.is_prn !== undefined) {
         altKey = query?.is_prn

@@ -1,14 +1,4 @@
-import { MutableRefObject, useEffect, useRef, useState } from "react";
-import {
-  addMonths,
-  addYears,
-  format,
-  getDay,
-  getDaysInMonth,
-  isEqual,
-  subMonths,
-  subYears,
-} from "date-fns";
+import { MutableRefObject, useEffect, useState } from "react";
 
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { Popover } from "@headlessui/react";
@@ -64,19 +54,24 @@ const DateInputV2: React.FC<Props> = ({
   const [displayValue, setDisplayValue] = useState<string>(
     value ? dayjs(value).format("DDMMYYYY") : ""
   );
-  const popover = useRef<HTMLDivElement>(null);
 
   const decrement = () => {
     switch (type) {
       case "date":
-        setDatePickerHeaderDate((prev) => subMonths(prev, 1));
+        setDatePickerHeaderDate((prev) =>
+          dayjs(prev).subtract(1, "month").toDate()
+        );
         break;
       case "month":
-        setDatePickerHeaderDate((prev) => subYears(prev, 1));
+        setDatePickerHeaderDate((prev) =>
+          dayjs(prev).subtract(1, "year").toDate()
+        );
         break;
       case "year":
-        setDatePickerHeaderDate((prev) => subYears(prev, 1));
-        setYear((prev) => subYears(prev, 10));
+        setDatePickerHeaderDate((prev) =>
+          dayjs(prev).subtract(1, "year").toDate()
+        );
+        setYear((prev) => dayjs(prev).subtract(10, "year").toDate());
         break;
     }
   };
@@ -84,24 +79,24 @@ const DateInputV2: React.FC<Props> = ({
   const increment = () => {
     switch (type) {
       case "date":
-        setDatePickerHeaderDate((prev) => addMonths(prev, 1));
+        setDatePickerHeaderDate((prev) => dayjs(prev).add(1, "month").toDate());
         break;
       case "month":
-        setDatePickerHeaderDate((prev) => addYears(prev, 1));
+        setDatePickerHeaderDate((prev) => dayjs(prev).add(1, "year").toDate());
         break;
       case "year":
-        setDatePickerHeaderDate((prev) => addYears(prev, 1));
-        setYear((prev) => addYears(prev, 10));
+        setDatePickerHeaderDate((prev) => dayjs(prev).add(1, "year").toDate());
+        setYear((prev) => dayjs(prev).add(10, "year").toDate());
         break;
     }
   };
 
   const isSelectedDate = (date: number) => {
-    if (value)
-      return isEqual(
-        new Date(value.getFullYear(), value.getMonth(), date),
-        value
-      );
+    if (value) {
+      return dayjs(
+        new Date(value.getFullYear(), value.getMonth(), date)
+      ).isSame(dayjs(value));
+    }
   };
 
   type CloseFunction = (
@@ -119,6 +114,7 @@ const DateInputV2: React.FC<Props> = ({
             )
           );
           close();
+          setIsOpen?.(false);
         })()
       : Notification.Error({
           msg: outOfLimitsErrorMessage ?? "Cannot select date out of range",
@@ -126,9 +122,11 @@ const DateInputV2: React.FC<Props> = ({
   };
 
   const getDayCount = (date: Date) => {
-    const daysInMonth = getDaysInMonth(date);
+    const daysInMonth = dayjs(date).daysInMonth();
 
-    const dayOfWeek = getDay(new Date(date.getFullYear(), date.getMonth(), 1));
+    const dayOfWeek = dayjs(
+      new Date(date.getFullYear(), date.getMonth(), 1)
+    ).day();
     const blankDaysArray = [];
     for (let i = 1; i <= dayOfWeek; i++) {
       blankDaysArray.push(i);
@@ -222,13 +220,7 @@ const DateInputV2: React.FC<Props> = ({
         <Popover className="relative">
           {({ open, close }) => (
             <div>
-              <Popover.Button
-                disabled={disabled}
-                className="w-full"
-                onClick={() => {
-                  setIsOpen?.(!isOpen);
-                }}
-              >
+              <Popover.Button disabled={disabled} className="w-full">
                 <input type="hidden" name="date" />
                 <input
                   id={id}
@@ -247,10 +239,6 @@ const DateInputV2: React.FC<Props> = ({
 
               {(open || isOpen) && (
                 <Popover.Panel
-                  onBlur={() => {
-                    setIsOpen?.(false);
-                  }}
-                  ref={popover}
                   static
                   className={classNames(
                     "cui-dropdown-base absolute mt-0.5 w-72 divide-y-0 p-4",
@@ -261,10 +249,6 @@ const DateInputV2: React.FC<Props> = ({
                     <input
                       id="date-input"
                       autoFocus
-                      onBlur={(e) => {
-                        popover.current?.focus();
-                        e.preventDefault();
-                      }}
                       className="cui-input-base bg-gray-50"
                       value={
                         displayValue.replace(
@@ -305,7 +289,7 @@ const DateInputV2: React.FC<Props> = ({
                             onClick={showMonthPicker}
                             className="cursor-pointer rounded px-3 py-1 text-center font-medium text-black hover:bg-gray-300"
                           >
-                            {format(datePickerHeaderDate, "MMMM")}
+                            {dayjs(datePickerHeaderDate).format("MMMM")}
                           </div>
                         )}
                         <div
@@ -315,7 +299,7 @@ const DateInputV2: React.FC<Props> = ({
                           <p className="text-center">
                             {type == "year"
                               ? year.getFullYear()
-                              : format(datePickerHeaderDate, "yyyy")}
+                              : dayjs(datePickerHeaderDate).format("YYYY")}
                           </p>
                         </div>
                       </div>
@@ -409,14 +393,9 @@ const DateInputV2: React.FC<Props> = ({
                             )}
                             onClick={setMonthValue(i)}
                           >
-                            {format(
-                              new Date(
-                                datePickerHeaderDate.getFullYear(),
-                                i,
-                                1
-                              ),
-                              "MMM"
-                            )}
+                            {dayjs(
+                              new Date(datePickerHeaderDate.getFullYear(), i, 1)
+                            ).format("MMM")}
                           </div>
                         ))}
                     </div>
