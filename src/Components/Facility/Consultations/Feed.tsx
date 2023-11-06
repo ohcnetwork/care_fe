@@ -15,7 +15,6 @@ import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
 import { useEffect, useRef, useState } from "react";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon.js";
-import { ConsultationModel } from "../models";
 import FeedButton from "./FeedButton";
 import Loading from "../../Common/Loading";
 import ReactPlayer from "react-player";
@@ -45,7 +44,6 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     id: "",
     accessKey: "",
   });
-  const [cameraMiddlewareHostname, setCameraMiddlewareHostname] = useState("");
   const [cameraConfig, setCameraConfig] = useState<any>({});
   const [bedPresets, setBedPresets] = useState<any>([]);
   const [bed, setBed] = useState<any>();
@@ -56,11 +54,13 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
   const [statusReported, setStatusReported] = useState(false);
   const authUser = useAuthUser();
 
+  let cameraMiddlewareHostname = "";
+
   useQuery(routes.getPermittedFacility, {
     pathParams: { id: facilityId || "" },
     onResponse: ({ res, data }) => {
       if (res && res.status === 200 && data && data.middleware_address) {
-        setCameraMiddlewareHostname(data.middleware_address);
+        cameraMiddlewareHostname = data.middleware_address;
       }
     },
   });
@@ -93,8 +93,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
     pathParams: { id: consultationId },
     onResponse: ({ res, data }) => {
       if (res && res.status === 200 && data) {
-        const consultation = data as ConsultationModel;
-        const consultationBedId = consultation.current_bed?.bed_object?.id;
+        const consultationBedId = data.current_bed?.bed_object?.id;
         if (consultationBedId) {
           (async () => {
             const { res: listAssetBedsRes, data: listAssetBedsData } =
@@ -339,7 +338,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
         onSuccess: async (data) => {
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
-            const { res, data: ResponseData } = await request(
+            const { res, data: assetBedData } = await request(
               routes.partialUpdateAssetBed,
               {
                 body: {
@@ -353,7 +352,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                 pathParams: { id: currentPreset?.id },
               }
             );
-            if (res && ResponseData && res.status === 200) {
+            if (res && assetBedData && res.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
               await getBedPresets(cameraAsset?.id);
               getPresets({});

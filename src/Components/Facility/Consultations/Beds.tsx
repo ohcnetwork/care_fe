@@ -1,7 +1,7 @@
 import * as Notification from "../../../Utils/Notifications.js";
 
 import { BedModel, CurrentBed } from "../models";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
 import useQuery from "../../../Utils/request/useQuery";
@@ -44,34 +44,23 @@ const Beds = (props: BedsProps) => {
   );
   const [assets, setAssets] = useState<any[]>([]);
   const [consultationBeds, setConsultationBeds] = useState<CurrentBed[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [key, setKey] = useState(0);
   const [showBedDetails, setShowBedDetails] = useState<CurrentBed | null>(null);
 
-  const {
-    res,
-    data: bedData,
-    refetch,
-  } = useQuery(routes.listConsultationBeds, {
-    pathParams: { consultation: consultationId },
+  const { loading } = useQuery(routes.listConsultationBeds, {
+    query: { consultation: consultationId },
+    onResponse: ({ res, data }) => {
+      if (res && res.status === 200 && data?.results) {
+        setConsultationBeds(data.results);
+        setBed(data?.results[0]?.bed_object || {});
+        setAssets(data?.results[0]?.assets_objects || []);
+      } else {
+        Notification.Error({
+          msg: "Something went wrong..!",
+        });
+      }
+    },
   });
-
-  useEffect(() => {
-    setIsLoading(true);
-    if (!bedData || !res?.ok) {
-      Notification.Error({
-        msg: "Something went wrong..!",
-      });
-    } else {
-      setConsultationBeds(bedData.results);
-      setBed(bedData.results[0]?.bed_object || {});
-      setAssets(bedData.results[0]?.assets_objects || []);
-    }
-  }, [bedData, res]);
-
-  useEffect(() => {
-    refetch();
-  }, [key, refetch]);
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -100,7 +89,7 @@ const Beds = (props: BedsProps) => {
     }
   };
 
-  if (isLoading) {
+  if (loading) {
     if (props.smallLoader && props.smallLoader === true) {
       return (
         <div className="flex w-full items-center justify-center p-5 px-10">

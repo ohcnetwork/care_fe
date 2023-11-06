@@ -32,11 +32,8 @@ import {
   CreateBedBody,
   DailyRoundsBody,
   DailyRoundsRes,
-  DeleteAssetBedData,
   FacilityModel,
-  GetAssetBedsData,
   GetBedsRes,
-  GetDailyReportsBody,
   LocationModel,
   WardModel,
 } from "../Components/Facility/models";
@@ -318,7 +315,7 @@ const routes = {
   getAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "GET",
-    TRes: Type<GetAssetBedsData>(),
+    TRes: Type<PaginatedResponse<AssetBedModel>>(),
   },
   updateAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
@@ -333,7 +330,9 @@ const routes = {
   deleteAssetBed: {
     path: "/api/v1/assetbed/{external_id}/",
     method: "DELETE",
-    TRes: Type<DeleteAssetBedData>(),
+    TRes: Type<null | {
+      detail?: string;
+    }>(),
   },
   operateAsset: {
     path: "/api/v1/asset/{external_id}/operate_assets/",
@@ -459,8 +458,7 @@ const routes = {
   getDailyReports: {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/",
     method: "GET",
-    TBody: Type<GetDailyReportsBody>(),
-    TRes: Type<PaginatedResponse<DailyRoundsModel[]>>(),
+    TRes: Type<PaginatedResponse<DailyRoundsModel>>(),
   },
 
   getDailyReport: {
@@ -470,7 +468,7 @@ const routes = {
     path: "/api/v1/consultation/{consultationId}/daily_rounds/analyse/",
     method: "POST",
     TBody: Type<DailyRoundsBody>(),
-    TRes: Type<PaginatedResponse<DailyRoundsRes>>(),
+    TRes: Type<DailyRoundsRes>(),
   },
 
   // Hospital Beds

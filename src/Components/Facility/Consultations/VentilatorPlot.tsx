@@ -61,8 +61,6 @@ export const VentilatorPlot = (props: any) => {
         },
       });
       if (res && res.ok && data) {
-        console.log(res);
-        console.log(data);
         setResults(data.results);
         setTotalCount(data.count);
       }

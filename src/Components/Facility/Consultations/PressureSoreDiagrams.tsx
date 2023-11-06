@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import routes from "../../../Redux/api";
 import request from "../../../Utils/request/request";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 import { make as CriticalCare__PressureScoreViewer } from "../../CriticalCareRecording/PressureSore/CriticalCare__PressureSoreViewer.bs";
 import Pagination from "../../Common/Pagination";
 import { PAGINATION_LIMIT } from "../../../Common/constants";
 
 import { formatDateTime } from "../../../Utils/utils";
+import { PressureSoreDiagramsRes } from "../models";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;
@@ -40,13 +39,11 @@ export const PressureSoreDiagrams = (props: any) => {
       );
       if (res && res.ok && dailyRounds) {
         const keys = Object.keys(dailyRounds.results || {}).filter(
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          (key) => dailyRounds.results[key].pressure_sore.length
+          (key) =>
+            (dailyRounds.results[key] as PressureSoreDiagramsRes).pressure_sore
+              .length
         );
         const data: any = {};
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         keys.forEach((key) => (data[key] = dailyRounds.results[key]));
 
         setResults(data);

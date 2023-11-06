@@ -109,7 +109,7 @@ const LiveFeed = (props: any) => {
   };
 
   const getBedPresets = async (id: any) => {
-    const { data } = await request(routes.getAssetBed, {
+    const { data } = await request(routes.listAssetBeds, {
       pathParams: { asset: id },
       body: {
         limit: page.limit,
@@ -143,7 +143,7 @@ const LiveFeed = (props: any) => {
       bed_id: bed.id,
       preset_name: preset,
     };
-    const { res: responseRes } = await request(routes.partialUpdateAssetBed, {
+    const { res } = await request(routes.partialUpdateAssetBed, {
       pathParams: { id: currentPreset.id },
       body: {
         asset: currentPreset.asset_object.id,
@@ -154,7 +154,7 @@ const LiveFeed = (props: any) => {
         },
       },
     });
-    if (responseRes && responseRes.status === 200) {
+    if (res && res.status === 200) {
       Notification.Success({ msg: "Preset Updated" });
     } else {
       Notification.Error({ msg: "Something Went Wrong" });
@@ -248,22 +248,19 @@ const LiveFeed = (props: any) => {
           if (currentPreset?.asset_object?.id && data?.position) {
             setLoading(option.loadingLabel);
             console.log("Updating Preset");
-            const { res: responseRes } = await request(
-              routes.partialUpdateAssetBed,
-              {
-                pathParams: { id: currentPreset.id },
-                body: {
-                  asset: currentPreset.asset_object.id,
-                  bed: currentPreset.bed_object.id,
-                  meta: {
-                    ...currentPreset.meta,
-                    position: data?.position,
-                  },
+            const { res } = await request(routes.partialUpdateAssetBed, {
+              pathParams: { id: currentPreset.id },
+              body: {
+                asset: currentPreset.asset_object.id,
+                bed: currentPreset.bed_object.id,
+                meta: {
+                  ...currentPreset.meta,
+                  position: data?.position,
                 },
-              }
-            );
+              },
+            });
 
-            if (responseRes && responseRes.status === 200) {
+            if (res && res.status === 200) {
               Notification.Success({ msg: "Preset Updated" });
               getBedPresets(cameraAsset?.id);
               fetchCameraPresets();

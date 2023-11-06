@@ -29,10 +29,7 @@ const DataTable = (props: any) => {
             Right
           </div>
         </div>
-        <div
-          style={{ direction: "rtl" }}
-          className="flex flex-row overflow-x-auto"
-        >
+        <div className="flex flex-row overflow-x-auto">
           {data.map((x: any, i: any) => {
             return (
               <div
@@ -293,10 +290,7 @@ export const NeurologicalTable = (props: any) => {
       <div className="mb-6">
         <div className="text-xl font-semibold">Level Of Consciousness</div>
         <div className="w-max-content my-4 flex max-w-full flex-row divide-y divide-gray-200 overflow-hidden shadow sm:rounded-lg">
-          <div
-            style={{ direction: "rtl" }}
-            className="flex flex-row overflow-x-auto"
-          >
+          <div className="flex flex-row overflow-x-auto">
             {locData.map((x: any, i: any) => (
               <div
                 key={`loc_${i}`}
@@ -372,10 +366,7 @@ export const NeurologicalTable = (props: any) => {
                 Total
               </div>
             </div>
-            <div
-              style={{ direction: "rtl" }}
-              className="flex flex-row overflow-x-auto"
-            >
+            <div className="flex flex-row overflow-x-auto">
               {glasgowData.map((x: any, i: any) => {
                 return (
                   <div
