@@ -62,7 +62,11 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
         diagnoses={props.value}
         onChange={async (value) => {
           props.onChange(
-            props.value.map((d) => ({ ...d, is_principal: d === value }))
+            props.value.map((d) => ({
+              ...d,
+              is_principal:
+                d.diagnosis_object?.id === value?.diagnosis_object?.id,
+            }))
           );
         }}
       />
