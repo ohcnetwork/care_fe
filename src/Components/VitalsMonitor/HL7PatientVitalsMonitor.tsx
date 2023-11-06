@@ -14,13 +14,6 @@ const minutesAgo = (timestamp: string) => {
   return `${dayjs().diff(dayjs(timestamp), "minute")}m ago`;
 };
 
-const isWithinMinutes = (timestamp: string, bedAssignmentStartDate: string) => {
-  return (
-    dayjs().diff(dayjs(timestamp), "minute") <
-    dayjs().diff(dayjs(bedAssignmentStartDate), "minute")
-  );
-};
-
 export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
   const { connect, waveformCanvas, data, isOnline } = useHL7VitalsMonitor(
     props.config
@@ -42,13 +35,8 @@ export default function HL7PatientVitalsMonitor(props: IVitalsComponentProps) {
     connect(props.socketUrl);
   }, [props.socketUrl]);
 
-  const bpWithinMaxPersistence = !!(
-    data.bp?.["date-time"] &&
-    props.patientCurrentBedAssignmentDate &&
-    isWithinMinutes(
-      data.bp?.["date-time"],
-      props.patientCurrentBedAssignmentDate
-    )
+  const bpWithinMaxPersistence = dayjs(data.bp?.["date-time"]).isAfter(
+    props.patientCurrentBedAssignmentDate
   );
 
   return (
