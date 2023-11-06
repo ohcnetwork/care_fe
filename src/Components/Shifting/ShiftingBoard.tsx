@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
 import { downloadShiftRequests } from "../../Redux/actions";
 import { useDrag, useDrop } from "react-dnd";
@@ -15,8 +15,8 @@ import useAuthUser from "../../Common/hooks/useAuthUser";
 import request from "../../Utils/request/request";
 import routes from "../../Redux/api";
 import useQuery from "../../Utils/request/useQuery";
-
-const limit = 14;
+import { PaginatedResponse } from "../../Utils/request/types";
+import { IShift } from "./models";
 
 interface boardProps {
   board: string;
@@ -258,9 +258,8 @@ export default function ShiftingBoard({
   filterProp,
   formatFilter,
 }: boardProps) {
-  const [currentPage, setCurrentPage] = useState(1);
   const [offset, setOffSet] = useState(0);
-  const [isLoading, setIsLoading] = useState({ board: true, more: true });
+  const [isLoading, setIsLoading] = useState({ board: "BOARD", more: false });
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "shift-card",
     drop: (item: any) => {
@@ -270,27 +269,61 @@ export default function ShiftingBoard({
     },
     collect: (monitor) => ({ isOver: !!monitor.isOver() }),
   }));
+  const [data, setData] = useState<PaginatedResponse<IShift>>();
 
-  const { data, refetch } = useQuery(routes.listShiftRequests, {
+  useQuery(routes.listShiftRequests, {
     query: formatFilter({
       ...filterProp,
       status: board,
-      offset: offset,
     }),
-    onResponse: ({ res, data }) => {
-      if (res?.ok && data) {
-        setCurrentPage(1);
+    onResponse: ({ res, data: listShiftData }) => {
+      if (res?.ok && listShiftData) {
+        setData(listShiftData);
       }
       setIsLoading((loading) => reduceLoading("COMPLETE", loading));
     },
   });
 
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setCurrentPage(page);
-    setOffSet(offset);
+  useEffect(() => {
+    setIsLoading((loading) => reduceLoading("BOARD", loading));
+  }, [
+    filterProp.facility,
+    filterProp.origin_facility,
+    filterProp.shifting_approving_facility,
+    filterProp.assigned_facility,
+    filterProp.emergency,
+    filterProp.is_up_shift,
+    filterProp.patient_name,
+    filterProp.created_date_before,
+    filterProp.created_date_after,
+    filterProp.modified_date_before,
+    filterProp.modified_date_after,
+    filterProp.patient_phone_number,
+    filterProp.ordering,
+    filterProp.is_kasp,
+    filterProp.assigned_to,
+    filterProp.disease_status,
+    filterProp.is_antenatal,
+    filterProp.breathlessness_level,
+  ]);
+
+  const handlePagination = async () => {
     setIsLoading((loading) => reduceLoading("MORE", loading));
-    refetch();
+    setOffSet(offset + 14);
+    const { res, data: newPageData } = await request(routes.listShiftRequests, {
+      query: formatFilter({
+        ...filterProp,
+        status: board,
+        offset: offset,
+      }),
+    });
+    if (res?.ok && newPageData) {
+      setData((prev) =>
+        prev
+          ? { ...prev, results: [...prev.results, ...newPageData.results] }
+          : newPageData
+      );
+    }
     setIsLoading((loading) => reduceLoading("COMPLETE", loading));
   };
   const { t } = useTranslation();
@@ -358,7 +391,7 @@ export default function ShiftingBoard({
             </div>
           ) : (
             <button
-              onClick={(_) => handlePagination(currentPage + 1, limit)}
+              onClick={(_) => handlePagination()}
               className="mx-auto my-4 rounded-md bg-gray-100 p-2 px-4 hover:bg-white"
             >
               More...

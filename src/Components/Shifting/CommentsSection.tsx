@@ -4,7 +4,6 @@ import * as Notification from "../../Utils/Notifications.js";
 import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
 import ButtonV2 from "../Common/components/ButtonV2";
-import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { IComment } from "../Resource/models";
 import PaginatedList from "../../CAREUI/misc/PaginatedList";
@@ -16,10 +15,6 @@ interface CommentSectionProps {
 const CommentSection = (props: CommentSectionProps) => {
   const [commentBox, setCommentBox] = useState("");
   const { t } = useTranslation();
-
-  const { loading, refetch: fetchData } = useQuery(routes.getShiftComments, {
-    pathParams: { id: props.id },
-  });
 
   const onSubmitComment = async () => {
     const payload = {
@@ -37,54 +32,55 @@ const CommentSection = (props: CommentSectionProps) => {
     });
     if (res?.ok) {
       Notification.Success({ msg: t("comment_added_successfully") });
-      fetchData();
+
       setCommentBox("");
     }
   };
 
   return (
-    <div className="flex w-full flex-col">
-      <textarea
-        rows={3}
-        value={commentBox}
-        minLength={3}
-        placeholder={t("type_your_comment")}
-        className="mt-4 rounded-lg border border-gray-500 p-4 focus:ring-primary-500"
-        onChange={(e) => setCommentBox(e.target.value)}
-      />
-      <div className="flex w-full justify-end">
-        <ButtonV2 onClick={onSubmitComment} className="mt-4">
-          {t("post_your_comment")}
-        </ButtonV2>
-      </div>
-      <div className=" w-full">
-        {loading ? (
-          <CircularProgress />
-        ) : (
-          <PaginatedList
-            route={routes.getShiftComments}
-            pathParams={{ id: props.id }}
-          >
-            {() => (
-              <div>
-                <PaginatedList.WhenEmpty>
-                  <span>No comments available</span>
-                </PaginatedList.WhenEmpty>
-                <PaginatedList.WhenLoading>
-                  <CircularProgress />
-                </PaginatedList.WhenLoading>
-                <PaginatedList.Items<IComment>>
-                  {(item) => <Comment {...item} />}
-                </PaginatedList.Items>
-                <div className="flex w-full items-center justify-center">
-                  <PaginatedList.Paginator hideIfSinglePage />
-                </div>
-              </div>
-            )}
-          </PaginatedList>
-        )}
-      </div>
-    </div>
+    <PaginatedList
+      route={routes.getShiftComments}
+      pathParams={{ id: props.id }}
+    >
+      {(_, query) => (
+        <div className="flex w-full flex-col">
+          <textarea
+            rows={3}
+            value={commentBox}
+            minLength={3}
+            placeholder={t("type_your_comment")}
+            className="mt-4 rounded-lg border border-gray-500 p-4 focus:ring-primary-500"
+            onChange={(e) => setCommentBox(e.target.value)}
+          />
+          <div className="flex w-full justify-end">
+            <ButtonV2
+              className="mt-4"
+              onClick={async () => {
+                await onSubmitComment();
+                query.refetch();
+              }}
+            >
+              {t("post_your_comment")}
+            </ButtonV2>
+          </div>
+          <div className="w-full">
+            <PaginatedList.WhenEmpty>
+              <span>No comments available</span>
+            </PaginatedList.WhenEmpty>
+            <PaginatedList.WhenLoading>
+              <CircularProgress />
+            </PaginatedList.WhenLoading>
+            <PaginatedList.Items<IComment>>
+              {(item) => <Comment {...item} />}
+            </PaginatedList.Items>
+            <PaginatedList.Paginator
+              className="flex w-full items-center justify-center"
+              hideIfSinglePage
+            />
+          </div>
+        </div>
+      )}
+    </PaginatedList>
   );
 };
 

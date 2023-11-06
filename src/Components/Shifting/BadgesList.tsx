@@ -1,19 +1,12 @@
 import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
-
+import { useFacilityQuery } from "../Resource/BadgesList";
 import { useTranslation } from "react-i18next";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
 import { UserModel } from "../Users/models";
 
-function useFacilityQuery(facilityId: string | undefined) {
-  return useQuery(routes.getAnyFacility, {
-    pathParams: { id: facilityId as string },
-    prefetch: !!facilityId,
-  });
-}
-
-export function namereturn(user: UserModel) {
-  return `${user.first_name || ""} ${user.last_name || ""}`;
+export function formatFacilityBadgeValue(user: UserModel | undefined) {
+  return user ? `${user.first_name} ${user.last_name}` : "";
 }
 
 export default function BadgesList(props: any) {
@@ -61,9 +54,7 @@ export default function BadgesList(props: any) {
           t("assigned_to"),
           "assigned_to",
           qParams.assigned_to
-            ? `${assignedUser?.results[0].first_name || ""} ${
-                assignedUser?.results[0].last_name || ""
-              }`
+            ? formatFacilityBadgeValue(assignedUser?.results[0])
             : ""
         ),
         value(
