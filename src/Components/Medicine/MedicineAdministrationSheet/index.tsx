@@ -37,11 +37,13 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
     }
   );
 
-  const discontinuedCount = useQuery(MedicineRoutes.listPrescriptions, {
+  const discontinuedPrescriptions = useQuery(MedicineRoutes.listPrescriptions, {
     pathParams: { consultation },
     query: { ...filters, discontinued: true },
     prefetch: !showDiscontinued,
-  }).data?.count;
+  });
+
+  const discontinuedCount = discontinuedPrescriptions.data?.count;
 
   const { activityTimelineBounds, prescriptions } = useMemo(
     () => ({
@@ -113,7 +115,10 @@ const MedicineAdministrationSheet = ({ readonly, is_prn }: Props) => {
           <MedicineAdministrationTable
             prescriptions={prescriptions}
             pagination={pagination}
-            onRefetch={refetch}
+            onRefetch={() => {
+              refetch();
+              discontinuedPrescriptions.refetch();
+            }}
           />
         )}
 
