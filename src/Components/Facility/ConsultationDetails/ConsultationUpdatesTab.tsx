@@ -240,7 +240,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         </div>
                         <div className="overflow-x-auto overflow-y-hidden">
                           <PrescriptionsTable
-                            consultation_id={props.consultationData.id ?? ""}
                             is_prn={false}
                             readonly
                             prescription_type="DISCHARGE"
@@ -249,7 +248,6 @@ export const ConsultationUpdatesTab = (props: ConsultationTabProps) => {
                         <hr className="my-2 border border-gray-300"></hr>
                         <div className="overflow-x-auto overflow-y-hidden">
                           <PrescriptionsTable
-                            consultation_id={props.consultationData.id ?? ""}
                             is_prn
                             readonly
                             prescription_type="DISCHARGE"
