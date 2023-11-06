@@ -86,17 +86,16 @@ export const TimelineNode = (props: TimelineNodeProps) => {
                     ? props.titleSuffix
                     : `${props.event.type} the ${props.name || name}.`}
                 </p>
+                {props.actions && (
+                  <TimelineNodeActions>{props.actions}</TimelineNodeActions>
+                )}
+                <RecordMeta
+                  className="flex-none py-0.5 text-xs leading-5 text-gray-500"
+                  time={props.event.timestamp}
+                />
               </TimelineNodeTitle>
             )}
           </div>
-
-          {props.actions && (
-            <TimelineNodeActions>{props.actions}</TimelineNodeActions>
-          )}
-          <RecordMeta
-            className="flex-none py-0.5 text-xs leading-5 text-gray-500"
-            time={props.event.timestamp}
-          />
         </div>
 
         <div className="flex w-full flex-col items-start gap-y-2 pl-10">
@@ -124,7 +123,9 @@ export const TimelineNodeTitle = (props: TimelineNodeTitleProps) => {
         />
       </div>
 
-      <div className="flex w-full justify-between">{props.children}</div>
+      <div className="flex w-full flex-wrap justify-between gap-2">
+        {props.children}
+      </div>
     </>
   );
 };
