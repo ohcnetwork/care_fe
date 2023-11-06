@@ -84,6 +84,7 @@ export default function PrescrpitionTimeline({
                 event={event}
                 onArchived={refetch}
                 isLastNode={index === events.length - 1}
+                hideArchive={prescription.discontinued}
               />
             );
         }
@@ -96,10 +97,12 @@ const MedicineAdministeredNode = ({
   event,
   onArchived,
   isLastNode,
+  hideArchive,
 }: {
   event: MedicineAdministeredEvent;
   onArchived: () => void;
   isLastNode: boolean;
+  hideArchive?: boolean;
 }) => {
   const consultation = useSlug("consultation");
   const [showArchiveConfirmation, setShowArchiveConfirmation] = useState(false);
@@ -114,7 +117,8 @@ const MedicineAdministeredNode = ({
         // TODO: to add administered dosage when Titrated Prescriptions are implemented
         // titleSuffix={`administered ${event.administration.dosage}.`}
         actions={
-          !event.cancelled && (
+          !event.cancelled &&
+          !hideArchive && (
             <ButtonV2
               size="small"
               border
