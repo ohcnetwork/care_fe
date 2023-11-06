@@ -107,8 +107,31 @@ export const handleSignOut = (forceReload: boolean) => {
   Object.values(LocalStorageKeys).forEach((key) =>
     localStorage.removeItem(key)
   );
+  const redirectURL = new URLSearchParams(window.location.search).get(
+    "redirect"
+  );
+  redirectURL ? navigate(`/?redirect=${redirectURL}`) : navigate("/");
   if (forceReload) window.location.href = "/";
-  else navigate("/");
+};
+
+export const handleRedirection = () => {
+  const redirectParam = new URLSearchParams(window.location.search).get(
+    "redirect"
+  );
+  try {
+    if (redirectParam) {
+      const redirectURL = new URL(redirectParam);
+
+      if (redirectURL.origin === window.location.origin) {
+        const newPath = redirectURL.pathname + redirectURL.search;
+        window.location.href = `${window.location.origin}${newPath}`;
+        return;
+      }
+    }
+    window.location.href = "/facility";
+  } catch {
+    window.location.href = "/facility";
+  }
 };
 
 /**
