@@ -27,6 +27,7 @@ const PrincipalDiagnosisSelect = <T extends Option>(props: Props<T>) => {
     <div className={props.className}>
       <div className="rounded-lg border border-gray-400 bg-gray-200 p-4">
         <SelectFormField
+          id="principal-diagnosis-select"
           name="principal_diagnosis"
           label="Principal Diagnosis"
           value={JSON.stringify(value)}
