@@ -1,6 +1,3 @@
-import { useTranslation } from "react-i18next";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../../Common/components/ButtonV2";
 import ConditionVerificationStatusMenu from "../ConditionVerificationStatusMenu";
 import {
   ActiveConditionVerificationStatuses,
@@ -41,8 +38,6 @@ interface ConsultationEditProps extends BaseProps {
 type Props = ConsultationCreateProps | ConsultationEditProps;
 
 export default function ConsultationDiagnosisEntry(props: Props) {
-  const { t } = useTranslation();
-  const [data, setData] = useState<ConsultationDiagnosis>();
   const [disabled, setDisabled] = useState(false);
 
   const handleUpdate = async (value: ConsultationDiagnosis) => {
@@ -60,12 +55,11 @@ export default function ConsultationDiagnosisEntry(props: Props) {
     setDisabled(false);
 
     if (res?.ok && data) {
-      setData(data);
+      props.onChange({ type: "edit", value: data });
     }
   };
 
-  const object = data ?? props.value;
-
+  const object = props.value;
   const isActive = ActiveConditionVerificationStatuses.includes(
     object.verification_status as (typeof ActiveConditionVerificationStatuses)[number]
   );
@@ -90,43 +84,7 @@ export default function ConsultationDiagnosisEntry(props: Props) {
         >
           {object.diagnosis_object?.label}
         </span>
-
         <div className="flex items-center justify-end gap-2 sm:flex-row md:absolute md:inset-y-0 md:right-2 md:justify-normal">
-          {isActive && (
-            <ButtonV2
-              type="button"
-              size="small"
-              variant={object.is_principal ? "primary" : "secondary"}
-              disabled={disabled}
-              ghost
-              border
-              onClick={async () => {
-                const value = { ...object, is_principal: !object.is_principal };
-                if (props.consultationId) {
-                  await handleUpdate(value as ConsultationDiagnosis);
-                }
-                props.onChange({ type: "edit", value });
-              }}
-              tooltip={object.is_principal ? t("unmark_as_principal") : ""}
-              tooltipClassName="tooltip-bottom -translate-x-1/2 translate-y-1 text-xs"
-            >
-              {object.is_principal && (
-                <CareIcon icon="l-check" className="text-lg" />
-              )}
-              <span className="py-0.5">
-                {object.is_principal ? (
-                  <>
-                    <span className="hidden md:block">
-                      {t("principal_diagnosis")}
-                    </span>
-                    <span className="block md:hidden">{t("principal")}</span>
-                  </>
-                ) : (
-                  t("mark_as_principal")
-                )}
-              </span>
-            </ButtonV2>
-          )}
           <div className="w-32">
             <ConditionVerificationStatusMenu
               className="w-full"
@@ -141,11 +99,12 @@ export default function ConsultationDiagnosisEntry(props: Props) {
                 const value = { ...object, verification_status };
                 if (props.consultationId) {
                   await handleUpdate(value as ConsultationDiagnosis);
+                } else {
+                  props.onChange({
+                    type: "edit",
+                    value: value as CreateDiagnosis | ConsultationDiagnosis,
+                  });
                 }
-                props.onChange({
-                  type: "edit",
-                  value: value as CreateDiagnosis | ConsultationDiagnosis,
-                });
               }}
               onRemove={
                 props.consultationId === undefined

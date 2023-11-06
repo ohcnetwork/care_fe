@@ -10,7 +10,7 @@ import ConsultationDiagnosisEntry from "./ConsultationDiagnosisEntry";
 import request from "../../../Utils/request/request";
 import DiagnosesRoutes from "../routes";
 import * as Notification from "../../../Utils/Notifications";
-import PrincipalDiagnosisCard from "./PrincipalDiagnosisCard";
+import PrincipalDiagnosisSelect from "./PrincipalDiagnosisSelect";
 
 interface CreateDiagnosesProps {
   className?: string;
@@ -19,7 +19,6 @@ interface CreateDiagnosesProps {
 }
 
 export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
-  const principalDiagnosis = props.value.find((d) => d.is_principal);
   return (
     <div className={props.className}>
       <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
@@ -30,18 +29,11 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
               value={diagnosis}
               onChange={(action) => {
                 if (action.type === "remove") {
-                  const diagnoses = [...props.value];
-                  diagnoses.splice(index, 1);
-                  props.onChange(diagnoses);
+                  props.onChange(props.value.toSpliced(index, 1));
                 }
 
                 if (action.type === "edit") {
-                  const diagnoses = action.value.is_principal
-                    ? props.value.map((d) => {
-                        d.is_principal = false;
-                        return d;
-                      })
-                    : [...props.value];
+                  const diagnoses = [...props.value];
                   diagnoses[index] = action.value as CreateDiagnosis;
                   props.onChange(diagnoses);
                 }
@@ -65,12 +57,15 @@ export const CreateDiagnosesBuilder = (props: CreateDiagnosesProps) => {
         </div>
       </div>
 
-      {principalDiagnosis?.diagnosis_object && (
-        <PrincipalDiagnosisCard
-          className="my-2"
-          diagnosis={principalDiagnosis.diagnosis_object}
-        />
-      )}
+      <PrincipalDiagnosisSelect
+        className="my-2"
+        diagnoses={props.value}
+        onChange={async (value) => {
+          props.onChange(
+            props.value.map((d) => ({ ...d, is_principal: d === value }))
+          );
+        }}
+      />
     </div>
   );
 };
@@ -83,9 +78,6 @@ interface EditDiagnosesProps {
 export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
   const consultation = useSlug("consultation");
   const [diagnoses, setDiagnoses] = useState(props.value);
-
-  const principalDiagnosis = diagnoses.find((d) => d.is_principal);
-
   return (
     <div className={props.className}>
       <div className="flex w-full flex-col items-start rounded-lg border border-gray-400">
@@ -139,12 +131,51 @@ export const EditDiagnosesBuilder = (props: EditDiagnosesProps) => {
         </div>
       </div>
 
-      {principalDiagnosis?.diagnosis_object && (
-        <PrincipalDiagnosisCard
-          className="my-2"
-          diagnosis={principalDiagnosis?.diagnosis_object}
-        />
-      )}
+      <PrincipalDiagnosisSelect
+        className="my-2"
+        diagnoses={diagnoses}
+        onChange={async (value) => {
+          // Unset existing principal diagnoses
+          await Promise.all(
+            diagnoses
+              .filter((d) => d.is_principal)
+              .map((d) => {
+                return request(DiagnosesRoutes.updateConsultationDiagnosis, {
+                  pathParams: { consultation, id: d.id },
+                  body: { ...d, is_principal: false },
+                });
+              })
+          );
+
+          if (!value) {
+            setDiagnoses((diagnoses) =>
+              diagnoses.map((d) => ({ ...d, is_principal: false }))
+            );
+            return;
+          }
+
+          // Set new principal diagnosis
+          const { res, data, error } = await request(
+            DiagnosesRoutes.updateConsultationDiagnosis,
+            {
+              pathParams: { consultation, id: value.id },
+              body: { ...value, is_principal: true },
+            }
+          );
+
+          if (res?.ok && data) {
+            setDiagnoses((diagnoses) =>
+              diagnoses.map((d) =>
+                d.id === data.id ? data : { ...d, is_principal: false }
+              )
+            );
+          }
+
+          if (error) {
+            Notification.Error({ msg: error });
+          }
+        }}
+      />
     </div>
   );
 };

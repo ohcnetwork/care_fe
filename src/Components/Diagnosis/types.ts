@@ -27,19 +27,20 @@ export type ConditionVerificationStatus =
   (typeof ConditionVerificationStatuses)[number];
 
 export interface ConsultationDiagnosis {
-  id: string;
-  diagnosis_object: ICD11DiagnosisModel;
+  readonly id: string;
+  diagnosis?: ICD11DiagnosisModel["id"];
+  readonly diagnosis_object: ICD11DiagnosisModel;
   verification_status: ConditionVerificationStatus;
   is_principal: boolean;
-  is_migrated: boolean;
-  created_by: PerformedByModel;
-  created_date: string;
-  modified_date: string;
+  readonly is_migrated: boolean;
+  readonly created_by: PerformedByModel;
+  readonly created_date: string;
+  readonly modified_date: string;
 }
 
 export interface CreateDiagnosis {
   diagnosis: ICD11DiagnosisModel["id"];
-  diagnosis_object?: ICD11DiagnosisModel;
+  readonly diagnosis_object?: ICD11DiagnosisModel;
   verification_status: (typeof ActiveConditionVerificationStatuses)[number];
   is_principal: boolean;
 }
