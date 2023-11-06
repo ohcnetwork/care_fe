@@ -8,7 +8,7 @@ import routes from "../../Redux/api";
 
 export const NoticeBoard = () => {
   const { t } = useTranslation();
-  const { data: data, loading } = useQuery(routes.getNotifications, {
+  const { data, loading } = useQuery(routes.getNotifications, {
     query: { offset: 0, event: "MESSAGE", medium_sent: "SYSTEM" },
   });
 

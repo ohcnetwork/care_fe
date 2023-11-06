@@ -13,23 +13,22 @@ export default function ShowPushNotification({ id }: DetailRoute) {
     },
   });
 
-  const resultUrl = (res: NotificationData) => {
-    const data = res?.caused_objects;
-    switch (res?.event) {
+  const resultUrl = ({ caused_objects, event }: NotificationData) => {
+    switch (event) {
       case "PATIENT_CREATED":
-        return `/facility/${data?.facility}/patient/${data?.patient}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}`;
       case "PATIENT_UPDATED":
-        return `/facility/${data?.facility}/patient/${data?.patient}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}`;
       case "PATIENT_CONSULTATION_CREATED":
-        return `/facility/${data?.facility}/patient/${data?.patient}/consultation/${data?.consultation}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}`;
       case "PATIENT_CONSULTATION_UPDATED":
-        return `/facility/${data?.facility}/patient/${data?.patient}/consultation/${data?.consultation}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}`;
       case "PATIENT_CONSULTATION_UPDATE_CREATED":
-        return `/facility/${data?.facility}/patient/${data?.patient}/consultation/${data?.consultation}/daily-rounds/${data?.daily_round}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}/daily-rounds/${caused_objects?.daily_round}`;
       case "PATIENT_CONSULTATION_UPDATE_UPDATED":
-        return `/facility/${data?.facility}/patient/${data?.patient}/consultation/${data?.consultation}/daily-rounds/${data?.daily_round}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}/daily-rounds/${caused_objects?.daily_round}`;
       case "INVESTIGATION_SESSION_CREATED":
-        return `/facility/${data?.facility}/patient/${data?.patient}/consultation/${data?.consultation}/investigation/${data?.session}`;
+        return `/facility/${caused_objects?.facility}/patient/${caused_objects?.patient}/consultation/${caused_objects?.consultation}/investigation/${caused_objects?.session}`;
       case "MESSAGE":
         return "/notice_board/";
       default:

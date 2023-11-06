@@ -296,12 +296,12 @@ export default function NotificationsList({
       pf_auth: auth,
     };
 
-    const res = await request(routes.updateUserPnconfig, {
+    const { res } = await request(routes.updateUserPnconfig, {
       pathParams: { username: username },
       body: data,
     });
 
-    if (res.res?.status >= 200 && res.res?.status <= 300) {
+    if (res?.ok) {
       setIsSubscribed("SubscribedOnThisDevice");
     }
     setIsSubscribing(false);
@@ -310,7 +310,7 @@ export default function NotificationsList({
   const handleMarkAllAsRead = async () => {
     setIsMarkingAllAsRead(true);
     await Promise.all(
-      data.map(async (notification) => {
+      data.map((notification) => {
         return request(routes.markNotificationAsRead, {
           pathParams: { id: notification.id },
           body: { read_at: new Date() },
@@ -326,7 +326,7 @@ export default function NotificationsList({
     request(routes.getNotifications, {
       query: { offset, event: eventFilter, medium_set: "SYSTEM" },
     })
-      .then((res: any) => {
+      .then((res) => {
         if (res && res.data) {
           setData(res.data.results);
           setUnreadCount(

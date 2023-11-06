@@ -14,11 +14,6 @@ export interface NotificationData {
   public_key: string;
 }
 
-export interface NotificationResponse {
-  results: NotificationData[];
-  count: number;
-}
-
 export interface cause_object {
   facility: string;
   patient: string;

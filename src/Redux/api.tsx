@@ -45,9 +45,7 @@ import { PatientModel } from "../Components/Patient/models";
 import { UserModel } from "../Components/Users/models";
 import { PaginatedResponse } from "../Utils/request/types";
 import {
-  MarkNotificationAsReadRequest,
   NotificationData,
-  NotificationResponse,
   PNconfigData,
 } from "../Components/Notifications/models";
 
@@ -777,7 +775,7 @@ const routes = {
   getNotifications: {
     path: "/api/v1/notification/",
     method: "GET",
-    TRes: Type<NotificationResponse>(),
+    TRes: Type<PaginatedResponse<NotificationData>>(),
   },
   getNotificationData: {
     path: "/api/v1/notification/{id}/",
@@ -788,7 +786,6 @@ const routes = {
     path: "/api/v1/notification/{id}/",
     method: "PATCH",
     TRes: Type<NotificationData>(),
-    // TBody: Type<unknown>(),
   },
   getPublicKey: {
     path: "/api/v1/notification/public_key/",
