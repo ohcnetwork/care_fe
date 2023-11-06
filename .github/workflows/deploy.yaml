@@ -181,7 +181,7 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   deploy-staging-gcp:
-    needs: build-production
+    needs: build-staging
     name: Deploy to staging GCP cluster
     runs-on: ubuntu-latest
     environment:
