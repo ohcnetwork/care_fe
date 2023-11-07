@@ -1,4 +1,5 @@
 import { IConfig } from "../Common/hooks/useConfig";
+
 import {
   IAadhaarOtp,
   IAadhaarOtpTBody,
@@ -29,6 +30,7 @@ import {
 } from "../Components/Assets/AssetTypes";
 import {
   ConsultationModel,
+  CurrentBed,
   FacilityModel,
   LocationModel,
   WardModel,
@@ -355,6 +357,7 @@ const routes = {
   listConsultationBeds: {
     path: "/api/v1/consultationbed/",
     method: "GET",
+    TRes: Type<PaginatedResponse<CurrentBed>>(),
   },
   createConsultationBed: {
     path: "/api/v1/consultationbed/",
