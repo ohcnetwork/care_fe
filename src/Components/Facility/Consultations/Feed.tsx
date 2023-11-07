@@ -124,9 +124,7 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
               ...bedAssets.data,
               results: bedAssets.data.results.filter(
                 (asset: { asset_object: { meta: { asset_type: string } } }) => {
-                  return asset?.asset_object?.meta?.asset_type === "CAMERA"
-                    ? true
-                    : false;
+                  return asset?.asset_object?.meta?.asset_type === "CAMERA";
                 }
               ),
             },
