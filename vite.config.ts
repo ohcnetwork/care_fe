@@ -1,7 +1,9 @@
-import { VitePWA } from "vite-plugin-pwa";
-import { defineConfig } from "vite";
 import { promises as fs } from "fs";
+import path from "path";
+
 import react from "@vitejs/plugin-react-swc";
+import { defineConfig } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   envPrefix: "REACT_",
@@ -104,7 +106,9 @@ export default defineConfig({
     include: [/src\/.*\.[tj]sx?$/],
     exclude: [/src\/stories/],
   },
-
+  resolve: {
+    alias: [{ find: "@", replacement: path.resolve(__dirname, "/src") }],
+  },
   define: {
     // for unconventional usage of global by third party libraries
     global: "window",
