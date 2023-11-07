@@ -1,9 +1,9 @@
-import Loading from "../Common/Loading";
-import HL7Monitor from "./AssetType/HL7Monitor";
-import ONVIFCamera from "./AssetType/ONVIFCamera";
-import Page from "../Common/components/Page";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+import HL7Monitor from "@/Components/Assets/AssetType/HL7Monitor";
+import ONVIFCamera from "@/Components/Assets/AssetType/ONVIFCamera";
+import Page from "@/Components/Common/components/Page";
+import Loading from "@/Components/Common/Loading";
+import routes from "@/Redux/api";
+import useQuery from "@/Utils/request/useQuery";
 
 interface AssetConfigureProps {
   assetId: string;

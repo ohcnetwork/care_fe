@@ -1,8 +1,9 @@
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { getAllSkills, getUserListSkills } from "../../Redux/actions";
-import AutoCompleteAsync from "../Form/AutoCompleteAsync";
-import { SkillObjectModel } from "../Users/models";
+
+import AutoCompleteAsync from "@/Components/Form/AutoCompleteAsync";
+import { SkillObjectModel } from "@/Components/Users/models";
+import { getAllSkills, getUserListSkills } from "@/Redux/actions";
 
 interface SkillSelectProps {
   name: string;

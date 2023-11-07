@@ -1,6 +1,19 @@
 import { lazy, useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import CountBlock from "@/CAREUI/display/Count";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "@/Common/constants";
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import Pagination from "@/Components/Common/Pagination";
+import UserDetails from "@/Components/Common/UserDetails";
+import { FacilityModel } from "@/Components/Facility/models";
+import LinkFacilityDialog from "@/Components/Users/LinkFacilityDialog";
+import UnlinkFacilityDialog from "@/Components/Users/UnlinkFacilityDialog";
+import UserDeleteDialog from "@/Components/Users/UserDeleteDialog";
 import {
   addUserFacility,
   deleteUserFacility,
@@ -8,21 +21,9 @@ import {
   deleteUser,
   getFacilityUsers,
   getAnyFacility,
-} from "../../Redux/actions";
-import Pagination from "../Common/Pagination";
-import { USER_TYPES, RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
-import { FacilityModel } from "../Facility/models";
-import LinkFacilityDialog from "../Users/LinkFacilityDialog";
-import UserDeleteDialog from "../Users/UserDeleteDialog";
-import * as Notification from "../../Utils/Notifications.js";
-import UserDetails from "../Common/UserDetails";
-import UnlinkFacilityDialog from "../Users/UnlinkFacilityDialog";
-import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
-import CountBlock from "../../CAREUI/display/Count";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
-import Page from "../Common/components/Page";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+import { classNames, isUserOnline, relativeTime } from "@/Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

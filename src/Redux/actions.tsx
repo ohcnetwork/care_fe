@@ -1,6 +1,6 @@
-import { HCXClaimModel, HCXPolicyModel } from "../Components/HCX/models";
-import { MedibaseMedicine } from "../Components/Medicine/models";
-import { fireRequest, fireRequestForFiles } from "./fireRequest";
+import { HCXClaimModel, HCXPolicyModel } from "@/Components/HCX/models";
+import { MedibaseMedicine } from "@/Components/Medicine/models";
+import { fireRequest, fireRequestForFiles } from "@/Redux/fireRequest";
 
 export const getConfig = () => {
   return fireRequestForFiles("config");

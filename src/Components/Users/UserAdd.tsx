@@ -1,18 +1,35 @@
 import { Link, navigate } from "raviger";
 import { lazy, useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+
+import Card from "@/CAREUI/display/Card";
 import {
   GENDER_TYPES,
   USER_TYPES,
   USER_TYPE_OPTIONS,
-} from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+} from "@/Common/constants";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import { statusType, useAbortableEffect } from "@/Common/utils";
 import {
   validateEmailAddress,
   validateName,
   validatePassword,
   validateUsername,
-} from "../../Common/validation";
+} from "@/Common/validation";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import Checkbox from "@/Components/Common/components/CheckBox";
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import Page from "@/Components/Common/components/Page";
+import { FacilitySelect } from "@/Components/Common/FacilitySelect";
+import { FacilityModel } from "@/Components/Facility/models";
+import { PhoneNumberValidator } from "@/Components/Form/FieldValidators";
+import DateFormField from "@/Components/Form/FormFields/DateFormField";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
 import {
   addUser,
   getDistrictByState,
@@ -20,31 +37,11 @@ import {
   getStates,
   getUserListFacility,
   checkUsername,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { FacilityModel } from "../Facility/models";
-import {
-  classNames,
-  dateQueryString,
-  parsePhoneNumber,
-} from "../../Utils/utils";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import Checkbox from "../Common/components/CheckBox";
-import DateFormField from "../Form/FormFields/DateFormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import Page from "../Common/components/Page";
-import Card from "../../CAREUI/display/Card";
-import CircularProgress from "../Common/components/CircularProgress";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-import dayjs from "../../Utils/dayjs";
-import useAuthUser from "../../Common/hooks/useAuthUser";
-import { PhoneNumberValidator } from "../Form/FieldValidators";
+} from "@/Redux/actions";
+import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
+import dayjs from "@/Utils/dayjs";
+import * as Notification from "@/Utils/Notifications.js";
+import { classNames, dateQueryString, parsePhoneNumber } from "@/Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

@@ -1,9 +1,11 @@
-import useRecorder from "./useRecorder";
 import { useEffect, useState } from "react";
-import ButtonV2 from "../Components/Common/components/ButtonV2";
-import CareIcon from "../CAREUI/icons/CareIcon";
-import { NonReadOnlyUsers } from "./AuthorizeFor";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import useRecorder from "@/Utils/useRecorder";
+
 export const VoiceRecorder = (props: any) => {
   const { t } = useTranslation();
   const { createAudioBlob, confirmAudioBlobExists, reset, setResetRecording } =

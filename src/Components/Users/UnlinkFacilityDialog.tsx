@@ -1,5 +1,6 @@
 import { useState } from "react";
-import ConfirmDialog from "../Common/ConfirmDialog";
+
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
 
 interface ConfirmDialogProps {
   facilityName: string;

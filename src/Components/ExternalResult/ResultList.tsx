@@ -1,21 +1,23 @@
-import ButtonV2 from "../Common/components/ButtonV2";
 import { navigate } from "raviger";
 import { lazy, useState } from "react";
-import { externalResultList } from "../../Redux/actions";
-import ListFilter from "./ListFilter";
-import FacilitiesSelectDialogue from "./FacilitiesSelectDialogue";
-import { FacilityModel } from "../Facility/models";
-import SearchInput from "../Form/SearchInput";
-import useFilters from "../../Common/hooks/useFilters";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ExportMenu from "../Common/Export";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import CountBlock from "../../CAREUI/display/Count";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import Page from "../Common/components/Page";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
-import { parsePhoneNumber } from "../../Utils/utils";
+
+import CountBlock from "@/CAREUI/display/Count";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+import useFilters from "@/Common/hooks/useFilters";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import ExportMenu from "@/Components/Common/Export";
+import FacilitiesSelectDialogue from "@/Components/ExternalResult/FacilitiesSelectDialogue";
+import ListFilter from "@/Components/ExternalResult/ListFilter";
+import { FacilityModel } from "@/Components/Facility/models";
+import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import SearchInput from "@/Components/Form/SearchInput";
+import { externalResultList } from "@/Redux/actions";
+import routes from "@/Redux/api";
+import useQuery from "@/Utils/request/useQuery";
+import { parsePhoneNumber } from "@/Utils/utils";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResultList() {

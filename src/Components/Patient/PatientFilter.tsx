@@ -1,6 +1,10 @@
+import dayjs from "dayjs";
+import { navigate } from "raviger";
 import { useEffect, useCallback } from "react";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import AutoCompleteAsync from "../Form/AutoCompleteAsync";
+import { useDispatch } from "react-redux";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
 import {
   GENDER_TYPES,
   FACILITY_TYPES,
@@ -8,33 +12,26 @@ import {
   PATIENT_FILTER_CATEGORIES,
   ADMITTED_TO,
   DISCHARGE_REASONS,
-} from "../../Common/constants";
-import {
-  getAllLocalBody,
-  getAnyFacility,
-  getDistrict,
-} from "../../Redux/actions";
-import { useDispatch } from "react-redux";
-import { navigate } from "raviger";
-import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import TextFormField from "../Form/FormFields/TextFormField";
+} from "@/Common/constants";
+import useConfig from "@/Common/hooks/useConfig";
+import useMergeState from "@/Common/hooks/useMergeState";
+import AccordionV2 from "@/Components/Common/components/AccordionV2";
+import { DateRange } from "@/Components/Common/DateRangeInputV2";
+import { FacilitySelect } from "@/Components/Common/FacilitySelect";
+import { LocationSelect } from "@/Components/Common/LocationSelect";
+import DistrictSelect from "@/Components/Facility/FacilityFilter/DistrictSelect";
+import AutoCompleteAsync from "@/Components/Form/AutoCompleteAsync";
+import DateRangeFormField from "@/Components/Form/FormFields/DateRangeFormField";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
 import {
   FieldChangeEvent,
   FieldChangeEventHandler,
-} from "../Form/FormFields/Utils";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
-import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
-import { DateRange } from "../Common/DateRangeInputV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useMergeState from "../../Common/hooks/useMergeState";
-import useConfig from "../../Common/hooks/useConfig";
-import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
-import AccordionV2 from "../Common/components/AccordionV2";
-import { dateQueryString } from "../../Utils/utils";
-import dayjs from "dayjs";
-import { LocationSelect } from "../Common/LocationSelect";
+} from "@/Components/Form/FormFields/Utils";
+import MultiSelectMenuV2 from "@/Components/Form/MultiSelectMenuV2";
+import SelectMenuV2 from "@/Components/Form/SelectMenuV2";
+import { getAllLocalBody, getAnyFacility, getDistrict } from "@/Redux/actions";
+import { dateQueryString } from "@/Utils/utils";
 
 const getDate = (value: any) =>
   value && dayjs(value).isValid() && dayjs(value).toDate();

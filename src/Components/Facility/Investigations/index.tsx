@@ -1,20 +1,20 @@
+import { navigate, useQueryParams } from "raviger";
 import { lazy, useEffect, useReducer, useState } from "react";
-import { TestTable } from "./Table";
+import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
+
+import Card from "@/CAREUI/display/Card";
+import { Submit } from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import { TestTable } from "@/Components/Facility/Investigations/Table";
+import AutocompleteMultiSelectFormField from "@/Components/Form/FormFields/AutocompleteMultiselect";
 import {
   createInvestigation,
   listInvestigationGroups,
   listInvestigations,
   getPatient,
-} from "../../../Redux/actions";
-import * as Notification from "../../../Utils/Notifications.js";
-import { navigate, useQueryParams } from "raviger";
-
-import { useTranslation } from "react-i18next";
-import Page from "../../Common/components/Page";
-import AutocompleteMultiSelectFormField from "../../Form/FormFields/AutocompleteMultiselect";
-import { Submit } from "../../Common/components/ButtonV2";
-import Card from "../../../CAREUI/display/Card";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 

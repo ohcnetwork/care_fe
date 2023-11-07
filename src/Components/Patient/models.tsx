@@ -1,5 +1,8 @@
-import { ConsultationModel, PatientCategory } from "../Facility/models";
-import { PerformedByModel } from "../HCX/misc";
+import {
+  ConsultationModel,
+  PatientCategory,
+} from "@/Components/Facility/models";
+import { PerformedByModel } from "@/Components/HCX/misc";
 
 export interface FlowModel {
   id?: number;

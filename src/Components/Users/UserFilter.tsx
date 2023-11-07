@@ -1,16 +1,17 @@
+import { navigate } from "raviger";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { getDistrict } from "../../Redux/actions";
-import { navigate } from "raviger";
-import DistrictSelect from "../Facility/FacilityFilter/DistrictSelect";
-import { parsePhoneNumber } from "../../Utils/utils";
-import TextFormField from "../Form/FormFields/TextFormField";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import { USER_TYPE_OPTIONS } from "../../Common/constants";
-import useMergeState from "../../Common/hooks/useMergeState";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
+
+import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
+import { USER_TYPE_OPTIONS } from "@/Common/constants";
+import useMergeState from "@/Common/hooks/useMergeState";
+import DistrictSelect from "@/Components/Facility/FacilityFilter/DistrictSelect";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import SelectMenuV2 from "@/Components/Form/SelectMenuV2";
+import { getDistrict } from "@/Redux/actions";
+import { parsePhoneNumber } from "@/Utils/utils";
 
 const parsePhoneNumberForFilterParam = (phoneNumber: string) => {
   if (!phoneNumber) return "";

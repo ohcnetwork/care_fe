@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { PrescriptionDropdown } from "./PrescriptionDropdown";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { PrescriptionDropdown } from "@/Components/Common/prescription-builder/PrescriptionDropdown";
 
 export type ProcedureType = {
   procedure?: string;

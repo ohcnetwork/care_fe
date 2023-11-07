@@ -1,5 +1,9 @@
-import * as Notification from "../../Utils/Notifications.js";
+import { navigate, useQueryParams } from "raviger";
+import { lazy, useCallback, useEffect, useReducer, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
 
+import Card from "@/CAREUI/display/Card";
 import {
   BREATHLESSNESS_LEVEL,
   FACILITY_TYPES,
@@ -7,33 +11,30 @@ import {
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
   SHIFTING_VEHICLE_CHOICES,
-} from "../../Common/constants";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { getShiftDetails, getUserList, updateShift } from "../../Redux/actions";
-import { navigate, useQueryParams } from "raviger";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useEffect, useReducer, useState } from "react";
-import { ConsultationModel } from "../Facility/models.js";
-import DischargeModal from "../Facility/DischargeModal.js";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import PatientCategorySelect from "../Patient/PatientCategorySelect";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { parsePhoneNumber } from "../../Utils/utils.js";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
-import { useTranslation } from "react-i18next";
-import CircularProgress from "../Common/components/CircularProgress.js";
-import Card from "../../CAREUI/display/Card";
-import RadioFormField from "../Form/FormFields/RadioFormField.js";
-import Page from "../Common/components/Page.js";
-import UserAutocompleteFormField from "../Common/UserAutocompleteFormField.js";
-import { UserModel } from "../Users/models.js";
+} from "@/Common/constants";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import useConfig from "@/Common/hooks/useConfig";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import { FacilitySelect } from "@/Components/Common/FacilitySelect";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils.js";
+import PatientCategorySelect from "@/Components/Patient/PatientCategorySelect";
+import { getShiftDetails, getUserList, updateShift } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+import { parsePhoneNumber } from "@/Utils/utils.js";
+
+import CircularProgress from "@/Components/Common/components/CircularProgress.js";
+import Page from "@/Components/Common/components/Page.js";
+import UserAutocompleteFormField from "@/Components/Common/UserAutocompleteFormField.js";
+import DischargeModal from "@/Components/Facility/DischargeModal.js";
+import { ConsultationModel } from "@/Components/Facility/models.js";
+import RadioFormField from "@/Components/Form/FormFields/RadioFormField.js";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField.js";
+import { UserModel } from "@/Components/Users/models.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

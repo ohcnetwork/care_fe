@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { HCXActions } from "../../Redux/actions";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { HCXPolicyModel } from "./models";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
-import * as Notification from "../../Utils/Notifications.js";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { useMessageListener } from "@/Common/hooks/useMessageListener";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import { HCXPolicyModel } from "@/Components/HCX/models";
+import { HCXActions } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
 
 interface Props {
   className?: string;

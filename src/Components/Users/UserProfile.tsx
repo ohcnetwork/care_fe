@@ -1,28 +1,29 @@
 import { useState, useCallback, useReducer, lazy, FormEvent } from "react";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { GENDER_TYPES } from "../../Common/constants";
 import { useDispatch } from "react-redux";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { GENDER_TYPES } from "@/Common/constants";
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import { validateEmailAddress } from "@/Common/validation";
+import ButtonV2, { Submit } from "@/Components/Common/components/ButtonV2";
+import LanguageSelector from "@/Components/Common/LanguageSelector";
+import UpdatableApp, { checkForUpdate } from "@/Components/Common/UpdatableApp";
+import { PhoneNumberValidator } from "@/Components/Form/FieldValidators";
+import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import { SkillModel, SkillObjectModel } from "@/Components/Users/models";
 import {
   getUserDetails,
   getUserListSkills,
   partialUpdateUser,
   updateUserPassword,
-} from "../../Redux/actions";
-import { validateEmailAddress } from "../../Common/validation";
-import * as Notification from "../../Utils/Notifications.js";
-import LanguageSelector from "../../Components/Common/LanguageSelector";
-import TextFormField from "../Form/FormFields/TextFormField";
-import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import { classNames, handleSignOut, parsePhoneNumber } from "../../Utils/utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { SkillModel, SkillObjectModel } from "../Users/models";
-import UpdatableApp, { checkForUpdate } from "../Common/UpdatableApp";
-import dayjs from "../../Utils/dayjs";
-import useAuthUser from "../../Common/hooks/useAuthUser";
-import { PhoneNumberValidator } from "../Form/FieldValidators";
+} from "@/Redux/actions";
+import dayjs from "@/Utils/dayjs";
+import * as Notification from "@/Utils/Notifications.js";
+import { classNames, handleSignOut, parsePhoneNumber } from "@/Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

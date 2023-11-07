@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
-import DateFormField from "../../../Components/Form/FormFields/DateFormField";
+
+import DateFormField from "@/Components/Form/FormFields/DateFormField";
 
 const meta: Meta<typeof DateFormField> = {
   component: DateFormField,

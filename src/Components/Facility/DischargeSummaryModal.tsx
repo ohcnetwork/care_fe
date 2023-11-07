@@ -1,23 +1,24 @@
 import { useState } from "react";
-import DialogModal from "../Common/Dialog";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { ConsultationModel } from "./models";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import DialogModal from "@/Components/Common/Dialog";
+import { ConsultationModel } from "@/Components/Facility/models";
 import {
   EmailValidator,
   MultiValidator,
   RequiredFieldValidator,
-} from "../Form/FieldValidators";
-import { useDispatch } from "react-redux";
+} from "@/Components/Form/FieldValidators";
+import CheckBoxFormField from "@/Components/Form/FormFields/CheckBoxFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
 import {
   emailDischargeSummary,
   generateDischargeSummary,
-} from "../../Redux/actions";
-import { Error, Success } from "../../Utils/Notifications";
-import { previewDischargeSummary } from "../../Redux/actions";
-import { useTranslation } from "react-i18next";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+  previewDischargeSummary,
+} from "@/Redux/actions";
+import { Error, Success } from "@/Utils/Notifications";
 
 interface Props {
   show: boolean;

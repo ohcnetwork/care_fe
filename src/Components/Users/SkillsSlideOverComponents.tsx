@@ -1,9 +1,10 @@
-import { useTranslation } from "react-i18next";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { SkillModel } from "./models";
 import { Fragment } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import { SkillModel } from "@/Components/Users/models";
+import { classNames } from "@/Utils/utils";
 
 export const AddSkillsPlaceholder = () => {
   const { t } = useTranslation();

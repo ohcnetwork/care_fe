@@ -1,5 +1,15 @@
-import * as Notification from "../../Utils/Notifications.js";
+import dayjs from "dayjs";
+import { Link, navigate } from "raviger";
+import { ReactNode, lazy, useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
 
+import Chip from "@/CAREUI/display/Chip";
+import CountBlock from "@/CAREUI/display/Count";
+import FilterBadge from "@/CAREUI/display/FilterBadge";
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 import {
   ADMITTED_TO,
   DISCHARGE_REASONS,
@@ -8,49 +18,35 @@ import {
   PATIENT_SORT_OPTIONS,
   RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
-} from "../../Common/constants";
-import { FacilityModel, PatientCategory } from "../Facility/models";
-import { Link, navigate } from "raviger";
-import { ReactNode, lazy, useCallback, useEffect, useState } from "react";
+} from "@/Common/constants";
+import useAuthUser from "@/Common/hooks/useAuthUser.js";
+import useFilters from "@/Common/hooks/useFilters";
+import { statusType, useAbortableEffect, parseOptionId } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import SwitchTabs from "@/Components/Common/components/SwitchTabs";
+import { ExportMenu } from "@/Components/Common/Export";
+import SortDropdownMenu from "@/Components/Common/SortDropdown";
+import FacilitiesSelectDialogue from "@/Components/ExternalResult/FacilitiesSelectDialogue";
+import DoctorVideoSlideover from "@/Components/Facility/DoctorVideoSlideover";
+import { FacilityModel, PatientCategory } from "@/Components/Facility/models";
+import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import SearchInput from "@/Components/Form/SearchInput";
+import PatientFilter from "@/Components/Patient/PatientFilter";
 import {
   getAllPatient,
   getAnyFacility,
   getDistrict,
   getFacilityAssetLocation,
   getLocalBody,
-} from "../../Redux/actions";
-import {
-  statusType,
-  useAbortableEffect,
-  parseOptionId,
-} from "../../Common/utils";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+import useQuery from "@/Utils/request/useQuery.js";
+import { formatAge, parsePhoneNumber } from "@/Utils/utils.js";
 
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import Chip from "../../CAREUI/display/Chip";
-import CountBlock from "../../CAREUI/display/Count";
-import DoctorVideoSlideover from "../Facility/DoctorVideoSlideover";
-import { ExportMenu } from "../Common/Export";
-import FacilitiesSelectDialogue from "../ExternalResult/FacilitiesSelectDialogue";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import FilterBadge from "../../CAREUI/display/FilterBadge";
-import PatientFilter from "./PatientFilter";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import SearchInput from "../Form/SearchInput";
-import SortDropdownMenu from "../Common/SortDropdown";
-import SwitchTabs from "../Common/components/SwitchTabs";
-import { formatAge, parsePhoneNumber } from "../../Utils/utils.js";
-import { useDispatch } from "react-redux";
-import useFilters from "../../Common/hooks/useFilters";
-import { useTranslation } from "react-i18next";
-import Page from "../Common/components/Page.js";
-import dayjs from "dayjs";
-import { triggerGoal } from "../../Integrations/Plausible.js";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
-import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
+import Page from "@/Components/Common/components/Page.js";
+import { triggerGoal } from "@/Integrations/Plausible.js";
+import routes from "@/Redux/api.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

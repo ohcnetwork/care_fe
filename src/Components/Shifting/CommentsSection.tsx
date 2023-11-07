@@ -1,12 +1,13 @@
 import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getShiftComments, addShiftComments } from "../../Redux/actions";
-import CircularProgress from "../Common/components/CircularProgress";
-import * as Notification from "../../Utils/Notifications.js";
-import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { useDispatch } from "react-redux";
+
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import { getShiftComments, addShiftComments } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+import { formatDateTime } from "@/Utils/utils";
 
 interface CommentSectionProps {
   id: string;

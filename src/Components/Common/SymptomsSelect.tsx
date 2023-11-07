@@ -1,11 +1,11 @@
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { SYMPTOM_CHOICES } from "../../Common/constants";
-import FormField from "../Form/FormFields/FormField";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { SYMPTOM_CHOICES } from "@/Common/constants";
+import FormField from "@/Components/Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
-} from "../Form/FormFields/Utils";
-import MultiSelectMenuV2 from "../Form/MultiSelectMenuV2";
+} from "@/Components/Form/FormFields/Utils";
+import MultiSelectMenuV2 from "@/Components/Form/MultiSelectMenuV2";
 
 const ASYMPTOMATIC_ID = 1;
 

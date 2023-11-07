@@ -1,31 +1,31 @@
-import { useReducer, useState, lazy } from "react";
-
-import { FacilitySelect } from "../Common/FacilitySelect";
-import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
+import { useReducer, useState, lazy } from "react";
+import { useTranslation } from "react-i18next";
+
+import Card from "@/CAREUI/display/Card";
 import {
   OptionsType,
   RESOURCE_CATEGORY_CHOICES,
   RESOURCE_SUBCATEGORIES,
-} from "../../Common/constants";
-import { parsePhoneNumber } from "../../Utils/utils";
-import { phonePreg } from "../../Common/validation";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import { useTranslation } from "react-i18next";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import Card from "../../CAREUI/display/Card";
-import Page from "../Common/components/Page";
-import { PhoneNumberValidator } from "../Form/FieldValidators";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
+} from "@/Common/constants";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import { phonePreg } from "@/Common/validation";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import { FacilitySelect } from "@/Components/Common/FacilitySelect";
+import { PhoneNumberValidator } from "@/Components/Form/FieldValidators";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import RadioFormField from "@/Components/Form/FormFields/RadioFormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import routes from "@/Redux/api";
+import * as Notification from "@/Utils/Notifications.js";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { parsePhoneNumber } from "@/Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

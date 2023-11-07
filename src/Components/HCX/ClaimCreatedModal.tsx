@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { HCXActions } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications";
-import { Submit } from "../Common/components/ButtonV2";
-import DialogModal from "../Common/Dialog";
-import { FileUpload } from "../Patient/FileUpload";
-import { HCXClaimModel } from "./models";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { Submit } from "@/Components/Common/components/ButtonV2";
+import DialogModal from "@/Components/Common/Dialog";
+import { HCXClaimModel } from "@/Components/HCX/models";
+import { FileUpload } from "@/Components/Patient/FileUpload";
+import { HCXActions } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications";
 
 interface Props {
   claim: HCXClaimModel;

@@ -1,5 +1,5 @@
-import { ChannelOptions } from "./types";
-import { lerp } from "./utils";
+import { ChannelOptions } from "@/Components/VitalsMonitor/types";
+import { lerp } from "@/Components/VitalsMonitor/utils";
 
 interface ChannelState {
   buffer: number[];

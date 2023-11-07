@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { useTranslation } from "react-i18next";
 import ReCaptcha from "react-google-recaptcha";
-import * as Notification from "../../Utils/Notifications.js";
-import LegendInput from "../../CAREUI/interactive/LegendInput";
-import LanguageSelectorLogin from "../Common/LanguageSelectorLogin";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useConfig from "../../Common/hooks/useConfig";
-import CircularProgress from "../Common/components/CircularProgress";
-import { LocalStorageKeys } from "../../Common/constants";
+import { useTranslation } from "react-i18next";
 import ReactMarkdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
-import { handleRedirection } from "../../Utils/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import LegendInput from "@/CAREUI/interactive/LegendInput";
+import { LocalStorageKeys } from "@/Common/constants";
+import useConfig from "@/Common/hooks/useConfig";
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import LanguageSelectorLogin from "@/Components/Common/LanguageSelectorLogin";
+import routes from "@/Redux/api";
+import * as Notification from "@/Utils/Notifications.js";
+import request from "@/Utils/request/request";
+import { handleRedirection } from "@/Utils/utils";
 
 export const Login = (props: { forgot?: boolean }) => {
   const {

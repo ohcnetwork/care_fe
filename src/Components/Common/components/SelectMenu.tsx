@@ -1,6 +1,7 @@
-import { Fragment } from "react";
 import { Listbox, Transition } from "@headlessui/react";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+import { Fragment } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 type Props<T> = {
   options: {

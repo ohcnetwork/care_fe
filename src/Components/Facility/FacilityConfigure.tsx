@@ -1,14 +1,15 @@
-import { lazy, useReducer, useState } from "react";
-import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import TextFormField from "../Form/FormFields/TextFormField";
-import Page from "../Common/components/Page";
-import { ConfigureHealthFacility } from "../ABDM/ConfigureHealthFacility";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
-import { FieldChangeEvent } from "../Form/FormFields/Utils.js";
+import { lazy, useReducer, useState } from "react";
+
+import { ConfigureHealthFacility } from "@/Components/ABDM/ConfigureHealthFacility";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils.js";
+import routes from "@/Redux/api";
+import * as Notification from "@/Utils/Notifications.js";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {

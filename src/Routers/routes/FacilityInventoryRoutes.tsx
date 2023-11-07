@@ -1,8 +1,9 @@
 import { Redirect } from "raviger";
-import InventoryList from "../../Components/Facility/InventoryList";
-import InventoryLog from "../../Components/Facility/InventoryLog";
-import MinQuantityList from "../../Components/Facility/MinQuantityList";
-import { SetInventoryForm } from "../../Components/Facility/SetInventoryForm";
+
+import InventoryList from "@/Components/Facility/InventoryList";
+import InventoryLog from "@/Components/Facility/InventoryLog";
+import MinQuantityList from "@/Components/Facility/MinQuantityList";
+import { SetInventoryForm } from "@/Components/Facility/SetInventoryForm";
 
 export default {
   "/facility/:facilityId/inventory": ({ facilityId }: any) => (

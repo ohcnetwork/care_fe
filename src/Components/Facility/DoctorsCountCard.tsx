@@ -1,15 +1,16 @@
 import { useState } from "react";
-import { DoctorModal } from "./models";
-import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
 import { useDispatch } from "react-redux";
-import { deleteDoctor } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications";
-import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
-import { DoctorCapacity } from "./DoctorCapacity";
-import DialogModal from "../Common/Dialog";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+
+import { DOCTOR_SPECIALIZATION } from "@/Common/constants";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import DialogModal from "@/Components/Common/Dialog";
+import { DoctorCapacity } from "@/Components/Facility/DoctorCapacity";
+import { DoctorModal } from "@/Components/Facility/models";
+import { DoctorIcon } from "@/Components/TeleIcu/Icons/DoctorIcon";
+import { deleteDoctor } from "@/Redux/actions";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
 
 interface DoctorsCountProps extends DoctorModal {
   facilityId: string;

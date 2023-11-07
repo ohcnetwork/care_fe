@@ -1,17 +1,21 @@
 import { useCallback, useRef, useState } from "react";
+
+import useCanvas from "@/Common/hooks/useCanvas";
 import HL7DeviceClient, {
   HL7MonitorData,
   HL7VitalsWaveformData,
-} from "./HL7DeviceClient";
-import HL7VitalsRenderer from "./HL7VitalsRenderer";
-import useCanvas from "../../Common/hooks/useCanvas";
+} from "@/Components/VitalsMonitor/HL7DeviceClient";
+import HL7VitalsRenderer from "@/Components/VitalsMonitor/HL7VitalsRenderer";
 import {
   ChannelOptions,
   IVitalsComponentProps,
   VitalsDataBase,
   VitalsValueBase as VitalsValue,
-} from "./types";
-import { getChannel, getVitalsCanvasSizeAndDuration } from "./utils";
+} from "@/Components/VitalsMonitor/types";
+import {
+  getChannel,
+  getVitalsCanvasSizeAndDuration,
+} from "@/Components/VitalsMonitor/utils";
 
 interface VitalsBPValue extends VitalsDataBase {
   systolic: VitalsValue;

@@ -1,50 +1,51 @@
-import * as Notification from "../../Utils/Notifications.js";
+import { navigate } from "raviger";
+import { lazy, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
 
-import AuthorizeFor, { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import {
-  CapacityModal,
-  DoctorModal,
-  FacilityModel,
-  PatientStatsModel,
-} from "./models";
+import Chip from "@/CAREUI/display/Chip";
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import {
   DOCTOR_SPECIALIZATION,
   FACILITY_FEATURE_TYPES,
   USER_TYPES,
   getBedTypes,
-} from "../../Common/constants";
-import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
+} from "@/Common/constants";
+import useAuthUser from "@/Common/hooks/useAuthUser.js";
+import useConfig from "@/Common/hooks/useConfig";
+import { useMessageListener } from "@/Common/hooks/useMessageListener";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import ContactLink from "@/Components/Common/components/ContactLink";
+import DropdownMenu, {
+  DropdownItem,
+} from "@/Components/Common/components/Menu";
+import Page from "@/Components/Common/components/Page";
+import Table from "@/Components/Common/components/Table";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import DialogModal from "@/Components/Common/Dialog";
+import { BedCapacity } from "@/Components/Facility/BedCapacity";
+import BedTypeCard from "@/Components/Facility/BedTypeCard";
+import CoverImageEditModal from "@/Components/Facility/CoverImageEditModal";
+import { DoctorCapacity } from "@/Components/Facility/DoctorCapacity";
+import DoctorsCountCard from "@/Components/Facility/DoctorsCountCard";
+import {
+  CapacityModal,
+  DoctorModal,
+  FacilityModel,
+  PatientStatsModel,
+} from "@/Components/Facility/models";
+import { DoctorIcon } from "@/Components/TeleIcu/Icons/DoctorIcon";
 import {
   deleteFacility,
   getPermittedFacility,
   getTriageInfo,
   listCapacity,
   listDoctor,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { BedCapacity } from "./BedCapacity";
-import BedTypeCard from "./BedTypeCard";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import Chip from "../../CAREUI/display/Chip";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import ContactLink from "../Common/components/ContactLink";
-import CoverImageEditModal from "./CoverImageEditModal";
-import DialogModal from "../Common/Dialog";
-import { DoctorCapacity } from "./DoctorCapacity";
-import { DoctorIcon } from "../TeleIcu/Icons/DoctorIcon";
-import DoctorsCountCard from "./DoctorsCountCard";
-import Page from "../Common/components/Page";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import Table from "../Common/components/Table";
-
-import { navigate } from "raviger";
-import useConfig from "../../Common/hooks/useConfig";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
-import { useTranslation } from "react-i18next";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
+} from "@/Redux/actions";
+import AuthorizeFor, { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

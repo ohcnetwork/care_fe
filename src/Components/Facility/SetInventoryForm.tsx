@@ -1,22 +1,22 @@
 import { useCallback, useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
 
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import Card from "@/CAREUI/display/Card";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import { InventoryItemsModel } from "@/Components/Facility/models";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
 import {
   getItems,
   setMinQuantity,
   getAnyFacility,
   getMinQuantity,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import { InventoryItemsModel } from "./models";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import Page from "../Common/components/Page";
-import Card from "../../CAREUI/display/Card";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm = {

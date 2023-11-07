@@ -1,6 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { classNames } from "../../Utils/utils";
 import { Fragment } from "react";
+
+import { classNames } from "@/Utils/utils";
 
 type DialogProps = {
   title: React.ReactNode;

@@ -1,4 +1,4 @@
-import { PerformedByModel } from "../HCX/misc";
+import { PerformedByModel } from "@/Components/HCX/misc";
 
 export interface IComment {
   id: string;

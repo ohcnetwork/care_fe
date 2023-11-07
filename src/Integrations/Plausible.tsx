@@ -1,7 +1,8 @@
 import { useLocationChange } from "raviger";
-import useConfig from "../Common/hooks/useConfig";
-import Script from "../Components/Common/Script";
 import { useEffect } from "react";
+
+import useConfig from "@/Common/hooks/useConfig";
+import Script from "@/Components/Common/Script";
 
 export default function Plausible() {
   const { site_url, analytics_server_url } = useConfig();

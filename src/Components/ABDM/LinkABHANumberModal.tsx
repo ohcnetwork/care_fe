@@ -1,18 +1,17 @@
-import * as Notify from "../../Utils/Notifications";
-
-import Dropdown, { DropdownItem } from "../Common/components/Menu";
 import { useEffect, useState } from "react";
 
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import CircularProgress from "../Common/components/CircularProgress";
-import DialogModal from "../Common/Dialog";
-import OtpFormField from "../Form/FormFields/OtpFormField";
-import QRScanner from "../Common/QRScanner";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { classNames } from "../../Utils/utils";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import Dropdown, { DropdownItem } from "@/Components/Common/components/Menu";
+import DialogModal from "@/Components/Common/Dialog";
+import QRScanner from "@/Components/Common/QRScanner";
+import OtpFormField from "@/Components/Form/FormFields/OtpFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import routes from "@/Redux/api";
+import * as Notify from "@/Utils/Notifications";
+import request from "@/Utils/request/request";
+import { classNames } from "@/Utils/utils";
 
 export const validateRule = (
   condition: boolean,

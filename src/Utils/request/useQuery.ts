@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { QueryRoute, RequestOptions, RequestResult } from "./types";
-import request from "./request";
-import { mergeRequestOptions } from "./utils";
+
+import request from "@/Utils/request/request";
+import {
+  QueryRoute,
+  RequestOptions,
+  RequestResult,
+} from "@/Utils/request/types";
+import { mergeRequestOptions } from "@/Utils/request/utils";
 
 export interface QueryOptions<TData> extends RequestOptions<TData> {
   prefetch?: boolean;

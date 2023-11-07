@@ -1,32 +1,29 @@
-import * as Notification from "../../../Utils/Notifications.js";
-
-import { BedModel, CurrentBed } from "../models";
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
-import {
-  createConsultationBed,
-  listConsultationBeds,
-} from "../../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-
-import { BedSelect } from "../../Common/BedSelect";
-import ButtonV2 from "../../Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import CircularProgress from "../../Common/components/CircularProgress.js";
-import { FieldLabel } from "../../Form/FormFields/FormField";
-import Loading from "../../Common/Loading";
-import TextFormField from "../../Form/FormFields/TextFormField";
-import { formatDateTime } from "../../../Utils/utils";
-import { useDispatch } from "react-redux";
-import dayjs from "../../../Utils/dayjs";
-import { AssetSelect } from "../../Common/AssetSelect.js";
-import DialogModal from "../../Common/Dialog.js";
 import { Link } from "raviger";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import { BedSelect } from "@/Components/Common/BedSelect";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Loading from "@/Components/Common/Loading";
+import { BedModel, CurrentBed } from "@/Components/Facility/models";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { createConsultationBed, listConsultationBeds } from "@/Redux/actions";
+import dayjs from "@/Utils/dayjs";
+import * as Notification from "@/Utils/Notifications.js";
+import { formatDateTime } from "@/Utils/utils";
+
+import Chip from "@/CAREUI/display/Chip.js";
 import {
   AssetClass,
   AssetData,
   assetClassProps,
-} from "../../Assets/AssetTypes.js";
-import Chip from "../../../CAREUI/display/Chip.js";
+} from "@/Components/Assets/AssetTypes.js";
+import { AssetSelect } from "@/Components/Common/AssetSelect.js";
+import CircularProgress from "@/Components/Common/components/CircularProgress.js";
+import DialogModal from "@/Components/Common/Dialog.js";
 
 interface BedsProps {
   facilityId: string;

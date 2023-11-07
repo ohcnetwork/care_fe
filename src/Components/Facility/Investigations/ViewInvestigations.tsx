@@ -1,9 +1,9 @@
 import { navigate } from "raviger";
-import ReportTable from "./Reports/ReportTable";
-
-import { formatDateTime } from "../../../Utils/utils";
-import { InvestigationSessionType } from "./investigationsTab";
 import { lazy } from "react";
+
+import { InvestigationSessionType } from "@/Components/Facility/Investigations/investigationsTab";
+import ReportTable from "@/Components/Facility/Investigations/Reports/ReportTable";
+import { formatDateTime } from "@/Utils/utils";
 const Loading = lazy(() => import("../../Common/Loading"));
 
 export default function ViewInvestigations(props: {

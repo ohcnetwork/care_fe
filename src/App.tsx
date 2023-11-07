@@ -1,13 +1,14 @@
 import { Suspense } from "react";
-import Routers from "./Routers";
+
+import ThemedFavicon from "@/CAREUI/misc/ThemedFavicon";
+import Loading from "@/Components/Common/Loading";
+import Intergrations from "@/Integrations";
 import {
   AppConfigProvider,
   AuthUserProvider,
   HistoryAPIProvider,
-} from "./Providers";
-import ThemedFavicon from "./CAREUI/misc/ThemedFavicon";
-import Intergrations from "./Integrations";
-import Loading from "./Components/Common/Loading";
+} from "@/Providers";
+import Routers from "@/Routers";
 
 const App = () => {
   return (

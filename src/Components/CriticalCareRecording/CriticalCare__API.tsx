@@ -1,4 +1,4 @@
-import { fireRequestV2 } from "../../Redux/fireRequest";
+import { fireRequestV2 } from "@/Redux/fireRequest";
 
 export const loadDailyRound = (
   consultationId: string,

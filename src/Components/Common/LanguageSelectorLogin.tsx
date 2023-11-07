@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { LANGUAGE_NAMES } from "../../Locale/config";
-import { classNames } from "../../Utils/utils";
+
+import { LANGUAGE_NAMES } from "@/Locale/config";
+import { classNames } from "@/Utils/utils";
 
 export const LanguageSelectorLogin = () => {
   const { i18n } = useTranslation();

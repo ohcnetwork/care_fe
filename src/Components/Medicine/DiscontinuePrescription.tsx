@@ -1,13 +1,14 @@
 import { useState } from "react";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import { Prescription } from "./models";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { Success } from "../../Utils/Notifications";
-import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import { useTranslation } from "react-i18next";
-import request from "../../Utils/request/request";
-import MedicineRoutes from "./routes";
-import useSlug from "../../Common/hooks/useSlug";
+
+import useSlug from "@/Common/hooks/useSlug";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import { Prescription } from "@/Components/Medicine/models";
+import PrescriptionDetailCard from "@/Components/Medicine/PrescriptionDetailCard";
+import MedicineRoutes from "@/Components/Medicine/routes";
+import { Success } from "@/Utils/Notifications";
+import request from "@/Utils/request/request";
 
 interface Props {
   prescription: Prescription;

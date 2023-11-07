@@ -1,4 +1,4 @@
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 type ContactLinkProps =
   | { mailto: string; tel?: undefined }

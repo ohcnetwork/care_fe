@@ -1,21 +1,22 @@
 import { useState } from "react";
-import Form from "../Form/Form";
-import { Prescription } from "./models";
-import request from "../../Utils/request/request";
-import * as Notification from "../../Utils/Notifications";
-import useSlug from "../../Common/hooks/useSlug";
-import { RequiredFieldValidator } from "../Form/FieldValidators";
 import { useTranslation } from "react-i18next";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
+
+import useSlug from "@/Common/hooks/useSlug";
+import { RequiredFieldValidator } from "@/Components/Form/FieldValidators";
+import Form from "@/Components/Form/Form";
+import NumericWithUnitsFormField from "@/Components/Form/FormFields/NumericWithUnitsFormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
 import {
   PRESCRIPTION_FREQUENCIES,
   PRESCRIPTION_ROUTES,
-} from "./CreatePrescriptionForm";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { EditPrescriptionFormValidator } from "./validators";
-import MedicineRoutes from "./routes";
+} from "@/Components/Medicine/CreatePrescriptionForm";
+import { Prescription } from "@/Components/Medicine/models";
+import MedicineRoutes from "@/Components/Medicine/routes";
+import { EditPrescriptionFormValidator } from "@/Components/Medicine/validators";
+import * as Notification from "@/Utils/Notifications";
+import request from "@/Utils/request/request";
 
 interface Props {
   initial: Prescription;

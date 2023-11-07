@@ -1,15 +1,16 @@
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
-import Pagination from "../../Common/Pagination";
+
 import {
   PAGINATION_LIMIT,
   EYE_OPEN_SCALE,
   VERBAL_RESPONSE_SCALE,
   MOTOR_RESPONSE_SCALE,
-} from "../../../Common/constants";
-import { formatDateTime } from "../../../Utils/utils";
+} from "@/Common/constants";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import Pagination from "@/Components/Common/Pagination";
+import { dailyRoundsAnalyse } from "@/Redux/actions";
+import { formatDateTime } from "@/Utils/utils";
 
 const DataTable = (props: any) => {
   const { title, data } = props;

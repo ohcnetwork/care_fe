@@ -1,21 +1,22 @@
 import { navigate } from "raviger";
-
 import { useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
-import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "../../Common/constants";
-import { createSampleTest, getPatient } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import { SampleTestModel } from "./models";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import Page from "../Common/components/Page";
-import { FacilitySelect } from "../Common/FacilitySelect";
+
+import { SAMPLE_TYPE_CHOICES, ICMR_CATEGORY } from "@/Common/constants";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import { FacilitySelect } from "@/Components/Common/FacilitySelect";
+import CheckBoxFormField from "@/Components/Form/FormFields/CheckBoxFormField";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import { SampleTestModel } from "@/Components/Patient/models";
+import { createSampleTest, getPatient } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: SampleTestModel = {

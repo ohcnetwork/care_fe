@@ -1,19 +1,4 @@
-import * as Notification from "../../Utils/Notifications.js";
-
-import { BedModel, FacilityModel, ICD11DiagnosisModel } from "./models";
-import {
-  CONSULTATION_STATUS,
-  CONSULTATION_SUGGESTION,
-  PATIENT_CATEGORIES,
-  REVIEW_AT_CHOICES,
-  TELEMEDICINE_ACTIONS,
-} from "../../Common/constants";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import InvestigationBuilder, {
-  InvestigationType,
-} from "../Common/prescription-builder/InvestigationBuilder";
+import { navigate } from "raviger";
 import {
   LegacyRef,
   createRef,
@@ -22,45 +7,66 @@ import {
   useEffect,
   useState,
 } from "react";
+import { useDispatch } from "react-redux";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import {
+  CONSULTATION_STATUS,
+  CONSULTATION_SUGGESTION,
+  PATIENT_CATEGORIES,
+  REVIEW_AT_CHOICES,
+  TELEMEDICINE_ACTIONS,
+} from "@/Common/constants";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import useConfig from "@/Common/hooks/useConfig";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import { BedSelect } from "@/Components/Common/BedSelect";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import { DiagnosisSelectFormField } from "@/Components/Common/DiagnosisSelectFormField";
+import { FacilitySelect } from "@/Components/Common/FacilitySelect";
+import InvestigationBuilder, {
+  InvestigationType,
+} from "@/Components/Common/prescription-builder/InvestigationBuilder";
 import ProcedureBuilder, {
   ProcedureType,
-} from "../Common/prescription-builder/ProcedureBuilder";
+} from "@/Components/Common/prescription-builder/ProcedureBuilder";
+import { SymptomsSelect } from "@/Components/Common/SymptomsSelect";
+import UserAutocompleteFormField from "@/Components/Common/UserAutocompleteFormField";
+import Beds from "@/Components/Facility/Consultations/Beds";
+import {
+  BedModel,
+  FacilityModel,
+  ICD11DiagnosisModel,
+} from "@/Components/Facility/models";
+import CheckBoxFormField from "@/Components/Form/FormFields/CheckBoxFormField";
+import DateFormField from "@/Components/Form/FormFields/DateFormField";
+import {
+  FieldErrorText,
+  FieldLabel,
+} from "@/Components/Form/FormFields/FormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import {
+  FieldChangeEvent,
+  FieldChangeEventHandler,
+} from "@/Components/Form/FormFields/Utils";
+import { FormAction } from "@/Components/Form/Utils";
+import PatientCategorySelect from "@/Components/Patient/PatientCategorySelect";
+import { UserModel } from "@/Components/Users/models";
 import {
   createConsultation,
   getConsultation,
   getPatient,
   updateConsultation,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+  dischargePatient,
+} from "@/Redux/actions";
+import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
+import dayjs from "@/Utils/dayjs";
+import * as Notification from "@/Utils/Notifications.js";
+import useVisibility from "@/Utils/useVisibility";
 
-import { BedSelect } from "../Common/BedSelect";
-import Beds from "./Consultations/Beds";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import DateFormField from "../Form/FormFields/DateFormField";
-import { DiagnosisSelectFormField } from "../Common/DiagnosisSelectFormField";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import {
-  FieldChangeEvent,
-  FieldChangeEventHandler,
-} from "../Form/FormFields/Utils";
-import { FormAction } from "../Form/Utils";
-import PatientCategorySelect from "../Patient/PatientCategorySelect";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { SymptomsSelect } from "../Common/SymptomsSelect";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
-import { UserModel } from "../Users/models";
-import { dischargePatient } from "../../Redux/actions";
-
-import { navigate } from "raviger";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
-import useVisibility from "../../Utils/useVisibility";
-import dayjs from "../../Utils/dayjs";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete.js";
+import AutocompleteFormField from "@/Components/Form/FormFields/Autocomplete.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));

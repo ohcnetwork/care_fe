@@ -1,23 +1,27 @@
-import { useEffect, useState, useReducer } from "react";
 import axios from "axios";
+import { useEffect, useState, useReducer } from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
-} from "../../Common/constants";
-import { SampleTestModel } from "./models";
-import * as Notification from "../../Utils/Notifications.js";
-import { createUpload, editUpload } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
-import { header_content_type, LinearProgressWithLabel } from "./FileUpload";
-import { Submit } from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import TextFormField from "../Form/FormFields/TextFormField";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { useTranslation } from "react-i18next";
+} from "@/Common/constants";
+import { Submit } from "@/Components/Common/components/ButtonV2";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import CheckBoxFormField from "@/Components/Form/FormFields/CheckBoxFormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import {
+  header_content_type,
+  LinearProgressWithLabel,
+} from "@/Components/Patient/FileUpload";
+import { SampleTestModel } from "@/Components/Patient/models";
+import { createUpload, editUpload } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
 
 interface Props {
   sample: SampleTestModel;

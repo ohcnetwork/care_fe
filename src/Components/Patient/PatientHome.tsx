@@ -1,8 +1,25 @@
 import { navigate } from "raviger";
 import { lazy, useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
-import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import Chip from "@/CAREUI/display/Chip";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { GENDER_TYPES, SAMPLE_TEST_STATUS } from "@/Common/constants";
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import Page from "@/Components/Common/components/Page";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import Pagination from "@/Components/Common/Pagination";
+import RelativeDateUserMention from "@/Components/Common/RelativeDateUserMention";
+import UserAutocompleteFormField from "@/Components/Common/UserAutocompleteFormField";
+import { ConsultationCard } from "@/Components/Facility/ConsultationCard";
+import { ConsultationModel } from "@/Components/Facility/models";
+import { PatientModel, SampleTestModel } from "@/Components/Patient/models";
+import { SampleTestCard } from "@/Components/Patient/SampleTestCard";
+import { triggerGoal } from "@/Integrations/Plausible";
 import {
   getConsultationList,
   listShiftRequests,
@@ -11,27 +28,11 @@ import {
   patchSample,
   patchPatient,
   completeTransfer,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications";
-import Pagination from "../Common/Pagination";
-import { ConsultationCard } from "../Facility/ConsultationCard";
-import { ConsultationModel } from "../Facility/models";
-import { PatientModel, SampleTestModel } from "./models";
-import { SampleTestCard } from "./SampleTestCard";
-import Chip from "../../CAREUI/display/Chip";
-import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import RelativeDateUserMention from "../Common/RelativeDateUserMention";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { useTranslation } from "react-i18next";
-import CircularProgress from "../Common/components/CircularProgress";
-import Page from "../Common/components/Page";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
-import dayjs from "../../Utils/dayjs";
-import { triggerGoal } from "../../Integrations/Plausible";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+} from "@/Redux/actions";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import dayjs from "@/Utils/dayjs";
+import * as Notification from "@/Utils/Notifications";
+import { classNames, formatAge, formatDateTime } from "@/Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

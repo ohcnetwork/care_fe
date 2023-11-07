@@ -1,12 +1,12 @@
-import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
-import { listICD11Diagnosis } from "../../Redux/actions";
-import { ICD11DiagnosisModel } from "../Facility/models";
-import { AutocompleteMutliSelect } from "../Form/FormFields/AutocompleteMultiselect";
-import FormField from "../Form/FormFields/FormField";
+import { useAsyncOptions } from "@/Common/hooks/useAsyncOptions";
+import { ICD11DiagnosisModel } from "@/Components/Facility/models";
+import { AutocompleteMutliSelect } from "@/Components/Form/FormFields/AutocompleteMultiselect";
+import FormField from "@/Components/Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
-} from "../Form/FormFields/Utils";
+} from "@/Components/Form/FormFields/Utils";
+import { listICD11Diagnosis } from "@/Redux/actions";
 
 type Props =
   // | ({ multiple?: false | undefined } & FormFieldBaseProps<ICD11DiagnosisModel>) // uncomment when single select form field is required and implemented.

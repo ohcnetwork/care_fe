@@ -1,14 +1,12 @@
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import {
-  getInvestigation,
-  getInvestigationSessions,
-} from "../../../Redux/actions";
-import { PatientModel } from "../../Patient/models";
-import ViewInvestigationSuggestions from "./InvestigationSuggestions";
-import { InvestigationResponse } from "./Reports/types";
-import ViewInvestigations from "./ViewInvestigations";
+
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ViewInvestigationSuggestions from "@/Components/Facility/Investigations/InvestigationSuggestions";
+import { InvestigationResponse } from "@/Components/Facility/Investigations/Reports/types";
+import ViewInvestigations from "@/Components/Facility/Investigations/ViewInvestigations";
+import { PatientModel } from "@/Components/Patient/models";
+import { getInvestigation, getInvestigationSessions } from "@/Redux/actions";
 
 export interface InvestigationSessionType {
   session_external_id: string;

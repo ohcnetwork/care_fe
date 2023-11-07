@@ -1,11 +1,12 @@
 import { lazy } from "react";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import Page from "../Common/components/Page";
-import routes from "../../Redux/api";
-import PaginatedList from "../../CAREUI/misc/PaginatedList";
-import { LocationModel } from "./models";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import PaginatedList from "@/CAREUI/misc/PaginatedList";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import { LocationModel } from "@/Components/Facility/models";
+import routes from "@/Redux/api";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

@@ -1,36 +1,40 @@
+import QRCode from "qrcode.react";
 import { useState, useEffect, ReactElement, lazy } from "react";
+import { useTranslation } from "react-i18next";
+
+import Chip from "@/CAREUI/display/Chip";
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { UserRole, USER_TYPES } from "@/Common/constants";
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import { AssetServiceEditModal } from "@/Components/Assets/AssetServiceEditModal";
+import { warrantyAmcValidityChip } from "@/Components/Assets/AssetsList";
 import {
   AssetClass,
   assetClassProps,
   AssetData,
   AssetService,
   AssetTransaction,
-} from "./AssetTypes";
-import Pagination from "../Common/Pagination";
-import { navigate } from "raviger";
-import QRCode from "qrcode.react";
-import AssetWarrantyCard from "./AssetWarrantyCard";
-import { formatDate, formatDateTime } from "../../Utils/utils";
-import Chip from "../../CAREUI/display/Chip";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { UserRole, USER_TYPES } from "../../Common/constants";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { useTranslation } from "react-i18next";
+} from "@/Components/Assets/AssetTypes";
+import AssetWarrantyCard from "@/Components/Assets/AssetWarrantyCard";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import Pagination from "@/Components/Common/Pagination";
+import { formatDate, formatDateTime } from "@/Utils/utils";
+
 const Loading = lazy(() => import("../Common/Loading"));
-import * as Notification from "../../Utils/Notifications.js";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import Uptime from "../Common/Uptime";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+import * as Notification from "@/Utils/Notifications.js";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import Uptime from "@/Components/Common/Uptime";
+
 import dayjs from "dayjs";
-import RelativeDateUserMention from "../Common/RelativeDateUserMention";
-import { AssetServiceEditModal } from "./AssetServiceEditModal";
-import { warrantyAmcValidityChip } from "./AssetsList";
-import Page from "../Common/components/Page";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
+import { navigate } from "raviger";
+
+import RelativeDateUserMention from "@/Components/Common/RelativeDateUserMention";
+import request from "@/Utils/request/request";
+import routes from "@/Redux/api";
+import useQuery from "@/Utils/request/useQuery";
+import Page from "@/Components/Common/components/Page";
 
 interface AssetManageProps {
   assetId: string;

@@ -1,8 +1,9 @@
 import { Link } from "raviger";
 import { useTranslation } from "react-i18next";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { handleSignOut } from "../../../Utils/utils";
-import useAuthUser from "../../../Common/hooks/useAuthUser";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import { handleSignOut } from "@/Utils/utils";
 
 const SidebarUserCard = ({ shrinked }: { shrinked: boolean }) => {
   const { t } = useTranslation();

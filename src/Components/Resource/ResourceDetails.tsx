@@ -1,14 +1,15 @@
-import { useState, lazy } from "react";
-import { classNames, formatDateTime } from "../../Utils/utils";
 import { navigate } from "raviger";
-import * as Notification from "../../Utils/Notifications.js";
-import CommentSection from "./CommentSection";
-import ButtonV2 from "../Common/components/ButtonV2";
-import Page from "../Common/components/Page";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
+import { useState, lazy } from "react";
+
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import CommentSection from "@/Components/Resource/CommentSection";
+import routes from "@/Redux/api";
+import * as Notification from "@/Utils/Notifications.js";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, formatDateTime } from "@/Utils/utils";
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function ResourceDetails(props: { id: string }) {

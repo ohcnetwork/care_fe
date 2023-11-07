@@ -1,5 +1,8 @@
-import FormField from "./FormField";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import FormField from "@/Components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/Components/Form/FormFields/Utils";
 
 type Props<T> = FormFieldBaseProps<string> & {
   options: T[];

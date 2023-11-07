@@ -1,10 +1,11 @@
 import { useQueryParams } from "raviger";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import GenericFilterBadge from "../../CAREUI/display/FilterBadge";
-import PaginationComponent from "../../Components/Common/Pagination";
-import useConfig from "./useConfig";
-import { classNames } from "../../Utils/utils";
+
+import GenericFilterBadge from "@/CAREUI/display/FilterBadge";
+import useConfig from "@/Common/hooks/useConfig";
+import PaginationComponent from "@/Components/Common/Pagination";
+import { classNames } from "@/Utils/utils";
 
 export type FilterState = Record<string, unknown>;
 export type FilterParamKeys = string | string[];

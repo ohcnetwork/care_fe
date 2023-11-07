@@ -1,38 +1,34 @@
-import * as Notification from "../../../Utils/Notifications.js";
+import { useCallback, useEffect, useRef, useState } from "react";
+import ReactPlayer from "react-player";
+import { useDispatch } from "react-redux";
+import useKeyboardShortcut from "use-keyboard-shortcut";
 
-import {
-  CAMERA_STATES,
-  CameraPTZ,
-  getCameraPTZ,
-} from "../../../Common/constants";
+import { CAMERA_STATES, CameraPTZ, getCameraPTZ } from "@/Common/constants";
+import useAuthUser from "@/Common/hooks/useAuthUser.js";
+import { PTZState, useFeedPTZ } from "@/Common/hooks/useFeedPTZ";
+import useFullscreen from "@/Common/hooks/useFullscreen.js";
+import { useHLSPLayer } from "@/Common/hooks/useHLSPlayer";
 import {
   ICameraAssetState,
   StreamStatus,
   useMSEMediaPlayer,
-} from "../../../Common/hooks/useMSEplayer";
-import { PTZState, useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-import { useCallback, useEffect, useRef, useState } from "react";
+} from "@/Common/hooks/useMSEplayer";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import Loading from "@/Components/Common/Loading";
+import FeedButton from "@/Components/Facility/Consultations/FeedButton";
+import { ConsultationModel } from "@/Components/Facility/models";
 import {
   getConsultation,
   getPermittedFacility,
   listAssetBeds,
   partialUpdateAssetBed,
-} from "../../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+import { classNames } from "@/Utils/utils";
 
-import CareIcon from "../../../CAREUI/icons/CareIcon.js";
-import { ConsultationModel } from "../models";
-import FeedButton from "./FeedButton";
-import Loading from "../../Common/Loading";
-import ReactPlayer from "react-player";
-import { classNames } from "../../../Utils/utils";
-import { useDispatch } from "react-redux";
-import { useHLSPLayer } from "../../../Common/hooks/useHLSPlayer";
-import useKeyboardShortcut from "use-keyboard-shortcut";
-import useFullscreen from "../../../Common/hooks/useFullscreen.js";
-import { triggerGoal } from "../../../Integrations/Plausible.js";
-import useAuthUser from "../../../Common/hooks/useAuthUser.js";
-import Spinner from "../../Common/Spinner.js";
+import CareIcon from "@/CAREUI/icons/CareIcon.js";
+import Spinner from "@/Components/Common/Spinner.js";
+import { triggerGoal } from "@/Integrations/Plausible.js";
 
 interface IFeedProps {
   facilityId: string;

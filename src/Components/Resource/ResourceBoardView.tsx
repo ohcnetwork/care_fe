@@ -1,19 +1,20 @@
-import { lazy, useState } from "react";
 import { navigate } from "raviger";
-import ListFilter from "./ListFilter";
-import ResourceBoard from "./ResourceBoard";
-import { RESOURCE_CHOICES } from "../../Common/constants";
-import { downloadResourceRequests } from "../../Redux/actions";
+import { lazy, useState } from "react";
 import withScrolling from "react-dnd-scrolling";
-import BadgesList from "./BadgesList";
-import { formatFilter } from "./Commons";
-import useFilters from "../../Common/hooks/useFilters";
-import { ExportButton } from "../Common/Export";
-import SwitchTabs from "../Common/components/SwitchTabs";
-import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+import { RESOURCE_CHOICES } from "@/Common/constants";
+import useFilters from "@/Common/hooks/useFilters";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import SwitchTabs from "@/Components/Common/components/SwitchTabs";
+import { ExportButton } from "@/Components/Common/Export";
+import BadgesList from "@/Components/Resource/BadgesList";
+import { formatFilter } from "@/Components/Resource/Commons";
+import ListFilter from "@/Components/Resource/ListFilter";
+import ResourceBoard from "@/Components/Resource/ResourceBoard";
+import { downloadResourceRequests } from "@/Redux/actions";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));

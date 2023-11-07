@@ -1,5 +1,5 @@
-import "./icon.css";
-import iconData from "./UniconPaths.json";
+import "@/CAREUI/icons/icon.css";
+import iconData from "@/CAREUI/icons/UniconPaths.json";
 
 const xmlns = "http://www.w3.org/2000/svg";
 

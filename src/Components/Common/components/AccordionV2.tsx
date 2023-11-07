@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { classNames } from "../../../Utils/utils";
+
+import { classNames } from "@/Utils/utils";
 
 export default function AccordionV2(props: {
   children: JSX.Element | JSX.Element[];

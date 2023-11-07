@@ -1,6 +1,7 @@
-import { RequestResult } from "./types";
-import * as Notifications from "../Notifications";
 import { navigate } from "raviger";
+
+import * as Notifications from "@/Utils/Notifications";
+import { RequestResult } from "@/Utils/request/types";
 
 export default function handleResponse(
   { res, error }: RequestResult<unknown>,

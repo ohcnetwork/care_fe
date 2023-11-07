@@ -1,10 +1,11 @@
-import { GENDER_TYPES } from "../../Common/constants";
 import { Link } from "raviger";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { PatientModel } from "../Patient/models";
-import LegacyPatientVitalsCard from "../Patient/LegacyPatientVitalsCard";
-import { AssetLocationObject } from "../Assets/AssetTypes";
-import { formatAge } from "../../Utils/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { GENDER_TYPES } from "@/Common/constants";
+import { AssetLocationObject } from "@/Components/Assets/AssetTypes";
+import LegacyPatientVitalsCard from "@/Components/Patient/LegacyPatientVitalsCard";
+import { PatientModel } from "@/Components/Patient/models";
+import { formatAge } from "@/Utils/utils";
 
 interface MonitorCardProps {
   facilityId: string;

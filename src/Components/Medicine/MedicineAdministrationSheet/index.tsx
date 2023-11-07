@@ -1,18 +1,19 @@
-import { useTranslation } from "react-i18next";
-import useSlug from "../../../Common/hooks/useSlug";
-import useQuery from "../../../Utils/request/useQuery";
-import MedicineRoutes from "../routes";
 import { useMemo, useState } from "react";
-import { computeActivityBounds } from "./utils";
-import useBreakpoints from "../../../Common/hooks/useBreakpoints";
-import SubHeading from "../../../CAREUI/display/SubHeading";
-import ButtonV2 from "../../Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import BulkAdminister from "./BulkAdminister";
-import useRangePagination from "../../../Common/hooks/useRangePagination";
-import MedicineAdministrationTable from "./AdministrationTable";
-import Loading from "../../Common/Loading";
-import ScrollOverlay from "../../../CAREUI/interactive/ScrollOverlay";
+import { useTranslation } from "react-i18next";
+
+import SubHeading from "@/CAREUI/display/SubHeading";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import ScrollOverlay from "@/CAREUI/interactive/ScrollOverlay";
+import useBreakpoints from "@/Common/hooks/useBreakpoints";
+import useRangePagination from "@/Common/hooks/useRangePagination";
+import useSlug from "@/Common/hooks/useSlug";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Loading from "@/Components/Common/Loading";
+import MedicineAdministrationTable from "@/Components/Medicine/MedicineAdministrationSheet/AdministrationTable";
+import BulkAdminister from "@/Components/Medicine/MedicineAdministrationSheet/BulkAdminister";
+import { computeActivityBounds } from "@/Components/Medicine/MedicineAdministrationSheet/utils";
+import MedicineRoutes from "@/Components/Medicine/routes";
+import useQuery from "@/Utils/request/useQuery";
 
 interface Props {
   readonly?: boolean;

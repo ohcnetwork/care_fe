@@ -1,7 +1,8 @@
 import { usePath, Link } from "raviger";
 import { useState } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { classNames } from "@/Utils/utils";
 
 const MENU_TAGS: { [key: string]: string } = {
   facility: "Facilities",

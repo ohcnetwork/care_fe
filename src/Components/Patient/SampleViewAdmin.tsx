@@ -1,31 +1,33 @@
-import SampleFilter from "./SampleFilters";
 import { navigate } from "raviger";
 import { useCallback, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
+
+import CountBlock from "@/CAREUI/display/Count";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
   SAMPLE_FLOW_RULES,
   SAMPLE_TYPE_CHOICES,
-} from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+} from "@/Common/constants";
+import useFilters from "@/Common/hooks/useFilters";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import Page from "@/Components/Common/components/Page";
+import { ExportButton } from "@/Components/Common/Export";
+import SearchInput from "@/Components/Form/SearchInput";
+import { SampleTestModel } from "@/Components/Patient/models";
+import SampleFilter from "@/Components/Patient/SampleFilters";
+import UpdateStatusDialog from "@/Components/Patient/UpdateStatusDialog";
 import {
   getTestList,
   patchSample,
   downloadSampleTests,
   getAnyFacility,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications";
-import { SampleTestModel } from "./models";
-import UpdateStatusDialog from "./UpdateStatusDialog";
-import { formatDateTime } from "../../Utils/utils";
-import SearchInput from "../Form/SearchInput";
-import useFilters from "../../Common/hooks/useFilters";
-import { ExportButton } from "../Common/Export";
-import CountBlock from "../../CAREUI/display/Count";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import Page from "../Common/components/Page";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications";
+import { formatDateTime } from "@/Utils/utils";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function SampleViewAdmin() {

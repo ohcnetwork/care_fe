@@ -1,8 +1,8 @@
-import { AddBedForm } from "../../Components/Facility/AddBedForm";
-import { AddInventoryForm } from "../../Components/Facility/AddInventoryForm";
-import { AddLocationForm } from "../../Components/Facility/AddLocationForm";
-import { BedManagement } from "../../Components/Facility/BedManagement";
-import LocationManagement from "../../Components/Facility/LocationManagement";
+import { AddBedForm } from "@/Components/Facility/AddBedForm";
+import { AddInventoryForm } from "@/Components/Facility/AddInventoryForm";
+import { AddLocationForm } from "@/Components/Facility/AddLocationForm";
+import { BedManagement } from "@/Components/Facility/BedManagement";
+import LocationManagement from "@/Components/Facility/LocationManagement";
 
 export default {
   "/facility/:facilityId/location": ({ facilityId }: any) => (

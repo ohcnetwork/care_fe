@@ -1,6 +1,6 @@
-import handleResponse from "./handleResponse";
-import { RequestOptions, RequestResult, Route } from "./types";
-import { makeHeaders, makeUrl } from "./utils";
+import handleResponse from "@/Utils/request/handleResponse";
+import { RequestOptions, RequestResult, Route } from "@/Utils/request/types";
+import { makeHeaders, makeUrl } from "@/Utils/request/utils";
 
 interface Options<TData, TBody> extends RequestOptions<TData, TBody> {
   controller?: AbortController;

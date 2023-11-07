@@ -1,13 +1,14 @@
-import * as Notification from "../../Utils/Notifications.js";
-
-import ButtonV2 from "../Common/components/ButtonV2";
-import DateFormField from "../Form/FormFields/DateFormField";
-import DialogModal from "../Common/Dialog";
-import { PatientModel } from "../Patient/models";
-import TextFormField from "../Form/FormFields/TextFormField";
 import { useState } from "react";
-import routes from "../../Redux/api.js";
-import request from "../../Utils/request/request.js";
+
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import DialogModal from "@/Components/Common/Dialog";
+import DateFormField from "@/Components/Form/FormFields/DateFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { PatientModel } from "@/Components/Patient/models";
+import * as Notification from "@/Utils/Notifications.js";
+import request from "@/Utils/request/request.js";
+
+import routes from "@/Redux/api.js";
 
 interface IProps {
   consultationId: string;

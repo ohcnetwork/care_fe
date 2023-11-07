@@ -1,20 +1,24 @@
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
-import FormField from "./FormField";
 import { useEffect, useMemo, useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import phoneCodesJson from "@/Common/static/countryPhoneAndFlags.json";
+import {
+  FieldError,
+  PhoneNumberValidator,
+  PhoneNumberType,
+} from "@/Components/Form/FieldValidators";
+import FormField from "@/Components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/Components/Form/FormFields/Utils";
 import {
   classNames,
   parsePhoneNumber,
   formatPhoneNumber as formatPhoneNumberUtil,
   getCountryCode,
   CountryData,
-} from "../../../Utils/utils";
-import phoneCodesJson from "../../../Common/static/countryPhoneAndFlags.json";
-import {
-  FieldError,
-  PhoneNumberValidator,
-  PhoneNumberType,
-} from "../FieldValidators";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+} from "@/Utils/utils";
 
 const phoneCodes: Record<string, CountryData> = phoneCodesJson;
 

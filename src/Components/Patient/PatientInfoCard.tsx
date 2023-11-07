@@ -1,34 +1,37 @@
-import * as Notification from "../../Utils/Notifications.js";
+import { Switch, Menu } from "@headlessui/react";
+import { Link } from "raviger";
+import { useState } from "react";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import {
   CONSULTATION_SUGGESTION,
   DISCHARGE_REASONS,
   PATIENT_CATEGORIES,
   RESPIRATORY_SUPPORT,
   TELEMEDICINE_ACTIONS,
-} from "../../Common/constants";
-import { ConsultationModel, PatientCategory } from "../Facility/models";
-import { Switch, Menu } from "@headlessui/react";
+} from "@/Common/constants";
+import useAuthUser from "@/Common/hooks/useAuthUser.js";
+import useConfig from "@/Common/hooks/useConfig";
+import { getDimensionOrDash } from "@/Common/utils";
+import ABHAProfileModal from "@/Components/ABDM/ABHAProfileModal";
+import LinkABHANumberModal from "@/Components/ABDM/LinkABHANumberModal";
+import LinkCareContextModal from "@/Components/ABDM/LinkCareContextModal";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import DialogModal from "@/Components/Common/Dialog";
+import Beds from "@/Components/Facility/Consultations/Beds";
+import {
+  ConsultationModel,
+  PatientCategory,
+} from "@/Components/Facility/models";
+import { PatientModel } from "@/Components/Patient/models";
+import dayjs from "@/Utils/dayjs";
+import * as Notification from "@/Utils/Notifications.js";
+import request from "@/Utils/request/request.js";
+import { classNames, formatDate, formatDateTime } from "@/Utils/utils.js";
 
-import { Link } from "raviger";
-import { useState } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useConfig from "../../Common/hooks/useConfig";
-import { getDimensionOrDash } from "../../Common/utils";
-import dayjs from "../../Utils/dayjs";
-import { classNames, formatDate, formatDateTime } from "../../Utils/utils.js";
-import ABHAProfileModal from "../ABDM/ABHAProfileModal";
-import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
-import LinkCareContextModal from "../ABDM/LinkCareContextModal";
-import DialogModal from "../Common/Dialog";
-import ButtonV2 from "../Common/components/ButtonV2";
-import Beds from "../Facility/Consultations/Beds";
-import { PatientModel } from "./models";
-import request from "../../Utils/request/request.js";
-import routes from "../../Redux/api.js";
-import DropdownMenu from "../Common/components/Menu.js";
-import { triggerGoal } from "../../Integrations/Plausible.js";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import DropdownMenu from "@/Components/Common/components/Menu.js";
+import { triggerGoal } from "@/Integrations/Plausible.js";
+import routes from "@/Redux/api.js";
 
 export default function PatientInfoCard(props: {
   patient: PatientModel;

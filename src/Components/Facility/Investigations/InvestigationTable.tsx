@@ -1,9 +1,10 @@
-import ButtonV2 from "../../Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { SelectFormField } from "../../Form/FormFields/SelectFormField";
-import TextFormField from "../../Form/FormFields/TextFormField";
-import { classNames } from "../../../Utils/utils";
 import { useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { classNames } from "@/Utils/utils";
 
 const TestRow = ({ data, i, onChange, showForm, value, isChanged }: any) => {
   return (

@@ -1,6 +1,6 @@
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { formatDateTime, relativeDate } from "../../Utils/utils";
-import { PerformedByModel } from "../HCX/misc";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { PerformedByModel } from "@/Components/HCX/misc";
+import { formatDateTime, relativeDate } from "@/Utils/utils";
 
 function RelativeDateUserMention(props: {
   actionDate?: string;

@@ -1,13 +1,13 @@
-import { FacilityConfigure } from "../../Components/Facility/FacilityConfigure";
-import { FacilityCreate } from "../../Components/Facility/FacilityCreate";
-import { FacilityHome } from "../../Components/Facility/FacilityHome";
-import FacilityUsers from "../../Components/Facility/FacilityUsers";
-import { HospitalList } from "../../Components/Facility/HospitalList";
-import { TriageForm } from "../../Components/Facility/TriageForm";
-import ResourceCreate from "../../Components/Resource/ResourceCreate";
-import CentralNursingStation from "../../Components/Facility/CentralNursingStation";
-import FacilityLocationRoutes from "./FacilityLocationRoutes";
-import FacilityInventoryRoutes from "./FacilityInventoryRoutes";
+import CentralNursingStation from "@/Components/Facility/CentralNursingStation";
+import { FacilityConfigure } from "@/Components/Facility/FacilityConfigure";
+import { FacilityCreate } from "@/Components/Facility/FacilityCreate";
+import { FacilityHome } from "@/Components/Facility/FacilityHome";
+import FacilityUsers from "@/Components/Facility/FacilityUsers";
+import { HospitalList } from "@/Components/Facility/HospitalList";
+import { TriageForm } from "@/Components/Facility/TriageForm";
+import ResourceCreate from "@/Components/Resource/ResourceCreate";
+import FacilityInventoryRoutes from "@/Routers/routes/FacilityInventoryRoutes";
+import FacilityLocationRoutes from "@/Routers/routes/FacilityLocationRoutes";
 
 export default {
   "/facility": () => <HospitalList />,

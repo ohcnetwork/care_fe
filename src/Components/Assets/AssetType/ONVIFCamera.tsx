@@ -1,22 +1,20 @@
-import { useEffect, useState } from "react";
-import { AssetData } from "../AssetTypes";
-import * as Notification from "../../../Utils/Notifications.js";
-import { BedModel } from "../../Facility/models";
 import axios from "axios";
-import { getCameraConfig } from "../../../Utils/transformUtils";
-import CameraConfigure from "../configure/CameraConfigure";
-import Loading from "../../Common/Loading";
-import { checkIfValidIP } from "../../../Common/validation";
-import TextFormField from "../../Form/FormFields/TextFormField";
-import { Submit } from "../../Common/components/ButtonV2";
-import { SyntheticEvent } from "react";
-import useAuthUser from "../../../Common/hooks/useAuthUser";
+import { useEffect, useState, SyntheticEvent } from "react";
 
-import request from "../../../Utils/request/request";
-import routes from "../../../Redux/api";
-import useQuery from "../../../Utils/request/useQuery";
-
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import { checkIfValidIP } from "@/Common/validation";
+import { AssetData } from "@/Components/Assets/AssetTypes";
+import CameraConfigure from "@/Components/Assets/configure/CameraConfigure";
+import { Submit } from "@/Components/Common/components/ButtonV2";
+import Loading from "@/Components/Common/Loading";
+import { BedModel } from "@/Components/Facility/models";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import routes from "@/Redux/api";
+import * as Notification from "@/Utils/Notifications.js";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { getCameraConfig } from "@/Utils/transformUtils";
 
 interface Props {
   assetId: string;

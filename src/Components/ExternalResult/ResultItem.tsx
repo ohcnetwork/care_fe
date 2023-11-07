@@ -1,12 +1,13 @@
-import { useState, lazy } from "react";
-import * as Notification from "../../Utils/Notifications.js";
 import { navigate } from "raviger";
+import { useState, lazy } from "react";
 import { useTranslation } from "react-i18next";
-import Page from "../Common/components/Page";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import request from "../../Utils/request/request";
+
+import Page from "@/Components/Common/components/Page";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import routes from "@/Redux/api";
+import * as Notification from "@/Utils/Notifications.js";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

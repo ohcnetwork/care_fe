@@ -1,31 +1,28 @@
-import * as Notification from "../../Utils/Notifications";
-
-import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { useCallback, useEffect, useState } from "react";
-
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ClaimDetailCard from "../HCX/ClaimDetailCard";
-import { ConsultationModel } from "./models";
-import CreateClaimCard from "../HCX/CreateClaimCard";
-import { DISCHARGE_REASONS } from "../../Common/constants";
-import DateFormField from "../Form/FormFields/DateFormField";
-import DialogModal from "../Common/Dialog";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import { HCXActions } from "../../Redux/actions";
-import { HCXClaimModel } from "../HCX/models";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { dischargePatient } from "../../Redux/actions";
-import useConfig from "../../Common/hooks/useConfig";
 import { useDispatch } from "react-redux";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
-import PrescriptionBuilder from "../Medicine/PrescriptionBuilder";
-import CircularProgress from "../Common/components/CircularProgress";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { FacilityModel } from "./models";
-import dayjs from "../../Utils/dayjs";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { DISCHARGE_REASONS } from "@/Common/constants";
+import useConfig from "@/Common/hooks/useConfig";
+import { useMessageListener } from "@/Common/hooks/useMessageListener";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import DialogModal from "@/Components/Common/Dialog";
+import { FacilitySelect } from "@/Components/Common/FacilitySelect";
+import { ConsultationModel, FacilityModel } from "@/Components/Facility/models";
+import DateFormField from "@/Components/Form/FormFields/DateFormField";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import ClaimDetailCard from "@/Components/HCX/ClaimDetailCard";
+import CreateClaimCard from "@/Components/HCX/CreateClaimCard";
+import { HCXClaimModel } from "@/Components/HCX/models";
+import PrescriptionBuilder from "@/Components/Medicine/PrescriptionBuilder";
+import { HCXActions, dischargePatient } from "@/Redux/actions";
+import dayjs from "@/Utils/dayjs";
+import * as Notification from "@/Utils/Notifications";
 
 interface PreDischargeFormInterface {
   discharge_reason: string;

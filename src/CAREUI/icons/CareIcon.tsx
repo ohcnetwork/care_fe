@@ -1,7 +1,7 @@
-import { transformIcons } from "./icon";
 import { useEffect } from "react";
 
-import iconData from "./UniconPaths.json";
+import { transformIcons } from "@/CAREUI/icons/icon";
+import iconData from "@/CAREUI/icons/UniconPaths.json";
 
 export type IconName = keyof typeof iconData;
 

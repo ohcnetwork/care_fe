@@ -1,12 +1,13 @@
 import { Popover } from "@headlessui/react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { listAssetAvailability } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
-import * as Notification from "../../Utils/Notifications.js";
-import { AssetStatus, AssetUptimeRecord } from "../Assets/AssetTypes";
 import { reverse } from "lodash-es";
-import { classNames } from "../../Utils/utils";
-import dayjs from "../../Utils/dayjs";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+
+import { AssetStatus, AssetUptimeRecord } from "@/Components/Assets/AssetTypes";
+import { listAssetAvailability } from "@/Redux/actions";
+import dayjs from "@/Utils/dayjs";
+import * as Notification from "@/Utils/Notifications.js";
+import { classNames } from "@/Utils/utils";
 
 const STATUS_COLORS = {
   Operational: "bg-green-500",

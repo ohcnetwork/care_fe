@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next";
-import RecordMeta from "../../../../CAREUI/display/RecordMeta";
-import CareIcon from "../../../../CAREUI/icons/CareIcon";
-import { DailyRoundsModel } from "../../../Patient/models";
-import LogUpdateCardAttribute from "./LogUpdateCardAttribute";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import LogUpdateCardAttribute from "@/Components/Facility/Consultations/DailyRounds/LogUpdateCardAttribute";
+import { DailyRoundsModel } from "@/Components/Patient/models";
 
 // TODO: remove this method once events module is ready
 const getDeepDiff = <T extends object>(a: any, b?: any): Partial<T> => {

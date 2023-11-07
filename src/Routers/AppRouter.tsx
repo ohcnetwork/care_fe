@@ -1,31 +1,30 @@
 import { useRedirect, useRoutes, usePath, Redirect } from "raviger";
 import { useState, useEffect } from "react";
 
-import ShowPushNotification from "../Components/Notifications/ShowPushNotification";
-import { NoticeBoard } from "../Components/Notifications/NoticeBoard";
-import Error404 from "../Components/ErrorPages/404";
+import { BLACKLISTED_PATHS, LocalStorageKeys } from "@/Common/constants";
+import useConfig from "@/Common/hooks/useConfig";
 import {
   DesktopSidebar,
   MobileSidebar,
   SIDEBAR_SHRINK_PREFERENCE_KEY,
   SidebarShrinkContext,
-} from "../Components/Common/Sidebar/Sidebar";
-import { BLACKLISTED_PATHS, LocalStorageKeys } from "../Common/constants";
-import useConfig from "../Common/hooks/useConfig";
-import { handleSignOut } from "../Utils/utils";
-import SessionExpired from "../Components/ErrorPages/SessionExpired";
-
-import UserRoutes from "./routes/UserRoutes";
-import PatientRoutes from "./routes/PatientRoutes";
-import SampleRoutes from "./routes/SampleRoutes";
-import FacilityRoutes from "./routes/FacilityRoutes";
-import ConsultationRoutes from "./routes/ConsultationRoutes";
-import HCXRoutes from "./routes/HCXRoutes";
-import ShiftingRoutes from "./routes/ShiftingRoutes";
-import AssetRoutes from "./routes/AssetRoutes";
-import ResourceRoutes from "./routes/ResourceRoutes";
-import ExternalResultRoutes from "./routes/ExternalResultRoutes";
-import { DetailRoute } from "./types";
+} from "@/Components/Common/Sidebar/Sidebar";
+import Error404 from "@/Components/ErrorPages/404";
+import SessionExpired from "@/Components/ErrorPages/SessionExpired";
+import { NoticeBoard } from "@/Components/Notifications/NoticeBoard";
+import ShowPushNotification from "@/Components/Notifications/ShowPushNotification";
+import AssetRoutes from "@/Routers/routes/AssetRoutes";
+import ConsultationRoutes from "@/Routers/routes/ConsultationRoutes";
+import ExternalResultRoutes from "@/Routers/routes/ExternalResultRoutes";
+import FacilityRoutes from "@/Routers/routes/FacilityRoutes";
+import HCXRoutes from "@/Routers/routes/HCXRoutes";
+import PatientRoutes from "@/Routers/routes/PatientRoutes";
+import ResourceRoutes from "@/Routers/routes/ResourceRoutes";
+import SampleRoutes from "@/Routers/routes/SampleRoutes";
+import ShiftingRoutes from "@/Routers/routes/ShiftingRoutes";
+import UserRoutes from "@/Routers/routes/UserRoutes";
+import { DetailRoute } from "@/Routers/types";
+import { handleSignOut } from "@/Utils/utils";
 
 const Routes = {
   "/": () => <Redirect to="/facility" />,

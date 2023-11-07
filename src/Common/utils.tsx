@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect } from "react";
-import { OptionsType } from "./constants";
+
+import { OptionsType } from "@/Common/constants";
 
 export interface statusType {
   aborted?: boolean;

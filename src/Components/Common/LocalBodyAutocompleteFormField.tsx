@@ -1,10 +1,11 @@
-import { useDispatch } from "react-redux";
-import { FormFieldBaseProps } from "../Form/FormFields/Utils";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useState } from "react";
-import { getLocalbodyByDistrict } from "../../Redux/actions";
-import { IDistrict } from "./DistrictAutocompleteFormField";
+import { useDispatch } from "react-redux";
+
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import { IDistrict } from "@/Components/Common/DistrictAutocompleteFormField";
+import AutocompleteFormField from "@/Components/Form/FormFields/Autocomplete";
+import { FormFieldBaseProps } from "@/Components/Form/FormFields/Utils";
+import { getLocalbodyByDistrict } from "@/Redux/actions";
 
 export type ILocalBody = {
   id: number;

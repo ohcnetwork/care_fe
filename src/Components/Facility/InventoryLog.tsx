@@ -1,19 +1,21 @@
 import { useState, useCallback, useEffect, lazy } from "react";
-
-import * as Notification from "../../Utils/Notifications.js";
 import { useDispatch } from "react-redux";
+
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import Pagination from "@/Components/Common/Pagination";
 import {
   getInventoryLog,
   flagInventoryItem,
   deleteLastInventoryLog,
   getAnyFacility,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import Pagination from "../Common/Pagination";
-import { formatDateTime } from "../../Utils/utils";
-import Page from "../Common/components/Page.js";
-import CareIcon from "../../CAREUI/icons/CareIcon.js";
-import ButtonV2 from "../Common/components/ButtonV2.js";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+import { formatDateTime } from "@/Utils/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon.js";
+import ButtonV2 from "@/Components/Common/components/ButtonV2.js";
+import Page from "@/Components/Common/components/Page.js";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function InventoryLog(props: any) {

@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { getConsultation, HCXActions } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications";
-import { classNames, formatCurrency } from "../../Utils/utils";
-import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import ClaimsItemsBuilder from "./ClaimsItemsBuilder";
-import { HCXClaimModel, HCXPolicyModel, HCXItemModel } from "./models";
-import HCXPolicyEligibilityCheck from "./PolicyEligibilityCheck";
-import DialogModal from "../Common/Dialog";
-import PatientInsuranceDetailsEditor from "./PatientInsuranceDetailsEditor";
-import ClaimCreatedModal from "./ClaimCreatedModal";
-import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import ButtonV2, { Submit } from "@/Components/Common/components/ButtonV2";
+import DialogModal from "@/Components/Common/Dialog";
+import { ProcedureType } from "@/Components/Common/prescription-builder/ProcedureBuilder";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import ClaimCreatedModal from "@/Components/HCX/ClaimCreatedModal";
+import ClaimsItemsBuilder from "@/Components/HCX/ClaimsItemsBuilder";
+import {
+  HCXClaimModel,
+  HCXPolicyModel,
+  HCXItemModel,
+} from "@/Components/HCX/models";
+import PatientInsuranceDetailsEditor from "@/Components/HCX/PatientInsuranceDetailsEditor";
+import HCXPolicyEligibilityCheck from "@/Components/HCX/PolicyEligibilityCheck";
+import { getConsultation, HCXActions } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications";
+import { classNames, formatCurrency } from "@/Utils/utils";
 
 interface Props {
   consultationId: string;

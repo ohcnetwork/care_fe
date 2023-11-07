@@ -1,5 +1,5 @@
-import SessionRouter from "./SessionRouter";
-import AppRouter from "./AppRouter";
+import AppRouter from "@/Routers/AppRouter";
+import SessionRouter from "@/Routers/SessionRouter";
 
 const routers = { SessionRouter, AppRouter };
 

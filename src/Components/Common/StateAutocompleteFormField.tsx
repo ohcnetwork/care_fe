@@ -1,9 +1,10 @@
 import { useCallback, useState } from "react";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import { FormFieldBaseProps } from "../Form/FormFields/Utils";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useDispatch } from "react-redux";
-import { getStates } from "../../Redux/actions";
+
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import AutocompleteFormField from "@/Components/Form/FormFields/Autocomplete";
+import { FormFieldBaseProps } from "@/Components/Form/FormFields/Utils";
+import { getStates } from "@/Redux/actions";
 
 export type IState = {
   id: number;

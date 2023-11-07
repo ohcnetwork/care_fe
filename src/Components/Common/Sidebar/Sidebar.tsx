@@ -1,13 +1,17 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { SidebarItem, ShrinkedSidebarItem } from "./SidebarItem";
-import SidebarUserCard from "./SidebarUserCard";
-import NotificationItem from "../../Notifications/NotificationsList";
-import useActiveLink from "../../../Common/hooks/useActiveLink";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import useConfig from "../../../Common/hooks/useConfig";
-import SlideOver from "../../../CAREUI/interactive/SlideOver";
-import { classNames } from "../../../Utils/utils";
 import { Link } from "raviger";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import SlideOver from "@/CAREUI/interactive/SlideOver";
+import useActiveLink from "@/Common/hooks/useActiveLink";
+import useConfig from "@/Common/hooks/useConfig";
+import {
+  SidebarItem,
+  ShrinkedSidebarItem,
+} from "@/Components/Common/Sidebar/SidebarItem";
+import SidebarUserCard from "@/Components/Common/Sidebar/SidebarUserCard";
+import NotificationItem from "@/Components/Notifications/NotificationsList";
+import { classNames } from "@/Utils/utils";
 
 export const SIDEBAR_SHRINK_PREFERENCE_KEY = "sidebarShrinkPreference";
 

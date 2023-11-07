@@ -1,5 +1,5 @@
-import CareIcon from "../../../../CAREUI/icons/CareIcon";
-import { formatDateTime } from "../../../../Utils/utils";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { formatDateTime } from "@/Utils/utils";
 
 export default function BinaryChronologicalChart(props: {
   data: {

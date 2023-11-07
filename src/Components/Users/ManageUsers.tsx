@@ -1,4 +1,27 @@
-import * as Notification from "../../Utils/Notifications.js";
+import dayjs from "dayjs";
+import { navigate } from "raviger";
+import { lazy, useCallback, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+
+import CountBlock from "@/CAREUI/display/Count";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+import SlideOverCustom from "@/CAREUI/interactive/SlideOver";
+import { USER_TYPES } from "@/Common/constants";
+import useAuthUser from "@/Common/hooks/useAuthUser.js";
+import useFilters from "@/Common/hooks/useFilters";
+import useWindowDimensions from "@/Common/hooks/useWindowDimensions";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2, { Submit } from "@/Components/Common/components/ButtonV2";
+import { FacilitySelect } from "@/Components/Common/FacilitySelect";
+import UserDetails from "@/Components/Common/UserDetails";
+import { FacilityModel } from "@/Components/Facility/models";
+import SearchInput from "@/Components/Form/SearchInput";
+import ConfirmHomeFacilityUpdateDialog from "@/Components/Users/ConfirmHomeFacilityUpdateDialog";
+import SkillsSlideOver from "@/Components/Users/SkillsSlideOver";
+import UnlinkFacilityDialog from "@/Components/Users/UnlinkFacilityDialog";
+import UserDeleteDialog from "@/Components/Users/UserDeleteDialog";
+import UserFilter from "@/Components/Users/UserFilter";
 import {
   addUserFacility,
   clearHomeFacility,
@@ -8,34 +31,13 @@ import {
   getUserList,
   getUserListFacility,
   partialUpdateUser,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import ButtonV2, { Submit } from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ConfirmHomeFacilityUpdateDialog from "./ConfirmHomeFacilityUpdateDialog";
-import CountBlock from "../../CAREUI/display/Count";
-import { FacilityModel } from "../Facility/models";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import SearchInput from "../Form/SearchInput";
-import SkillsSlideOver from "./SkillsSlideOver";
-import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
-import { USER_TYPES } from "../../Common/constants";
-import UnlinkFacilityDialog from "./UnlinkFacilityDialog";
-import UserDeleteDialog from "./UserDeleteDialog";
-import UserDetails from "../Common/UserDetails";
-import UserFilter from "./UserFilter";
-import { classNames, isUserOnline, relativeTime } from "../../Utils/utils";
-import { navigate } from "raviger";
-import useFilters from "../../Common/hooks/useFilters";
-import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
-import CircularProgress from "../Common/components/CircularProgress.js";
-import Page from "../Common/components/Page.js";
-import dayjs from "dayjs";
-import TextFormField from "../Form/FormFields/TextFormField.js";
-import useAuthUser from "../../Common/hooks/useAuthUser.js";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+import { classNames, isUserOnline, relativeTime } from "@/Utils/utils";
+
+import CircularProgress from "@/Components/Common/components/CircularProgress.js";
+import Page from "@/Components/Common/components/Page.js";
+import TextFormField from "@/Components/Form/FormFields/TextFormField.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

@@ -1,21 +1,25 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import SlideOverCustom from "../../CAREUI/interactive/SlideOver";
-import { SkillModel, SkillObjectModel } from "../Users/models";
-import { SkillSelect } from "../Common/SkillSelect";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+
+import SlideOverCustom from "@/CAREUI/interactive/SlideOver";
+import { useIsAuthorized } from "@/Common/hooks/useIsAuthorized";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import { SkillSelect } from "@/Components/Common/SkillSelect";
+import { SkillModel, SkillObjectModel } from "@/Components/Users/models";
+import {
+  AddSkillsPlaceholder,
+  SkillsArray,
+} from "@/Components/Users/SkillsSlideOverComponents";
+import UnlinkSkillDialog from "@/Components/Users/UnlinkSkillDialog";
 import {
   addUserSkill,
   getUserListSkills,
   deleteUserSkill,
-} from "../../Redux/actions";
-import UnlinkSkillDialog from "./UnlinkSkillDialog";
-import * as Notification from "../../Utils/Notifications.js";
-import { useDispatch } from "react-redux";
-import ButtonV2 from "../Common/components/ButtonV2";
-import AuthorizeFor from "../../Utils/AuthorizeFor";
-import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
-import { AddSkillsPlaceholder, SkillsArray } from "./SkillsSlideOverComponents";
-import { useTranslation } from "react-i18next";
-import CircularProgress from "../Common/components/CircularProgress";
+} from "@/Redux/actions";
+import AuthorizeFor from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications.js";
 
 interface IProps {
   username: string;

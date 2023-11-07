@@ -1,24 +1,24 @@
-import * as Notification from "../../../../Utils/Notifications";
 import { chain } from "lodash-es";
-import { Group, InvestigationType } from "..";
+import { useCallback, useEffect, useReducer, useState, useRef } from "react";
+import { useDispatch } from "react-redux";
+
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import Page from "@/Components/Common/components/Page";
+import Loading from "@/Components/Common/Loading";
+import ReportTable from "@/Components/Facility/Investigations/Reports/ReportTable";
+import { InvestigationResponse } from "@/Components/Facility/Investigations/Reports/types";
+import AutocompleteMultiSelectFormField from "@/Components/Form/FormFields/AutocompleteMultiselect";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
 import {
   getPatient,
   getPatientInvestigation,
   listInvestigationGroups,
   listInvestigations,
-} from "../../../../Redux/actions";
-import { useCallback, useEffect, useReducer, useState } from "react";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications";
 
-import AutocompleteMultiSelectFormField from "../../../Form/FormFields/AutocompleteMultiselect";
-import ButtonV2 from "../../../Common/components/ButtonV2";
-import CircularProgress from "../../../Common/components/CircularProgress";
-import { FieldChangeEvent } from "../../../Form/FormFields/Utils";
-import { InvestigationResponse } from "./types";
-import Loading from "../../../Common/Loading";
-import Page from "../../../Common/components/Page";
-import ReportTable from "./ReportTable";
-import { useDispatch } from "react-redux";
-import { useRef } from "react";
+import { Group, InvestigationType } from "..";
 
 const RESULT_PER_PAGE = 14;
 interface InitialState {

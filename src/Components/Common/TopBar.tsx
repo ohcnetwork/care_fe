@@ -1,5 +1,5 @@
-import useConfig from "../../Common/hooks/useConfig";
-import LanguageSelector from "./LanguageSelector";
+import useConfig from "@/Common/hooks/useConfig";
+import LanguageSelector from "@/Components/Common/LanguageSelector";
 
 const TopBar = () => {
   const { main_logo } = useConfig();

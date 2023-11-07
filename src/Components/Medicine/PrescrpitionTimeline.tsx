@@ -1,20 +1,24 @@
-import dayjs from "../../Utils/dayjs";
-import useSlug from "../../Common/hooks/useSlug";
-import useQuery from "../../Utils/request/useQuery";
-import { classNames, formatDateTime } from "../../Utils/utils";
-import { MedicineAdministrationRecord, Prescription } from "./models";
-import MedicineRoutes from "./routes";
+import { useState } from "react";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
 import Timeline, {
   TimelineEvent,
   TimelineNode,
   TimelineNodeNotes,
-} from "../../CAREUI/display/Timeline";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { useState } from "react";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import request from "../../Utils/request/request";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+} from "@/CAREUI/display/Timeline";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useSlug from "@/Common/hooks/useSlug";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import {
+  MedicineAdministrationRecord,
+  Prescription,
+} from "@/Components/Medicine/models";
+import MedicineRoutes from "@/Components/Medicine/routes";
+import dayjs from "@/Utils/dayjs";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, formatDateTime } from "@/Utils/utils";
 
 interface MedicineAdministeredEvent extends TimelineEvent<"administered"> {
   administration: MedicineAdministrationRecord;

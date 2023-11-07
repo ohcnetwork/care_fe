@@ -1,6 +1,7 @@
 import { RefObject } from "react";
-import PageTitle, { PageTitleProps } from "../PageTitle";
-import { classNames } from "../../../Utils/utils";
+
+import PageTitle, { PageTitleProps } from "@/Components/Common/PageTitle";
+import { classNames } from "@/Utils/utils";
 
 interface PageProps extends PageTitleProps {
   children: any;

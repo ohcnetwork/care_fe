@@ -1,23 +1,24 @@
-import Card from "../../CAREUI/display/Card";
-
+import { navigate } from "raviger";
 import { useState, useEffect, lazy, SyntheticEvent } from "react";
 import { useDispatch } from "react-redux";
+
+import Card from "@/CAREUI/display/Card";
+import { LOCATION_BED_TYPES } from "@/Common/constants";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import CheckBoxFormField from "@/Components/Form/FormFields/CheckBoxFormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
 import {
   createFacilityBed,
   getAnyFacility,
   getFacilityAssetLocation,
   getFacilityBed,
   updateFacilityBed,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { LOCATION_BED_TYPES } from "../../Common/constants";
-import { navigate } from "raviger";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import Page from "../Common/components/Page";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 interface BedFormProps {

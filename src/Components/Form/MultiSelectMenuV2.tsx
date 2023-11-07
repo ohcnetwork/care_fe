@@ -1,8 +1,9 @@
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { DropdownTransition } from "../Common/components/HelperComponents";
 import { Listbox } from "@headlessui/react";
-import { classNames } from "../../Utils/utils";
 import { ReactNode } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { DropdownTransition } from "@/Components/Common/components/HelperComponents";
+import { classNames } from "@/Utils/utils";
 
 type OptionCallback<T, R = void> = (option: T) => R;
 

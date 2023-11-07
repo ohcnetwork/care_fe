@@ -1,18 +1,22 @@
 import { useEffect, useMemo, useState } from "react";
-import PrescriptionDetailCard from "./PrescriptionDetailCard";
-import { MedicineAdministrationRecord, Prescription } from "./models";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { Error, Success } from "../../Utils/Notifications";
-import { classNames, formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import dayjs from "../../Utils/dayjs";
-import TextFormField from "../Form/FormFields/TextFormField";
-import request from "../../Utils/request/request";
-import MedicineRoutes from "./routes";
-import useSlug from "../../Common/hooks/useSlug";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useSlug from "@/Common/hooks/useSlug";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import CheckBoxFormField from "@/Components/Form/FormFields/CheckBoxFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import {
+  MedicineAdministrationRecord,
+  Prescription,
+} from "@/Components/Medicine/models";
+import PrescriptionDetailCard from "@/Components/Medicine/PrescriptionDetailCard";
+import MedicineRoutes from "@/Components/Medicine/routes";
+import dayjs from "@/Utils/dayjs";
+import { Error, Success } from "@/Utils/Notifications";
+import request from "@/Utils/request/request";
+import { classNames, formatDateTime } from "@/Utils/utils";
 
 interface Props {
   prescriptions: Prescription[];

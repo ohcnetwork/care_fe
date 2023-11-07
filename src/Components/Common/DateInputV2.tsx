@@ -1,9 +1,9 @@
+import { Popover } from "@headlessui/react";
 import { MutableRefObject, useEffect, useState } from "react";
 
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { Popover } from "@headlessui/react";
-import { classNames } from "../../Utils/utils";
-import dayjs from "../../Utils/dayjs";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import dayjs from "@/Utils/dayjs";
+import { classNames } from "@/Utils/utils";
 
 type DatePickerType = "date" | "month" | "year";
 export type DatePickerPosition = "LEFT" | "RIGHT" | "CENTER";

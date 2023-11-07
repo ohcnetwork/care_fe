@@ -1,6 +1,6 @@
-import { CameraPTZ } from "../../../Common/constants";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { classNames } from "../../../Utils/utils";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { CameraPTZ } from "@/Common/constants";
+import { classNames } from "@/Utils/utils";
 
 export default function FeedButton(props: {
   camProp: any;

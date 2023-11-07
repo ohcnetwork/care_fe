@@ -1,5 +1,9 @@
-import * as Notification from "../../Utils/Notifications.js";
+import { debounce } from "lodash-es";
+import { navigate, useQueryParams } from "raviger";
+import { lazy, useCallback, useEffect, useReducer, useState } from "react";
+import { useDispatch } from "react-redux";
 
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import {
   BLOOD_GROUPS,
   DISEASE_STATUS,
@@ -7,7 +11,44 @@ import {
   MEDICAL_HISTORY_CHOICES,
   TEST_TYPE,
   VACCINES,
-} from "../../Common/constants";
+} from "@/Common/constants";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import useConfig from "@/Common/hooks/useConfig";
+import countryList from "@/Common/static/countries.json";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import { validatePincode } from "@/Common/validation";
+import LinkABHANumberModal from "@/Components/ABDM/LinkABHANumberModal";
+import AccordionV2 from "@/Components/Common/components/AccordionV2";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import CollapseV2 from "@/Components/Common/components/CollapseV2";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import DialogModal from "@/Components/Common/Dialog";
+import Spinner from "@/Components/Common/Spinner";
+import DuplicatePatientDialog from "@/Components/Facility/DuplicatePatientDialog";
+import { DupPatientModel } from "@/Components/Facility/models";
+import TransferPatientDialog from "@/Components/Facility/TransferPatientDialog";
+import {
+  FieldError,
+  PhoneNumberValidator,
+  RequiredFieldValidator,
+} from "@/Components/Form/FieldValidators";
+import Form from "@/Components/Form/Form";
+import { FormContextValue } from "@/Components/Form/FormContext.js";
+import CheckBoxFormField from "@/Components/Form/FormFields/CheckBoxFormField";
+import DateFormField from "@/Components/Form/FormFields/DateFormField";
+import {
+  FieldErrorText,
+  FieldLabel,
+} from "@/Components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import RadioFormField from "@/Components/Form/FormFields/RadioFormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import InsuranceDetailsBuilder from "@/Components/HCX/InsuranceDetailsBuilder";
+import { HCXPolicyModel } from "@/Components/HCX/models";
+import HCXPolicyValidator from "@/Components/HCX/validators";
+import { PatientModel } from "@/Components/Patient/models";
 import {
   HCXActions,
   createPatient,
@@ -20,54 +61,14 @@ import {
   getWardByLocalBody,
   searchPatient,
   updatePatient,
-} from "../../Redux/actions";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
 import {
   dateQueryString,
   getPincodeDetails,
   includesIgnoreCase,
   parsePhoneNumber,
-} from "../../Utils/utils";
-import { navigate, useQueryParams } from "raviger";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useEffect, useReducer, useState } from "react";
-
-import AccordionV2 from "../Common/components/AccordionV2";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import CollapseV2 from "../Common/components/CollapseV2";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import DateFormField from "../Form/FormFields/DateFormField";
-import DialogModal from "../Common/Dialog";
-import { DupPatientModel } from "../Facility/models";
-import DuplicatePatientDialog from "../Facility/DuplicatePatientDialog";
-import {
-  FieldError,
-  PhoneNumberValidator,
-  RequiredFieldValidator,
-} from "../Form/FieldValidators";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import Form from "../Form/Form";
-import { HCXPolicyModel } from "../HCX/models";
-import HCXPolicyValidator from "../HCX/validators";
-import InsuranceDetailsBuilder from "../HCX/InsuranceDetailsBuilder";
-import LinkABHANumberModal from "../ABDM/LinkABHANumberModal";
-import { PatientModel } from "./models";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import Spinner from "../Common/Spinner";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TransferPatientDialog from "../Facility/TransferPatientDialog";
-import countryList from "../../Common/static/countries.json";
-import { debounce } from "lodash-es";
-
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
-import { validatePincode } from "../../Common/validation";
-import { FormContextValue } from "../Form/FormContext.js";
+} from "@/Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));

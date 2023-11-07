@@ -1,18 +1,19 @@
 import { useState } from "react";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import { Prescription } from "./models";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import { Success } from "../../Utils/Notifications";
-import PrescriptionDetailCard from "./PrescriptionDetailCard";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import dayjs from "../../Utils/dayjs";
-import useSlug from "../../Common/hooks/useSlug";
-import request from "../../Utils/request/request";
-import MedicineRoutes from "./routes";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useSlug from "@/Common/hooks/useSlug";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import CheckBoxFormField from "@/Components/Form/FormFields/CheckBoxFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { Prescription } from "@/Components/Medicine/models";
+import PrescriptionDetailCard from "@/Components/Medicine/PrescriptionDetailCard";
+import MedicineRoutes from "@/Components/Medicine/routes";
+import dayjs from "@/Utils/dayjs";
+import { Success } from "@/Utils/Notifications";
+import request from "@/Utils/request/request";
+import { formatDateTime } from "@/Utils/utils";
 
 interface Props {
   prescription: Prescription;

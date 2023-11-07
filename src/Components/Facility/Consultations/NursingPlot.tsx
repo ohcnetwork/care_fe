@@ -1,13 +1,11 @@
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  NURSING_CARE_FIELDS,
-  PAGINATION_LIMIT,
-} from "../../../Common/constants";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
-import Pagination from "../../Common/Pagination";
-import { formatDateTime } from "../../../Utils/utils";
+
+import { NURSING_CARE_FIELDS, PAGINATION_LIMIT } from "@/Common/constants";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import Pagination from "@/Components/Common/Pagination";
+import { dailyRoundsAnalyse } from "@/Redux/actions";
+import { formatDateTime } from "@/Utils/utils";
 
 export const NursingPlot = (props: any) => {
   const { consultationId } = props;

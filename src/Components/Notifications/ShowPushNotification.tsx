@@ -1,7 +1,8 @@
-import { useDispatch } from "react-redux";
-import { getNotificationData } from "../../Redux/actions";
 import { useEffect } from "react";
-import { DetailRoute } from "../../Routers/types";
+import { useDispatch } from "react-redux";
+
+import { getNotificationData } from "@/Redux/actions";
+import { DetailRoute } from "@/Routers/types";
 
 export default function ShowPushNotification({ id }: DetailRoute) {
   const dispatch: any = useDispatch();

@@ -1,8 +1,9 @@
 import { createContext, useContext } from "react";
-import { PerformedByModel } from "../../Components/HCX/misc";
-import { classNames, formatName } from "../../Utils/utils";
-import CareIcon, { IconName } from "../icons/CareIcon";
-import RecordMeta from "./RecordMeta";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+import { PerformedByModel } from "@/Components/HCX/misc";
+import { classNames, formatName } from "@/Utils/utils";
 
 export interface TimelineEvent<TType = string> {
   type: TType;

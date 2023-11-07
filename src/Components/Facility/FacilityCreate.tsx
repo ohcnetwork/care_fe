@@ -1,20 +1,45 @@
-import * as Notification from "../../Utils/Notifications.js";
+import { Popover, Transition } from "@headlessui/react";
+import { navigate } from "raviger";
+import { Fragment, lazy, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
 
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import { CapacityModal, DoctorModal } from "./models";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave.js";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 import {
   FACILITY_FEATURE_TYPES,
   FACILITY_TYPES,
   getBedTypes,
-} from "../../Common/constants";
+} from "@/Common/constants";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import useConfig from "@/Common/hooks/useConfig";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import {
+  phonePreg,
+  validateLatitude,
+  validateLongitude,
+  validatePincode,
+} from "@/Common/validation";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/Components/Common/components/ButtonV2";
+import GLocationPicker from "@/Components/Common/GLocationPicker";
+import Steps, { Step } from "@/Components/Common/Steps";
+import { BedCapacity } from "@/Components/Facility/BedCapacity";
+import BedTypeCard from "@/Components/Facility/BedTypeCard";
+import { DoctorCapacity } from "@/Components/Facility/DoctorCapacity";
+import DoctorsCountCard from "@/Components/Facility/DoctorsCountCard";
+import { CapacityModal, DoctorModal } from "@/Components/Facility/models";
+import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import RadioFormField from "@/Components/Form/FormFields/RadioFormField";
 import {
   MultiSelectFormField,
   SelectFormField,
-} from "../Form/FormFields/SelectFormField";
-import { Popover, Transition } from "@headlessui/react";
-import { Fragment, lazy, useCallback, useState } from "react";
-import Steps, { Step } from "../Common/Steps";
+} from "@/Components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import { FormAction } from "@/Components/Form/Utils.js";
 import {
   createFacility,
   getDistrictByState,
@@ -25,41 +50,18 @@ import {
   listCapacity,
   listDoctor,
   updateFacility,
-} from "../../Redux/actions";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
 import {
   getPincodeDetails,
   includesIgnoreCase,
   parsePhoneNumber,
-} from "../../Utils/utils";
-import {
-  phonePreg,
-  validateLatitude,
-  validateLongitude,
-  validatePincode,
-} from "../../Common/validation";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+} from "@/Utils/utils";
 
-import { BedCapacity } from "./BedCapacity";
-import BedTypeCard from "./BedTypeCard";
-import Card from "../../CAREUI/display/Card.js";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { DoctorCapacity } from "./DoctorCapacity";
-import DoctorsCountCard from "./DoctorsCountCard";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { FormAction } from "../Form/Utils.js";
-import GLocationPicker from "../Common/GLocationPicker";
-import Page from "../Common/components/Page.js";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-
-import { navigate } from "raviger";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
-import { useTranslation } from "react-i18next";
-import { PhoneNumberValidator } from "../Form/FieldValidators.js";
+import Card from "@/CAREUI/display/Card.js";
+import Page from "@/Components/Common/components/Page.js";
+import { PhoneNumberValidator } from "@/Components/Form/FieldValidators.js";
+import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

@@ -1,40 +1,41 @@
-import { navigate } from "raviger";
-
 import dayjs from "dayjs";
+import { navigate } from "raviger";
 import { lazy, useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
+
 import {
   PATIENT_CATEGORIES,
   REVIEW_AT_CHOICES,
   RHYTHM_CHOICES,
   TELEMEDICINE_ACTIONS,
-} from "../../Common/constants";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+} from "@/Common/constants";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import BloodPressureFormField, {
+  meanArterialPressure,
+} from "@/Components/Common/BloodPressureFormField";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import { SymptomsSelect } from "@/Components/Common/SymptomsSelect";
+import TemperatureFormField from "@/Components/Common/TemperatureFormField";
+import CheckBoxFormField from "@/Components/Form/FormFields/CheckBoxFormField";
+import RangeAutocompleteFormField from "@/Components/Form/FormFields/RangeAutocompleteFormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import PatientCategorySelect from "@/Components/Patient/PatientCategorySelect";
 import {
   createDailyReport,
   getConsultationDailyRoundsDetails,
   getDailyReport,
   getPatient,
   updateDailyReport,
-} from "../../Redux/actions";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-import * as Notification from "../../Utils/Notifications";
-import { formatDateTime } from "../../Utils/utils";
-import BloodPressureFormField, {
-  meanArterialPressure,
-} from "../Common/BloodPressureFormField";
-import { SymptomsSelect } from "../Common/SymptomsSelect";
-import TemperatureFormField from "../Common/TemperatureFormField";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import Page from "../Common/components/Page";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
-import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import PatientCategorySelect from "./PatientCategorySelect";
+} from "@/Redux/actions";
+import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
+import * as Notification from "@/Utils/Notifications";
+import { formatDateTime } from "@/Utils/utils";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 const initForm: any = {

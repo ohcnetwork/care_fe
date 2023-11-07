@@ -1,28 +1,28 @@
+import { navigate } from "raviger";
+import { lazy, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import useConfig from "@/Common/hooks/useConfig";
+import useFilters from "@/Common/hooks/useFilters";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import { ExportButton } from "@/Components/Common/Export";
+import SearchInput from "@/Components/Form/SearchInput";
+import BadgesList from "@/Components/Shifting/BadgesList";
+import { formatFilter } from "@/Components/Shifting/Commons";
+import ListFilter from "@/Components/Shifting/ListFilter";
 import {
   completeTransfer,
   downloadShiftRequests,
   listShiftRequests,
-} from "../../Redux/actions";
-import { lazy, useEffect, useState } from "react";
-
-import BadgesList from "./BadgesList";
-import ButtonV2 from "../Common/components/ButtonV2";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import { ExportButton } from "../Common/Export";
-import ListFilter from "./ListFilter";
-import Page from "../Common/components/Page";
-import SearchInput from "../Form/SearchInput";
-import { formatAge, formatDateTime } from "../../Utils/utils";
-import { formatFilter } from "./Commons";
-import { navigate } from "raviger";
-import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
-import useFilters from "../../Common/hooks/useFilters";
-import { useTranslation } from "react-i18next";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import dayjs from "../../Utils/dayjs";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+} from "@/Redux/actions";
+import dayjs from "@/Utils/dayjs";
+import { formatAge, formatDateTime } from "@/Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

@@ -1,26 +1,25 @@
+import { navigate } from "raviger";
+import { lazy, useState } from "react";
+import withScrolling from "react-dnd-scrolling";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
 import {
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
-} from "../../Common/constants";
-
-import BadgesList from "./BadgesList";
-import { ExportButton } from "../Common/Export";
-import ListFilter from "./ListFilter";
-import SearchInput from "../Form/SearchInput";
-import ShiftingBoard from "./ShiftingBoard";
-import { downloadShiftRequests } from "../../Redux/actions";
-import { formatFilter } from "./Commons";
-
-import { navigate } from "raviger";
-import useConfig from "../../Common/hooks/useConfig";
-import useFilters from "../../Common/hooks/useFilters";
-import { lazy, useState } from "react";
-import { useTranslation } from "react-i18next";
-import withScrolling from "react-dnd-scrolling";
-import ButtonV2 from "../Common/components/ButtonV2";
-import SwitchTabs from "../Common/components/SwitchTabs";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+} from "@/Common/constants";
+import useConfig from "@/Common/hooks/useConfig";
+import useFilters from "@/Common/hooks/useFilters";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import SwitchTabs from "@/Components/Common/components/SwitchTabs";
+import { ExportButton } from "@/Components/Common/Export";
+import SearchInput from "@/Components/Form/SearchInput";
+import BadgesList from "@/Components/Shifting/BadgesList";
+import { formatFilter } from "@/Components/Shifting/Commons";
+import ListFilter from "@/Components/Shifting/ListFilter";
+import ShiftingBoard from "@/Components/Shifting/ShiftingBoard";
+import { downloadShiftRequests } from "@/Redux/actions";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));

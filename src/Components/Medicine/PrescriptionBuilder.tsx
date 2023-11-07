@@ -1,16 +1,21 @@
 import { useState } from "react";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { NormalPrescription, Prescription, PRNPrescription } from "./models";
-import DialogModal from "../Common/Dialog";
-import CreatePrescriptionForm from "./CreatePrescriptionForm";
-import PrescriptionDetailCard from "./PrescriptionDetailCard";
-import DiscontinuePrescription from "./DiscontinuePrescription";
-import AdministerMedicine from "./AdministerMedicine";
 import { useTranslation } from "react-i18next";
-import useQuery from "../../Utils/request/useQuery";
-import MedicineRoutes from "./routes";
-import useSlug from "../../Common/hooks/useSlug";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useSlug from "@/Common/hooks/useSlug";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import DialogModal from "@/Components/Common/Dialog";
+import AdministerMedicine from "@/Components/Medicine/AdministerMedicine";
+import CreatePrescriptionForm from "@/Components/Medicine/CreatePrescriptionForm";
+import DiscontinuePrescription from "@/Components/Medicine/DiscontinuePrescription";
+import {
+  NormalPrescription,
+  Prescription,
+  PRNPrescription,
+} from "@/Components/Medicine/models";
+import PrescriptionDetailCard from "@/Components/Medicine/PrescriptionDetailCard";
+import MedicineRoutes from "@/Components/Medicine/routes";
+import useQuery from "@/Utils/request/useQuery";
 
 interface Props {
   prescription_type?: Prescription["prescription_type"];

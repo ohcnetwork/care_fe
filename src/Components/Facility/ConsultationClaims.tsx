@@ -1,13 +1,14 @@
+import { navigate } from "raviger";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { HCXActions } from "../../Redux/actions";
-import PageTitle from "../Common/PageTitle";
-import ClaimDetailCard from "../HCX/ClaimDetailCard";
-import CreateClaimCard from "../HCX/CreateClaimCard";
-import { HCXClaimModel } from "../HCX/models";
-import { useMessageListener } from "../../Common/hooks/useMessageListener";
-import { navigate } from "raviger";
-import * as Notification from "../../Utils/Notifications";
+
+import { useMessageListener } from "@/Common/hooks/useMessageListener";
+import PageTitle from "@/Components/Common/PageTitle";
+import ClaimDetailCard from "@/Components/HCX/ClaimDetailCard";
+import CreateClaimCard from "@/Components/HCX/CreateClaimCard";
+import { HCXClaimModel } from "@/Components/HCX/models";
+import { HCXActions } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications";
 
 interface Props {
   facilityId: string;

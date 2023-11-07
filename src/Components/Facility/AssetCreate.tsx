@@ -1,7 +1,5 @@
-import * as Notification from "../../Utils/Notifications.js";
-
-import { AssetClass, AssetData, AssetType } from "../Assets/AssetTypes";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
+import { t } from "i18next";
+import { navigate } from "raviger";
 import {
   LegacyRef,
   RefObject,
@@ -11,34 +9,42 @@ import {
   useReducer,
   useState,
 } from "react";
+import QrReader from "react-qr-reader";
+import { useDispatch } from "react-redux";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import { validateEmailAddress } from "@/Common/validation";
+import {
+  AssetClass,
+  AssetData,
+  AssetType,
+} from "@/Components/Assets/AssetTypes";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import SwitchV2 from "@/Components/Common/components/Switch";
+import { LocationSelect } from "@/Components/Common/LocationSelect";
+import {
+  FieldErrorText,
+  FieldLabel,
+} from "@/Components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
 import {
   createAsset,
   getAsset,
   listFacilityAssetLocation,
   updateAsset,
-} from "../../Redux/actions";
+} from "@/Redux/actions";
+import dayjs from "@/Utils/dayjs";
+import * as Notification from "@/Utils/Notifications.js";
+import { parseQueryParams } from "@/Utils/primitives";
+import useVisibility from "@/Utils/useVisibility";
+import { dateQueryString, parsePhoneNumber } from "@/Utils/utils.js";
 
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import { LocationSelect } from "../Common/LocationSelect";
-import Page from "../Common/components/Page";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import QrReader from "react-qr-reader";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import SwitchV2 from "../Common/components/Switch";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-
-import { navigate } from "raviger";
-import { parseQueryParams } from "../../Utils/primitives";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import { useDispatch } from "react-redux";
-import useVisibility from "../../Utils/useVisibility";
-import { validateEmailAddress } from "../../Common/validation";
-import { dateQueryString, parsePhoneNumber } from "../../Utils/utils.js";
-import dayjs from "../../Utils/dayjs";
-import DateFormField from "../Form/FormFields/DateFormField.js";
-import { t } from "i18next";
+import DateFormField from "@/Components/Form/FormFields/DateFormField.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

@@ -1,5 +1,5 @@
-import PatientCategoryBadge from "../../../Common/PatientCategoryBadge";
-import { DailyRoundsModel } from "../../../Patient/models";
+import PatientCategoryBadge from "@/Components/Common/PatientCategoryBadge";
+import { DailyRoundsModel } from "@/Components/Patient/models";
 
 interface Props<T extends keyof DailyRoundsModel> {
   attributeKey: T;

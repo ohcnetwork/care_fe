@@ -1,24 +1,28 @@
+import { uniqBy } from "lodash-es";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AssetData, AssetLocationObject } from "@/Components/Assets/AssetTypes";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import DialogModal from "@/Components/Common/Dialog";
+import Loading from "@/Components/Common/Loading";
+import Pagination from "@/Components/Common/Pagination";
+import { LegacyMonitorCard } from "@/Components/Facility/LegacyMonitorCard";
+import { FacilityModel } from "@/Components/Facility/models";
+import AutocompleteFormField from "@/Components/Form/FormFields/Autocomplete";
+import { PatientModel } from "@/Components/Patient/models";
 import {
   getAllPatient,
   getPermittedFacility,
   listAssetBeds,
-} from "../../Redux/actions";
-import { classNames } from "../../Utils/utils";
-import { AssetData, AssetLocationObject } from "../Assets/AssetTypes";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import Page from "../Common/components/Page";
-import Loading from "../Common/Loading";
-import Pagination from "../Common/Pagination";
-import { PatientModel } from "../Patient/models";
-import { FacilityModel } from "./models";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import { uniqBy } from "lodash-es";
-import DialogModal from "../Common/Dialog";
-import { LegacyMonitorCard } from "./LegacyMonitorCard";
+} from "@/Redux/actions";
+import { classNames } from "@/Utils/utils";
 
 interface Monitor {
   patient: PatientModel;

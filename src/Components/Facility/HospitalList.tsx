@@ -1,3 +1,20 @@
+import { navigate } from "raviger";
+import { lazy, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+
+import CountBlock from "@/CAREUI/display/Count";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+import { FACILITY_TYPES } from "@/Common/constants";
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import useFilters from "@/Common/hooks/useFilters";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import Page from "@/Components/Common/components/Page";
+import ExportMenu from "@/Components/Common/Export";
+import { FacilityCard } from "@/Components/Facility/FacilityCard";
+import FacilityFilter from "@/Components/Facility/FacilityFilter";
+import { FacilityModel } from "@/Components/Facility/models";
+import SearchInput from "@/Components/Form/SearchInput";
 import {
   downloadFacility,
   downloadFacilityCapacity,
@@ -7,24 +24,7 @@ import {
   getLocalBody,
   getPermittedFacilities,
   getState,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CountBlock from "../../CAREUI/display/Count";
-import ExportMenu from "../Common/Export";
-import { FACILITY_TYPES } from "../../Common/constants";
-import { FacilityCard } from "./FacilityCard";
-import FacilityFilter from "./FacilityFilter";
-import { FacilityModel } from "./models";
-import Page from "../Common/components/Page";
-import SearchInput from "../Form/SearchInput";
-
-import { navigate } from "raviger";
-import useFilters from "../../Common/hooks/useFilters";
-import { useTranslation } from "react-i18next";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+} from "@/Redux/actions";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

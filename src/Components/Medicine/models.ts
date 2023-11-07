@@ -1,4 +1,4 @@
-import { PerformedByModel } from "../HCX/misc";
+import { PerformedByModel } from "@/Components/HCX/misc";
 
 interface BasePrescription {
   readonly id: string;

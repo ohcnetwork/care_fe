@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { BedSelect } from "../../Common/BedSelect";
-import { BedModel } from "../../Facility/models";
-import { AssetData } from "../AssetTypes";
-import * as Notification from "../../../Utils/Notifications.js";
-import { Submit } from "../../Common/components/ButtonV2";
-import { FieldLabel } from "../../Form/FormFields/FormField";
-import request from "../../../Utils/request/request";
-import routes from "../../../Redux/api";
-import useQuery from "../../../Utils/request/useQuery";
+
+import { AssetData } from "@/Components/Assets/AssetTypes";
+import { BedSelect } from "@/Components/Common/BedSelect";
+import { Submit } from "@/Components/Common/components/ButtonV2";
+import { BedModel } from "@/Components/Facility/models";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import routes from "@/Redux/api";
+import * as Notification from "@/Utils/Notifications.js";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 const saveLink = async (assetId: string, bedId: string) => {
   await request(routes.createAssetBed, {

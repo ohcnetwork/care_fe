@@ -1,14 +1,15 @@
 import { navigate } from "raviger";
-import { FACILITY_TYPES } from "../../../Common/constants";
-import useMergeState from "../../../Common/hooks/useMergeState";
-import useConfig from "../../../Common/hooks/useConfig";
-import FiltersSlideover from "../../../CAREUI/interactive/FiltersSlideover";
 import { useTranslation } from "react-i18next";
-import StateAutocompleteFormField from "../../Common/StateAutocompleteFormField";
-import { FieldChangeEvent } from "../../Form/FormFields/Utils";
-import DistrictAutocompleteFormField from "../../Common/DistrictAutocompleteFormField";
-import LocalBodyAutocompleteFormField from "../../Common/LocalBodyAutocompleteFormField";
-import { SelectFormField } from "../../Form/FormFields/SelectFormField";
+
+import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
+import { FACILITY_TYPES } from "@/Common/constants";
+import useConfig from "@/Common/hooks/useConfig";
+import useMergeState from "@/Common/hooks/useMergeState";
+import DistrictAutocompleteFormField from "@/Components/Common/DistrictAutocompleteFormField";
+import LocalBodyAutocompleteFormField from "@/Components/Common/LocalBodyAutocompleteFormField";
+import StateAutocompleteFormField from "@/Components/Common/StateAutocompleteFormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
 
 const clearFilterState = {
   state: "",

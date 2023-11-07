@@ -1,16 +1,17 @@
+import { startCase, camelCase } from "lodash-es";
 import { navigate } from "raviger";
 import { useState } from "react";
-import { SampleTestModel } from "./models";
 import { useDispatch } from "react-redux";
-import { SAMPLE_TEST_STATUS } from "../../Common/constants";
-import { patchSample } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications";
-import UpdateStatusDialog from "./UpdateStatusDialog";
-import { startCase, camelCase } from "lodash-es";
-import { formatDateTime } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import RelativeDateUserMention from "../Common/RelativeDateUserMention";
+
+import { SAMPLE_TEST_STATUS } from "@/Common/constants";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import RelativeDateUserMention from "@/Components/Common/RelativeDateUserMention";
+import { SampleTestModel } from "@/Components/Patient/models";
+import UpdateStatusDialog from "@/Components/Patient/UpdateStatusDialog";
+import { patchSample } from "@/Redux/actions";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
+import { formatDateTime } from "@/Utils/utils";
 
 interface SampleDetailsProps {
   facilityId: number;

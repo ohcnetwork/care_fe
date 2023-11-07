@@ -1,5 +1,5 @@
-import useBreakpoints from "../../Common/hooks/useBreakpoints";
-import { getVitalsCanvasSizeAndDuration } from "./utils";
+import useBreakpoints from "@/Common/hooks/useBreakpoints";
+import { getVitalsCanvasSizeAndDuration } from "@/Components/VitalsMonitor/utils";
 
 export default function useVitalsAspectRatioConfig(
   breakpointsMap: Parameters<typeof useBreakpoints<number | undefined>>[0]

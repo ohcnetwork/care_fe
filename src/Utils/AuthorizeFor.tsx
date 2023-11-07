@@ -1,4 +1,4 @@
-import { UserRole } from "../Common/constants";
+import { UserRole } from "@/Common/constants";
 
 export type AuthorizedForCB = (userType: UserRole) => boolean;
 export type AuthorizedElementProps = {

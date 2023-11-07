@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { HCXActions } from "../../Redux/actions";
-import * as Notifications from "../../Utils/Notifications";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import InsuranceDetailsBuilder from "./InsuranceDetailsBuilder";
-import { HCXPolicyModel } from "./models";
-import HCXPolicyValidator from "./validators";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/Components/Common/components/ButtonV2";
+import InsuranceDetailsBuilder from "@/Components/HCX/InsuranceDetailsBuilder";
+import { HCXPolicyModel } from "@/Components/HCX/models";
+import HCXPolicyValidator from "@/Components/HCX/validators";
+import { HCXActions } from "@/Redux/actions";
+import * as Notifications from "@/Utils/Notifications";
 
 interface Props {
   patient: string;

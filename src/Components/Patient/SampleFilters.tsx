@@ -1,20 +1,21 @@
+import { navigate } from "raviger";
 import { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+
+import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
 import {
   SAMPLE_TEST_STATUS,
   SAMPLE_TEST_RESULT,
   SAMPLE_TYPE_CHOICES,
-} from "../../Common/constants";
-import { navigate } from "raviger";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { FacilityModel } from "../Facility/models";
-import { getAnyFacility } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
-import useMergeState from "../../Common/hooks/useMergeState";
-import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
-import CircularProgress from "../Common/components/CircularProgress";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
+} from "@/Common/constants";
+import useMergeState from "@/Common/hooks/useMergeState";
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import { FacilitySelect } from "@/Components/Common/FacilitySelect";
+import { FacilityModel } from "@/Components/Facility/models";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import { getAnyFacility } from "@/Redux/actions";
 
 const clearFilterState = {
   status: "",

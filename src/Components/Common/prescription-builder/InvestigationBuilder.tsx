@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  listInvestigationGroups,
-  listInvestigations,
-} from "../../../Redux/actions";
-import { PrescriptionDropdown } from "./PrescriptionDropdown";
-import { PrescriptionMultiDropdown } from "./PrescriptionMultiselect";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { PrescriptionDropdown } from "@/Components/Common/prescription-builder/PrescriptionDropdown";
+import { PrescriptionMultiDropdown } from "@/Components/Common/prescription-builder/PrescriptionMultiselect";
+import { listInvestigationGroups, listInvestigations } from "@/Redux/actions";
 export type InvestigationType = {
   type?: string[];
   repetitive?: boolean;

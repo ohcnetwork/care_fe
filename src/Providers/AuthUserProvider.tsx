@@ -1,11 +1,12 @@
 import { useEffect } from "react";
-import { AuthUserContext } from "../Common/hooks/useAuthUser";
-import Loading from "../Components/Common/Loading";
-import routes from "../Redux/api";
-import useQuery from "../Utils/request/useQuery";
-import { LocalStorageKeys } from "../Common/constants";
-import request from "../Utils/request/request";
-import useConfig from "../Common/hooks/useConfig";
+
+import { LocalStorageKeys } from "@/Common/constants";
+import { AuthUserContext } from "@/Common/hooks/useAuthUser";
+import useConfig from "@/Common/hooks/useConfig";
+import Loading from "@/Components/Common/Loading";
+import routes from "@/Redux/api";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 interface Props {
   children: React.ReactNode;

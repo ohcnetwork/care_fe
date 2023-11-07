@@ -1,6 +1,7 @@
-import CareIcon from "../icons/CareIcon";
-import { classNames } from "../../Utils/utils";
 import { RefObject, useRef, useState, useEffect } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { classNames } from "@/Utils/utils";
 
 type InputProps = {
   id?: string;

@@ -1,6 +1,7 @@
 import { lazy } from "react";
-import { ConsultationTabProps } from "./index";
-import { PrimaryParametersPlot } from "../Consultations/PrimaryParametersPlot";
+
+import { ConsultationTabProps } from "@/Components/Facility/ConsultationDetails/index";
+import { PrimaryParametersPlot } from "@/Components/Facility/Consultations/PrimaryParametersPlot";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 

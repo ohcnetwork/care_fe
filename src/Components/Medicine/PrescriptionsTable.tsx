@@ -1,20 +1,24 @@
 import { useState } from "react";
-import ResponsiveMedicineTable from "./ResponsiveMedicineTables";
-import { formatDateTime } from "../../Utils/utils";
-import { Prescription } from "./models";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import SlideOver from "../../CAREUI/interactive/SlideOver";
-import MedicineAdministration from "./MedicineAdministration";
-import DiscontinuePrescription from "./DiscontinuePrescription";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import AdministerMedicine from "./AdministerMedicine";
-import DialogModal from "../Common/Dialog";
-import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import { useTranslation } from "react-i18next";
-import useSlug from "../../Common/hooks/useSlug";
-import useQuery from "../../Utils/request/useQuery";
-import MedicineRoutes from "./routes";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import SlideOver from "@/CAREUI/interactive/SlideOver";
+import useSlug from "@/Common/hooks/useSlug";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/Components/Common/components/ButtonV2";
+import DialogModal from "@/Components/Common/Dialog";
+import AdministerMedicine from "@/Components/Medicine/AdministerMedicine";
+import DiscontinuePrescription from "@/Components/Medicine/DiscontinuePrescription";
+import MedicineAdministration from "@/Components/Medicine/MedicineAdministration";
+import { Prescription } from "@/Components/Medicine/models";
+import PrescriptionDetailCard from "@/Components/Medicine/PrescriptionDetailCard";
+import ResponsiveMedicineTable from "@/Components/Medicine/ResponsiveMedicineTables";
+import MedicineRoutes from "@/Components/Medicine/routes";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDateTime } from "@/Utils/utils";
 
 interface Props {
   is_prn?: boolean;

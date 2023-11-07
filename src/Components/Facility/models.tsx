@@ -1,8 +1,11 @@
-import { AssignedToObjectModel } from "../Patient/models";
-import { ProcedureType } from "../Common/prescription-builder/ProcedureBuilder";
-import { NormalPrescription, PRNPrescription } from "../Medicine/models";
-import { AssetData } from "../Assets/AssetTypes";
-import { UserBareMinimum } from "../Users/models";
+import { AssetData } from "@/Components/Assets/AssetTypes";
+import { ProcedureType } from "@/Components/Common/prescription-builder/ProcedureBuilder";
+import {
+  NormalPrescription,
+  PRNPrescription,
+} from "@/Components/Medicine/models";
+import { AssignedToObjectModel } from "@/Components/Patient/models";
+import { UserBareMinimum } from "@/Components/Users/models";
 
 export interface LocalBodyModel {
   name: string;

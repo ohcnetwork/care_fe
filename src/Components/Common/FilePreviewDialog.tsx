@@ -1,9 +1,10 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { classNames } from "../../Utils/utils";
-import CircularProgress from "./components/CircularProgress";
-import { useTranslation } from "react-i18next";
-import { StateInterface } from "../Patient/FileUpload";
 import { Dispatch, Fragment, ReactNode, SetStateAction } from "react";
+import { useTranslation } from "react-i18next";
+
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import { StateInterface } from "@/Components/Patient/FileUpload";
+import { classNames } from "@/Utils/utils";
 
 export const zoom_values = [
   "h-1/6 w-1/6 my-40",

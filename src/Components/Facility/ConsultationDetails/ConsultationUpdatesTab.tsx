@@ -1,18 +1,23 @@
 import { lazy, useEffect, useState } from "react";
-import { ConsultationTabProps } from "./index";
-import { AssetBedModel, AssetClass, AssetData } from "../../Assets/AssetTypes";
 import { useDispatch } from "react-redux";
-import { getPermittedFacility, listAssetBeds } from "../../../Redux/actions";
-import { BedModel, FacilityModel } from "../models";
-import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
-import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
-import useVitalsAspectRatioConfig from "../../VitalsMonitor/useVitalsAspectRatioConfig";
-import { DISCHARGE_REASONS, SYMPTOM_CHOICES } from "../../../Common/constants";
-import PrescriptionsTable from "../../Medicine/PrescriptionsTable";
-import Chip from "../../../CAREUI/display/Chip";
-import { formatAge, formatDate, formatDateTime } from "../../../Utils/utils";
-import ReadMore from "../../Common/components/Readmore";
-import { DailyRoundsList } from "../Consultations/DailyRoundsList";
+
+import Chip from "@/CAREUI/display/Chip";
+import { DISCHARGE_REASONS, SYMPTOM_CHOICES } from "@/Common/constants";
+import {
+  AssetBedModel,
+  AssetClass,
+  AssetData,
+} from "@/Components/Assets/AssetTypes";
+import ReadMore from "@/Components/Common/components/Readmore";
+import { ConsultationTabProps } from "@/Components/Facility/ConsultationDetails/index";
+import { DailyRoundsList } from "@/Components/Facility/Consultations/DailyRoundsList";
+import { BedModel, FacilityModel } from "@/Components/Facility/models";
+import PrescriptionsTable from "@/Components/Medicine/PrescriptionsTable";
+import HL7PatientVitalsMonitor from "@/Components/VitalsMonitor/HL7PatientVitalsMonitor";
+import useVitalsAspectRatioConfig from "@/Components/VitalsMonitor/useVitalsAspectRatioConfig";
+import VentilatorPatientVitalsMonitor from "@/Components/VitalsMonitor/VentilatorPatientVitalsMonitor";
+import { getPermittedFacility, listAssetBeds } from "@/Redux/actions";
+import { formatAge, formatDate, formatDateTime } from "@/Utils/utils";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 

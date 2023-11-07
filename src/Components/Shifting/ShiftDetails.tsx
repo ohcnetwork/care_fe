@@ -1,27 +1,27 @@
-import * as Notification from "../../Utils/Notifications.js";
+import QRCode from "qrcode.react";
+import { Link, navigate } from "raviger";
+import { lazy, useCallback, useState } from "react";
+import { CopyToClipboard } from "react-copy-to-clipboard";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
 
+import RecordMeta from "@/CAREUI/display/RecordMeta";
 import {
   GENDER_TYPES,
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
   TEST_TYPE_CHOICES,
-} from "../../Common/constants";
-import { Link, navigate } from "raviger";
-import { lazy, useCallback, useState } from "react";
-import { deleteShiftRecord, getShiftDetails } from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+} from "@/Common/constants";
+import useConfig from "@/Common/hooks/useConfig";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import CommentSection from "@/Components/Shifting/CommentsSection";
+import { deleteShiftRecord, getShiftDetails } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+import { formatAge, formatDateTime } from "@/Utils/utils";
 
-import ButtonV2 from "../Common/components/ButtonV2";
-import CommentSection from "./CommentsSection";
-import ConfirmDialog from "../Common/ConfirmDialog.js";
-import { CopyToClipboard } from "react-copy-to-clipboard";
-import Page from "../Common/components/Page";
-import QRCode from "qrcode.react";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import { formatAge, formatDateTime } from "../../Utils/utils";
-import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
-import { useTranslation } from "react-i18next";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

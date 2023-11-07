@@ -1,12 +1,13 @@
 import { lazy, useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { CURRENT_HEALTH_CHANGE, SYMPTOM_CHOICES } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getConsultationDailyRoundsDetails } from "../../Redux/actions";
-import { DailyRoundsModel } from "./models";
-import Page from "../Common/components/Page";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { formatDateTime } from "../../Utils/utils";
+
+import { CURRENT_HEALTH_CHANGE, SYMPTOM_CHOICES } from "@/Common/constants";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import { DailyRoundsModel } from "@/Components/Patient/models";
+import { getConsultationDailyRoundsDetails } from "@/Redux/actions";
+import { formatDateTime } from "@/Utils/utils";
 const Loading = lazy(() => import("../Common/Loading"));
 const symptomChoices = [...SYMPTOM_CHOICES];
 const currentHealthChoices = [...CURRENT_HEALTH_CHANGE];

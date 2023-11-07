@@ -1,8 +1,9 @@
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { getAllFacilities, getPermittedFacilities } from "../../Redux/actions";
-import AutoCompleteAsync from "../Form/AutoCompleteAsync";
-import { FacilityModel } from "../Facility/models";
+
+import { FacilityModel } from "@/Components/Facility/models";
+import AutoCompleteAsync from "@/Components/Form/AutoCompleteAsync";
+import { getAllFacilities, getPermittedFacilities } from "@/Redux/actions";
 
 interface FacilitySelectProps {
   name: string;

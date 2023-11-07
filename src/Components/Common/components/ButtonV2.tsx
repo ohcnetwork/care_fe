@@ -1,9 +1,10 @@
-import AuthorizedChild from "../../../CAREUI/misc/AuthorizedChild";
-import { AuthorizedElementProps } from "../../../Utils/AuthorizeFor";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
 import { Link } from "raviger";
-import { classNames } from "../../../Utils/utils";
 import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
+import { AuthorizedElementProps } from "@/Utils/AuthorizeFor";
+import { classNames } from "@/Utils/utils";
 
 export type ButtonSize = "small" | "default" | "large";
 export type ButtonShape = "square" | "circle";

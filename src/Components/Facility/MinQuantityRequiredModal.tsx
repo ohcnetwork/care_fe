@@ -1,15 +1,16 @@
 import { useCallback, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import DialogModal from "@/Components/Common/Dialog";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
 import {
   updateMinQuantity,
   getAnyFacility,
   getMinQuantityOfItem,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import ButtonV2 from "../Common/components/ButtonV2";
-import DialogModal from "../Common/Dialog";
-import TextFormField from "../Form/FormFields/TextFormField";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
 
 const initForm = {
   id: "",

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Error } from "./Notifications";
+
+import { Error } from "@/Utils/Notifications";
 
 const useRecorder = () => {
   const [audioURL, setAudioURL] = useState("");

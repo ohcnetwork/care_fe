@@ -1,7 +1,10 @@
-import MultiSelectMenuV2 from "../MultiSelectMenuV2";
-import SelectMenuV2 from "../SelectMenuV2";
-import FormField from "./FormField";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
+import FormField from "@/Components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/Components/Form/FormFields/Utils";
+import MultiSelectMenuV2 from "@/Components/Form/MultiSelectMenuV2";
+import SelectMenuV2 from "@/Components/Form/SelectMenuV2";
 
 type OptionCallback<T, R> = (option: T) => R;
 

@@ -1,5 +1,5 @@
-import { classNames, formatCurrency, formatDateTime } from "../../Utils/utils";
-import { HCXClaimModel } from "../HCX/models";
+import { HCXClaimModel } from "@/Components/HCX/models";
+import { classNames, formatCurrency, formatDateTime } from "@/Utils/utils";
 
 interface IProps {
   claim: HCXClaimModel;

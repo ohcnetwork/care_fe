@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { FormFieldBaseProps } from "../Form/FormFields/Utils";
-import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "./components/ButtonV2";
-import { classNames } from "../../Utils/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import RangeAutocompleteFormField from "@/Components/Form/FormFields/RangeAutocompleteFormField";
+import { FormFieldBaseProps } from "@/Components/Form/FormFields/Utils";
+import { classNames } from "@/Utils/utils";
 
 type TemperatureUnit = "celsius" | "fahrenheit";
 

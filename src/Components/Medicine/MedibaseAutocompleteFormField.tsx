@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
-import Switch from "../../CAREUI/interactive/Switch";
-import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
-import { listMedibaseMedicines } from "../../Redux/actions";
-import { Autocomplete } from "../Form/FormFields/Autocomplete";
-import FormField from "../Form/FormFields/FormField";
+
+import Switch from "@/CAREUI/interactive/Switch";
+import { useAsyncOptions } from "@/Common/hooks/useAsyncOptions";
+import { Autocomplete } from "@/Components/Form/FormFields/Autocomplete";
+import FormField from "@/Components/Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
-} from "../Form/FormFields/Utils";
-import { MedibaseMedicine } from "./models";
+} from "@/Components/Form/FormFields/Utils";
+import { MedibaseMedicine } from "@/Components/Medicine/models";
+import { listMedibaseMedicines } from "@/Redux/actions";
 
 export default function MedibaseAutocompleteFormField(
   props: FormFieldBaseProps<MedibaseMedicine>

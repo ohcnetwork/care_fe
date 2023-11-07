@@ -1,20 +1,17 @@
+import { navigate } from "raviger";
 import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  getPatientNotes,
-  addPatientNote,
-  getPatient,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import PageTitle from "../Common/PageTitle";
-import Pagination from "../Common/Pagination";
-import { navigate } from "raviger";
-import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
-import Loading from "../Common/Loading";
-import { formatDateTime } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+
+import { RESULTS_PER_PAGE_LIMIT } from "@/Common/constants";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Loading from "@/Components/Common/Loading";
+import PageTitle from "@/Components/Common/PageTitle";
+import Pagination from "@/Components/Common/Pagination";
+import { getPatientNotes, addPatientNote, getPatient } from "@/Redux/actions";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications.js";
+import { formatDateTime } from "@/Utils/utils";
 
 interface PatientNotesProps {
   patientId: any;

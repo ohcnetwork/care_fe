@@ -1,19 +1,19 @@
-import Auth from "./Auth.json";
-import Asset from "./Asset.json";
-import Common from "./Common.json";
-import Consultation from "./Consultation.json";
-import Entities from "./Entities.json";
-import Facility from "./Facility.json";
-import Hub from "./Hub.json";
-import ErrorPages from "./ErrorPages.json";
-import Shifting from "./Shifting.json";
-import Notifications from "./Notifications.json";
-import ExternalResult from "./ExternalResult.json";
-import CoverImageEdit from "./CoverImageEdit.json";
-import Resource from "./Resource.json";
-import SortOptions from "./SortOptions.json";
-import Bed from "./Bed.json";
-import Medicine from "./Medicine.json";
+import Asset from "@/Locale/en/Asset.json";
+import Auth from "@/Locale/en/Auth.json";
+import Bed from "@/Locale/en/Bed.json";
+import Common from "@/Locale/en/Common.json";
+import Consultation from "@/Locale/en/Consultation.json";
+import CoverImageEdit from "@/Locale/en/CoverImageEdit.json";
+import Entities from "@/Locale/en/Entities.json";
+import ErrorPages from "@/Locale/en/ErrorPages.json";
+import ExternalResult from "@/Locale/en/ExternalResult.json";
+import Facility from "@/Locale/en/Facility.json";
+import Hub from "@/Locale/en/Hub.json";
+import Medicine from "@/Locale/en/Medicine.json";
+import Notifications from "@/Locale/en/Notifications.json";
+import Resource from "@/Locale/en/Resource.json";
+import Shifting from "@/Locale/en/Shifting.json";
+import SortOptions from "@/Locale/en/SortOptions.json";
 
 export default {
   ...Auth,

@@ -1,21 +1,21 @@
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
-import { classNames, formatAge, formatDateTime } from "../../Utils/utils";
+import { useDrag, useDrop } from "react-dnd";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import useConfig from "@/Common/hooks/useConfig";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import { ExportButton } from "@/Components/Common/Export";
 import {
   completeTransfer,
   downloadShiftRequests,
   listShiftRequests,
-} from "../../Redux/actions";
-import { useDrag, useDrop } from "react-dnd";
-
-import ButtonV2 from "../Common/components/ButtonV2";
-import ConfirmDialog from "../Common/ConfirmDialog";
-import { navigate } from "raviger";
-import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
-import { useTranslation } from "react-i18next";
-import { ExportButton } from "../Common/Export";
-import dayjs from "../../Utils/dayjs";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+} from "@/Redux/actions";
+import dayjs from "@/Utils/dayjs";
+import { classNames, formatAge, formatDateTime } from "@/Utils/utils";
 
 const limit = 14;
 

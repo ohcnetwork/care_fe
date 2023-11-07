@@ -1,5 +1,5 @@
-import { CSSTransition as ReactCSSTransition } from "react-transition-group";
 import { createContext, useContext, useEffect, useRef } from "react";
+import { CSSTransition as ReactCSSTransition } from "react-transition-group";
 
 type TransitionContextProps = {
   parent: {

@@ -1,17 +1,18 @@
+import { navigate } from "raviger";
 import { useState, useEffect, lazy, SyntheticEvent } from "react";
 import { useDispatch } from "react-redux";
+
+import { Submit, Cancel } from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
 import {
   createFacilityAssetLocation,
   getAnyFacility,
   getFacilityAssetLocation,
   updateFacilityAssetLocation,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import { navigate } from "raviger";
-import { Submit, Cancel } from "../Common/components/ButtonV2";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import Page from "../Common/components/Page";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

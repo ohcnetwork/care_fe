@@ -1,16 +1,12 @@
 import { lazy, useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  getPatient,
-  getInvestigation,
-  getConsultation,
-} from "../../Redux/actions";
-import { ConsultationModel } from "./models";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { PatientModel } from "../Patient/models";
 
-import { GENDER_TYPES } from "../../Common/constants";
-import { formatAge, formatDate, formatDateTime } from "../../Utils/utils";
+import { GENDER_TYPES } from "@/Common/constants";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import { ConsultationModel } from "@/Components/Facility/models";
+import { PatientModel } from "@/Components/Patient/models";
+import { getPatient, getInvestigation, getConsultation } from "@/Redux/actions";
+import { formatAge, formatDate, formatDateTime } from "@/Utils/utils";
 const Loading = lazy(() => import("../Common/Loading"));
 
 const TreatmentSummary = (props: any) => {

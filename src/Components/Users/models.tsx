@@ -1,5 +1,9 @@
-import { UserRole } from "../../Common/constants";
-import { DistrictModel, LocalBodyModel, StateModel } from "../Facility/models";
+import { UserRole } from "@/Common/constants";
+import {
+  DistrictModel,
+  LocalBodyModel,
+  StateModel,
+} from "@/Components/Facility/models";
 
 interface HomeFacilityObjectModel {
   id?: string;

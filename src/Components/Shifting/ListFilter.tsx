@@ -1,31 +1,30 @@
-import {
-  BREATHLESSNESS_LEVEL,
-  DISEASE_STATUS,
-  SHIFTING_FILTER_ORDER,
-} from "../../Common/constants";
-import { DateRange } from "../Common/DateRangeInputV2";
+import dayjs from "dayjs";
+import { navigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+
+import FiltersSlideover from "@/CAREUI/interactive/FiltersSlideover";
 import {
   SHIFTING_CHOICES_PEACETIME,
   SHIFTING_CHOICES_WARTIME,
-} from "../../Common/constants";
-import { getAnyFacility, getUserList } from "../../Redux/actions";
-import CircularProgress from "../Common/components/CircularProgress";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import DateRangeFormField from "../Form/FormFields/DateRangeFormField";
-import FiltersSlideover from "../../CAREUI/interactive/FiltersSlideover";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { navigate } from "raviger";
-import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
-import useMergeState from "../../Common/hooks/useMergeState";
-import { useTranslation } from "react-i18next";
-import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
-import { dateQueryString, parsePhoneNumber } from "../../Utils/utils";
-import dayjs from "dayjs";
+  BREATHLESSNESS_LEVEL,
+  DISEASE_STATUS,
+  SHIFTING_FILTER_ORDER,
+} from "@/Common/constants";
+import useConfig from "@/Common/hooks/useConfig";
+import useMergeState from "@/Common/hooks/useMergeState";
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import { DateRange } from "@/Components/Common/DateRangeInputV2";
+import { FacilitySelect } from "@/Components/Common/FacilitySelect";
+import UserAutocompleteFormField from "@/Components/Common/UserAutocompleteFormField";
+import DateRangeFormField from "@/Components/Form/FormFields/DateRangeFormField";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import { getAnyFacility, getUserList } from "@/Redux/actions";
+import { dateQueryString, parsePhoneNumber } from "@/Utils/utils";
 
 const clearFilterState = {
   origin_facility: "",

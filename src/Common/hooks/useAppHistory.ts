@@ -1,9 +1,10 @@
 import { navigate } from "raviger";
 import { useContext } from "react";
+
 import {
   HistoryContext,
   ResetHistoryContext,
-} from "../../Providers/HistoryAPIProvider";
+} from "@/Providers/HistoryAPIProvider";
 
 export default function useAppHistory() {
   const history = useContext(HistoryContext);

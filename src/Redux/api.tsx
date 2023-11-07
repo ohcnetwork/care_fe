@@ -1,4 +1,4 @@
-import { IConfig } from "../Common/hooks/useConfig";
+import { IConfig } from "@/Common/hooks/useConfig";
 import {
   IAadhaarOtp,
   IAadhaarOtpTBody,
@@ -16,7 +16,7 @@ import {
   IgetAbhaCardTBody,
   IinitiateAbdmAuthenticationTBody,
   IpartialUpdateHealthFacilityTBody,
-} from "../Components/ABDM/models";
+} from "@/Components/ABDM/models";
 import {
   AssetBedBody,
   AssetBedModel,
@@ -26,13 +26,7 @@ import {
   AssetServiceUpdate,
   AssetTransaction,
   AssetUpdate,
-} from "../Components/Assets/AssetTypes";
-import {
-  ConsultationModel,
-  FacilityModel,
-  LocationModel,
-  WardModel,
-} from "../Components/Facility/models";
+} from "@/Components/Assets/AssetTypes";
 import {
   IDeleteExternalResult,
   IExternalResult,
@@ -40,11 +34,17 @@ import {
   ILocalBodies,
   ILocalBodyByDistrict,
   IPartialUpdateExternalResult,
-} from "../Components/ExternalResult/models";
-import { UserModel } from "../Components/Users/models";
-import { PaginatedResponse } from "../Utils/request/types";
-import { PatientModel } from "../Components/Patient/models";
-import { IComment, IResource } from "../Components/Resource/models";
+} from "@/Components/ExternalResult/models";
+import {
+  ConsultationModel,
+  FacilityModel,
+  LocationModel,
+  WardModel,
+} from "@/Components/Facility/models";
+import { PatientModel } from "@/Components/Patient/models";
+import { IComment, IResource } from "@/Components/Resource/models";
+import { UserModel } from "@/Components/Users/models";
+import { PaginatedResponse } from "@/Utils/request/types";
 
 /**
  * A fake function that returns an empty object casted to type T

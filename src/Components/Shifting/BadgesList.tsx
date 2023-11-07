@@ -1,9 +1,9 @@
-import { getAnyFacility, getUserList } from "../../Redux/actions";
 import { useEffect, useState } from "react";
-
-import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
-import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+
+import { SHIFTING_FILTER_ORDER } from "@/Common/constants";
+import { getAnyFacility, getUserList } from "@/Redux/actions";
 
 export default function BadgesList(props: any) {
   const { qParams, FilterBadges } = props;

@@ -1,16 +1,17 @@
 import { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
-import { LinePlot } from "./components/LinePlot";
-import { StackedLinePlot } from "./components/StackedLinePlot";
-import Pagination from "../../Common/Pagination";
-import { PAGINATION_LIMIT } from "../../../Common/constants";
-import { formatDateTime } from "../../../Utils/utils";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import { PainDiagrams } from "./PainDiagrams";
-import PageTitle from "../../Common/PageTitle";
-import dayjs from "../../../Utils/dayjs";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { PAGINATION_LIMIT } from "@/Common/constants";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import PageTitle from "@/Components/Common/PageTitle";
+import Pagination from "@/Components/Common/Pagination";
+import { LinePlot } from "@/Components/Facility/Consultations/components/LinePlot";
+import { StackedLinePlot } from "@/Components/Facility/Consultations/components/StackedLinePlot";
+import { PainDiagrams } from "@/Components/Facility/Consultations/PainDiagrams";
+import { dailyRoundsAnalyse } from "@/Redux/actions";
+import dayjs from "@/Utils/dayjs";
+import { formatDateTime } from "@/Utils/utils";
 
 interface PrimaryParametersPlotProps {
   facilityId: string;

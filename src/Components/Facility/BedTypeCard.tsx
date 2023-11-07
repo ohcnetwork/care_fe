@@ -1,16 +1,17 @@
-import { useState } from "react";
-import * as Notification from "../../Utils/Notifications";
 import { animated, config, useSpring } from "@react-spring/web";
-import { useDispatch } from "react-redux";
-import { deleteCapacity } from "../../Redux/actions";
-import { BedCapacity } from "./BedCapacity";
-import DialogModal from "../Common/Dialog";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import ConfirmDialog from "../Common/ConfirmDialog";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import DialogModal from "@/Components/Common/Dialog";
+import { BedCapacity } from "@/Components/Facility/BedCapacity";
+import { deleteCapacity } from "@/Redux/actions";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications";
 
 interface BedTypeCardProps {
   facilityId?: string;

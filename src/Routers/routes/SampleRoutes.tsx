@@ -1,8 +1,8 @@
-import { SampleDetails } from "../../Components/Patient/SampleDetails";
-import SampleReport from "../../Components/Patient/SamplePreview";
-import { SampleTest } from "../../Components/Patient/SampleTest";
-import SampleViewAdmin from "../../Components/Patient/SampleViewAdmin";
-import { DetailRoute, RouteParams } from "../types";
+import { SampleDetails } from "@/Components/Patient/SampleDetails";
+import SampleReport from "@/Components/Patient/SamplePreview";
+import { SampleTest } from "@/Components/Patient/SampleTest";
+import SampleViewAdmin from "@/Components/Patient/SampleViewAdmin";
+import { DetailRoute, RouteParams } from "@/Routers/types";
 
 export default {
   "/sample": () => <SampleViewAdmin />,

@@ -1,6 +1,6 @@
-import CareIcon, { IconName } from "../icons/CareIcon";
-import { ButtonVariant } from "../../Components/Common/components/ButtonV2";
-import { classNames } from "../../Utils/utils";
+import CareIcon, { IconName } from "@/CAREUI/icons/CareIcon";
+import { ButtonVariant } from "@/Components/Common/components/ButtonV2";
+import { classNames } from "@/Utils/utils";
 
 interface Props {
   size?: "small" | "medium" | "large";

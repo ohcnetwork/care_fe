@@ -1,18 +1,19 @@
+import { useDispatch } from "react-redux";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useConfig from "@/Common/hooks/useConfig";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import FormField, { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
 import {
   FieldChangeEvent,
   FormFieldBaseProps,
   useFormFieldPropsResolver,
-} from "../Form/FormFields/Utils";
-import FormField, { FieldLabel } from "../Form/FormFields/FormField";
-import { HCXPolicyModel } from "./models";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { useDispatch } from "react-redux";
-import { HCXActions } from "../../Redux/actions";
-import { classNames } from "../../Utils/utils";
-import InsurerAutocomplete from "./InsurerAutocomplete";
-import useConfig from "../../Common/hooks/useConfig";
+} from "@/Components/Form/FormFields/Utils";
+import InsurerAutocomplete from "@/Components/HCX/InsurerAutocomplete";
+import { HCXPolicyModel } from "@/Components/HCX/models";
+import { HCXActions } from "@/Redux/actions";
+import { classNames } from "@/Utils/utils";
 
 type Props = FormFieldBaseProps<HCXPolicyModel[]> & { gridView?: boolean };
 

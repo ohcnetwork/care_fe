@@ -1,22 +1,19 @@
-import { ChangeEventHandler, useEffect, useState } from "react";
-import useDragAndDrop from "../../Utils/useDragAndDrop";
-import { sleep } from "../../Utils/utils";
-import { FacilityModel } from "../Facility/models";
-import { AssetData } from "./AssetTypes";
-import * as Notification from "../../Utils/Notifications.js";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
 import { Link } from "raviger";
+import { ChangeEventHandler, useEffect, useState } from "react";
 import readXlsxFile from "read-excel-file";
-import {
-  LocalStorageKeys,
-  XLSXAssetImportSchema,
-} from "../../Common/constants";
-import { parseCsvFile } from "../../Utils/utils";
-import useConfig from "../../Common/hooks/useConfig";
-import DialogModal from "../Common/Dialog";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
+
+import { LocalStorageKeys, XLSXAssetImportSchema } from "@/Common/constants";
+import useConfig from "@/Common/hooks/useConfig";
+import { AssetData } from "@/Components/Assets/AssetTypes";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import DialogModal from "@/Components/Common/Dialog";
+import { FacilityModel } from "@/Components/Facility/models";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import routes from "@/Redux/api";
+import * as Notification from "@/Utils/Notifications.js";
+import useQuery from "@/Utils/request/useQuery";
+import useDragAndDrop from "@/Utils/useDragAndDrop";
+import { parseCsvFile, sleep } from "@/Utils/utils";
 
 interface Props {
   open: boolean;

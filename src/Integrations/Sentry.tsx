@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import useConfig from "../Common/hooks/useConfig";
+
+import useConfig from "@/Common/hooks/useConfig";
 
 interface Props {
   disabled?: boolean;

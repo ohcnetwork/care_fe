@@ -1,6 +1,6 @@
-import { ConsultationModel } from "../Facility/models";
-import { PatientModel } from "../Patient/models";
-import { PerformedByModel } from "./misc";
+import { ConsultationModel } from "@/Components/Facility/models";
+import { PerformedByModel } from "@/Components/HCX/misc";
+import { PatientModel } from "@/Components/Patient/models";
 
 export type HCXPriority = "Immediate" | "Normal" | "Deferred";
 

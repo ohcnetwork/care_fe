@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { DOCTOR_SPECIALIZATION } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { createDoctor, getDoctor, listDoctor } from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import ButtonV2, { Cancel } from "../Common/components/ButtonV2";
-import { FieldErrorText, FieldLabel } from "../Form/FormFields/FormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { FieldChangeEventHandler } from "../Form/FormFields/Utils";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import { DoctorModal, OptionsType } from "./models";
+
+import { DOCTOR_SPECIALIZATION } from "@/Common/constants";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2, { Cancel } from "@/Components/Common/components/ButtonV2";
+import { DoctorModal, OptionsType } from "@/Components/Facility/models";
+import {
+  FieldErrorText,
+  FieldLabel,
+} from "@/Components/Form/FormFields/FormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEventHandler } from "@/Components/Form/FormFields/Utils";
+import SelectMenuV2 from "@/Components/Form/SelectMenuV2";
+import { createDoctor, getDoctor, listDoctor } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
 
 interface DoctorCapacityProps extends DoctorModal {
   facilityId: string;

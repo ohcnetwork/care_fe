@@ -1,19 +1,23 @@
-import { useTranslation } from "react-i18next";
-import { Prescription } from "../models";
 import { useState } from "react";
-import useQuery from "../../../Utils/request/useQuery";
-import MedicineRoutes from "../routes";
-import { classNames, formatDateTime } from "../../../Utils/utils";
-import useSlug from "../../../Common/hooks/useSlug";
-import DiscontinuePrescription from "../DiscontinuePrescription";
-import AdministerMedicine from "../AdministerMedicine";
-import DialogModal from "../../Common/Dialog";
-import PrescriptionDetailCard from "../PrescriptionDetailCard";
-import ButtonV2, { Cancel, Submit } from "../../Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import EditPrescriptionForm from "../EditPrescriptionForm";
-import AdministrationEventSeperator from "./AdministrationEventSeperator";
-import AdministrationEventCell from "./AdministrationEventCell";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useSlug from "@/Common/hooks/useSlug";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/Components/Common/components/ButtonV2";
+import DialogModal from "@/Components/Common/Dialog";
+import AdministerMedicine from "@/Components/Medicine/AdministerMedicine";
+import DiscontinuePrescription from "@/Components/Medicine/DiscontinuePrescription";
+import EditPrescriptionForm from "@/Components/Medicine/EditPrescriptionForm";
+import AdministrationEventCell from "@/Components/Medicine/MedicineAdministrationSheet/AdministrationEventCell";
+import AdministrationEventSeperator from "@/Components/Medicine/MedicineAdministrationSheet/AdministrationEventSeperator";
+import { Prescription } from "@/Components/Medicine/models";
+import PrescriptionDetailCard from "@/Components/Medicine/PrescriptionDetailCard";
+import MedicineRoutes from "@/Components/Medicine/routes";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, formatDateTime } from "@/Utils/utils";
 
 interface Props {
   prescription: Prescription;

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { listFacilityAssetLocation } from "../../Redux/actions";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import AutocompleteMultiSelectFormField from "../Form/FormFields/AutocompleteMultiselect";
+
+import AutocompleteFormField from "@/Components/Form/FormFields/Autocomplete";
+import AutocompleteMultiSelectFormField from "@/Components/Form/FormFields/AutocompleteMultiselect";
+import { listFacilityAssetLocation } from "@/Redux/actions";
 interface LocationSelectProps {
   name: string;
   disabled?: boolean;

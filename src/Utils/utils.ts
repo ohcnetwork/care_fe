@@ -1,11 +1,12 @@
 import { navigate } from "raviger";
+
 import {
   AREACODES,
   IN_LANDLINE_AREA_CODES,
   LocalStorageKeys,
-} from "../Common/constants";
-import phoneCodesJson from "../Common/static/countryPhoneAndFlags.json";
-import dayjs from "./dayjs";
+} from "@/Common/constants";
+import phoneCodesJson from "@/Common/static/countryPhoneAndFlags.json";
+import dayjs from "@/Utils/dayjs";
 
 interface ApacheParams {
   age: number;

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { getNotifications } from "../../Redux/actions";
-import Page from "../Common/components/Page";
-import Loading from "../Common/Loading";
-import { formatDateTime } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useDispatch } from "react-redux";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import Page from "@/Components/Common/components/Page";
+import Loading from "@/Components/Common/Loading";
+import { getNotifications } from "@/Redux/actions";
+import { formatDateTime } from "@/Utils/utils";
 
 export const NoticeBoard = () => {
   const dispatch: any = useDispatch();

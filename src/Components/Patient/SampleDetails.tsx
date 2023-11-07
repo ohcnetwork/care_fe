@@ -1,19 +1,18 @@
-import { FlowModel, SampleTestModel } from "./models";
-import { GENDER_TYPES, TEST_TYPE_CHOICES } from "../../Common/constants";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useState } from "react";
-
-import ButtonV2 from "../Common/components/ButtonV2";
-import Card from "../../CAREUI/display/Card";
-import { FileUpload } from "./FileUpload";
-import Page from "../Common/components/Page";
 import { startCase, camelCase, capitalize } from "lodash-es";
-import { formatAge, formatDateTime } from "../../Utils/utils";
-import { getTestSample } from "../../Redux/actions";
-
 import { navigate } from "raviger";
+import { lazy, useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
-import { DetailRoute } from "../../Routers/types";
+
+import Card from "@/CAREUI/display/Card";
+import { GENDER_TYPES, TEST_TYPE_CHOICES } from "@/Common/constants";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import { FileUpload } from "@/Components/Patient/FileUpload";
+import { FlowModel, SampleTestModel } from "@/Components/Patient/models";
+import { getTestSample } from "@/Redux/actions";
+import { DetailRoute } from "@/Routers/types";
+import { formatAge, formatDateTime } from "@/Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

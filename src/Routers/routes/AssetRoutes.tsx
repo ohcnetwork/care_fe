@@ -1,7 +1,7 @@
-import AssetConfigure from "../../Components/Assets/AssetConfigure";
-import AssetManage from "../../Components/Assets/AssetManage";
-import AssetsList from "../../Components/Assets/AssetsList";
-import AssetCreate from "../../Components/Facility/AssetCreate";
+import AssetConfigure from "@/Components/Assets/AssetConfigure";
+import AssetManage from "@/Components/Assets/AssetManage";
+import AssetsList from "@/Components/Assets/AssetsList";
+import AssetCreate from "@/Components/Facility/AssetCreate";
 
 export default {
   "/assets": () => <AssetsList />,

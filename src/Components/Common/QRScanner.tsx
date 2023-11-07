@@ -1,10 +1,11 @@
-import * as Notification from "../../Utils/Notifications.js";
-
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import DialogModal from "./Dialog";
-import QrReader from "react-qr-reader";
-import TextFormField from "../Form/FormFields/TextFormField.js";
 import { useState } from "react";
+import QrReader from "react-qr-reader";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import DialogModal from "@/Components/Common/Dialog";
+import * as Notification from "@/Utils/Notifications.js";
+
+import TextFormField from "@/Components/Form/FormFields/TextFormField.js";
 
 interface IQRScannerModalProps {
   show: boolean;

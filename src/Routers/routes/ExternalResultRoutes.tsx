@@ -1,8 +1,8 @@
-import ExternalResultUpload from "../../Components/ExternalResult/ExternalResultUpload";
-import ResultItem from "../../Components/ExternalResult/ResultItem";
-import ResultList from "../../Components/ExternalResult/ResultList";
-import ResultUpdate from "../../Components/ExternalResult/ResultUpdate";
-import { DetailRoute } from "../types";
+import ExternalResultUpload from "@/Components/ExternalResult/ExternalResultUpload";
+import ResultItem from "@/Components/ExternalResult/ResultItem";
+import ResultList from "@/Components/ExternalResult/ResultList";
+import ResultUpdate from "@/Components/ExternalResult/ResultUpdate";
+import { DetailRoute } from "@/Routers/types";
 
 export default {
   "/external_results": () => <ResultList />,

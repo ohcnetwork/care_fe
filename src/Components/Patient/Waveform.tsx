@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { LinePlot } from "../Facility/Consultations/components/LinePlot";
+
+import { LinePlot } from "@/Components/Facility/Consultations/components/LinePlot";
 
 export type WaveformType = {
   data: string;

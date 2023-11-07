@@ -1,11 +1,12 @@
+import { Redirect } from "raviger";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { ShiftCreate } from "../../Components/Patient/ShiftCreate";
-import ShiftDetails from "../../Components/Shifting/ShiftDetails";
-import { ShiftDetailsUpdate } from "../../Components/Shifting/ShiftDetailsUpdate";
-import ListView from "../../Components/Shifting/ListView";
-import BoardView from "../../Components/Shifting/BoardView";
-import { Redirect } from "raviger";
+
+import { ShiftCreate } from "@/Components/Patient/ShiftCreate";
+import BoardView from "@/Components/Shifting/BoardView";
+import ListView from "@/Components/Shifting/ListView";
+import ShiftDetails from "@/Components/Shifting/ShiftDetails";
+import { ShiftDetailsUpdate } from "@/Components/Shifting/ShiftDetailsUpdate";
 
 const getDefaultView = () =>
   localStorage.getItem("defaultShiftView") === "list" ? "list" : "board";

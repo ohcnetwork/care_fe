@@ -1,7 +1,7 @@
-import Auth from "./Auth.json";
-import Common from "./Common.json";
-import Entities from "./Entities.json";
-import Facility from "./Facility.json";
+import Auth from "@/Locale/ml/Auth.json";
+import Common from "@/Locale/ml/Common.json";
+import Entities from "@/Locale/ml/Entities.json";
+import Facility from "@/Locale/ml/Facility.json";
 
 export default {
   ...Auth,

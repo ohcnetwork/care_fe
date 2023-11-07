@@ -1,4 +1,3 @@
-import ReactEchartsCore from "echarts-for-react/lib/core";
 import { BarChart, LineChart } from "echarts/charts";
 import {
   DataZoomComponent,
@@ -10,9 +9,9 @@ import {
   VisualMapComponent,
   VisualMapPiecewiseComponent,
 } from "echarts/components";
-
 import * as echarts from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
+import ReactEchartsCore from "echarts-for-react/lib/core";
 echarts.use([
   BarChart,
   LineChart,

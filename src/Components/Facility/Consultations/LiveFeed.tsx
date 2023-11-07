@@ -1,28 +1,26 @@
+import { AxiosError } from "axios";
 import { useEffect, useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import useKeyboardShortcut from "use-keyboard-shortcut";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { getCameraPTZ } from "@/Common/constants";
+import { useFeedPTZ } from "@/Common/hooks/useFeedPTZ";
+import useFullscreen from "@/Common/hooks/useFullscreen";
+import { StreamStatus, useMSEMediaPlayer } from "@/Common/hooks/useMSEplayer";
+import useWindowDimensions from "@/Common/hooks/useWindowDimensions";
+import { BedSelect } from "@/Components/Common/BedSelect";
+import Page from "@/Components/Common/components/Page";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import { FeedCameraPTZHelpButton } from "@/Components/Facility/Consultations/Feed";
+import { BedModel } from "@/Components/Facility/models";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
 import {
   listAssetBeds,
   partialUpdateAssetBed,
   deleteAssetBed,
-} from "../../../Redux/actions";
-import { getCameraPTZ } from "../../../Common/constants";
-import {
-  StreamStatus,
-  useMSEMediaPlayer,
-} from "../../../Common/hooks/useMSEplayer";
-import { useFeedPTZ } from "../../../Common/hooks/useFeedPTZ";
-import * as Notification from "../../../Utils/Notifications.js";
-import { FeedCameraPTZHelpButton } from "./Feed";
-import { AxiosError } from "axios";
-import { BedSelect } from "../../Common/BedSelect";
-import { BedModel } from "../models";
-import useWindowDimensions from "../../../Common/hooks/useWindowDimensions";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import Page from "../../Common/components/Page";
-import ConfirmDialog from "../../Common/ConfirmDialog";
-import { FieldLabel } from "../../Form/FormFields/FormField";
-import useFullscreen from "../../../Common/hooks/useFullscreen";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
 
 const LiveFeed = (props: any) => {
   const middlewareHostname =

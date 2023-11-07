@@ -1,6 +1,7 @@
 import { lazy } from "react";
-import { NeurologicalTable } from "../Consultations/NeurologicalTables";
-import { ConsultationTabProps } from "./index";
+
+import { ConsultationTabProps } from "@/Components/Facility/ConsultationDetails/index";
+import { NeurologicalTable } from "@/Components/Facility/Consultations/NeurologicalTables";
 
 const PageTitle = lazy(() => import("../../Common/PageTitle"));
 

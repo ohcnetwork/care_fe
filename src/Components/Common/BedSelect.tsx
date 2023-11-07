@@ -1,9 +1,10 @@
 import { useCallback } from "react";
-import { useDispatch } from "react-redux";
-import { listFacilityBeds } from "../../Redux/actions";
-import { BedModel } from "../Facility/models";
-import AutoCompleteAsync from "../Form/AutoCompleteAsync";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
+
+import { BedModel } from "@/Components/Facility/models";
+import AutoCompleteAsync from "@/Components/Form/AutoCompleteAsync";
+import { listFacilityBeds } from "@/Redux/actions";
 
 interface BedSelectProps {
   name: string;

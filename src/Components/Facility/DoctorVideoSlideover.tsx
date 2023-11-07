@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import SlideOver from "../../CAREUI/interactive/SlideOver";
-import { getFacilityUsers } from "../../Redux/actions";
-import { UserAssignedModel } from "../Users/models";
-import { SkillObjectModel } from "../Users/models";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { relativeTime } from "../../Utils/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import SlideOver from "@/CAREUI/interactive/SlideOver";
+import { UserAssignedModel, SkillObjectModel } from "@/Components/Users/models";
+import { getFacilityUsers } from "@/Redux/actions";
+import { relativeTime } from "@/Utils/utils";
 
 export default function DoctorVideoSlideover(props: {
   show: boolean;

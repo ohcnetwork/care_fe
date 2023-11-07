@@ -1,19 +1,16 @@
 import { useCallback, useEffect, useReducer, useState } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import {
-  createCapacity,
-  listCapacity,
-  getCapacityBed,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import { CapacityModal, OptionsType } from "./models";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import useConfig from "../../Common/hooks/useConfig";
-import { getBedTypes } from "../../Common/constants";
+
+import { getBedTypes } from "@/Common/constants";
+import useConfig from "@/Common/hooks/useConfig";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import { CapacityModal, OptionsType } from "@/Components/Facility/models";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import { createCapacity, listCapacity, getCapacityBed } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
 
 interface BedCapacityProps extends CapacityModal {
   facilityId: string;

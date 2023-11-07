@@ -1,10 +1,11 @@
-import { Prescription } from "./models";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
-import ReadMore from "../Common/components/Readmore";
-import ButtonV2 from "../Common/components/ButtonV2";
 import { useTranslation } from "react-i18next";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import ReadMore from "@/Components/Common/components/Readmore";
+import { Prescription } from "@/Components/Medicine/models";
+import { classNames } from "@/Utils/utils";
 
 export default function PrescriptionDetailCard({
   prescription,

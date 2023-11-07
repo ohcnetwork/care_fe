@@ -1,9 +1,12 @@
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
 import { HTMLInputTypeAttribute, forwardRef, useState } from "react";
 
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import FormField from "./FormField";
-import { classNames } from "../../../Utils/utils";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import FormField from "@/Components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/Components/Form/FormFields/Utils";
+import { classNames } from "@/Utils/utils";
 
 export type TextFormFieldProps = FormFieldBaseProps<string> & {
   placeholder?: string;

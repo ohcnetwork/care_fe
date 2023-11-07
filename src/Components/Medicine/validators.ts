@@ -1,6 +1,9 @@
-import { FieldError, RequiredFieldValidator } from "../Form/FieldValidators";
-import { FormErrors } from "../Form/Utils";
-import { Prescription } from "./models";
+import {
+  FieldError,
+  RequiredFieldValidator,
+} from "@/Components/Form/FieldValidators";
+import { FormErrors } from "@/Components/Form/Utils";
+import { Prescription } from "@/Components/Medicine/models";
 
 export const PrescriptionFormValidator = () => {
   return (form: Prescription): FormErrors<Prescription> => {

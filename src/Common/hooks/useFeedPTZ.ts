@@ -1,4 +1,4 @@
-import { operateAsset } from "../../Redux/actions";
+import { operateAsset } from "@/Redux/actions";
 
 export interface IAsset {
   id: string;

@@ -1,4 +1,7 @@
-import { ChannelOptions, VitalsWaveformBase } from "./types";
+import {
+  ChannelOptions,
+  VitalsWaveformBase,
+} from "@/Components/VitalsMonitor/types";
 
 /**
  * Maps a value from one range to another.

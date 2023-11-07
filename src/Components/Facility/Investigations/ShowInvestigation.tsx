@@ -1,17 +1,17 @@
+import { chain, set } from "lodash-es";
+import { navigate } from "raviger";
 import { useCallback, useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
+
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import PageTitle from "@/Components/Common/PageTitle";
+import InvestigationTable from "@/Components/Facility/Investigations/InvestigationTable";
 import {
   editInvestigation,
   getInvestigation,
   getPatient,
-} from "../../../Redux/actions";
-import PageTitle from "../../Common/PageTitle";
-import InvestigationTable from "./InvestigationTable";
-import { chain } from "lodash-es";
-import { set } from "lodash-es";
-import { navigate } from "raviger";
-import * as Notification from "../../../Utils/Notifications.js";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 

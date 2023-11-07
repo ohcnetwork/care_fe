@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
-import { LinePlot } from "./components/LinePlot";
-import Pagination from "../../Common/Pagination";
-import { PAGINATION_LIMIT } from "../../../Common/constants";
-import { formatDateTime } from "../../../Utils/utils";
-import BinaryChronologicalChart from "./components/BinaryChronologicalChart";
+
+import { PAGINATION_LIMIT } from "@/Common/constants";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import Pagination from "@/Components/Common/Pagination";
+import BinaryChronologicalChart from "@/Components/Facility/Consultations/components/BinaryChronologicalChart";
+import { LinePlot } from "@/Components/Facility/Consultations/components/LinePlot";
+import { dailyRoundsAnalyse } from "@/Redux/actions";
+import { formatDateTime } from "@/Utils/utils";
 
 /*
 interface ModalityType {

@@ -1,7 +1,8 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { classNames } from "../../Utils/utils";
-import CareIcon from "../icons/CareIcon";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { classNames } from "@/Utils/utils";
 
 export type SlideFromEdges = "left" | "top" | "right" | "bottom";
 

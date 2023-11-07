@@ -1,9 +1,10 @@
-import * as Notification from "../../Utils/Notifications";
 import { useNavigate } from "raviger";
 import { useContext, useEffect } from "react";
-import { handleSignOut } from "../../Utils/utils";
 import { useTranslation } from "react-i18next";
-import { AuthUserContext } from "../../Common/hooks/useAuthUser";
+
+import { AuthUserContext } from "@/Common/hooks/useAuthUser";
+import * as Notification from "@/Utils/Notifications";
+import { handleSignOut } from "@/Utils/utils";
 
 export default function SessionExpired() {
   const isAuthenticated = !!useContext(AuthUserContext);

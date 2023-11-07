@@ -1,14 +1,15 @@
 import { navigate } from "raviger";
 import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { getDailyReport } from "../../../Redux/actions";
-import Pagination from "../../Common/Pagination";
-import { DailyRoundsModel } from "../../Patient/models";
-import VirtualNursingAssistantLogUpdateCard from "./DailyRounds/VirtualNursingAssistantLogUpdateCard";
-import DefaultLogUpdateCard from "./DailyRounds/DefaultLogUpdateCard";
 import { useTranslation } from "react-i18next";
-import LoadingLogUpdateCard from "./DailyRounds/LoadingCard";
+import { useDispatch } from "react-redux";
+
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import Pagination from "@/Components/Common/Pagination";
+import DefaultLogUpdateCard from "@/Components/Facility/Consultations/DailyRounds/DefaultLogUpdateCard";
+import LoadingLogUpdateCard from "@/Components/Facility/Consultations/DailyRounds/LoadingCard";
+import VirtualNursingAssistantLogUpdateCard from "@/Components/Facility/Consultations/DailyRounds/VirtualNursingAssistantLogUpdateCard";
+import { DailyRoundsModel } from "@/Components/Patient/models";
+import { getDailyReport } from "@/Redux/actions";
 
 export const DailyRoundsList = (props: any) => {
   const { t } = useTranslation();

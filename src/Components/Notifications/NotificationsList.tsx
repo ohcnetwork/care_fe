@@ -1,29 +1,30 @@
+import * as Sentry from "@sentry/browser";
 import { navigate } from "raviger";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import SlideOver from "@/CAREUI/interactive/SlideOver";
+import { NOTIFICATION_EVENTS } from "@/Common/constants";
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import {
+  ShrinkedSidebarItem,
+  SidebarItem,
+} from "@/Components/Common/Sidebar/SidebarItem";
+import Spinner from "@/Components/Common/Spinner";
+import SelectMenuV2 from "@/Components/Form/SelectMenuV2";
 import {
   getNotifications,
   markNotificationAsRead,
   getUserPnconfig,
   updateUserPnconfig,
   getPublicKey,
-} from "../../Redux/actions";
-import Spinner from "../Common/Spinner";
-import { NOTIFICATION_EVENTS } from "../../Common/constants";
-import { Error } from "../../Utils/Notifications.js";
-import { classNames, formatDateTime } from "../../Utils/utils";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import * as Sentry from "@sentry/browser";
-import {
-  ShrinkedSidebarItem,
-  SidebarItem,
-} from "../Common/Sidebar/SidebarItem";
-import SlideOver from "../../CAREUI/interactive/SlideOver";
-import ButtonV2 from "../Common/components/ButtonV2";
-import SelectMenuV2 from "../Form/SelectMenuV2";
-import { useTranslation } from "react-i18next";
-import CircularProgress from "../Common/components/CircularProgress";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+} from "@/Redux/actions";
+import { Error } from "@/Utils/Notifications.js";
+import { classNames, formatDateTime } from "@/Utils/utils";
 
 const RESULT_LIMIT = 14;
 

@@ -1,7 +1,8 @@
 import { useContext } from "react";
-import { FieldError, FieldValidator } from "../FieldValidators";
-import { FormContext } from "../FormContext";
-import { FormDetails } from "../Utils";
+
+import { FieldError, FieldValidator } from "@/Components/Form/FieldValidators";
+import { FormContext } from "@/Components/Form/FormContext";
+import { FormDetails } from "@/Components/Form/Utils";
 
 export type FieldChangeEvent<T> = { name: string; value: T };
 export type FieldChangeEventHandler<T> = (event: FieldChangeEvent<T>) => void;

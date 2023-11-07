@@ -1,6 +1,9 @@
-import { Type } from "../../Redux/api";
-import { PaginatedResponse } from "../../Utils/request/types";
-import { MedicineAdministrationRecord, Prescription } from "./models";
+import {
+  MedicineAdministrationRecord,
+  Prescription,
+} from "@/Components/Medicine/models";
+import { Type } from "@/Redux/api";
+import { PaginatedResponse } from "@/Utils/request/types";
 
 const MedicineRoutes = {
   listPrescriptions: {

@@ -1,7 +1,7 @@
-import { AppConfigContext } from "../Common/hooks/useConfig";
-import Loading from "../Components/Common/Loading";
-import routes from "../Redux/api";
-import useQuery from "../Utils/request/useQuery";
+import { AppConfigContext } from "@/Common/hooks/useConfig";
+import Loading from "@/Components/Common/Loading";
+import routes from "@/Redux/api";
+import useQuery from "@/Utils/request/useQuery";
 
 interface Props {
   children: React.ReactNode;

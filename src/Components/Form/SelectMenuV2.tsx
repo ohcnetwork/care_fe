@@ -1,9 +1,10 @@
 import { Listbox } from "@headlessui/react";
-import { DropdownTransition } from "../Common/components/HelperComponents";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { dropdownOptionClassNames } from "./MultiSelectMenuV2";
-import { classNames } from "../../Utils/utils";
 import { ReactNode } from "react";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { DropdownTransition } from "@/Components/Common/components/HelperComponents";
+import { dropdownOptionClassNames } from "@/Components/Form/MultiSelectMenuV2";
+import { classNames } from "@/Utils/utils";
 
 type OptionCallback<T, R> = (option: T) => R;
 

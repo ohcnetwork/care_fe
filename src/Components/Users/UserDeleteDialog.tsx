@@ -1,4 +1,4 @@
-import ConfirmDialog from "../Common/ConfirmDialog";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
 
 interface ConfirmDialogProps {
   name: string;

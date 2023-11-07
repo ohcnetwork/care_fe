@@ -1,6 +1,7 @@
 import { Context, createContext } from "react";
-import { FieldError, FieldValidator } from "./FieldValidators";
-import { FormDetails } from "./Utils";
+
+import { FieldError, FieldValidator } from "@/Components/Form/FieldValidators";
+import { FormDetails } from "@/Components/Form/Utils";
 
 export type FormContextValue<T extends FormDetails> = (
   name: keyof T,

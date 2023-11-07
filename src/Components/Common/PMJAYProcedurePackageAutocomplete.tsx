@@ -1,11 +1,11 @@
-import { useAsyncOptions } from "../../Common/hooks/useAsyncOptions";
-import { listPMJYPackages } from "../../Redux/actions";
-import { Autocomplete } from "../Form/FormFields/Autocomplete";
-import FormField from "../Form/FormFields/FormField";
+import { useAsyncOptions } from "@/Common/hooks/useAsyncOptions";
+import { Autocomplete } from "@/Components/Form/FormFields/Autocomplete";
+import FormField from "@/Components/Form/FormFields/FormField";
 import {
   FormFieldBaseProps,
   useFormFieldPropsResolver,
-} from "../Form/FormFields/Utils";
+} from "@/Components/Form/FormFields/Utils";
+import { listPMJYPackages } from "@/Redux/actions";
 
 type PMJAYPackageItem = {
   name?: string;

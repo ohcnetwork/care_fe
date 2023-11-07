@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import AutocompleteFormField from "./Autocomplete";
-import { FormFieldBaseProps } from "./Utils";
-import { classNames } from "../../../Utils/utils";
-import ButtonV2 from "../../Common/components/ButtonV2";
+
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import AutocompleteFormField from "@/Components/Form/FormFields/Autocomplete";
+import { FormFieldBaseProps } from "@/Components/Form/FormFields/Utils";
+import { classNames } from "@/Utils/utils";
 
 interface Threshold {
   value: number;

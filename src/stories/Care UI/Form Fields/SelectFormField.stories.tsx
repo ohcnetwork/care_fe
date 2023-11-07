@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
-import { SelectFormField } from "../../../Components/Form/FormFields/SelectFormField";
+
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
 
 const meta: Meta<typeof SelectFormField> = {
   component: SelectFormField,

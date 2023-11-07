@@ -1,16 +1,16 @@
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../Common/components/ButtonV2";
-import PMJAYProcedurePackageAutocomplete from "../Common/PMJAYProcedurePackageAutocomplete";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import FormField, { FieldLabel } from "../Form/FormFields/FormField";
-import TextFormField from "../Form/FormFields/TextFormField";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import PMJAYProcedurePackageAutocomplete from "@/Components/Common/PMJAYProcedurePackageAutocomplete";
+import AutocompleteFormField from "@/Components/Form/FormFields/Autocomplete";
+import FormField, { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
 import {
   FieldChangeEvent,
   FormFieldBaseProps,
   useFormFieldPropsResolver,
-} from "../Form/FormFields/Utils";
-import { ITEM_CATEGORIES } from "./constants";
-import { HCXItemModel } from "./models";
+} from "@/Components/Form/FormFields/Utils";
+import { ITEM_CATEGORIES } from "@/Components/HCX/constants";
+import { HCXItemModel } from "@/Components/HCX/models";
 
 type Props = FormFieldBaseProps<HCXItemModel[]>;
 

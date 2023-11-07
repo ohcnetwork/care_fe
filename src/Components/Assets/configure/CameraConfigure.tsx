@@ -1,12 +1,13 @@
 import { SyntheticEvent } from "react";
-import { AssetData } from "../AssetTypes";
-import LiveFeed from "../../Facility/Consultations/LiveFeed";
-import { BedSelect } from "../../Common/BedSelect";
-import { BedModel } from "../../Facility/models";
-import { getCameraConfig } from "../../../Utils/transformUtils";
-import { Submit } from "../../Common/components/ButtonV2";
-import TextFormField from "../../Form/FormFields/TextFormField";
-import Card from "../../../CAREUI/display/Card";
+
+import Card from "@/CAREUI/display/Card";
+import { AssetData } from "@/Components/Assets/AssetTypes";
+import { BedSelect } from "@/Components/Common/BedSelect";
+import { Submit } from "@/Components/Common/components/ButtonV2";
+import LiveFeed from "@/Components/Facility/Consultations/LiveFeed";
+import { BedModel } from "@/Components/Facility/models";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { getCameraConfig } from "@/Utils/transformUtils";
 
 interface CameraConfigureProps {
   asset: AssetData;

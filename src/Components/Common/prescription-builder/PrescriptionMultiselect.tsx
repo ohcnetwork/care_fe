@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { classNames } from "../../../Utils/utils";
+
+import { classNames } from "@/Utils/utils";
 
 export function PrescriptionMultiDropdown(props: {
   options: string[];

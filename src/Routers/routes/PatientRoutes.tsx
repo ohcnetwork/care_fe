@@ -1,11 +1,11 @@
-import InvestigationReports from "../../Components/Facility/Investigations/Reports";
-import { FileUpload } from "../../Components/Patient/FileUpload";
-import { PatientManager } from "../../Components/Patient/ManagePatients";
-import { PatientHome } from "../../Components/Patient/PatientHome";
-import PatientNotes from "../../Components/Patient/PatientNotes";
-import { PatientRegister } from "../../Components/Patient/PatientRegister";
-import { DetailRoute } from "../types";
-import DeathReport from "../../Components/DeathReport/DeathReport";
+import DeathReport from "@/Components/DeathReport/DeathReport";
+import InvestigationReports from "@/Components/Facility/Investigations/Reports";
+import { FileUpload } from "@/Components/Patient/FileUpload";
+import { PatientManager } from "@/Components/Patient/ManagePatients";
+import { PatientHome } from "@/Components/Patient/PatientHome";
+import PatientNotes from "@/Components/Patient/PatientNotes";
+import { PatientRegister } from "@/Components/Patient/PatientRegister";
+import { DetailRoute } from "@/Routers/types";
 
 export default {
   "/patients": () => <PatientManager />,

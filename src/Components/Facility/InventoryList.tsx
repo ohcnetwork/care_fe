@@ -1,14 +1,14 @@
-import { useState, useCallback, useEffect, lazy } from "react";
-
 import { navigate } from "raviger";
+import { useState, useCallback, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getInventorySummary, getAnyFacility } from "../../Redux/actions";
-import Pagination from "../Common/Pagination";
-import { classNames } from "../../Utils/utils";
-import Page from "../Common/components/Page";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
+
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import Pagination from "@/Components/Common/Pagination";
+import { getInventorySummary, getAnyFacility } from "@/Redux/actions";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import { classNames } from "@/Utils/utils";
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function InventoryList(props: any) {

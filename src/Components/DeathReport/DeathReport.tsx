@@ -1,19 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useState } from "react";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { GENDER_TYPES } from "../../Common/constants";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import DateFormField from "../Form/FormFields/DateFormField";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import { formatDateTime } from "../../Utils/utils";
-import Page from "../Common/components/Page";
-import Form from "../Form/Form";
-import { useTranslation } from "react-i18next";
-import { navigate } from "raviger";
 import dayjs from "dayjs";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+import { navigate } from "raviger";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { GENDER_TYPES } from "@/Common/constants";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import Page from "@/Components/Common/components/Page";
+import Form from "@/Components/Form/Form";
+import DateFormField from "@/Components/Form/FormFields/DateFormField";
+import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import routes from "@/Redux/api";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDateTime } from "@/Utils/utils";
 
 type DeathReport = {
   name?: string;

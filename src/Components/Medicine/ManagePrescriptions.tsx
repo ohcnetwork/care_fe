@@ -1,9 +1,10 @@
 import { useTranslation } from "react-i18next";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import ButtonV2 from "../Common/components/ButtonV2";
-import Page from "../Common/components/Page";
-import PrescriptionBuilder from "./PrescriptionBuilder";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import PrescriptionBuilder from "@/Components/Medicine/PrescriptionBuilder";
 
 export default function ManagePrescriptions() {
   const { t } = useTranslation();

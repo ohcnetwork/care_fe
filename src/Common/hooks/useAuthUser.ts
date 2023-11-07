@@ -1,5 +1,6 @@
 import { createContext, useContext } from "react";
-import { UserModel } from "../../Components/Users/models";
+
+import { UserModel } from "@/Components/Users/models";
 
 export const AuthUserContext = createContext<UserModel | null>(null);
 

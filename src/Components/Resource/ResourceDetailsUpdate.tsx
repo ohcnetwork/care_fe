@@ -1,24 +1,26 @@
-import * as Notification from "../../Utils/Notifications.js";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { lazy, useReducer, useState } from "react";
 import { navigate, useQueryParams } from "raviger";
-import Card from "../../CAREUI/display/Card";
-import CircularProgress from "../Common/components/CircularProgress";
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import Page from "../Common/components/Page";
-import { RESOURCE_CHOICES } from "../../Common/constants";
-import RadioFormField from "../Form/FormFields/RadioFormField";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import UserAutocompleteFormField from "../Common/UserAutocompleteFormField";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
-import { UserModel } from "../Users/models.js";
-import request from "../../Utils/request/request.js";
+import { lazy, useReducer, useState } from "react";
+
+import Card from "@/CAREUI/display/Card";
+import { RESOURCE_CHOICES } from "@/Common/constants";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import Page from "@/Components/Common/components/Page";
+import { FacilitySelect } from "@/Components/Common/FacilitySelect";
+import UserAutocompleteFormField from "@/Components/Common/UserAutocompleteFormField";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import RadioFormField from "@/Components/Form/FormFields/RadioFormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import * as Notification from "@/Utils/Notifications.js";
+import request from "@/Utils/request/request.js";
+import useQuery from "@/Utils/request/useQuery.js";
+
+import { UserModel } from "@/Components/Users/models.js";
+import routes from "@/Redux/api.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState } from "react";
-import SlideOver from "../../CAREUI/interactive/SlideOver";
-import ButtonV2 from "../../Components/Common/components/ButtonV2";
+
+import SlideOver from "@/CAREUI/interactive/SlideOver";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
 
 const meta: Meta<typeof SlideOver> = {
   component: SlideOver,

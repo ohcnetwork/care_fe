@@ -1,23 +1,23 @@
-import { lazy, useCallback, useState } from "react";
-
+import { lazy, useCallback, useState, ReactElement } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { LOCATION_BED_TYPES } from "@/Common/constants";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import Pagination from "@/Components/Common/Pagination";
+import BedDeleteDialog from "@/Components/Facility/BedDeleteDialog";
+import { BedModel } from "@/Components/Facility/models";
 import {
   getAnyFacility,
   getFacilityAssetLocation,
   listFacilityBeds,
   deleteFacilityBed,
-} from "../../Redux/actions";
-import Pagination from "../Common/Pagination";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { BedModel } from "./models";
-import { ReactElement } from "react";
-import * as Notification from "../../Utils/Notifications.js";
-import { LOCATION_BED_TYPES } from "../../Common/constants";
-import BedDeleteDialog from "./BedDeleteDialog";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import Page from "../Common/components/Page";
+} from "@/Redux/actions";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications.js";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 interface BedManagementProps {

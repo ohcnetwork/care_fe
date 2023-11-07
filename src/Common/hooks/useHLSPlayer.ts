@@ -1,5 +1,6 @@
 import ReactPlayer from "react-player";
-import { IOptions } from "./useMSEplayer";
+
+import { IOptions } from "@/Common/hooks/useMSEplayer";
 
 export const useHLSPLayer = (ref: ReactPlayer | null) => {
   const startStream = ({ onSuccess, onError }: IOptions = {}) => {

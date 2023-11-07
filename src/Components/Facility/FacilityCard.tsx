@@ -1,19 +1,21 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
 import { Link } from "raviger";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
 
-import { sendNotificationMessages } from "../../Redux/actions";
-import { FACILITY_FEATURE_TYPES } from "../../Common/constants";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import * as Notification from "../../Utils/Notifications.js";
-import Chip from "../../CAREUI/display/Chip";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { formatPhoneNumber, parsePhoneNumber } from "../../Utils/utils";
-import DialogModal from "../Common/Dialog";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import useConfig from "../../Common/hooks/useConfig";
-import { classNames } from "../../Utils/utils";
+import Chip from "@/CAREUI/display/Chip";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { FACILITY_FEATURE_TYPES } from "@/Common/constants";
+import useConfig from "@/Common/hooks/useConfig";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/Components/Common/components/ButtonV2";
+import DialogModal from "@/Components/Common/Dialog";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import { sendNotificationMessages } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+import { formatPhoneNumber, parsePhoneNumber, classNames } from "@/Utils/utils";
 
 export const FacilityCard = (props: { facility: any; userType: any }) => {
   const { facility, userType } = props;

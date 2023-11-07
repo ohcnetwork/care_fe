@@ -6,20 +6,24 @@ import {
   useRef,
   useState,
 } from "react";
-import { useDispatch } from "react-redux";
-import { deleteFacilityCoverImage } from "../../Redux/actions";
-import { Success } from "../../Utils/Notifications";
-import useDragAndDrop from "../../Utils/useDragAndDrop";
-import { sleep } from "../../Utils/utils";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import Webcam from "react-webcam";
-import { FacilityModel } from "./models";
-import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import * as Notification from "../../Utils/Notifications.js";
 import { useTranslation } from "react-i18next";
-import { LocalStorageKeys } from "../../Common/constants";
-import DialogModal from "../Common/Dialog";
+import { useDispatch } from "react-redux";
+import Webcam from "react-webcam";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { LocalStorageKeys } from "@/Common/constants";
+import useWindowDimensions from "@/Common/hooks/useWindowDimensions";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/Components/Common/components/ButtonV2";
+import DialogModal from "@/Components/Common/Dialog";
+import { FacilityModel } from "@/Components/Facility/models";
+import { deleteFacilityCoverImage } from "@/Redux/actions";
+import { Success } from "@/Utils/Notifications";
+import * as Notification from "@/Utils/Notifications.js";
+import useDragAndDrop from "@/Utils/useDragAndDrop";
+import { sleep } from "@/Utils/utils";
 interface Props {
   open: boolean;
   onClose: (() => void) | undefined;

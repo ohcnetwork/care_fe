@@ -1,34 +1,34 @@
-import * as Notification from "../../Utils/Notifications.js";
+import { navigate } from "raviger";
+import { lazy, useEffect, useReducer, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useDispatch } from "react-redux";
 
 import {
   BREATHLESSNESS_LEVEL,
   FACILITY_TYPES,
   PATIENT_CATEGORIES,
   SHIFTING_VEHICLE_CHOICES,
-} from "../../Common/constants";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { createShift, getPatient } from "../../Redux/actions";
-import { lazy, useEffect, useReducer, useState } from "react";
+} from "@/Common/constants";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import useConfig from "@/Common/hooks/useConfig";
+import { phonePreg } from "@/Common/validation";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import { FacilitySelect } from "@/Components/Common/FacilitySelect";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import PhoneNumberFormField from "@/Components/Form/FormFields/PhoneNumberFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import PatientCategorySelect from "@/Components/Patient/PatientCategorySelect";
+import { createShift, getPatient } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+import { parsePhoneNumber } from "@/Utils/utils.js";
 
-import { FacilitySelect } from "../Common/FacilitySelect";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import PatientCategorySelect from "./PatientCategorySelect";
-import PhoneNumberFormField from "../Form/FormFields/PhoneNumberFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { navigate } from "raviger";
-import { parsePhoneNumber } from "../../Utils/utils.js";
-import { phonePreg } from "../../Common/validation";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import useConfig from "../../Common/hooks/useConfig";
-import { useDispatch } from "react-redux";
-import { useTranslation } from "react-i18next";
-import Page from "../Common/components/Page.js";
-import Card from "../../CAREUI/display/Card.js";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField.js";
-import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
-import { PhoneNumberValidator } from "../Form/FieldValidators.js";
+import Card from "@/CAREUI/display/Card.js";
+import Page from "@/Components/Common/components/Page.js";
+import { PhoneNumberValidator } from "@/Components/Form/FieldValidators.js";
+import CheckBoxFormField from "@/Components/Form/FormFields/CheckBoxFormField.js";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

@@ -1,10 +1,10 @@
-import FormField from "../Form/FormFields/FormField";
-import RangeAutocompleteFormField from "../Form/FormFields/RangeAutocompleteFormField";
+import FormField from "@/Components/Form/FormFields/FormField";
+import RangeAutocompleteFormField from "@/Components/Form/FormFields/RangeAutocompleteFormField";
 import {
   FieldChangeEvent,
   FormFieldBaseProps,
   useFormFieldPropsResolver,
-} from "../Form/FormFields/Utils";
+} from "@/Components/Form/FormFields/Utils";
 
 export interface BloodPressure {
   systolic: number;

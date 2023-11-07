@@ -1,4 +1,4 @@
-import useWindowDimensions from "./useWindowDimensions";
+import useWindowDimensions from "@/Common/hooks/useWindowDimensions";
 
 type Breakpoints = "vs" | "sm" | "md" | "lg" | "xl" | "2xl" | "3xl";
 

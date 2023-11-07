@@ -1,13 +1,14 @@
-import { useEffect, useState, useMemo } from "react";
 import { Combobox } from "@headlessui/react";
 import { debounce } from "lodash-es";
-import { DropdownTransition } from "../Common/components/HelperComponents";
-import CareIcon from "../../CAREUI/icons/CareIcon";
+import { useEffect, useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { DropdownTransition } from "@/Components/Common/components/HelperComponents";
 import {
   MultiSelectOptionChip,
   dropdownOptionClassNames,
-} from "./MultiSelectMenuV2";
-import { useTranslation } from "react-i18next";
+} from "@/Components/Form/MultiSelectMenuV2";
 
 interface Props {
   name?: string;

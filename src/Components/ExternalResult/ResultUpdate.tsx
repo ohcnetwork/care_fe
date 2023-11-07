@@ -1,16 +1,18 @@
-import { useCallback, useState, useReducer, lazy } from "react";
-import * as Notification from "../../Utils/Notifications.js";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField.js";
-import CircularProgress from "../Common/components/CircularProgress.js";
-import { SelectFormField } from "../Form/FormFields/SelectFormField.js";
-import RadioFormField from "../Form/FormFields/RadioFormField.js";
 import { navigate } from "raviger";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import Page from "../Common/components/Page.js";
-import useQuery from "../../Utils/request/useQuery.js";
-import routes from "../../Redux/api.js";
-import request from "../../Utils/request/request.js";
+import { useCallback, useState, useReducer, lazy } from "react";
+
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import * as Notification from "@/Utils/Notifications.js";
+import request from "@/Utils/request/request.js";
+import useQuery from "@/Utils/request/useQuery.js";
+
+import CircularProgress from "@/Components/Common/components/CircularProgress.js";
+import Page from "@/Components/Common/components/Page.js";
+import RadioFormField from "@/Components/Form/FormFields/RadioFormField.js";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField.js";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField.js";
+import routes from "@/Redux/api.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

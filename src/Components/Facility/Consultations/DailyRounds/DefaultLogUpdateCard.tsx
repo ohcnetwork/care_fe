@@ -1,9 +1,10 @@
 import { useTranslation } from "react-i18next";
-import RecordMeta from "../../../../CAREUI/display/RecordMeta";
-import CareIcon from "../../../../CAREUI/icons/CareIcon";
-import ButtonV2 from "../../../Common/components/ButtonV2";
-import { DailyRoundsModel } from "../../../Patient/models";
-import LogUpdateCardAttribute from "./LogUpdateCardAttribute";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import LogUpdateCardAttribute from "@/Components/Facility/Consultations/DailyRounds/LogUpdateCardAttribute";
+import { DailyRoundsModel } from "@/Components/Patient/models";
 
 interface Props {
   round: DailyRoundsModel;

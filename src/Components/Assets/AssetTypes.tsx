@@ -1,6 +1,6 @@
-import { BedModel } from "../Facility/models";
-import { PerformedByModel } from "../HCX/misc";
-import { PatientModel } from "../Patient/models";
+import { BedModel } from "@/Components/Facility/models";
+import { PerformedByModel } from "@/Components/HCX/misc";
+import { PatientModel } from "@/Components/Patient/models";
 
 export interface AssetLocationObject {
   id: string;

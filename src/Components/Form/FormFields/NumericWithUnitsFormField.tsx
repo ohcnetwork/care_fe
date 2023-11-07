@@ -1,6 +1,9 @@
-import FormField from "./FormField";
-import { FormFieldBaseProps, useFormFieldPropsResolver } from "./Utils";
-import { classNames } from "../../../Utils/utils";
+import FormField from "@/Components/Form/FormFields/FormField";
+import {
+  FormFieldBaseProps,
+  useFormFieldPropsResolver,
+} from "@/Components/Form/FormFields/Utils";
+import { classNames } from "@/Utils/utils";
 
 type Props = FormFieldBaseProps<string> & {
   placeholder?: string;

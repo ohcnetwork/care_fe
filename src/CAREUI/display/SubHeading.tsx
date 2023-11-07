@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
-import CareIcon from "../icons/CareIcon";
-import RecordMeta from "./RecordMeta";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
 
 interface Props {
   title: ReactNode;

@@ -1,13 +1,12 @@
-import { classNames, formatDateTime } from "../../Utils/utils";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 import { lazy, useCallback, useState } from "react";
-
-import ButtonV2 from "../Common/components/ButtonV2";
-import Page from "../Common/components/Page";
-import { SampleReportModel } from "./models";
-
-import { sampleReport } from "../../Redux/actions";
 import { useDispatch } from "react-redux";
+
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import { SampleReportModel } from "@/Components/Patient/models";
+import { sampleReport } from "@/Redux/actions";
+import { classNames, formatDateTime } from "@/Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

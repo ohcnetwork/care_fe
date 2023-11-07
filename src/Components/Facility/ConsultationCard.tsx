@@ -1,11 +1,12 @@
 import { navigate } from "raviger";
-import { ConsultationModel } from "./models";
-import { formatDateTime } from "../../Utils/utils";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import RelativeDateUserMention from "../Common/RelativeDateUserMention";
-import useConfig from "../../Common/hooks/useConfig";
-import Chip from "../../CAREUI/display/Chip";
+
+import Chip from "@/CAREUI/display/Chip";
+import useConfig from "@/Common/hooks/useConfig";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import RelativeDateUserMention from "@/Components/Common/RelativeDateUserMention";
+import { ConsultationModel } from "@/Components/Facility/models";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import { formatDateTime } from "@/Utils/utils";
 
 interface ConsultationProps {
   itemData: ConsultationModel;

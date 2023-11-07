@@ -1,7 +1,8 @@
 import { useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { listAssets } from "../../Redux/actions";
-import AutoCompleteAsync from "../Form/AutoCompleteAsync";
+
+import AutoCompleteAsync from "@/Components/Form/AutoCompleteAsync";
+import { listAssets } from "@/Redux/actions";
 
 interface AssetSelectProps {
   name: string;

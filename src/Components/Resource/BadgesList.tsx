@@ -1,6 +1,6 @@
-import { SHIFTING_FILTER_ORDER } from "../../Common/constants";
-import routes from "../../Redux/api";
-import useQuery from "../../Utils/request/useQuery";
+import { SHIFTING_FILTER_ORDER } from "@/Common/constants";
+import routes from "@/Redux/api";
+import useQuery from "@/Utils/request/useQuery";
 
 function useFacilityQuery(facilityId: string | undefined) {
   return useQuery(routes.getAnyFacility, {

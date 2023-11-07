@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { downloadResourceRequests } from "../../Redux/actions";
 import { navigate } from "raviger";
-import { classNames } from "../../Utils/utils";
+import { useState, useEffect } from "react";
 import { useDrag, useDrop } from "react-dnd";
-import { formatDateTime } from "../../Utils/utils";
-import { ExportButton } from "../Common/Export";
-import dayjs from "../../Utils/dayjs";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+
+import { ExportButton } from "@/Components/Common/Export";
+import { downloadResourceRequests } from "@/Redux/actions";
+import routes from "@/Redux/api";
+import dayjs from "@/Utils/dayjs";
+import useQuery from "@/Utils/request/useQuery";
+import { classNames, formatDateTime } from "@/Utils/utils";
 
 const limit = 14;
 

@@ -1,19 +1,20 @@
 import { SyntheticEvent, useEffect, useState } from "react";
-import { AssetData } from "../AssetTypes";
-import * as Notification from "../../../Utils/Notifications.js";
-import MonitorConfigure from "../configure/MonitorConfigure";
-import Loading from "../../Common/Loading";
-import { checkIfValidIP } from "../../../Common/validation";
-import Card from "../../../CAREUI/display/Card";
-import { Submit } from "../../Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import TextFormField from "../../Form/FormFields/TextFormField";
-import HL7PatientVitalsMonitor from "../../VitalsMonitor/HL7PatientVitalsMonitor";
-import VentilatorPatientVitalsMonitor from "../../VitalsMonitor/VentilatorPatientVitalsMonitor";
-import useAuthUser from "../../../Common/hooks/useAuthUser";
-import request from "../../../Utils/request/request";
-import routes from "../../../Redux/api";
-import useQuery from "../../../Utils/request/useQuery";
+
+import Card from "@/CAREUI/display/Card";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import { checkIfValidIP } from "@/Common/validation";
+import { AssetData } from "@/Components/Assets/AssetTypes";
+import MonitorConfigure from "@/Components/Assets/configure/MonitorConfigure";
+import { Submit } from "@/Components/Common/components/ButtonV2";
+import Loading from "@/Components/Common/Loading";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import HL7PatientVitalsMonitor from "@/Components/VitalsMonitor/HL7PatientVitalsMonitor";
+import VentilatorPatientVitalsMonitor from "@/Components/VitalsMonitor/VentilatorPatientVitalsMonitor";
+import routes from "@/Redux/api";
+import * as Notification from "@/Utils/Notifications.js";
+import request from "@/Utils/request/request";
+import useQuery from "@/Utils/request/useQuery";
 
 interface HL7MonitorProps {
   assetId: string;

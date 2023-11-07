@@ -1,5 +1,6 @@
 import { memoize, chain, findIndex } from "lodash-es";
-import { InvestigationResponse } from "./types";
+
+import { InvestigationResponse } from "@/Components/Facility/Investigations/Reports/types";
 
 export const transformData = memoize((data: InvestigationResponse) => {
   const sessions = chain(data)

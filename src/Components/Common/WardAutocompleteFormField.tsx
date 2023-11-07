@@ -1,10 +1,11 @@
-import { useDispatch } from "react-redux";
-import { FormFieldBaseProps } from "../Form/FormFields/Utils";
-import AutocompleteFormField from "../Form/FormFields/Autocomplete";
-import { statusType, useAbortableEffect } from "../../Common/utils";
 import { useCallback, useState } from "react";
-import { getWardByLocalBody } from "../../Redux/actions";
-import { ILocalBody } from "./LocalBodyAutocompleteFormField";
+import { useDispatch } from "react-redux";
+
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import { ILocalBody } from "@/Components/Common/LocalBodyAutocompleteFormField";
+import AutocompleteFormField from "@/Components/Form/FormFields/Autocomplete";
+import { FormFieldBaseProps } from "@/Components/Form/FormFields/Utils";
+import { getWardByLocalBody } from "@/Redux/actions";
 
 export type IWard = {
   id: number;

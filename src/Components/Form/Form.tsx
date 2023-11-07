@@ -1,13 +1,22 @@
 import { isEmpty, omitBy } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
-import { classNames } from "../../Utils/utils";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { FieldValidator } from "./FieldValidators";
-import { FormContextValue, createFormContext } from "./FormContext";
-import { FieldChangeEvent } from "./FormFields/Utils";
-import { FormDetails, FormErrors, FormState, formReducer } from "./Utils";
-import { DraftSection, useAutoSaveReducer } from "../../Utils/AutoSave";
-import * as Notification from "../../Utils/Notifications";
+
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import { FieldValidator } from "@/Components/Form/FieldValidators";
+import {
+  FormContextValue,
+  createFormContext,
+} from "@/Components/Form/FormContext";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
+import {
+  FormDetails,
+  FormErrors,
+  FormState,
+  formReducer,
+} from "@/Components/Form/Utils";
+import { DraftSection, useAutoSaveReducer } from "@/Utils/AutoSave";
+import * as Notification from "@/Utils/Notifications";
+import { classNames } from "@/Utils/utils";
 
 type Props<T extends FormDetails> = {
   className?: string;

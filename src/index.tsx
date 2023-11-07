@@ -1,12 +1,14 @@
 import { createRoot } from "react-dom/client";
-import reducer from "../src/Redux/Reducer";
-import App from "./App";
-import "./i18n";
+
+import App from "@/App";
+import reducer from "@/Redux/Reducer";
+
+import "@/i18n";
 import { applyMiddleware, createStore } from "redux";
 import thunk from "redux-thunk";
 import { Provider } from "react-redux";
 import * as Sentry from "@sentry/browser";
-import "./style/index.css";
+import "@/style/index.css";
 // eslint-disable-next-line import/no-unresolved
 import { registerSW } from "virtual:pwa-register";
 

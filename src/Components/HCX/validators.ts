@@ -1,5 +1,5 @@
-import { FieldValidator } from "../Form/FieldValidators";
-import { HCXPolicyModel } from "./models";
+import { FieldValidator } from "@/Components/Form/FieldValidators";
+import { HCXPolicyModel } from "@/Components/HCX/models";
 
 const HCXPolicyValidator: FieldValidator<HCXPolicyModel> = (
   value,

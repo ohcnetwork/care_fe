@@ -1,16 +1,20 @@
 import { useCallback, useRef, useState } from "react";
-import useCanvas from "../../Common/hooks/useCanvas";
+
+import useCanvas from "@/Common/hooks/useCanvas";
 import {
   ChannelOptions,
   IVitalsComponentProps,
   VitalsValueBase as VitalsValue,
-} from "./types";
+} from "@/Components/VitalsMonitor/types";
+import {
+  getChannel,
+  getVitalsCanvasSizeAndDuration,
+} from "@/Components/VitalsMonitor/utils";
 import VentilatorDeviceClient, {
   VentilatorData,
   VentilatorVitalsWaveformData,
-} from "./VentilatorDeviceClient";
-import VentilatorVitalsRenderer from "./VentilatorWaveformsRenderer";
-import { getChannel, getVitalsCanvasSizeAndDuration } from "./utils";
+} from "@/Components/VitalsMonitor/VentilatorDeviceClient";
+import VentilatorVitalsRenderer from "@/Components/VitalsMonitor/VentilatorWaveformsRenderer";
 
 export default function useVentilatorVitalsMonitor(
   config?: IVitalsComponentProps["config"]

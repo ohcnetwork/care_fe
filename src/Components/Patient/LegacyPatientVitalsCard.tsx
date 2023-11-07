@@ -1,11 +1,12 @@
 import { ReactNode, useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { listAssetBeds, getPermittedFacility } from "../../Redux/actions";
-import { classNames } from "../../Utils/utils";
-import { AssetData } from "../Assets/AssetTypes";
-import ToolTip from "../Common/utils/Tooltip";
-import { PatientModel } from "./models";
-import Waveform, { WaveformType } from "./Waveform";
+
+import { AssetData } from "@/Components/Assets/AssetTypes";
+import ToolTip from "@/Components/Common/utils/Tooltip";
+import { PatientModel } from "@/Components/Patient/models";
+import Waveform, { WaveformType } from "@/Components/Patient/Waveform";
+import { listAssetBeds, getPermittedFacility } from "@/Redux/actions";
+import { classNames } from "@/Utils/utils";
 
 export interface IPatientVitalsCardProps {
   facilityId?: string;

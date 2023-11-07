@@ -1,5 +1,5 @@
 import axios from "axios";
-import CircularProgress from "../Common/components/CircularProgress";
+import imageCompression from "browser-image-compression";
 import {
   useCallback,
   useState,
@@ -8,37 +8,41 @@ import {
   lazy,
   ChangeEvent,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+import Webcam from "react-webcam";
+
+import RecordMeta from "@/CAREUI/display/RecordMeta";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import AuthorizedChild from "@/CAREUI/misc/AuthorizedChild";
+import { RESULTS_PER_PAGE_LIMIT } from "@/Common/constants";
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import useWindowDimensions from "@/Common/hooks/useWindowDimensions";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2, {
+  Cancel,
+  Submit,
+} from "@/Components/Common/components/ButtonV2";
+import CircularProgress from "@/Components/Common/components/CircularProgress";
+import Page from "@/Components/Common/components/Page";
+import DialogModal from "@/Components/Common/Dialog";
+import FilePreviewDialog from "@/Components/Common/FilePreviewDialog";
+import HeadedTabs from "@/Components/Common/HeadedTabs";
+import Pagination from "@/Components/Common/Pagination";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FileUploadModel } from "@/Components/Patient/models";
 import {
   viewUpload,
   retrieveUpload,
   createUpload,
   getPatient,
   editUpload,
-} from "../../Redux/actions";
-import { FileUploadModel } from "./models";
-import * as Notification from "../../Utils/Notifications.js";
-import { VoiceRecorder } from "../../Utils/VoiceRecorder";
-import Pagination from "../Common/Pagination";
-import { RESULTS_PER_PAGE_LIMIT } from "../../Common/constants";
-import imageCompression from "browser-image-compression";
-import { formatDateTime } from "../../Utils/utils";
-import { useTranslation } from "react-i18next";
-import HeadedTabs from "../Common/HeadedTabs";
-import ButtonV2, { Cancel, Submit } from "../Common/components/ButtonV2";
-import DialogModal from "../Common/Dialog";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import TextFormField from "../Form/FormFields/TextFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import RecordMeta from "../../CAREUI/display/RecordMeta";
-import Webcam from "react-webcam";
-import useWindowDimensions from "../../Common/hooks/useWindowDimensions";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import AuthorizedChild from "../../CAREUI/misc/AuthorizedChild";
-import Page from "../Common/components/Page";
-import FilePreviewDialog from "../Common/FilePreviewDialog";
-import useAuthUser from "../../Common/hooks/useAuthUser";
+} from "@/Redux/actions";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+import * as Notification from "@/Utils/Notifications.js";
+import { formatDateTime } from "@/Utils/utils";
+import { VoiceRecorder } from "@/Utils/VoiceRecorder";
 
 const Loading = lazy(() => import("../Common/Loading"));
 

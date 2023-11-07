@@ -1,7 +1,8 @@
 import { useReducer, useEffect, useRef, useState, Dispatch } from "react";
-import ButtonV2 from "../Components/Common/components/ButtonV2";
-import { FormAction, FormReducer, FormState } from "../Components/Form/Utils";
-import { relativeTime } from "./utils";
+
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import { FormAction, FormReducer, FormState } from "@/Components/Form/Utils";
+import { relativeTime } from "@/Utils/utils";
 
 type Draft = {
   timestamp: number;

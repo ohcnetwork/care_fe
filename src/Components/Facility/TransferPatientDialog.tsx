@@ -1,18 +1,17 @@
-import * as Notification from "../../Utils/Notifications.js";
-
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import { useReducer, useState } from "react";
-
-import DateFormField from "../Form/FormFields/DateFormField";
-import { DupPatientModel } from "./models";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import { OptionsType } from "../../Common/constants";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import { navigate } from "raviger";
-import { transferPatient } from "../../Redux/actions";
-import { useDispatch } from "react-redux";
-import { dateQueryString } from "../../Utils/utils.js";
 import dayjs from "dayjs";
+import { navigate } from "raviger";
+import { useReducer, useState } from "react";
+import { useDispatch } from "react-redux";
+
+import { OptionsType } from "@/Common/constants";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import { DupPatientModel } from "@/Components/Facility/models";
+import DateFormField from "@/Components/Form/FormFields/DateFormField";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import { transferPatient } from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+import { dateQueryString } from "@/Utils/utils.js";
 
 interface Props {
   patientList: Array<DupPatientModel>;

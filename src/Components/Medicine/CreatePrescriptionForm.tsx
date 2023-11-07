@@ -1,19 +1,23 @@
-import { RequiredFieldValidator } from "../Form/FieldValidators";
-import Form from "../Form/Form";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { MedicineAdministrationRecord, Prescription } from "./models";
 import { useState } from "react";
-import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
 import { useTranslation } from "react-i18next";
-import MedibaseAutocompleteFormField from "./MedibaseAutocompleteFormField";
-import dayjs from "../../Utils/dayjs";
-import { PrescriptionFormValidator } from "./validators";
-import MedicineRoutes from "./routes";
-import request from "../../Utils/request/request";
-import useSlug from "../../Common/hooks/useSlug";
-import { Success } from "../../Utils/Notifications";
+
+import useSlug from "@/Common/hooks/useSlug";
+import { RequiredFieldValidator } from "@/Components/Form/FieldValidators";
+import Form from "@/Components/Form/Form";
+import NumericWithUnitsFormField from "@/Components/Form/FormFields/NumericWithUnitsFormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import TextAreaFormField from "@/Components/Form/FormFields/TextAreaFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import MedibaseAutocompleteFormField from "@/Components/Medicine/MedibaseAutocompleteFormField";
+import {
+  MedicineAdministrationRecord,
+  Prescription,
+} from "@/Components/Medicine/models";
+import MedicineRoutes from "@/Components/Medicine/routes";
+import { PrescriptionFormValidator } from "@/Components/Medicine/validators";
+import dayjs from "@/Utils/dayjs";
+import { Success } from "@/Utils/Notifications";
+import request from "@/Utils/request/request";
 
 export default function CreatePrescriptionForm(props: {
   prescription: Prescription;

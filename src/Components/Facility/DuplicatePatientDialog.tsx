@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import DialogModal from "../Common/Dialog";
-import { DupPatientModel } from "./models";
+
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import DialogModal from "@/Components/Common/Dialog";
+import { DupPatientModel } from "@/Components/Facility/models";
 
 interface Props {
   patientList: Array<DupPatientModel>;

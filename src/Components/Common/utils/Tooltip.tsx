@@ -1,5 +1,6 @@
 import { ReactNode, useState } from "react";
-import { classNames } from "../../../Utils/utils";
+
+import { classNames } from "@/Utils/utils";
 
 interface TooltipProps {
   children: ReactNode;

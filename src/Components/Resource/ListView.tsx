@@ -1,19 +1,20 @@
-import { lazy } from "react";
 import { navigate } from "raviger";
-import { downloadResourceRequests } from "../../Redux/actions";
-import ListFilter from "./ListFilter";
-import { formatFilter } from "./Commons";
-import BadgesList from "./BadgesList";
-import { formatDateTime } from "../../Utils/utils";
-import useFilters from "../../Common/hooks/useFilters";
-import { ExportButton } from "../Common/Export";
-import ButtonV2 from "../Common/components/ButtonV2";
+import { lazy } from "react";
 import { useTranslation } from "react-i18next";
-import { AdvancedFilterButton } from "../../CAREUI/interactive/FiltersSlideover";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import dayjs from "../../Utils/dayjs";
-import useQuery from "../../Utils/request/useQuery";
-import routes from "../../Redux/api";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import { AdvancedFilterButton } from "@/CAREUI/interactive/FiltersSlideover";
+import useFilters from "@/Common/hooks/useFilters";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import { ExportButton } from "@/Components/Common/Export";
+import BadgesList from "@/Components/Resource/BadgesList";
+import { formatFilter } from "@/Components/Resource/Commons";
+import ListFilter from "@/Components/Resource/ListFilter";
+import { downloadResourceRequests } from "@/Redux/actions";
+import routes from "@/Redux/api";
+import dayjs from "@/Utils/dayjs";
+import useQuery from "@/Utils/request/useQuery";
+import { formatDateTime } from "@/Utils/utils";
 
 const Loading = lazy(() => import("../Common/Loading"));
 const PageTitle = lazy(() => import("../Common/PageTitle"));

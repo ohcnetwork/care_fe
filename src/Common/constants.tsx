@@ -1,9 +1,9 @@
-import { IConfig } from "./hooks/useConfig";
-import { PatientCategory } from "../Components/Facility/models";
-import { SortOption } from "../Components/Common/SortDropdown";
-import { dateQueryString } from "../Utils/utils";
-import { IconName } from "../CAREUI/icons/CareIcon";
-import { PhoneNumberValidator } from "../Components/Form/FieldValidators";
+import { IconName } from "@/CAREUI/icons/CareIcon";
+import { IConfig } from "@/Common/hooks/useConfig";
+import { SortOption } from "@/Components/Common/SortDropdown";
+import { PatientCategory } from "@/Components/Facility/models";
+import { PhoneNumberValidator } from "@/Components/Form/FieldValidators";
+import { dateQueryString } from "@/Utils/utils";
 
 export const RESULTS_PER_PAGE_LIMIT = 14;
 export const PAGINATION_LIMIT = 36;

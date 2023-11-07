@@ -1,10 +1,9 @@
-import * as Notification from "../Utils/Notifications.js";
-
+import axios from "axios";
 import { isEmpty, omitBy } from "lodash-es";
 
-import { LocalStorageKeys } from "../Common/constants";
-import api from "./api";
-import axios from "axios";
+import { LocalStorageKeys } from "@/Common/constants";
+import api from "@/Redux/api";
+import * as Notification from "@/Utils/Notifications.js";
 
 const requestMap: any = api;
 export const actions = {

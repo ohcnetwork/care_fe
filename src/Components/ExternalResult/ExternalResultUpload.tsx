@@ -2,15 +2,17 @@ import { startCase, camelCase } from "lodash-es";
 import { navigate } from "raviger";
 import { lazy, useState } from "react";
 import CSVReader from "react-csv-reader";
-import useConfig from "../../Common/hooks/useConfig";
-import * as Notification from "../../Utils/Notifications.js";
-const PageTitle = lazy(() => import("../Common/PageTitle"));
 import { useTranslation } from "react-i18next";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import request from "../../Utils/request/request";
-import routes from "../../Redux/api";
-import { IExternalResult } from "./models";
+
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import useConfig from "@/Common/hooks/useConfig";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import { IExternalResult } from "@/Components/ExternalResult/models";
+import routes from "@/Redux/api";
+import * as Notification from "@/Utils/Notifications.js";
+import request from "@/Utils/request/request";
+
+const PageTitle = lazy(() => import("../Common/PageTitle"));
 
 export default function ExternalResultUpload() {
   const { sample_format_external_result_import } = useConfig();

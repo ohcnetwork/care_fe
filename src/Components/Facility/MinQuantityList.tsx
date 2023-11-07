@@ -1,13 +1,14 @@
 import { useCallback, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
 
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { getMinQuantity, getAnyFacility } from "../../Redux/actions";
-import Pagination from "../Common/Pagination";
-import { MinQuantityRequiredModal } from "./MinQuantityRequiredModal";
-import ButtonV2 from "../Common/components/ButtonV2";
-import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
-import Page from "../Common/components/Page";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import Pagination from "@/Components/Common/Pagination";
+import { MinQuantityRequiredModal } from "@/Components/Facility/MinQuantityRequiredModal";
+import { getMinQuantity, getAnyFacility } from "@/Redux/actions";
+import { NonReadOnlyUsers } from "@/Utils/AuthorizeFor";
+
 const Loading = lazy(() => import("../Common/Loading"));
 
 export default function MinQuantityList(props: any) {

@@ -1,5 +1,5 @@
-import { IConfig } from "../Common/hooks/useConfig";
-import { actions } from "./fireRequest";
+import { IConfig } from "@/Common/hooks/useConfig";
+import { actions } from "@/Redux/fireRequest";
 
 export const getCachedConfig = () => {
   const localConfig = localStorage.getItem("config");

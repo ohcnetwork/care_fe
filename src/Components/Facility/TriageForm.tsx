@@ -1,27 +1,30 @@
-import ConfirmDialog from "../Common/ConfirmDialog";
-import Card from "../../CAREUI/display/Card";
-
-import CareIcon from "../../CAREUI/icons/CareIcon";
 import { useCallback, useReducer, useState, useEffect, lazy } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../Common/utils";
+
+import Card from "@/CAREUI/display/Card";
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useAppHistory from "@/Common/hooks/useAppHistory";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import { Cancel, Submit } from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import ConfirmDialog from "@/Components/Common/ConfirmDialog";
+import { PatientStatsModel } from "@/Components/Facility/models";
+import DateFormField from "@/Components/Form/FormFields/DateFormField";
+import TextFormField from "@/Components/Form/FormFields/TextFormField";
+import { FieldChangeEvent } from "@/Components/Form/FormFields/Utils";
 import {
   createTriageForm,
   getTriageDetails,
   getAnyFacility,
   getTriageInfo,
-} from "../../Redux/actions";
-import * as Notification from "../../Utils/Notifications.js";
-import TextFormField from "../Form/FormFields/TextFormField";
-import { PatientStatsModel } from "./models";
-import { Cancel, Submit } from "../Common/components/ButtonV2";
-import useAppHistory from "../../Common/hooks/useAppHistory";
-import DateFormField from "../Form/FormFields/DateFormField";
-import { FieldChangeEvent } from "../Form/FormFields/Utils";
+} from "@/Redux/actions";
+import * as Notification from "@/Utils/Notifications.js";
+
 const Loading = lazy(() => import("../Common/Loading"));
-import Page from "../Common/components/Page";
+
 import dayjs from "dayjs";
-import { dateQueryString } from "../../Utils/utils";
+
+import { dateQueryString } from "@/Utils/utils";
 
 interface triageFormProps extends PatientStatsModel {
   facilityId: number;

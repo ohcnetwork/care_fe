@@ -1,29 +1,27 @@
-import { useDispatch } from "react-redux";
-import useFullscreen from "../../Common/hooks/useFullscreen";
-import { Fragment, useContext, useEffect, useState } from "react";
-import {
-  getPermittedFacility,
-  listPatientAssetBeds,
-} from "../../Redux/actions";
-import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
-import useFilters from "../../Common/hooks/useFilters";
-import { FacilityModel } from "./models";
-import Loading from "../Common/Loading";
-import Page from "../Common/components/Page";
-import ButtonV2 from "../Common/components/ButtonV2";
-import CareIcon from "../../CAREUI/icons/CareIcon";
-import { classNames } from "../../Utils/utils";
-import { LocationSelect } from "../Common/LocationSelect";
-import Pagination from "../Common/Pagination";
-import { SidebarShrinkContext } from "../Common/Sidebar/Sidebar";
-import { PatientAssetBed } from "../Assets/AssetTypes";
 import { Popover, Transition } from "@headlessui/react";
-import { FieldLabel } from "../Form/FormFields/FormField";
-import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
+import { Fragment, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { SortOption } from "../Common/SortDropdown";
-import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
+import { useDispatch } from "react-redux";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useFilters from "@/Common/hooks/useFilters";
+import useFullscreen from "@/Common/hooks/useFullscreen";
+import { PatientAssetBed } from "@/Components/Assets/AssetTypes";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import Page from "@/Components/Common/components/Page";
+import Loading from "@/Components/Common/Loading";
+import { LocationSelect } from "@/Components/Common/LocationSelect";
+import Pagination from "@/Components/Common/Pagination";
+import { SidebarShrinkContext } from "@/Components/Common/Sidebar/Sidebar";
+import { SortOption } from "@/Components/Common/SortDropdown";
+import { FacilityModel } from "@/Components/Facility/models";
+import CheckBoxFormField from "@/Components/Form/FormFields/CheckBoxFormField";
+import { FieldLabel } from "@/Components/Form/FormFields/FormField";
+import { SelectFormField } from "@/Components/Form/FormFields/SelectFormField";
+import HL7PatientVitalsMonitor from "@/Components/VitalsMonitor/HL7PatientVitalsMonitor";
+import useVitalsAspectRatioConfig from "@/Components/VitalsMonitor/useVitalsAspectRatioConfig";
+import { getPermittedFacility, listPatientAssetBeds } from "@/Redux/actions";
+import { classNames } from "@/Utils/utils";
 
 const PER_PAGE_LIMIT = 6;
 

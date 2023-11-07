@@ -1,5 +1,5 @@
-import { useIsAuthorized } from "../../Common/hooks/useIsAuthorized";
-import { AuthorizedForCB } from "../../Utils/AuthorizeFor";
+import { useIsAuthorized } from "@/Common/hooks/useIsAuthorized";
+import { AuthorizedForCB } from "@/Utils/AuthorizeFor";
 
 interface Props {
   children: (value: { isAuthorized: boolean }) => JSX.Element;
