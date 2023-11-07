@@ -105,10 +105,12 @@
     "lib",
     "build",
     "*.bs.js",
+    "*.bs",
     "*.gen.tsx",
     "*.res",
     "*.css",
     "*.csv",
+    "*.d.ts",
     "Dockerfile"
   ]
 }

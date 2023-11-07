@@ -1,4 +1,3 @@
-/* eslint-disable import/no-unresolved */
 // Type definitions for react-virtualized 9.21
 // Project: https://github.com/bvaughn/react-virtualized
 // Definitions by: Kalle Ott <https://github.com/kaoDev>
