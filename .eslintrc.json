@@ -48,7 +48,7 @@
     "quotes": ["error", "double"],
     "no-unused-vars": "off",
     "no-relative-import-paths/no-relative-import-paths": [
-      "error",
+      "warn",
       { "allowSameFolder": false, "rootDir": "./src", "prefix": "@" }
     ],
     "import/no-unresolved": "error",
