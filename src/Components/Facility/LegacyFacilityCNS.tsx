@@ -82,15 +82,29 @@ export default function LegacyFacilityCNS({
           expected_type_c_cylinders: data.expected_type_c_cylinders,
           expected_type_d_cylinders: data.expected_type_d_cylinders,
           expected_oxygen_requirement: data.expected_oxygen_requirement,
-          local_body_object: data.local_body_object,
-          district_object: data.district_object,
-          state_object: data.state_object,
-          ward_object: data.ward_object,
+          local_body_object: {
+            name: data.local_body_object.name,
+            body_type: data.local_body_object.body_type,
+            localbody_code: data.local_body_object.localbody_code,
+            district: data.local_body_object.district,
+          },
+          district_object: {
+            id: data.district_object.id,
+            name: data.district_object.name,
+            state: data.district_object.state,
+          },
+          state_object: {
+            id: data.state_object.id,
+            name: data.state_object.name,
+          },
+          ward_object: {
+            id: data.ward_object.id,
+            name: data.ward_object.name,
+            number: data.ward_object.number,
+            local_body: data.ward_object.local_body,
+          },
           modified_date: data.modified_date,
           created_date: data.created_date,
-          local_body: data.local_body,
-          ward: data.ward,
-          state: data.state,
         };
 
         setFacility(updateData);
