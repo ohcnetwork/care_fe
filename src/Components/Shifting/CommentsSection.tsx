@@ -64,9 +64,6 @@ const CommentSection = (props: CommentSectionProps) => {
             </ButtonV2>
           </div>
           <div className="w-full">
-            <PaginatedList.WhenEmpty>
-              <span>No comments available</span>
-            </PaginatedList.WhenEmpty>
             <PaginatedList.WhenLoading>
               <CircularProgress />
             </PaginatedList.WhenLoading>
