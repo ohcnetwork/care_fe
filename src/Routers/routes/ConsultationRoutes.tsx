@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-unresolved
 import { make as CriticalCareRecording } from "@/Components/CriticalCareRecording/CriticalCareRecording.bs.js";
 import { ConsultationDetails } from "@/Components/Facility/ConsultationDetails";
 import { ConsultationForm } from "@/Components/Facility/ConsultationForm";

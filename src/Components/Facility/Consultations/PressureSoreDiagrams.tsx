@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { PAGINATION_LIMIT } from "@/Common/constants";
 import { statusType, useAbortableEffect } from "@/Common/utils";
 import Pagination from "@/Components/Common/Pagination";
+// eslint-disable-next-line import/no-unresolved
 import { make as CriticalCare__PressureScoreViewer } from "@/Components/CriticalCareRecording/PressureSore/CriticalCare__PressureSoreViewer.bs.js";
 import { dailyRoundsAnalyse } from "@/Redux/actions";
 import { formatDateTime } from "@/Utils/utils";

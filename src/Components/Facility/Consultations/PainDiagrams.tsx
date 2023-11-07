@@ -2,6 +2,7 @@ import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 
 import { statusType, useAbortableEffect } from "@/Common/utils";
+// eslint-disable-next-line import/no-unresolved
 import { make as CriticalCare__PainViewer } from "@/Components/CriticalCareRecording/Pain/CriticalCare__PainViewer.bs.js";
 import { dailyRoundsAnalyse } from "@/Redux/actions";
 import { formatDateTime } from "@/Utils/utils";
