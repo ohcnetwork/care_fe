@@ -56,14 +56,6 @@ export const assetClassProps = {
   },
 };
 
-export interface AssetService {
-  id: string;
-  created_date: string;
-  modified_date: string;
-  serviced_on: string;
-  note: string;
-}
-
 export interface AssetData {
   id: string;
   name: string;

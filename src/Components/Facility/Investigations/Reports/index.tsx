@@ -1,5 +1,5 @@
 import * as Notification from "../../../../Utils/Notifications";
-import _ from "lodash-es";
+import { chain } from "lodash-es";
 import { Group, InvestigationType } from "..";
 import {
   getPatient,
@@ -174,7 +174,7 @@ const InvestigationReports = ({ id }: any) => {
       })
     );
 
-    const investigationList = _.chain(data)
+    const investigationList = chain(data)
       .compact()
       .flatten()
       .map((i) => ({

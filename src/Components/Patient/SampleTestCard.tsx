@@ -6,7 +6,7 @@ import { SAMPLE_TEST_STATUS } from "../../Common/constants";
 import { patchSample } from "../../Redux/actions";
 import * as Notification from "../../Utils/Notifications";
 import UpdateStatusDialog from "./UpdateStatusDialog";
-import _ from "lodash-es";
+import { startCase, camelCase } from "lodash-es";
 import { formatDateTime } from "../../Utils/utils";
 import ButtonV2 from "../Common/components/ButtonV2";
 import { NonReadOnlyUsers } from "../../Utils/AuthorizeFor";
@@ -92,7 +92,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               Status{" "}
             </div>
             <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-              {_.startCase(_.camelCase(itemData.status))}
+              {startCase(camelCase(itemData.status))}
             </div>
           </div>
         </div>
@@ -127,7 +127,7 @@ export const SampleTestCard = (props: SampleDetailsProps) => {
               Result{" "}
             </div>
             <div className="mt-1 overflow-x-scroll whitespace-normal break-words text-sm font-medium leading-5">
-              {_.startCase(_.camelCase(itemData.result))}
+              {startCase(camelCase(itemData.result))}
             </div>
           </div>
         </div>
