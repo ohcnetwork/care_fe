@@ -16,7 +16,6 @@ const CommentSection = (props: { id: string }) => {
     routes.getResourceComments,
     {
       pathParams: { id: props.id },
-      query: { limit: 8, offset: 0 },
     }
   );
 

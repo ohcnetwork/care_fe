@@ -52,10 +52,10 @@ export interface FacilityModel {
   ward_object?: WardModel;
   modified_date?: string;
   created_date?: string;
-  state: number;
-  district: number;
-  local_body: number;
-  ward: number;
+  state?: number;
+  district?: number;
+  local_body?: number;
+  ward?: number;
 }
 
 export interface CapacityModal {
