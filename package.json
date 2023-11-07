@@ -43,7 +43,7 @@
     "cypress:install": "cross-env NODE_ENV=development cypress install",
     "prepare": "husky install",
     "lint": "eslint ./src",
-    "lint-fix": "eslint ./src --fix",
+    "lint:fix": "eslint ./src --fix",
     "format": "prettier ./src --write",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
@@ -135,6 +135,7 @@
     "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-config-standard": "^17.1.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
     "eslint-plugin-i18next": "^6.0.3",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsx-a11y": "^6.7.1",

@@ -7,6 +7,11 @@
   "settings": {
     "react": {
       "version": "detect"
+    },
+    "import/resolver": {
+      "typescript": {
+        "project": "./tsconfig.json"
+      }
     }
   },
   "extends": [
@@ -16,22 +21,19 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:i18next/recommended",
-    "plugin:tailwindcss/recommended"
+    "plugin:tailwindcss/recommended",
+    "plugin:import/recommended",
+    "plugin:import/typescript"
   ],
   "overrides": [
     {
-      "files": [
-        "**/*.mdx"
-      ],
-      "extends": [
-        "plugin:react/recommended",
-        "plugin:mdx/recommended"
-      ],
+      "files": ["**/*.mdx"],
+      "extends": ["plugin:react/recommended", "plugin:mdx/recommended"],
       "rules": {
         "react/jsx-no-target-blank": "off",
         "i18next/no-literal-string": "off"
       }
-    }    
+    }
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -41,13 +43,29 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": [
-    "@typescript-eslint", 
-    "i18next"
-  ],
+  "plugins": ["@typescript-eslint", "i18next", "import"],
   "rules": {
     "quotes": ["error", "double"],
     "no-unused-vars": "off",
+    "import/no-unresolved": "error",
+    "import/order": [
+      "warn",
+      {
+        "groups": [
+          "builtin",
+          "external",
+          "internal",
+          ["sibling", "parent"],
+          "index",
+          "unknown"
+        ],
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc",
+          "caseInsensitive": true
+        }
+      }
+    ],
     "@typescript-eslint/no-unused-vars": [
       "error",
       {
@@ -76,7 +94,7 @@
     "tailwindcss/enforces-shorthand": "error",
     "tailwindcss/no-contradicting-classname": "error"
   },
-  
+
   "ignorePatterns": [
     "dist",
     "public",
