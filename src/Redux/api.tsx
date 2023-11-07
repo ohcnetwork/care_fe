@@ -219,6 +219,7 @@ const routes = {
 
   getPermittedFacilities: {
     path: "/api/v1/facility/",
+    TRes: Type<PaginatedResponse<FacilityModel>>(),
   },
 
   getAllFacilities: {

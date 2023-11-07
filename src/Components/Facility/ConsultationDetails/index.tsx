@@ -8,6 +8,7 @@ import { ConsultationModel, ICD11DiagnosisModel } from "../models";
 import {
   getConsultation,
   getPatient,
+  listAssetBeds,
   listShiftRequests,
 } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
@@ -88,6 +89,7 @@ export const ConsultationDetails = (props: any) => {
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
+  const [isCameraAttached, setIsCameraAttached] = useState(false);
 
   const getPatientGender = (patientData: any) =>
     GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
@@ -126,6 +128,17 @@ export const ConsultationDetails = (props: any) => {
             data.symptoms_text = symptoms.join(", ");
           }
           setConsultationData(data);
+          const assetRes = await dispatch(
+            listAssetBeds({
+              bed: data?.current_bed?.bed_object?.id,
+            })
+          );
+          const isCameraAttachedRes = assetRes.data.results.some(
+            (asset: { asset_object: { asset_class: string } }) => {
+              return asset?.asset_object?.asset_class === "ONVIF";
+            }
+          );
+          setIsCameraAttached(isCameraAttachedRes);
           const id = res.data.patient;
           const patientRes = await dispatch(getPatient({ id }));
           if (patientRes?.data) {
@@ -336,6 +349,7 @@ export const ConsultationDetails = (props: any) => {
                   Doctor Connect
                 </button>
                 {patientData.last_consultation?.id &&
+                  isCameraAttached &&
                   ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
                     authUser.user_type
                   ) && (
@@ -507,6 +521,7 @@ export const ConsultationDetails = (props: any) => {
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
                     if (
+                      isCameraAttached === false || // No camera attached
                       consultationData?.discharge_date || // Discharged
                       !consultationData?.current_bed?.bed_object?.id || // Not admitted to bed
                       !["DistrictAdmin", "StateAdmin", "Doctor"].includes(
