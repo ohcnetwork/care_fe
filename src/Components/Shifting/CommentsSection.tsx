@@ -73,10 +73,9 @@ const CommentSection = (props: CommentSectionProps) => {
             <PaginatedList.Items<IComment>>
               {(item) => <Comment {...item} />}
             </PaginatedList.Items>
-            <PaginatedList.Paginator
-              className="flex w-full items-center justify-center"
-              hideIfSinglePage
-            />
+            <div className="flex w-full items-center justify-center">
+              <PaginatedList.Paginator hideIfSinglePage />
+            </div>
           </div>
         </div>
       )}
