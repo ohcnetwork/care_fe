@@ -1,9 +1,10 @@
 import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
-import { make as CriticalCare__PainViewer } from "../../CriticalCareRecording/Pain/CriticalCare__PainViewer.bs";
-import { formatDateTime } from "../../../Utils/utils";
+
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import { make as CriticalCare__PainViewer } from "@/Components/CriticalCareRecording/Pain/CriticalCare__PainViewer.bs.js";
+import { dailyRoundsAnalyse } from "@/Redux/actions";
+import { formatDateTime } from "@/Utils/utils";
 
 export const PainDiagrams = (props: any) => {
   const { consultationId } = props;

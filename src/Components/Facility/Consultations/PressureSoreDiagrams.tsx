@@ -1,11 +1,12 @@
 import { useCallback, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { dailyRoundsAnalyse } from "../../../Redux/actions";
-import { make as CriticalCare__PressureScoreViewer } from "../../CriticalCareRecording/PressureSore/CriticalCare__PressureSoreViewer.bs";
-import Pagination from "../../Common/Pagination";
-import { PAGINATION_LIMIT } from "../../../Common/constants";
-import { formatDateTime } from "../../../Utils/utils";
+
+import { PAGINATION_LIMIT } from "@/Common/constants";
+import { statusType, useAbortableEffect } from "@/Common/utils";
+import Pagination from "@/Components/Common/Pagination";
+import { make as CriticalCare__PressureScoreViewer } from "@/Components/CriticalCareRecording/PressureSore/CriticalCare__PressureSoreViewer.bs.js";
+import { dailyRoundsAnalyse } from "@/Redux/actions";
+import { formatDateTime } from "@/Utils/utils";
 
 export const PressureSoreDiagrams = (props: any) => {
   const { consultationId } = props;

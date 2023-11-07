@@ -1,48 +1,53 @@
+import { navigate, useQueryParams } from "raviger";
+import { lazy, useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
+
+import CareIcon from "@/CAREUI/icons/CareIcon";
+import useAuthUser from "@/Common/hooks/useAuthUser";
+import ButtonV2 from "@/Components/Common/components/ButtonV2";
+import ToolTip from "@/Components/Common/utils/Tooltip";
+import { statusType, useAbortableEffect } from "../../../Common/utils";
+
+import { make as Link } from "@/Components/Common/components/Link.bs.js";
+import PatientInfoCard from "@/Components/Patient/PatientInfoCard";
+import DischargeModal from "@/Components/Facility/DischargeModal";
+import DischargeSummaryModal from "@/Components/Facility/DischargeSummaryModal";
+import DoctorVideoSlideover from "@/Components/Facility/DoctorVideoSlideover";
+import { PatientModel } from "@/Components/Patient/models";
+import { formatDateTime, relativeTime } from "@/Utils/utils";
+
+import { useTranslation } from "react-i18next";
+
+import { triggerGoal } from "@/Integrations/Plausible";
+import { ConsultationUpdatesTab } from "@/Components/Facility/ConsultationDetails/ConsultationUpdatesTab";
+import { ConsultationABGTab } from "@/Components/Facility/ConsultationDetails/ConsultationABGTab";
+import { ConsultationNursingTab } from "@/Components/Facility/ConsultationDetails/ConsultationNursingTab";
+import { ConsultationFeedTab } from "@/Components/Facility/ConsultationDetails/ConsultationFeedTab";
+import { ConsultationSummaryTab } from "@/Components/Facility/ConsultationDetails/ConsultationSummaryTab";
+import { ConsultationFilesTab } from "@/Components/Facility/ConsultationDetails/ConsultationFilesTab";
+import { ConsultationMedicinesTab } from "@/Components/Facility/ConsultationDetails/ConsultationMedicinesTab";
+import { ConsultationInvestigationsTab } from "@/Components/Facility/ConsultationDetails/ConsultationInvestigationsTab";
+import { ConsultationVentilatorTab } from "@/Components/Facility/ConsultationDetails/ConsultationVentilatorTab";
+import { ConsultationPressureSoreTab } from "@/Components/Facility/ConsultationDetails/ConsultationPressureSoreTab";
+import { ConsultationDialysisTab } from "@/Components/Facility/ConsultationDetails/ConsultationDialysisTab";
+import { ConsultationNeurologicalMonitoringTab } from "@/Components/Facility/ConsultationDetails/ConsultationNeurologicalMonitoringTab";
+import { ConsultationNutritionTab } from "@/Components/Facility/ConsultationDetails/ConsultationNutritionTab";
 import {
   CONSULTATION_TABS,
   GENDER_TYPES,
   OptionsType,
   SYMPTOM_CHOICES,
-} from "../../../Common/constants";
-import { ConsultationModel, ICD11DiagnosisModel } from "../models";
+} from "@/Common/constants";
 import {
   getConsultation,
   getPatient,
   listAssetBeds,
   listShiftRequests,
-} from "../../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../../Common/utils";
-import { lazy, useCallback, useState } from "react";
-import ToolTip from "../../Common/utils/Tooltip";
-import ButtonV2 from "../../Common/components/ButtonV2";
-import CareIcon from "../../../CAREUI/icons/CareIcon";
-import DischargeModal from "../DischargeModal";
-import DischargeSummaryModal from "../DischargeSummaryModal";
-import DoctorVideoSlideover from "../DoctorVideoSlideover";
-import { make as Link } from "../../Common/components/Link.bs";
-import PatientInfoCard from "../../Patient/PatientInfoCard";
-import { PatientModel } from "../../Patient/models";
-import { formatDateTime, relativeTime } from "../../../Utils/utils";
-
-import { navigate } from "raviger";
-import { useDispatch } from "react-redux";
-import { useQueryParams } from "raviger";
-import { useTranslation } from "react-i18next";
-import { triggerGoal } from "../../../Integrations/Plausible";
-import useAuthUser from "../../../Common/hooks/useAuthUser";
-import { ConsultationUpdatesTab } from "./ConsultationUpdatesTab";
-import { ConsultationABGTab } from "./ConsultationABGTab";
-import { ConsultationNursingTab } from "./ConsultationNursingTab";
-import { ConsultationFeedTab } from "./ConsultationFeedTab";
-import { ConsultationSummaryTab } from "./ConsultationSummaryTab";
-import { ConsultationFilesTab } from "./ConsultationFilesTab";
-import { ConsultationMedicinesTab } from "./ConsultationMedicinesTab";
-import { ConsultationInvestigationsTab } from "./ConsultationInvestigationsTab";
-import { ConsultationVentilatorTab } from "./ConsultationVentilatorTab";
-import { ConsultationPressureSoreTab } from "./ConsultationPressureSoreTab";
-import { ConsultationDialysisTab } from "./ConsultationDialysisTab";
-import { ConsultationNeurologicalMonitoringTab } from "./ConsultationNeurologicalMonitoringTab";
-import { ConsultationNutritionTab } from "./ConsultationNutritionTab";
+} from "@/Redux/actions";
+import {
+  ConsultationModel,
+  ICD11DiagnosisModel,
+} from "@/Components/Facility/models";
 
 const Loading = lazy(() => import("../../Common/Loading"));
 const PageTitle = lazy(() => import("../../Common/PageTitle"));

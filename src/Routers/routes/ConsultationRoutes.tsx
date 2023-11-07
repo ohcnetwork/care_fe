@@ -1,13 +1,13 @@
-import { ConsultationForm } from "../../Components/Facility/ConsultationForm";
-import Investigation from "../../Components/Facility/Investigations";
-import ShowInvestigation from "../../Components/Facility/Investigations/ShowInvestigation";
-import ManagePrescriptions from "../../Components/Medicine/ManagePrescriptions";
-import { DailyRoundListDetails } from "../../Components/Patient/DailyRoundListDetails";
-import { DailyRounds } from "../../Components/Patient/DailyRounds";
-import { FileUpload } from "../../Components/Patient/FileUpload";
-import { make as CriticalCareRecording } from "../../Components/CriticalCareRecording/CriticalCareRecording.bs";
-import { ConsultationDetails } from "../../Components/Facility/ConsultationDetails";
-import TreatmentSummary from "../../Components/Facility/TreatmentSummary";
+import { make as CriticalCareRecording } from "@/Components/CriticalCareRecording/CriticalCareRecording.bs.js";
+import { ConsultationDetails } from "@/Components/Facility/ConsultationDetails";
+import { ConsultationForm } from "@/Components/Facility/ConsultationForm";
+import Investigation from "@/Components/Facility/Investigations";
+import ShowInvestigation from "@/Components/Facility/Investigations/ShowInvestigation";
+import TreatmentSummary from "@/Components/Facility/TreatmentSummary";
+import ManagePrescriptions from "@/Components/Medicine/ManagePrescriptions";
+import { DailyRoundListDetails } from "@/Components/Patient/DailyRoundListDetails";
+import { DailyRounds } from "@/Components/Patient/DailyRounds";
+import { FileUpload } from "@/Components/Patient/FileUpload";
 
 export default {
   "/facility/:facilityId/patient/:patientId/consultation": ({
