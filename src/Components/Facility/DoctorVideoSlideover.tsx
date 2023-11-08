@@ -68,7 +68,13 @@ export default function DoctorVideoSlideover(props: {
           home: false,
         },
       ].map((type, i) => (
-        <div key={i} className="mb-4">
+        <div
+          key={i}
+          className="mb-4"
+          id={`doctor-connect-${
+            type.home ? "home" : "remote"
+          }-${type.user_type.toLowerCase()}`}
+        >
           <div>
             <span className="text-lg font-semibold">{type.title}</span>
           </div>
