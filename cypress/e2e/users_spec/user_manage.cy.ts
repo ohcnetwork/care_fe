@@ -54,7 +54,7 @@ describe("Manage User", () => {
     userPage.typeInSearchInput(usernametolinkfacilitydoc2);
     userPage.checkUsernameText(usernametolinkfacilitydoc2);
     manageUserPage.assertHomeFacility(facilitytolinkusername);
-    // Link a new facility and unlink the facility from the user
+    // Link a new facility and unlink the facility from the doctor username (3)
     userPage.clearSearchInput();
     userPage.typeInSearchInput(usernametolinkfacilitydoc3);
     userPage.checkUsernameText(usernametolinkfacilitydoc3);
