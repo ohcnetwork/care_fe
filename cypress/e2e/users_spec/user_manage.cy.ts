@@ -10,8 +10,10 @@ describe("Manage User", () => {
   const usernametolinkfacilitydoc1 = "dummydoctor4";
   const usernametolinkfacilitydoc2 = "dummydoctor5";
   const usernametolinkfacilitydoc3 = "dummydoctor6";
+  const usernametolinkskill = "devdistrictadmin";
   const usernamerealname = "Dummy Doctor";
   const facilitytolinkusername = "Dummy Shifting Center";
+  const workinghour = "23";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -21,6 +23,22 @@ describe("Manage User", () => {
   beforeEach(() => {
     cy.restoreLocalStorage();
     cy.awaitUrl("/users");
+  });
+
+  it("add working hour for a user and verify its reflection in card and user profile", () => {
+    // verify mandatory field error and select working hour for a user
+    userPage.typeInSearchInput(usernametolinkskill);
+    userPage.checkUsernameText(usernametolinkskill);
+    manageUserPage.clicksetaveragehourbutton();
+    manageUserPage.clearweeklyhourfield();
+    manageUserPage.clickSubmit();
+    manageUserPage.verifyErrorText("Value should be between 0 and 168");
+    // verify the data is reflected in user card and profile page
+    manageUserPage.typeInWeeklyWorkingHours(workinghour);
+    manageUserPage.clickSubmit();
+    manageUserPage.verifyWorkingHours(workinghour);
+    manageUserPage.navigateToProfile();
+    manageUserPage.verifyProfileWorkingHours(workinghour);
   });
 
   it("linking and unlinking facility for multiple users, and confirm reflection in user cards and doctor connect", () => {

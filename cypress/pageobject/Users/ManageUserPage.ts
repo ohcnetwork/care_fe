@@ -56,6 +56,37 @@ export class ManageUserPage {
     cy.get("#submit").click();
   }
 
+  clicksetaveragehourbutton() {
+    cy.get("#avg-workinghour").click();
+  }
+
+  clearweeklyhourfield() {
+    cy.get("#weekly_working_hours").click().clear();
+  }
+
+  verifyErrorText(expectedError: string) {
+    cy.get(".error-text").should("contain", expectedError).and("be.visible");
+  }
+
+  typeInWeeklyWorkingHours(hours: string) {
+    cy.get("#weekly_working_hours").click().type(hours);
+  }
+
+  navigateToProfile() {
+    cy.get("#profilenamelink").click();
+  }
+
+  verifyWorkingHours(expectedHours: string) {
+    cy.get("#working-hours").should("contain", `${expectedHours} hours`);
+  }
+
+  verifyProfileWorkingHours(expectedHours: string) {
+    cy.get("#averageworkinghour-profile-details").should(
+      "contain",
+      expectedHours
+    );
+  }
+
   navigateToFacility() {
     cy.visit("/facility");
   }
