@@ -77,8 +77,8 @@ export class ManageUserPage {
   }
 
   assertDoctorConnectVisibility(realName) {
-    cy.get("#Doctor-connect-homedoctor").should("contain.text", realName);
-    cy.get("#Doctor-connect-remotedoctor").should("contain.text", realName);
+    cy.get("#doctor-connect-home-doctor").should("contain.text", realName);
+    cy.get("#doctor-connect-remote-doctor").should("contain.text", realName);
   }
 }
 

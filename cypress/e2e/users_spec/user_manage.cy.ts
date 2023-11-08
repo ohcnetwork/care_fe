@@ -76,6 +76,7 @@ describe("Manage User", () => {
     manageUserPage.clickDoctorConnectButton();
     manageUserPage.assertDoctorConnectVisibility(usernamerealname);
   });
+
   afterEach(() => {
     cy.saveLocalStorage();
   });
