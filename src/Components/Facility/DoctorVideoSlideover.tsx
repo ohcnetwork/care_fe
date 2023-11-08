@@ -56,19 +56,22 @@ export default function DoctorVideoSlideover(props: {
           title: "Doctors",
           user_type: "Doctor",
           home: true,
+          id: "Doctor-connect-homedoctor",
         },
         {
           title: "Staff",
           user_type: "Staff",
           home: true,
+          id: "Doctor-connect-homestaff",
         },
         {
           title: "TeleICU Hub",
           user_type: "Doctor",
           home: false,
+          id: "Doctor-connect-remotedoctor",
         },
       ].map((type, i) => (
-        <div key={i} className="mb-4">
+        <div key={i} className="mb-4" id={type.id}>
           <div>
             <span className="text-lg font-semibold">{type.title}</span>
           </div>

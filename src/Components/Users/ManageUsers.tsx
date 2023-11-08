@@ -731,7 +731,7 @@ function UserFacilities(props: { user: any }) {
         <div className="flex flex-col">
           {/* Home Facility section */}
           {user?.home_facility_object && (
-            <div className="mt-2">
+            <div className="mt-2" id="home-facility">
               <div className="mb-2 ml-2 text-lg font-bold">Home Facility</div>
               <div className="relative rounded p-2 transition hover:bg-gray-200 focus:bg-gray-200 md:rounded-lg">
                 <div className="flex items-center justify-between">
@@ -762,7 +762,7 @@ function UserFacilities(props: { user: any }) {
 
           {/* Linked Facilities section */}
           {facilities.length > 0 && (
-            <div className="mt-2">
+            <div className="mt-2" id="linked-facility-list">
               <div className="mb-2 ml-2 text-lg font-bold">
                 Linked Facilities
               </div>
@@ -785,6 +785,7 @@ function UserFacilities(props: { user: any }) {
                         <div className="flex items-center gap-2">
                           <button
                             className="tooltip text-lg hover:text-primary-500"
+                            id="home-facility-icon"
                             onClick={() => {
                               if (user?.home_facility_object) {
                                 // has previous home facility
@@ -806,6 +807,7 @@ function UserFacilities(props: { user: any }) {
                             </span>
                           </button>
                           <button
+                            id="unlink-facility-button"
                             className="tooltip text-lg text-red-600"
                             onClick={() =>
                               setUnlinkFacilityData({
