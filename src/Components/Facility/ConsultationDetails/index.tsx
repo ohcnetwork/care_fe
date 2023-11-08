@@ -8,6 +8,7 @@ import { ConsultationModel, ICD11DiagnosisModel } from "../models";
 import {
   getConsultation,
   getPatient,
+  listAssetBeds,
   listShiftRequests,
 } from "../../../Redux/actions";
 import { statusType, useAbortableEffect } from "../../../Common/utils";
@@ -88,6 +89,7 @@ export const ConsultationDetails = (props: any) => {
   const [openDischargeSummaryDialog, setOpenDischargeSummaryDialog] =
     useState(false);
   const [openDischargeDialog, setOpenDischargeDialog] = useState(false);
+  const [isCameraAttached, setIsCameraAttached] = useState(false);
 
   const getPatientGender = (patientData: any) =>
     GENDER_TYPES.find((i) => i.id === patientData.gender)?.text;
@@ -126,6 +128,17 @@ export const ConsultationDetails = (props: any) => {
             data.symptoms_text = symptoms.join(", ");
           }
           setConsultationData(data);
+          const assetRes = await dispatch(
+            listAssetBeds({
+              bed: data?.current_bed?.bed_object?.id,
+            })
+          );
+          const isCameraAttachedRes = assetRes.data.results.some(
+            (asset: { asset_object: { asset_class: string } }) => {
+              return asset?.asset_object?.asset_class === "ONVIF";
+            }
+          );
+          setIsCameraAttached(isCameraAttachedRes);
           const id = res.data.patient;
           const patientRes = await dispatch(getPatient({ id }));
           if (patientRes?.data) {
@@ -271,7 +284,7 @@ export const ConsultationDetails = (props: any) => {
       />
 
       <div className="px-2 pb-2">
-        <nav className="relative flex flex-wrap justify-between">
+        <nav className="relative flex flex-wrap items-start justify-between">
           <PageTitle
             title="Patient Dashboard"
             className="sm:m-0 sm:p-0"
@@ -290,9 +303,9 @@ export const ConsultationDetails = (props: any) => {
             breadcrumbs={true}
             backUrl="/patients"
           />
-          <div className="-right-6 top-0 flex w-full flex-col space-y-1 sm:w-min sm:flex-row sm:items-center sm:space-y-0 sm:divide-x-2 lg:absolute xl:right-0">
+          <div className="flex w-full flex-col min-[1150px]:w-min min-[1150px]:flex-row min-[1150px]:items-center">
             {!consultationData.discharge_date && (
-              <div className="flex w-full flex-col px-2 sm:flex-row">
+              <>
                 {hasActiveShiftingRequest() ? (
                   <ButtonV2
                     onClick={() =>
@@ -302,7 +315,7 @@ export const ConsultationDetails = (props: any) => {
                         }`
                       )
                     }
-                    className="btn btn-primary m-1 w-full hover:text-white"
+                    className="btn btn-primary mx-1 w-full p-1.5 px-4 hover:text-white"
                   >
                     <CareIcon className="care-l-ambulance h-5 w-5" />
                     Track Shifting
@@ -315,7 +328,7 @@ export const ConsultationDetails = (props: any) => {
                         `/facility/${patientData.facility}/patient/${patientData.id}/shift/new`
                       )
                     }
-                    className="btn btn-primary m-1 w-full hover:text-white"
+                    className="btn btn-primary mx-1 w-full p-1.5 px-4 hover:text-white"
                   >
                     <CareIcon className="care-l-ambulance h-5 w-5" />
                     Shift Patient
@@ -335,31 +348,33 @@ export const ConsultationDetails = (props: any) => {
                 >
                   Doctor Connect
                 </button>
-                {patientData.last_consultation?.id && (
-                  <Link
-                    href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
-                    className="btn btn-primary m-1 w-full hover:text-white"
-                  >
-                    Camera Feed
-                  </Link>
-                )}
-              </div>
+                {patientData.last_consultation?.id &&
+                  isCameraAttached &&
+                  ["DistrictAdmin", "StateAdmin", "Doctor"].includes(
+                    authUser.user_type
+                  ) && (
+                    <Link
+                      href={`/facility/${patientData.facility}/patient/${patientData.id}/consultation/${patientData.last_consultation?.id}/feed`}
+                      className="btn btn-primary m-1 w-full hover:text-white"
+                    >
+                      Camera Feed
+                    </Link>
+                  )}
+              </>
             )}
-            <div className="flex w-full flex-col px-2 sm:flex-row">
-              <Link
-                href={`/facility/${patientData.facility}/patient/${patientData.id}`}
-                className="btn btn-primary m-1 w-full hover:text-white"
-              >
-                Patient Details
-              </Link>
-              <Link
-                id="patient_doctor_notes"
-                href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
-                className="btn btn-primary m-1 w-full hover:text-white"
-              >
-                Doctor&apos;s Notes
-              </Link>
-            </div>
+            <Link
+              href={`/facility/${patientData.facility}/patient/${patientData.id}`}
+              className="btn btn-primary m-1 w-full hover:text-white"
+            >
+              Patient Details
+            </Link>
+            <Link
+              id="patient_doctor_notes"
+              href={`/facility/${patientData.facility}/patient/${patientData.id}/notes`}
+              className="btn btn-primary m-1 w-full hover:text-white"
+            >
+              Doctor&apos;s Notes
+            </Link>
           </div>
         </nav>
         <div className="mt-2 flex w-full flex-col md:flex-row">
@@ -506,10 +521,14 @@ export const ConsultationDetails = (props: any) => {
                 {CONSULTATION_TABS.map((p: OptionsType) => {
                   if (p.text === "FEED") {
                     if (
-                      !consultationData?.current_bed?.bed_object?.id ??
-                      consultationData?.discharge_date !== null
+                      isCameraAttached === false || // No camera attached
+                      consultationData?.discharge_date || // Discharged
+                      !consultationData?.current_bed?.bed_object?.id || // Not admitted to bed
+                      !["DistrictAdmin", "StateAdmin", "Doctor"].includes(
+                        authUser.user_type
+                      ) // Not admin or doctor
                     )
-                      return null;
+                      return null; // Hide feed tab
                   }
                   return (
                     <Link

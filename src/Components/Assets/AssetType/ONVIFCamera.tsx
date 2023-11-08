@@ -18,7 +18,6 @@ import useQuery from "../../../Utils/request/useQuery";
 
 import CareIcon from "../../../CAREUI/icons/CareIcon";
 
-
 interface Props {
   assetId: string;
   facilityId: string;
@@ -53,6 +52,11 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
       setFacilityMiddlewareHostname(facility.middleware_address);
     }
   }, [facility, facilityId]);
+
+  const fallbackMiddleware =
+    asset?.location_object?.middleware_address || facilityMiddlewareHostname;
+
+  const currentMiddleware = middlewareHostname || fallbackMiddleware;
 
   useEffect(() => {
     if (asset) {
@@ -106,7 +110,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     try {
       setLoadingAddPreset(true);
       const presetData = await axios.get(
-        `https://${facilityMiddlewareHostname}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
+        `https://${currentMiddleware}/status?hostname=${config.hostname}&port=${config.port}&username=${config.username}&password=${config.password}`
       );
 
       const { res } = await request(routes.createAssetBed, {
@@ -135,11 +139,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
     }
     setLoadingAddPreset(false);
   };
-  
   if (isLoading || loading || !facility) return <Loading />;
-
-  const fallbackMiddleware =
-    asset?.location_object?.middleware_address || facilityMiddlewareHostname;
 
   return (
     <div className="space-y-6">
@@ -225,7 +225,7 @@ const ONVIFCamera = ({ assetId, facilityId, asset, onUpdated }: Props) => {
           addPreset={addPreset}
           isLoading={loadingAddPreset}
           refreshPresetsHash={refreshPresetsHash}
-          facilityMiddlewareHostname={facilityMiddlewareHostname}
+          facilityMiddlewareHostname={currentMiddleware}
         />
       ) : null}
     </div>

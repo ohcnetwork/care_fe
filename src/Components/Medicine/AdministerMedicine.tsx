@@ -1,10 +1,8 @@
 import { useState } from "react";
-import { PrescriptionActions } from "../../Redux/actions";
 import ConfirmDialog from "../Common/ConfirmDialog";
 import { Prescription } from "./models";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
 import { Success } from "../../Utils/Notifications";
-import { useDispatch } from "react-redux";
 import PrescriptionDetailCard from "./PrescriptionDetailCard";
 import CareIcon from "../../CAREUI/icons/CareIcon";
 import { formatDateTime } from "../../Utils/utils";
@@ -13,16 +11,18 @@ import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import TextFormField from "../Form/FormFields/TextFormField";
 import dayjs from "../../Utils/dayjs";
 import NumericWithUnitsFormField from "../Form/FormFields/NumericWithUnitsFormField";
+import useSlug from "../../Common/hooks/useSlug";
+import request from "../../Utils/request/request";
+import MedicineRoutes from "./routes";
 
 interface Props {
   prescription: Prescription;
-  actions: ReturnType<ReturnType<typeof PrescriptionActions>["prescription"]>;
   onClose: (success: boolean) => void;
 }
 
 export default function AdministerMedicine({ prescription, ...props }: Props) {
   const { t } = useTranslation();
-  const dispatch = useDispatch<any>();
+  const consultation = useSlug("consultation");
   const [isLoading, setIsLoading] = useState(false);
   const [notes, setNotes] = useState<string>("");
   const [dosage, setDosage] = useState<string | undefined>();
@@ -84,14 +84,15 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
         }
 
         setIsLoading(true);
-        const res = await dispatch(
-          props.actions.administer({
+        const { res } = await request(MedicineRoutes.administerPrescription, {
+          pathParams: { consultation, external_id: prescription.id },
+          body: {
             notes,
             dosage,
             administered_date: isCustomTime ? customTime : undefined,
-          })
-        );
-        if (res.status === 201) {
+          },
+        });
+        if (res?.ok) {
           Success({ msg: t("medicines_administered") });
         }
         setIsLoading(false);
@@ -99,14 +100,9 @@ export default function AdministerMedicine({ prescription, ...props }: Props) {
       }}
       className="w-full md:max-w-4xl"
     >
-      <div className="mt-4 flex flex-col">
-        <div className="mb-8">
-          <PrescriptionDetailCard
-            prescription={prescription}
-            readonly
-            actions={props.actions}
-          />
-        </div>
+      <div className="mt-4 flex flex-col gap-8">
+        <PrescriptionDetailCard prescription={prescription} readonly />
+
         {prescription.dosage_type === "TITRATED" && (
           <NumericWithUnitsFormField
             name="dosage"

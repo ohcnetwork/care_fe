@@ -46,7 +46,6 @@ const AssetsList = () => {
   const [facility, setFacility] = useState<FacilityModel>();
   const [asset_type, setAssetType] = useState<string>();
   const [status, setStatus] = useState<string>();
-  const [facilityName, setFacilityName] = useState<string>();
   const [asset_class, setAssetClass] = useState<string>();
   const [importAssetModalOpen, setImportAssetModalOpen] = useState(false);
   const assetsExist = assets.length > 0 && Object.keys(assets[0]).length > 0;
@@ -66,7 +65,7 @@ const AssetsList = () => {
     status: qParams.status || "",
   };
 
-  useQuery(routes.listAssets, {
+  const { loading } = useQuery(routes.listAssets, {
     query: params,
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data) {
@@ -76,13 +75,12 @@ const AssetsList = () => {
     },
   });
 
-  useQuery(routes.getAnyFacility, {
+  const { data: facilityObject } = useQuery(routes.getAnyFacility, {
     pathParams: { id: qParams.facility },
     onResponse: ({ res, data }) => {
       if (res?.status === 200 && data) {
         setFacility(data);
         setSelectedFacility(data);
-        setFacilityName(data.name);
       }
     },
     prefetch: !!qParams.facility,
@@ -100,7 +98,7 @@ const AssetsList = () => {
     setAssetClass(qParams.asset_class);
   }, [qParams.asset_class]);
 
-  const { data: location } = useQuery(routes.getFacilityAssetLocation, {
+  const { data: locationObject } = useQuery(routes.getFacilityAssetLocation, {
     pathParams: {
       facility_external_id: String(qParams.facility),
       external_id: String(qParams.location),
@@ -178,7 +176,13 @@ const AssetsList = () => {
     );
 
   let manageAssets = null;
-  if (assetsExist) {
+  if (loading) {
+    manageAssets = (
+      <div className="col-span-3 w-full py-8 text-center">
+        <Loading />
+      </div>
+    );
+  } else if (assetsExist) {
     manageAssets = (
       <div className="grid grid-cols-1 gap-2 md:-mx-8 md:grid-cols-2 lg:grid-cols-3">
         {assets.map((asset: AssetData) => (
@@ -311,7 +315,7 @@ const AssetsList = () => {
         <CountBlock
           text="Total Assets"
           count={totalCount}
-          loading={isLoading}
+          loading={loading}
           icon="l-monitor-heart-rate"
           className="flex-1"
         />
@@ -365,12 +369,20 @@ const AssetsList = () => {
         <>
           <FilterBadges
             badges={({ badge, value }) => [
-              value("Facility", "facility", facilityName ?? ""),
+              value(
+                "Facility",
+                "facility",
+                qParams.facility && facilityObject?.name
+              ),
               badge("Name/Serial No./QR ID", "search"),
               value("Asset Type", "asset_type", asset_type ?? ""),
               value("Asset Class", "asset_class", asset_class ?? ""),
               value("Status", "status", status?.replace(/_/g, " ") ?? ""),
-              value("Location", "location", location?.name ?? ""),
+              value(
+                "Location",
+                "location",
+                qParams.location && locationObject?.name
+              ),
               value(
                 "Warranty AMC End Of Validity Before",
                 "warranty_amc_end_of_validity_before",

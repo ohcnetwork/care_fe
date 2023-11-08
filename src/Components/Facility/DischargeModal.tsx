@@ -12,7 +12,7 @@ import DateFormField from "../Form/FormFields/DateFormField";
 import DialogModal from "../Common/Dialog";
 import { FieldChangeEvent } from "../Form/FormFields/Utils";
 import { FieldLabel } from "../Form/FormFields/FormField";
-import { HCXActions, PrescriptionActions } from "../../Redux/actions";
+import { HCXActions } from "../../Redux/actions";
 import { HCXClaimModel } from "../HCX/models";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
 import TextAreaFormField from "../Form/FormFields/TextAreaFormField";
@@ -183,8 +183,6 @@ const DischargeModal = ({
     });
   };
 
-  const prescriptionActions = PrescriptionActions(consultationData.id ?? "");
-
   const handleFacilitySelect = (selected: FacilityModel) => {
     setFacility(selected);
     const { id, name } = selected || {};
@@ -238,7 +236,7 @@ const DischargeModal = ({
               setSelected={(selected) =>
                 handleFacilitySelect(selected as FacilityModel)
               }
-              selected={facility}
+              selected={facility ?? null}
               showAll
               freeText
               multiple={false}
@@ -284,18 +282,11 @@ const DischargeModal = ({
 
             <div className="mb-4">
               <FieldLabel>Discharge Prescription Medications</FieldLabel>
-              <PrescriptionBuilder
-                actions={prescriptionActions}
-                prescription_type="DISCHARGE"
-              />
+              <PrescriptionBuilder prescription_type="DISCHARGE" />
             </div>
             <div className="mb-4">
               <FieldLabel>Discharge PRN Prescriptions</FieldLabel>
-              <PrescriptionBuilder
-                actions={prescriptionActions}
-                prescription_type="DISCHARGE"
-                is_prn
-              />
+              <PrescriptionBuilder prescription_type="DISCHARGE" is_prn />
             </div>
           </div>
         )}

@@ -3,7 +3,6 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import ReadMore from "../Common/components/Readmore";
 import ButtonV2 from "../Common/components/ButtonV2";
-import { PrescriptionActions } from "../../Redux/actions";
 import { useTranslation } from "react-i18next";
 import RecordMeta from "../../CAREUI/display/RecordMeta";
 
@@ -14,7 +13,6 @@ export default function PrescriptionDetailCard({
   prescription: Prescription;
   readonly?: boolean;
   children?: React.ReactNode;
-  actions: ReturnType<ReturnType<typeof PrescriptionActions>["prescription"]>;
   onDiscontinueClick?: () => void;
   onAdministerClick?: () => void;
   selected?: boolean;
@@ -130,22 +128,23 @@ export default function PrescriptionDetailCard({
           {prescription.dosage_type === "PRN" ? (
             <>
               <Detail
-                className="col-span-10 md:col-span-5"
+                className="col-span-10 md:col-span-6"
                 label={t("indicator")}
               >
                 {prescription.indicator}
               </Detail>
               <Detail
-                className="col-span-5 md:col-span-2"
+                className="col-span-10 md:col-span-2"
                 label={t("max_dosage_24_hrs")}
               >
                 {prescription.max_dosage}
               </Detail>
               <Detail
-                className="col-span-5 md:col-span-2"
+                className="col-span-10 md:col-span-2"
                 label={t("min_time_bw_doses")}
               >
-                {prescription.max_dosage}
+                {prescription.min_hours_between_doses &&
+                  prescription.min_hours_between_doses + " hrs."}
               </Detail>
             </>
           ) : (
@@ -189,7 +188,7 @@ export default function PrescriptionDetailCard({
         </div>
 
         <div className="flex flex-col gap-1 text-xs text-gray-600 md:mt-3 md:flex-row md:items-center">
-          <span className="flex gap-1">
+          <span className="flex gap-1 font-medium">
             Prescribed
             <RecordMeta
               time={prescription.created_date}
@@ -224,7 +223,9 @@ const Detail = (props: {
         {props.children ? (
           <span className="font-medium">{props.children}</span>
         ) : (
-          <span className="italic text-gray-500">{t("not_specified")}</span>
+          <span className="whitespace-nowrap text-xs font-medium text-gray-500">
+            {t("not_specified")}
+          </span>
         )}
       </div>
     </div>

@@ -92,6 +92,10 @@ export const relativeDate = (date: DateLike) => {
   return `${obj.fromNow()} at ${obj.format(TIME_FORMAT)}`;
 };
 
+export const formatName = (user: { first_name: string; last_name: string }) => {
+  return `${user.first_name} ${user.last_name}`;
+};
+
 export const relativeTime = (time?: DateLike) => {
   return `${dayjs(time).fromNow()}`;
 };
@@ -107,8 +111,35 @@ export const handleSignOut = (forceReload: boolean) => {
   Object.values(LocalStorageKeys).forEach((key) =>
     localStorage.removeItem(key)
   );
-  navigate("/");
-  if (forceReload) window.location.reload();
+  const redirectURL = new URLSearchParams(window.location.search).get(
+    "redirect"
+  );
+  const url = redirectURL ? `/?redirect=${redirectURL}` : "/";
+  if (forceReload) {
+    window.location.href = url;
+  } else {
+    navigate(url);
+  }
+};
+
+export const handleRedirection = () => {
+  const redirectParam = new URLSearchParams(window.location.search).get(
+    "redirect"
+  );
+  try {
+    if (redirectParam) {
+      const redirectURL = new URL(redirectParam);
+
+      if (redirectURL.origin === window.location.origin) {
+        const newPath = redirectURL.pathname + redirectURL.search;
+        window.location.href = `${window.location.origin}${newPath}`;
+        return;
+      }
+    }
+    window.location.href = "/facility";
+  } catch {
+    window.location.href = "/facility";
+  }
 };
 
 /**

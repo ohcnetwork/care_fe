@@ -24,7 +24,7 @@ function useContextualized<TItem>() {
   const ctx = useContext(context);
 
   if (ctx === null) {
-    throw new Error("PaginatedList must be used within a PaginatedList");
+    throw new Error("Component must be used within a PaginatedList");
   }
 
   return ctx as PaginatedListContext<TItem>;
@@ -33,7 +33,10 @@ function useContextualized<TItem>() {
 interface Props<TItem> extends QueryOptions<PaginatedResponse<TItem>> {
   route: QueryRoute<PaginatedResponse<TItem>>;
   perPage?: number;
-  children: (ctx: PaginatedListContext<TItem>) => JSX.Element | JSX.Element[];
+  children: (
+    ctx: PaginatedListContext<TItem>,
+    query: ReturnType<typeof useQuery<PaginatedResponse<TItem>>>
+  ) => JSX.Element | JSX.Element[];
 }
 
 export default function PaginatedList<TItem extends object>({
@@ -42,11 +45,15 @@ export default function PaginatedList<TItem extends object>({
   perPage = DEFAULT_PER_PAGE_LIMIT,
   ...queryOptions
 }: Props<TItem>) {
+  const [currentPage, setPage] = useState(1);
   const query = useQuery(route, {
     ...queryOptions,
-    query: { ...queryOptions.query, limit: perPage },
+    query: {
+      ...queryOptions.query,
+      limit: perPage,
+      offset: (currentPage - 1) * perPage,
+    },
   });
-  const [currentPage, setPage] = useState(1);
 
   const items = query.data?.results ?? [];
 
@@ -55,7 +62,7 @@ export default function PaginatedList<TItem extends object>({
       value={{ ...query, items, perPage, currentPage, setPage }}
     >
       <context.Consumer>
-        {(ctx) => children(ctx as PaginatedListContext<TItem>)}
+        {(ctx) => children(ctx as PaginatedListContext<TItem>, query)}
       </context.Consumer>
     </context.Provider>
   );

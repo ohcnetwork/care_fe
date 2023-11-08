@@ -1,5 +1,10 @@
 import CareIcon from "../icons/CareIcon";
-import { formatDateTime, isUserOnline, relativeTime } from "../../Utils/utils";
+import {
+  formatDateTime,
+  formatName,
+  isUserOnline,
+  relativeTime,
+} from "../../Utils/utils";
 import { ReactNode } from "react";
 
 interface Props {
@@ -30,7 +35,7 @@ const RecordMeta = ({ time, user, prefix, className, inlineUser }: Props) => {
           <span className="flex items-center gap-1">
             by
             <CareIcon className="care-l-user" />
-            {user.first_name} {user.last_name}
+            {formatName(user)}
             {isOnline && (
               <div className="h-1.5 w-1.5 rounded-full bg-primary-400" />
             )}
@@ -48,9 +53,7 @@ const RecordMeta = ({ time, user, prefix, className, inlineUser }: Props) => {
         {user && inlineUser && <span>by</span>}
         {user && <CareIcon className="care-l-user" />}
         {user && inlineUser && (
-          <span className="font-medium">
-            {user.first_name} {user.last_name}
-          </span>
+          <span className="font-medium">{formatName(user)}</span>
         )}
       </div>
     );

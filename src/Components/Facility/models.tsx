@@ -52,10 +52,10 @@ export interface FacilityModel {
   ward_object?: WardModel;
   modified_date?: string;
   created_date?: string;
-  state: number;
-  district: number;
-  local_body: number;
-  ward: number;
+  state?: number;
+  district?: number;
+  local_body?: number;
+  ward?: number;
 }
 
 export interface CapacityModal {
@@ -146,6 +146,7 @@ export interface ConsultationModel {
   death_datetime?: string;
   death_confirmed_doctor?: string;
   is_readmission?: boolean;
+  medico_legal_case?: boolean;
 }
 export interface PatientStatsModel {
   id?: number;
