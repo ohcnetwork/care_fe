@@ -442,7 +442,7 @@ export default function ManageUsers() {
                   ) && (
                     <div className="flex-col md:flex-row">
                       <ButtonV2
-                        id="skills"
+                        id="avg-workinghour"
                         className="flex w-full items-center md:w-full"
                         onClick={() => {
                           setExpandWorkingHours(true);
