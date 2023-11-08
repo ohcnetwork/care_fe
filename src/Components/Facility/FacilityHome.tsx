@@ -639,6 +639,7 @@ export const FacilityHome = (props: any) => {
                 <span className="text-sm">Add Details of a Patient</span>
               </ButtonV2>
               <ButtonV2
+                id="view-patient-facility-list"
                 variant="primary"
                 ghost
                 border
