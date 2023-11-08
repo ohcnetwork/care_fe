@@ -10,10 +10,13 @@ describe("Manage User", () => {
   const usernametolinkfacilitydoc1 = "dummydoctor4";
   const usernametolinkfacilitydoc2 = "dummydoctor5";
   const usernametolinkfacilitydoc3 = "dummydoctor6";
-  const usernametolinkskill = "devdistrictadmin";
+  const usernametolinkskill = "devdoctor";
+  const usernameforworkinghour = "devdistrictadmin";
   const usernamerealname = "Dummy Doctor";
   const facilitytolinkusername = "Dummy Shifting Center";
+  const facilitytolinkskill = "Dummy Facility 1";
   const workinghour = "23";
+  const linkedskill = "General Medicine";
 
   before(() => {
     loginPage.loginAsDisctrictAdmin();
@@ -25,10 +28,49 @@ describe("Manage User", () => {
     cy.awaitUrl("/users");
   });
 
-  it("add working hour for a user and verify its reflection in card and user profile", () => {
-    // verify mandatory field error and select working hour for a user
+  it("linking skills for a  users and verify its reflection in profile", () => {
+    // select the district user and select one skill link and verify its profile reflection
+    userPage.typeInSearchInput(usernameforworkinghour);
+    userPage.checkUsernameText(usernameforworkinghour);
+    manageUserPage.clicklinkedskillbutton();
+    manageUserPage.typeSkill(linkedskill);
+    manageUserPage.selectFacilityFromDropdown(linkedskill);
+    manageUserPage.clickAddSkillButton();
+    manageUserPage.clickCloseSlideOver();
+    manageUserPage.navigateToProfile();
+    manageUserPage.assertSkillInAlreadyLinkedSkills(linkedskill);
+  });
+
+  it("linking skills for a doctor users and verify its reflection in doctor connect", () => {
+    // select a doctor user and link and unlink same skill twice and verify the badge is only shown once in doctor connect
     userPage.typeInSearchInput(usernametolinkskill);
     userPage.checkUsernameText(usernametolinkskill);
+    manageUserPage.clicklinkedskillbutton();
+    manageUserPage.typeSkill(linkedskill);
+    manageUserPage.selectFacilityFromDropdown(linkedskill);
+    manageUserPage.clickAddSkillButton();
+    manageUserPage.clickCloseSlideOver();
+    manageUserPage.clicklinkedskillbutton();
+    manageUserPage.assertSkillInAddedUserSkills(linkedskill);
+    manageUserPage.clickUnlinkSkill();
+    manageUserPage.clickSubmit();
+    manageUserPage.typeSkill(linkedskill);
+    manageUserPage.selectFacilityFromDropdown(linkedskill);
+    manageUserPage.clickAddSkillButton();
+    manageUserPage.clickCloseSlideOver();
+    // verifying the doctor connect
+    manageUserPage.navigateToFacility();
+    manageUserPage.typeFacilitySearch(facilitytolinkskill);
+    manageUserPage.assertFacilityInCard(facilitytolinkskill);
+    manageUserPage.clickFacilityPatients();
+    manageUserPage.clickDoctorConnectButton();
+    manageUserPage.assertSkillIndoctorconnect(linkedskill);
+  });
+
+  it("add working hour for a user and verify its reflection in card and user profile", () => {
+    // verify mandatory field error and select working hour for a user
+    userPage.typeInSearchInput(usernameforworkinghour);
+    userPage.checkUsernameText(usernameforworkinghour);
     manageUserPage.clicksetaveragehourbutton();
     manageUserPage.clearweeklyhourfield();
     manageUserPage.clickSubmit();

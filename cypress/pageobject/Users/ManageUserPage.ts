@@ -103,8 +103,40 @@ export class ManageUserPage {
     cy.get("#facility-patients").click();
   }
 
+  clicklinkedskillbutton() {
+    cy.get("#skills").click();
+  }
+
+  clickAddSkillButton() {
+    cy.get("#add-skill-button").click();
+  }
+
+  assertSkillInAlreadyLinkedSkills(skillName) {
+    cy.get("#already-linked-skills")
+      .contains(skillName)
+      .should("have.length", 1);
+  }
+
+  assertSkillIndoctorconnect(skillName) {
+    cy.get("#doctor-connect-home-staff")
+      .contains(skillName)
+      .should("have.length", 1);
+  }
+
+  typeSkill(skillName) {
+    cy.get("#select-skill").click().type(skillName);
+  }
+
   clickDoctorConnectButton() {
     cy.get("#doctor-connect-patient-button").click();
+  }
+
+  clickUnlinkSkill() {
+    cy.get("#unlink-skill").click();
+  }
+
+  assertSkillInAddedUserSkills(skillName) {
+    cy.get("#added-user-skills").should("contain", skillName);
   }
 
   assertDoctorConnectVisibility(realName) {
