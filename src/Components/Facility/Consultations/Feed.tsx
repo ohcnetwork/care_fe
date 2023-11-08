@@ -459,9 +459,9 @@ export const Feed: React.FC<IFeedProps> = ({ consultationId, facilityId }) => {
                   getCameraStatus({});
                 }}
                 className={classNames(
-                  "block border border-gray-500 px-4 py-2",
+                  "block border border-gray-500 px-4 py-2 first:rounded-l last:rounded-r",
                   currentPreset === preset
-                    ? "rounded border-primary-500 bg-primary-500 text-white"
+                    ? "border-primary-500 bg-primary-500 text-white"
                     : "bg-transparent"
                 )}
               >
