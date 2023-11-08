@@ -108,7 +108,9 @@ export class ManageUserPage {
   }
 
   clickAddSkillButton() {
+    cy.intercept("GET", "**/api/v1/skill/**").as("getSkills");
     cy.get("#add-skill-button").click();
+    cy.wait("@getSkills").its("response.statusCode").should("eq", 200);
   }
 
   assertSkillInAlreadyLinkedSkills(skillName) {

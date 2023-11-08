@@ -50,6 +50,7 @@ describe("Manage User", () => {
     manageUserPage.selectFacilityFromDropdown(linkedskill);
     manageUserPage.clickAddSkillButton();
     manageUserPage.clickCloseSlideOver();
+    cy.wait(5000); // temporary hack to fix the failure
     manageUserPage.clicklinkedskillbutton();
     manageUserPage.assertSkillInAddedUserSkills(linkedskill);
     manageUserPage.clickUnlinkSkill();
