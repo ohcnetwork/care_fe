@@ -1,12 +1,6 @@
-import { useDispatch } from "react-redux";
-import useFullscreen from "../../Common/hooks/useFullscreen";
 import { Fragment, useContext, useEffect, useState } from "react";
-import {
-  getPermittedFacility,
-  listPatientAssetBeds,
-} from "../../Redux/actions";
-import HL7PatientVitalsMonitor from "../VitalsMonitor/HL7PatientVitalsMonitor";
 import useFilters from "../../Common/hooks/useFilters";
+import useFullscreen from "../../Common/hooks/useFullscreen";
 import { FacilityModel } from "./models";
 import Loading from "../Common/Loading";
 import Page from "../Common/components/Page";
@@ -16,14 +10,17 @@ import { classNames } from "../../Utils/utils";
 import { LocationSelect } from "../Common/LocationSelect";
 import Pagination from "../Common/Pagination";
 import { SidebarShrinkContext } from "../Common/Sidebar/Sidebar";
-import { PatientAssetBed } from "../Assets/AssetTypes";
+import { AssetData } from "../Assets/AssetTypes";
 import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField";
 import CheckBoxFormField from "../Form/FormFields/CheckBoxFormField";
 import { useTranslation } from "react-i18next";
 import { SortOption } from "../Common/SortDropdown";
 import { SelectFormField } from "../Form/FormFields/SelectFormField";
-import useVitalsAspectRatioConfig from "../VitalsMonitor/useVitalsAspectRatioConfig";
+import LiveFeedTile from "./LiveFeedTile";
+import { getCameraConfig } from "../../Utils/transformUtils";
+import { getPermittedFacility, listAssets } from "../../Redux/actions";
+import { useDispatch } from "react-redux";
 
 const PER_PAGE_LIMIT = 6;
 
@@ -38,19 +35,49 @@ interface Props {
   facilityId: string;
 }
 
-export default function CentralNursingStation({ facilityId }: Props) {
+const getOrderingList = async (
+  facilityId: string,
+  setOrdering: (order: string) => void
+) => {
+  const orderData = localStorage.getItem("live-feed-order");
+  if (orderData) {
+    const order = JSON.parse(orderData);
+    const orderValue = order.find((item: any) => item.facility === facilityId);
+    setOrdering(orderValue.order);
+  }
+};
+
+const setOrderingList = async (facilityId: string, order: string) => {
+  const orderData = localStorage.getItem("live-feed-order") || "[]";
+  const orderList = JSON.parse(orderData);
+  const index = orderList.findIndex(
+    (item: any) => item.facility === facilityId
+  );
+  if (index !== -1) {
+    orderList[index].order = order;
+  } else {
+    orderList.push({ facility: facilityId, order });
+  }
+  localStorage.setItem("live-feed-order", JSON.stringify(orderList));
+};
+
+export default function LiveFeedScreen({ facilityId }: Props) {
   const { t } = useTranslation();
   const dispatch = useDispatch<any>();
   const [isFullscreen, setFullscreen] = useFullscreen();
   const sidebar = useContext(SidebarShrinkContext);
 
-  const [facilityObject, setFacilityObject] = useState<FacilityModel>();
-  const [data, setData] =
-    useState<Parameters<typeof HL7PatientVitalsMonitor>[0][]>();
+  const [facility, setFacility] = useState<FacilityModel>();
+  const [assets, setAssets] = useState<AssetData[]>();
   const [totalCount, setTotalCount] = useState(0);
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
+  const [ordering, setOrdering] = useState<string>("bed__name");
+
+  const [refresh_presets_hash, setRefreshPresetsHash] = useState<number>(
+    Number(new Date())
+  );
 
   // To automatically collapse sidebar.
   useEffect(() => {
@@ -62,53 +89,49 @@ export default function CentralNursingStation({ facilityId }: Props) {
   }, []);
 
   useEffect(() => {
+    getOrderingList(facilityId, setOrdering);
+  }, [facilityId]);
+
+  useEffect(() => {
     async function fetchFacilityOrObject() {
-      if (facilityObject) return facilityObject;
+      if (facility) return facility;
       const res = await dispatch(getPermittedFacility(facilityId));
       if (res.status !== 200) return;
-      setFacilityObject(res.data);
+      setFacility(res.data);
       return res.data as FacilityModel;
     }
 
     async function fetchData() {
-      setData(undefined);
+      setAssets(undefined);
 
       const filters = {
         ...qParams,
         page: qParams.page || 1,
         limit: PER_PAGE_LIMIT,
         offset: (qParams.page ? qParams.page - 1 : 0) * PER_PAGE_LIMIT,
-        asset_class: "HL7MONITOR",
-        ordering: qParams.ordering || "bed__name",
-        bed_is_occupied: qParams.bed_is_occupied ?? true,
+        asset_class: "ONVIF",
+        facility: facilityId || "",
+        location: qParams.location,
+        ordering: qParams.ordering || ordering,
+        bed_is_occupied: qParams.bed_is_occupied,
       };
 
       const [facilityObj, res] = await Promise.all([
         fetchFacilityOrObject(),
-        dispatch(listPatientAssetBeds(facilityId, filters)),
+        dispatch(listAssets(filters)),
       ]);
 
       if (!facilityObj || res.status !== 200) {
         return;
       }
+      console.log(facilityObj, res.data);
+      const entries = res.data.results;
 
-      const entries = res.data.results as PatientAssetBed[];
-
-      setTotalCount(res.data.count);
-      setData(
-        entries.map(({ patient, asset, bed }) => {
-          const middleware =
-            asset.meta?.middleware_hostname || facilityObj?.middleware_address;
-          const local_ip_address = asset.meta?.local_ip_address;
-
-          return {
-            patientAssetBed: { patient, asset, bed },
-            socketUrl: `wss://${middleware}/observations/${local_ip_address}`,
-          };
-        })
-      );
+      setTotalCount(entries.length);
+      setAssets(entries);
     }
     fetchData();
+    setRefreshPresetsHash(Number(new Date()));
   }, [
     dispatch,
     facilityId,
@@ -118,20 +141,9 @@ export default function CentralNursingStation({ facilityId }: Props) {
     qParams.bed_is_occupied,
   ]);
 
-  const { config, hash } = useVitalsAspectRatioConfig({
-    default: 6 / 11,
-    vs: 10 / 11,
-    sm: 17 / 11,
-    md: 19 / 11,
-    lg: 11 / 11,
-    xl: 13 / 11,
-    "2xl": 16 / 11,
-    "3xl": 12 / 11,
-  });
-
   return (
     <Page
-      title="Central Nursing Station"
+      title="Live Monitoring"
       backUrl={`/facility/${facilityId}/`}
       noImplicitPadding
       breadcrumbs={false}
@@ -158,8 +170,8 @@ export default function CentralNursingStation({ facilityId }: Props) {
                   <div className="rounded-t-lg bg-gray-100 px-6 py-4">
                     <div className="flow-root rounded-md">
                       <span className="block text-sm text-gray-800">
-                        <span className="font-bold ">{totalCount}</span> Vitals
-                        Monitor present
+                        <span className="font-bold ">{totalCount}</span> Camera
+                        present
                       </span>
                     </div>
                   </div>
@@ -196,8 +208,11 @@ export default function CentralNursingStation({ facilityId }: Props) {
                       name="ordering"
                       label={t("sort_by")}
                       required
-                      value={qParams.ordering || "bed__name"}
-                      onChange={({ value }) => updateQuery({ ordering: value })}
+                      value={qParams.ordering || ordering}
+                      onChange={({ value }) => {
+                        updateQuery({ ordering: value });
+                        setOrderingList(facilityId, value);
+                      }}
                       options={SORT_OPTIONS}
                       optionLabel={({ value }) => t("SortOptions." + value)}
                       optionIcon={({ isAscending }) => (
@@ -215,7 +230,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
                     />
                     <CheckBoxFormField
                       name="bed_is_occupied"
-                      label="Hide Monitors without Patient"
+                      label="Hide Cameras without Patient"
                       value={
                         qParams.bed_is_occupied === "true" ||
                         qParams.bed_is_occupied === undefined
@@ -262,24 +277,22 @@ export default function CentralNursingStation({ facilityId }: Props) {
         </div>
       }
     >
-      {data === undefined ? (
+      {assets === undefined ? (
         <Loading />
-      ) : data.length === 0 ? (
+      ) : assets.length === 0 ? (
         <div className="flex h-[80vh] w-full items-center justify-center text-center text-black">
-          No Vitals Monitor present in this location or facility.
+          No Camera present in this location or facility.
         </div>
       ) : (
-        <div className="mt-1 grid grid-cols-1 gap-1 lg:grid-cols-2 3xl:grid-cols-3">
-          {data.map((props) => (
-            <div className="overflow-hidden text-clip">
-              <HL7PatientVitalsMonitor
-                patientCurrentBedAssignmentDate={
-                  props.patientAssetBed?.patient?.last_consultation?.current_bed
-                    ?.start_date
-                }
-                key={`${props.patientAssetBed?.bed.id}-${hash}`}
-                {...props}
-                config={config}
+        <div className="mt-1 grid grid-cols-1 gap-2 pl-4 xl:grid-cols-1 3xl:grid-cols-2">
+          {assets.map((asset, idx) => (
+            <div className="text-clip" key={idx}>
+              {/* <LiveFeedTile assetId={asset.asset.id} key={asset?.bed.id} /> */}
+              <LiveFeedTile
+                middlewareHostname={facility?.middleware_address}
+                asset={getCameraConfig(asset)}
+                showRefreshButton={true}
+                refreshPresetsHash={refresh_presets_hash}
               />
             </div>
           ))}

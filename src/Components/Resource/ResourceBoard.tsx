@@ -8,8 +8,9 @@ import { ExportButton } from "../Common/Export";
 import dayjs from "../../Utils/dayjs";
 import useQuery from "../../Utils/request/useQuery";
 import routes from "../../Redux/api";
-
-const limit = 14;
+import { PaginatedResponse } from "../../Utils/request/types";
+import { IResource } from "./models";
+import request from "../../Utils/request/request";
 
 interface boardProps {
   board: string;
@@ -153,8 +154,7 @@ export default function ResourceBoard({
   filterProp,
   formatFilter,
 }: boardProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState({ board: false, more: false });
+  const [isLoading, setIsLoading] = useState({ board: "BOARD", more: false });
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "resource-card",
     drop: (item: any) => {
@@ -165,24 +165,10 @@ export default function ResourceBoard({
     collect: (monitor) => ({ isOver: !!monitor.isOver() }),
   }));
   const [offset, setOffSet] = useState(0);
-
-  const { data, refetch } = useQuery(routes.listResourceRequests, {
-    query: formatFilter({
-      ...filterProp,
-      status: board,
-      offset: offset,
-    }),
-    onResponse: ({ res, data }) => {
-      if (res && data) {
-        setCurrentPage(1);
-      }
-      setIsLoading((loading) => reduceLoading("COMPLETE", loading));
-    },
-  });
+  const [data, setData] = useState<PaginatedResponse<IResource>>();
 
   useEffect(() => {
     setIsLoading((loading) => reduceLoading("BOARD", loading));
-    refetch();
   }, [
     board,
     filterProp.facility,
@@ -197,25 +183,50 @@ export default function ResourceBoard({
     filterProp.ordering,
   ]);
 
-  const handlePagination = (page: number, limit: number) => {
-    const offset = (page - 1) * limit;
-    setOffSet(offset);
-    setCurrentPage(page);
+  useQuery(routes.listResourceRequests, {
+    query: formatFilter({
+      ...filterProp,
+      status: board,
+    }),
+    onResponse: ({ res, data: listResourceData }) => {
+      if (res?.ok && listResourceData) {
+        setData(listResourceData);
+      }
+      setIsLoading((loading) => reduceLoading("COMPLETE", loading));
+    },
+  });
+
+  const handlePagination = async () => {
     setIsLoading((loading) => reduceLoading("MORE", loading));
-    refetch();
+    setOffSet(offset + 14);
+    const { res, data: newPageData } = await request(
+      routes.listResourceRequests,
+      {
+        query: formatFilter({
+          ...filterProp,
+          status: board,
+          offset: offset,
+        }),
+      }
+    );
+    if (res?.ok && newPageData) {
+      setData((prev) =>
+        prev
+          ? { ...prev, results: [...prev.results, ...newPageData.results] }
+          : newPageData
+      );
+    }
     setIsLoading((loading) => reduceLoading("COMPLETE", loading));
   };
 
   const boardFilter = (filter: string) => {
-    return (
-      data &&
-      data?.results
-        .filter(({ status }) => status === filter)
-        .map((resource: any) => (
-          <ResourceCard key={`resource_${resource.id}`} resource={resource} />
-        ))
-    );
+    return data?.results
+      .filter(({ status }) => status === filter)
+      .map((resource: any) => (
+        <ResourceCard key={`resource_${resource.id}`} resource={resource} />
+      ));
   };
+
   return (
     <div
       ref={drop}
@@ -272,7 +283,7 @@ export default function ResourceBoard({
             </div>
           ) : (
             <button
-              onClick={(_) => handlePagination(currentPage + 1, limit)}
+              onClick={(_) => handlePagination()}
               className="mx-auto my-4 rounded-md bg-gray-100 p-2 px-4 hover:bg-white"
             >
               More...
