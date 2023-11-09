@@ -14,16 +14,7 @@ import {
   getBedTypes,
 } from "../../Common/constants";
 import DropdownMenu, { DropdownItem } from "../Common/components/Menu";
-import {
-  deleteFacility,
-  getPermittedFacility,
-  getTriageInfo,
-  listCapacity,
-  listDoctor,
-} from "../../Redux/actions";
-import { statusType, useAbortableEffect } from "../../Common/utils";
-import { lazy, useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
+import { lazy, useEffect, useState } from "react";
 import { BedCapacity } from "./BedCapacity";
 import BedTypeCard from "./BedTypeCard";
 import ButtonV2 from "../Common/components/ButtonV2";
@@ -45,6 +36,9 @@ import useConfig from "../../Common/hooks/useConfig";
 import { useMessageListener } from "../../Common/hooks/useMessageListener";
 import { useTranslation } from "react-i18next";
 import useAuthUser from "../../Common/hooks/useAuthUser.js";
+import request from "../../Utils/request/request.js";
+import routes from "../../Redux/api.js";
+import useQuery from "../../Utils/request/useQuery.js";
 
 const Loading = lazy(() => import("../Common/Loading"));
 
@@ -61,7 +55,6 @@ export const getFacilityFeatureIcon = (featureId: number) => {
 export const FacilityHome = (props: any) => {
   const { t } = useTranslation();
   const { facilityId } = props;
-  const dispatch: any = useDispatch();
   const [facilityData, setFacilityData] = useState<FacilityModel>({});
   const [capacityData, setCapacityData] = useState<Array<CapacityModal>>([]);
   const [doctorData, setDoctorData] = useState<Array<DoctorModal>>([]);
@@ -80,32 +73,60 @@ export const FacilityHome = (props: any) => {
 
   useMessageListener((data) => console.log(data));
 
-  const fetchData = useCallback(
-    async (status: statusType) => {
+  const { res: permittedFacilityRes, data: permittedFacilityData } = useQuery(
+    routes.getPermittedFacility,
+    {
+      pathParams: {
+        id: facilityId,
+      },
+    }
+  );
+
+  const {
+    res: capacityRes,
+    data: capacityFetchData,
+    refetch: capacityFetch,
+  } = useQuery(routes.getCapacity, {
+    pathParams: { facilityId },
+  });
+
+  const {
+    res: doctorRes,
+    data: doctorFetchData,
+    refetch: doctorFetch,
+  } = useQuery(routes.listDoctor, {
+    pathParams: { facilityId: facilityId },
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
       setIsLoading(true);
-      const facilityRes = await dispatch(getPermittedFacility(facilityId));
-      if (facilityRes) {
-        const [capacityRes, doctorRes, triageRes] = await Promise.all([
-          dispatch(listCapacity({}, { facilityId })),
-          dispatch(listDoctor({}, { facilityId })),
-          dispatch(getTriageInfo({ facilityId })),
-        ]);
-        if (!status.aborted) {
+      if (permittedFacilityRes?.ok) {
+        capacityFetch();
+        doctorFetch();
+        const { res: triageRes, data: triageData } = await request(
+          routes.getTriage,
+          {
+            pathParams: { facilityId },
+          }
+        );
+
+        if (permittedFacilityRes) {
           setIsLoading(false);
-          if (!facilityRes.data) {
+          if (!permittedFacilityData) {
             Notification.Error({
               msg: "Something went wrong..!",
             });
           } else {
-            setFacilityData(facilityRes.data);
-            if (capacityRes && capacityRes.data) {
-              setCapacityData(capacityRes.data.results);
+            setFacilityData(permittedFacilityData);
+            if (capacityRes?.ok && capacityFetchData) {
+              setCapacityData(capacityFetchData.results);
             }
-            if (doctorRes && doctorRes.data) {
-              setDoctorData(doctorRes.data.results);
+            if (doctorRes?.ok && doctorFetchData) {
+              setDoctorData(doctorFetchData.results);
               // calculating total doctors count
               let totalCount = 0;
-              doctorRes.data.results.map((doctor: DoctorModal) => {
+              [doctorFetchData].map((doctor: DoctorModal) => {
                 if (doctor.count) {
                   totalCount += doctor.count;
                 }
@@ -113,12 +134,12 @@ export const FacilityHome = (props: any) => {
               setTotalDoctors(totalCount);
             }
             if (
-              triageRes &&
-              triageRes.data &&
-              triageRes.data.results &&
-              triageRes.data.results.length
+              triageRes?.ok &&
+              triageData &&
+              triageData.results &&
+              triageData.results.length
             ) {
-              setPatientStatsData(triageRes.data.results);
+              setPatientStatsData(triageData.results);
             }
           }
         }
@@ -126,30 +147,25 @@ export const FacilityHome = (props: any) => {
         navigate("/not-found");
         setIsLoading(false);
       }
-    },
-    [dispatch, facilityId]
-  );
-
-  useAbortableEffect(
-    (status: statusType) => {
-      fetchData(status);
-    },
-    [dispatch, fetchData]
-  );
+    };
+    if (permittedFacilityRes?.ok) fetchData();
+  }, [facilityId, permittedFacilityRes, permittedFacilityData]);
 
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
   };
 
   const handleDeleteSubmit = async () => {
-    const res = await dispatch(deleteFacility(facilityId));
-    if (res?.status === 204) {
+    const { res, data } = await request(routes.deleteFacility, {
+      pathParams: { id: facilityId },
+    });
+    if (res?.ok) {
       Notification.Success({
         msg: "Facility deleted successfully",
       });
     } else {
       Notification.Error({
-        msg: "Error while deleting Facility: " + (res?.data?.detail || ""),
+        msg: "Error while deleting Facility: " + (data?.detail || ""),
       });
     }
     navigate("/facility");
@@ -208,12 +224,10 @@ export const FacilityHome = (props: any) => {
                 total={res.total_capacity}
                 lastUpdated={res.modified_date}
                 removeBedType={removeCurrentBedType}
-                handleUpdate={async () => {
-                  const capacityRes = await dispatch(
-                    listCapacity({}, { facilityId })
-                  );
-                  if (capacityRes && capacityRes.data) {
-                    setCapacityData(capacityRes.data.results);
+                handleUpdate={() => {
+                  capacityFetch();
+                  if (capacityRes?.ok && capacityFetchData) {
+                    setCapacityData(capacityFetchData.results);
                   }
                 }}
               />
@@ -263,14 +277,12 @@ export const FacilityHome = (props: any) => {
               facilityId={facilityId}
               key={`bed_${data.id}`}
               handleUpdate={async () => {
-                const doctorRes = await dispatch(
-                  listDoctor({}, { facilityId })
-                );
-                if (doctorRes && doctorRes.data) {
-                  setDoctorData(doctorRes.data.results);
+                doctorFetch();
+                if (doctorRes?.ok && doctorFetchData) {
+                  setDoctorData(doctorFetchData.results);
                   // update total doctors count
                   let totalCount = 0;
-                  doctorRes.data.results.map((doctor: DoctorModal) => {
+                  doctorFetchData.results.map((doctor: DoctorModal) => {
                     if (doctor.count) {
                       totalCount += doctor.count;
                     }
@@ -750,11 +762,9 @@ export const FacilityHome = (props: any) => {
             facilityId={facilityId}
             handleClose={() => setBedCapacityModalOpen(false)}
             handleUpdate={async () => {
-              const capacityRes = await dispatch(
-                listCapacity({}, { facilityId })
-              );
-              if (capacityRes && capacityRes.data) {
-                setCapacityData(capacityRes.data.results);
+              capacityFetch();
+              if (capacityRes?.ok && capacityFetchData) {
+                setCapacityData(capacityFetchData.results);
               }
             }}
           />
@@ -771,12 +781,12 @@ export const FacilityHome = (props: any) => {
             facilityId={facilityId}
             handleClose={() => setDoctorCapacityModalOpen(false)}
             handleUpdate={async () => {
-              const doctorRes = await dispatch(listDoctor({}, { facilityId }));
-              if (doctorRes && doctorRes.data) {
-                setDoctorData(doctorRes.data.results);
+              doctorFetch;
+              if (doctorRes?.ok && doctorFetchData) {
+                setDoctorData(doctorFetchData.results);
                 // update total doctors count
                 setTotalDoctors(
-                  doctorRes.data.results.reduce(
+                  doctorFetchData.results.reduce(
                     (acc: number, doctor: DoctorModal) =>
                       acc + (doctor.count || 0),
                     0
