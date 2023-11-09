@@ -357,7 +357,7 @@ const DateInputV2: React.FC<Props> = ({
                             }
                           } else {
                             conditionalClasses =
-                              "!cursor-not-allowed bg-gray-200 !text-gray-400";
+                              "!cursor-not-allowed !text-gray-400";
                           }
                           return (
                             <div
