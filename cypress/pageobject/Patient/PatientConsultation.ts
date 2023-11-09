@@ -44,23 +44,20 @@ export class PatientConsultationPage {
     cy.get("#height").click().type(weight);
     cy.get("#patient_no").type(ipNumber);
     cy.intercept("GET", "**/icd/**").as("getIcdResults");
-    cy.get(
-      "#icd11_diagnoses_object input[placeholder='Select'][role='combobox']"
-    )
+    cy.get("#icd11-search input[role='combobox']")
       .scrollIntoView()
       .click()
       .type("1A");
-    cy.get("#icd11_diagnoses_object [role='option']")
+    cy.get("#icd11-search [role='option']")
       .contains("1A00 Cholera")
       .scrollIntoView()
       .click();
-    cy.get("label[for='icd11_diagnoses_object']").click();
+    cy.get("#condition-verification-status-menu").click();
+    cy.get("#add-icd11-diagnosis-as-confirmed").click();
     cy.wait("@getIcdResults").its("response.statusCode").should("eq", 200);
 
-    cy.get("#icd11_principal_diagnosis [role='combobox']").click().type("1A");
-    cy.get("#icd11_principal_diagnosis [role='option']")
-      .contains("1A00 Cholera")
-      .click();
+    cy.get("#principal-diagnosis-select").click();
+    cy.get("#principal-diagnosis-select [role='option']").first().click();
 
     cy.get("#consultation_notes").click().type(consulationNotes);
     cy.get("#verified_by")
