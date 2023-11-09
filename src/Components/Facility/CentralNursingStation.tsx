@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux";
 import useFullscreen from "../../Common/hooks/useFullscreen";
-import { Fragment, useContext, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   getPermittedFacility,
   listPatientAssetBeds,
@@ -15,7 +15,6 @@ import CareIcon from "../../CAREUI/icons/CareIcon";
 import { classNames } from "../../Utils/utils";
 import { LocationSelect } from "../Common/LocationSelect";
 import Pagination from "../Common/Pagination";
-import { SidebarShrinkContext } from "../Common/Sidebar/Sidebar";
 import { PatientAssetBed } from "../Assets/AssetTypes";
 import { Popover, Transition } from "@headlessui/react";
 import { FieldLabel } from "../Form/FormFields/FormField";
@@ -42,7 +41,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
   const { t } = useTranslation();
   const dispatch = useDispatch<any>();
   const [isFullscreen, setFullscreen] = useFullscreen();
-  const sidebar = useContext(SidebarShrinkContext);
 
   const [facilityObject, setFacilityObject] = useState<FacilityModel>();
   const [data, setData] =
@@ -51,15 +49,6 @@ export default function CentralNursingStation({ facilityId }: Props) {
   const { qParams, updateQuery, removeFilter, updatePage } = useFilters({
     limit: PER_PAGE_LIMIT,
   });
-
-  // To automatically collapse sidebar.
-  useEffect(() => {
-    sidebar.setShrinked(true);
-
-    return () => {
-      sidebar.setShrinked(sidebar.shrinked);
-    };
-  }, []);
 
   useEffect(() => {
     async function fetchFacilityOrObject() {
@@ -135,6 +124,7 @@ export default function CentralNursingStation({ facilityId }: Props) {
       backUrl={`/facility/${facilityId}/`}
       noImplicitPadding
       breadcrumbs={false}
+      collapseSidebar
       options={
         <div className="flex flex-row-reverse items-center gap-4 md:flex-row">
           <Popover className="relative">
