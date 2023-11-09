@@ -120,7 +120,7 @@ export class ManageUserPage {
   }
 
   assertSkillIndoctorconnect(skillName) {
-    cy.get("#doctor-connect-home-staff")
+    cy.get("#doctor-connect-home-doctor")
       .contains(skillName)
       .should("have.length", 1);
   }
