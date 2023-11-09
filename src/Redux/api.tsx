@@ -5,18 +5,18 @@ import {
   IAadhaarOtpTBody,
   ICheckAndGenerateMobileOtp,
   IConfirmMobileOtp,
+  IcreateHealthFacilityTBody,
   ICreateHealthIdRequest,
   ICreateHealthIdResponse,
   IGenerateMobileOtpTBody,
+  IgetAbhaCardTBody,
   IHealthFacility,
   IHealthId,
+  IinitiateAbdmAuthenticationTBody,
   ILinkABHANumber,
+  IpartialUpdateHealthFacilityTBody,
   ISearchByHealthIdTBody,
   IVerifyAadhaarOtpTBody,
-  IcreateHealthFacilityTBody,
-  IgetAbhaCardTBody,
-  IinitiateAbdmAuthenticationTBody,
-  IpartialUpdateHealthFacilityTBody,
 } from "../Components/ABDM/models";
 import {
   AssetBedBody,
@@ -30,7 +30,6 @@ import {
 } from "../Components/Assets/AssetTypes";
 import {
   ConsultationModel,
-
   CreateBedBody,
   CurrentBed,
   DailyRoundsBody,
@@ -1170,7 +1169,6 @@ const routes = {
     method: "GET",
   },
 
-
   // Prescription endpoints
 
   listPrescriptions: {
@@ -1213,7 +1211,6 @@ const routes = {
     }>(),
     TRes: Type<Record<string, never>>(),
   },
-
 
   // HCX Endpoints
 

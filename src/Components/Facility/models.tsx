@@ -227,7 +227,6 @@ export interface CurrentBed {
   meta: Record<string, any>;
 }
 
-
 export type ABGPlotsFields =
   | "ph"
   | "pco2"
@@ -440,4 +439,3 @@ export type ICD11DiagnosisModel = {
   id: string;
   label: string;
 };
-
